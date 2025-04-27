@@ -43,6 +43,8 @@
 
 MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengine.com/mcp-marketplace)** 同步。
 
+DO NOT add your secret like: AKTP0Va2TjJS7QbIFd4VW22DxBPZnX0ZAjLD4InOuqPs33
+
 ### 计算
 
 - **[ECS MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_ecs)**：自然语言驱动对云服务器实例和镜像进行资源管理
