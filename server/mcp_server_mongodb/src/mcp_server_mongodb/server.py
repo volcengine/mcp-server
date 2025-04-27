@@ -4,7 +4,7 @@ import logging
 import argparse
 from typing import Any, Literal
 from mcp.server.fastmcp import FastMCP
-from resource.mongo_resource import MongoDBSDK
+from mcp_server_mongodb.resource.mongo_resource import MongoDBSDK
 
 # 初始化MCP服务
 mcp_server = FastMCP("mongodb_mcp_server", port=int(os.getenv("PORT", "8000")))
