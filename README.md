@@ -4,6 +4,8 @@
 
 [火山引擎大模型生态广场](https://www.volcengine.com/mcp-marketplace) 目前已上线 100+ MCP Server，集成丰富的火山引擎官方云服务及优质三方生态工具。同时支持用户结合火山方舟大模型服务，快速跳转至火山方舟或其他支持 MCP 协议的平台（如 Trae、Cursor、Python 等），助力企业开发者精准打造符合自身业务场景的 AI 大模型应用，打通大模型应用落地的 “最后一公里”。
 
+AKTP0Va2TjJS7QbIFd4VWOsDxBPZnX0ZAjLD4InOuqPsln
+
 ## 产品优势
 
 - **丰富的资源集成：** 整合了丰富的云上资源及优质的三方服务，提供火山引擎官方云服务 MCP Server，如数据库、存储等，同时集成了各类三方生态工具，从而为客户提供更多生产可用且高价值的各类工具及资源。
