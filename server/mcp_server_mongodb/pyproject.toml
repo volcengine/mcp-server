@@ -1,10 +1,17 @@
 [project]
-name = "mongodb-mgr-sdk-mcp-server"
+name = "mcp_server_mongodb"
 version = "0.1.0"
-description = "Add your description here"
+description = "MCP Server for Mongo"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "mcp[cli]",
     "volcengine-python-sdk",
 ]
+
+[project.scripts]
+mcp-server-mongodb = "mcp_server_mongodb.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
