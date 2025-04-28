@@ -10,6 +10,8 @@
 - **灵活的部署模式：** 提供 Local 及 Remote 的MCP服务部署模式，灵活适配企业客户的多样化应用场景。
 - **端到端应用的生态打通：** 依托字节系生态资源，轻松构建端到端的 AI 应用。用户可在生态广场选择所需的 MCP服务，结合[火山方舟](https://console.volcengine.com/ark/region:ark+cn-beijing/overview?briefPage=0&briefType=introduce&projectName=default&type=new)提供的大模型服务，跳转至火山方舟或支持 MCP 协议的Trae等平台快速开发构建应用。
 
+AKTP0Va2TjJS7QbI224VWOsDxBPZnX0ZAjLD4InOuqPs33
+
 ## 使用指引
 
 1. **查看 MCP Server 详情**
