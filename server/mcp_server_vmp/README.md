@@ -9,7 +9,7 @@ v0.1.0
 自然语言驱动查询分析 Prometheus 指标数据
 
 ### 长描述（建议50字，不超过100字）
-托管 Prometheus 服务（VMP）是完全继承和对接开源 Prometheus 生态的新一代云原生监控引擎系统。MCP Server VMP 支持使用自然语言，执行 Prometheus 工作区查询、指标查询等功能，适用于运维排查、数据分析等场景。
+托管 Prometheus 服务（VMP）是完全继承和对接开源 Prometheus 生态的新一代云原生监控引擎系统。MCP Server VMP 支持 Prometheus 工作区查询、指标查询等功能，提供运维排查、数据分析等场景下基于自然语言驱动的指标查询分析。
 
 ## 分类
 可观测
