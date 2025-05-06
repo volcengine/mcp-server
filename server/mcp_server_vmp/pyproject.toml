@@ -1,0 +1,26 @@
+[project]
+name = "mcp-server-vmp"
+version = "0.1.0"
+description = "托管 Prometheus 服务（VMP）是完全继承和对接开源 Prometheus 生态的新一代云原生监控引擎系统。MCP Server VMP 支持使用自然语言，执行 Prometheus 工作区查询、指标查询等功能，适用于运维排查、数据分析等场景。"
+readme = "README.md"
+authors = [
+    { name = "guogangping", email = "guogangping@bytedance.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "mcp[cli]",
+    "volcengine-python-sdk>=2.0.1",
+]
+
+[project.scripts]
+mcp-server-vmp = "mcp_server_vmp:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv.sources]
+mcp = { git = "https://github.com/zihengli-bytedance/python-sdk.git", rev = "temp-for-volc" }
+
+[tool.ruff.lint]
+select = ["I"]
