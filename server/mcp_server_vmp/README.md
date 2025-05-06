@@ -1,6 +1,6 @@
-# MCP Server 产品名称：MCP Server VMP ![产品Logo](./logo.svg)
+# MCP Server 产品名称：VMP MCP Server ![产品Logo](./logo.svg)
 
-托管 Prometheus 服务（VMP）是完全继承和对接开源 Prometheus 生态的新一代云原生监控引擎系统。MCP Server VMP 提供 Prometheus 工作区查询、指标查询等功能，助力运维排查、数据分析等场景下基于自然语言驱动的指标查询分析体验。
+托管 Prometheus 服务（VMP）是完全继承和对接开源 Prometheus 生态的新一代云原生监控引擎系统。VMP MCP Server 提供 Prometheus 工作区查询、指标查询等功能，助力运维排查、数据分析等场景下基于自然语言驱动的指标查询分析体验。
 
 <table>
   <tr>
