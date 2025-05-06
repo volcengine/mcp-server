@@ -1,21 +1,25 @@
-#MCP Server 产品名称：MCP Server VMP
-[![产品Logo]([./logo.png])]
+# MCP Server 产品名称：MCP Server VMP ![产品Logo](./logo.svg)
 
-## 版本信息
-v0.1.0
+托管 Prometheus 服务（VMP）是完全继承和对接开源 Prometheus 生态的新一代云原生监控引擎系统。MCP Server VMP 提供 Prometheus 工作区查询、指标查询等功能，助力运维排查、数据分析等场景下基于自然语言驱动的指标查询分析体验。
 
-## 产品描述
-### 短描述（建议20个字）
-自然语言驱动查询分析 Prometheus 指标数据
-
-### 长描述（建议50字，不超过100字）
-托管 Prometheus 服务（VMP）是完全继承和对接开源 Prometheus 生态的新一代云原生监控引擎系统。MCP Server VMP 支持 Prometheus 工作区查询、指标查询等功能，提供运维排查、数据分析等场景下基于自然语言驱动的指标查询分析。
-
-## 分类
-可观测
-
-## 标签
-Prometheus, 监控, 可观测
+<table>
+  <tr>
+    <td>版本</td>
+    <td>v0.1.0</td>
+  </tr>
+  <tr>
+    <td>描述</td>
+    <td>自然语言驱动查询分析 Prometheus 指标数据</td>
+  </tr>
+  <tr>
+    <td>分类</td>
+    <td>可观测</td>
+  </tr>
+  <tr>
+    <td>标签</td>
+    <td>Prometheus, 监控, 可观测</td>
+  </tr>
+</table>
 
 ## Tools
 本 MCP Server 产品提供以下 Tools (工具/能力):
