@@ -1,84 +1,84 @@
-# MCP Server 产品名称：VMP MCP Server ![产品Logo](./logo.svg)
+# MCP Server Product Name: VMP MCP Server ![Product Logo](./logo.svg)
 
-托管 Prometheus 服务（VMP）是完全继承和对接开源 Prometheus 生态的新一代云原生监控引擎系统。VMP MCP Server 提供 Prometheus 工作区查询、指标查询等功能，助力运维排查、数据分析等场景下基于自然语言驱动的指标查询分析体验。
+The Volcengine Managed Prometheus Service (VMP) is a new-generation cloud-native monitoring system that fully inherits and integrates with the open-source prometheus ecosystem. The VMP MCP Server provides functions such as prometheus workspace queries and metric queries, facilitating the natural-language-driven metrics query and analysis experience in scenarios like operational troubleshooting and data analysis.
 
 <table>
   <tr>
-    <td>版本</td>
+    <td>Version</td>
     <td>v0.1.0</td>
   </tr>
   <tr>
-    <td>描述</td>
-    <td>自然语言驱动查询分析 Prometheus 指标数据</td>
+    <td>Description</td>
+    <td>Natural-language-driven query and analysis of prometheus metric data</td>
   </tr>
   <tr>
-    <td>分类</td>
-    <td>可观测</td>
+    <td>Category</td>
+    <td>Observability</td>
   </tr>
   <tr>
-    <td>标签</td>
-    <td>Prometheus, 监控, 可观测</td>
+    <td>Tags</td>
+    <td>Prometheus, Monitoring, Observability</td>
   </tr>
 </table>
 
 ## Tools
-本 MCP Server 产品提供以下 Tools (工具/能力):
+This MCP Server product provides the following Tools (capabilities):
 
 ### Tool 1: list_workspaces
 
-#### 类型
-saas
+#### Type
+SaaS
 
-#### 详细描述
-查询当前账户下指定地域的所有工作区信息
+#### Detailed Description
+Query all workspace information in the specified region under the current account.
 
-#### 调试所需的输入参数:
-输入：
+#### Input parameters required for debugging:
+Input:
 ```json 
 {
     "name": "list_workspaces",
-    "description": "查询在指定地域下的所有VMP工作区实例信息",
+    "description": "Query all VMP workspace instances information in the specified region.",
     "inputSchema": {
         "type": "object",
         "properties": {
             "region": {
                 "default": "cn-beijing",
-                "description": "目标地域(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
+                "description": "Target region (e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
                 "type": "string"
             }
         }
     }
 }
 ```
-输出：
-- 工作区列表
+Output:
+- Workspace list
 
-#### 最容易被唤起的 Prompt示例
-请列出在cn-beijing地域下的所有VMP工作区实例信息
+#### Example Prompt most likely to trigger
+Please list all VMP workspace instances in the cn-beijing region.
 
 ### Tool 2: query_metrics
 
-#### 类型
-saas
+#### Type
+SaaS
 
-#### 详细描述
-在指定的VMP工作区中，执行指定的PromQL的Instant查询
+#### Detailed Description
+Execute a specified PromQL instant query in the specified VMP workspace.
 
-#### 调试所需的输入参数:
-输入：
+#### Input parameters required for debugging:
+Input:
 ```json 
 {
     "name": "query_metrics",
-    "description": "在指定的VMP工作区中，执行指定的PromQL查询语句",
+    "description": "Execute a specified PromQL query statement in the specified VMP workspace.",
     "inputSchema": {
         "type": "object",
         "properties": {
             "workspaceId": {
-                "description": "要查询的VMP工作区实例ID",
+                "description": "The ID of the VMP workspace instance to query.",
                 "type": "string"
             },
             "query": {
-                "description": "PromQL查询语句",
+                "description": "PromQL query statement.",
                 "type": "string"
             },
             "time": {
@@ -91,11 +91,11 @@ saas
                     }
                 ],
                 "default": null,
-                "description": "查询时间，格式为RFC3339 或 Unix 时间戳，默认为当前时间",
+                "description": "Query time, in RFC3339 format or Unix timestamp, default is the current time.",
             },
             "region": {
                 "default": "cn-beijing",
-                "description": "目标地域(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
+                "description": "Target region (e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
                 "type": "string"
             }
         },
@@ -106,44 +106,43 @@ saas
     }
 }
 ```
-输出：
-- 指标查询结果
+Output:
+- Metric query results
 
-#### 最容易被唤起的 Prompt示例
-查询cn-beijing地域下的VMP工作区b73766b5-2e63-4143-bcd1-8a1ba3a94746实例中，当前时间的cpu使用率
-
+#### Example Prompt most likely to trigger
+Query the CPU usage at the current time in the VMP workspace instance b73766b5-2e63-4143-bcd1-8a1ba3a94746 in the cn-beijing region.
 
 ### Tool 3: query_range_metrics
 
-#### 类型
-saas
+#### Type
+SaaS
 
-#### 详细描述
-在指定的VMP工作区中，执行指定时间范围的PromQL的查询
+#### Detailed Description
+Execute a specified PromQL query within a specified time range in the specified VMP workspace.
 
-#### 调试所需的输入参数:
-输入：
+#### Input parameters required for debugging:
+Input:
 ```json 
 {
     "name": "query_range_metrics",
-    "description": "在指定的VMP工作区中，执行指定时间范围的PromQL的查询",
+    "description": "Execute a specified PromQL query within a specified time range in the specified VMP workspace.",
     "inputSchema": {
         "type": "object",
         "properties": {
             "workspaceId": {
-                "description": "目标VMP工作区实例ID",
+                "description": "The ID of the target VMP workspace instance.",
                 "type": "string"
             },
             "query": {
-                "description": "PromQL查询语句",
+                "description": "PromQL query statement.",
                 "type": "string"
             },
             "start": {
-                "description": "查询起始时间，格式为RFC3339 或 Unix 时间戳",
+                "description": "Query start time, in RFC3339 format or Unix timestamp.",
                 "type": "string"
             },
             "end": {
-                "description": "查询截止时间，格式为RFC3339 或 Unix 时间戳",
+                "description": "Query end time, in RFC3339 format or Unix timestamp.",
                 "type": "string"
             },
             "step": {
@@ -156,11 +155,11 @@ saas
                     }
                 ],
                 "default": null,
-                "description": "查询Step，duration格式，可选传入，不传会根据查询时间范围自动计算",
+                "description": "Query step, in duration format, optional. If not provided, it will be automatically calculated based on the query time range.",
             },
             "region": {
                 "default": "cn-beijing",
-                "description": "目标地域(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
+                "description": "Target region (e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
                 "type": "string"
             }
         },
@@ -173,32 +172,31 @@ saas
     }
 }
 ```
-输出：
-- 指标查询结果
+Output:
+- Metric query results
 
-#### 最容易被唤起的 Prompt示例
-查询cn-beijing地域下的VMP工作区b73766b5-2e63-4143-bcd1-8a1ba3a94746实例中，最近一小时中cpu使用率top3的pod
-
+#### Example Prompt most likely to trigger
+Query the top 3 pods in terms of CPU usage in the last hour in the VMP workspace instance b73766b5-2e63-4143-bcd1-8a1ba3a94746 in the cn-beijing region.
 
 ### Tool 4: query_metric_names
 
-#### 类型
-saas
+#### Type
+SaaS
 
-#### 详细描述
-查询指定VMP工作区下，匹配指定过滤条件的指标名称列表
+#### Detailed Description
+Query the list of metric names that match the specified filter conditions in the specified VMP workspace.
 
-#### 调试所需的输入参数:
-输入：
+#### Input parameters required for debugging:
+Input:
 ```json 
 {
     "name": "query_metric_names",
-    "description": "查询指定VMP工作区下，匹配指定过滤条件的指标名称列表",
+    "description": "Query the list of metric names that match the specified filter conditions in the specified VMP workspace.",
     "inputSchema": {
         "type": "object",
         "properties": {
             "workspaceId": {
-                "description": "目标VMP工作区实例ID",
+                "description": "The ID of the target VMP workspace instance.",
                 "type": "string"
             },
             "match": {
@@ -211,11 +209,11 @@ saas
                     }
                 ],
                 "default": null,
-                "description": "Series Selector，用于过滤匹配的指标范围，标准的Promtheus Vector Selector语法，如：{job=~\"kubelet\"}",
+                "description": "Series Selector, used to filter the matching metric range, following the standard Prometheus Vector Selector syntax, e.g.: {job=~\"kubelet\"}",
             },
             "region": {
                 "default": "cn-beijing",
-                "description": "目标地域(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
+                "description": "Target region (e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
                 "type": "string"
             }
         },
@@ -225,41 +223,40 @@ saas
     }
 }
 ```
-输出：
-- 匹配的指标名称列表
+Output:
+- List of matching metric names
 
-#### 最容易被唤起的 Prompt示例
-VMP工作区b73766b5-2e63-4143-bcd1-8a1ba3a94746中，cpu相关的指标有哪些
-
+#### Example Prompt most likely to trigger
+What are the CPU related metrics in the VMP workspace b73766b5-2e63-4143-bcd1-8a1ba3a94746 ?
 
 ### Tool 5: query_metric_labels
 
-#### 类型
-saas
+#### Type
+SaaS
 
-#### 详细描述
-查询指定VMP工作区下，指定指标的所有标签名称列表
+#### Detailed Description
+Query the list of all label names for a specified metric in the specified VMP workspace.
 
-#### 调试所需的输入参数:
-输入：
+#### Input parameters required for debugging:
+Input:
 ```json 
 {
     "name": "query_metric_labels",
-    "description": "查询指定VMP工作区下，指定指标的所有标签名称列表",
+    "description": "Query the list of all label names for a specified metric in the specified VMP workspace.",
     "inputSchema": {
         "type": "object",
         "properties": {
             "workspaceId": {
-                "description": "目标VMP工作区实例ID",
+                "description": "The ID of the target VMP workspace instance.",
                 "type": "string"
             },
             "metricName": {
-                "description": "要查询的指标名称",
+                "description": "The name of the metric to query.",
                 "type": "string"
             },
             "region": {
                 "default": "cn-beijing",
-                "description": "目标地域(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
+                "description": "Target region (e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
                 "type": "string"
             }
         },
@@ -270,26 +267,25 @@ saas
     }
 }
 ```
-输出：
-- 指标的标签名称列表
+Output:
+- List of metric label names
 
-#### 最容易被唤起的 Prompt示例
-VMP工作区b73766b5-2e63-4143-bcd1-8a1ba3a94746中，container_cpu_usage_seconds_total指标有哪些label
+#### Example Prompt most likely to trigger
+What are the labels of the container_cpu_usage_seconds_total metric in the VMP workspace b73766b5-2e63-4143-bcd1-8a1ba3a94746 ?
 
+## Compatible Platforms
+Ark, Trae, Cursor, Claude Desktop, or other terminals that support MCP Server calls.
 
-## 可适配平台  
-方舟、Trae、Cursor、Claude Desktop 或支持 MCP Server 调用的其他终端
-
-## 服务开通链接 (整体产品)  
+## Service Activation Link (Entire Product)
 https://console.volcengine.com/prometheus
 
-## 鉴权方式  
-API Key ([签名机制](https://www.volcengine.com/docs/6731/942192))
+## Authentication Method
+API Key ([Signature Mechanism](https://www.volcengine.com/docs/6731/942192))
 
-## 安装部署  
-### 系统依赖
-- 安装 Python3.10或更高版本
-- 安装uv
+## Installation and Deployment
+### System Dependencies
+- Install Python 3.10 or higher.
+- Install uv
   - MacOS/Linux
   ```text
   curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -299,8 +295,7 @@ API Key ([签名机制](https://www.volcengine.com/docs/6731/942192))
   powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
   ```
 
-### 部署
-
+### Deployment
 UV
 ```json
 {
