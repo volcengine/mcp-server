@@ -43,11 +43,10 @@ saas
         "properties": {
             "region": {
                 "default": "cn-beijing",
-                "title": "Region",
+                "description": "目标地域(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
                 "type": "string"
             }
-        },
-        "title": "list_workspacesArguments"
+        }
     }
 }
 ```
@@ -75,11 +74,11 @@ saas
         "type": "object",
         "properties": {
             "workspaceId": {
-                "title": "Workspaceid",
+                "description": "要查询的VMP工作区实例ID",
                 "type": "string"
             },
             "query": {
-                "title": "Query",
+                "description": "PromQL查询语句",
                 "type": "string"
             },
             "time": {
@@ -92,19 +91,18 @@ saas
                     }
                 ],
                 "default": null,
-                "title": "Time"
+                "description": "查询时间，格式为RFC3339 或 Unix 时间戳，默认为当前时间",
             },
             "region": {
                 "default": "cn-beijing",
-                "title": "Region",
+                "description": "目标地域(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
                 "type": "string"
             }
         },
         "required": [
             "workspaceId",
             "query"
-        ],
-        "title": "query_metricsArguments"
+        ]
     }
 }
 ```
@@ -133,19 +131,19 @@ saas
         "type": "object",
         "properties": {
             "workspaceId": {
-                "title": "Workspaceid",
+                "description": "目标VMP工作区实例ID",
                 "type": "string"
             },
             "query": {
-                "title": "Query",
+                "description": "PromQL查询语句",
                 "type": "string"
             },
             "start": {
-                "title": "Start",
+                "description": "查询起始时间，格式为RFC3339 或 Unix 时间戳",
                 "type": "string"
             },
             "end": {
-                "title": "End",
+                "description": "查询截止时间，格式为RFC3339 或 Unix 时间戳",
                 "type": "string"
             },
             "step": {
@@ -158,11 +156,11 @@ saas
                     }
                 ],
                 "default": null,
-                "title": "Step"
+                "description": "查询Step，duration格式，可选传入，不传会根据查询时间范围自动计算",
             },
             "region": {
                 "default": "cn-beijing",
-                "title": "Region",
+                "description": "目标地域(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
                 "type": "string"
             }
         },
@@ -171,8 +169,7 @@ saas
             "query",
             "start",
             "end"
-        ],
-        "title": "query_range_metricsArguments"
+        ]
     }
 }
 ```
@@ -201,7 +198,7 @@ saas
         "type": "object",
         "properties": {
             "workspaceId": {
-                "title": "Workspaceid",
+                "description": "目标VMP工作区实例ID",
                 "type": "string"
             },
             "match": {
@@ -214,18 +211,17 @@ saas
                     }
                 ],
                 "default": null,
-                "title": "Match"
+                "description": "Series Selector，用于过滤匹配的指标范围，标准的Promtheus Vector Selector语法，如：{job=~\"kubelet\"}",
             },
             "region": {
                 "default": "cn-beijing",
-                "title": "Region",
+                "description": "目标地域(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
                 "type": "string"
             }
         },
         "required": [
             "workspaceId"
-        ],
-        "title": "query_metric_namesArguments"
+        ]
     }
 }
 ```
@@ -254,24 +250,23 @@ saas
         "type": "object",
         "properties": {
             "workspaceId": {
-                "title": "Workspaceid",
+                "description": "目标VMP工作区实例ID",
                 "type": "string"
             },
             "metricName": {
-                "title": "Metricname",
+                "description": "要查询的指标名称",
                 "type": "string"
             },
             "region": {
                 "default": "cn-beijing",
-                "title": "Region",
+                "description": "目标地域(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
                 "type": "string"
             }
         },
         "required": [
             "workspaceId",
             "metricName"
-        ],
-        "title": "query_metric_labelsArguments"
+        ]
     }
 }
 ```
@@ -283,7 +278,7 @@ VMP工作区b73766b5-2e63-4143-bcd1-8a1ba3a94746中，container_cpu_usage_second
 
 
 ## 可适配平台  
-方舟、cursor、claude desktop 或支持MCP server调用的其他终端
+方舟、Trae、Cursor、Claude Desktop 或支持 MCP Server 调用的其他终端
 
 ## 服务开通链接 (整体产品)  
 https://console.volcengine.com/prometheus
