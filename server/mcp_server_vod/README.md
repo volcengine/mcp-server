@@ -1,46 +1,48 @@
-# Volcengine MCP
+# Volcengine MCP Server for VOD
 
-Volcengine VOD 的 Model Context Protocol (MCP) Server 实现
+Implementation of Model Context Protocol (MCP) Server for Volcengine VOD
 
-## 项目简介
+## Project Overview
 
-Volcengine VOD MCP是一个基于[Model Context Protocol](https://github.com/modelcontextprotocol/python-sdk)的 MCP Server，
-它将 Volcengine VOD服务集成到LLM模型上下文中，使大模型能够直接操作和管理VOD资源。
+Volcengine VOD MCP is an MCP Server based on [Model Context Protocol](https://github.com/modelcontextprotocol/python-sdk) that integrates Volcengine VOD services into LLM model contexts, enabling large language models to directly operate and manage VOD resources.
 
-## 功能特点
+## Key Features
 
-- 提供多种资源访问接口，便于LLM获取Volcengine VOD服务信息、视频资源等
-- 实现了多个Volcengine功能的工具封装，包括上传媒资，剪辑视频等
+- Provides multiple resource access interfaces for LLMs to obtain Volcengine VOD service information and video resources
+- Implements tool encapsulation for various Volcengine functionalities including media upload and video editing
+
+## Feature Demos
+- [Multiple videos spliced by timeline example](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/多个视频时域拼接.mp4): In Cline, splice two local videos together by specified timeline through conversation to generate a new address and return the playback URL of the synthesized video (requires domain configuration in Volcengine VOD service)
+- [Video multi-segment extraction and composition example](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/时域拼接.mp4): Extract video segments through conversation and splice them by timeline into a new video
+- [Adding text and transition effects example](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/添加文案及转场动画.mp4): Splice multiple videos by timeline into a new video and add transition effects and fixed text.
 
 ## Available Tools
 
-- `get_space_detail`: [get space details](https://www.volcengine.com/docs/4/107689)
-- `list_space`: [list available spaces for the user](https://www.volcengine.com/docs/4/107686)
-- `create_space`: [create VOD space](https://www.volcengine.com/docs/4/107685)
-- `upload_media`: [upload media](https://www.volcengine.com/docs/6396/76279)
-- `submit_direct_edit_task_async`: [submit direct async edit task ](https://www.volcengine.com/docs/4/102240)
-- `cancel_direct_edit_task`: [cancel direct edit task](https://www.volcengine.com/docs/4/1250179)
-- `get_direct_edit_progress`: [get direct edit progress](https://www.volcengine.com/docs/4/102241)
-- `get_direct_edit_result`: [get direct edit result](https://www.volcengine.com/docs/4/102242)
-- `upload_by_url`: [upload by url](https://www.volcengine.com/docs/4/4652)
-- `get_play_info`: [get video play info](https://www.volcengine.com/docs/4/2918)
-- `list_domain`: [list domain](https://www.volcengine.com/docs/4/106062)
-- `get_media_info`: [get media info](https://www.volcengine.com/docs/4/1256363)
-- `update_publish_status`: [update publish status](https://www.volcengine.com/docs/4/4709)
-- `get_media_list`: [get media list](https://www.volcengine.com/docs/4/69205)
+- `get_space_detail`: [Get detailed information of specified space](https://www.volcengine.com/docs/4/107689), including region, description and creation time.
+- `list_space`: [List video-on-demand spaces](https://www.volcengine.com/docs/4/107686), get information of all spaces under current account.
+- `create_space`: [Create video-on-demand space](https://www.volcengine.com/docs/4/107685), space is the basic unit for resource isolation, each can be independently configured with business resources, templates, workflows and policies.
+- `upload_media`: [Upload video](https://www.volcengine.com/docs/4/65647#%E4%B8%8A%E4%BC%A0%E9%9F%B3%E8%A7%86%E9%A2%91), upload local video to specified VOD space
+- `submit_direct_edit_task_async`: [Submit video editing task](https://www.volcengine.com/docs/4/102240), edit video resources in specified VOD space, supporting timeline splicing, multi-segment extraction, adding text and transitions
+- `get_direct_edit_progress`: [Check video editing task progress](https://www.volcengine.com/docs/4/102241), query processing progress after submitting editing task
+- `get_direct_edit_result`: [Get editing task result](https://www.volcengine.com/docs/4/102242)
+- `upload_by_url`: [URL video upload](https://www.volcengine.com/docs/4/4652), upload video to specified VOD space by pulling from URL
+- `get_play_info`: [Get video playback information](https://www.volcengine.com/docs/4/2918), including playback URL, cover image etc.
+- `list_domain`: [List domains](https://www.volcengine.com/docs/4/106062), query all domain lists configured under specified space
+- `get_media_info`: [Query media information](https://www.volcengine.com/docs/4/1256363), get media info by Vid (Video ID), including basic info, source files and processed output files
+- `get_media_list`: [Get audio/video information](https://www.volcengine.com/docs/4/69205), get audio/video info by specified Vid (Video ID).
 
-## 安装
+## Installation
 
-### 环境要求
+### Requirements
 
 - Python 3.13+
-- 火山引擎账号及AccessKey/SecretKey
+- Volcengine account with AccessKey/SecretKey
 
-## 使用方法
+## Usage
 
-### 在 Mcp Client 中集成
+### Integration in Mcp Client
 
-在 mcp client 中配置 mcp 服务, 配置的 MCP JSON：
+Configure MCP service in mcp client with this JSON:
 
 ```json
 {
@@ -61,4 +63,4 @@ Volcengine VOD MCP是一个基于[Model Context Protocol](https://github.com/mod
 }
 ```
 
-请在[火山引擎-视频点播-控制台](https://www.volcengine.com/product/vod)申请VOLCENGINE_ACCESS_KEY、VOLCENGINE_SECRET_KEY
+Apply for VOLCENGINE_ACCESS_KEY and VOLCENGINE_SECRET_KEY at [Volcengine VOD Console](https://www.volcengine.com/product/vod)
