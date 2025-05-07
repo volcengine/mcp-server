@@ -248,6 +248,43 @@ wheels = [
 ]
 
 [[package]]
+name = "mcp-server-vod"
+version = "0.1.1"
+source = { editable = "." }
+dependencies = [
+    { name = "mcp" },
+    { name = "pydantic" },
+    { name = "python-dotenv" },
+    { name = "retry" },
+    { name = "starlette" },
+    { name = "typing-extensions" },
+    { name = "volcengine" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pre-commit" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "mcp", specifier = ">=1.6.0" },
+    { name = "pydantic", specifier = ">=1.8.2" },
+    { name = "python-dotenv", specifier = ">=1.1.0" },
+    { name = "retry", specifier = ">=0.9.2" },
+    { name = "starlette", specifier = ">=0.14.2" },
+    { name = "typing-extensions", specifier = ">=4.0.0" },
+    { name = "volcengine", specifier = ">=1.0.177" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pre-commit", specifier = ">=4.2.0" },
+    { name = "ruff", specifier = ">=0.11.4" },
+]
+
+[[package]]
 name = "nodeenv"
 version = "1.9.1"
 source = { registry = "https://pypi.org/simple" }
@@ -602,43 +639,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/4b/4d/938bd85e5bf2edeec766267a5015ad969730bb91e31b44021dfe8b22df6c/uvicorn-0.34.0.tar.gz", hash = "sha256:404051050cd7e905de2c9a7e61790943440b3416f49cb409f965d9dcd0fa73e9", size = 76568 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/61/14/33a3a1352cfa71812a3a21e8c9bfb83f60b0011f5e36f2b1399d51928209/uvicorn-0.34.0-py3-none-any.whl", hash = "sha256:023dc038422502fa28a09c7a30bf2b6991512da7dcdb8fd35fe57cfc154126f4", size = 62315 },
-]
-
-[[package]]
-name = "vevod-mcp"
-version = "0.1.1"
-source = { editable = "." }
-dependencies = [
-    { name = "mcp" },
-    { name = "pydantic" },
-    { name = "python-dotenv" },
-    { name = "retry" },
-    { name = "starlette" },
-    { name = "typing-extensions" },
-    { name = "volcengine" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pre-commit" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "mcp", specifier = ">=1.6.0" },
-    { name = "pydantic", specifier = ">=1.8.2" },
-    { name = "python-dotenv", specifier = ">=1.1.0" },
-    { name = "retry", specifier = ">=0.9.2" },
-    { name = "starlette", specifier = ">=0.14.2" },
-    { name = "typing-extensions", specifier = ">=4.0.0" },
-    { name = "volcengine", specifier = ">=1.0.177" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pre-commit", specifier = ">=4.2.0" },
-    { name = "ruff", specifier = ">=0.11.4" },
 ]
 
 [[package]]

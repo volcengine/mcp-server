@@ -6,24 +6,22 @@ import time
 import random
 import string
 from mcp.server.fastmcp import FastMCP
-from .api.vod import VodService
+from .api.vod import VodAPI
 from volcengine.vod.models.request.request_vod_pb2 import *
 from volcengine.vod.models.business.vod_workflow_pb2 import *
 from volcengine.util.Functions import Function
 
 
 def create_mcp_server():
+    vod_service = VodAPI()
+
     """Create and configure VOD MCP server instance"""
     mcp = FastMCP(
         "VOD MCP", 
         description="VOD provides audio/video solutions including media upload, media management, and video editing.",
     )
     
-    vod_service = VodService(region='cn-north-1')
-    vod_service.set_ak(os.getenv("VOLCENGINE_ACCESS_KEY"))
-    vod_service.set_sk(os.getenv("VOLCENGINE_SECRET_KEY"))
-
-     @mcp.tool()
+    @mcp.tool()
     def guide():
         """VOD MCP is the Volcengine VOD MCP Server.
 

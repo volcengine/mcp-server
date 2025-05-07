@@ -1,12 +1,15 @@
- # Copyright 2025 Beijing Volcano Engine Technology Ltd.
- # SPDX-License-Identifier: MIT
-import os
 from volcengine.vod.VodService import VodService
+import os
 
-if __name__ == '__main__':
-    vod_service = VodService(region='cn-north-1')
+class VodAPI(VodService):
 
-    # call below method if you dont set ak and sk in $HOME/.vcloud/config
-    vod_service.set_ak(os.getenv("VOLCENGINE_ACCESS_KEY"))
-    vod_service.set_sk(os.getenv("VOLCENGINE_SECRET_KEY"))
-    # then call specific action
+    def __init__(self):
+        if os.getenv("VOLCENGINE_REGION") is None:
+            region = "cn-north-1"
+        else:
+            region = os.getenv("VOLCENGINE_REGION")
+
+        super().__init__(region=region)
+        self.set_ak(os.getenv("VOLCENGINE_ACCESS_KEY"))
+        self.set_sk(os.getenv("VOLCENGINE_SECRET_KEY"))
+        self.service_info.header["x-tt-mcp"] = 'volc'
