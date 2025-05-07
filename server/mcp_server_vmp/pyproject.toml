@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-mcp-server-vmp = "mcp_server_vmp:main"
+mcp-server-vmp = "mcp_server_vmp.server:main"
 
 [build-system]
 requires = ["hatchling"]
