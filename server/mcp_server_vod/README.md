@@ -12,9 +12,9 @@ Volcengine VOD MCP is an MCP Server based on [Model Context Protocol](https://gi
 - Implements tool encapsulation for various Volcengine functionalities including media upload and video editing
 
 ## Feature Demos
-- [Multiple videos spliced by timeline example](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/多个视频时域拼接.mp4): In Cline, splice two local videos together by specified timeline through conversation to generate a new address and return the playback URL of the synthesized video (requires domain configuration in Volcengine VOD service)
-- [Video multi-segment extraction and composition example](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/时域拼接.mp4): Extract video segments through conversation and splice them by timeline into a new video
-- [Adding text and transition effects example](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/添加文案及转场动画.mp4): Splice multiple videos by timeline into a new video and add transition effects and fixed text.
+- [Multiple videos spliced by timeline example](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/多视频按时域拼接.mp4): In Cline, splice two local videos together by specified timeline through conversation to generate a new address and return the playback URL of the synthesized video (requires domain configuration in Volcengine VOD service)
+- [Video multi-segment extraction and composition example](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/单视频多段截取.mp4): Extract video segments through conversation and splice them by timeline into a new video
+- [Adding text and transition effects example](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/添加文字及转场动画.mp4): Splice multiple videos by timeline into a new video and add transition effects and fixed text.
 
 ## Available Tools
 
