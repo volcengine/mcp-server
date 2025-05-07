@@ -169,7 +169,7 @@ def init_auth_config(region: str) -> config.VMPConfig:
 def main():
     """Start A Volcengine Managed Prometheus server."""
     load_dotenv()
-    parser = argparse.ArgumentParser(description="Run the Cloud Assistant MCP Server")
+    parser = argparse.ArgumentParser(description="Run the Volcengine Managed Prometheus MCP Server")
     parser.add_argument(
         "--transport",
         "-t",
