@@ -41,6 +41,7 @@ class VMPConfig:
         volcConf.ak = self.volcengine_ak
         volcConf.sk = self.volcengine_sk
         volcConf.session_token = self.session_token
+        volcConf.connection_pool_maxsize = self.pool_concurrency
         return volcConf
 
     def to_runtime_option(self) -> RuntimeOption:
