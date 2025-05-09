@@ -29,72 +29,266 @@
 ### Detailed Tool Specifications
 ### 1. take_screenshot
 **Description**: Capture cloud phone screen and return screenshot URL  
-**Input Parameters**: None  
-**Output Example**: `result`: Screenshot download URL
+
+**Input Parameters**:
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+**Output Example**: 
+```json
+{
+  "result": "Screenshot download URL"
+}
+```
 
 ### 2. text_input
 **Description**: Input specified text on cloud phone screen  
-**Input Parameters**: `text` (string): Text content  
-**Output Example**: `result`: "Input text successfully"
+
+**Input Parameters**:
+```json
+{
+  "type": "object",
+  "properties": {
+    "text": {
+      "description": "The text to input", // Text content 
+      "type": "string"
+    }
+  },
+  "required": [
+    "text"
+  ]
+}
+```
+
+**Output Example**: 
+```json
+{
+  "result": "Input text successfully"
+}
+```
 
 ### 3. tap
 **Description**: Tap specified coordinates on screen  
-**Input Parameters**:
-- `x` (number): X coordinate
-- `y` (number): Y coordinate  
 
-**Output Example**: `result`: "Tap the screen successfully"
+**Input Parameters**:
+```json
+{
+  "type": "object",
+  "properties": {
+    "x": {
+      "description": "The x coordinate of the tap point", // X coordinate
+      "type": "number"
+    },
+    "y": {
+      "description": "The y coordinate of the tap point", // Y coordinate  
+      "type": "number"
+    }
+  },
+  "required": [
+    "x",
+    "y"
+  ]
+}
+```
+
+**Output Example**:
+```json
+{
+  "result": "Tap the screen successfully"
+}
+```
 
 ### 4. swipe
 **Description**: Perform swipe operation (default duration 300ms)  
-**Input Parameters**:
-- `from_x` (number): Start X
-- `from_y` (number): Start Y
-- `to_x` (number): End X
-- `to_y` (number): End Y  
 
-**Output Example**: `result`: "Swipe the screen successfully"
+**Input Parameters**:
+```json
+{
+  "type": "object",
+  "properties": {
+    "from_x": {
+      "description": "The x coordinate of the start point", // Start X
+      "type": "number"
+    },
+    "from_y": {
+      "description": "The y coordinate of the start point", // Start Y
+      "type": "number"
+    },
+    "to_x": {
+      "description": "The x coordinate of the end point", // End X
+      "type": "number"
+    },
+    "to_y": {
+      "description": "The y coordinate of the end point", // End Y 
+      "type": "number"
+    }
+  },
+  "required": [
+    "from_x",
+    "from_y",
+    "to_x",
+    "to_y"
+  ]
+}
+```
+
+**Output Example**: 
+```json
+{
+  "result": "Swipe the screen successfully"
+}
+```
 
 ### 5. home
 **Description**: Simulate Home button press  
-**Input Parameters**: None  
-**Output Example**: `result`: "Go home successfully"
+
+**Input Parameters**: 
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+**Output Example**: 
+```json
+{
+  "result": "Go home successfully"
+}
+```
 
 ### 6. back
 **Description**: Simulate Back button press  
-**Input Parameters**: None  
-**Output Example**: `result`: "Back successfully"
+
+**Input Parameters**: 
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+**Output Example**: 
+```json
+{
+  "result": "Back successfully"
+}
+```
 
 ### 7. menu
 **Description**: Simulate Menu button press  
-**Input Parameters**: None  
-**Output Example**: `result`: "Open the Menu successfully"
+
+**Input Parameters**: 
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+**Output Example**: 
+```json
+{
+  "result": "Open the Menu successfully"
+}
+```
 
 ### 8. autoinstall_app
 **Description**: Download and auto-install app  
-**Input Parameters**:
-- `download_url` (string): Download URL
-- `app_name` (string): Application name  
 
-**Output Example**: `result`: "Apk is being installed"
+**Input Parameters**:
+```json
+{
+  "type": "object",
+  "properties": {
+    "app_name": {
+      "description": "The app name to be uploaded", // Application name  
+    },
+    "download_url": {
+      "description": "The download url of the app", // Download URL
+      "type": "string"
+    }
+  },
+  "required": [
+    "download_url",
+    "app_name"
+  ]
+}
+```
+
+**Output Example**: 
+```json
+{
+  "result": "Apk is being installed"
+}
+```
 
 ### 9. launch_app
 **Description**: Launch app by package name  
-**Input Parameters**:
-- `package_name` (string): Package name  
 
-**Output Example**: `result`: "Launch app successfully"
+**Input Parameters**:
+```json
+{
+  "type": "object",
+  "properties": {
+    "package_name": {
+      "description": "The package name of apk", // Package name  
+      "type": "string"
+    }
+  },
+  "required": [
+    "package_name"
+  ]
+}
+```
+
+**Output Example**: 
+```json
+{
+  "result": "Launch app successfully"
+}
+```
 
 ### 10. close_app
 **Description**: Close running app  
-**Input Parameters**:
-- `package_name` (string): Package name  
 
-**Output Example**: `result`: "Close app successfully"
+**Input Parameters**:
+```json
+{
+  "type": "object",
+  "properties": {
+    "package_name": {
+      "description": "The package name of apk", // 应用包名  
+      "type": "string"
+    }
+  },
+  "required": [
+    "package_name"
+  ]
+}
+```
+
+**Output Example**: 
+```json
+{
+  "result": "Close app successfully"
+}
+```
 
 ### 11. list_apps
 **Description**: List all installed apps  
-**Input Parameters**: None  
+
+**Input Parameters**: 
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+``` 
+
 **Output Example**:
 ```json
 {
@@ -102,9 +296,9 @@
     "AppList": [
       {
         "app_id": "",
-        "app_name": "Gaode Map",
+        "app_name": "抖音",
         "app_status": "undeployed",
-        "package_name": "com.autonavi.minimap"
+        "package_name": "com.ss.android.ugc.aweme"
       }
     ]
   }

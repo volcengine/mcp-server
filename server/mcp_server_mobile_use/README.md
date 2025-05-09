@@ -31,74 +31,262 @@
 ### Tools 详细说明
 ### 1. take_screenshot
 **描述**：对云手机屏幕进行截图，返回截图下载链接  
-**输入参数**：无  
-**输出示例**：`result`: 截图下载URL
+
+**输入参数**：
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+**输出示例**：
+```json
+{
+  "result": "截图下载URL"
+}
+```
 
 ### 2. text_input
 **描述**：在云手机屏幕上输入指定文本  
-**输入参数**：`text` (string): 要输入的文本内容  
-**输出示例**：`result`: "Input text successfully"
+
+**输入参数**：
+```json
+{
+  "type": "object",
+  "properties": {
+    "text": {
+      "description": "The text to input", // 要输入的文本内容 
+      "type": "string"
+    }
+  },
+  "required": [
+    "text"
+  ]
+}
+```
+**输出示例**：
+```json
+{
+  "result": "Input text successfully"
+}
+```
 
 ### 3. tap
 **描述**：在云手机屏幕上点击指定坐标
 
 **输入参数**：
-- `x` (number): x坐标
-- `y` (number): y坐标
+```json
+{
+  "type": "object",
+  "properties": {
+    "x": {
+      "description": "The x coordinate of the tap point", // x坐标
+      "type": "number"
+    },
+    "y": {
+      "description": "The y coordinate of the tap point", // y坐标
+      "type": "number"
+    }
+  },
+  "required": [
+    "x",
+    "y"
+  ]
+}
+```
 
 **输出示例**：
-- `result`: "Tap the screen successfully"
+```json
+{
+  "result": "Tap the screen successfully"
+}
+```
 
 ### 4. swipe
 **描述**：在云手机屏幕上执行滑动操作，默认滑动时间 300毫秒 
-**输入参数**：
-- `from_x` (number): 起点x坐标
-- `from_y` (number): 起点y坐标
-- `to_x` (number): 终点x坐标
-- `to_y` (number): 终点y坐标  
 
-**输出示例**：`result`: "Swipe the screen successfully"
+**输入参数**：
+```json
+{
+  "type": "object",
+  "properties": {
+    "from_x": {
+      "description": "The x coordinate of the start point", // 起点x坐标
+      "type": "number"
+    },
+    "from_y": {
+      "description": "The y coordinate of the start point", // 起点y坐标
+      "type": "number"
+    },
+    "to_x": {
+      "description": "The x coordinate of the end point", // 终点x坐标
+      "type": "number"
+    },
+    "to_y": {
+      "description": "The y coordinate of the end point", // 终点y坐标  
+      "type": "number"
+    }
+  },
+  "required": [
+    "from_x",
+    "from_y",
+    "to_x",
+    "to_y"
+  ]
+}
+```
+
+**输出示例**：
+```json
+{
+  "result": "Swipe the screen successfully"
+}
+```
 
 ### 5. home
 **描述**：模拟按下主页Home键操作  
-**输入参数**：无  
-**输出示例**：`result`: "Go home successfully"
+
+**输入参数**：
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+**输出示例**：
+```json
+{
+  "result": "Go home successfully"
+}
+```
 
 ### 6. back
 **描述**：模拟按下返回键操作  
-**输入参数**：无  
-**输出示例**：`result`: "Back successfully"
+
+**输入参数**：
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+**输出示例**：
+```json
+{
+  "result": "Back successfully"
+}
+```
 
 ### 7. menu
 **描述**：模拟按下菜单键操作  
-**输入参数**：无  
-**输出示例**：`result`: "Open the Menu successfully"
+
+**输入参数**：
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+**输出示例**：
+```json
+{
+  "result": "Open the Menu successfully"
+}
+```
 
 ### 8. autoinstall_app
 **描述**：在云手机中下载并自动安装应用  
+
 **输入参数**：
-- `download_url` (string): 下载链接
-- `app_name` (string): 应用名称  
+```json
+{
+  "type": "object",
+  "properties": {
+    "app_name": {
+      "description": "The app name to be uploaded", // 应用名称 
+      "type": "string"
+    },
+    "download_url": {
+      "description": "The download url of the app", // 下载链接
+      "type": "string"
+    }
+  },
+  "required": [
+    "download_url",
+    "app_name"
+  ]
+}
+```
+
 **输出示例**：
-- `result`: "Apk is being installed"
+```json
+{
+  "result": "Apk is being installed"
+}
+```
 
 ### 9. launch_app
 **描述**：启动指定包名的应用  
-**输入参数**：
-- `package_name` (string): 应用包名  
 
-**输出示例**：`result`: "Launch app successfully"
+**输入参数**：
+```json
+{
+  "type": "object",
+  "properties": {
+    "package_name": {
+      "description": "The package name of apk", // 应用包名  
+      "type": "string"
+    }
+  },
+  "required": [
+    "package_name"
+  ]
+}
+```
+
+**输出示例**：
+```json
+{
+  "result": "Launch app successfully"
+}
+```
 
 ### 10. close_app
 **描述**：关闭运行中的应用  
-**输入参数**：
-- `package_name` (string): 应用包名  
 
-**输出示例**：`result`: "Close app successfully"
+**输入参数**：
+```json
+{
+  "type": "object",
+  "properties": {
+    "package_name": {
+      "description": "The package name of apk", // 应用包名  
+      "type": "string"
+    }
+  },
+  "required": [
+    "package_name"
+  ]
+}
+```
+
+**输出示例**：
+```json
+{
+  "result": "Close app successfully"
+}
+```
 
 ### 11. list_apps
 **描述**：列出云手机上全部应用  
-**输入参数**：无
+
+**输入参数**：
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
 
 **输出示例**：
 ```json
@@ -107,9 +295,9 @@
     "AppList": [
       {
         "app_id": "",
-        "app_name": "高德地图",
+        "app_name": "抖音",
         "app_status": "undeployed",
-        "package_name": "com.autonavi.minimap"
+        "package_name": "com.ss.android.ugc.aweme"
       }
     ]
   }
@@ -120,7 +308,7 @@
 
 ## 服务开通
 [火山引擎云手机](https://www.volcengine.com/product/ACEP)       
-云手机实例适配MCP的详细资源要求请咨询相关对接人员
+云手机实例适配MCP的详细资源和特殊镜像要求请咨询相关对接人员
 
 [火山引擎对象存储](https://www.volcengine.com/product/TOS)    
 [火山引擎方舟大模型](https://www.volcengine.com/product/ark)
