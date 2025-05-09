@@ -9,7 +9,7 @@ mcp = FastMCP("vefaas-sandbox", port=int(os.getenv("PORT", "8000")))
 
 # Constants
 Sandbox_API_BASE = (
-    "xxx.apigateway-cn-beijing.volceapi.com"  # 替换为用户沙盒服务地址
+    "xxx.apigateway-cn-beijing.volceapi.com"  # 替换为用户沙盒服务 APIG 地址
 )
 
 # send http reqeust to SandboxFusion run_code api
