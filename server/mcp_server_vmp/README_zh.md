@@ -313,7 +313,7 @@ UV
       },
       "args": [
         "--directory",
-        "/<your local path to mcp-servers>/mcp_server_vmp/src/mcp_server_vmp",
+        "/<your local path to mcp-servers>/server/mcp_server_vmp",
         "run",
         "mcp-server-vmp"
       ]
