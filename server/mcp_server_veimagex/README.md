@@ -20,28 +20,25 @@ This MCP Server product provides the following Tools (capabilities):
 ### Tool3: get_image_storage_files
  - Description: Retrieve all asset information.
  - Trigger Example: Call get_image_storage_files to obtain relevant data
-### Tool4: delete_image_upload_files
- - Description: Delete specified image assets.
- - Trigger Example: Call delete_image_upload_files to delete specified image assets
-### Tool5: get_image_url_by_store_uri
+### Tool4: get_image_url_by_store_uri
  - Description: Retrieve access URLs for specified assets.
  - Trigger Example: Call get_image_url_by_store_uri to obtain access URLs for specified assets
-### Tool6: upload_image
+### Tool5: upload_image
  - Description: Upload images.
  - Trigger Example: Call upload_image to upload images
-### Tool7: generate_image_by_text
+### Tool6: generate_image_by_text
  - Description: Generate images from text.
  - Trigger Example: Call generate_image_by_text to generate images from text
-### Tool8: enhance_image_quality
+### Tool7: enhance_image_quality
  - Description: Enhance image quality based on image URLs.
  - Trigger Example: Call enhance_image_quality to enhance image quality based on image URLs
-### Tool9: convert_image_to_comic_style
+### Tool8: convert_image_to_comic_style
  - Description: Convert images to comic style based on image URLs.
  - Trigger Example: Call convert_image_to_comic_style to convert images to comic style based on image URLs
-### Tool10: image_ocr
+### Tool9: image_ocr
  - Description: Perform OCR recognition on images based on image URLs.
  - Trigger Example: Call image_ocr to perform OCR recognition on images based on image URLs
-### Tool11: expand_image
+### Tool10: expand_image
  - Description: Expand images based on image URLs.
  - Trigger Example: Call expand_image to expand images based on image URLs
 

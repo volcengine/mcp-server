@@ -20,28 +20,25 @@ veImageX的MCP Server实现，为MCP客户端提供与火山引擎veImageX服务
 ### Tool3: get_image_storage_files
  - 详细描述：获取所有资源信息。
  - 触发示例：调用 get_image_storage_files 获取相关数据
-### Tool4: delete_image_upload_files
- - 详细描述：删除指定的图片资源。
- - 触发示例：调用 delete_image_upload_files 删除指定的图片资源
-### Tool5: get_image_url_by_store_uri
+### Tool4: get_image_url_by_store_uri
  - 详细描述：获取指定资源的访问链接。
  - 触发示例：调用 get_image_url_by_store_uri 获取指定资源的访问链接
-### Tool6: upload_image
+### Tool5: upload_image
  - 详细描述：上传图片。
  - 触发示例：调用 upload_image 上传图片
-### Tool7: generate_image_by_text
+### Tool6: generate_image_by_text
  - 详细描述：根据文本生成图片。
  - 触发示例：调用 generate_image_by_text 根据文本生成图片
-### Tool8: enhance_image_quality
+### Tool7: enhance_image_quality
  - 详细描述：根据图片URL，对图片进行画质增强。
  - 触发示例：调用 enhance_image_quality 根据图片URL，对图片进行画质增强
-### Tool9: convert_image_to_comic_style
+### Tool8: convert_image_to_comic_style
  - 详细描述：根据图片URL，对图片进行漫画风格转换。
  - 触发示例：调用 convert_image_to_comic_style 根据图片URL，对图片进行漫画风格转换
-### Tool10: image_ocr
+### Tool9: image_ocr
  - 详细描述：根据图片URL，对图片进行OCR识别。
  - 触发示例：调用 image_ocr 根据图片URL，对图片进行OCR识别
-### Tool11: expand_image
+### Tool10: expand_image
  - 详细描述：根据图片URL，对图片进行扩展。
  - 触发示例：调用 expand_image 根据图片URL，对图片进行扩展
 

@@ -104,7 +104,8 @@ def create_mcp_server():
 
         return str(HandlerVolcResponse(result))
     
-    @mcp.tool()
+    # 为避免LLM调用删除功能产生的风险，默认关闭该功能。在明确风险的前提下，如果需要使用该功能，请取消下方注释
+    # @mcp.tool()
     def delete_image_upload_files(uris: list[str]) -> str:
         """pass in a list of image uris and delete these images in the corresponding service.
         Args:
