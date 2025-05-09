@@ -67,39 +67,25 @@
 
 ---
 
-## 安装部署
-
-### 使用 `uv`（推荐）
-```bash
-uv --directory /path/to/mcp-server-rds-mysql run server.py
-```
-
-### Using PIP
-```bash
-pip install volcenginesdkrdsmysqlv2
-python -m mcp_server_rds_mysql
-```
-
 ## 部署
-### UVX
+火山引擎RDS MySQL 服务接入地址：https://www.volcengine.com/docs/6313/170639
 ```json
 {
   "mcpServers": {
     "rds_mysql": {
-      "command": "uv",
+      "command": "uvx",
       "args": [
-        "--directory",
-        "/<path to mcp-servers>/mcp/server/mcp_server_rds_mysql/src/mcp_server_rds_mysql",
-        "run",
-        "server.py"
+        "--from",
+        "git+https://github.com/volcengine/mcp-server.git#subdirectory=server/mcp_server_rds_mysql",
+        "mcp-server-rds-mysql"
       ],
       "transportType": "stdio",
       "env": {
-        "ENDPOINT": "<ENDPOINT>",
-        "REGION": "<REGION>",
-        "VOLC_ACCESSKEY": "<VOLC_ACCESSKEY>",
-        "VOLC_SECRETKEY": "<VOLC_SECRETKEY>",
-        "PORT": "<PORT>"
+        "VOLCENGINE_ENDPOINT": "火山引擎endpoint",
+        "VOLCENGINE_REGION": "火山引擎资源region",
+        "VOLCENGINE_ACCESS_KEY": "火山引擎账号ACCESSKEY",
+        "VOLCENGINE_SECRET_KEY": "火山引擎账号SECRETKEY",
+        "MCP_SERVER_PORT": "MCP server监听端口"
       }
     }
   }
