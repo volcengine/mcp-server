@@ -64,7 +64,7 @@ veImageX的MCP Server实现，为MCP客户端提供与火山引擎veImageX服务
 | `VOLCENGINE_ACCESS_KEY` | 火山引擎账号 ACCESS KEY      | -   |
 | `VOLCENGINE_SECRET_KEY` | 火山引擎账号 SECRET KEY      | -   |
 | `SERVICE_ID`    | veImageX 服务 ID         | -   |
-| `DOMAIN`    | veImageX 域名        | -   |
+| `DOMAIN_NAME`    | veImageX 域名        | -   |
 
 ## 安装部署
 
@@ -106,7 +106,7 @@ veImageX的MCP Server实现，为MCP客户端提供与火山引擎veImageX服务
         "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
         "VOLCENGINE_SECRET_KEY": "Your Volcengine SK",
         "SERVICE_ID": "Your Service ID",
-        "DOMAIN": "Your Domain"
+        "DOMAIN_NAME": "Your Domain"
       }
     }
   }

@@ -15,7 +15,7 @@ class ImagexAPI(ImagexService):
         self.set_sk(os.getenv("VOLCENGINE_SECRET_KEY"))
         self.api_info = {**self.api_info, **api_info}
         self.service_id = os.getenv("SERVICE_ID")
-        self.domain = os.getenv("DOMAIN")
+        self.domain = os.getenv("DOMAIN_NAME")
         self.set_connection_timeout(100)
         self.set_socket_timeout(100)
 

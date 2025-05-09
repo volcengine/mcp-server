@@ -64,7 +64,7 @@ The following environment variables can be used to configure the MCP server:
 | `VOLCENGINE_ACCESS_KEY` | Volcano Engine account ACCESS KEY | -   |
 | `VOLCENGINE_SECRET_KEY` | Volcano Engine account SECRET KEY | -   |
 | `SERVICE_ID`    | veImageX service ID         | -   |
-| `DOMAIN`    | veImageX domain        | -   |
+| `DOMAIN_NAME`    | veImageX domain        | -   |
 
 ## Installation & Deployment
 
@@ -106,7 +106,7 @@ The following environment variables can be used to configure the MCP server:
         "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
         "VOLCENGINE_SECRET_KEY": "Your Volcengine SK",
         "SERVICE_ID": "Your Service ID",
-        "DOMAIN": "Your Domain"
+        "DOMAIN_NAME": "Your Domain"
       }
     }
   }
