@@ -15,6 +15,11 @@ v1
 
 点播，视频点播，视频剪辑
 
+## 功能演示
+- [多个视频按时域拼接为一个视频示例](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/多视频按时域拼接.mp4)：在 Trae 中通过对话将两个本地视频按指定时域拼接在一起合成一个新的地址，并返回合成视频的播放地址（这一步需要已在火山引擎 VOD 服务中配置域名）
+- [视频多段截取合成示例](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/单视频多段截取.mp4) ：可以通过对话将视频分段截取，再按时域拼接为一个新的视频
+- [添加文字及转场动画示例](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/添加文字及转场动画.mp4)：将多个视频按时域拼接为一个新视频，并针对新视频添加转场动画效果以及固定文案。
+
 ## Tools
 
 本 MCP Server 产品提供以下 Tools (工具/能力):
@@ -115,11 +120,6 @@ v1
 
 ## 鉴权方式  
 请在[火山引擎-视频点播-控制台](https://www.volcengine.com/product/vod)申请VOLCENGINE_ACCESS_KEY、VOLCENGINE_SECRET_KEY
-
-## 功能演示
-- [多个视频按时域拼接为一个视频示例](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/多视频按时域拼接.mp4)：在 Trae 中通过对话将两个本地视频按指定时域拼接在一起合成一个新的地址，并返回合成视频的播放地址（这一步需要已在火山引擎 VOD 服务中配置域名）
-- [视频多段截取合成示例](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/单视频多段截取.mp4) ：可以通过对话将视频分段截取，再按时域拼接为一个新的视频
-- [添加文字及转场动画示例](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/添加文字及转场动画.mp4)：将多个视频按时域拼接为一个新视频，并针对新视频添加转场动画效果以及固定文案。
 
 ## 安装
 
