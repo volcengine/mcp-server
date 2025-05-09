@@ -197,6 +197,8 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 - [Python MCP SDK](https://github.com/modelcontextprotocol/python-sdk)
 - [MCP intro](https://modelcontextprotocol.io/introduction)
 
+  AKTP0Va2TjJS7QbIFd422OsDxBPZnX0ZAjLD4InOuqPs33
+
 ## License
 
 volcengine/mcp-server is licensed under the [MIT License](https://github.com/volcengine/mcp-server/blob/main/LICENSE).
