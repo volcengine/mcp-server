@@ -87,7 +87,7 @@ v1
 
 ## Using uv (recommended)
 When using uv no specific installation is needed. We will
-use uvx to directly run mcp-server-tos.
+use uvx to directly run mcp-server-certificate-center.
 
 ### 本地配置
 - 添加以下配置到你的 mcp settings 文件中
@@ -95,18 +95,17 @@ use uvx to directly run mcp-server-tos.
 ```json
 {
     "mcpServers": {
-      "mcp-server": {
+      "mcp-server-certificate-center": {
         "command": "uv",
         "args": [
           "--directory",
           "/ABSOLUTE/PATH/TO/PARENT/mcp_server_certificate_center/src/certificate_service",
           "run",
-           "mcp-server-certificate-center"
+          "server.py"
         ],
         "env": {
           "VOLCENGINE_ACCESS_KEY": "your access-key-id",
-          "VOLCENGINE_SECRET_KEY": "your access-key-secret",
-          "VOLCENGINE_REGION": "your region",
+          "VOLCENGINE_SECRET_KEY": "your access-key-secret"
         }
       }
     }
@@ -118,32 +117,8 @@ OR
 - 添加以下配置到你的 mcp settings 文件中
 ```json
 {
-  "mcpServers": {
-    "mcp-server": {
-      "command": "uv",
-      "args": [
-        "--directory",
-        "/ABSOLUTE/PATH/TO/PARENT/mcp_server_certificate_center/src/certificate_service",
-        "run",
-        "server.py"
-      ],
-      "env": {
-        "VOLCENGINE_ACCESS_KEY": "your access-key-id",
-        "VOLCENGINE_SECRET_KEY": "your access-key-secret",
-        "VOLCENGINE_REGION": "your region"
-      }
-    }
-  }
-}
-```
-
-## Using uvx
-### 本地配置
-- 添加以下配置到你的 mcp settings 文件中
-```json
-{
   "mcp-server": {
-    "tos-mcp": {
+    "mcp-server-certificate-center": {
       "command": "uvx",
       "args": [
         "--from",
@@ -152,14 +127,12 @@ OR
       ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "your access-key-id",
-        "VOLCENGINE_SECRET_KEY": "your access-key-secret",
-        "VOLCENGINE_REGION": "your region",
+        "VOLCENGINE_SECRET_KEY": "your access-key-secret"
       }
     }
   }
 }
 ```
-
 
 # License
 MIT
