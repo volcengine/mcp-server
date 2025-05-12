@@ -64,6 +64,8 @@ v1
 帮我查询一下 xxx.xxx.com 这个域名的详细信息
 ### describe_live_stream_session_data
 帮我查询一下 XXX 域名今天的在线人数
+### describe_live_push_stream_info_data
+查询一下xxx域名，app是xx，流名是xx，今天的推流信息，并列出推流断开的原因
 
 
 # 可适配平台  

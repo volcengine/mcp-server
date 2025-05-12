@@ -71,6 +71,8 @@ List the first 10 domain information under the current account.
 Query detailed information for the domain xxx.xxx.com
 ### describe_live_stream_session_data
 Help me check the number of online users of the XXX domain name today.
+### describe_live_push_stream_info_data
+Check the streaming information of the xxx domain name today. The app is xx and the stream name is xx. Also, list the reasons for the stream disconnection.
 
 # Supported Platforms  
 Compatible with cline, cursor, Trae, claude desktop or other terminals supporting MCP server invocation
