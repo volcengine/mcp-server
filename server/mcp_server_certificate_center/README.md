@@ -8,7 +8,7 @@ v1
 ### Short Description
 Certificate service management driven by natural language
 ### Long Description
-The official Certificate Center MCP Server provides powerful query capabilities, supporting convenient application and querying of certificates through natural language, enhancing the intuitiveness and efficiency of data access. It can be combined with Volcano Engine cloud products and MCP to help build smarter business application scenarios.
+The official Certificate Center MCP Server provides powerful certificate management capabilities, supporting convenient management of certificate-related services through natural language, enhancing the intuitiveness and efficiency of certificate management. It can be combined with Volcano Engine cloud products and MCP to help build smarter business application scenarios.
 
 ## Category
 Enterprise Applications
