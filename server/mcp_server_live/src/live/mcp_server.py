@@ -59,7 +59,7 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
+
     def describe_live_source_traffic_data(body: dict) -> str:
         """
         调用 DescribeLiveSourceTrafficData 接口，查询指定时间范围内拉流域名或回源流产生的回源流量和带宽监控数据。
@@ -87,7 +87,7 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
+
     def describe_live_play_status_code_data(body: dict) -> str:
         """
         调用 DescribeLivePlayStatusCodeData 接口，查询指定时间范围内域名请求的状态码占比数据，包含推流请求、拉流请求和回源请求。
@@ -115,7 +115,7 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
+
     def describe_live_source_stream_metrics(body: dict) -> str:
         """
         调用 DescribeLiveSourceStreamMetrics 接口，查询指定时间范围内单路回源流的音视频帧率、码率等监控数据，用于判断回源流的健康程度。
@@ -129,7 +129,7 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
+
     def describe_live_batch_stream_transcode_data(body: dict) -> str:
         """
         调用 DescribeLiveBatchStreamTranscodeData 接口，查询指定时间范围内域名下所有转码流的转码时长、分辨率档位、编码方式等转码数据。
@@ -143,7 +143,7 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
+
     def describe_live_batch_push_stream_metrics(body: dict) -> str:
         """
         调用 DescribeLiveBatchPushStreamMetrics 接口，查询指定时间范围内指定推流域名下所有直推流或指定直推流的音视频帧率、码率等监控数据，用于判断直播流的健康程度。
@@ -157,7 +157,7 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
+
     def describe_live_batch_source_stream_metrics(body: dict) -> str:
         """
         调用 DescribeLiveBatchSourceStreamMetrics 接口，查询指定时间范围内指定拉流域名下所有回源流或指定回源流的音视频帧率、码率等监控数据，用于判断回源流的健康程度。
@@ -231,7 +231,7 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
+
     def describe_live_isp_data() -> str:
         """
         调用 DescribeLiveISPData 接口，查询所有为火山引擎视频直播提供网络接入服务的运营商标识符。获取运营商标识符后您可以在支持以运营商为查询维度的接口中使用运营商标识符查询指定运营商的维度数据。
@@ -243,7 +243,7 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
+
     def describe_live_region_data() -> str:
         """
         调用 DescribeLiveRegionData 接口，查询火山引擎视频直播服务覆盖的区域标识符。获取区域标识符后您可以在支持以区域为查询维度的接口中使用区域标识符查询指定区域的维度数据。
@@ -283,7 +283,7 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
+
     def describe_live_batch_stream_session_data(body: dict) -> str:
         """
         调用 DescribeLiveBatchStreamSessionData 接口，查询指定时间范围内域名下所有直播流的请求数和最大在线人数。
@@ -309,7 +309,7 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
+
     def describe_live_edge_stat_data(body: dict) -> str:
         """
         调用 DescribeLiveEdgeStatData 接口，查询指定协议、运营商、区域、时间范围下，直播流产生的上下行流量、上下行峰值带宽和请求数等数据。
