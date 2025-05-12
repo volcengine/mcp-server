@@ -39,6 +39,6 @@ func HandleCloseAppTool() func(context.Context, mcp.CallToolRequest) (*mcp.CallT
 		if err != nil {
 			return CallResultError(err)
 		}
-		return CallResultSuccess("Launch app successfully")
+		return CallResultSuccess("Close app successfully")
 	}
 }

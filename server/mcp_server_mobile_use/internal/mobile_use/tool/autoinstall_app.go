@@ -41,7 +41,7 @@ func HandleAppUploadTool() func(context.Context, mcp.CallToolRequest) (*mcp.Call
 			return CallResultError(fmt.Errorf("download_url is required"))
 		}
 		if ok := isUrl(downloadUrl); !ok {
-			return CallResultError(fmt.Errorf("download_url is invaild"))
+			return CallResultError(fmt.Errorf("download_url is invalid"))
 		}
 		err = handler.AutoInstallApp(ctx, req.Params.Arguments["download_url"].(string))
 		if err != nil {
