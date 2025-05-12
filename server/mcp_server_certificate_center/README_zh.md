@@ -32,13 +32,13 @@ v1
  - 详细描述：调用本接口获取SSL证书实例列表。
  - 触发示例：调用 certificate_get_instance_list 获取相关数据
 ### Tool5: certificate_add_organization
- - 详细描述：调用本接口创建一个信息模板。
+ - 详细描述：调用本接口创建一个证书的信息模板。
  - 触发示例：调用 certificate_add_organization 获取相关数据
 ### Tool6: certificate_get_organization
- - 详细描述：调用本接口创建一个信息模板。
+ - 详细描述：调用本接口获取一个证书的信息模板详情。
  - 触发示例：调用 certificate_get_organization 获取相关数据
 ### Tool7: certificate_get_organization_list
- - 详细描述：调用本接口获取已有信息模板列表。
+ - 详细描述：调用本接口获取已有的证书信息模板列表。
  - 触发示例：调用 certificate_get_organization_list 获取相关数据
 ### Tool8: list_tags_for_resources
  - 详细描述：调用本接口查询您的证书中心资源绑定的标签。

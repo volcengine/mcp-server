@@ -1,4 +1,4 @@
-# MCP Server Product Name: Certificate Center MCP Server![Product Logo](https://ti.volccdn.com/obj/net-fe/assets/log-colrtrlector.svg)
+# MCP Server Product: Certificate Center MCP Server ![Product Logo](https://ti.volccdn.com/obj/net-fe/assets/log-colrtrlector.svg)
 
 
 ## Version Information
@@ -8,7 +8,7 @@ v1
 ### Short Description
 Certificate resource management based on MCP
 ### Long Description
-The Certificate Center's official MCP Server provides powerful query capabilities, supporting convenient application and query of certificates through natural language, enhancing the intuitiveness and efficiency of data access. It can be combined with Volcano Engine cloud product MCP to help build smarter business application scenarios.
+The official Certificate Center MCP Server provides powerful query capabilities, supporting convenient application and querying of certificates through natural language, enhancing the intuitiveness and efficiency of data access. It can be combined with Volcano Engine cloud products and MCP to help build smarter business application scenarios.
 
 ## Category
 Enterprise Applications
@@ -31,13 +31,13 @@ This MCP Server product provides the following Tools (capabilities):
  - Detailed Description: Call this interface to get a list of SSL certificate instances.
  - Trigger Example: Call certificate_get_instance_list to get relevant data
 ### Tool5: certificate_add_organization
- - Detailed Description: Call this interface to create an information template.
+ - Detailed Description: Call this interface to create a certificate information template.
  - Trigger Example: Call certificate_add_organization to get relevant data
 ### Tool6: certificate_get_organization
- - Detailed Description: Call this interface to create an information template.
+ - Detailed Description: Call this interface to retrieve details of a certificate information template.
  - Trigger Example: Call certificate_get_organization to get relevant data
 ### Tool7: certificate_get_organization_list
- - Detailed Description: Call this interface to get a list of existing information templates.
+ - Detailed Description: Call this interface to get a list of existing certificate information templates.
  - Trigger Example: Call certificate_get_organization_list to get relevant data
 ### Tool8: list_tags_for_resources
  - Detailed Description: Call this interface to query the tags bound to your Certificate Center resources.
