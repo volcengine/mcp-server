@@ -150,6 +150,7 @@ use uvx to directly run mcp-server-live.
 ### Local Configuration
 - Add the following configuration to your mcp settings file
 
+
 ```json
 {
     "mcpServers": {

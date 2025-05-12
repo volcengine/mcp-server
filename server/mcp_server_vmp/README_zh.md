@@ -308,12 +308,12 @@ UV
     "mcp_server_vmp": {
       "command": "uv",
       "env": {
-        "VOLC_ACCESSKEY":"Your Volcengine access key",
-        "VOLC_SECRETKEY":"Your Volcengine secret key"
+        "VOLCENGINE_ACCESS_KEY":"Your Volcengine access key",
+        "VOLCENGINE_SECRET_KEY":"Your Volcengine secret key"
       },
       "args": [
         "--directory",
-        "/<your local path to mcp-servers>/mcp_server_vmp/src/mcp_server_vmp",
+        "/<your local path to mcp-servers>/server/mcp_server_vmp",
         "run",
         "mcp-server-vmp"
       ]
@@ -328,8 +328,8 @@ UVX
     "mcp_server_vmp": {
       "command": "uvx",
       "env": {
-        "VOLC_ACCESSKEY":"Your Volcengine access key",
-        "VOLC_SECRETKEY":"Your Volcengine secret key"
+        "VOLCENGINE_ACCESS_KEY":"Your Volcengine access key",
+        "VOLCENGINE_SECRET_KEY":"Your Volcengine secret key"
       },
       "args": [
         "--from",

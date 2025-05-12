@@ -14,6 +14,7 @@ ENV_MCP_SERVER_NAME = "MCP_SERVER_NAME"
 ENV_MCP_SERVER_MODE = "MCP_SERVER_MODE"
 ENV_MCP_SERVER_PORT = "MCP_SERVER_PORT"
 
+ENV_POOL_CONCURRENCY = "POOL_CONCURRENCY"
 
 @dataclass
 class VMPConfig:
@@ -23,6 +24,8 @@ class VMPConfig:
     volcengine_ak: str
     volcengine_sk: str
     session_token: str
+
+    pool_concurrency: int
 
     def is_valid(self) -> bool:
         """Check if the configuration is valid."""
@@ -38,6 +41,7 @@ class VMPConfig:
         volcConf.ak = self.volcengine_ak
         volcConf.sk = self.volcengine_sk
         volcConf.session_token = self.session_token
+        volcConf.connection_pool_maxsize = self.pool_concurrency
         return volcConf
 
     def to_runtime_option(self) -> RuntimeOption:
@@ -59,4 +63,5 @@ def load_env_config() -> VMPConfig:
         volcengine_ak=os.getenv(ENV_VOLCENGINE_ACCESS_KEY, ""),
         volcengine_sk=os.getenv(ENV_VOLCENGINE_SECRET_KEY, ""),
         session_token=os.getenv(ENV_VOLCENGINE_SESSION_TOKEN, ""),
+        pool_concurrency=int(os.getenv(ENV_POOL_CONCURRENCY, "0")) or os.cpu_count()*32+1,
     )

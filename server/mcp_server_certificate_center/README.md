@@ -1,149 +1,82 @@
+# MCP Server Product Name: Certificate Center MCP Server![Product Logo](https://ti.volccdn.com/obj/net-fe/assets/log-colrtrlector.svg)
 
-# MCP Server 产品名称：
-证书中心 MCP Server
 
-## 版本信息
+## Version Information
 v1
 
-## 产品描述
-### 短描述
-基于 MCP 管理证书资源
-### 长描述
-证书中心 官方推出的 MCP Server 提供强大的查询能力，支持通过自然语言便捷地申请以及查询证书，提升了数据访问的直观性与效率。可以与火山引擎云产品MCP 组合，助力构建更智能的业务应用场景。
+## Product Description
+### Short Description
+Certificate resource management based on MCP
+### Long Description
+The Certificate Center's official MCP Server provides powerful query capabilities, supporting convenient application and query of certificates through natural language, enhancing the intuitiveness and efficiency of data access. It can be combined with Volcano Engine cloud product MCP to help build smarter business application scenarios.
 
-## 分类
-企业应用
+## Category
+Enterprise Applications
 
-## 标签
-域名与网站，SSL证书
+## Tags
+Domain and Website, SSL Certificate
 
 ## Tools
-本 MCP Server 产品提供以下 Tools (工具/能力):
+This MCP Server product provides the following Tools (capabilities):
 ### Tool1: quick_apply_certificate
- - 详细描述：调用本接口创建一个付费证书订单并提交证书申请。
- - 触发示例：调用 quick_apply_certificate 获取相关数据
+ - Detailed Description: Call this interface to create a paid certificate order and submit a certificate application.
+ - Trigger Example: Call quick_apply_certificate to get relevant data
 ### Tool2: certificate_get_instance
- - 详细描述：调用本接口查询指定SSL证书实例的详情。
- - 触发示例：调用 certificate_get_instance 获取相关数据
+ - Detailed Description: Call this interface to query the details of a specified SSL certificate instance.
+ - Trigger Example: Call certificate_get_instance to get relevant data
 ### Tool3: import_certificate
- - 详细描述：调用本接口上传一本SSL证书到证书中心。
- - 触发示例：调用 import_certificate 获取相关数据
+ - Detailed Description: Call this interface to upload an SSL certificate to the Certificate Center.
+ - Trigger Example: Call import_certificate to get relevant data
 ### Tool4: certificate_get_instance_list
- - 详细描述：调用本接口获取SSL证书实例列表。
- - 触发示例：调用 certificate_get_instance_list 获取相关数据
+ - Detailed Description: Call this interface to get a list of SSL certificate instances.
+ - Trigger Example: Call certificate_get_instance_list to get relevant data
 ### Tool5: certificate_add_organization
- - 详细描述：调用本接口创建一个信息模板。
- - 触发示例：调用 certificate_add_organization 获取相关数据
+ - Detailed Description: Call this interface to create an information template.
+ - Trigger Example: Call certificate_add_organization to get relevant data
 ### Tool6: certificate_get_organization
- - 详细描述：调用本接口创建一个信息模板。
- - 触发示例：调用 certificate_get_organization 获取相关数据
+ - Detailed Description: Call this interface to create an information template.
+ - Trigger Example: Call certificate_get_organization to get relevant data
 ### Tool7: certificate_get_organization_list
- - 详细描述：调用本接口获取已有信息模板列表。
- - 触发示例：调用 certificate_get_organization_list 获取相关数据
+ - Detailed Description: Call this interface to get a list of existing information templates.
+ - Trigger Example: Call certificate_get_organization_list to get relevant data
 ### Tool8: list_tags_for_resources
- - 详细描述：调用本接口查询您的证书中心资源绑定的标签。
- - 触发示例：调用 list_tags_for_resources 获取相关数据
+ - Detailed Description: Call this interface to query the tags bound to your Certificate Center resources.
+ - Trigger Example: Call list_tags_for_resources to get relevant data
 
 
 
-## 最容易被唤起的 Prompt示例
+## Most Easily Invoked Prompt Examples
 ### quick_apply_certificate
-我想要申请一本证书。 
+I want to apply for a certificate.
 ### certificate_get_instance_list
-我想要查看下我的证书列表。
+I want to check my certificate list.
 
 
-# 可适配平台  
-可以使用 cline, cursor, claude desktop 或支持MCP server调用的的其他终端
+## Compatible Platforms  
+Can be used with cline, cursor, claude desktop, or other terminals that support MCP server calls
 
-## 服务开通链接 (整体产品)
+## Service Activation Link (Overall Product)
 <https://console.volcengine.com/certificate-center>
 
 
-## 鉴权方式
-从 volcengine 管理控制台获取 volcengine 访问密钥 ID、秘密访问密钥和区域
+## Authentication Method
+Obtain Volcengine access key ID and secret access key from the Volcengine management console
 
-## 安装部署
+## Installation
 
-### 系统依赖
-- 安装 Python 3.10 或者更高版本
-- 安装 uv
-    - 如果是linux系统
-    ```
-    curl -LsSf https://astral.sh/uv/install.sh | sh
-   ```
-    - 如果是window系统
-    ```
-    powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-    ```
-    - 同步依赖项并更uv.lock:
-    ```bash
-    uv sync
-    ```
-    - 构建mcp server:
-    ```bash
-    uv build
-    ```
+### Environment Requirements
 
-## Using uv (recommended)
-When using uv no specific installation is needed. We will
-use uvx to directly run mcp-server-tos.
+- Python 3.13+
+- Volcano Engine account and AccessKey/SecretKey
 
-### 本地配置
-- 添加以下配置到你的 mcp settings 文件中
 
-```json
-{
-    "mcpServers": {
-      "mcp-server": {
-        "command": "uv",
-        "args": [
-          "--directory",
-          "/ABSOLUTE/PATH/TO/PARENT/mcp_server_certificate_center/src/certificate_service",
-          "run",
-           "mcp-server-certificate-center"
-        ],
-        "env": {
-          "VOLCENGINE_ACCESS_KEY": "your access-key-id",
-          "VOLCENGINE_SECRET_KEY": "your access-key-secret",
-          "VOLCENGINE_REGION": "your region",
-        }
-      }
-    }
-  }
-```
+## Deployment
+### Integration in MCP Client
 
-OR
-
-- 添加以下配置到你的 mcp settings 文件中
-```json
-{
-  "mcpServers": {
-    "mcp-server": {
-      "command": "uv",
-      "args": [
-        "--directory",
-        "/ABSOLUTE/PATH/TO/PARENT/mcp_server_certificate_center/src/certificate_service",
-        "run",
-        "server.py"
-      ],
-      "env": {
-        "VOLCENGINE_ACCESS_KEY": "your access-key-id",
-        "VOLCENGINE_SECRET_KEY": "your access-key-secret",
-        "VOLCENGINE_REGION": "your region"
-      }
-    }
-  }
-}
-```
-
-## Using uvx
-### 本地配置
-- 添加以下配置到你的 mcp settings 文件中
 ```json
 {
   "mcp-server": {
-    "tos-mcp": {
+    "mcp-server-certificate-center": {
       "command": "uvx",
       "args": [
         "--from",
@@ -151,15 +84,13 @@ OR
         "mcp-server-certificate-center"
       ],
       "env": {
-        "VOLCENGINE_ACCESS_KEY": "your access-key-id",
-        "VOLCENGINE_SECRET_KEY": "your access-key-secret",
-        "VOLCENGINE_REGION": "your region",
+        "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
+        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK"
       }
     }
   }
 }
 ```
 
-
-# License
+## License
 MIT
