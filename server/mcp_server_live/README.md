@@ -40,77 +40,37 @@ This MCP Server provides the following tools/capabilities:
  - Description: Obtain upstream/downstream traffic metrics and detailed data for specified time periods.
  - Example: Utilize DescribeLiveBatchStreamTrafficData to analyze traffic patterns across multiple streams.
 
-### Tool7: describe_live_source_traffic_data
- - Description: Monitor back-to-source traffic and bandwidth metrics for pull domain names or streams.
- - Example: Access DescribeLiveSourceTrafficData to track source server traffic consumption.
-
-### Tool8: describe_live_stream_session_data
+### Tool7: describe_live_stream_session_data
  - Description: Retrieve request counts and peak concurrent users for live streams.
  - Example: Employ DescribeLiveStreamSessionData to monitor viewer engagement metrics.
 
-### Tool9: describe_live_play_status_code_data
- - Description: Analyze status code distributions for streaming requests (push/pull/back-to-source).
- - Example: Use DescribeLivePlayStatusCodeData for HTTP status code monitoring and troubleshooting.
-
-### Tool10: describe_live_push_stream_metrics
+### Tool8: describe_live_push_stream_metrics
  - Description: Monitor audio/video frame rates and bitrates for individual push streams.
  - Example: Implement DescribeLivePushStreamMetrics for real-time stream health checks.
 
-### Tool11: describe_live_source_stream_metrics
- - Description: Track performance metrics for individual back-to-source streams.
- - Example: Apply DescribeLiveSourceStreamMetrics to ensure source stream stability.
-
-### Tool12: describe_live_batch_stream_transcode_data
- - Description: Aggregate transcoding metrics including duration, resolution profiles, and codecs.
- - Example: Query DescribeLiveBatchStreamTranscodeData for transcoding workload analysis.
-
-### Tool13: describe_live_batch_push_stream_metrics
- - Description: Batch monitor push stream performance across domains or specific streams.
- - Example: Use DescribeLiveBatchPushStreamMetrics for multi-stream quality assurance.
-
-### Tool14: describe_live_batch_source_stream_metrics
- - Description: Collect metrics for multiple back-to-source streams simultaneously.
- - Example: Leverage DescribeLiveBatchSourceStreamMetrics for comprehensive source monitoring.
-
-### Tool15: describe_ip_info
+### Tool9: describe_ip_info
  - Description: Verify CDN node attribution and obtain regional/ISP details for IP addresses.
  - Example: Check DescribeIpInfo to validate Volcano Engine CDN node status.
 
-### Tool16: describe_live_isp_data
- - Description: Retrieve ISP identifiers for network provider-specific analytics.
- - Example: Access DescribeLiveISPData to filter metrics by internet service provider.
-
-### Tool17: describe_live_region_data
- - Description: Obtain regional identifiers for geographical-based data segmentation.
- - Example: Use DescribeLiveRegionData for location-specific performance insights.
-
-### Tool18: describe_live_push_stream_info_data
+### Tool10: describe_live_push_stream_info_data
  - Description: Investigate disconnected push streams and termination causes.
  - Example: Analyze DescribeLivePushStreamInfoData for stream interruption diagnostics.
 
-### Tool19: describe_live_transcode_info_data
+### Tool11: describe_live_transcode_info_data
  - Description: Access detailed transcoding job records including timelines and configurations.
  - Example: Query DescribeLiveTranscodeInfoData for transcoding operation audits.
 
-### Tool20: describe_live_batch_stream_session_data
- - Description: Invoke this API to query request count and maximum concurrent users.
- - Example: Call DescribeLiveBatchStreamSessionData API to query request count and maximum concurrent users for all live streams under specified domains within a time range.
-
-### Tool21: describe_live_top_play_data
+### Tool12: describe_live_top_play_data
  - Description: Use this API to retrieve traffic and bandwidth metrics for TopN live streams or TopN domains.
  - Example: Invoke DescribeLiveTopPlayData API to query traffic and bandwidth information of TopN live streams/domains within specified time ranges.
-
-### Tool22: describe_live_edge_stat_data
- - Description: Query upstream/downstream traffic, peak bandwidth, and request count data for live streams by protocol, ISP, region, and time range.
- - Example: Call DescribeLiveEdgeStatData API to retrieve edge statistics including upstream/downstream traffic, peak bandwidth, and request counts based on protocol, ISP, region, and time parameters.
 
 ## Most Frequently Used Prompt Examples
 ### list_domain_detail
 List the first 10 domain information under the current account.
 ### describe_domain
 Query detailed information for the domain xxx.xxx.com
-### describe_live_region_data
-Query region identifiers covered by the live streaming service
+### describe_live_stream_session_data
+Help me check the number of online users of the XXX domain name today.
 
 # Supported Platforms  
 Compatible with cline, cursor, Trae, claude desktop or other terminals supporting MCP server invocation
