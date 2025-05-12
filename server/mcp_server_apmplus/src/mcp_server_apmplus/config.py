@@ -4,7 +4,6 @@ import logging
 import os
 from dataclasses import dataclass
 
-from starlette.requests import Request
 from volcenginesdkcore.signv4 import SignerV4
 
 logger = logging.getLogger(__name__)
@@ -21,9 +20,16 @@ class ApmplusConfig:
         VOLC_SECRETKEY: Access key secret for authentication
     """
 
+    endpoint: str
     access_key: str
     secret_key: str
-    endpoint: str
+    session_token: str
+
+    def is_valid(self) -> bool:
+        """Check if the configuration is valid."""
+        if self.access_key == "" and self.secret_key == "" and self.session_token == "":
+            return False
+        return True
 
     def append_authorization(
         self, path, method, headers, body, post_params, query, region, service
@@ -39,6 +45,7 @@ class ApmplusConfig:
             self.secret_key,
             region,
             service,
+            self.session_token,
         )
 
 
@@ -60,35 +67,13 @@ def validate_required_vars():
         )
 
 
-def load_config(raw_request: Request) -> ApmplusConfig:
-    auth = None
-    if raw_request:
-        # 从 header 的 authorization 字段读取 base64 编码后的 sts json
-        auth = raw_request.headers.get("authorization", None)
-    if auth is None:
-        # 如果 header 中没有认证信息，可能是 stdio 模式，尝试从环境变量获取
-        auth = os.getenv("authorization", None)
-    if auth is not None:
-        if ' ' in auth:
-            _, base64_data = auth.split(' ', 1)
-        else:
-            base64_data = auth
-
-        try:
-            config = parse_authorization(base64_data)
-            return config
-        except Exception as e:
-            raise ValueError("Decode authorization info error", e)
-
+def load_config() -> ApmplusConfig:
     # validate_required_vars()  # 不强校验AKSK，允许通过authorization参数传入
     config = ApmplusConfig(
-        access_key=os.environ["VOLC_ACCESSKEY"],
-        secret_key=os.environ["VOLC_SECRETKEY"],
-        endpoint=(
-            DEFAULT_ENDPOINT
-            if os.environ.get("ENDPOINT", "") == ""
-            else os.environ.get("ENDPOINT")
-        ),
+        access_key=os.getenv("VOLC_ACCESSKEY", ""),
+        secret_key=os.getenv("VOLC_SECRETKEY", ""),
+        session_token=os.getenv("VOLC_SESSION_TOKEN", ""),
+        endpoint=os.getenv("ENDPOINT", DEFAULT_ENDPOINT),
     )
     logger.info(f"Loaded configuration")
 
@@ -100,5 +85,6 @@ def parse_authorization(authorization: str) -> ApmplusConfig:
     return ApmplusConfig(
         access_key=auth_obj["AccessKeyId"],
         secret_key=auth_obj["SecretAccessKey"],
-        endpoint=DEFAULT_ENDPOINT,
+        session_token=auth_obj["SessionToken"],
+        endpoint=os.getenv("ENDPOINT", DEFAULT_ENDPOINT),
     )
