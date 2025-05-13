@@ -1,8 +1,9 @@
 import argparse
 import logging
+import os
 from typing import Optional
 
-from mcp_server_apmplus.config import load_config, ApmplusConfig
+from mcp_server_apmplus.config import load_config, ApmplusConfig, ENV_MCP_SERVER_MODE
 from mcp_server_apmplus.server import mcp
 
 # Configure logging
@@ -21,7 +22,7 @@ def main():
         "--transport",
         "-t",
         choices=["sse", "stdio"],
-        default="stdio",
+        default=os.getenv(ENV_MCP_SERVER_MODE, "stdio"),
         help="Transport protocol to use (sse or stdio)",
     )
 

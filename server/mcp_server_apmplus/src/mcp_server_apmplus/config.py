@@ -8,6 +8,16 @@ from volcenginesdkcore.signv4 import SignerV4
 
 logger = logging.getLogger(__name__)
 
+ENV_VOLCENGINE_ENDPOINT = "VOLCENGINE_ENDPOINT"
+ENV_VOLCENGINE_REGION = "VOLCENGINE_REGION"
+ENV_VOLCENGINE_ACCESS_KEY = "VOLCENGINE_ACCESS_KEY"
+ENV_VOLCENGINE_SECRET_KEY = "VOLCENGINE_SECRET_KEY"
+ENV_VOLCENGINE_SESSION_TOKEN = "VOLCENGINE_SESSION_TOKEN"
+
+ENV_MCP_SERVER_NAME = "MCP_SERVER_NAME"
+ENV_MCP_SERVER_MODE = "MCP_SERVER_MODE"
+ENV_MCP_SERVER_PORT = "MCP_SERVER_PORT"
+
 DEFAULT_ENDPOINT = "https://open.volcengineapi.com"
 
 
@@ -16,8 +26,8 @@ class ApmplusConfig:
     """Configuration for Storage APMPlus MCP Server.
 
     Required environment variables:
-        VOLC_ACCESSKEY: The Access key ID for authentication
-        VOLC_SECRETKEY: Access key secret for authentication
+        VOLCENGINE_ACCESS_KEY: The Access key ID for authentication
+        VOLCENGINE_SECRET_KEY: Access key secret for authentication
     """
 
     endpoint: str
@@ -57,7 +67,7 @@ def validate_required_vars():
     ValueError: If any required environment variable is missing.
     """
     missing_vars = []
-    for var in ["VOLC_ACCESSKEY", "VOLC_SECRETKEY"]:
+    for var in [ENV_VOLCENGINE_ACCESS_KEY, ENV_VOLCENGINE_SECRET_KEY]:
         if var not in os.environ:
             missing_vars.append(var)
 
@@ -70,14 +80,15 @@ def validate_required_vars():
 def load_config() -> ApmplusConfig:
     # validate_required_vars()  # 不强校验AKSK，允许通过authorization参数传入
     config = ApmplusConfig(
-        access_key=os.getenv("VOLC_ACCESSKEY", ""),
-        secret_key=os.getenv("VOLC_SECRETKEY", ""),
-        session_token=os.getenv("VOLC_SESSION_TOKEN", ""),
-        endpoint=os.getenv("ENDPOINT", DEFAULT_ENDPOINT),
+        access_key=os.getenv(ENV_VOLCENGINE_ACCESS_KEY, ""),
+        secret_key=os.getenv(ENV_VOLCENGINE_SECRET_KEY, ""),
+        session_token=os.getenv(ENV_VOLCENGINE_SESSION_TOKEN, ""),
+        endpoint=os.getenv(ENV_VOLCENGINE_ENDPOINT, DEFAULT_ENDPOINT),
     )
     logger.info(f"Loaded configuration")
 
     return config
+
 
 def parse_authorization(authorization: str) -> ApmplusConfig:
     b = base64.standard_b64decode(authorization)
@@ -86,5 +97,5 @@ def parse_authorization(authorization: str) -> ApmplusConfig:
         access_key=auth_obj["AccessKeyId"],
         secret_key=auth_obj["SecretAccessKey"],
         session_token=auth_obj["SessionToken"],
-        endpoint=os.getenv("ENDPOINT", DEFAULT_ENDPOINT),
+        endpoint=os.getenv(ENV_VOLCENGINE_ENDPOINT, DEFAULT_ENDPOINT),
     )

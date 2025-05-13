@@ -43,8 +43,8 @@ https://console.volcengine.com/apmplus-server
 ## 安装部署  
 从 [volcengine](https://www.volcengine.com/docs/6291/65568) 获取 ak/sk, 然后将 ak/sk 添加到 mcp server 配置中, 或者在工作目录下的 `.env` 文件中配置, 格式如下:
 ```shell
-VOLC_ACCESSKEY=your_volcengine_ak
-VOLC_SECRETKEY=your_volcengine_sk
+VOLCENGINE_ACCESS_KEY=your_volcengine_ak
+VOLCENGINE_SECRET_KEY=your_volcengine_sk
 ```
 
 ## 使用 uv
@@ -60,8 +60,8 @@ VOLC_SECRETKEY=your_volcengine_sk
         "mcp-server-apmplus"
       ],
       "env": {
-        "VOLC_ACCESSKEY": "your_volcengine_ak",
-        "VOLC_SECRETKEY": "your_volcengine_sk"
+        "VOLCENGINE_ACCESS_KEY": "your_volcengine_ak",
+        "VOLCENGINE_SECRET_KEY": "your_volcengine_sk"
       }
     }
   }
@@ -80,8 +80,8 @@ VOLC_SECRETKEY=your_volcengine_sk
         "server.py"
       ],
       "env": {
-        "VOLC_ACCESSKEY": "your_volcengine_ak",
-        "VOLC_SECRETKEY": "your_volcengine_sk"
+        "VOLCENGINE_ACCESS_KEY": "your_volcengine_ak",
+        "VOLCENGINE_SECRET_KEY": "your_volcengine_sk"
       }
     }
   }

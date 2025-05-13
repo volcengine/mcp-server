@@ -1,9 +1,6 @@
 from dataclasses import dataclass
 
 
-# common
-
-
 @dataclass
 class ResponseError:
     code: str

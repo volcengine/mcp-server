@@ -1,17 +1,24 @@
 import logging
 import os
-from typing import Optional
 
 from mcp.server.fastmcp import Context, FastMCP
 from mcp.server.session import ServerSession
 from starlette.requests import Request
 
 from mcp_server_apmplus.api import *
-from mcp_server_apmplus.config import load_config, parse_authorization
+from mcp_server_apmplus.config import (
+    load_config,
+    parse_authorization,
+    ENV_MCP_SERVER_PORT,
+    ENV_MCP_SERVER_NAME,
+)
 from mcp_server_apmplus.model import *
 
 # Initialize FastMCP server
-mcp = FastMCP("APMPlus MCP Server", port=int(os.getenv("PORT", "8000")))
+mcp = FastMCP(
+    os.getenv(ENV_MCP_SERVER_NAME, "mcp_server_apmplus"),
+    port=int(os.getenv(ENV_MCP_SERVER_PORT, "8000")),
+)
 
 
 @mcp.tool()
@@ -38,8 +45,8 @@ async def apmplus_server_list_alert_rule(
             keyword = None
 
         req = ApmplusServerListAlertRuleRequest(
-            region_id=region_id.strip(),
-            keyword=keyword.strip(),
+            region_id=region_id,
+            keyword=keyword,
             page_number=page_number,
             page_size=page_size,
         )
@@ -76,8 +83,8 @@ async def apmplus_server_list_notify_group(
             keyword = None
 
         req = ApmplusServerListNotifyGroupRequest(
-            region_id=region_id.strip(),
-            keyword=keyword.strip(),
+            region_id=region_id,
+            keyword=keyword,
             page_number=page_number,
             page_size=page_size,
         )
@@ -96,7 +103,6 @@ async def apmplus_server_query_metrics(
     query: str,
     start_time: int,
     end_time: int,
-
 ):
     """
     Query metrics.
@@ -113,7 +119,7 @@ async def apmplus_server_query_metrics(
             region_id = DEFAULT_REGION
 
         req = ApmplusServerQueryMetricsRequest(
-            region_id=region_id.strip(),
+            region_id=region_id,
             query=query,
             start_time=start_time,
             end_time=end_time,
@@ -126,9 +132,10 @@ async def apmplus_server_query_metrics(
         logging.error(f"Error in apmplus_server_query_metrics: {e}")
         raise
 
+
 def init_auth_config() -> ApmplusConfig:
     """Initialize auth config from env or request context."""
-    conf = load_config() # load default config from env
+    conf = load_config()  # load default config from env
 
     # 从 context 中获取 header
     ctx: Context[ServerSession, object] = mcp.get_context()
@@ -142,8 +149,8 @@ def init_auth_config() -> ApmplusConfig:
         # 如果 header 中没有认证信息，可能是 stdio 模式，尝试从环境变量获取
         auth = os.getenv("authorization", None)
     if auth is not None:
-        if ' ' in auth:
-            _, base64_data = auth.split(' ', 1)
+        if " " in auth:
+            _, base64_data = auth.split(" ", 1)
         else:
             base64_data = auth
 

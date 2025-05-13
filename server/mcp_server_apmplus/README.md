@@ -43,8 +43,8 @@ https://console.volcengine.com/apmplus-server
 ## Installation and Deployment
 Obtain your AK/SK from [volcengine](https://www.volcengine.com/docs/6291/65568), then add the AK/SK to the MCP server configuration, or configure them in the `.env` file in your working directory with the following format:
 ```shell
-VOLC_ACCESSKEY=your_volcengine_ak
-VOLC_SECRETKEY=your_volcengine_sk
+VOLCENGINE_ACCESS_KEY=your_volcengine_ak
+VOLCENGINE_SECRET_KEY=your_volcengine_sk
 
 ## Using uv
 Add the following configuration to your MCP settings file:
@@ -59,8 +59,8 @@ Add the following configuration to your MCP settings file:
         "mcp-server-apmplus"
       ],
       "env": {
-        "VOLC_ACCESSKEY": "your_volcengine_ak",
-        "VOLC_SECRETKEY": "your_volcengine_sk"
+        "VOLCENGINE_ACCESS_KEY": "your_volcengine_ak",
+        "VOLCENGINE_SECRET_KEY": "your_volcengine_sk"
       }
     }
   }
@@ -79,8 +79,8 @@ Or clone the repository locally and start it from the local code repository:
         "server.py"
       ],
       "env": {
-        "VOLC_ACCESSKEY": "your_volcengine_ak",
-        "VOLC_SECRETKEY": "your_volcengine_sk"
+        "VOLCENGINE_ACCESS_KEY": "your_volcengine_ak",
+        "VOLCENGINE_SECRET_KEY": "your_volcengine_sk"
       }
     }
   }
