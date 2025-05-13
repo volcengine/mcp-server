@@ -1,0 +1,4891 @@
+{
+ "components": {
+  "schemas": {
+   "Auth": {
+    "description": "授权邀约",
+    "properties": {
+     "AuthID": {
+      "description": "授权ID",
+      "type": "string"
+     },
+     "AuthList": {
+      "description": "授权列表",
+      "format": "int32",
+      "items": {
+       "type": "integer"
+      },
+      "maxItems": 5,
+      "type": "array"
+     },
+     "MajorAccountID": {
+      "description": "主账号的火山引擎账号 UID",
+      "format": "int32",
+      "type": "integer"
+     },
+     "RelationID": {
+      "description": "授权所属财务关系ID",
+      "type": "string"
+     },
+     "SubAccountID": {
+      "description": "主账号的火山引擎账号 UID",
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "AuthID",
+     "MajorAccountID",
+     "SubAccountID",
+     "AuthList",
+     "RelationID"
+    ],
+    "type": "object"
+   },
+   "AuthInfo": {
+    "description": "财务关系授权信息",
+    "properties": {
+     "AuthID": {
+      "description": "财务关系授权ID",
+      "type": "string"
+     },
+     "AuthList": {
+      "description": "授权列表",
+      "example": [
+       1,
+       2,
+       3,
+       4,
+       5
+      ],
+      "format": "int32",
+      "items": {
+       "type": "integer"
+      },
+      "maxItems": 5,
+      "type": "array"
+     },
+     "AuthStatus": {
+      "description": "授权状态枚举值\n100 授权建立中\n200 授权已建立\n250 授权变更已被子账号拒绝\n300 授权变更已被主账号取消\n400 授权已解除",
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "AuthID",
+     "AuthStatus",
+     "AuthList"
+    ],
+    "type": "object"
+   },
+   "BalanceInfoResult": {
+    "description": "返回的余额信息",
+    "properties": {
+     "AccountID": {
+      "description": "账户ID",
+      "example": "210005xxxx",
+      "type": "string"
+     },
+     "ArrearsBalance": {
+      "description": "欠费金额",
+      "example": "0.01",
+      "type": "string"
+     },
+     "AvailableBalance": {
+      "description": "可用余额",
+      "example": "0.01",
+      "type": "string"
+     },
+     "CashBalance": {
+      "description": "现金余额",
+      "type": "string"
+     },
+     "CreditLimit": {
+      "description": "信控额度",
+      "type": "string"
+     },
+     "FreezeAmount": {
+      "description": "冻结金额",
+      "example": "0.01",
+      "type": "string"
+     }
+    },
+    "required": [
+     "AccountID",
+     "ArrearsBalance",
+     "AvailableBalance",
+     "CashBalance",
+     "CreditLimit",
+     "FreezeAmount"
+    ],
+    "type": "object"
+   },
+   "Bill": {
+    "description": "账单",
+    "properties": {
+     "BillCategoryParent": {
+      "description": "账单类型",
+      "example": "消费",
+      "type": "string"
+     },
+     "BillDetailNum": {
+      "description": "账单明细条数",
+      "example": "1",
+      "type": "string"
+     },
+     "BillID": {
+      "description": "订单号/账单号",
+      "example": "Bill7262035879529697551",
+      "type": "string"
+     },
+     "BillPeriod": {
+      "description": "账期",
+      "example": "2023-08",
+      "type": "string"
+     },
+     "BillingMode": {
+      "description": "计费模式",
+      "example": "按量计费",
+      "type": "string"
+     },
+     "BusiPeriod": {
+      "description": "业务账期",
+      "example": "2023-08",
+      "type": "string"
+     },
+     "BusinessMode": {
+      "description": "业务类型",
+      "example": "普通业务",
+      "type": "string"
+     },
+     "CouponAmount": {
+      "description": "代金券抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "CreditCarriedAmount": {
+      "description": "信控额度退款抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "Currency": {
+      "description": "币种",
+      "example": "CNY",
+      "type": "string"
+     },
+     "DiscountBillAmount": {
+      "description": "折后价",
+      "example": "0.06",
+      "type": "string"
+     },
+     "ExpenseBeginTime": {
+      "description": "消费开始时间",
+      "example": "2023-08-01 00:00:00",
+      "type": "string"
+     },
+     "ExpenseEndTime": {
+      "description": "消费结束时间",
+      "example": "2023-08-01 01:00:00",
+      "type": "string"
+     },
+     "OriginalBillAmount": {
+      "description": "原价",
+      "example": "0.519200",
+      "type": "string"
+     },
+     "OwnerCustomerName": {
+      "description": "Owner账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "OwnerID": {
+      "description": "Owner账号ID",
+      "example": "2100153894",
+      "type": "string"
+     },
+     "OwnerUserName": {
+      "description": "Owner账户名",
+      "example": "Doooo",
+      "type": "string"
+     },
+     "PaidAmount": {
+      "description": "现金支付",
+      "example": "0.00",
+      "type": "string"
+     },
+     "PayStatus": {
+      "description": "支付状态",
+      "example": "已结清",
+      "type": "string"
+     },
+     "PayableAmount": {
+      "description": "应付金额",
+      "example": "0.06",
+      "type": "string"
+     },
+     "PayerCustomerName": {
+      "description": "支付账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "PayerID": {
+      "description": "支付账号ID",
+      "example": "2100153894",
+      "type": "string"
+     },
+     "PayerUserName": {
+      "description": "支付账号名",
+      "example": "Doooo",
+      "type": "string"
+     },
+     "PreferentialBillAmount": {
+      "description": "优惠金额",
+      "example": "0.457835",
+      "type": "string"
+     },
+     "Product": {
+      "description": "产品英文名称",
+      "example": "ECS",
+      "type": "string"
+     },
+     "ProductZh": {
+      "description": "产品中文名称",
+      "example": "云服务器",
+      "type": "string"
+     },
+     "RoundBillAmount": {
+      "description": "抹零金额",
+      "example": "0.001365",
+      "type": "string"
+     },
+     "SellerCustomerName": {
+      "description": "Seller账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "SellerID": {
+      "description": "Seller账号ID",
+      "example": "3423",
+      "type": "string"
+     },
+     "SellerUserName": {
+      "description": "Seller账户名",
+      "example": "火山引擎",
+      "type": "string"
+     },
+     "SettlementType": {
+      "description": "结算类型，settle：结算，non-settle：非结算，quota-settle：Quota结算",
+      "example": "非结算",
+      "type": "string"
+     },
+     "SubjectName": {
+      "description": "主体名",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "TradeTime": {
+      "description": "交易时间，格式：2006-01-02 15:04:05",
+      "example": "2023-08-01 01:28:14",
+      "type": "string"
+     },
+     "UnpaidAmount": {
+      "description": "欠费金额",
+      "example": "0.00",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BillDetail": {
+    "description": "账单明细",
+    "properties": {
+     "BillCategory": {
+      "description": "账单类型",
+      "example": "消费-使用",
+      "type": "string"
+     },
+     "BillDetailId": {
+      "description": "账单明细ID",
+      "example": "Detail7039533873751019820",
+      "type": "string"
+     },
+     "BillID": {
+      "description": "订单号/账单号",
+      "example": "Bill7262035879529697551",
+      "type": "string"
+     },
+     "BillPeriod": {
+      "description": "账期",
+      "example": "2023-08",
+      "type": "string"
+     },
+     "BillingFunction": {
+      "description": "单价价格类型",
+      "example": "固定单价",
+      "type": "string"
+     },
+     "BillingMethodCode": {
+      "description": "计费方式",
+      "example": "按加和量小时结",
+      "type": "string"
+     },
+     "BillingMode": {
+      "description": "计费模式",
+      "example": "按量计费",
+      "type": "string"
+     },
+     "BusiPeriod": {
+      "description": "业务账期",
+      "example": "2023-08",
+      "type": "string"
+     },
+     "BusinessMode": {
+      "description": "业务类型",
+      "example": "普通业务",
+      "type": "string"
+     },
+     "ConfigName": {
+      "description": "配置名称",
+      "example": "低配",
+      "type": "string"
+     },
+     "ConfigurationCode": {
+      "description": "配置Code",
+      "example": "ecs.g1.large",
+      "type": "string"
+     },
+     "Count": {
+      "description": "用量",
+      "example": "0",
+      "type": "string"
+     },
+     "CouponAmount": {
+      "description": "代金券抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "CreditCarriedAmount": {
+      "description": "信控额度退款抵扣",
+      "example": "0.000",
+      "type": "string"
+     },
+     "Currency": {
+      "description": "币种",
+      "example": "CNY",
+      "type": "string"
+     },
+     "DeductionCount": {
+      "description": "资源包抵扣量",
+      "example": "0",
+      "type": "string"
+     },
+     "DeductionUseDuration": {
+      "description": "抵扣量",
+      "example": "0.0",
+      "type": "string"
+     },
+     "DiscountBillAmount": {
+      "description": "折后价",
+      "example": "0.66",
+      "type": "string"
+     },
+     "DiscountBizBillingFunction": {
+      "description": "优惠类型",
+      "example": "全额累进单价",
+      "type": "string"
+     },
+     "DiscountBizMeasureInterval": {
+      "description": "优惠用量区间",
+      "example": "0,100,200",
+      "type": "string"
+     },
+     "DiscountBizUnitPrice": {
+      "description": "优惠价格/折扣",
+      "example": "1.3",
+      "type": "string"
+     },
+     "DiscountBizUnitPriceInterval": {
+      "description": "优惠价格区间",
+      "example": "1,2,3",
+      "type": "string"
+     },
+     "EffectiveFactor": {
+      "description": "有效因子",
+      "example": "1",
+      "type": "string"
+     },
+     "Element": {
+      "description": "计费单元",
+      "example": "BE000232",
+      "type": "string"
+     },
+     "ElementCode": {
+      "description": "计费单元Code",
+      "example": "BE000137",
+      "type": "string"
+     },
+     "ExpandField": {
+      "description": "扩展字段",
+      "example": "按加和量小时结",
+      "type": "string"
+     },
+     "ExpenseBeginTime": {
+      "description": "消费开始时间",
+      "example": "2023-08-14",
+      "type": "string"
+     },
+     "ExpenseDate": {
+      "description": "日期",
+      "example": "2023-08-14",
+      "type": "string"
+     },
+     "ExpenseEndTime": {
+      "description": "消费结束时间",
+      "example": "-",
+      "type": "string"
+     },
+     "Factor": {
+      "description": "影响因子",
+      "example": "{\"type\":\"zanya\"}",
+      "type": "string"
+     },
+     "FactorCode": {
+      "description": "影响因子Code",
+      "example": "{\"type\":\"large\"}",
+      "type": "string"
+     },
+     "Formula": {
+      "description": "应付金额计费公式",
+      "example": "（333）【单价】 * （2419200秒）【使用时长】 * （1/2419200）【时长转化系数】 - （0.000000）【优惠金额】 - （0.000000）【抹零金额】 - （0.000000）【代金券抵扣】",
+      "type": "string"
+     },
+     "InstanceName": {
+      "description": "实例名称",
+      "example": "ECS-fEaG",
+      "type": "string"
+     },
+     "InstanceNo": {
+      "description": "实例ID",
+      "example": "i-ycjlq77tdg8rx6ib4v1s",
+      "type": "string"
+     },
+     "MarketPrice": {
+      "description": "市场价",
+      "example": "2.716",
+      "type": "string"
+     },
+     "MeasureInterval": {
+      "description": "单价用量区间",
+      "example": "0,100,200",
+      "type": "string"
+     },
+     "OriginalBillAmount": {
+      "description": "原价",
+      "example": "5.711200",
+      "type": "string"
+     },
+     "OwnerCustomerName": {
+      "description": "Owner账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "OwnerID": {
+      "description": "Owner账号ID",
+      "example": "2100153894",
+      "type": "string"
+     },
+     "OwnerUserName": {
+      "description": "Owner账户名",
+      "example": "Doooo",
+      "type": "string"
+     },
+     "PaidAmount": {
+      "description": "现金支付",
+      "example": "0.00",
+      "type": "string"
+     },
+     "PayableAmount": {
+      "description": "应付金额",
+      "example": "0.66",
+      "type": "string"
+     },
+     "PayerCustomerName": {
+      "description": "支付账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "PayerID": {
+      "description": "支付账号ID",
+      "example": "2100153894",
+      "type": "string"
+     },
+     "PayerUserName": {
+      "description": "支付账户名",
+      "example": "Doooo",
+      "type": "string"
+     },
+     "PreferentialBillAmount": {
+      "description": "优惠金额",
+      "example": "5.036185",
+      "type": "string"
+     },
+     "Price": {
+      "description": "单价",
+      "example": "640.00",
+      "type": "string"
+     },
+     "PriceInterval": {
+      "description": "单价价格区间",
+      "example": "1,2,3",
+      "type": "string"
+     },
+     "PriceUnit": {
+      "description": "单价单位",
+      "example": "块",
+      "type": "string"
+     },
+     "Product": {
+      "description": "产品英文名称",
+      "example": "ECS",
+      "type": "string"
+     },
+     "ProductZh": {
+      "description": "产品中文名称",
+      "example": "云服务器",
+      "type": "string"
+     },
+     "Project": {
+      "description": "项目",
+      "example": "default",
+      "type": "string"
+     },
+     "ProjectDisplayName": {
+      "description": "项目中文名",
+      "example": "默认项目",
+      "type": "string"
+     },
+     "Region": {
+      "description": "地域",
+      "example": "华北2（北京",
+      "type": "string"
+     },
+     "RegionCode": {
+      "description": "地域Code",
+      "example": "R000671",
+      "type": "string"
+     },
+     "ReservationInstance": {
+      "description": "售卖模式，0：普通实例，1：弹性预约实例",
+      "example": "0",
+      "type": "string"
+     },
+     "RoundAmount": {
+      "description": "抹零金额",
+      "example": 0,
+      "format": "double",
+      "type": "number"
+     },
+     "SellerCustomerName": {
+      "description": "Seller账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "SellerID": {
+      "description": "Seller账号ID",
+      "example": "3423",
+      "type": "string"
+     },
+     "SellerUserName": {
+      "description": "Seller账户名",
+      "example": "火山引擎",
+      "type": "string"
+     },
+     "SellingMode": {
+      "description": "售卖模式，0：普通实例，1：竞价实例",
+      "example": "0",
+      "type": "string"
+     },
+     "SettlementType": {
+      "description": "非结算",
+      "example": "结算类型，settle：结算，non-settle：非结算，quota-settle：Quota结算",
+      "type": "string"
+     },
+     "SolutionZh": {
+      "description": "解决方案中文名称",
+      "example": "测试方案",
+      "type": "string"
+     },
+     "SubjectName": {
+      "description": "主体名",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "Tag": {
+      "description": "标签，格式为包含多个键值对的Json字符串",
+      "example": "{\"voKey1\":[\"v1\"],\"voKey101\":[\"v5\"],\"voKey2\":[\"v2\"],\"volc:vke:cluster-id\":[\"valu3\"],\"volc:vke:createdby-vke-flag\":[\"valu4\"],\"volc:vke:used-by-vke-cluster\":[\"value5\"]}",
+      "type": "string"
+     },
+     "TradeTime": {
+      "description": "交易时间，格式：2006-01-02 15:04:05",
+      "example": "2023-08-01 01:28:14",
+      "type": "string"
+     },
+     "Unit": {
+      "description": "用量单位",
+      "example": "GB",
+      "type": "string"
+     },
+     "UnpaidAmount": {
+      "description": "欠费金额",
+      "example": "0.66",
+      "type": "string"
+     },
+     "UseDuration": {
+      "description": "使用时长",
+      "example": "0",
+      "type": "string"
+     },
+     "UseDurationUnit": {
+      "description": "时长单位",
+      "example": "秒",
+      "type": "string"
+     },
+     "Zone": {
+      "description": "可用区",
+      "example": "可用区B",
+      "type": "string"
+     },
+     "ZoneCode": {
+      "description": "可用区Code",
+      "example": "Zone1",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BillOverviewByCategory": {
+    "description": "账单总览账号汇总\n",
+    "properties": {
+     "BillCategoryParent": {
+      "description": "账单类型",
+      "example": "消费",
+      "type": "string"
+     },
+     "BillPeriod": {
+      "description": "账期",
+      "example": "2023-11",
+      "type": "string"
+     },
+     "BusinessMode": {
+      "description": "业务类型",
+      "example": "财务托管",
+      "type": "string"
+     },
+     "CouponAmount": {
+      "description": "代金券抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "CreditCarriedAmount": {
+      "description": "信控额度退款抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "Currency": {
+      "description": "币种",
+      "example": "CNY",
+      "type": "string"
+     },
+     "DiscountBillAmount": {
+      "description": "折后价",
+      "example": "0.00",
+      "type": "string"
+     },
+     "OriginalBillAmount": {
+      "description": "原价",
+      "example": "0.00",
+      "type": "string"
+     },
+     "OwnerCustomerName": {
+      "description": "Owner账号客户名称",
+      "example": "俊杰1",
+      "type": "string"
+     },
+     "OwnerID": {
+      "description": "Owner账号ID",
+      "example": "2100057673",
+      "type": "string"
+     },
+     "OwnerUserName": {
+      "description": "Owner账号名",
+      "example": "weitest009",
+      "type": "string"
+     },
+     "PaidAmount": {
+      "description": "现金支付",
+      "example": "0.00",
+      "type": "string"
+     },
+     "PayableAmount": {
+      "description": "应付金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "PayerCustomerName": {
+      "description": "支付账号客户名称",
+      "example": "俊杰1",
+      "type": "string"
+     },
+     "PayerID": {
+      "description": "支付账号ID",
+      "example": "2100057673",
+      "type": "string"
+     },
+     "PayerUserName": {
+      "description": "支付账号名",
+      "example": "weitest009",
+      "type": "string"
+     },
+     "SellerCustomerName": {
+      "description": "Seller账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "SellerID": {
+      "description": "Seller账号ID",
+      "example": "3423",
+      "type": "string"
+     },
+     "SellerUserName": {
+      "description": "Seller账号名",
+      "example": "火山引擎",
+      "type": "string"
+     },
+     "SettlementType": {
+      "description": "结算类型，settle：结算，non-settle：非结算，quota-settle：Quota结算",
+      "example": "非结算",
+      "type": "string"
+     },
+     "SubjectName": {
+      "description": "主体名",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "SubjectNo": {
+      "description": "主体编码",
+      "example": "3423",
+      "type": "string"
+     },
+     "UnpaidAmount": {
+      "description": "欠费金额",
+      "example": "0.00",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BillOverviewByCategoryByPayerList": {
+    "description": "账单总览-账号汇总单账号列表\n",
+    "properties": {
+     "List": {
+      "description": "账单总览-账号汇总项",
+      "example": [
+       "-"
+      ],
+      "items": {
+       "$ref": "#/components/schemas/BillOverviewByCategory"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "BillOverviewByProd": {
+    "description": "账单总览-产品汇总",
+    "properties": {
+     "BillCategoryParent": {
+      "description": "账单类型",
+      "example": "消费",
+      "type": "string"
+     },
+     "BillPeriod": {
+      "description": "账期",
+      "example": "2023-08",
+      "type": "string"
+     },
+     "BillingMode": {
+      "description": "计费模式",
+      "example": "2",
+      "type": "string"
+     },
+     "BusinessMode": {
+      "description": "业务类型",
+      "example": "普通业务",
+      "type": "string"
+     },
+     "CouponAmount": {
+      "description": "代金券抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "CreditCarriedAmount": {
+      "description": "信控额度退款抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DiscountBillAmount": {
+      "description": "折后价",
+      "example": "19.68",
+      "type": "string"
+     },
+     "OriginalBillAmount": {
+      "description": "原价",
+      "example": "168.740000",
+      "type": "string"
+     },
+     "OwnerCustomerName": {
+      "description": "Owner账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "OwnerID": {
+      "description": "Owner账号ID",
+      "example": "2100153894",
+      "type": "string"
+     },
+     "OwnerUserName": {
+      "description": "Owner账户名",
+      "example": "Doooo",
+      "type": "string"
+     },
+     "PaidAmount": {
+      "description": "现金支付",
+      "example": "0.00",
+      "type": "string"
+     },
+     "PayableAmount": {
+      "description": "应付金额",
+      "example": "19.68",
+      "type": "string"
+     },
+     "PayerCustomerName": {
+      "description": "支付账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "PayerID": {
+      "description": "支付账号ID",
+      "example": "2100153894",
+      "type": "string"
+     },
+     "PayerUserName": {
+      "description": "支付账户名",
+      "example": "Doooo",
+      "type": "string"
+     },
+     "PreferentialBillAmount": {
+      "description": "优惠金额",
+      "example": "148.500779",
+      "type": "string"
+     },
+     "Product": {
+      "description": "产品英文名称",
+      "example": "ECS",
+      "type": "string"
+     },
+     "ProductZh": {
+      "description": "产品中文名称",
+      "example": "云服务器",
+      "type": "string"
+     },
+     "RoundBillAmount": {
+      "description": "抹零金额",
+      "example": "0.559221",
+      "type": "string"
+     },
+     "SellerCustomerName": {
+      "description": "Seller账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "SellerID": {
+      "description": "Seller账号ID",
+      "example": "3423",
+      "type": "string"
+     },
+     "SellerUserName": {
+      "description": "Seller账户名",
+      "example": "火山引擎",
+      "type": "string"
+     },
+     "SettlementType": {
+      "description": "结算类型，settle：结算，non-settle：非结算，quota-settle：Quota结算",
+      "example": "非结算",
+      "type": "string"
+     },
+     "UnpaidAmount": {
+      "description": "欠费金额",
+      "example": "0.00",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CostAnalysisData": {
+    "description": "费用分析数据",
+    "properties": {
+     "Amount": {
+      "description": "金额",
+      "example": "10.00",
+      "type": "string"
+     },
+     "ClassifyDimension": {
+      "description": "分类维度： 1:payer, 2:owner, 3:产品, 4:计费模式, 5:计费单元, 6:地域, 7:可用区, 8:账单类型, 9:项目, 10:标签, 11:实例id、12:业务类型, 13:服务主体",
+      "example": 1,
+      "format": "int32",
+      "type": "integer"
+     },
+     "ClassifyItemId": {
+      "description": "维度值",
+      "example": "2000000000",
+      "type": "string"
+     },
+     "Currency": {
+      "description": "币种",
+      "example": "CNY",
+      "type": "string"
+     },
+     "TimeStr": {
+      "description": "数据归属时间： \n- 账期：YYYY-MM \n- 日期：YYYY-MM-DD",
+      "example": "2025-01-01",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CostAnalysisFilter": {
+    "description": "费用分析过滤器",
+    "properties": {
+     "FilterKey": {
+      "description": "过滤条件：\n1:payerId, 2:ownerId, 3:产品, 4:计费模式, 5:计费单元, 6:地域, 7:可用区, 8:账单类型, 9:项目, 10:标签, 12:业务类型, 13:服务主体",
+      "example": 1,
+      "format": "int32",
+      "type": "integer"
+     },
+     "FilterValue": {
+      "description": "过滤器值：（最多100个）\n- 若FilterKey = 1（payerId）或 2（ownerId），FilterValue格式：list\u003c账号\u003e，FilterValue示例：[\"2100054924\", \"2100054925\"]\n- 若FilterKey = 3（产品），FilterValue格式：list\u003c产品\u003e，FilterValue示例：[\"TOS\", \"VKE\" ]\n- 若FilterKey = 4（计费模式），FilterValue格式：list\u003c计费模式\u003e，计费模式枚举：（1:包年包月，2:按量计费，3:合同计费），FilterValue示例：[\"1\", \"2\"]\n- 若FilterKey=5（计费单元），FilterValue格式：list\u003cmap\u003c商品\u003e\u003clist\u003c计费单元\u003e\u003e\u003e，FilterValue示例：[\"{\\\"sms\\\":[\"BE000383\", \"BE000601\"]}\",  \"{\"ark_bd\":[\"BE150994\"]}\"]\n- 若FilterKey=6（地域），FilterValue格式：list\u003c地域\u003e，地域枚举：（\"\": 不限），FilterValue示例：[ \"\", \"R000807\"]\n- 若FilterKey=7（可用区），FilterValue格式：list\u003cmap\u003c地域\u003e\u003clist\u003c可用区\u003e\u003e\u003e，地域枚举：（\"\": 不限），可用区枚举：（\"\":空），FilterValue示例：[\"{\\\"\\\":[\"\"]}\", \"{\\\"R000017\\\":[\"ZoneA\"]}\"]\n- 若FilterKey=8（账单类型），FilterValue格式：list\u003c账单类型\u003e，账单类型枚举：（consume-trial：消费-试用，consume-use：   消费-使用，consume-new：消费-新购，consume-renew：消费-续费，consume-formalize：消费-转正，consume-modify：消费-更配，consume-RIAdjust：消费-预留实例调整，refund-terminate：退款-退订，refund-modify：退款-更配，refund-TempUpgrade：退款-临时升配，refund-RIAdjust：退款-预留实例调整，transfer-manual：调账-人工，transfer-system：调账-系统，consumption-guarantee：消费-保底），FilterValue示例：[\"consume-use\", \"consume-new\", \"refund-terminate\"]\n- 若FilterKey=9（项目），FilterValue格式：list\u003c项目\u003e，项目枚举：（\"\": 空），FilterValue示例：[ \"\", \"projectA\"]\n- 若FilterKey=10（标签），FilterValue格式：map\u003c标签key\u003e\u003clist\u003c标签value\u003e\u003e（放置于list的第一位），FilterValue示例：[{\"voKey2\": [\"v2\", \"v3\"], \"voKey1\": [\"v1\", \"v11\"]}]\n- 若FilterKey=12（业务类型），FilterValue格式：list\u003c业务类型\u003e，业务类型枚举：（0: 普通业务，1: 财务托管，2: 代销，3: 代售，4: 财务管理），FilterValue示例：[ \"0\", \"1\"]\n- 若FilterKey=13（服务主体），FilterValue格式：list\u003c服务主体\u003e，服务主体枚举：（3423: 北京火山引擎科技有限公司，3002: 北京互动百科网络技术有限公司，2065: 北京火山万有在线科技有限公司），FilterValue示例：[ \"3423\", \"3002\"]",
+      "example": [
+       "2100054924",
+       "2100054925"
+      ],
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 100,
+      "type": "array"
+     },
+     "Operator": {
+      "description": "运算符\n0：仅包含\n1：仅排除",
+      "example": 0,
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "Operator",
+     "FilterKey",
+     "FilterValue"
+    ],
+    "type": "object"
+   },
+   "CostBillDaily": {
+    "description": "成本明细按天",
+    "properties": {
+     "AmortizedBeginTime": {
+      "description": "分摊开始时间，格式：2023-04-02 00:00:00",
+      "example": "2023-08-01 00:00:00",
+      "type": "string"
+     },
+     "AmortizedDay": {
+      "description": "分摊日",
+      "example": "2023-10-01",
+      "type": "string"
+     },
+     "AmortizedEndTime": {
+      "description": "分摊结束时间，格式：2023-04-02 23:59:59",
+      "example": "2023-08-11 00:00:00",
+      "type": "string"
+     },
+     "AmortizedMonth": {
+      "description": "分摊月",
+      "example": "2023-08",
+      "type": "string"
+     },
+     "AmortizedType": {
+      "description": "分摊类型",
+      "example": "按量计费分摊",
+      "type": "string"
+     },
+     "BillCategory": {
+      "description": "账单类型",
+      "example": "消费-使用",
+      "type": "string"
+     },
+     "BillID": {
+      "description": "预付费账单为订单号，否则为账单号",
+      "example": "Bill7271090921067712812",
+      "type": "string"
+     },
+     "BillPeriod": {
+      "description": "账务账期",
+      "example": "2023-08",
+      "type": "string"
+     },
+     "BillingMethodCode": {
+      "description": "计费方式",
+      "example": "按加和量小时结",
+      "type": "string"
+     },
+     "BillingMode": {
+      "description": "计费模式",
+      "example": "按量计费",
+      "type": "string"
+     },
+     "BusiPeriod": {
+      "description": "业务账期",
+      "example": "2023-08",
+      "type": "string"
+     },
+     "BusinessMode": {
+      "description": "业务类型",
+      "example": "普通业务",
+      "type": "string"
+     },
+     "ConfigName": {
+      "description": "配置名称",
+      "example": "低配",
+      "type": "string"
+     },
+     "ConfigurationCode": {
+      "description": "配置Code",
+      "example": "ecs.g1.large",
+      "type": "string"
+     },
+     "Count": {
+      "description": "用量",
+      "example": "1.00",
+      "type": "string"
+     },
+     "CouponAmount": {
+      "description": "代金券抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "Currency": {
+      "description": "币种",
+      "example": "CNY",
+      "type": "string"
+     },
+     "DailyAmortizedCouponAmount": {
+      "description": "每日分摊-代金券抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DailyAmortizedDiscountBillAmount": {
+      "description": "每日分摊-折后价",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DailyAmortizedOriginalBillAmount": {
+      "description": "每日分摊-原始账单金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DailyAmortizedPaidAmount": {
+      "description": "每日分摊-现金支付",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DailyAmortizedPayableAmount": {
+      "description": "每日分摊-应付金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DailyAmortizedPreferentialBillAmount": {
+      "description": "每日分摊-优惠金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DailyAmortizedRoundAmount": {
+      "description": "每日分摊-抹零金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DeductionUseDuration": {
+      "description": "抵扣量",
+      "example": "1.0000000000",
+      "type": "string"
+     },
+     "DiscountBillAmount": {
+      "description": "折后价",
+      "example": "200.0",
+      "type": "string"
+     },
+     "Element": {
+      "description": "计费单元",
+      "example": "ecs.g3i",
+      "type": "string"
+     },
+     "ElementCode": {
+      "description": "计费单元Code",
+      "example": "BE000137",
+      "type": "string"
+     },
+     "ExpandField": {
+      "description": "扩展字段",
+      "example": "type-large",
+      "type": "string"
+     },
+     "ExpenseTime": {
+      "description": "消费时间",
+      "example": "2033-08-08 00:00:00-2036-08-07 23:59:59",
+      "type": "string"
+     },
+     "Factor": {
+      "description": "影响因子",
+      "example": "类型-ESSD_PL0",
+      "type": "string"
+     },
+     "FactorCode": {
+      "description": "影响因子Code",
+      "example": "type:ESSD_PL0",
+      "type": "string"
+     },
+     "InstanceName": {
+      "description": "实例名称",
+      "example": "ECS-fEaG",
+      "type": "string"
+     },
+     "InstanceNo": {
+      "description": "实例ID",
+      "example": "i-ycjlq77tdg8rx6ib4v1s",
+      "type": "string"
+     },
+     "NowAmortizedCouponAmount": {
+      "description": "本日已分摊-代金券抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "NowAmortizedDiscountBillAmount": {
+      "description": "本日已分摊-折后价",
+      "example": "0.00",
+      "type": "string"
+     },
+     "NowAmortizedOriginalBillAmount": {
+      "description": "本日已分摊-原价",
+      "example": "0.00",
+      "type": "string"
+     },
+     "NowAmortizedPaidAmount": {
+      "description": "本日已分摊-现金支付",
+      "example": "0.00",
+      "type": "string"
+     },
+     "NowAmortizedPayableAmount": {
+      "description": "本日已分摊-应付金额",
+      "example": "14.58",
+      "type": "string"
+     },
+     "NowAmortizedPreferentialBillAmount": {
+      "description": "本日已分摊-优惠金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "NowAmortizedRoundAmount": {
+      "description": "本日已分摊-抹零金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "OriginalBillAmount": {
+      "description": "原价",
+      "example": "200.0",
+      "type": "string"
+     },
+     "OwnerCustomerName": {
+      "description": "Owner账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "OwnerID": {
+      "description": "Owner账号ID",
+      "example": "2100153894",
+      "type": "string"
+     },
+     "OwnerUserName": {
+      "description": "Owner账号名",
+      "example": "Doooo",
+      "type": "string"
+     },
+     "PaidAmount": {
+      "description": "现金支付",
+      "example": "0.00",
+      "type": "string"
+     },
+     "PayableAmount": {
+      "description": "应付金额",
+      "example": "14.58",
+      "type": "string"
+     },
+     "PayerCustomerName": {
+      "description": "支付账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "PayerID": {
+      "description": "支付账号ID",
+      "example": "2100153894",
+      "type": "string"
+     },
+     "PayerUserName": {
+      "description": "支付账号名",
+      "example": "Doooo",
+      "type": "string"
+     },
+     "PreferentialBillAmount": {
+      "description": "优惠金额",
+      "example": "0.0",
+      "type": "string"
+     },
+     "Price": {
+      "description": "单价",
+      "example": "0.52",
+      "type": "string"
+     },
+     "PriceUnit": {
+      "description": "单价单位",
+      "example": "台/时",
+      "type": "string"
+     },
+     "Product": {
+      "description": "产品英文名称",
+      "example": "ECS",
+      "type": "string"
+     },
+     "ProductZh": {
+      "description": "产品中文名称",
+      "example": "云服务器",
+      "type": "string"
+     },
+     "Project": {
+      "description": "项目",
+      "example": "default",
+      "type": "string"
+     },
+     "ProjectDisplayName": {
+      "description": "项目中文名",
+      "example": "默认项目",
+      "type": "string"
+     },
+     "Region": {
+      "description": "地域",
+      "example": "华北2（北京)",
+      "type": "string"
+     },
+     "RegionCode": {
+      "description": "地域Code",
+      "example": "R000671",
+      "type": "string"
+     },
+     "RoundAmount": {
+      "description": "抹零金额",
+      "example": "0.0",
+      "type": "string"
+     },
+     "SellerCustomerName": {
+      "description": "Seller账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "SellerID": {
+      "description": "Seller账号ID",
+      "example": "3423",
+      "type": "string"
+     },
+     "SellerUserName": {
+      "description": "Seller账号名",
+      "example": "火山引擎",
+      "type": "string"
+     },
+     "SplitItemID": {
+      "description": "分拆项ID",
+      "example": "split_test_1",
+      "type": "string"
+     },
+     "SplitItemName": {
+      "description": "分拆项名称",
+      "example": "split_test_1",
+      "type": "string"
+     },
+     "SubjectName": {
+      "description": "主体名",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "Tag": {
+      "description": "标签，格式为包含多个键值对的Json字符串",
+      "example": "{\"voKey1\":[\"v1\"],\"voKey101\":[\"v5\"],\"voKey2\":[\"v2\"],\"volc:vke:cluster-id\":[\"valu3\"],\"volc:vke:createdby-vke-flag\":[\"valu4\"],\"volc:vke:used-by-vke-cluster\":[\"value5\"]}",
+      "type": "string"
+     },
+     "Unit": {
+      "description": "用量单位",
+      "example": "台",
+      "type": "string"
+     },
+     "UseDuration": {
+      "description": "使用时长",
+      "example": "864000",
+      "type": "string"
+     },
+     "UseDurationUnit": {
+      "description": "使用时长单位",
+      "example": "秒",
+      "type": "string"
+     },
+     "Zone": {
+      "description": "可用区",
+      "example": "可用区北京B",
+      "type": "string"
+     },
+     "ZoneCode": {
+      "description": "可用区Code",
+      "example": "Zone1",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CostBillDetail": {
+    "description": "成本明细",
+    "properties": {
+     "AmortizedBeginTime": {
+      "description": "分摊开始时间，格式：2023-04-02 00:00:00",
+      "example": "2023-08-01 00:00:00",
+      "type": "string"
+     },
+     "AmortizedDay": {
+      "description": "2023-08-01",
+      "example": "分摊日",
+      "type": "string"
+     },
+     "AmortizedEndTime": {
+      "description": "分摊结束时间，格式：2023-04-02 23:59:59",
+      "example": "2023-08-01 01:00:00",
+      "type": "string"
+     },
+     "AmortizedMonth": {
+      "description": "分摊月",
+      "example": "2023-08",
+      "type": "string"
+     },
+     "AmortizedType": {
+      "description": "分摊类型",
+      "example": "按量计费分摊",
+      "type": "string"
+     },
+     "BillCategory": {
+      "description": "账单类型",
+      "example": "消费-使用",
+      "type": "string"
+     },
+     "BillID": {
+      "description": "预付费账单为订单号，否则为账单号",
+      "example": "Bill7262035879529697551",
+      "type": "string"
+     },
+     "BillPeriod": {
+      "description": "账务账期",
+      "example": "2023-08",
+      "type": "string"
+     },
+     "BillingFunction": {
+      "description": "单价价格类型",
+      "example": "固定单价",
+      "type": "string"
+     },
+     "BillingMethodCode": {
+      "description": "计费方式",
+      "example": "按加和量小时结",
+      "type": "string"
+     },
+     "BillingMode": {
+      "description": "计费模式",
+      "example": "按量计费",
+      "type": "string"
+     },
+     "BusiPeriod": {
+      "description": "业务账期",
+      "example": "2023-08",
+      "type": "string"
+     },
+     "BusinessMode": {
+      "description": "业务类型",
+      "example": "普通业务",
+      "type": "string"
+     },
+     "ConfigName": {
+      "description": "配置名称",
+      "example": "低配",
+      "type": "string"
+     },
+     "CostID": {
+      "description": "成本账单明细业务主键",
+      "example": "Cost7265731716064792869",
+      "type": "string"
+     },
+     "Count": {
+      "description": "用量",
+      "example": "1.00",
+      "type": "string"
+     },
+     "CouponAmount": {
+      "description": "代金券抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "Currency": {
+      "description": "币种",
+      "example": "CNY",
+      "type": "string"
+     },
+     "DailyAmortizedCouponAmount": {
+      "description": "每日分摊-代金券抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DailyAmortizedDiscountBillAmount": {
+      "description": "每日分摊-折后价",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DailyAmortizedOriginalBillAmount": {
+      "description": "每日分摊-原价",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DailyAmortizedPaidAmount": {
+      "description": "每日分摊-现金支付",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DailyAmortizedPayableAmount": {
+      "description": "每日分摊-应付金额",
+      "example": "0.07",
+      "type": "string"
+     },
+     "DailyAmortizedPreferentialBillAmount": {
+      "description": "每日分摊-优惠金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DailyAmortizedRoundAmount": {
+      "description": "每日分摊-抹零金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DeductionUseDuration": {
+      "description": "抵扣量",
+      "example": "1.0000000000",
+      "type": "string"
+     },
+     "DiscountBillAmount": {
+      "description": "折后价",
+      "example": "200.0",
+      "type": "string"
+     },
+     "DiscountBizBillingFunction": {
+      "description": "优惠类型",
+      "example": "全额累进单价",
+      "type": "string"
+     },
+     "DiscountBizMeasureInterval": {
+      "description": "优惠用量区间",
+      "example": "0,100,200",
+      "type": "string"
+     },
+     "DiscountBizUnitPrice": {
+      "description": "优惠价格/折扣",
+      "example": "1.3",
+      "type": "string"
+     },
+     "DiscountBizUnitPriceInterval": {
+      "description": "优惠价格区间",
+      "example": "1,2,3",
+      "type": "string"
+     },
+     "EffectiveFactor": {
+      "description": "有效因子",
+      "example": "1",
+      "type": "string"
+     },
+     "Element": {
+      "description": "计费单元",
+      "example": "ecs.g3i",
+      "type": "string"
+     },
+     "ExpandField": {
+      "description": "扩展字段",
+      "example": "type-large",
+      "type": "string"
+     },
+     "ExpenseBeginTime": {
+      "description": "消费开始时间，格式：2023-03-02 15:04:05",
+      "example": "2023-08-01 00:00:00",
+      "type": "string"
+     },
+     "ExpenseEndTime": {
+      "description": "消费结束时间，格式：2023-04-02 23:59:59",
+      "example": "2023-08-01 01:00:00",
+      "type": "string"
+     },
+     "Factor": {
+      "description": "影响因子",
+      "example": "{\"type\":\"zanya\"}",
+      "type": "string"
+     },
+     "InstanceName": {
+      "description": "实例名称",
+      "example": "ECS-fEaG",
+      "type": "string"
+     },
+     "InstanceNo": {
+      "description": "实例ID",
+      "example": "i-ycjlq77tdg8rx6ib4v1s",
+      "type": "string"
+     },
+     "MarketPrice": {
+      "description": "市场价",
+      "example": "2.716",
+      "type": "string"
+     },
+     "MeasureInterval": {
+      "description": "单价用量区间",
+      "example": "0,100,200",
+      "type": "string"
+     },
+     "OriginalBillAmount": {
+      "description": "原价",
+      "example": "200.0",
+      "type": "string"
+     },
+     "OwnerCustomerName": {
+      "description": "Owner账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "OwnerID": {
+      "description": "Owner账号ID",
+      "example": "2100153894",
+      "type": "string"
+     },
+     "OwnerUserName": {
+      "description": "Owner账号名",
+      "example": "Doooo",
+      "type": "string"
+     },
+     "PaidAmount": {
+      "description": "现金支付",
+      "example": "0.00",
+      "type": "string"
+     },
+     "PayableAmount": {
+      "description": "应付金额",
+      "example": "0.07",
+      "type": "string"
+     },
+     "PayerCustomerName": {
+      "description": "支付账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "PayerID": {
+      "description": "支付账号ID",
+      "example": "2100153894",
+      "type": "string"
+     },
+     "PayerUserName": {
+      "description": "支付账号名",
+      "example": "Doooo",
+      "type": "string"
+     },
+     "PreferentialBillAmount": {
+      "description": "有优惠金额",
+      "example": "0.0",
+      "type": "string"
+     },
+     "Price": {
+      "description": "单价",
+      "example": "0.52",
+      "type": "string"
+     },
+     "PriceInterval": {
+      "description": "单价价格区间",
+      "example": "1,2,3",
+      "type": "string"
+     },
+     "PriceUnit": {
+      "description": "单价单位",
+      "example": "台/时",
+      "type": "string"
+     },
+     "Product": {
+      "description": "产品英文名称",
+      "example": "ECS",
+      "type": "string"
+     },
+     "ProductZh": {
+      "description": "产品中文名称",
+      "example": "云服务器",
+      "type": "string"
+     },
+     "Project": {
+      "description": "项目",
+      "example": "default",
+      "type": "string"
+     },
+     "ProjectDisplayName": {
+      "description": "项目中文名",
+      "example": "默认项目",
+      "type": "string"
+     },
+     "Region": {
+      "description": "地域",
+      "example": "华北2（北京)",
+      "type": "string"
+     },
+     "RoundAmount": {
+      "description": "抹零金额",
+      "example": "0.0",
+      "type": "string"
+     },
+     "SellerCustomerName": {
+      "description": "Seller账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "SellerID": {
+      "description": "Seller账号ID",
+      "example": "3423",
+      "type": "string"
+     },
+     "SellerUserName": {
+      "description": "Seller账号名",
+      "example": "火山引擎",
+      "type": "string"
+     },
+     "SplitItemID": {
+      "description": "分拆项ID",
+      "example": "split_test_1",
+      "type": "string"
+     },
+     "SplitItemName": {
+      "description": "分拆项名称",
+      "example": "split_test_1",
+      "type": "string"
+     },
+     "SubjectName": {
+      "description": "主体名",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "Tag": {
+      "description": "标签，格式为包含多个键值对的Json字符串",
+      "example": "{\"voKey1\":[\"v1\"],\"voKey101\":[\"v5\"],\"voKey2\":[\"v2\"],\"volc:vke:cluster-id\":[\"valu3\"],\"volc:vke:createdby-vke-flag\":[\"valu4\"],\"volc:vke:used-by-vke-cluster\":[\"value5\"]}",
+      "type": "string"
+     },
+     "TradeTime": {
+      "description": "交易时间，格式：2006-01-02 15:04:05",
+      "example": "2023-08-01 01:28:14",
+      "type": "string"
+     },
+     "Unit": {
+      "description": "用量单位",
+      "example": "台",
+      "type": "string"
+     },
+     "UseDuration": {
+      "description": "使用时长",
+      "example": "3600",
+      "type": "string"
+     },
+     "UseDurationUnit": {
+      "description": "使用时长单位",
+      "example": "秒",
+      "type": "string"
+     },
+     "Zone": {
+      "description": "可用区",
+      "example": "可用区北京B",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CostBillMonthly": {
+    "description": "成本总览",
+    "properties": {
+     "AmortizedBeginTime": {
+      "description": "分摊开始时间，格式：2023-04-02 00:00:00",
+      "example": "2023-08-01 00:00:00",
+      "type": "string"
+     },
+     "AmortizedDayNum": {
+      "description": "已分摊天数",
+      "example": "10",
+      "type": "string"
+     },
+     "AmortizedEndTime": {
+      "description": "分摊结束时间，格式：2023-04-02 23:59:59",
+      "example": "2023-08-11 00:00:00",
+      "type": "string"
+     },
+     "AmortizedMonth": {
+      "description": "分摊月",
+      "example": "2023-08",
+      "type": "string"
+     },
+     "AmortizedType": {
+      "description": "分摊类型",
+      "example": "按量计费分摊",
+      "type": "string"
+     },
+     "BeforeAmortizedCouponAmount": {
+      "description": "期初已分摊-代金券抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "BeforeAmortizedDiscountBillAmount": {
+      "description": "期初已分摊-折后价",
+      "example": "0.00",
+      "type": "string"
+     },
+     "BeforeAmortizedOriginalBillAmount": {
+      "description": "期初已分摊-原价",
+      "example": "0.00",
+      "type": "string"
+     },
+     "BeforeAmortizedPaidAmount": {
+      "description": "期初已分摊-现金支付",
+      "example": "0.00",
+      "type": "string"
+     },
+     "BeforeAmortizedPayableAmount": {
+      "description": "期初已分摊-应付金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "BeforeAmortizedPreferentialBillAmount": {
+      "description": "期初已分摊-优惠金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "BeforeAmortizedRoundAmount": {
+      "description": "期初已分摊-抹零金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "BillCategory": {
+      "description": "账单类型",
+      "example": "消费-使用",
+      "type": "string"
+     },
+     "BillID": {
+      "description": "预付费账单为订单号，否则为账单号",
+      "example": "Bill7271090921067712812",
+      "type": "string"
+     },
+     "BillPeriod": {
+      "description": "账务账期",
+      "example": "2023-08",
+      "type": "string"
+     },
+     "BillingFunction": {
+      "description": "单价价格类型",
+      "example": "固定单价",
+      "type": "string"
+     },
+     "BillingMethodCode": {
+      "description": "计费方式",
+      "example": "按加和量小时结",
+      "type": "string"
+     },
+     "BillingMode": {
+      "description": "计费模式",
+      "example": "按量计费",
+      "type": "string"
+     },
+     "BusiPeriod": {
+      "description": "业务账期",
+      "example": "2023-08",
+      "type": "string"
+     },
+     "BusinessMode": {
+      "description": "业务类型",
+      "example": "普通业务",
+      "type": "string"
+     },
+     "ConfigName": {
+      "description": "配置名称",
+      "example": "低配",
+      "type": "string"
+     },
+     "Count": {
+      "description": "用量",
+      "example": "1.00",
+      "type": "string"
+     },
+     "CouponAmount": {
+      "description": "代金券抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "Currency": {
+      "description": "币种",
+      "example": "CNY",
+      "type": "string"
+     },
+     "DailyAmortizedCouponAmount": {
+      "description": "每日分摊-代金券抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DailyAmortizedDiscountBillAmount": {
+      "description": "每日分摊-折后价",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DailyAmortizedOriginalBillAmount": {
+      "description": "每日分摊-原始账单金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DailyAmortizedPaidAmount": {
+      "description": "每日分摊-现金支付",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DailyAmortizedPayableAmount": {
+      "description": "每日分摊-应付金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DailyAmortizedPreferentialBillAmount": {
+      "description": "每日分摊-优惠金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DailyAmortizedRoundAmount": {
+      "description": "每日分摊-抹零金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "DeductionUseDuration": {
+      "description": "抵扣量",
+      "example": "1.0000000000",
+      "type": "string"
+     },
+     "DiscountBillAmount": {
+      "description": "折后价",
+      "example": "200.0",
+      "type": "string"
+     },
+     "DiscountBizBillingFunction": {
+      "description": "优惠类型",
+      "example": "全额累进单价",
+      "type": "string"
+     },
+     "DiscountBizMeasureInterval": {
+      "description": "优惠用量区间",
+      "example": "0,100,200",
+      "type": "string"
+     },
+     "DiscountBizUnitPrice": {
+      "description": "优惠价格/折扣",
+      "example": "1.3",
+      "type": "string"
+     },
+     "DiscountBizUnitPriceInterval": {
+      "description": "优惠价格区间",
+      "example": "1,2,3",
+      "type": "string"
+     },
+     "EffectiveFactor": {
+      "description": "有效因子",
+      "example": "1",
+      "type": "string"
+     },
+     "Element": {
+      "description": "计费单元",
+      "example": "ecs.g3i",
+      "type": "string"
+     },
+     "ExpandField": {
+      "description": "扩展字段",
+      "example": "type-large",
+      "type": "string"
+     },
+     "ExpenseTime": {
+      "description": "消费时间",
+      "example": "2033-08-08 00:00:00-2036-08-07 23:59:59",
+      "type": "string"
+     },
+     "Factor": {
+      "description": "影响因子",
+      "example": "{\"type\":\"zanya\"}",
+      "type": "string"
+     },
+     "InstanceName": {
+      "description": "实例名称",
+      "example": "ECS-fEaG",
+      "type": "string"
+     },
+     "InstanceNo": {
+      "description": "实例ID",
+      "example": "i-ycjlq77tdg8rx6ib4v1s",
+      "type": "string"
+     },
+     "MarketPrice": {
+      "description": "市场价",
+      "example": "2.716",
+      "type": "string"
+     },
+     "MeasureInterval": {
+      "description": "单价用量区间",
+      "example": "0,100,200",
+      "type": "string"
+     },
+     "NowAmortizedCouponAmount": {
+      "description": "本期已分摊-代金券抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "NowAmortizedDiscountBillAmount": {
+      "description": "本期已分摊-折后价",
+      "example": "0.00",
+      "type": "string"
+     },
+     "NowAmortizedOriginalBillAmount": {
+      "description": "本期已分摊-原价",
+      "example": "0.00",
+      "type": "string"
+     },
+     "NowAmortizedPaidAmount": {
+      "description": "本期已分摊-现金支付",
+      "example": "0.00",
+      "type": "string"
+     },
+     "NowAmortizedPayableAmount": {
+      "description": "本期已分摊-应付金额",
+      "example": "14.58",
+      "type": "string"
+     },
+     "NowAmortizedPreferentialBillAmount": {
+      "description": "本期已分摊-优惠金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "NowAmortizedRoundAmount": {
+      "description": "本期已分摊-抹零金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "OriginalBillAmount": {
+      "description": "原价",
+      "example": "200.0",
+      "type": "string"
+     },
+     "OwnerCustomerName": {
+      "description": "Owner账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "OwnerID": {
+      "description": "Owner账号ID",
+      "example": "2100153894",
+      "type": "string"
+     },
+     "OwnerUserName": {
+      "description": "Owner账号名",
+      "example": "Doooo",
+      "type": "string"
+     },
+     "PaidAmount": {
+      "description": "现金支付",
+      "example": "0.00",
+      "type": "string"
+     },
+     "PayableAmount": {
+      "description": "应付金额",
+      "example": "14.58",
+      "type": "string"
+     },
+     "PayerCustomerName": {
+      "description": "支付账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "PayerID": {
+      "description": "支付账号ID",
+      "example": "2100153894",
+      "type": "string"
+     },
+     "PayerUserName": {
+      "description": "支付账号名",
+      "example": "Doooo",
+      "type": "string"
+     },
+     "PreferentialBillAmount": {
+      "description": "优惠金额",
+      "example": "0.0",
+      "type": "string"
+     },
+     "Price": {
+      "description": "单价",
+      "example": "0.52",
+      "type": "string"
+     },
+     "PriceInterval": {
+      "description": "单价价格区间",
+      "example": "1,2,3",
+      "type": "string"
+     },
+     "PriceUnit": {
+      "description": "单价单位",
+      "example": "台/时",
+      "type": "string"
+     },
+     "Product": {
+      "description": "产品英文名称",
+      "example": "ECS",
+      "type": "string"
+     },
+     "ProductZh": {
+      "description": "产品中文名称",
+      "example": "云服务器",
+      "type": "string"
+     },
+     "Project": {
+      "description": "项目",
+      "example": "default",
+      "type": "string"
+     },
+     "ProjectDisplayName": {
+      "description": "项目中文名",
+      "example": "默认项目",
+      "type": "string"
+     },
+     "Region": {
+      "description": "地域",
+      "example": "华北2（北京)",
+      "type": "string"
+     },
+     "RoundAmount": {
+      "description": "抹零金额",
+      "example": "0.0",
+      "type": "string"
+     },
+     "SellerCustomerName": {
+      "description": "Seller账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "SellerID": {
+      "description": "Seller账号ID",
+      "example": "3423",
+      "type": "string"
+     },
+     "SellerUserName": {
+      "description": "Seller账号名",
+      "example": "火山引擎",
+      "type": "string"
+     },
+     "SplitItemID": {
+      "description": "分拆项ID",
+      "example": "split_test_1",
+      "type": "string"
+     },
+     "SplitItemName": {
+      "description": "分拆项名称",
+      "example": "split_test_1",
+      "type": "string"
+     },
+     "SubjectName": {
+      "description": "主体名",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "Tag": {
+      "description": "标签，格式为包含多个键值对的Json字符串",
+      "example": "{\"voKey1\":[\"v1\"],\"voKey101\":[\"v5\"],\"voKey2\":[\"v2\"],\"volc:vke:cluster-id\":[\"valu3\"],\"volc:vke:createdby-vke-flag\":[\"valu4\"],\"volc:vke:used-by-vke-cluster\":[\"value5\"]}",
+      "type": "string"
+     },
+     "UnamortizedCouponAmount": {
+      "description": "未分摊-代金券抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "UnamortizedDiscountBillAmount": {
+      "description": "未分摊-折后价",
+      "example": "0.00",
+      "type": "string"
+     },
+     "UnamortizedOriginalBillAmount": {
+      "description": "未分摊-原价",
+      "example": "0.00",
+      "type": "string"
+     },
+     "UnamortizedPaidAmount": {
+      "description": "未分摊-现金支付",
+      "example": "0.00",
+      "type": "string"
+     },
+     "UnamortizedPayableAmount": {
+      "description": "未分摊-应付金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "UnamortizedPreferentialBillAmount": {
+      "description": "未分摊-优惠金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "UnamortizedRoundAmount": {
+      "description": "未分摊-抹零金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "Unit": {
+      "description": "用量单位",
+      "example": "台",
+      "type": "string"
+     },
+     "UseDuration": {
+      "description": "使用时长",
+      "example": "864000",
+      "type": "string"
+     },
+     "UseDurationUnit": {
+      "description": "使用时长单位",
+      "example": "秒",
+      "type": "string"
+     },
+     "Zone": {
+      "description": "可用区",
+      "example": "可用区北京B",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FinancialRelation": {
+    "description": "财务关系",
+    "properties": {
+     "AccountAlias": {
+      "description": "显示名称，用于页面显示，便于明确账号使用场景",
+      "example": "xxx项目",
+      "type": "string"
+     },
+     "AuthInfo": {
+      "description": "财务关系授权点",
+      "items": {
+       "$ref": "#/components/schemas/AuthInfo"
+      },
+      "type": "array"
+     },
+     "Filiation": {
+      "description": "主子关系枚举值\n1 主\n2 子",
+      "format": "int32",
+      "type": "integer"
+     },
+     "FiliationDesc": {
+      "description": "主子关系",
+      "example": "主",
+      "type": "string"
+     },
+     "MajorAccountID": {
+      "description": "主账号的火山引擎账号 UID",
+      "example": 2000000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "MajorAccountName": {
+      "description": "主账号的火山引擎账号名",
+      "example": "robin",
+      "type": "string"
+     },
+     "Relation": {
+      "description": "财务关系类型枚举值 \n1 财务托管 \n4 财务管理",
+      "format": "int32",
+      "type": "integer"
+     },
+     "RelationDesc": {
+      "description": "财务关系类型",
+      "type": "string"
+     },
+     "RelationID": {
+      "description": "财务关系ID",
+      "type": "string"
+     },
+     "Status": {
+      "description": "财务关系状态枚举值\n100 建立中\n200 已建立\n250 已拒绝\n300 已取消\n400 已解除\n500 已删除（在页面不可见）",
+      "format": "int32",
+      "type": "integer"
+     },
+     "StatusDesc": {
+      "description": "财务关系状态",
+      "type": "string"
+     },
+     "SubAccountID": {
+      "description": "子账号的火山引擎账号 UID",
+      "format": "int64",
+      "type": "integer"
+     },
+     "SubAccountName": {
+      "description": "子账号的火山引擎账号名",
+      "example": "robint",
+      "type": "string"
+     },
+     "UpdateTime": {
+      "description": "财务关系更新时间",
+      "type": "string"
+     }
+    },
+    "required": [
+     "MajorAccountID",
+     "MajorAccountName",
+     "SubAccountID",
+     "SubAccountName",
+     "AccountAlias",
+     "Filiation",
+     "FiliationDesc",
+     "Relation",
+     "RelationDesc",
+     "Status",
+     "StatusDesc",
+     "UpdateTime",
+     "RelationID",
+     "AuthInfo"
+    ],
+    "type": "object"
+   },
+   "InstancVO": {
+    "description": "实例基本信息\n",
+    "properties": {
+     "AccountID": {
+      "description": "实例归属账号ID",
+      "format": "int32",
+      "type": "integer"
+     },
+     "BeginTime": {
+      "description": "实例生效开始时间。UTC格式",
+      "example": "2024-07-02T15:17:21+08:00",
+      "type": "string"
+     },
+     "ConfigurationCode": {
+      "description": "配置编码",
+      "type": "string"
+     },
+     "ExpiredTime": {
+      "description": "实例到期时间。UTC格式。后付费实例不返回此字段",
+      "example": "2024-07-02T15:17:21+08:00",
+      "type": "string"
+     },
+     "InstanceID": {
+      "description": "实例ID",
+      "type": "string"
+     },
+     "InstanceName": {
+      "description": "实例名称",
+      "type": "string"
+     },
+     "PaymentMethod": {
+      "description": "付款方式：预付费、后付费、部分预付\nPre：预付费，Post：后付费，PreAndPost：部分预付费",
+      "example": "Pre",
+      "type": "string"
+     },
+     "Product": {
+      "description": "商品code",
+      "type": "string"
+     },
+     "RemainRenewTimes": {
+      "description": "剩余自动续费次数。后付费不返回此字段",
+      "type": "string"
+     },
+     "RenewType": {
+      "description": "续费类型。后付费不返回此字段\n手动续费 \nManualRenewal\n 自动续费 \nAutoRenewal\n到期不续费 \nNonRenewal",
+      "type": "string"
+     },
+     "RenewalDurationUnit": {
+      "description": "自动续费的周期单位。后付费不返回此字段\n年 \nYear\n月 \nMonth\n天 \nDay",
+      "type": "string"
+     },
+     "RenewalTimes": {
+      "description": "自动续费的周期次数。后付费不返回此字段",
+      "type": "string"
+     },
+     "Status": {
+      "description": "实例状态\n创建中 \nCreating\n运行中 \nRunning \n到期关停 \nExpired \n欠费关停 \nOverdue \n退订关停 \nUnSubscribed\n服务关闭（开通型实例） \nServiceShutdown",
+      "example": "ServiceShutdown",
+      "type": "string"
+     },
+     "SubStatus": {
+      "description": "实例子状态，如混合计费实例后付费模块受限状态\n受限\nLimited\n正常\nNormal",
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceID",
+     "AccountID",
+     "InstanceName",
+     "Product",
+     "ConfigurationCode",
+     "PaymentMethod",
+     "Status",
+     "SubStatus"
+    ],
+    "type": "object"
+   },
+   "Invitation": {
+    "description": "企业财务邀约",
+    "properties": {
+     "Auth": {
+      "$ref": "#/components/schemas/Auth"
+     },
+     "InvitationType": {
+      "description": "邀约类型\n1 财务关系邀约\n2 授权邀约",
+      "format": "int32",
+      "type": "integer"
+     },
+     "Relation": {
+      "$ref": "#/components/schemas/FinancialRelation"
+     }
+    },
+    "required": [
+     "InvitationType",
+     "Relation",
+     "Auth"
+    ],
+    "type": "object"
+   },
+   "OrderFailRefundInfo": {
+    "description": "订单交付失败退款信息",
+    "properties": {
+     "CouponAmount": {
+      "description": "代金券抵扣金额，精确到小数点后2位",
+      "type": "string"
+     },
+     "DiscountAmount": {
+      "description": "优惠金额，精确到小数点后2位",
+      "type": "string"
+     },
+     "OriginalAmount": {
+      "description": "原价，精确到小数点后2位",
+      "type": "string"
+     },
+     "PaidAmount": {
+      "description": "实付金额，精确到小数点后2位",
+      "type": "string"
+     },
+     "PayableAmount": {
+      "description": "税后应付金额，精确到小数点后2位",
+      "type": "string"
+     }
+    },
+    "required": [
+     "OriginalAmount",
+     "DiscountAmount",
+     "CouponAmount",
+     "PayableAmount",
+     "PaidAmount"
+    ],
+    "type": "object"
+   },
+   "OrderInfo": {
+    "description": "订单信息",
+    "properties": {
+     "BuyerCustomerName": {
+      "description": "Buyer账号名称",
+      "example": "测试账号",
+      "type": "string"
+     },
+     "BuyerID": {
+      "description": "Buyer账号ID",
+      "example": 123456789,
+      "format": "int32",
+      "type": "integer"
+     },
+     "CouponAmount": {
+      "description": "代金券抵扣金额，精确到小数点后2位",
+      "example": "600.00",
+      "type": "string"
+     },
+     "CreateTime": {
+      "description": "创建时间，格式为YYYY-MM-DD'T'HH:MM:SS'Z'",
+      "example": "2024-06-01T12:00:00+08:00",
+      "type": "string"
+     },
+     "DiscountAmount": {
+      "description": "优惠金额，精确到小数点后2位",
+      "example": "8000.00",
+      "type": "string"
+     },
+     "OrderFailRefundInfo": {
+      "$ref": "#/components/schemas/OrderFailRefundInfo"
+     },
+     "OrderID": {
+      "description": "订单号",
+      "example": "Order123456",
+      "type": "string"
+     },
+     "OrderType": {
+      "description": "订单类型\n新购：Purchase\n试用：Trial\n更配：Modify\n续费：Renew\n转正：Formalize\n退订：Unsubscribed\n预留实例调整：RIAdjustment\n临时升配：TempUpgrade\n费用调整：CostAdjustment",
+      "example": "Purchase",
+      "type": "string"
+     },
+     "OriginalAmount": {
+      "description": "原价，精确到小数点后2位",
+      "example": "10000.00",
+      "type": "string"
+     },
+     "PaidAmount": {
+      "description": "实付金额，精确到小数点后2位",
+      "example": "1400.00",
+      "type": "string"
+     },
+     "PayableAmount": {
+      "description": "税后应付金额，精确到小数点后2位",
+      "example": "1400.00",
+      "type": "string"
+     },
+     "PayerCustomerName": {
+      "description": "Payer账号名称",
+      "example": "测试账号",
+      "type": "string"
+     },
+     "PayerID": {
+      "description": "Payer账号ID",
+      "example": 123456789,
+      "format": "int32",
+      "type": "integer"
+     },
+     "SellerCustomerName": {
+      "description": "Seller账号名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "SellerID": {
+      "description": "Seller账号ID",
+      "example": 3423,
+      "format": "int32",
+      "type": "integer"
+     },
+     "Status": {
+      "description": "订单状态\n待支付：UnPaid\n已支付：Paid\n已取消：Closed\n支付中：Paying\n已退款：Refunded\n退款中：Refunding\n退款失败：RefundFail\n部分退款：PartialRefunded",
+      "example": "Paid",
+      "type": "string"
+     },
+     "SubjectNo": {
+      "description": "服务主体ID\n火山引擎：3423\n万有商城：2065",
+      "example": "3423",
+      "type": "string"
+     }
+    },
+    "required": [
+     "OrderID",
+     "Status",
+     "OrderType",
+     "SellerID",
+     "SellerCustomerName",
+     "PayerID",
+     "PayerCustomerName",
+     "BuyerID",
+     "BuyerCustomerName",
+     "OriginalAmount",
+     "DiscountAmount",
+     "CouponAmount",
+     "PayableAmount",
+     "PaidAmount",
+     "SubjectNo",
+     "CreateTime",
+     "OrderFailRefundInfo"
+    ],
+    "type": "object"
+   },
+   "OrderProductInfo": {
+    "description": "订单商品信息",
+    "properties": {
+     "BeginTime": {
+      "description": "服务开始时间\n格式：YYYY-MM-DD'T'HH:MM:SS'Z'",
+      "example": "2024-06-01T14:00:00+08:00",
+      "type": "string"
+     },
+     "ConfigurationCode": {
+      "description": "配置编码",
+      "example": "ecs.xlarge.month",
+      "type": "string"
+     },
+     "CouponAmount": {
+      "description": "代金券抵扣金额，精确到小数点后2位",
+      "example": "600.00",
+      "type": "string"
+     },
+     "DiscountAmount": {
+      "description": "优惠金额，精确到小数点后2位",
+      "example": "8000.00",
+      "type": "string"
+     },
+     "EndTime": {
+      "description": "服务结束时间\n格式：YYYY-MM-DD'T'HH:MM:SS'Z'",
+      "example": "2024-06-30T23:59:59+08:00",
+      "type": "string"
+     },
+     "InstanceID": {
+      "description": "实例ID",
+      "example": "ECS123456",
+      "type": "string"
+     },
+     "OrderFailRefundInfo": {
+      "$ref": "#/components/schemas/OrderFailRefundInfo"
+     },
+     "OriginalAmount": {
+      "description": "原价，精确到小数点后2位",
+      "example": "10000.00",
+      "type": "string"
+     },
+     "PaidAmount": {
+      "description": "实付金额，精确到小数点后2位",
+      "example": "1400.00",
+      "type": "string"
+     },
+     "PayableAmount": {
+      "description": "税后应付金额，精确到小数点后2位",
+      "example": "1400.00",
+      "type": "string"
+     },
+     "PayerCustomerName": {
+      "description": "Payer账号名称",
+      "example": "测试账号",
+      "type": "string"
+     },
+     "PayerID": {
+      "description": "Payer账号ID",
+      "example": 123456,
+      "format": "int32",
+      "type": "integer"
+     },
+     "PaymentMethod": {
+      "description": "付款方式\n预付费：Pre\n后付费：Post\n部分预付：PreAndPost",
+      "example": "Pre",
+      "type": "string"
+     },
+     "Period": {
+      "description": "购买周期\n时：hourly\n天：daily\n月：monthly\n年：yearly",
+      "example": "monthly",
+      "type": "string"
+     },
+     "Product": {
+      "description": "产品编码",
+      "example": "ECS",
+      "type": "string"
+     },
+     "Status": {
+      "description": "订单状态 \n待支付：UnPaid \n已支付：Paid \n已取消：Closed \n支付中：Paying \n已退款：Refunded \n退款中：Refunding \n退款失败：RefundFail \n部分退款：PartialRefunded",
+      "example": "UnPaid",
+      "type": "string"
+     },
+     "Times": {
+      "description": "购买时长",
+      "example": "1",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Product",
+     "ConfigurationCode",
+     "PaymentMethod",
+     "Times",
+     "Period",
+     "InstanceID",
+     "Status",
+     "PayerID",
+     "PayerCustomerName",
+     "OriginalAmount",
+     "DiscountAmount",
+     "CouponAmount",
+     "PayableAmount",
+     "PaidAmount",
+     "BeginTime",
+     "EndTime",
+     "OrderFailRefundInfo"
+    ],
+    "type": "object"
+   },
+   "PackageUsageDetail": {
+    "description": "资源包抵扣明细结构字段",
+    "properties": {
+     "AfterAmount": {
+      "description": "资源实例抵扣后余量",
+      "example": "4",
+      "type": "string"
+     },
+     "BeforeAmount": {
+      "description": "资源实例抵扣前余量",
+      "example": "5",
+      "type": "string"
+     },
+     "BeginTime": {
+      "description": "抵扣消费开始时间。 日期格式按照 ISO8601 标准表示，并需要使用 UTC 时间。 格式为：yyyy-MM-ddTHH:mm:ssZ。",
+      "example": "2024-07-05T19:00:00Z",
+      "type": "string"
+     },
+     "ConfigurationCode": {
+      "description": "抵扣的资源实例配置编码",
+      "example": "traffic_package-1TB",
+      "type": "string"
+     },
+     "ConfigurationName": {
+      "description": "抵扣的资源实例配置编码",
+      "example": "流量包-1TB",
+      "type": "string"
+     },
+     "DeductBillingFactor": {
+      "description": "抵扣的按量计费实例价格影响因子",
+      "example": "类型-ESSD_PL0",
+      "type": "string"
+     },
+     "DeductionAccountID": {
+      "description": "抵扣的按量计费实例账号ID",
+      "example": "2100000001",
+      "type": "string"
+     },
+     "DeductionAmount": {
+      "description": "资源实例抵扣量",
+      "example": "1",
+      "type": "string"
+     },
+     "DeductionCalculateFactor": {
+      "description": "抵扣的按量计费实例计算力因子",
+      "example": "2",
+      "type": "string"
+     },
+     "DeductionElementCode": {
+      "description": "抵扣的按量计费实例计费单元",
+      "example": "流量",
+      "type": "string"
+     },
+     "DeductionInstanceNo": {
+      "description": "抵扣的按量计费实例ID",
+      "example": "Instance7388090304050184236",
+      "type": "string"
+     },
+     "DeductionInstanceUnit": {
+      "description": "抵扣的按量计费实例用量单位",
+      "example": "GB",
+      "type": "string"
+     },
+     "DeductionProduct": {
+      "description": "抵扣的按量计费实例商品编码",
+      "example": "CDN",
+      "type": "string"
+     },
+     "DeductionRatio": {
+      "description": "抵扣系数",
+      "example": "1",
+      "type": "string"
+     },
+     "DeductionRegionCode": {
+      "description": "抵扣的按量计费实例地域编码",
+      "example": "cn-beijing",
+      "type": "string"
+     },
+     "DeductionSpecification": {
+      "description": "抵扣的按量计费实例规格",
+      "example": "100",
+      "type": "string"
+     },
+     "DeductionSpecificationUnit": {
+      "description": "抵扣的按量计费实例规格单位",
+      "example": "GB",
+      "type": "string"
+     },
+     "DeductionTime": {
+      "description": "抵扣时间。日期格式按照 ISO8601 标准表示，并需要使用 UTC 时间。 格式为：yyyy-MM-ddTHH:mm:ssZ。",
+      "example": "2024-07-05T18:21:15Z",
+      "type": "string"
+     },
+     "DeductionUseAmount": {
+      "description": "抵扣的按量计费实例用量",
+      "example": "1",
+      "type": "string"
+     },
+     "DeductionUserName": {
+      "description": "抵扣的按量计费实例账号名称",
+      "example": "user",
+      "type": "string"
+     },
+     "EndTime": {
+      "description": "抵扣消费结束时间。 日期格式按照 ISO8601 标准表示，并需要使用 UTC 时间。 格式为：yyyy-MM-ddTHH:mm:ssZ。",
+      "example": "2024-07-05T20:00:00Z",
+      "type": "string"
+     },
+     "InstanceName": {
+      "description": "抵扣的资源实例名称",
+      "example": "资源包实例1",
+      "type": "string"
+     },
+     "InstanceNo": {
+      "description": "抵扣的资源实例ID",
+      "example": "Package7388090431495520300",
+      "type": "string"
+     },
+     "OwnerID": {
+      "description": "资源实例所属账号ID",
+      "example": "2100000001",
+      "type": "string"
+     },
+     "PackageType": {
+      "description": "资源实例形态 Periodic:周期型 Diminishing:递减型 Hybrid:混合型",
+      "enum": [
+       "Periodic",
+       "Diminishing",
+       "Hybrid"
+      ],
+      "example": "Periodic",
+      "type": "string"
+     },
+     "Product": {
+      "description": "抵扣资源实例商品英文编码",
+      "example": "dcdn",
+      "type": "string"
+     },
+     "ProductName": {
+      "description": "所抵扣资源实例的商品中文名称",
+      "example": "全站加速",
+      "type": "string"
+     },
+     "RegionCode": {
+      "description": "地域编码",
+      "example": "cn-beijing",
+      "type": "string"
+     },
+     "SpecCalculateFactor": {
+      "description": "规格计算力因子",
+      "example": "1",
+      "type": "string"
+     },
+     "Specification": {
+      "description": "抵扣的资源实例规格",
+      "example": "5",
+      "type": "string"
+     },
+     "SpecificationUnit": {
+      "description": "抵扣资源实例规格单位",
+      "example": "GB",
+      "type": "string"
+     },
+     "SubjectNo": {
+      "description": "服务主体名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "Unit": {
+      "description": "抵扣资源实例单位",
+      "example": "GB",
+      "type": "string"
+     },
+     "UserName": {
+      "description": "资源实例所属账号名称",
+      "example": "user",
+      "type": "string"
+     },
+     "ZoneCode": {
+      "description": "可用区编码",
+      "example": "cn-beijing-a",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "QueryPriceConfigReqForPriceCalculatorApi": {
+    "description": "the struct def of QueryPriceConfigReq only for price_api",
+    "properties": {
+     "ChargeItemCode": {
+      "description": "计费项编码",
+      "example": "ChargeItemCode_1",
+      "type": "string"
+     },
+     "ConfigurationCode": {
+      "description": "配置编码",
+      "example": "ConfigurationCode_1",
+      "type": "string"
+     },
+     "Count": {
+      "description": "用量",
+      "example": "1",
+      "type": "string"
+     },
+     "Quantity": {
+      "description": "数量",
+      "example": 2,
+      "format": "int32",
+      "type": "integer"
+     },
+     "UseDuration": {
+      "description": "使用时长",
+      "example": 1,
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "ConfigurationCode",
+     "ChargeItemCode",
+     "Quantity",
+     "UseDuration",
+     "Count"
+    ],
+    "type": "object"
+   },
+   "QueryPriceConfigReqForPriceCalculatorApiForPayAsYouGo": {
+    "description": "the struct def of QueryPriceConfigReq only for price_api for pay as you go\n",
+    "properties": {
+     "ChargeItemCode": {
+      "description": "计费项编码",
+      "example": "ChargeItemCode_1",
+      "type": "string"
+     },
+     "ConfigurationCode": {
+      "description": "配置编码",
+      "example": "ConfigurationCode_1",
+      "type": "string"
+     },
+     "Count": {
+      "description": "用量",
+      "example": "1",
+      "type": "string"
+     },
+     "Quantity": {
+      "description": "数量",
+      "example": 2,
+      "format": "int32",
+      "type": "integer"
+     },
+     "UseDuration": {
+      "description": "使用时长\n按使用时长计费时必传（如：计费方式为按配置小时/日结的商品）",
+      "example": 1,
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "ConfigurationCode",
+     "ChargeItemCode",
+     "Quantity",
+     "Count"
+    ],
+    "type": "object"
+   },
+   "QueryPriceConfigRespDiscountDetailForPriceCalculatorApi": {
+    "description": "the struct def of QueryPriceConfigRespDiscountDetail only for price_api",
+    "properties": {
+     "DiscountPrice": {
+      "description": "折扣价",
+      "example": "25",
+      "type": "string"
+     },
+     "DiscountType": {
+      "description": "优惠类型\n[fixed_price:固定单价;full_progressive:全额累进单价;over_progressive:超额累进单价;full_progressive_total:全额累进单价;simple_discount:单一折扣;time_discount:时间满折;quantity_discount:数量满折]",
+      "example": "fixed_price",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "QueryPriceConfigRespForPriceCalculatorApi": {
+    "description": "the struct def of QueryPriceConfigResp only for price_api",
+    "properties": {
+     "ChargeItemCode": {
+      "description": "计费项编码",
+      "example": "ChargeItemCode_1",
+      "type": "string"
+     },
+     "ConfigurationCode": {
+      "description": "配置编码",
+      "example": "ConfigurationCode_1",
+      "type": "string"
+     },
+     "DiscountAmount": {
+      "description": "折扣价",
+      "example": "50",
+      "type": "string"
+     },
+     "DiscountDetail": {
+      "$ref": "#/components/schemas/QueryPriceConfigRespDiscountDetailForPriceCalculatorApi"
+     },
+     "OriginalAmount": {
+      "description": "刊例价",
+      "example": "100",
+      "type": "string"
+     },
+     "Price": {
+      "description": "单价",
+      "example": "50",
+      "type": "string"
+     },
+     "Quantity": {
+      "description": "数量",
+      "example": 2,
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "QueryPriceInstanceAmountForPriceCalculatorApi": {
+    "description": "the struct def of QueryPriceInstanceAmount only for price_api",
+    "properties": {
+     "ConfigurationCode": {
+      "description": "配置编码",
+      "example": "ConfigurationCode_1",
+      "type": "string"
+     },
+     "DiscountAmount": {
+      "description": "折扣价",
+      "example": "50",
+      "type": "string"
+     },
+     "InstanceID": {
+      "description": "实例ID",
+      "example": "InstanceID_1",
+      "type": "string"
+     },
+     "OriginalAmount": {
+      "description": "刊例价",
+      "example": "100",
+      "type": "string"
+     },
+     "Product": {
+      "description": "商品",
+      "example": "Product_1",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RenewInstanceSuccessData": {
+    "description": "设置实例续费类型返回结果",
+    "properties": {
+     "InstanceID": {
+      "description": "实例ID",
+      "type": "string"
+     },
+     "Product": {
+      "description": "商品code",
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceID",
+     "Product"
+    ],
+    "type": "object"
+   },
+   "ResourcePackages": {
+    "description": "资源包信息",
+    "properties": {
+     "AvailableAmount": {
+      "description": "资源实例余量",
+      "example": "499",
+      "type": "string"
+     },
+     "BillTime": {
+      "description": "资源实例购买时间。 日期格式按照 ISO8601 标准表示，并需要使用 UTC 时间。格式为：yyyy-MM-ddTHH:mm:ssZ。",
+      "example": "2022-02-02T12:00:00Z",
+      "type": "string"
+     },
+     "ConfigurationCode": {
+      "description": "资源实例配置编码",
+      "example": "CDN_mainland_500GB_1m_package",
+      "type": "string"
+     },
+     "ConfigurationName": {
+      "description": "资源实例配置中文名称",
+      "example": "国内CDN-500GB-1月有效期",
+      "type": "string"
+     },
+     "EffectiveTime": {
+      "description": "资源实例生效时间。 日期格式按照 ISO8601 标准表示，并需要使用 UTC 时间。格式为：yyyy-MM-ddTHH:mm:ssZ。",
+      "example": "2022-02-02T12:00:00Z",
+      "type": "string"
+     },
+     "ExpiryTime": {
+      "description": "资源实例失效时间。 日期格式按照 ISO8601 标准表示，并需要使用 UTC 时间。格式为：yyyy-MM-ddTHH:mm:ssZ。",
+      "example": "2025-02-02T12:00:00Z",
+      "type": "string"
+     },
+     "InstanceName": {
+      "description": "实例ID对应中文名称",
+      "example": "资源包实例1",
+      "type": "string"
+     },
+     "InstanceNo": {
+      "description": "实例ID",
+      "example": "Instance7365828935959969836",
+      "type": "string"
+     },
+     "OwnerID": {
+      "description": "资源实例归属账号",
+      "example": "2100000001",
+      "type": "string"
+     },
+     "PackageType": {
+      "description": "资源实例形态 Periodic:周期型 Diminishing:递减型 Hybrid:混合型",
+      "example": "Periodic",
+      "type": "string"
+     },
+     "Product": {
+      "description": "商品英文名称",
+      "example": "CDN",
+      "type": "string"
+     },
+     "ProductName": {
+      "description": "商品中文名称",
+      "example": "内容分发网络",
+      "type": "string"
+     },
+     "RegionCode": {
+      "description": "地域编码",
+      "example": "cn-beijing",
+      "type": "string"
+     },
+     "ResetByNaturalMonth": {
+      "description": "按月周期重置型资源实例，是否按自然月周期重置。 true: 按自然月重置 ；false: 按非自然月重置",
+      "example": "true",
+      "type": "string"
+     },
+     "ResetPeriod": {
+      "description": "重置周期。仅周期型资源实例存在。 hourly: 小时重置；daily: 按天重置；monthly: 按月重置；yearly：按年重置；",
+      "example": "monthly",
+      "type": "string"
+     },
+     "SpecCalculateFactor": {
+      "description": "规格计算力因子",
+      "example": "1",
+      "type": "string"
+     },
+     "Specification": {
+      "description": "资源实例规格",
+      "example": "500",
+      "type": "string"
+     },
+     "SpecificationUnit": {
+      "description": "资源实例规格单位",
+      "example": "GB",
+      "type": "string"
+     },
+     "Status": {
+      "description": "资源实例状态。 NotEffective：未生效； Effective：生效中； FailedToCreate：创建失败； UsedUp：已用完； Expired：已到期； Refunded：已退款；",
+      "enum": [
+       "Effective",
+       "NotEffective",
+       "FailedToCreate",
+       "UsedUp",
+       "Expired",
+       "Refunded"
+      ],
+      "example": "Effective",
+      "type": "string"
+     },
+     "SubjectNo": {
+      "description": "服务主体",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "TotalAmount": {
+      "description": "资源实例总量",
+      "example": "500",
+      "type": "string"
+     },
+     "Unit": {
+      "description": "资源实例用量单位",
+      "example": "GB",
+      "type": "string"
+     },
+     "UserName": {
+      "description": "账户名称",
+      "example": "user",
+      "type": "string"
+     },
+     "ZoneCode": {
+      "description": "可用区编码",
+      "example": "cn-beijing-a",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SetRenewalTypeSuccessData": {
+    "description": "设置实例续费类型返回结果",
+    "properties": {
+     "InstanceID": {
+      "description": "实例ID",
+      "type": "string"
+     },
+     "Product": {
+      "description": "商品code",
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceID",
+     "Product"
+    ],
+    "type": "object"
+   },
+   "SplitBill": {
+    "description": "分账账单",
+    "properties": {
+     "BillCategory": {
+      "description": "账单类型",
+      "example": "消费-使用",
+      "type": "string"
+     },
+     "BillID": {
+      "description": "预付费账单为订单号，否则为账单号，仅在GroupPeriod为2时有意义",
+      "example": "Bill7262035879529697551",
+      "type": "string"
+     },
+     "BillPeriod": {
+      "description": "账期",
+      "example": "2023-08",
+      "type": "string"
+     },
+     "BillingFunction": {
+      "description": "单价价格类型",
+      "example": "固定单价",
+      "type": "string"
+     },
+     "BillingMethodCode": {
+      "description": "计费方式",
+      "example": "按加和量小时结",
+      "type": "string"
+     },
+     "BillingMode": {
+      "description": "计费模式",
+      "example": "按量计费",
+      "type": "string"
+     },
+     "BusiPeriod": {
+      "description": "业务账期",
+      "example": "2023-08",
+      "type": "string"
+     },
+     "BusinessMode": {
+      "description": "业务类型",
+      "example": "普通业务",
+      "type": "string"
+     },
+     "ConfigName": {
+      "description": "配置名称，仅在GroupPeriod为2时有意义",
+      "example": "ecs.g3i.large",
+      "type": "string"
+     },
+     "ConfigurationCode": {
+      "description": "配置Code",
+      "example": "BGP_fixed_bandwidth",
+      "type": "string"
+     },
+     "CouponDeductionAmount": {
+      "description": "代金券抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "CreditCarriedAmount": {
+      "description": "信控额度退款抵扣",
+      "example": "0.00",
+      "type": "string"
+     },
+     "Currency": {
+      "description": "币种",
+      "example": "CNY",
+      "type": "string"
+     },
+     "DeductionCount": {
+      "description": "资源包抵扣量",
+      "example": "0",
+      "type": "string"
+     },
+     "DiscountBillAmount": {
+      "description": "折后价",
+      "example": "0.07",
+      "type": "string"
+     },
+     "DiscountBizBillingFunction": {
+      "description": "优惠类型",
+      "example": "固定单价",
+      "type": "string"
+     },
+     "DiscountBizMeasureInterval": {
+      "description": "优惠用量区间",
+      "example": "0,100,200",
+      "type": "string"
+     },
+     "DiscountBizUnitPrice": {
+      "description": "优惠价格/折扣",
+      "example": "1.3",
+      "type": "string"
+     },
+     "DiscountBizUnitPriceInterval": {
+      "description": "优惠价格区间",
+      "example": "1,2,3",
+      "type": "string"
+     },
+     "EffectiveFactor": {
+      "description": "有效因子",
+      "example": "1.0",
+      "type": "string"
+     },
+     "Element": {
+      "description": "计费单元",
+      "example": "ecs.g3i",
+      "type": "string"
+     },
+     "ElementCode": {
+      "description": "计费单元Code",
+      "example": "BE004848",
+      "type": "string"
+     },
+     "ExpandField": {
+      "description": "扩展字段",
+      "example": "按加和量小时结",
+      "type": "string"
+     },
+     "ExpenseTime": {
+      "description": "消费时间，GroupPeriod为0时无意义，GroupPeriod为1时表示消费日期，GroupPeriod为2时表示消费开始时间~消费结束时间",
+      "example": "2023-08-01",
+      "type": "string"
+     },
+     "Factor": {
+      "description": "影响因子",
+      "example": "type-large",
+      "type": "string"
+     },
+     "FactorCode": {
+      "description": "影响因子Code",
+      "example": "{\"type\":\"BGP\"}",
+      "type": "string"
+     },
+     "InstanceName": {
+      "description": "实例名称",
+      "example": "ECS-fEaG",
+      "type": "string"
+     },
+     "InstanceNo": {
+      "description": "实例ID",
+      "example": "i-ycjlq77tdg8rx6ib4v1s",
+      "type": "string"
+     },
+     "MarketPrice": {
+      "description": "市场价",
+      "example": "2.716",
+      "type": "string"
+     },
+     "MeasureInterval": {
+      "description": "单价用量区间",
+      "example": "0,100,200",
+      "type": "string"
+     },
+     "OriginalBillAmount": {
+      "description": "原价",
+      "example": "0.5192000000",
+      "type": "string"
+     },
+     "OwnerCustomerName": {
+      "description": "Owner账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "OwnerID": {
+      "description": "Owner账号ID",
+      "example": "2100153894",
+      "type": "string"
+     },
+     "OwnerUserName": {
+      "description": "Owner账号名",
+      "example": "Doooo",
+      "type": "string"
+     },
+     "PaidAmount": {
+      "description": "现金支付",
+      "example": "0.00",
+      "type": "string"
+     },
+     "PayableAmount": {
+      "description": "应付金额",
+      "example": "0.07",
+      "type": "string"
+     },
+     "PayerCustomerName": {
+      "description": "支付账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "PayerID": {
+      "description": "支付账号ID",
+      "example": "2100153894",
+      "type": "string"
+     },
+     "PayerUserName": {
+      "description": "支付账号名",
+      "example": "Doooo",
+      "type": "string"
+     },
+     "PreferentialBillAmount": {
+      "description": "优惠金额",
+      "example": "0.4414130000",
+      "type": "string"
+     },
+     "Price": {
+      "description": "单价",
+      "example": "0.519200",
+      "type": "string"
+     },
+     "PriceInterval": {
+      "description": "单价价格区间",
+      "example": "1,2,3",
+      "type": "string"
+     },
+     "PriceUnit": {
+      "description": "单价单位",
+      "example": "台/时",
+      "type": "string"
+     },
+     "Product": {
+      "description": "产品英文名称",
+      "example": "ECS",
+      "type": "string"
+     },
+     "ProductZh": {
+      "description": "产品中文名称",
+      "example": "云服务器",
+      "type": "string"
+     },
+     "Project": {
+      "description": "项目",
+      "example": "default",
+      "type": "string"
+     },
+     "ProjectDisplayName": {
+      "description": "项目中文名",
+      "example": "默认项目",
+      "type": "string"
+     },
+     "Region": {
+      "description": "地域",
+      "example": "华北2（北京）",
+      "type": "string"
+     },
+     "RegionCode": {
+      "description": "地域Code",
+      "example": "R000807",
+      "type": "string"
+     },
+     "ReservationInstance": {
+      "description": "售卖模式，0：普通实例，1：弹性预约实例",
+      "example": "0",
+      "type": "string"
+     },
+     "SellerCustomerName": {
+      "description": "Seller账号客户名称",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "SellerID": {
+      "description": "Seller账号ID",
+      "example": "3423",
+      "type": "string"
+     },
+     "SellerUserName": {
+      "description": "Seller账号名",
+      "example": "火山引擎",
+      "type": "string"
+     },
+     "SellingMode": {
+      "description": "售卖模式，0：普通实例，1：竞价实例",
+      "example": "0",
+      "type": "string"
+     },
+     "SettlementType": {
+      "description": "结算类型，settle：结算，non-settle：非结算，quota-settle：Quota结算，仅在GroupPeriod为2时有意义",
+      "example": "非结算",
+      "type": "string"
+     },
+     "SolutionZh": {
+      "description": "解决方案中文名称",
+      "example": "测试方案",
+      "type": "string"
+     },
+     "SplitBillDetailId": {
+      "description": "分账账单明细ID",
+      "example": "SplitDetail7241880997514465580",
+      "type": "string"
+     },
+     "SplitItemAmount": {
+      "description": "分拆项用量",
+      "example": "1",
+      "type": "string"
+     },
+     "SplitItemID": {
+      "description": "分拆项ID",
+      "example": "split-test1",
+      "type": "string"
+     },
+     "SplitItemName": {
+      "description": "分拆项名称",
+      "example": "split-test1",
+      "type": "string"
+     },
+     "SplitItemRatio": {
+      "description": "分拆用量占比，仅在GroupPeriod为2时有意义",
+      "example": "0.1",
+      "type": "string"
+     },
+     "SubjectName": {
+      "description": "主体名",
+      "example": "北京火山引擎科技有限公司",
+      "type": "string"
+     },
+     "Tag": {
+      "description": "标签，格式为包含多个键值对的Json字符串",
+      "example": "{\"voKey1\":[\"v1\"],\"voKey101\":[\"v5\"],\"voKey2\":[\"v2\"],\"volc:vke:cluster-id\":[\"valu3\"],\"volc:vke:createdby-vke-flag\":[\"valu4\"],\"volc:vke:used-by-vke-cluster\":[\"value5\"]}",
+      "type": "string"
+     },
+     "TradeTime": {
+      "description": "交易时间，格式：2006-01-02 15:04:05，仅在GroupPeriod为2时有意义",
+      "example": "2023-08-01 01:28:14",
+      "type": "string"
+     },
+     "Unit": {
+      "description": "用量单位",
+      "example": "台",
+      "type": "string"
+     },
+     "UnpaidAmount": {
+      "description": "欠费金额",
+      "example": "0.00",
+      "type": "string"
+     },
+     "UseDuration": {
+      "description": "使用时长",
+      "example": "86400",
+      "type": "string"
+     },
+     "UseDurationUnit": {
+      "description": "时长单位",
+      "example": "秒",
+      "type": "string"
+     },
+     "Zone": {
+      "description": "可用区",
+      "example": "可用区B",
+      "type": "string"
+     },
+     "ZoneCode": {
+      "description": "可用区Code",
+      "example": "Zone1",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SuccessInstanceInfo": {
+    "description": "当前成功响应涉及的实例信息",
+    "properties": {
+     "InstanceID": {
+      "description": "实例ID",
+      "type": "string"
+     },
+     "Product": {
+      "description": "商品编码",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Product",
+     "InstanceID"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "API documentation for billing",
+  "title": "billing",
+  "version": "2022-01-01"
+ },
+ "openapi": "3.0.0",
+ "paths": {
+  "/ListAmortizedCostBillDetail": {
+   "post": {
+    "description": "查询成本账单明细",
+    "operationId": "ListAmortizedCostBillDetail",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AmortizedDay": {
+          "description": "分摊日：格式为YYYY-MM-DD；仅支持单日查询；最早只能查询2023-04-01",
+          "example": "2023-08-01",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "AmortizedMonth": {
+          "description": "分摊月：格式为YYYY-MM；仅支持单月查询；所查分摊月至多距今 24 个月；最早只能查询2023-04",
+          "example": "2023-08",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "AmortizedType": {
+          "description": "分摊类型：1：履约计费分摊；2：合同计费分摊；3：按量计费分摊；4：新购分摊；5：更配分摊；6：续费分摊；7：退订分摊；8：预留实例调整分摊；9：试用分摊；10：转正分摊；默认不选为全部\n",
+          "example": [
+           1
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "BillCategory": {
+          "description": "账单类型：consume-use：消费-使用；consume-new：消费-新购；consume-renew：消费-续费；consume-formalize：消费-转正；consume-modify：消费-更配；consume-trial：消费-试用；refund-terminate：退款-退订；refund-modify：退款-更配；transfer-manual：调账-人工；transfer-system：调账-系统；默认不选为全部\n",
+          "example": [
+           "[consume-use]"
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "BillPeriod": {
+          "description": "账务账期：格式为YYYY-MM；仅支持单月查询；所查账期至多距今 24 个月；最早只能查询2023-04",
+          "example": "2023-08",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "BillingMode": {
+          "description": "计费模式：1：包年包月；2：按量计费；3：合同计费；4：履约计费；默认不选为全部\n",
+          "example": [
+           1
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "IgnoreZero": {
+          "description": "是否忽略折后价为0的数据：0：不忽略；1忽略；默认为不忽略",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "InstanceNo": {
+          "description": "实例id，默认不选为全部",
+          "example": "i-ycjlq77tdg8rx6ib4v1s",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "Limit": {
+          "description": "数量：[1-300]",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "NeedRecordNum": {
+          "description": "是否需要访问列表的总记录数：用于前端分页；1：表示需要； 0：表示不需要；默认为不需要，Total返回-1",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "Offset": {
+          "description": "偏移量",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "OwnerID": {
+          "description": "Owner账号ID\n",
+          "example": [
+           2100057673
+          ],
+          "format": "int64",
+          "items": {
+           "type": "integer"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "PayerID": {
+          "description": "Payer账号ID\n",
+          "example": [
+           2100057673
+          ],
+          "format": "int64",
+          "items": {
+           "type": "integer"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "Product": {
+          "description": "产品名称，默认不选为全部\n",
+          "example": [
+           "[ECS]"
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "Limit",
+         "AmortizedMonth"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Limit": {
+           "description": "步长",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "List": {
+           "description": "成本明细列表",
+           "example": [
+            "-"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/CostBillDetail"
+           },
+           "type": "array"
+          },
+          "Offset": {
+           "description": "偏移量",
+           "example": 0,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数，默认返回-1（NeedRecordNum=0时）",
+           "example": 100,
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询成本账单明细"
+     }
+    },
+    "summary": "查询成本账单明细",
+    "tags": [
+     "账单中心"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "billing",
+   "x-version": "2022-01-01"
+  },
+  "/ListAmortizedCostBillMonthly": {
+   "post": {
+    "description": "查询成本账单总览",
+    "operationId": "ListAmortizedCostBillMonthly",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AmortizedMonth": {
+          "description": "分摊月：格式为YYYY-MM；仅支持单月查询；所查分摊月至多距今 24 个月；最早只能查询2023-04",
+          "example": "2023-08",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "AmortizedType": {
+          "description": "分摊类型：1：履约计费分摊；2：合同计费分摊；3：按量计费分摊；4：新购分摊；5：更配分摊；6：续费分摊；7：退订分摊；8：预留实例调整分摊；9：试用分摊；10：转正分摊；默认不选为全部\n",
+          "example": [
+           1
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "BillCategory": {
+          "description": "账单类型：consume-use：消费-使用；consume-new：消费-新购；consume-renew：消费-续费；consume-formalize：消费-转正；consume-modify：消费-更配；consume-trial：消费-试用；refund-terminate：退款-退订；refund-modify：退款-更配；transfer-manual：调账-人工；transfer-system：调账-系统；默认不选为全部\n",
+          "example": [
+           "[consume-use]"
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "BillPeriod": {
+          "description": "账务账期：格式为YYYY-MM；仅支持单月查询；所查账期至多距今 24 个月；最早只能查询2023-04",
+          "example": "2023-08",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "BillingMode": {
+          "description": "计费模式：1：包年包月；2：按量计费；3：合同计费；4：履约计费；默认不选为全部",
+          "example": [
+           1
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "IgnoreZero": {
+          "description": "是否忽略折后价为0的数据：0：不忽略；1忽略；默认为不忽略",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "InstanceNo": {
+          "description": "实例id，默认不选为全部",
+          "example": "i-ycjlq77tdg8rx6ib4v1s",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "Limit": {
+          "description": "数量：[1-300]",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "NeedRecordNum": {
+          "description": "是否需要访问列表的总记录数：用于前端分页；1：表示需要； 0：表示不需要；默认为不需要，Total返回-1",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "Offset": {
+          "description": "偏移量",
+          "example": 0,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "OwnerID": {
+          "description": "Owner账号ID\n",
+          "example": [
+           2100057673
+          ],
+          "format": "int64",
+          "items": {
+           "type": "integer"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "PayerID": {
+          "description": "Payer账号ID\n",
+          "example": [
+           2100057673
+          ],
+          "format": "int64",
+          "items": {
+           "type": "integer"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "Product": {
+          "description": "产品名称，默认不选为全部\n",
+          "example": [
+           "[ECS]"
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "Limit",
+         "AmortizedMonth"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Limit": {
+           "description": "步长",
+           "example": 100,
+           "format": "int32",
+           "type": "integer"
+          },
+          "List": {
+           "description": "成本总览列表",
+           "example": [
+            "-"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/CostBillMonthly"
+           },
+           "type": "array"
+          },
+          "Offset": {
+           "description": "偏移量",
+           "example": 0,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数，默认返回-1（NeedRecordNum=0时）",
+           "example": 100,
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询成本账单总览"
+     }
+    },
+    "summary": "查询成本账单总览",
+    "tags": [
+     "账单中心"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "billing",
+   "x-version": "2022-01-01"
+  },
+  "/ListBill": {
+   "post": {
+    "description": "分页查询账单",
+    "operationId": "ListBill",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "BillCategoryParent": {
+          "description": "账单大类类型：consume：消费；refund：退款；transfer：调账；默认不选为全部",
+          "example": [
+           "[consume]"
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "BillPeriod": {
+          "description": "账期：格式为YYYY-MM；仅支持单月查询；最多24个月；最早只能查询2022-01（新版账单的时间）",
+          "example": "2023-08",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "BillingMode": {
+          "description": "计费模式：1：包年包月；2：按量计费；3：合同计费；4：履约计费；默认不选为全部\n",
+          "example": [
+           1
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "IgnoreZero": {
+          "description": "是否忽略折后价为0的数据：0：不忽略；1忽略；默认为不忽略",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "Limit": {
+          "description": "数量：[1-300]",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "NeedRecordNum": {
+          "description": "是否需要访问列表的总记录数：用于前端分页；1：表示需要； 0：表示不需要；默认为不需要，Total返回-1",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "Offset": {
+          "description": "偏移量",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "OwnerID": {
+          "description": "Owner账号ID\n",
+          "example": [
+           2100057673
+          ],
+          "format": "int64",
+          "items": {
+           "type": "integer"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "PayStatus": {
+          "description": "支付状态：CompletedSettle：已结清；PartSettle：未结清；Unsettle：未结算；默认不选为全部",
+          "example": "CompletedSettle",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "PayerID": {
+          "description": "Payer账号ID\n",
+          "example": [
+           2100057673
+          ],
+          "format": "int64",
+          "items": {
+           "type": "integer"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "Product": {
+          "description": "产品名称，默认不选为全部\n",
+          "example": [
+           "[ECS]"
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "Limit",
+         "BillPeriod"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Limit": {
+           "description": "步长",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "List": {
+           "description": "账单列表",
+           "example": [
+            "-"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/Bill"
+           },
+           "type": "array"
+          },
+          "Offset": {
+           "description": "偏移量",
+           "example": 0,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数，默认返回-1（NeedRecordNum=0时）",
+           "example": 100,
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "分页查询账单"
+     }
+    },
+    "summary": "分页查询账单",
+    "tags": [
+     "账单中心"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "billing",
+   "x-version": "2022-01-01"
+  },
+  "/ListBillDetail": {
+   "post": {
+    "description": "分页查询账单明细",
+    "operationId": "ListBillDetail",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "BillCategory": {
+          "description": "账单类型：consume-use：消费-使用；consume-new：消费-新购；consume-renew：消费-续费；consume-formalize：消费-转正；consume-modify：消费-更配；consume-trial：消费-试用；refund-terminate：退款-退订；refund-modify：退款-更配；transfer-manual：调账-人工；transfer-system：调账-系统；默认不选为全部\n",
+          "example": [
+           "[consume-use]"
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "BillPeriod": {
+          "description": "账期：格式为YYYY-MM；仅支持单月查询；所查账期至多距今 24 个月；最早只能查询2022-01（新版账单的时间）",
+          "example": "2023-08",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "BillingMode": {
+          "description": "计费模式：1：包年包月；2：按量计费；3：合同计费；4：履约计费；默认不选为全部\n",
+          "example": [
+           1
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "ExpenseDate": {
+          "description": "账单日期，在GroupPeriod=1时支持账单日期传参，必须与账期在同一月份",
+          "example": "2023-03-15",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "GroupPeriod": {
+          "description": "统计周期：0：账期；1：按天；2：明细",
+          "enum": [
+           "0",
+           "1",
+           "2"
+          ],
+          "example": 0,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "GroupTerm": {
+          "description": "统计项：0：计费项；1：实例；2：产品；3：账号",
+          "enum": [
+           "0",
+           "1",
+           "2",
+           "3"
+          ],
+          "example": 0,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "IgnoreZero": {
+          "description": "是否忽略折后价为0的数据：0：不忽略；1忽略；默认为不忽略",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "InstanceNo": {
+          "description": "实例id：默认不选为全部",
+          "example": "i-ycjlq77tdg8rx6ib4v1s",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "Limit": {
+          "description": "数量：[1-300]",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "NeedRecordNum": {
+          "description": "是否需要访问列表的总记录数：用于前端分页；1：表示需要； 0：表示不需要；默认为不需要，Total返回-1",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "Offset": {
+          "description": "偏移量",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "OwnerID": {
+          "description": "Owner账号ID\n",
+          "example": [
+           2100057673
+          ],
+          "format": "int64",
+          "items": {
+           "type": "integer"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "PayerID": {
+          "description": "Payer账号ID\n",
+          "example": [
+           2100057673
+          ],
+          "format": "int64",
+          "items": {
+           "type": "integer"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "Product": {
+          "description": "产品名称，默认不选为全部\n",
+          "example": [
+           "[ECS]"
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "Limit",
+         "BillPeriod"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Limit": {
+           "description": "步长",
+           "example": 100,
+           "format": "int32",
+           "type": "integer"
+          },
+          "List": {
+           "description": "账单明细列表",
+           "example": [
+            "-"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/BillDetail"
+           },
+           "type": "array"
+          },
+          "Offset": {
+           "description": "偏移量",
+           "example": 0,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数，默认返回-1（NeedRecordNum=0时）",
+           "example": 100,
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "分页查询账单明细"
+     }
+    },
+    "summary": "分页查询账单明细",
+    "tags": [
+     "账单中心"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "billing",
+   "x-version": "2022-01-01"
+  },
+  "/ListBillOverviewByCategory": {
+   "post": {
+    "description": "查询账单总览-账号汇总信息",
+    "operationId": "ListBillOverviewByCategory",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "BillCategoryParent": {
+          "description": "账单大类类型：consume：消费；refund：退款；transfer：调账；默认不选为全部",
+          "example": [
+           "[consume]"
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "BillPeriod": {
+          "description": "账务账期：格式为YYYY-MM；仅支持单月查询；所查账期至多距今 24 个月；最早只能查询2023-04",
+          "example": "2023-03",
+          "maxLength": 7,
+          "minLength": 7,
+          "type": "string",
+          "x-split-type": 0
+         },
+         "BillingMode": {
+          "description": "计费模式：1：包年包月；2：按量计费；3：合同计费；4：履约计费；默认不选为全部\n",
+          "example": [
+           1
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "OwnerID": {
+          "description": "Owner账号ID\n",
+          "example": [
+           2100057673
+          ],
+          "format": "int64",
+          "items": {
+           "type": "integer"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "PayerID": {
+          "description": "Payer账号ID\n",
+          "example": [
+           2100057673
+          ],
+          "format": "int64",
+          "items": {
+           "type": "integer"
+          },
+          "type": "array",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "BillPeriod"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "List": {
+           "description": "账单总览-账号汇总总列表\n",
+           "example": [
+            "-"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/BillOverviewByCategoryByPayerList"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询账单总览-账号汇总信息"
+     }
+    },
+    "summary": "查询账单总览-账号汇总信息",
+    "tags": [
+     "账单中心"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "billing",
+   "x-version": "2022-01-01"
+  },
+  "/ListBillOverviewByProd": {
+   "post": {
+    "description": "分页查询账单总览-产品汇总信息",
+    "operationId": "ListBillOverviewByProd",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "BillCategoryParent": {
+          "description": "账单大类类型：consume：消费；refund：退款；transfer：调账；默认不选为全部；",
+          "example": [
+           "[consume]"
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "BillPeriod": {
+          "description": "账期：格式为YYYY-MM；仅支持单月查询；所查账期至多距今 24 个月；最早只能查询2022-01（新版账单的时间）",
+          "example": "2023-08",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "BillingMode": {
+          "description": "计费模式：1：包年包月；2：按量计费；3：合同计费；4：履约计费；默认不选为全部\n",
+          "example": [
+           1
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "IgnoreZero": {
+          "description": "是否忽略折后价为0的数据：0：不忽略；1忽略；默认为不忽略；",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "Limit": {
+          "description": "数量：[1-300]",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "NeedRecordNum": {
+          "description": "是否需要访问列表的总记录数：用于前端分页；1：表示需要； 0：表示不需要；默认为不需要，Total返回-1",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "Offset": {
+          "description": "偏移量",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "OwnerID": {
+          "description": "Owner账号ID\n",
+          "example": [
+           2100057673
+          ],
+          "format": "int64",
+          "items": {
+           "type": "integer"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "PayerID": {
+          "description": "Payer账号ID\n",
+          "example": [
+           2100057673
+          ],
+          "format": "int64",
+          "items": {
+           "type": "integer"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "Product": {
+          "description": "产品名称，默认不选为全部\n",
+          "example": [
+           "[ECS]"
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "Limit",
+         "BillPeriod"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Limit": {
+           "description": "步长",
+           "example": 100,
+           "format": "int32",
+           "type": "integer"
+          },
+          "List": {
+           "description": "账单总览-产品汇总列表",
+           "example": [
+            "-"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/BillOverviewByProd"
+           },
+           "type": "array"
+          },
+          "Offset": {
+           "description": "偏移量",
+           "example": 0,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数，默认返回-1（NeedRecordNum=0时）",
+           "example": 100,
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "分页查询账单总览-产品汇总信息"
+     }
+    },
+    "summary": "分页查询账单总览-产品汇总信息",
+    "tags": [
+     "账单中心"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "billing",
+   "x-version": "2022-01-01"
+  },
+  "/ListSplitBillDetail": {
+   "post": {
+    "description": "分页查询分账账单",
+    "operationId": "ListSplitBillDetail",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "BillCategory": {
+          "description": "账单类型：consume-use：消费-使用；consume-new：消费-新购；consume-renew：消费-续费；consume-formalize：消费-转正；consume-modify：消费-更配；consume-trial：消费-试用；refund-terminate：退款-退订；refund-modify：退款-更配；transfer-manual：调账-人工；transfer-system：调账-系统；默认不选为全部\n",
+          "example": [
+           "[consume-use]"
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "BillPeriod": {
+          "description": "账务账期：格式为YYYY-MM；仅支持单月查询；所查账期至多距今 24 个月；最早只能查询2022-01（新版账单的时间）",
+          "example": "2023-08",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "BillingMode": {
+          "description": "计费模式：1：包年包月；2：按量计费；3：合同计费；4：履约计费；默认不选为全部\n",
+          "example": [
+           1
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "ExpenseDate": {
+          "description": "账单日期，在GroupPeriod=1时支持账单日期传参，必须与账期在同一月份",
+          "example": "2023-08-15",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "GroupPeriod": {
+          "description": "统计周期：0：账期；1：按天；2：明细",
+          "example": 0,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "IgnoreZero": {
+          "description": "是否忽略折后价为0的数据：0：不忽略；1忽略；默认为不忽略",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "InstanceNo": {
+          "description": "实例ID",
+          "example": "i-ycjlq77tdg8rx6ib4v1s",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "Limit": {
+          "description": "数量：[1-300]",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "NeedRecordNum": {
+          "description": "是否需要访问列表的总记录数：用于前端分页；1：表示需要； 0：表示不需要；默认为不需要，Total返回-1",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "Offset": {
+          "description": "偏移量",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "OwnerID": {
+          "description": "Owner账号ID\n",
+          "example": [
+           2100057673
+          ],
+          "format": "int64",
+          "items": {
+           "type": "integer"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "PayerID": {
+          "description": "Payer账号ID\n",
+          "example": [
+           2100057673
+          ],
+          "format": "int64",
+          "items": {
+           "type": "integer"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "Product": {
+          "description": "产品名称，默认不选为全部\n",
+          "example": [
+           "[ECS]"
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "SplitItemID": {
+          "description": "分拆项ID",
+          "example": "split-test1",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "Limit",
+         "BillPeriod"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Limit": {
+           "description": "步长",
+           "example": 100,
+           "format": "int32",
+           "type": "integer"
+          },
+          "List": {
+           "description": "分账账单列表",
+           "example": [
+            "-"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/SplitBill"
+           },
+           "type": "array"
+          },
+          "Offset": {
+           "description": "偏移量",
+           "example": 0,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数，默认返回-1（NeedRecordNum=0时）",
+           "example": 100,
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "分页查询分账账单"
+     }
+    },
+    "summary": "分页查询分账账单",
+    "tags": [
+     "账单中心"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "billing",
+   "x-version": "2022-01-01"
+  },
+  "/QueryBalanceAcct": {
+   "post": {
+    "description": "查询账户余额信息",
+    "operationId": "QueryBalanceAcct",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AccountID": {
+           "description": "账号ID",
+           "example": "21000000X",
+           "format": "int32",
+           "type": "integer"
+          },
+          "ArrearsBalance": {
+           "description": "欠费金额\n",
+           "example": "1.01",
+           "type": "string"
+          },
+          "AvailableBalance": {
+           "description": "可用余额\n",
+           "example": "1.01",
+           "type": "string"
+          },
+          "CashBalance": {
+           "description": "现金余额",
+           "example": "1.01",
+           "type": "string"
+          },
+          "CreditLimit": {
+           "description": "信控额度",
+           "example": "1.01",
+           "type": "string"
+          },
+          "FreezeAmount": {
+           "description": "冻结金额",
+           "example": "1.01",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询账户余额信息"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "RecordNoFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "查询无记录",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The Record No Found.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParam",
+             "type": "string"
+            },
+            "description": {
+             "example": "请求参数非法",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter is invalid",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "系统未知异常，请重试",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The request has failed due to an unknown error",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询用户账户余额信息",
+    "tags": [
+     "资金服务"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "billing",
+   "x-version": "2022-01-01"
+  }
+ }
+}
