@@ -27,9 +27,9 @@ uv pip install -e .
 
 The server requires the following environment variables:
 
-- `VOLC_ACCESSKEY`: Your VolcEngine access key
-- `VOLC_SECRETKEY`: Your VolcEngine secret key
-- `REGION`: Your VolcEngine region (e.g., "cn-beijing")
+- `VOLCENGINE_ACCESS_KEY`: Your VolcEngine access key
+- `VOLCENGINE_SECRET_KEY`: Your VolcEngine secret key
+- `VOLCENGINE_REGION`: Your VolcEngine region (e.g., "cn-beijing")
 
 Optional environment variables:
 
@@ -162,9 +162,9 @@ To add this server to your MCP configuration, add the following to your MCP sett
           "mcp-server-ebs",
         ],
       "env": {
-        "VOLC_ACCESSKEY": "your-access-key",
-        "VOLC_SECRETKEY": "your-secret-key",
-        "Region": "your-resource-region",
+        "VOLCENGINE_ACCESS_KEY": "your-access-key",
+        "VOLCENGINE_SECRET_KEY": "your-secret-key",
+        "VOLCENGINE_REGION": "your-resource-region",
         "PORT": "8000",
         "ENDPOINT": "api-endpoint"
       },
