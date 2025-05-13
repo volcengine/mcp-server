@@ -89,6 +89,64 @@ Parameters:
 - `query` (Optional): Specific questions about the volume (status, size, type, etc.)
 - `snapshot_id` (required): The ID of the EBS snapshot to query (e.g. "snap-12345678")
 
+####  `create_volume`
+
+Create a new EBS volume with specified parameters.
+
+```python
+create_volume(
+    volume_name="my-volume",
+    zone_id="cn-beijing-a",
+    size=40,
+    volume_type="ESSD_PL0"
+)
+```
+
+Parameters:
+- `volume_name` (required): The name of the EBS volume to create
+- `zone_id` (required): The ID of the zone where the volume will be created
+- `size` (Optional): The size of the EBS volume in GiB (default: 40)
+- `volume_type` (Optional): The type of the EBS volume (default: "ESSD_PL0")
+- `region_id` (Optional): The ID of the region where the volume will be created
+- `snapshot_id` (Optional): The ID of the snapshot to create volume from
+- `volume_charge_type` (Optional): The charge type of the volume (default: "PostPaid")
+- `instance_id` (Optional): The ID of the instance to attach the volume
+- `query` (Optional): Specific questions about the volume
+
+####  `create_snapshot`
+
+Create a new EBS snapshot from specified volume.
+
+```python
+create_snapshot(
+    volume_id="vol-12345678",
+    snapshot_name="my-snapshot"
+)
+```
+
+Parameters:
+- `volume_id` (required): The ID of the EBS volume to create snapshot from
+- `snapshot_name` (Optional): The name of the EBS snapshot to create
+- `region_id` (Optional): The ID of the region where the snapshot will be created
+- `query` (Optional): Specific questions about the snapshot
+
+####  `extend_volume`
+
+Extend the size of an existing EBS volume.
+
+```python
+extend_volume(
+    volume_id="vol-12345678",
+    new_size=80
+)
+```
+
+Parameters:
+- `volume_id` (required): The ID of the EBS volume to extend
+- `new_size` (required): The new size of the EBS volume in GiB
+- `region_id` (Optional): The ID of the region where the volume is located
+- `query` (Optional): Specific questions about the volume
+
 ## MCP Integration
 
 To add this server to your MCP configuration, add the following to your MCP settings file:
