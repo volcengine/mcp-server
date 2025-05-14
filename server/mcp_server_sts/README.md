@@ -50,7 +50,7 @@ git clone git@github.com:volcengine/mcp-server.git
 
 ### 3. 运行模式
 #### STDIO 模式
-- 设置 `credential = env` 需准备AK、SK并设置到环境变量
+- 设置`transport` = `stdio`、`credential = env` 需要准备AK、SK并设置到环境变量
 
 ### 4. 环境变量设置
 - ak 环境变量名:  VOLCENGINE_ACCESS_KEY
