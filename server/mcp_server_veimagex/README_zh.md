@@ -45,7 +45,7 @@ veImageX的MCP Server实现，为MCP客户端提供与火山引擎veImageX服务
 
 ## 可适配平台
 
-方舟，python，cursor
+方舟，Trae，cursor
 
 ## 服务开通链接 (整体产品)
 
@@ -95,7 +95,7 @@ veImageX的MCP Server实现，为MCP客户端提供与火山引擎veImageX服务
 ```json
 {
   "mcp-server": {
-    "tos-mcp": {
+    "veimagex-mcp": {
       "command": "uvx",
       "args": [
         "--from",
