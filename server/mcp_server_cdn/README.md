@@ -1,60 +1,64 @@
 # CDN MCP Server
 
-## 版本信息
+## Version Information
 v0.1.0
 
-## 产品描述
+## Product Description
 
-火山引擎 CDN 官方推出的 MCP Server，支持基于自然语言查询并分析业务数据和域名配置信息，适用于运维排障、数据分析等场景，助力构建更智能的云业务运维场景。
+Volcano Engine CDN officially launches the MCP Server, which supports natural language queries and analysis of business data and domain configuration information. It is suitable for scenarios such as operation and maintenance troubleshooting, data analysis, etc., helping to build more intelligent cloud business operation and maintenance scenarios.
 
-## 分类
+## Category
 
-内容分发网络
+Content Delivery Network
 
-## 标签
+## Tags
 
-CDN、 内容分发网络、业务数据分析、域名配置分析
+CDN, Content Delivery Network, Business Data Analysis, Domain Configuration Analysis
 
-## 可用工具
-CDN MCP Server 支持查询并分析业务数据信息和域名配置信息，提供如下工具。
+## Available Tools
 
-业务数据查询
+The CDN MCP Server supports querying and analyzing business data information and domain configuration information, providing the following tools.
 
-- `DescribeDistrictData`: [获取访问统计的细分数据](https://www.volcengine.com/docs/6454/1228873)
-- `DescribeEdgeData`: [获取计费区域的细分数据](https://www.volcengine.com/docs/6454/1229443)
-- `DescribeDistrictSummary`: [获取访问统计的汇总数据](https://www.volcengine.com/docs/6454/1229447)
-- `DescribeEdgeSummary`: [获取计费区域的汇总数据](https://www.volcengine.com/docs/6454/1229442)
-- `DescribeOriginData`: [获取回源统计的细分数据](https://www.volcengine.com/docs/6454/1229441)
-- `DescribeOriginSummary`: [获取回源统计的汇总数据](https://www.volcengine.com/docs/6454/1229451)
-- `DescribeUserData`: [获取独立访客的细分数据](https://www.volcengine.com/docs/6454/1230197)
-- `DescribeDistrictRanking`: [获取访问数据的统计排名](https://www.volcengine.com/docs/6454/1229445)
-- `DescribeEdgeRanking`: [获取计费区域的统计排名](https://www.volcengine.com/docs/6454/1229448)
-- `DescribeOriginRanking`: [获取回源数据的统计排名](https://www.volcengine.com/docs/6454/1229444)
-- `DescribeEdgeStatusCodeRanking`: [获取访问状态码的统计排名](https://www.volcengine.com/docs/6454/1229449)
-- `DescribeOriginStatusCodeRanking`: [获取回源状态码的统计排名](https://www.volcengine.com/docs/6454/1229450)
-- `DescribeStatisticalRanking`: [获取热门对象的统计排名](https://www.volcengine.com/docs/6454/1230196)
-- `DescribeOriginTopStatisticalData`: [获取 TOP 回源 URL](https://www.volcengine.com/docs/6454/1213039)
+Business Data Query
 
-
-域名配置查询
-
-- `DescribeCdnConfig`: [获取加速域名配置](https://www.volcengine.com/docs/6454/80320)
-- `ListCdnDomains`: [获取加速域名列表](https://www.volcengine.com/docs/6454/75269)
+- `DescribeDistrictData`: [Get detailed access statistics](https://www.volcengine.com/docs/6454/1228873)
+- `DescribeEdgeData`: [Get detailed billing area data](https://www.volcengine.com/docs/6454/1229443)
+- `DescribeDistrictSummary`: [Get summary access statistics](https://www.volcengine.com/docs/6454/1229447)
+- `DescribeEdgeSummary`: [Get summary billing area data](https://www.volcengine.com/docs/6454/1229442)
+- `DescribeOriginData`: [Get detailed origin statistics](https://www.volcengine.com/docs/6454/1229441)
+- `DescribeOriginSummary`: [Get summary origin statistics](https://www.volcengine.com/docs/6454/1229451)
+- `DescribeUserData`: [Get detailed unique visitor data](https://www.volcengine.com/docs/6454/1230197)
+- `DescribeDistrictRanking`: [Get access data ranking](https://www.volcengine.com/docs/6454/1229445)
+- `DescribeEdgeRanking`: [Get billing area data ranking](https://www.volcengine.com/docs/6454/1229448)
+- `DescribeOriginRanking`: [Get origin data ranking](https://www.volcengine.com/docs/6454/1229444)
+- `DescribeEdgeStatusCodeRanking`: [Get access status code ranking](https://www.volcengine.com/docs/6454/1229449)
+- `DescribeOriginStatusCodeRanking`: [Get origin status code ranking](https://www.volcengine.com/docs/6454/1229450)
+- `DescribeStatisticalRanking`: [Get hot object ranking](https://www.volcengine.com/docs/6454/1230196)
+- `DescribeOriginTopStatisticalData`: [ Get TOP origin URLsL](https://www.volcengine.com/docs/6454/1213039)
 
 
-## 可适配平台  
-可以使用 Cline、Cursor、Claude Desktop 等支持 MCP Server 调用的客户端。
+Domain Configuration Query
 
-## 服务开通链接（整体产品）
+- `DescribeCdnConfig`: [Get accelerated domain configuration](https://www.volcengine.com/docs/6454/80320)
+- `ListCdnDomains`: [Get accelerated domain list](https://www.volcengine.com/docs/6454/75269)
+
+
+## Compatible Platforms
+Can be used with clients that support MCP Server calls such as Cline, Cursor, Claude Desktop, etc.
+
+## Service Activation Link (Overall Product)
 <https://console.volcengine.com/cdn>
 
 
-## 鉴权方式
-从[ 火山引擎控制台-访问控制 ](https://console.volcengine.com/iam/identitymanage/user)获取 AccessKey 和 SecretKey。注：AccessKey 和 SecretKey 具备上述 OpenAPI（可用工具）的权限。
+## Authentication Method
 
-## 安装
+Obtain AccessKey and SecretKey from [ Volcano Engine Console - Access Control ](https://console.volcengine.com/iam/identitymanage/user). Note: AccessKey and SecretKey must have the permissions for the above OpenAPIs (available tools).
 
-### 环境要求
+
+
+## Installation
+
+### System Requirements
 
 - Python 3.12+
 - UV
@@ -68,11 +72,11 @@ CDN MCP Server 支持查询并分析业务数据信息和域名配置信息，�
   ```bash
   powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
   ```
-- 火山引擎账号及 AccessKey/SecretKey
+- Volcano Engine account and AccessKey/SecretKey
 
-## 部署
+## Deployment
 
-### 在 MCP Client 中集成
+### Integrate into MCP Client
 
 ```json
 {
@@ -93,36 +97,14 @@ CDN MCP Server 支持查询并分析业务数据信息和域名配置信息，�
 }
 ```
 
-### 环境变量
+### Environment Variables
 
-以下环境变量可用于配置 MCP 服务器:
+The following environment variables can be used to configure the MCP server:
 
-| 环境变量 | 描述 | 默认值 |
-|----------|------|--------|
-| VOLCENGINE_ACCESS_KEY | 火山引擎账号 AccessKey | - |
-| VOLCENGINE_SECRET_KEY | 火山引擎账号 SecretKey | - |
-
-
-
-## 使用示例
-
-### 业务数据分析
-
-| 用户输入 | 查询 CDN 过去一周的带宽数据，分析带宽峰值时间点的特征，并给出参考结论。 | 
-|----------|------|
-| 任务拆解 |  1.分析用户输入<br/><img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/lm-pa/ljhwZthlaukjlkulzlp/mcp-icons/1e0a1a4a-22b2-4fc1-b305-3e85f796aa96.png" alt="图片alt" title="图片title"><br/>2.调用工具<br/><img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/lm-pa/ljhwZthlaukjlkulzlp/mcp-icons/eae12383-6d8c-42c4-af81-7f1716037e95.png" alt="图片alt" title="图片title"><br/><img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/lm-pa/ljhwZthlaukjlkulzlp/mcp-icons/0ceaf9f6-8f0c-42bd-83f0-fb104bf8e18f.png" alt="图片alt" title="图片title"><br/>|
-| 分析结论 | <img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/lm-pa/ljhwZthlaukjlkulzlp/mcp-icons/6fb3f79d-97a5-457e-8138-e7c6d8a345c7.png" alt="图片alt" title="图片title"><br/>|
-
-
-### 域名配置分析
-
-| 用户输入 | 查询 CDN 域名（选取前 100 个域名）的配置信息，查看这些域名的配置特征，挖掘更多信息供参考。如项目组、标签、上下线状态、加速区域、证书配置等维度。 | 
-|----------|------|
-| 任务拆解 |  <img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/lm-pa/ljhwZthlaukjlkulzlp/mcp-icons/1.png" alt="图片alt" title="图片title"><br/><img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/lm-pa/ljhwZthlaukjlkulzlp/mcp-icons/2.png" alt="图片alt" title="图片title"><br/>|
-| 初步分析 | <img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/lm-pa/ljhwZthlaukjlkulzlp/mcp-icons/3.png" alt="图片alt" title="图片title"><br/>|
-| 持续提问 | <img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/lm-pa/ljhwZthlaukjlkulzlp/mcp-icons/4.png" alt="图片alt" title="图片title"><br/>|
-| 深度分析 | <img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/lm-pa/ljhwZthlaukjlkulzlp/mcp-icons/5.png" alt="图片alt" title="图片title"><br/>|
-
+| Environment Variable | Description | Default Value |
+|----------------------|-------------|---------------|
+| VOLCENGINE_ACCESS_KEY | Volcano Engine account AccessKey | - |
+| VOLCENGINE_SECRET_KEY | Volcano Engine account SecretKey | - |
 
 ## License
 MIT
