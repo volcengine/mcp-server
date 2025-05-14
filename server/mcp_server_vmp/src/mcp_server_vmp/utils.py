@@ -1,3 +1,6 @@
+import asyncio
+from multiprocessing.pool import AsyncResult
+
 import six
 import volcenginesdkcore
 
@@ -5,6 +8,11 @@ import volcenginesdkcore
 class UniversalApi(volcenginesdkcore.UniversalApi):
     def __init__(self, api_client=None):
         super().__init__(api_client)
+
+    async def do_call_async(self, info, body, **kwargs):  # noqa: E501
+        kwargs['async_req'] = True
+        result = self.do_call(info, body, **kwargs)
+        return await wait_for_async_result(result)
 
     def do_call_with_http_info(self, info, body, **kwargs):  # noqa: E501
         all_params = ['body', 'async_req', '_return_http_data_only', '_preload_content',
@@ -77,4 +85,8 @@ class UniversalApi(volcenginesdkcore.UniversalApi):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    
+async def wait_for_async_result(async_result: AsyncResult):
+    while not async_result.ready():
+        # check if the async result is ready every 100ms
+        await asyncio.sleep(0.1)
+    return async_result.get()

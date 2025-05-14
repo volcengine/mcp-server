@@ -84,7 +84,7 @@ def create_mcp_server():
     @mcp.tool()
     def certificate_add_organization(body: dict) -> str:
         """
-        调用本接口创建一个信息模板。
+        调用本接口创建一个证书的信息模板。
         Call steps:
         1. Pass "certificate_add_organization" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  certificate_add_organization
@@ -96,7 +96,7 @@ def create_mcp_server():
     @mcp.tool()
     def certificate_get_organization(body: dict) -> str:
         """
-        调用本接口创建一个信息模板。
+        调用本接口获取一个证书的信息模板详情。
         Call steps:
         1. Pass "certificate_get_organization" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  certificate_get_organization
@@ -108,7 +108,7 @@ def create_mcp_server():
     @mcp.tool()
     def certificate_get_organization_list(body: dict) -> str:
         """
-        调用本接口获取已有信息模板列表。
+        调用本接口获取已有的证书信息模板列表。
         Call steps:
         1. Pass "certificate_get_organization_list" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  certificate_get_organization_list

@@ -78,12 +78,6 @@ use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run *mcp-server
 5. 去对应的Client的平台进行使用
    点击快捷跳转按钮，前往方舟平台的体验中心进行对应MCP Server的体验
 
-## 资源列表 - optional
-
-## 商业化 - optional
-
-## 产品截图/视频 - optional
-
 ## 部署
 
 ### uvx
@@ -91,16 +85,15 @@ use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run *mcp-server
 ```json
 {
   "mcpServers": {
-    "vefaas": {
+    "mcp-server-vefaas-sandbox": {
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/volcengine/mcp-server#subdirectory=/server/mcp_server_vefaas_sandbox",
-        "mcp_server_vefaas_sandbox"
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vefaas_sandbox",
+        "mcp-server-vefaas-sandbox"
       ],
       "env": {
-        "VOLC_ACCESSKEY": "xxx",
-        "VOLC_SECRETKEY": "xxx"
+        "SANDBOX_API": "your-sandbox-apig-address"
       }
     }
   }

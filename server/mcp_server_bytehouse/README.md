@@ -51,10 +51,10 @@ mcp-bytehouse --transport sse
       "command": "uvx",
       "args": [
             "--from",
-            "git+https://github.com/volcengine/mcp-server@master#subdirectory=server/mcp_server_bytehouse",
+            "git+https://github.com/volcengine/mcp-server@main#subdirectory=server/mcp_server_bytehouse",
             "--python",
             "3.13",
-            "mcp-bytehouse",
+            "mcp_bytehouse",
       ],
       "env": {
         "BYTEHOUSE_HOST": "<ByteHouse-host>",
