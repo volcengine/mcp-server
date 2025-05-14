@@ -131,7 +131,7 @@ urllib3==2.4.0
     #   volcengine-python-sdk
 uvicorn==0.34.2
     # via mcp
-volcengine-python-sdk==1.1.5
+volcengine-python-sdk==3.0.1
     # via mcp-server-tag (pyproject.toml)
 websockets==15.0.1
     # via fastmcp

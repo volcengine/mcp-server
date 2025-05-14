@@ -7,7 +7,7 @@ requires-python = ">=3.10"
 dependencies = [
     "mcp>=1.7.1",
     "requests>=2.32.3",
-    "volcengine-python-sdk>=2.0.1",
+    "volcengine-python-sdk>=3.0.1",
 ]
 
 [project.scripts]
