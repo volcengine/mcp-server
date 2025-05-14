@@ -23,7 +23,7 @@ class Config:
     sse_port: int
     transport: TransportType  # 支持 "sse" 或 "stdio"
     auth: AuthType  # 支持 "oauth" 或 "none"
-    credential: CredentialType  # 支持  "sse" 或 "stdio"
+    credential: CredentialType  # 支持 "env" 或 "token"
     oauth: Optional[OAuthConfig] = None
     ak: Optional[str] = None
     sk: Optional[str] = None
