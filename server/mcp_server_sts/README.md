@@ -18,7 +18,7 @@
 https://console.volcengine.com/iam/identitymanage/role
 
 ## 鉴权方式
-支持Oauth鉴权，需要提供三方OAuth服务器，如GitHub Oauth应用
+仅支持本地 STDIO 模式运行
 
 ## 系统依赖
 - 安装 Python 3.11 或者更高版本
@@ -48,11 +48,11 @@ git clone git@github.com:volcengine/mcp-server.git
 对应配置中 `credential` 参数：
 - `env`: 从环境变量获取 AK、SK 进行鉴权，取值内容参考：环境变量设置
 
-### 5. 运行模式
+### 3. 运行模式
 #### STDIO 模式
 - 设置 `credential = env` 需准备AK、SK并设置到环境变量
 
-### 6. 环境变量设置
+### 4. 环境变量设置
 - ak 环境变量名:  VOLCENGINE_ACCESS_KEY
 - sk 环境变量名:  VOLCENGINE_SECRET_KEY
 - session_token 环境变量名:  VOLCENGINE_ACCESS_SESSION_TOKEN
@@ -61,7 +61,7 @@ git clone git@github.com:volcengine/mcp-server.git
 - auth 环境变量名: MCP_SERVER_AUTH (若设置，则优先级高于配置)
 - sse_port 环境变量名: MCP_SERVER_PORT (若设置，则优先级高于配置)
 
-### 7. 运行
+### 5. 运行
 
 #### 变量说明
 - /ABSOLUTE/PATH/TO/PARENT/FOLDER
