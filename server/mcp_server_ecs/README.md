@@ -2,7 +2,7 @@
 
 
 ## Version
-v0.1.0
+v0.2.0
 
 ## Overview
 
@@ -16,8 +16,10 @@ ECS
 - Query instance information
 - Query event information 
 - Query region information
+- Simple instance operations
 
 ## Available Tools
+Since some interfaces have a lot of input parameters and return content, some uncommon content will cause too much context burden on llm. In order to avoid unnecessary token waste, ECS MCP Server only provides queries for common content.
 
 - `describe_instances`: [query instance list](https://www.volcengine.com/docs/6396/70466)
 - `describe_images`: [query image list](https://www.volcengine.com/docs/6396/70808)
@@ -26,6 +28,8 @@ ECS
 - `describe_system_events`: [query system events](https://www.volcengine.com/docs/6396/129399)
 - `describe_regions`: [query region list](https://www.volcengine.com/docs/6396/1053194)
 - `describe_zones`: [query availability zone list](https://www.volcengine.com/docs/6396/120518)
+- `start_instances`: [start instances](https://www.volcengine.com/docs/6396/101068)
+- `renew_instance`: [renew instance](https://www.volcengine.com/docs/6396/76276)
 
 ## Usage Guide
 
@@ -63,7 +67,7 @@ uv run mcp-server-ecs -t sse
 
 Use a client to interact with the server:
 ```
-Claude Desktop | Cline | Cursor | Trae | ...
+Trae | Cursor ｜ Claude Desktop | Cline | ...
 ```
 
 ## Configuration
@@ -71,8 +75,8 @@ Claude Desktop | Cline | Cursor | Trae | ...
 The main configuration file for the MCP server is located at:
 
 ```
-src/mcp_server_ecs/conf/settings.toml
-src/mcp_server_ecs/conf/.secrets.toml
+settings.toml
+.secrets.toml
 ```
 
 This configuration file contains key settings for the server, such as logging and Volcengine account AK|SK configuration.
@@ -83,21 +87,20 @@ The following environment variables are available for configuring the MCP server
 
 | Environment Variable | Description | Default Value |
 |----------|------|--------|
-| `FASTMCP_PORT` | MCP server listening port | `8000` |
-| `VOLC_ACCESSKEY` | Volcengine account ACCESSKEY | - |
-| `VOLC_SECRETKEY` | Volcengine account SECRETKEY | - |
-| `VOLC_REGION` | Volcengine resource region | - 
-| `VOLC_ENDPOINT` | Volcengine endpoint | - |
+| `VOLCENGINE_ACCESS_KEY` | Volcengine account ACCESSKEY | - |
+| `VOLCENGINE_SECRET_KEY` | Volcengine account SECRETKEY | - |
+| `VOLCENGINE_REGION` | Volcengine resource region | - 
+| `VOLCENGINE_ENDPOINT` | Volcengine endpoint | - |
+| `MCP_SERVER_PORT` | MCP server listening port | `8000` |
 
 For example, set these environment variables before starting the server:
 
 ```bash
-export FASTMCP_PORT=8000
-export VOLC_ACCESSKEY={ak}
-export VOLC_SECRETKEY={sk}
-export VOLC_REGION={region}
-export VOLC_ENDPOINT={endpoint}
-
+export VOLCENGINE_ACCESS_KEY={ak}
+export VOLCENGINE_SECRET_KEY={sk}
+export VOLCENGINE_REGION={region}
+export VOLCENGINE_ENDPOINT={endpoint}
+export MCP_SERVER_PORT=8000
 ```
 
 ### Run with uvx
@@ -112,16 +115,15 @@ export VOLC_ENDPOINT={endpoint}
             "mcp-server-ecs"
           ],
             "env": {
-                "VOLC_ACCESSKEY": "",
-                "VOLC_SECRETKEY": "",
-                "VOLC_ENDPOINT": "",
-                "VOLC_REGION": "",
-                "FASTMCP_PORT": ""
+                "VOLCENGINE_ACCESS_KEY": "",
+                "VOLCENGINE_SECRET_KEY": "",
+                "VOLCENGINE_REGION": "",
+                "VOLCENGINE_ENDPOINT": "",
+                "MCP_SERVER_PORT": ""
             }
         }
     }
 }
-
 ```
 
 ## Examples

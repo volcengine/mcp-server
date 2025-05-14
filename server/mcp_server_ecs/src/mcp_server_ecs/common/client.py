@@ -1,28 +1,47 @@
 import os
+
 import volcenginesdkcore
 from volcenginesdkecs.api.ecs_api import ECSApi
-from mcp_server_ecs.conf.config import auth_config
 
-_ecs_client = None
+from mcp_server_ecs.common.auth import get_auth_info
+from mcp_server_ecs.common.config import auth_config, deploy_config
+from mcp_server_ecs.common.logs import LOG
+
+_ecs_local_client = None
 
 
-def get_volc_ecs_client() -> ECSApi:
-    global _ecs_client
-    if _ecs_client is None:
-        ecs_config = volcenginesdkcore.Configuration()
+def get_volc_ecs_client(region: str = None) -> ECSApi:
+    global _ecs_local_client
+    try:
+        if deploy_config.get("is_local"):
+            if _ecs_local_client is None:
+                ecs_config = volcenginesdkcore.Configuration()
+                ecs_config.ak = os.environ.get(
+                    "VOLCENGINE_ACCESS_KEY") or auth_config.get("ak")
+                ecs_config.sk = os.environ.get(
+                    "VOLCENGINE_SECRET_KEY") or auth_config.get("sk")
+                ecs_config.region = os.environ.get(
+                    "VOLCENGINE_REGION") or auth_config.get("region")
+                ecs_config.host = os.environ.get(
+                    "VOLCENGINE_ENDPOINT") or auth_config.get("endpoint")
+                ecs_config.client_side_validation = True
+                volcenginesdkcore.Configuration.set_default(ecs_config)
+                _ecs_local_client = ECSApi()
 
-        # 优先从环境变量获取配置，如果没有则使用 auth_config
-        ecs_config.ak = os.environ.get(
-            "VOLC_ACCESSKEY") or auth_config.get("ak")
-        ecs_config.sk = os.environ.get(
-            "VOLC_SECRETKEY") or auth_config.get("sk")
-        ecs_config.region = os.environ.get(
-            "VOLC_REGION") or auth_config.get("region")
-        ecs_config.host = os.environ.get(
-            "VOLC_ENDPOINT") or auth_config.get("endpoint")
+            return _ecs_local_client
 
-        ecs_config.client_side_validation = True
-        volcenginesdkcore.Configuration.set_default(ecs_config)
-        _ecs_client = ECSApi()
+        else:
+            ak, sk, session_token = get_auth_info()
+            ecs_config = volcenginesdkcore.Configuration()
+            ecs_config.ak = ak
+            ecs_config.sk = sk
+            ecs_config.session_token = session_token
+            ecs_config.client_side_validation = True
+            ecs_config.region = region
+            volcenginesdkcore.Configuration.set_default(ecs_config)
 
-    return _ecs_client
+            return ECSApi()
+
+    except Exception as e:
+        LOG.error(f"Failed to get volc ecs client: {e}")
+        raise e
