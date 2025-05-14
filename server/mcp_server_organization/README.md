@@ -25,8 +25,6 @@
 
 - DescribeQuitApplication: 查询成员账号退出申请信息
 
-- EnableServiceControlPolicy: 启用管控策略功能
-
 - GetAccountSecureContactInfo: 查询成员账号安全信息
 
 - GetServiceControlPolicy: 查询管控策略详情

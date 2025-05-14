@@ -9,9 +9,6 @@
 ## Tools
 本 MCP Server 产品提供以下 Tools:
 
-
-- EnableResourceCenter: 开通资源中心。
-
 - GetResourceCenterStatus: 查询资源中心服务状态。
 
 - GetResourceCounts: 查询当前账号下的资源数量

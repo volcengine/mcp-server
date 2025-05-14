@@ -9,9 +9,6 @@
 ## Tools
 本 MCP Server 产品提供以下 Tools:
 
-
-- AttachPolicyToUserProvision: 为用户访问授权任务附加系统预设策略
-
 - CreateAccountAssignment: 创建角色访问授权
 
 - CreateGroup: 创建用户组
@@ -19,8 +16,6 @@
 - CreateUser: 创建用户
 
 - CreateUserProvisioning: 创建用户访问授权任务
-
-- EnableService: 开启云身份中心
 
 - GetExternalSAMLIdentityProvider: 获取云身份中心中已经配置的外部SAML身份提供商信息。
 

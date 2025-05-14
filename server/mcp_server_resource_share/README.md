@@ -18,8 +18,6 @@
 
 - DescribeResourceShares: 查询共享单元
 
-- EnableSharingWithOrganization: 开启组织可信服务
-
 - GetPermission: 获取权限详情
 
 - ListPermissions: 查询全部权限

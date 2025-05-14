@@ -163,55 +163,10 @@ async def serve() -> None:
         except Exception as e:
             raise ValueError(f"Error processing mcp-server-sts query: {str(e)}")
 
-    if server_config.transport == TRANSPORT_SSE:
-        # Create an SSE transport at an endpoint
-        sse = SseServerTransport("/messages/")
-
-        async def handle_sse(request):
-            async with sse.connect_sse(
-                    request.scope, request.receive, request._send
-            ) as streams:
-                await server.run(
-                    streams[0], streams[1], server.create_initialization_options()
-                )
-
-        middleware = []
-        if (server_config.auth == AUTH_TYPE_OAUTH or
-                server_config.credential == CREDENTIAL_TYPE_TOKEN):
-            middleware = [
-                Middleware(SSEMiddleware)
-            ]
-        starlette_app = Starlette(
-            routes=[
-                Route("/sse", endpoint=handle_sse),
-                Mount("/messages/", app=sse.handle_post_message),
-                # 添加OAuth相关路由
-                Route("/.well-known/oauth-authorization-server", endpoint=well_known),
-                Route("/auth/oauth/register", endpoint=oauth_register, methods=["POST"]),
-                Route("/auth/oauth/authorize", endpoint=oauth_authorize, methods=["GET"]),
-                Route("/auth/oauth/callback", endpoint=oauth_callback, methods=["GET"]),
-                Route("/auth/oauth/token", endpoint=oauth_token, methods=["POST"]),
-            ],
-            middleware=middleware
-        )
-
-        # 添加CORS中间件
-        starlette_app.add_middleware(
-            CORSMiddleware,
-            allow_origins=["*"],
-            allow_credentials=True,
-            allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            allow_headers=["*"],
-        )
-
-        config = uvicorn.Config(starlette_app, host="0.0.0.0", port=server_config.sse_port)
-        sse_server = uvicorn.Server(config)
-        await sse_server.serve()
-    else:
-        # Create an STDIO transport
-        options = server.create_initialization_options()
-        async with stdio_server() as (read_stream, write_stream):
-            await server.run(read_stream, write_stream, options)
+    # Create an STDIO transport
+    options = server.create_initialization_options()
+    async with stdio_server() as (read_stream, write_stream):
+        await server.run(read_stream, write_stream, options)
 
 
 # OAuth处理函数
