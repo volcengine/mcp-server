@@ -76,8 +76,8 @@ CDN MCP Server 支持查询并分析业务数据信息和域名配置信息，�
 
 ```json
 {
-  "mcp-server": {
-    "mcp-server-domain-service": {
+  "mcpServers": {
+    "mcp-server-cdn": {
       "command": "uvx",
       "args": [
         "--from",
