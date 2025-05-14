@@ -75,7 +75,7 @@ v1
 
 ```json
 {
-  "mcp-server": {
+  "mcpServers": {
     "mcp-server-certificate-center": {
       "command": "uvx",
       "args": [
