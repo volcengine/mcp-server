@@ -22,7 +22,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Create MCP server
-mcp = FastMCP("RDS MySQL MCP Server", port=int(os.getenv("PORT", "8000")))
+mcp = FastMCP("RDS MySQL MCP Server", port=int(os.getenv("MCP_SERVER_PORT", "8000")))
 
 
 @mcp.tool(
