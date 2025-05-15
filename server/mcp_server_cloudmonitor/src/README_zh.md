@@ -123,7 +123,7 @@ SaaS
 #### 最容易被唤起的 Prompt示例
 
 ```
-查询云产品下的某某子空间的指标数据
+查询最近5分钟，cn-beijing区域下VCM_ECS产品的Instance子命名空间下，实例为i-cnlfk3hz2nf95hjlz的CpuTotal指标数据。
 ```
 
 ## 可适配平台  

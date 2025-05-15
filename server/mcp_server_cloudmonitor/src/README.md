@@ -129,7 +129,7 @@ output：
 #### The most easily evoked Prompt example
 
 ```
-Query the metric data of a certain subspace under the cloud product
+Query the CpuTotal metric data of the Instance i-cnlfk3hz2nf95hjlz under the Instance subnamespace of the VCM_ECS product in the cn-beijing area in the recent 5 minutes.
 ```
 
 ## Adaptable platform  
@@ -177,8 +177,8 @@ Please obtain the environment variables in advance VOLC_ACCESSKEY 和 VOLC_SECRE
         "mcp-server-cloudmonitor"
       ],
       "env": {
-        "VOLC_ACCESSKEY": "xxx",
-        "VOLC_SECRETKEY": "xxx"
+        "VOLCENGINE_ACCESS_KEY": "xxx",
+        "VOLCENGINE_SECRET_KEY": "xxx"
       }
     }
   }

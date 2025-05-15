@@ -8,7 +8,7 @@ from mcp.server.session import ServerSession
 from starlette.requests import Request
 
 def init_client(region: str = None, ctx: Context = None):
-    if "VOLC_ACCESSKEY" not in os.environ or "VOLC_SECRETKEY" not in os.environ:
+    if "VOLCENGINE_ACCESS_KEY" not in os.environ or "VOLCENGINE_SECRET_KEY" not in os.environ:
         _ctx: Context[ServerSession, object] = ctx
         raw_request: Request = _ctx.request_context.request
         auth = None
