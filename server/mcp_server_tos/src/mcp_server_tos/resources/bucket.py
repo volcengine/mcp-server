@@ -30,7 +30,10 @@ class BucketResource(TosResource):
             return configured_bucket_list
         else:
             resp = await self.get(bucket="")
-            return resp.json()["Buckets"]
+            if resp.status_code == 200:
+                return resp.json()["Buckets"]
+            else:
+                return resp.json()
 
     async def list_objects(self, bucket: str, prefix: Optional[str] = None, start_after: Optional[str] = None,
                            continuation_token: Optional[str] = None) -> List[dict]:
@@ -53,4 +56,7 @@ class BucketResource(TosResource):
             query["continuation-token"] = continuation_token
 
         resp = await self.get(bucket=bucket, params=query)
-        return resp.json()["Contents"]
+        if resp.status_code == 200:
+            return resp.json()["Contents"]
+        else:
+            return resp.json()
