@@ -164,7 +164,7 @@ Click the quick jump button to go to the experience center of the Ark platform f
 
 ### UVX
 
-Please obtain the environment variables in advance VOLC_ACCESSKEY 和 VOLC_SECRETKEY。
+Please obtain the environment variables in advance VOLCENGINE_ACCESS_KEY 和 VOLCENGINE_SECRET_KEY。
 
 ```json
 {
