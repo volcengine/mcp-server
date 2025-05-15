@@ -39,8 +39,8 @@ def init_client(region: str = None, ctx: Context = None):
         except Exception as e:
             raise ValueError("Decode authorization info error", e)
     else:
-        ak = os.environ["VOLC_ACCESSKEY"]
-        sk = os.environ["VOLC_SECRETKEY"]
+        ak = os.environ["VOLCENGINE_ACCESS_KEY"]
+        sk = os.environ["VOLCENGINE_SECRET_KEY"]
         session_token = ""
 
     configuration = volcenginesdkcore.Configuration()
