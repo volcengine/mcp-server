@@ -55,17 +55,13 @@ uv run mcp-server-computer-use
 uv run mcp-server-computer-use -t sse
 ```
 
-## Configuration
-
-MCP server's main configuration file is located at:
-
-```
-settings.toml
-```
-
-This configuration file contains key settings for the server, such as logging and tool server configurations.
+#### Connect to the sandbox
+Sandbox means the actual computer you are using. The request to mcp server will be transfered to the tool server on sandbox, which actually operating the os. So, you need to create a sandbox before use this mcp server, and configure the tool server client endpoint in the mcp server as followed.
 
 TODO 补充下apikey + endpoint ｜ 模板配置阐述 | endpoint示例修改
+
+
+## Configuration
 
 ### Environment Variables
 
@@ -73,15 +69,15 @@ The following environment variables are available for configuring the MCP server
 
 | Environment Variable | Description | Default Value |
 |----------|------|--------|
-| `FASTMCP_PORT` | MCP server listening port | `8000` |
-| `TOOL_SERVER_ENDPOINT` | Tool server endpoint | `http://127.0.0.1:8102` |
+| `MCP_SERVER_PORT` | MCP server listening port | `8000` |
+| `TOOL_SERVER_ENDPOINT` | Tool server endpoint | - |
 
 For example, set these environment variables before starting the server:
 
 ```bash
 # Set fastmcp port and [tool server]() endpoint here
-export FASTMCP_PORT=8000
-export TOOL_SERVER_ENDPOINT="http://127.0.0.1:8102"
+export MCP_SERVER_PORT=8000
+export TOOL_SERVER_ENDPOINT={endpoint}
 cd mcp_server_computer_use
 uv run mcp-server-computer-use
 ```
@@ -98,8 +94,8 @@ uv run mcp-server-computer-use
             "mcp-server-computer-use"
           ],
             "env": {
-                "FASTMCP_PORT": "8000",
-                "TOOL_SERVER_ENDPOINT": "http://127.0.0.1:8102?token=..."
+                "MCP_SERVER_PORT": 8000,
+                "TOOL_SERVER_ENDPOINT": "{endpoint}"
             }
         }
     }

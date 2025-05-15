@@ -14,8 +14,8 @@ LOG.propagate = False
 
 def setup_logger(logger: logging.Logger, config: Any) -> None:
     try:
-        logger.setLevel(getattr(logging, config.level.upper(), logging.INFO))
-        log_dir = os.path.dirname(config.file)
+        logger.setLevel(getattr(logging, config["level"].upper(), logging.INFO))
+        log_dir = os.path.dirname(config["file"])
         os.makedirs(log_dir, exist_ok=True)
 
         formatter = logging.Formatter(
@@ -24,10 +24,10 @@ def setup_logger(logger: logging.Logger, config: Any) -> None:
         )
 
         rotate_handler = ConcurrentRotatingFileHandler(
-            config.file,
+            config["file"],
             _WRITE_MODE,
-            config.max_size,
-            config.backup_count,
+            config["max_size"],
+            config["backup_count"],
         )
         rotate_handler.setFormatter(formatter)
         console_handler = logging.StreamHandler()

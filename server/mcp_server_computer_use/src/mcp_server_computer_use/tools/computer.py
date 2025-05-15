@@ -22,7 +22,7 @@ async def move_mouse(
         description="Y coordinate of the mouse pointer to the target position"
     ),
     endpoint: str = Field(
-        default=None,
+        default="",
     ),
 ):
     LOG.info(f"Call move mouse, x: {x}, y: {y}")
@@ -62,10 +62,10 @@ async def click_mouse(
     ),
     button: str = Field(
         default="",
-        description="Mouse button, optional values: Left: left button, Right: right button, Middle: middle button, DoubleLeft: double-click left button"
+        description="Mouse button, optional values: Left: left button, Right: right button, Middle: middle button, DoubleLeft: double-click left button",
     ),
     endpoint: str = Field(
-        default=None,
+        default="",
     )
 ):
     LOG.info(f"Call click mouse, x: {x}, y: {y}, button: {button}")
@@ -114,7 +114,7 @@ async def drag_mouse(
         description="Y coordinate of the mouse pointer to the target position"
     ),
     endpoint: str = Field(
-        default=None,
+        default="",
     ),
 ):
     LOG.info(
@@ -144,7 +144,7 @@ async def drag_mouse(
 
 @MCP.tool(
     name="scroll",
-    description="Scroll the mouse pointer to the target position"
+    description="Scroll the mouse wheel in the specified direction and by the specified amount"
 )
 async def scroll(
     x: int = Field(
@@ -156,7 +156,7 @@ async def scroll(
         description="Y coordinate of the mouse pointer to the target position"
     ),
     direction: str = Field(
-        default=None,
+        default="",
         description="Scroll direction, optional values: Up, Down, Left, Right"
     ),
     amount: int = Field(
@@ -164,7 +164,7 @@ async def scroll(
         description="Scroll times", ge=0, le=10
     ),
     endpoint: str = Field(
-        default=None,
+        default="",
     ),
 ):
     LOG.info(
@@ -198,11 +198,11 @@ async def scroll(
 )
 async def press_key(
     key: str = Field(
-        default=None,
+        default="",
         description="Specified key, if it's multiple text, please use TypeText"
     ),
     endpoint: str = Field(
-        default=None,
+        default="",
     ),
 ):
     LOG.info(f"Call press key, key: {key}")
@@ -232,11 +232,11 @@ async def press_key(
 )
 async def type_text(
     text: str = Field(
-        default=None,
+        default="",
         description="Clipboard content, string length limit 100"
     ),
     endpoint: str = Field(
-        default=None,
+        default="",
     ),
 ):
     LOG.info(f"Call type text, text: {text}")
@@ -266,7 +266,7 @@ async def type_text(
 )
 async def get_cursor_position(
     endpoint: str = Field(
-        default=None,
+        default="",
     ),
 ):
     LOG.info("Call get cursor position")
@@ -302,7 +302,7 @@ async def get_cursor_position(
 )
 async def screenshot(
     endpoint: str = Field(
-        default=None,
+        default="",
     ),
 ):
     LOG.info("Call screenshot")

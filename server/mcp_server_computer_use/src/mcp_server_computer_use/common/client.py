@@ -12,10 +12,10 @@ def tool_server_client(endpoint: str = None) -> ComputerUseClient:
     global _local_client
 
     try:
-        if tool_server_config.get("local"):
+        if tool_server_config["local"]:
             if _local_client is None:
                 endpoint = os.environ.get(
-                    "TOOL_SERVER_ENDPOINT") or tool_server_config.get("endpoint")
+                    "TOOL_SERVER_ENDPOINT") or tool_server_config["endpoint"]
                 _local_client = new_computer_use_client(endpoint)
 
             return _local_client
