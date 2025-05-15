@@ -1,27 +1,18 @@
-import os
-from pathlib import Path
+deploy_config = {
+    "is_local": True,
+    "port": 8000,
+}
 
-from dynaconf import Dynaconf
+log_config = {
+    "level": "INFO",
+    "file": "/var/log/mcp/ecs.log",
+    "max_size": 1024000,
+    "backup_count": 10,
+}
 
-
-def find_project_root():
-    current = Path(__file__).resolve()
-    for parent in [current, *current.parents]:
-        if (parent / "pyproject.toml").exists():
-            return str(parent)
-
-    return os.getcwd()
-
-
-root_dir = find_project_root()
-
-settings = Dynaconf(
-    settings_files=[
-        os.path.join(root_dir, "settings.toml"),
-        os.path.join(root_dir, ".secrets.toml"),
-    ],
-)
-
-log_config = settings.get("logging", {})
-auth_config = settings.get("auth", {})
-deploy_config = settings.get("deploy", {})
+auth_config = {
+    "ak": "",
+    "sk": "",
+    "region": "",
+    "endpoint": "",
+}

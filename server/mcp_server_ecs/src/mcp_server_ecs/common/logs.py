@@ -11,8 +11,8 @@ LOG = logging.getLogger(__name__)
 LOG.propagate = False
 
 try:
-    LOG.setLevel(getattr(logging, log_config.level.upper(), logging.INFO))
-    log_dir = os.path.dirname(log_config.file)
+    LOG.setLevel(getattr(logging, log_config["level"].upper(), logging.INFO))
+    log_dir = os.path.dirname(log_config["file"])
     os.makedirs(log_dir, exist_ok=True)
 
     formatter = logging.Formatter(
@@ -20,10 +20,10 @@ try:
         datefmt="%Y-%m-%d %H:%M:%S",
     )
     rotate_handler = ConcurrentRotatingFileHandler(
-        log_config.file,
+        log_config["file"],
         _WRITE_MODE,
-        log_config.max_size,
-        log_config.backup_count,
+        log_config["max_size"],
+        log_config["backup_count"],
     )
     rotate_handler.setLevel(logging.INFO)
     rotate_handler.setFormatter(formatter)

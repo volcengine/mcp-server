@@ -72,15 +72,6 @@ Trae | Cursor ｜ Claude Desktop | Cline | ...
 
 ## Configuration
 
-The main configuration file for the MCP server is located at:
-
-```
-settings.toml
-.secrets.toml
-```
-
-This configuration file contains key settings for the server, such as logging and Volcengine account AK|SK configuration.
-
 ### Environment Variables
 
 The following environment variables are available for configuring the MCP server:

@@ -71,15 +71,6 @@ Trae | Cursor ｜ Claude Desktop | Cline | ...
 
 ## 配置
 
-MCP服务器的主要配置文件位于:
-
-```
-settings.toml
-.secrets.toml
-```
-
-此配置文件包含服务器的日志记录和火山引擎账户AK|SK配置
-
 ### 环境变量
 
 以下环境变量可用于配置MCP服务器:
