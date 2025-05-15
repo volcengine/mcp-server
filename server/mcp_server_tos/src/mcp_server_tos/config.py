@@ -15,10 +15,10 @@ class TosConfig:
     """Configuration for Storage TOS MCP Server.
 
     Required environment variables:
-        VOLC_ACCESSKEY: The Access key ID for authentication
-        VOLC_SECRETKEY: Access key secret for authentication
+        VOLCENGINE_ACCESS_KEY: The Access key ID for authentication
+        VOLCENGINE_SECRET_KEY: Access key secret for authentication
         TOS_ENDPOINT:   The TOS service endpoint
-        REGION:         The region of the TOS service
+        VOLCENGINE_REGION:         The region of the TOS service
         DEPLOY_MODE:    The deployment mode
         TOS_BUCKETS:    The bucket list to use for the TOS service
         MAX_OBJECT_SIZE: The maximum size of an object in bytes
@@ -41,7 +41,7 @@ def validate_local_required_vars():
     ValueError: If any required environment variable is missing.
     """
     missing_vars = []
-    for var in ["VOLC_ACCESSKEY", "VOLC_SECRETKEY", "TOS_ENDPOINT"]:
+    for var in ["VOLCENGINE_ACCESS_KEY", "VOLCENGINE_SECRET_KEY", "TOS_ENDPOINT"]:
         if var not in os.environ:
             missing_vars.append(var)
 
@@ -73,9 +73,9 @@ def load_config() -> TosConfig:
         validate_remote_required_vars()
 
     config = TosConfig(
-        access_key=os.getenv("VOLC_ACCESSKEY", ""),
-        secret_key=os.getenv("VOLC_SECRETKEY", ""),
-        region=os.getenv("REGION", ""),
+        access_key=os.getenv("VOLCENGINE_ACCESS_KEY", ""),
+        secret_key=os.getenv("VOLCENGINE_SECRET_KEY", ""),
+        region=os.getenv("VOLCENGINE_REGION", ""),
         endpoint=os.environ["TOS_ENDPOINT"],
         security_token=os.getenv("SECURITY_TOKEN", ""),
         deploy_mode=deploy_mode,
