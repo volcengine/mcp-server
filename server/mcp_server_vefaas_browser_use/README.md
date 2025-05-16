@@ -4,7 +4,7 @@ veFaaS browser-use MCP server 可以让用户仅输入检索任务，就可以�
 
 | | |
 |------|------|
-| 版本 | v0.0.1 |
+| 版本 | v0.0.2 |
 | 描述 | veFaaS browser-use MCP server 自动化你的浏览器操作任务 |
 | 分类 | 容器与中间件 |
 | 标签 | veFaaS，函数服务，browser-use，浏览器 |
@@ -47,20 +47,9 @@ OAuth 2.0
 
 ## 在不同平台的配置
 
-### 方舟
+### 获取 veFaaS browser-use 服务的访问入口
 
-#### 体验中心
-
-1. 查看 MCP Server 详情
-在大模型生态广场，选择合适的 veFaaS MCP Server，并查看详情
-2. 选择 MCP Server 即将运行的平台
-检查当前 MCP Server 已适配的平台，并选择合适的平台
-3. 查看并对比可用的 Tools
-仔细查看可用的 Tools 的功能描述与所需的输入参数，并尝试运行对应的功能。
-4. 获取专属的URL或代码示例
-检查账号登录状态与服务开通情况，生成唯一URL
-5. 去对应的Client的平台进行使用
-点击快捷跳转按钮，前往方舟平台的体验中心进行对应MCP Server的体验
+参考火山引擎 veFaaS [一键部署 Browser Use Agent 应用](https://www.volcengine.com/docs/6662/1537697)，获取 veFaaS Browser Use Agent 服务的访问入口，如 `https://xxxxxxxxxxx.apigateway-cn-beijing.volceapi.com/tasks`，请去掉 URL 里的路径，获取 `https://xxxxxxxxxxx.apigateway-cn-beijing.volceapi.com`，用于下方的 `BROWSER_USE_ENDPOINT` 配置。
 
 ### UVX
 
@@ -84,4 +73,4 @@ OAuth 2.0
 
 ## License
 
-volcengine/mcp-server is licensed under the MIT License.
+volcengine/mcp-server is licensed under the [MIT License](../../LICENSE).
