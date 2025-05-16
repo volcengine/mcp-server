@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "veen": {
+    "mcp-server-veen": {
       "command": "uvx",
       "args": [
         "--from",

@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "traffic-route": {
+    "mcp-server-traffic-route": {
       "command": "uvx",
       "args": [
         "--from",

@@ -1,59 +1,59 @@
 # TrafficRoute MCP Server
 
-## Version Information
+## 版本信息
 
 v0.1
 
-## Product Description
+## 产品描述
 
-###  Short Description
+### 短描述
 
-The DNS routing service that allows users to configure DNS rules to ensure that requests from clients reach the desired service nodes.
+TrafficRoute 用于配置 DNS 规则，以确保终端请求能够正确快捷到达对应的服务节点。
 
-### Long Description
+### 长描述
 
-The DNS routing service that allows users to configure DNS rules to ensure that requests from clients reach the desired service nodes.
+TrafficRoute 用于配置 DNS 规则，以确保终端请求能够正确快捷到达对应的服务节点。
 
-## Category
+## 分类
 
-Enterprise Applications
+企业应用
 
-## Tags
+## 标签
 
 DNS，Domain
 
 ## Tools
 
-This MCP Server product provides the following Tools (capabilities):
+本 MCP Server 产品提供以下 Tools (工具/能力):
 
 ### Tool 1: list-zones
 
-List DNS on TrafficRoute.
+获取在 TrafficRoute 上的解析域名列表。
 
 ### Tool 2: create-zone
 
-Add a domain.
-After adding, you can use `create-record` to add DNS record.
+添加域名。
+添加完毕后，后续可以通过 `create-record` 工具来添加解析。
 
 ### Tool 3: create-record
 
-Add a DNS record.
+给指定域名增加解析记录。
 
 ### Tool 4: list-records
 
-Get all records of the specific DNS.
+获取域名的全部解析记录列表。
 
-## Compatible Platforms
+## 可适配平台
 
 Python
 
-## Authentication Method
+## 鉴权方式
 
 AK&amp;SK
 
-## Installation
+## 安装
 
-### Using uv
+### 使用 uv
 
 When using [`uv`](https://docs.astral.sh/uv/) no specific installation is needed.
 We will use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run.
@@ -66,17 +66,17 @@ uv run mcp-server-traffic-route
 uv run mcp-server-traffic-route -t sse
 ```
 
-### Using a client
+### 使用客户端
 
-Use a client to interact with the server:
+支持通过以下客户端与 MCP Server 交互，具体配置可查阅该客户端文档。
 
 - 方舟
 - Trae
 - Cursor
 
-## Deployment
+## 部署
 
-### Integration in MCP Client
+### UVX
 
 ```json
 {
@@ -97,6 +97,6 @@ Use a client to interact with the server:
 }
 ```
 
-## License
+## 许可
 
 MIT

@@ -1,0 +1,46 @@
+{
+  "name": "@net-fe/mcp-server-traffic-route",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "bin": {
+    "volc-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "rm -rf dist && mkdir dist && cp package.json dist/ && tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "release": "release-it --no-git.requireUpstream"
+  },
+  "keywords": [],
+  "author": "Kingcean Tuan <duanjinchen@bytedance.com>",
+  "description": "The VolcEngine AI components based on model context protocol.",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.10.1",
+    "@release-it/conventional-changelog": "^10.0.0",
+    "langpack": "^1.1.1",
+    "zod": "^3.24.3",
+    "axios": "^1.8.4",
+    "crc": "^4.1.0",
+    "crypto-js": "^4.2.0",
+    "dayjs": "^1.11.5",
+    "debug": "^4.3.1",
+    "dotenv": "^16.5.0",
+    "form-data": "^4.0.2",
+    "lodash.get": "^4.4.2",
+    "p-limit": "^3.0.0",
+    "protobufjs": "7.2.5",
+    "release-it": "^18.1.2",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/inspector": "^0.8.2",
+    "@types/node": "^22.14.1",
+    "typescript": "^5.8.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://bnpm.byted.org/"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+}
