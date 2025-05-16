@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "mcp-server-veen": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_veen",
+        "mcp-server-veen"
+      ],
+      "env": {
+        "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
+        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK"
+      }
+    }
+  }
+}
