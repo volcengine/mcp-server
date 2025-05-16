@@ -1,13 +1,13 @@
-# veFaaS browser-use MCP Server
+# veFaaS Browser-Use MCP Server
 
-veFaaS browser-use MCP server 可以让用户仅输入检索任务，就可以由大模型分析拆解任务，调用浏览器实时搜索任务，最后整合输出任务结果。
+veFaaS Browser-Use MCP server 可以让用户仅输入检索任务，就可以由大模型分析拆解任务，调用浏览器实时搜索任务，最后整合输出任务结果。
 
 | | |
 |------|------|
 | 版本 | v0.0.2 |
-| 描述 | veFaaS browser-use MCP server 自动化你的浏览器操作任务 |
+| 描述 | veFaaS Browser-Use MCP server 自动化你的浏览器操作任务 |
 | 分类 | 容器与中间件 |
-| 标签 | veFaaS，函数服务，browser-use，浏览器 |
+| 标签 | veFaaS，函数服务，Browser-Use，浏览器 |
 
 ## Tools
 
@@ -47,7 +47,7 @@ OAuth 2.0
 
 ## 在不同平台的配置
 
-### 获取 veFaaS browser-use 服务的访问入口
+### 获取 veFaaS Browser-Use 服务的访问入口
 
 参考火山引擎 veFaaS [一键部署 Browser Use Agent 应用](https://www.volcengine.com/docs/6662/1537697)，获取 veFaaS Browser Use Agent 服务的访问入口，如 `https://xxxxxxxxxxx.apigateway-cn-beijing.volceapi.com/tasks`，请去掉 URL 里的路径，获取 `https://xxxxxxxxxxx.apigateway-cn-beijing.volceapi.com`，用于下方的 `BROWSER_USE_ENDPOINT` 配置。
 
