@@ -1,4 +1,4 @@
-# MCP Server 产品名称：VMP MCP Server ![产品Logo](./logo.svg)
+# VMP MCP Server ![产品Logo](./logo.svg)
 
 托管 Prometheus 服务（VMP）是完全继承和对接开源 Prometheus 生态的新一代云原生监控引擎系统。VMP MCP Server 提供 Prometheus 工作区查询、指标查询等功能，助力运维排查、数据分析等场景下基于自然语言驱动的指标查询分析体验。
 
@@ -25,9 +25,6 @@
 本 MCP Server 产品提供以下 Tools (工具/能力):
 
 ### Tool 1: list_workspaces
-
-#### 类型
-saas
 
 #### 详细描述
 查询当前账户下指定地域的所有工作区信息
@@ -57,9 +54,6 @@ saas
 请列出在cn-beijing地域下的所有VMP工作区实例信息
 
 ### Tool 2: query_metrics
-
-#### 类型
-saas
 
 #### 详细描述
 在指定的VMP工作区中，执行指定的PromQL的Instant查询
@@ -114,9 +108,6 @@ saas
 
 
 ### Tool 3: query_range_metrics
-
-#### 类型
-saas
 
 #### 详细描述
 在指定的VMP工作区中，执行指定时间范围的PromQL的查询
@@ -182,9 +173,6 @@ saas
 
 ### Tool 4: query_metric_names
 
-#### 类型
-saas
-
 #### 详细描述
 查询指定VMP工作区下，匹配指定过滤条件的指标名称列表
 
@@ -233,9 +221,6 @@ VMP工作区b73766b5-2e63-4143-bcd1-8a1ba3a94746中，cpu相关的指标有哪�
 
 
 ### Tool 5: query_metric_labels
-
-#### 类型
-saas
 
 #### 详细描述
 查询指定VMP工作区下，指定指标的所有标签名称列表
@@ -298,6 +283,13 @@ API Key ([签名机制](https://www.volcengine.com/docs/6731/942192))
   ```text
   powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
   ```
+
+### 环境变量
+| 环境变量名 | 描述 | 默认值 | 获取方式 |
+| --- | --- | --- | --- |
+| VOLCENGINE_ACCESS_KEY | 火山引擎账号 ACCESS KEY | - | [火山引擎访问控制台](https://console.volcengine.com/iam/keymanage/) |
+| VOLCENGINE_SECRET_KEY | 火山引擎账号 SECRET KEY | - | [火山引擎访问控制台](https://console.volcengine.com/iam/keymanage/) |
+| VOLCENGINE_REGION | 火山引擎 地域 | cn-beijing | - |
 
 ### 部署
 
