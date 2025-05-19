@@ -32,41 +32,33 @@ CDN与边缘
 
 根据边缘服务的 ID 启动边缘服务。
 
-### Tool 2: stop_cloud_server
-
-根据边缘服务的 ID 停止边缘服务。
-
-### Tool 3: reboot_cloud_server
-
-根据边缘服务的 ID 重启边缘服务。
-
-### Tool 4: get_cloud_server
+### Tool 2: get_cloud_server
 
 根据边缘服务的 ID 获取边缘服务的详细信息。
 
-### Tool 5: start_instances
+### Tool 3: start_instances
 
 根据边缘实例 ID 启动实例。
 
-### Tool 6: stop_instances
-
-根据边缘实例 ID 停止实例。
-
-### Tool 7: reboot_instances
-
-根据边缘实例 ID 重启实例。
-
-### Tool 8: get_instance
+### Tool 4: get_instance
 
 根据边缘实例 ID 获取实例详细信息。
 
-### Tool 9: list_instances
+### Tool 5: list_instances
 
 列出指定的边缘服务或所有边缘服务下的边缘实例。
 
-### Tool 10: get_image
+### Tool 6: get_image
 
 获取容器镜像详情。
+
+### Tool 7: list_instance_internal_ips
+
+获取边缘实例的私网 IP 地址的列表。
+
+### Tool 8: list_instance_types
+
+获取边缘服务下可开通的实例规格。
 
 ## 可适配平台
 
@@ -118,8 +110,8 @@ uv run mcp-server-veen -t sse
         "mcp-server-veen"
       ],
       "env": {
-        "VOLCENGINE_ACCESS_KEY": "<Your-Volcengine-AK>",
-        "VOLCENGINE_SECRET_KEY": "<Your-Volcengine-SK>"
+        "VOLC_ACCESSKEY": "<Your-Volcengine-AK>",
+        "VOLC_SECRETKEY": "<Your-Volcengine-SK>"
       }
     }
   }

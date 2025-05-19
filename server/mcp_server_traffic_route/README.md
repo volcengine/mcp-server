@@ -89,8 +89,8 @@ Use a client to interact with the server:
         "mcp-server-traffic-route"
       ],
       "env": {
-        "VOLCENGINE_ACCESS_KEY": "<Your-Volcengine-AK>",
-        "VOLCENGINE_SECRET_KEY": "<Your-Volcengine-SK>"
+        "VOLC_ACCESSKEY": "<Your-Volcengine-AK>",
+        "VOLC_SECRETKEY": "<Your-Volcengine-SK>"
       }
     }
   }

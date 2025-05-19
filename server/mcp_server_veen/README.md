@@ -32,41 +32,33 @@ This MCP Server product provides the following Tools (capabilities):
 
 Start the cloud server by the specific ID.
 
-### Tool 2: stop_cloud_server
-
-Stop the cloud server by the specific ID.
-
-### Tool 3: reboot_cloud_server
-
-Reboot the cloud server by the specific ID.
-
-### Tool 4: get_cloud_server
+### Tool 2: get_cloud_server
 
 Get details of the cloud server by the specific ID.
 
-### Tool 5: start_instances
+### Tool 3: start_instances
 
 Start the edge computing node instance by the specific ID.
 
-### Tool 6: stop_instances
-
-Stop the edge computing node instance by the specific ID.
-
-### Tool 7: reboot_instances
-
-Reboot the edge computing node instance by the specific ID.
-
-### Tool 8: get_instance
+### Tool 4: get_instance
 
 Get details of the edge computing node instance by the specific ID.
 
-### Tool 9: list_instances
+### Tool 5: list_instances
 
 List the edge computing node instances.
 
-### Tool 10: get_image
+### Tool 6: get_image
 
 Get details of the container image by the specific ID.
+
+### Tool 7: list_instance_internal_ips
+
+List all internal IP addresses of the specific edge computing node.
+
+### Tool 8: list_instance_types
+
+List all the available spec types of the specific edge computing node.
 
 ## Compatible Platforms
 
@@ -118,8 +110,8 @@ Use a client to interact with the server:
         "mcp-server-veen"
       ],
       "env": {
-        "VOLCENGINE_ACCESS_KEY": "<Your-Volcengine-AK>",
-        "VOLCENGINE_SECRET_KEY": "<Your-Volcengine-SK>"
+        "VOLC_ACCESSKEY": "<Your-Volcengine-AK>",
+        "VOLC_SECRETKEY": "<Your-Volcengine-SK>"
       }
     }
   }
