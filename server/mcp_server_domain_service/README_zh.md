@@ -76,7 +76,7 @@ v1
 
 ```json
 {
-  "mcp-server": {
+  "mcpServers": {
     "mcp-server-domain-service": {
       "command": "uvx",
       "args": [

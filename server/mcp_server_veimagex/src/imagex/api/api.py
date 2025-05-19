@@ -13,6 +13,7 @@ class ImagexAPI(ImagexService):
         super().__init__(region=region)
         self.set_ak(os.getenv("VOLCENGINE_ACCESS_KEY"))
         self.set_sk(os.getenv("VOLCENGINE_SECRET_KEY"))
+        self.service_info.header["x-tt-mcp"] = 'volc'
         self.api_info = {**self.api_info, **api_info}
         self.service_id = os.getenv("SERVICE_ID")
         self.domain = os.getenv("DOMAIN_NAME")

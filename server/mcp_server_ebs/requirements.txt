@@ -2,7 +2,7 @@ httpx>=0.28.1
 mcp @ git+https://github.com/zihengli-bytedance/python-sdk.git@3ff71057c9e60a20f81bfef6bd117f3b3d518f9c
 python-dotenv>=1.0.1
 volcengine>=1.0.175
-volcengine-python-sdk>=1.1.2
+volcengine-python-sdk>=3.0.1
 aiohttp>=3.11.14
 deprecated>=1.2.18
 starlette

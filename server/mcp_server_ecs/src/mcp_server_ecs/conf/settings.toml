@@ -1,8 +1,0 @@
-[default]
-debug = false
-
-[logging]
-level = "INFO"
-file = "/var/log/mcp/ecs.log"
-max_size = 1024000
-backup_count = 10

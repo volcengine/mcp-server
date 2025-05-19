@@ -1,0 +1,385 @@
+{
+ "components": {
+  "schemas": {
+   "AssumedRoleUser": {
+    "description": "AssumeRole - AssumedRoleUser",
+    "properties": {
+     "AssumedRoleId": {
+      "description": "本次角色会话的唯一ID。",
+      "type": "string"
+     },
+     "Trn": {
+      "description": "本次角色会话的TRN。",
+      "type": "string"
+     }
+    },
+    "required": [
+     "AssumedRoleId",
+     "Trn"
+    ],
+    "type": "object"
+   },
+   "Credentials": {
+    "description": "AssumeRole - Credentials",
+    "properties": {
+     "AccessKeyId": {
+      "description": "临时凭证的Access Key Id。",
+      "example": "AKTPODg0MzV**2ZDcxMDg",
+      "type": "string"
+     },
+     "CurrentTime": {
+      "description": "凭证生效起始时间，时间格式为RFC3339。",
+      "example": "2021-04-12T10:57:09+08:00",
+      "type": "string"
+     },
+     "ExpiredTime": {
+      "description": "凭证失效时间，时间格式为RFC3339。",
+      "example": "2021-04-12T11:57:09+08:00",
+      "type": "string"
+     },
+     "SecretAccessKey": {
+      "description": "临时凭证的Secret Access Key。",
+      "example": "TVRNNVlqRmxPR1**mRoTkdWbE1ESQ==",
+      "type": "string"
+     },
+     "SessionToken": {
+      "description": "临时凭证的Session Token。",
+      "example": "STSeyJBY2NvdW50SW******W50aXR5VHlwZSI6NCwiSWRlbnRpdHlJZCI6MzAyMTcsIkNoYW5uZWwiOiJyZXNvdXJjZSIsIkFjY2Vzc0tleUlkIjoiQUtUUE9EZzBNelZrWlRNMVlqQXlOR05sWkdGbU0yVTNaVEl6T0RnMlpEY3hNRGciLCJTaWduZWRTZWNyZXRBY2Nlc3NLZXkiOiJHSHRuc2Q1b3BOOThUeUNrckVuMVAxTDd1ZzBXczZFMytzTktDMDJQT01lNzFMOUloNzhYaDB5VXE4Ni9JMW8reEZxTmtkK01tVUR0cjRHR0NodXJQdz09IiwiRXhwaXJlZFRpbWUiOjE2MTgxOTk4MjksIlBvbGljeVN0cmluZyI6IiIsIlNpZ25hdHVyZSI6IjdiZTEzNTU1MDM5NzcyM2VkMDQxYmVkNTIyNzU4YmMyNjQ3YzRmNzZiNmRjYTViNzVhZDUyOTMwYTg1NjE5ZGEiLCJTZXNzaW9uTmFtZSI6ImNlc2hpYXNzdW1lIn0=",
+      "type": "string"
+     }
+    },
+    "required": [
+     "CurrentTime",
+     "ExpiredTime",
+     "AccessKeyId",
+     "SecretAccessKey",
+     "SessionToken"
+    ],
+    "type": "object"
+   },
+   "CredentialsViaOIDC": {
+    "description": "AssumeRoleWithOIDC - Credentials\n",
+    "properties": {
+     "AccessKeyId": {
+      "description": "临时凭证的Access Key Id。",
+      "example": "AKTPODg0MzV**2ZDcxMDg\n\n",
+      "type": "string"
+     },
+     "CurrentTime": {
+      "description": "凭证生效起始时间，时间格式为RFC3339。",
+      "example": "2021-04-12T10:57:09+08:00\n\n",
+      "type": "string"
+     },
+     "Expiration": {
+      "description": "凭证失效时间，时间格式为RFC3339。",
+      "example": "2021-04-12T11:57:09+08:00\n\n",
+      "type": "string"
+     },
+     "SecretAccessKey": {
+      "description": "临时凭证的Secret Access Key。",
+      "example": "TVRNNVlqRmxPR1**mRoTkdWbE1ESQ==\n\n",
+      "type": "string"
+     },
+     "SessionToken": {
+      "description": "临时凭证的Session Token。",
+      "example": "STSeyJBY2NvdW50SW******...W50a",
+      "type": "string"
+     }
+    },
+    "required": [
+     "CurrentTime",
+     "Expiration",
+     "AccessKeyId",
+     "SecretAccessKey",
+     "SessionToken"
+    ],
+    "type": "object"
+   },
+   "OIDCTokenInfo": {
+    "description": "OIDC Token 信息。",
+    "properties": {
+     "ClientIds": {
+      "description": "OIDC 受众。多个之间用半角逗号（,）分隔。\n对应 OIDC Token 中的aud字段值。",
+      "example": [
+       "496271242565057****"
+      ],
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "ExpirationTime": {
+      "description": "OIDC Token 的过期时间。",
+      "example": "2021-10-20T04:27:09Z",
+      "type": "string"
+     },
+     "IssuanceTime": {
+      "description": "OIDC Token 的签发时间。",
+      "example": "2021-10-20T03:27:09Z",
+      "type": "string"
+     },
+     "Issuer": {
+      "description": "OIDC 颁发者 URL。\n对应 OIDC Token 中的`iss`字段值。",
+      "example": "https://dev-xxxxxx.****.com",
+      "type": "string"
+     },
+     "Subject": {
+      "description": "OIDC 主体。\n对应 OIDC Token 中的`sub`字段值。",
+      "example": "KryrkIdjylZb7agUgCEf****",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Subject",
+     "Issuer",
+     "ClientIds",
+     "ExpirationTime",
+     "IssuanceTime"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "description": "标签",
+    "properties": {
+     "Key": {
+      "description": "标签键，长度不超过128字符。",
+      "type": "string"
+     },
+     "Value": {
+      "description": "标签值，长度不超过256字符。",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tags": {
+    "properties": {
+     "Key": {
+      "description": "标签键。至多附加50对标签。使用UTF-8编码的Unicode，长度为1~128字符，允许任何语言文字、数字、空格和_ . : / = + - @符号。\n\n",
+      "type": "string"
+     },
+     "Value": {
+      "description": "标签值。至多附加50对标签。使用UTF-8编码的Unicode，长度为0~256字符（即Value可以为空），允许任何语言文字、数字、空格和_ . : / = + - @符号。\n",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "API documentation for sts",
+  "title": "sts",
+  "version": "2018-01-01"
+ },
+ "openapi": "3.0.0",
+ "paths": {
+  "/AssumeRole": {
+   "get": {
+    "description": "以角色身份发起一次临时会话，临时会话中包含一组短效安全凭证用于请求云服务API。关于角色的使用方法可以参考 [角色说明文档](https://www.volcengine.com/docs/6257/64979)。",
+    "operationId": "AssumeRole",
+    "parameters": [
+     {
+      "description": "角色会话名称，长度2-64字符，支持英文、数字和.-\\_@符号。对于同一个角色，在每次扮演时可以指定不同的会话名称，从而达到区分会话的目的。该字段也会在[云审计](https://www.volcengine.com/docs/7015/166040)中体现，方便从审计日志中区分不同会话的访问记录。",
+      "in": "query",
+      "name": "RoleSessionName",
+      "required": true,
+      "schema": {
+       "description": "角色会话名称，长度2-64字符，支持英文、数字和.-\\_@符号。对于同一个角色，在每次扮演时可以指定不同的会话名称，从而达到区分会话的目的。该字段也会在[云审计](https://www.volcengine.com/docs/7015/166040)中体现，方便从审计日志中区分不同会话的访问记录。",
+       "example": "bob",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "临时密钥有效时长（单位：秒），最短支持900，最长支持43200。若未传入该值或传入的值小于900，则默认按3600执行，若传入的值大于43200，则默认按43200执行。",
+      "in": "query",
+      "name": "DurationSeconds",
+      "schema": {
+       "description": "临时密钥有效时长（单位：秒），最短支持900，最长支持43200。若未传入该值或传入的值小于900，则默认按3600执行，若传入的值大于43200，则默认按43200执行。",
+       "example": 3600,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "角色内联策略，用于进一步限制临时凭证的权限。如果内联权限策略不为空，则临时凭证的实际权限为所扮演角色的权限策略与内联权限策略的交集。策略语法格式同普通的IAM策略，可参考[策略语法介绍](https://www.volcengine.com/docs/6257/65059)。",
+      "in": "query",
+      "name": "Policy",
+      "schema": {
+       "description": "角色内联策略，用于进一步限制临时凭证的权限。如果内联权限策略不为空，则临时凭证的实际权限为所扮演角色的权限策略与内联权限策略的交集。策略语法格式同普通的IAM策略，可参考[策略语法介绍](https://www.volcengine.com/docs/6257/65059)。",
+       "example": "{\n    \"Statement\": [\n        {\n            \"Effect\": \"Allow\",\n            \"Action\": [\n                \"vpc:CreateVpc\"\n            ],\n            \"Resource\": [\n                \"*\"\n            ],\n            \"Condition\": {\n                \"StringEquals\": {\n                    \"volc:RequestedRegion\": [\n                        \"cn-beijing\"\n                    ]\n                }\n            }\n        }\n    ]\n}",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "需要扮演的角色Trn，格式为`trn:iam::${AccountId}:role/${RoleName}`。其中`${AccountId}`需要填入角色所属的主账号ID，`${RoleName}`需要填入实际的角色名称。例如账号ID为2000012345的账号内角色名为myRole的角色对应的RoleTrn为`trn:iam::2000012345:role/myRole`",
+      "in": "query",
+      "name": "RoleTrn",
+      "required": true,
+      "schema": {
+       "description": "需要扮演的角色Trn，格式为`trn:iam::${AccountId}:role/${RoleName}`。其中`${AccountId}`需要填入角色所属的主账号ID，`${RoleName}`需要填入实际的角色名称。例如账号ID为2000012345的账号内角色名为myRole的角色对应的RoleTrn为`trn:iam::2000012345:role/myRole`",
+       "example": "trn:iam::2000012345:role/my_role",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "Tags",
+      "in": "query",
+      "name": "Tags",
+      "schema": {
+       "description": "Tags",
+       "items": {
+        "$ref": "#/components/schemas/Tags"
+       },
+       "type": "array",
+       "x-split-type": 3
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AssumedRoleUser": {
+           "$ref": "#/components/schemas/AssumedRoleUser"
+          },
+          "Credentials": {
+           "$ref": "#/components/schemas/Credentials"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "以角色身份发起一次临时会话，临时会话中包含一组短效安全凭证用于请求云服务API。关于角色的使用方法可以参考 [角色说明文档](https://www.volcengine.com/docs/6257/64979)。"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "存在无效调用参数。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter '{{.Name}}' is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "RoleNotExist",
+             "type": "string"
+            },
+            "description": {
+             "example": "所要扮演的角色不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Role '{{.Role}}' does not exist.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "RootUserAssumeRole",
+             "type": "string"
+            },
+            "description": {
+             "example": "主账号无法进行角色扮演，请使用子用户或角色进行扮演。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Root user is forbidden to assume role.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "NoPermission",
+             "type": "string"
+            },
+            "description": {
+             "example": "角色未信任身份进行扮演。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "You have no permission for this action.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "角色扮演",
+    "tags": [
+     "角色扮演"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "sts",
+   "x-version": "2018-01-01"
+  }
+ }
+}

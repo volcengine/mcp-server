@@ -75,7 +75,7 @@ Obtain Volcengine access key ID and secret access key from the Volcengine manage
 
 ```json
 {
-  "mcp-server": {
+  "mcpServers": {
     "mcp-server-certificate-center": {
       "command": "uvx",
       "args": [
