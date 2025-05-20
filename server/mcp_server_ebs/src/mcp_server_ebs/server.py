@@ -35,19 +35,6 @@ stream_handler.setFormatter(formatter)
 # Add handlers
 logger.addHandler(stream_handler)
 
-try:
-    # Check if directory is writable
-    log_dir = os.path.dirname(log_file) # log_file is defined in the block above this
-    if os.access(log_dir, os.W_OK):
-        file_handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
-        logger.info(f"Logging to file: {log_file}")
-    else:
-        logger.warning(f"Log directory {log_dir} is not writable, logging to console only")
-except Exception as e:
-    logger.error(f"Failed to initialize file logging: {str(e)}", exc_info=True)
-
 def _parse_and_validate_sts_token(auth_header_value: str) -> Dict[str, str]: # Changed signature
     """Helper function to parse and validate STS token from authorization header.
     
@@ -196,7 +183,6 @@ def describe_volume(
         query: Optional specific questions about the volume(status, size, creation time etc.)
     """
 
-    logger.info(f"Received describe_volume request for volume: {volume_id}")
     ebs_cli = init_ebs_service(config,region_id)
     try:
         volumes_ids = []
@@ -261,7 +247,6 @@ def describe_snapshot(
         region_id: The ID of the region where the snapshot is located (e.g. "cn-beijing")
         query: Optional specific questions about the snapshot (status, size, creation time etc.)
     """
-    logger.info(f"Received describe_snapshot request for snapshot: {snapshot_id}")
     ebs_cli = init_ebs_service(config,region_id)
 
     try:
@@ -322,7 +307,6 @@ def create_volume(
         region_id: The ID of the region where the volume will be created (e.g. "cn-beijing")
         query: Optional specific questions about the volume (status, size, creation time etc.)
     """
-    logger.info(f"Received create_volume request for volume: {volume_name}")
     ebs_cli = init_ebs_service(config,region_id)
 
     if size is None:
@@ -346,9 +330,8 @@ def create_volume(
             instance_id=instance_id,
             description="mcp-create"
             )
-        logger.info(f"create_volume request: {create_request}")
+
         create_response = ebs_cli.create_volume(create_request)
-        logger.info(f"create_volume response: {create_response}")
         
         # If query is provided, add additional processing logic here
         if query:
@@ -391,7 +374,6 @@ def create_snapshot(
         region_id: The ID of the region where the snapshot will be created (e.g. "cn-beijing")
         query: Optional specific questions about the snapshot (status, size, creation time etc.)
     """
-    logger.info(f"Received create_snapshot request for volume: {volume_id}")
     ebs_cli = init_ebs_service(config,region_id)
 
     if snapshot_name is None:
@@ -403,16 +385,12 @@ def create_snapshot(
             snapshot_name=snapshot_name,
             description="mcp-create"
         )
-        logger.info(f"create_snapshot request: {create_request}")
         create_response = ebs_cli.create_snapshot(create_request)
-        logger.info(f"create_snapshot response: {create_response}")
 
         describe_snapshot_request = volcenginesdkstorageebs.DescribeSnapshotsRequest(
             snapshot_ids=[create_response.snapshot_id]
         )
-        logger.info(f"describe_snapshot request: {describe_snapshot_request}")
         describe_snapshot_response = ebs_cli.describe_snapshots(describe_snapshot_request)
-        logger.info(f"describe_snapshot response: {describe_snapshot_response}")
         # If query is provided, add additional processing logic here
         if query:
             # You can add NLP processing to answer specific questions
@@ -453,23 +431,19 @@ def extend_volume(
         region_id: The ID of the region where the volume is located (e.g. "cn-beijing")
         query: Optional specific questions about the volume (status, size, creation time etc.)
     """
-    logger.info(f"Received extend_volume request for volume: {volume_id}")
     ebs_cli = init_ebs_service(config,region_id)
     try:
         extend_request = volcenginesdkstorageebs.ExtendVolumeRequest(
             volume_id=volume_id,
             new_size=new_size
         )
-        logger.info(f"extend_volume request: {extend_request}")
         extend_response = ebs_cli.extend_volume(extend_request)
-        logger.info(f"extend_volume response: {extend_response}")
         # If query is provided, add additional processing logic here
 
         describe_volume_request = volcenginesdkstorageebs.DescribeVolumesRequest(
             volume_ids=[volume_id]
         )           
         describe_volume_response = ebs_cli.describe_volumes(describe_volume_request)
-        logger.info(f"describe_volume response: {describe_volume_response}")
             
         if query:
             # You can add NLP processing to answer specific questions

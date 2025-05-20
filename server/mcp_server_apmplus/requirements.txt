@@ -77,5 +77,5 @@ urllib3==2.4.0
     #   volcengine-python-sdk
 uvicorn==0.34.2
     # via mcp
-volcengine-python-sdk==2.0.2
+volcengine-python-sdk==3.0.1
     # via mcp-server-apmplus (pyproject.toml)

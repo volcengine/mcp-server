@@ -7,7 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "mcp @ git+https://github.com/zihengli-bytedance/python-sdk.git@temp-for-volc",
     "pydantic==2.10.6",
-    "volcengine-python-sdk==1.1.2",
+    "volcengine-python-sdk>=3.0.1",
     "concurrent-log-handler==0.9.25",
     "dynaconf==3.2.10",
     "jsonref>=1.1.0",

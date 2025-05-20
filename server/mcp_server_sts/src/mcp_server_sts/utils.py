@@ -33,7 +33,7 @@ def load_config(file_name: Union[str, Path]) -> Config:
     try:
         current_dir = Path(__file__).parent
         config_path = current_dir / 'config' / file_name
-        with open(config_path, 'r') as f:
+        with open(config_path, 'r', encoding='utf-8') as f:
             config_dict = yaml.safe_load(f)
     except FileNotFoundError:
         raise FileNotFoundError(f"YAML 文件未找到: {config_path}")

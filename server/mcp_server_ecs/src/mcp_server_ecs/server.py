@@ -107,7 +107,7 @@ async def call_tool(name: str, args: dict) -> list[types.TextContent | types.Ima
 
         tool_function = get_tool_function(name)
 
-        if deploy_config.get("is_local"):
+        if deploy_config["is_local"]:
             result = await tool_function(validated_args.model_dump())
         else:
             headers = GLOBAL_CONTEXT.get_request_headers()
@@ -155,7 +155,7 @@ def serve(transport: str):
         )
 
         mcp_server_port = os.environ.get(
-            "MCP_SERVER_PORT") or deploy_config.get("port")
+            "MCP_SERVER_PORT") or deploy_config["port"]
         LOG.info(f"MCP server port: {mcp_server_port}")
 
         uvicorn.run(starlette_app, host="0.0.0.0", port=int(mcp_server_port))
