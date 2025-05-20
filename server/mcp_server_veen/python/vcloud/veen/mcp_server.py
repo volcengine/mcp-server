@@ -4,7 +4,6 @@ from .note import note
 from vcloud.utils.response import HandlerVolcResponse
 import json
 
-
 def create_mcp_server():
     service = VeenedgeAPI()
     mcp = FastMCP(
@@ -45,41 +44,41 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def delete_cloud_server() -> str:
-        """
-        本接口用于根据边缘服务 ID 删除边缘服务。
-        Call steps:
-        1. Pass "delete_cloud_server" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  delete_cloud_server
-        """
-        reqs = service.mcp_post("McpDeleteCloudServer", {}, json.dumps({}))
+    # @mcp.tool()
+    # def delete_cloud_server() -> str:
+    #     """
+    #     本接口用于根据边缘服务 ID 删除边缘服务。
+    #     Call steps:
+    #     1. Pass "delete_cloud_server" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  delete_cloud_server
+    #     """
+    #     reqs = service.mcp_post("McpDeleteCloudServer", {}, json.dumps({}))
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def stop_cloud_server() -> str:
-        """
-        本接口用于根据边缘服务的 ID 停止边缘服务。
-        Call steps:
-        1. Pass "stop_cloud_server" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  stop_cloud_server
-        """
-        reqs = service.mcp_post("McpStopCloudServer", {}, json.dumps({}))
+    # @mcp.tool()
+    # def stop_cloud_server() -> str:
+    #     """
+    #     本接口用于根据边缘服务的 ID 停止边缘服务。
+    #     Call steps:
+    #     1. Pass "stop_cloud_server" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  stop_cloud_server
+    #     """
+    #     reqs = service.mcp_post("McpStopCloudServer", {}, json.dumps({}))
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def reboot_cloud_server() -> str:
-        """
-        本接口用于根据边缘服务的 ID 重启边缘服务。
-        Call steps:
-        1. Pass "reboot_cloud_server" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  reboot_cloud_server
-        """
-        reqs = service.mcp_post("McpRebootCloudServer", {}, json.dumps({}))
+    # @mcp.tool()
+    # def reboot_cloud_server() -> str:
+    #     """
+    #     本接口用于根据边缘服务的 ID 重启边缘服务。
+    #     Call steps:
+    #     1. Pass "reboot_cloud_server" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  reboot_cloud_server
+    #     """
+    #     reqs = service.mcp_post("McpRebootCloudServer", {}, json.dumps({}))
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
     @mcp.tool()
     def create_cloud_server(body: dict) -> str:
@@ -93,17 +92,17 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def update_cloud_server(body: dict) -> str:
-        """
-        本接口用于修改边缘服务配置。
-        Call steps:
-        1. Pass "update_cloud_server" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  update_cloud_server
-        """
-        reqs = service.mcp_post("McpUpdateCloudServer", {}, json.dumps(body))
+    # @mcp.tool()
+    # def update_cloud_server(body: dict) -> str:
+    #     """
+    #     本接口用于修改边缘服务配置。
+    #     Call steps:
+    #     1. Pass "update_cloud_server" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  update_cloud_server
+    #     """
+    #     reqs = service.mcp_post("McpUpdateCloudServer", {}, json.dumps(body))
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
     @mcp.tool()
     def get_cloud_server(params: dict) -> str:
@@ -117,17 +116,17 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def reboot_instances(body: dict) -> str:
-        """
-        本接口用于根据边缘实例 ID 重启实例。
-        Call steps:
-        1. Pass "reboot_instances" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  reboot_instances
-        """
-        reqs = service.mcp_post("McpRebootInstances", {}, json.dumps(body))
+    # @mcp.tool()
+    # def reboot_instances(body: dict) -> str:
+    #     """
+    #     本接口用于根据边缘实例 ID 重启实例。
+    #     Call steps:
+    #     1. Pass "reboot_instances" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  reboot_instances
+    #     """
+    #     reqs = service.mcp_post("McpRebootInstances", {}, json.dumps(body))
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
     @mcp.tool()
     def start_instances(body: dict) -> str:
@@ -141,17 +140,17 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def stop_instances(body: dict) -> str:
-        """
-        本接口用于根据边缘实例 ID 停止实例。
-        Call steps:
-        1. Pass "stop_instances" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  stop_instances
-        """
-        reqs = service.mcp_post("McpStopInstances", {}, json.dumps(body))
+    # @mcp.tool()
+    # def stop_instances(body: dict) -> str:
+    #     """
+    #     本接口用于根据边缘实例 ID 停止实例。
+    #     Call steps:
+    #     1. Pass "stop_instances" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  stop_instances
+    #     """
+    #     reqs = service.mcp_post("McpStopInstances", {}, json.dumps(body))
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
     @mcp.tool()
     def list_instances(params: dict) -> str:
@@ -177,17 +176,17 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def reset_login_credential(body: dict) -> str:
-        """
-        本接口用于重置重置边缘实例的密码。密码类型允许修改。
-        Call steps:
-        1. Pass "reset_login_credential" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  reset_login_credential
-        """
-        reqs = service.mcp_post("McpResetLoginCredential", {}, json.dumps(body))
+    # @mcp.tool()
+    # def reset_login_credential(body: dict) -> str:
+    #     """
+    #     本接口用于重置重置边缘实例的密码。密码类型允许修改。
+    #     Call steps:
+    #     1. Pass "reset_login_credential" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  reset_login_credential
+    #     """
+    #     reqs = service.mcp_post("McpResetLoginCredential", {}, json.dumps(body))
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
     @mcp.tool()
     def set_instance_name(body: dict) -> str:
@@ -201,29 +200,29 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def batch_reset_system(body: dict) -> str:
-        """
-        本接口用于重置指定边缘实例的操作系统或更换边缘实例的镜像。
-        Call steps:
-        1. Pass "batch_reset_system" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  batch_reset_system
-        """
-        reqs = service.mcp_post("McpBatchResetSystem", {}, json.dumps(body))
+    # @mcp.tool()
+    # def batch_reset_system(body: dict) -> str:
+    #     """
+    #     本接口用于重置指定边缘实例的操作系统或更换边缘实例的镜像。
+    #     Call steps:
+    #     1. Pass "batch_reset_system" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  batch_reset_system
+    #     """
+    #     reqs = service.mcp_post("McpBatchResetSystem", {}, json.dumps(body))
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def set_instances_bandwidth_peak(body: dict) -> str:
-        """
-        本接口用于批量设置边缘实例的带宽峰值。
-        Call steps:
-        1. Pass "set_instances_bandwidth_peak" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  set_instances_bandwidth_peak
-        """
-        reqs = service.mcp_post("McpSetInstancesBandwidthPeak", {}, json.dumps(body))
+    # @mcp.tool()
+    # def set_instances_bandwidth_peak(body: dict) -> str:
+    #     """
+    #     本接口用于批量设置边缘实例的带宽峰值。
+    #     Call steps:
+    #     1. Pass "set_instances_bandwidth_peak" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  set_instances_bandwidth_peak
+    #     """
+    #     reqs = service.mcp_post("McpSetInstancesBandwidthPeak", {}, json.dumps(body))
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
     @mcp.tool()
     def enable_instances_i_pv6(body: dict) -> str:
@@ -251,17 +250,17 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def update_instances_spec(body: dict) -> str:
-        """
-        本接口用于变更边缘实例的实例规格。
-        Call steps:
-        1. Pass "update_instances_spec" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  update_instances_spec
-        """
-        reqs = service.mcp_post("McpUpdateInstancesSpec", {}, json.dumps(body))
+    # @mcp.tool()
+    # def update_instances_spec(body: dict) -> str:
+    #     """
+    #     本接口用于变更边缘实例的实例规格。
+    #     Call steps:
+    #     1. Pass "update_instances_spec" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  update_instances_spec
+    #     """
+    #     reqs = service.mcp_post("McpUpdateInstancesSpec", {}, json.dumps(body))
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
     @mcp.tool()
     def list_instance_internal_ips(params: dict) -> str:
@@ -275,45 +274,45 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def set_bound_eip_share_bandwidth_peak(body: dict) -> str:
-        """
-        本接口用于设置弹性公网 IP 的共享带宽峰值。共享带宽峰值指的是绑定在边缘实例私网 IP 地址（含主私网 IP 地址和辅助私网 IP 地址）上的所有弹性公网 IP 的共享公网带宽限速值。
-        Call steps:
-        1. Pass "set_bound_eip_share_bandwidth_peak" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  set_bound_eip_share_bandwidth_peak
-        """
-        reqs = service.mcp_post(
-            "McpSetBoundEipShareBandwidthPeak", {}, json.dumps(body)
-        )
+    # @mcp.tool()
+    # def set_bound_eip_share_bandwidth_peak(body: dict) -> str:
+    #     """
+    #     本接口用于设置弹性公网 IP 的共享带宽峰值。共享带宽峰值指的是绑定在边缘实例私网 IP 地址（含主私网 IP 地址和辅助私网 IP 地址）上的所有弹性公网 IP 的共享公网带宽限速值。
+    #     Call steps:
+    #     1. Pass "set_bound_eip_share_bandwidth_peak" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  set_bound_eip_share_bandwidth_peak
+    #     """
+    #     reqs = service.mcp_post(
+    #         "McpSetBoundEipShareBandwidthPeak", {}, json.dumps(body)
+    #     )
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def batch_bind_eip_to_internal_ips_randomly(body: dict) -> str:
-        """
-        本接口用于批量随机绑定弹性公网 IP 到私网 IP 地址。
-        Call steps:
-        1. Pass "batch_bind_eip_to_internal_ips_randomly" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  batch_bind_eip_to_internal_ips_randomly
-        """
-        reqs = service.mcp_post(
-            "McpBatchBindEipToInternalIpsRandomly", {}, json.dumps(body)
-        )
+    # @mcp.tool()
+    # def batch_bind_eip_to_internal_ips_randomly(body: dict) -> str:
+    #     """
+    #     本接口用于批量随机绑定弹性公网 IP 到私网 IP 地址。
+    #     Call steps:
+    #     1. Pass "batch_bind_eip_to_internal_ips_randomly" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  batch_bind_eip_to_internal_ips_randomly
+    #     """
+    #     reqs = service.mcp_post(
+    #         "McpBatchBindEipToInternalIpsRandomly", {}, json.dumps(body)
+    #     )
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def batch_delete_internal_ips(body: dict) -> str:
-        """
-        本接口用于批量删除边缘实例的辅助私网 IP 地址。
-        Call steps:
-        1. Pass "batch_delete_internal_ips" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  batch_delete_internal_ips
-        """
-        reqs = service.mcp_post("McpBatchDeleteInternalIps", {}, json.dumps(body))
+    # @mcp.tool()
+    # def batch_delete_internal_ips(body: dict) -> str:
+    #     """
+    #     本接口用于批量删除边缘实例的辅助私网 IP 地址。
+    #     Call steps:
+    #     1. Pass "batch_delete_internal_ips" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  batch_delete_internal_ips
+    #     """
+    #     reqs = service.mcp_post("McpBatchDeleteInternalIps", {}, json.dumps(body))
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
     @mcp.tool()
     def get_instance_cloud_disk_info(params: dict) -> str:
@@ -417,17 +416,17 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def bind_eip_to_internal_ip(body: dict) -> str:
-        """
-        本接口用于绑定单个弹性公网 IP 到私网 IP 地址。
-        Call steps:
-        1. Pass "bind_eip_to_internal_ip" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  bind_eip_to_internal_ip
-        """
-        reqs = service.mcp_post("McpBindEipToInternalIP", {}, json.dumps(body))
+    # @mcp.tool()
+    # def bind_eip_to_internal_ip(body: dict) -> str:
+    #     """
+    #     本接口用于绑定单个弹性公网 IP 到私网 IP 地址。
+    #     Call steps:
+    #     1. Pass "bind_eip_to_internal_ip" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  bind_eip_to_internal_ip
+    #     """
+    #     reqs = service.mcp_post("McpBindEipToInternalIP", {}, json.dumps(body))
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
     @mcp.tool()
     def list_images(params: dict) -> str:
@@ -466,40 +465,40 @@ def create_mcp_server():
         return HandlerVolcResponse(reqs)
 
     @mcp.tool()
-    def upload_url_image(body: dict) -> str:
-        """
-        本接口用于导入镜像。
-        Call steps:
-        1. Pass "upload_url_image" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  upload_url_image
-        """
-        reqs = service.mcp_post("McpUploadURLImage", {}, json.dumps(body))
+    # def upload_url_image(body: dict) -> str:
+    #     """
+    #     本接口用于导入镜像。
+    #     Call steps:
+    #     1. Pass "upload_url_image" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  upload_url_image
+    #     """
+    #     reqs = service.mcp_post("McpUploadURLImage", {}, json.dumps(body))
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def update_image(body: dict) -> str:
-        """
-        本接口用于编辑镜像的名称。
-        Call steps:
-        1. Pass "update_image" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  update_image
-        """
-        reqs = service.mcp_post("McpUpdateImage", {}, json.dumps(body))
+    # @mcp.tool()
+    # def update_image(body: dict) -> str:
+    #     """
+    #     本接口用于编辑镜像的名称。
+    #     Call steps:
+    #     1. Pass "update_image" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  update_image
+    #     """
+    #     reqs = service.mcp_post("McpUpdateImage", {}, json.dumps(body))
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def delete_image(body: dict) -> str:
-        """
-        本接口用于删除镜像。
-        Call steps:
-        1. Pass "delete_image" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  delete_image
-        """
-        reqs = service.mcp_post("McpDeleteImage", {}, json.dumps(body))
+    # @mcp.tool()
+    # def delete_image(body: dict) -> str:
+    #     """
+    #     本接口用于删除镜像。
+    #     Call steps:
+    #     1. Pass "delete_image" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  delete_image
+    #     """
+    #     reqs = service.mcp_post("McpDeleteImage", {}, json.dumps(body))
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
     @mcp.tool()
     def get_veen_instance_usage(params: dict) -> str:
@@ -633,17 +632,17 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def delete_route_entry(body: dict) -> str:
-        """
-        本接口用于删除路由条目。
-        Call steps:
-        1. Pass "delete_route_entry" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  delete_route_entry
-        """
-        reqs = service.mcp_post("McpDeleteRouteEntry", {}, json.dumps(body))
+    # @mcp.tool()
+    # def delete_route_entry(body: dict) -> str:
+    #     """
+    #     本接口用于删除路由条目。
+    #     Call steps:
+    #     1. Pass "delete_route_entry" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  delete_route_entry
+    #     """
+    #     reqs = service.mcp_post("McpDeleteRouteEntry", {}, json.dumps(body))
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
     @mcp.tool()
     def enable_route_entry(body: dict) -> str:
@@ -657,17 +656,17 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def disable_route_entry(body: dict) -> str:
-        """
-        本接口用于禁用路由条目。
-        Call steps:
-        1. Pass "disable_route_entry" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  disable_route_entry
-        """
-        reqs = service.mcp_post("McpDisableRouteEntry", {}, json.dumps(body))
+    # @mcp.tool()
+    # def disable_route_entry(body: dict) -> str:
+    #     """
+    #     本接口用于禁用路由条目。
+    #     Call steps:
+    #     1. Pass "disable_route_entry" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  disable_route_entry
+    #     """
+    #     reqs = service.mcp_post("McpDisableRouteEntry", {}, json.dumps(body))
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
     @mcp.tool()
     def set_route_entry_desc(body: dict) -> str:
