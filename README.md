@@ -203,7 +203,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 - **[MySQL](https://github.com/designcomputer/mysql_mcp_server)**：MySQL database integration in Python with configurable access controls and schema inspection.  
 - **[Data Exploration](https://github.com/reading-plus-ai/mcp-server-data-exploration)**：MCP server for autonomous data exploration on .csv-based datasets, providing intelligent insights with minimal effort.  
 - **[Dataset Viewer](https://github.com/privetin/dataset-viewer)**：Browse and analyze Hugging Face datasets with features like search, filtering, statistics, and data export.  
-- **[MongoDB](https://code.byted.org/machinelearning/mcp/tree/master/server/mcp_server_mongodb)**：A Model Context Protocol Server for MongoDB.  
+- **[MongoDB](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_mongodb)**：A Model Context Protocol Server for MongoDB.  
 - **[MSSQL](https://github.com/RichardHan/mssql_mcp_server)**：MSSQL database integration with configurable access controls and schema inspection.  
 
 
