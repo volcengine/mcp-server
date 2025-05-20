@@ -14,7 +14,7 @@
   },
   "keywords": [],
   "author": "Kingcean Tuan <duanjinchen@bytedance.com>",
-  "description": "The VolcEngine AI components based on model context protocol.",
+  "description": "The Volcengine DNS routing service that allows users to configure DNS rules to ensure that requests from clients reach the desired service nodes.",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.10.1",
     "@release-it/conventional-changelog": "^10.0.0",
@@ -37,10 +37,6 @@
     "@modelcontextprotocol/inspector": "^0.8.2",
     "@types/node": "^22.14.1",
     "typescript": "^5.8.3"
-  },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://bnpm.byted.org/"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
