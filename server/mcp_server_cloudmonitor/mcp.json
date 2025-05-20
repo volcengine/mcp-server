@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "vefaas": {
+    "mcp-server-cloudmonitor": {
       "command": "uvx",
       "args": [
         "--from",
