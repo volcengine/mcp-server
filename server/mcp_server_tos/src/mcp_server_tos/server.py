@@ -95,7 +95,7 @@ async def list_buckets() -> list[dict]:
 
 @mcp.tool()
 async def list_objects(bucket: str, prefix: Optional[str] = None, start_after: Optional[str] = None,
-                       continuation_token: Optional[str] = None) -> list[dict]:
+                       continuation_token: Optional[str] = None) -> str:
     """
     List all objects in a bucket.
     Args:
@@ -112,7 +112,7 @@ async def list_objects(bucket: str, prefix: Optional[str] = None, start_after: O
         objects = await tos_resource.list_objects(bucket, prefix, start_after, continuation_token)
         return objects
     except Exception as e:
-        logger.error(f"Error listing objects: {e}")
+        logger.error(f"Error list objects: {e}")
         raise
 
 

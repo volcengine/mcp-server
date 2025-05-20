@@ -5,6 +5,7 @@ from typing import List, Dict
 from urllib.parse import quote
 
 import httpx
+from httpx import Limits
 from mcp_server_tos.config import TosConfig
 from requests.structures import CaseInsensitiveDict
 from tos import TosClientV2, exceptions, HttpMethodType
@@ -15,7 +16,14 @@ TOS_USER_AGENT = 've-tos-python-sdk/v2.8.1 (linux/amd64;python3.12.0) -- TOS/MCP
 
 logger = logging.getLogger(__name__)
 
-_global_client = httpx.AsyncClient()
+_global_client = httpx.AsyncClient(
+    limits=Limits(
+        max_connections=200,
+        max_keepalive_connections=50,
+        keepalive_expiry=30
+    ),
+    timeout=30.0,
+)
 
 
 class TosResource:
