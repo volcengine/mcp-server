@@ -169,7 +169,7 @@ Please obtain the environment variables in advance VOLCENGINE_ACCESS_KEY 和 VOL
 ```json
 {
   "mcpServers": {
-    "cloudmonitor": {
+    "mcp-server-cloudmonitor": {
       "command": "uvx",
       "args": [
         "--from",

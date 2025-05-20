@@ -163,7 +163,7 @@ OAuth 2.0
 ```json
 {
   "mcpServers": {
-    "cloudmonitor": {
+    "mcp-server-cloudmonitor": {
       "command": "uvx",
       "args": [
         "--from",
