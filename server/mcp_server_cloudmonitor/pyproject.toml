@@ -1,0 +1,23 @@
+[project]
+name = "mcp-server-cloudmonitor"
+version = "0.0.1"
+description = "MCP server for Cloud Monitor"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.6.0",
+    "volcengine-python-sdk==2.0.1",
+]
+
+[project.scripts]
+mcp-server-cloudmonitor = "mcp_server_cloudmonitor:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.uv.sources]
+mcp = { git = "https://github.com/zihengli-bytedance/python-sdk.git", rev = "temp-for-volc" }

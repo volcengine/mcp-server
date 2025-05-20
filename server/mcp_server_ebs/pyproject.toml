@@ -10,7 +10,7 @@ dependencies = [
     "mcp[cli] @ git+https://github.com/zihengli-bytedance/python-sdk.git@temp-for-volc",
     "python-dotenv>=1.0.1",
     "volcengine==1.0.175",
-    "volcengine-python-sdk>=1.1.2",
+    "volcengine-python-sdk>=3.0.1",
     "aiohttp>=3.11.14",
     "deprecated>=1.2.18",
 ]
