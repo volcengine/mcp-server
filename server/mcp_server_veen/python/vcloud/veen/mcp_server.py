@@ -464,7 +464,7 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
+    # @mcp.tool()
     # def upload_url_image(body: dict) -> str:
     #     """
     #     本接口用于导入镜像。
