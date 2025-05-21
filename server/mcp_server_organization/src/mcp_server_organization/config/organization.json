@@ -1,0 +1,3384 @@
+{
+ "components": {
+  "schemas": {
+   "AccountAndTag": {
+    "description": "账号与标签详情",
+    "properties": {
+     "AccountID": {
+      "description": "账号ID",
+      "type": "string"
+     },
+     "AccountName": {
+      "description": "账号名称",
+      "type": "string"
+     },
+     "AllowConsole": {
+      "description": "允许控制台访问，1允许，2不允许",
+      "enum": [
+       "1",
+       "2"
+      ],
+      "format": "int32",
+      "type": "integer"
+     },
+     "AllowExit": {
+      "description": "允许退出，1允许，2不允许",
+      "enum": [
+       "1",
+       "2"
+      ],
+      "format": "int32",
+      "type": "integer"
+     },
+     "CreatedTime": {
+      "description": "创建时间",
+      "type": "string"
+     },
+     "DeleteUk": {
+      "description": "删除标记",
+      "type": "string"
+     },
+     "DeletedTime": {
+      "description": "删除时间",
+      "type": "string"
+     },
+     "Description": {
+      "description": "描述",
+      "type": "string"
+     },
+     "ID": {
+      "description": "账号ID",
+      "type": "string"
+     },
+     "IamRole": {
+      "description": "IAM角色名称",
+      "type": "string"
+     },
+     "IsOwner": {
+      "description": "是否是管理员，0.非管理员，1.管理员",
+      "format": "int32",
+      "type": "integer"
+     },
+     "JoinType": {
+      "description": "加入类型, 1创建，2邀请",
+      "enum": [
+       "1",
+       "2"
+      ],
+      "format": "int32",
+      "type": "integer"
+     },
+     "OrgID": {
+      "description": "组织ID",
+      "type": "string"
+     },
+     "OrgType": {
+      "description": "组织类型",
+      "format": "int32",
+      "type": "integer"
+     },
+     "OrgUnitID": {
+      "description": "组织单元ID",
+      "type": "string"
+     },
+     "OrgUnitName": {
+      "description": "组织单元名称",
+      "type": "string"
+     },
+     "OrgVerificationID": {
+      "description": "认证主体ID",
+      "type": "string"
+     },
+     "Owner": {
+      "description": "管理员ID",
+      "type": "string"
+     },
+     "ShowName": {
+      "description": "显示名称",
+      "type": "string"
+     },
+     "Tags": {
+      "description": "标签",
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     },
+     "UpdatedTime": {
+      "description": "更新时间",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ID",
+     "CreatedTime",
+     "UpdatedTime",
+     "DeletedTime",
+     "Owner",
+     "OrgID",
+     "OrgUnitID",
+     "OrgVerificationID",
+     "AccountID",
+     "AccountName",
+     "ShowName",
+     "Description",
+     "IamRole",
+     "JoinType",
+     "AllowExit",
+     "AllowConsole",
+     "OrgUnitName",
+     "IsOwner",
+     "DeleteUk",
+     "Tags",
+     "OrgType"
+    ],
+    "type": "object"
+   },
+   "AccountInvitationAndMainName": {
+    "description": "账号邀请详情",
+    "properties": {
+     "AccountID": {
+      "description": "账号ID",
+      "type": "string"
+     },
+     "AccountName": {
+      "description": "账号名称",
+      "type": "string"
+     },
+     "AllowExit": {
+      "description": "允许退出，1允许，2不允许",
+      "format": "int32",
+      "type": "integer"
+     },
+     "CreatedTime": {
+      "description": "创建时间",
+      "type": "string"
+     },
+     "DeleteUk": {
+      "description": "删除标记",
+      "type": "string"
+     },
+     "DeletedTime": {
+      "description": "删除时间",
+      "type": "string"
+     },
+     "Description": {
+      "description": "描述",
+      "type": "string"
+     },
+     "ID": {
+      "description": "ID",
+      "type": "string"
+     },
+     "LinkID": {
+      "description": "链接唯一ID",
+      "type": "string"
+     },
+     "MainName": {
+      "description": "主体名称",
+      "type": "string"
+     },
+     "OrgID": {
+      "description": "组织ID",
+      "type": "string"
+     },
+     "OrgUnitID": {
+      "description": "组织单元ID",
+      "type": "string"
+     },
+     "Owner": {
+      "description": "管理员",
+      "type": "string"
+     },
+     "OwnerName": {
+      "description": "管理员显示名称",
+      "type": "string"
+     },
+     "RejectReason": {
+      "description": "拒绝理由",
+      "type": "string"
+     },
+     "ShowName": {
+      "description": "账号显示名称",
+      "type": "string"
+     },
+     "Status": {
+      "description": "状态，1待接受，2已接受，3已拒绝，4已取消，已过期",
+      "format": "int32",
+      "type": "integer"
+     },
+     "UpdatedTime": {
+      "description": "更新时间",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ID",
+     "CreatedTime",
+     "UpdatedTime",
+     "Owner",
+     "OrgID",
+     "OrgUnitID",
+     "AccountID",
+     "AccountName",
+     "LinkID",
+     "Description",
+     "ShowName",
+     "AllowExit",
+     "Status",
+     "RejectReason",
+     "DeleteUk",
+     "OwnerName",
+     "MainName"
+    ],
+    "type": "object"
+   },
+   "AccountInvitationAndOUName": {
+    "description": "账号邀请记录详情",
+    "properties": {
+     "AccountID": {
+      "description": "账号ID",
+      "type": "string"
+     },
+     "AccountName": {
+      "description": "账号名称",
+      "type": "string"
+     },
+     "AllowExit": {
+      "description": "允许退出，1允许，2不允许",
+      "format": "int32",
+      "type": "integer"
+     },
+     "CreatedTime": {
+      "description": "创建时间",
+      "type": "string"
+     },
+     "DeleteUk": {
+      "description": "删除标记",
+      "type": "string"
+     },
+     "DeletedTime": {
+      "description": "删除时间",
+      "type": "string"
+     },
+     "Description": {
+      "description": "描述",
+      "type": "string"
+     },
+     "ExTime": {
+      "description": "过期时间",
+      "type": "string"
+     },
+     "ID": {
+      "description": "ID",
+      "type": "string"
+     },
+     "LinkID": {
+      "description": "链接唯一ID",
+      "type": "string"
+     },
+     "OrgID": {
+      "description": "组织ID",
+      "type": "string"
+     },
+     "OrgUnitID": {
+      "description": "组织单元ID",
+      "type": "string"
+     },
+     "OrgUnitName": {
+      "description": "组织单元名称",
+      "type": "string"
+     },
+     "Owner": {
+      "description": "管理员账号ID",
+      "type": "string"
+     },
+     "RejectReason": {
+      "description": "拒绝理由",
+      "type": "string"
+     },
+     "ShowName": {
+      "description": "账号显示名称",
+      "type": "string"
+     },
+     "Status": {
+      "description": "状态，1待接受，2已接受，3已拒绝，4已取消，已过期",
+      "format": "int32",
+      "type": "integer"
+     },
+     "UpdatedTime": {
+      "description": "更新时间",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ID",
+     "OrgUnitName",
+     "ExTime",
+     "CreatedTime",
+     "UpdatedTime",
+     "DeletedTime",
+     "Owner",
+     "OrgID",
+     "OrgUnitID",
+     "AccountID",
+     "AccountName",
+     "LinkID",
+     "Description",
+     "ShowName",
+     "AllowExit",
+     "Status",
+     "RejectReason",
+     "DeleteUk"
+    ],
+    "type": "object"
+   },
+   "AccountWithMainName": {
+    "description": "成员数据结构",
+    "properties": {
+     "AccountID": {
+      "description": "账号ID",
+      "type": "string"
+     },
+     "AccountName": {
+      "description": "账号名称",
+      "type": "string"
+     },
+     "AllowConsole": {
+      "description": "允许控制台访问，1允许，2不允许",
+      "format": "int32",
+      "type": "integer"
+     },
+     "AllowExit": {
+      "description": "允许退出，1允许，2不允许",
+      "format": "int32",
+      "type": "integer"
+     },
+     "CreatedTime": {
+      "description": "创建时间",
+      "type": "string"
+     },
+     "DeleteUk": {
+      "description": "删除标记",
+      "type": "string"
+     },
+     "DeletedTime": {
+      "description": "删除时间",
+      "type": "string"
+     },
+     "Description": {
+      "description": "描述",
+      "type": "string"
+     },
+     "ID": {
+      "description": "账号ID",
+      "type": "string"
+     },
+     "IamRole": {
+      "description": "IAM角色名称",
+      "type": "string"
+     },
+     "JoinType": {
+      "description": "加入类型, 1创建，2邀请",
+      "format": "int32",
+      "type": "integer"
+     },
+     "MainName": {
+      "description": "主体名称",
+      "type": "string"
+     },
+     "OrgID": {
+      "description": "组织ID",
+      "type": "string"
+     },
+     "OrgType": {
+      "description": "组织类型，1.企业组织",
+      "format": "int32",
+      "type": "integer"
+     },
+     "OrgUnitID": {
+      "description": "组织单元ID",
+      "type": "string"
+     },
+     "OrgVerificationID": {
+      "description": "认证主体ID",
+      "type": "string"
+     },
+     "Owner": {
+      "description": "管理员ID",
+      "type": "string"
+     },
+     "ShowName": {
+      "description": "显示名称",
+      "type": "string"
+     },
+     "UpdatedTime": {
+      "description": "更新时间",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ID",
+     "CreatedTime",
+     "UpdatedTime",
+     "DeletedTime",
+     "Owner",
+     "OrgID",
+     "OrgType",
+     "OrgUnitID",
+     "OrgVerificationID",
+     "AccountID",
+     "AccountName",
+     "ShowName",
+     "Description",
+     "IamRole",
+     "JoinType",
+     "AllowConsole",
+     "AllowExit",
+     "MainName",
+     "DeleteUk"
+    ],
+    "type": "object"
+   },
+   "ListTargetsForPolicyNode": {
+    "description": "Policy 绑定记录列表",
+    "properties": {
+     "AttachedTime": {
+      "description": "绑定时间",
+      "type": "string"
+     },
+     "TargetID": {
+      "description": "目标 ID",
+      "example": "\"1\"",
+      "type": "string"
+     },
+     "TargetName": {
+      "description": "目标名称",
+      "type": "string"
+     },
+     "TargetType": {
+      "description": "目标类型",
+      "enum": [
+       "OU",
+       "Account"
+      ],
+      "example": "Account",
+      "type": "string"
+     }
+    },
+    "required": [
+     "AttachedTime",
+     "TargetID",
+     "TargetName",
+     "TargetType"
+    ],
+    "type": "object"
+   },
+   "OrgQuitApplication": {
+    "description": "退出申请详情",
+    "properties": {
+     "AccountID": {
+      "description": "账号ID",
+      "type": "string"
+     },
+     "ApplyReason": {
+      "description": "申请理由",
+      "type": "string"
+     },
+     "AuditReason": {
+      "description": "审核理由",
+      "type": "string"
+     },
+     "AuditedTime": {
+      "description": "审核时间",
+      "type": "string"
+     },
+     "CreatedTime": {
+      "description": "创建时间",
+      "type": "string"
+     },
+     "DeleteUk": {
+      "description": "删除标记",
+      "type": "string"
+     },
+     "DeletedTime": {
+      "description": "删除时间",
+      "type": "string"
+     },
+     "ID": {
+      "description": "ID",
+      "type": "string"
+     },
+     "OrgID": {
+      "description": "组织ID",
+      "type": "string"
+     },
+     "Owner": {
+      "description": "管理员ID",
+      "type": "string"
+     },
+     "Status": {
+      "description": "状态，1审核中，2有效，3拒绝",
+      "format": "int32",
+      "type": "integer"
+     },
+     "UpdatedTime": {
+      "description": "更新时间",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ID",
+     "CreatedTime",
+     "UpdatedTime",
+     "DeletedTime",
+     "Owner",
+     "OrgID",
+     "AccountID",
+     "ApplyReason",
+     "AuditReason",
+     "AuditedTime",
+     "Status",
+     "DeleteUk"
+    ],
+    "type": "object"
+   },
+   "Organization": {
+    "description": "组织",
+    "properties": {
+     "CreatedTime": {
+      "description": "创建时间",
+      "type": "string"
+     },
+     "DeleteUk": {
+      "description": "删除标示",
+      "type": "string"
+     },
+     "DeletedTime": {
+      "description": "删除时间",
+      "type": "string"
+     },
+     "Description": {
+      "description": "描述",
+      "type": "string"
+     },
+     "ID": {
+      "description": "组织ID",
+      "type": "string"
+     },
+     "Name": {
+      "description": "组织名称",
+      "type": "string"
+     },
+     "Owner": {
+      "description": "管理员ID",
+      "type": "string"
+     },
+     "Status": {
+      "description": "状态",
+      "format": "int32",
+      "type": "integer"
+     },
+     "Type": {
+      "description": "组织类型",
+      "format": "int32",
+      "type": "integer"
+     },
+     "UpdatedTime": {
+      "description": "更新时间",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ID",
+     "CreatedTime",
+     "UpdatedTime",
+     "DeletedTime",
+     "Owner",
+     "Type",
+     "Name",
+     "Description",
+     "Status",
+     "DeleteUk"
+    ],
+    "type": "object"
+   },
+   "OrganizationUnit": {
+    "description": "组织单元",
+    "properties": {
+     "CreatedTime": {
+      "description": "创建时间",
+      "type": "string"
+     },
+     "DeleteUk": {
+      "description": "删除标识",
+      "type": "string"
+     },
+     "DeletedTime": {
+      "description": "删除时间",
+      "type": "string"
+     },
+     "Depth": {
+      "description": "深度",
+      "format": "int32",
+      "type": "integer"
+     },
+     "Description": {
+      "description": "描述",
+      "type": "string"
+     },
+     "ID": {
+      "description": "单元ID",
+      "type": "string"
+     },
+     "Name": {
+      "description": "单元名称",
+      "type": "string"
+     },
+     "OrgID": {
+      "description": "组织ID",
+      "type": "string"
+     },
+     "OrgType": {
+      "description": "组织类型",
+      "format": "int32",
+      "type": "integer"
+     },
+     "Owner": {
+      "description": "管理员ID",
+      "type": "string"
+     },
+     "ParentID": {
+      "description": "父单元ID",
+      "type": "string"
+     },
+     "UpdatedTime": {
+      "description": "更新时间",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ID",
+     "CreatedTime",
+     "UpdatedTime",
+     "DeletedTime",
+     "Owner",
+     "OrgID",
+     "OrgType",
+     "ParentID",
+     "Depth",
+     "Name",
+     "Description",
+     "DeleteUk"
+    ],
+    "type": "object"
+   },
+   "Owner": {
+    "description": "管理员信息",
+    "properties": {
+     "AccountID": {
+      "description": "账号ID",
+      "format": "int64",
+      "type": "integer"
+     },
+     "AccountName": {
+      "description": "账号名称",
+      "type": "string"
+     },
+     "MainName": {
+      "description": "主体名称",
+      "type": "string"
+     }
+    },
+    "required": [
+     "AccountName",
+     "MainName",
+     "AccountID"
+    ],
+    "type": "object"
+   },
+   "SCPAttachmentsForTarget": {
+    "description": "SCPAttachmentsForTarget",
+    "properties": {
+     "AttachedTime": {
+      "description": "绑定时间",
+      "example": "-",
+      "type": "string"
+     },
+     "Description": {
+      "description": "描述",
+      "example": "-",
+      "type": "string"
+     },
+     "PolicyID": {
+      "description": "策略ID",
+      "example": "-",
+      "type": "string"
+     },
+     "PolicyName": {
+      "description": "策略名称",
+      "example": "-",
+      "type": "string"
+     },
+     "PolicyType": {
+      "description": "策略类型",
+      "example": "-",
+      "type": "string"
+     }
+    },
+    "required": [
+     "AttachedTime",
+     "PolicyID",
+     "PolicyType",
+     "PolicyName",
+     "Description"
+    ],
+    "type": "object"
+   },
+   "ServiceControlPolicies": {
+    "description": "SCP详情",
+    "properties": {
+     "CreateDate": {
+      "description": "创建时间",
+      "type": "string"
+     },
+     "Description": {
+      "description": "描述",
+      "type": "string"
+     },
+     "PolicyID": {
+      "description": "策略ID",
+      "type": "string"
+     },
+     "PolicyName": {
+      "description": "策略名称",
+      "type": "string"
+     },
+     "PolicyType": {
+      "description": "策略类型",
+      "type": "string"
+     },
+     "UpdateDate": {
+      "description": "更新时间",
+      "type": "string"
+     }
+    },
+    "required": [
+     "PolicyID",
+     "PolicyName",
+     "PolicyType",
+     "CreateDate",
+     "UpdateDate",
+     "Description"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "description": "标签详情",
+    "properties": {
+     "Key": {
+      "description": "键",
+      "type": "string"
+     },
+     "Value": {
+      "description": "值",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "API documentation for organization",
+  "title": "organization",
+  "version": "2022-01-01"
+ },
+ "openapi": "3.0.0",
+ "paths": {
+  "/CreateOrganization": {
+   "post": {
+    "description": "创建企业组织",
+    "operationId": "CreateOrganization",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ID": {
+           "description": "企业组织ID",
+           "example": "-",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "创建企业组织"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ErrAccountIsPartner",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前账号是伙伴账号，禁止开通组织",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Account is partner",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "EnterpriseRealNameVerification",
+             "type": "string"
+            },
+            "description": {
+             "example": "账号未进行企业认证",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The account %d not a enterprise verified account",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ConcurrentException",
+             "type": "string"
+            },
+            "description": {
+             "example": "并发请求异常",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "concurrent request exception",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "RecordAlreadyExists",
+             "type": "string"
+            },
+            "description": {
+             "example": "记录已存在",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "record %s already exists",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "NoPermissionOnVerificationError",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前账号的实名认证主体信息不支持完成该操作，请联系账号管理员。 ",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "当前账号的实名认证主体信息不支持完成该操作，请联系账号管理员。",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "AccountInactive",
+             "type": "string"
+            },
+            "description": {
+             "example": "账号未激活",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The account inactive",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "未知错误，根据错误信息判断详情",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "创建企业组织",
+    "tags": [
+     "企业组织"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "organization",
+   "x-version": "2022-01-01"
+  },
+  "/CreateOrganizationalUnit": {
+   "post": {
+    "description": "创建企业组织单元",
+    "operationId": "CreateOrganizationalUnit",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "description": "描述",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "Name": {
+          "description": "组织单元名称",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "ParentId": {
+          "description": "父组织单元ID",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "ParentId",
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ID": {
+           "description": "单元ID",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "创建企业组织单元"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ConcurrentException",
+             "type": "string"
+            },
+            "description": {
+             "example": "并发请求异常",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "concurrent request exception",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "RecordAlreadyExists",
+             "type": "string"
+            },
+            "description": {
+             "example": "记录已存在",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "record %s already exists",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "RecordNotExists",
+           "type": "string"
+          },
+          "description": {
+           "example": "记录不存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "record %s not exists",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "创建企业组织单元",
+    "tags": [
+     "组织单元"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "organization",
+   "x-version": "2022-01-01"
+  },
+  "/CreateServiceControlPolicy": {
+   "post": {
+    "description": "创建管控策略",
+    "operationId": "CreateServiceControlPolicy",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "description": "策略描述",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "PolicyName": {
+          "description": "策略名称",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "Statement": {
+          "description": "策略表达式",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "PolicyName",
+         "Statement"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "CreateDate": {
+           "description": "创建时间",
+           "type": "string"
+          },
+          "Description": {
+           "description": "描述",
+           "type": "string"
+          },
+          "PolicyId": {
+           "description": "策略ID",
+           "type": "string"
+          },
+          "PolicyName": {
+           "description": "策略名称",
+           "type": "string"
+          },
+          "PolicyType": {
+           "description": "策略类型",
+           "type": "string"
+          },
+          "UpdateDate": {
+           "description": "更新时间",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "创建管控策略"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ConcurrentException",
+             "type": "string"
+            },
+            "description": {
+             "example": "并发请求异常",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "concurrent request exception",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParam",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数不合法",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter %v[%v] is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "无权限，没有对该资源进行该操作的权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "DuplicatePolicyException",
+             "type": "string"
+            },
+            "description": {
+             "example": "策略名称已存在",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "策略名称已存在",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "RecordNotExists",
+           "type": "string"
+          },
+          "description": {
+           "example": "记录不存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "record %s not exists",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "未知错误，根据错误信息判断详情",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "创建管控策略",
+    "tags": [
+     "管控策略"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "organization",
+   "x-version": "2022-01-01"
+  },
+  "/DescribeAccount": {
+   "post": {
+    "description": "查询成员账号信息",
+    "operationId": "DescribeAccount",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AccountId": {
+          "description": "成员账号ID",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "AccountId"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Account": {
+           "$ref": "#/components/schemas/AccountWithMainName"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询成员账号信息"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "无权限，没有对该资源进行该操作的权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParam",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数不合法",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter %v[%v] is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "RecordNotExists",
+           "type": "string"
+          },
+          "description": {
+           "example": "记录不存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "record %s not exists",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "未知错误，根据错误信息判断详情",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询成员账号信息",
+    "tags": [
+     "成员"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "organization",
+   "x-version": "2022-01-01"
+  },
+  "/DescribeAccountInvitation": {
+   "post": {
+    "description": "成员账号查询加入企业组织邀请信息",
+    "operationId": "DescribeAccountInvitation",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "InviteId": {
+          "description": "邀请记录ID",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "InviteId"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "InvationInfo": {
+           "$ref": "#/components/schemas/AccountInvitationAndMainName"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "成员账号查询加入企业组织邀请信息"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "无权限，没有对该资源进行该操作的权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParam",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数不合法",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter %v[%v] is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "RecordNotExists",
+           "type": "string"
+          },
+          "description": {
+           "example": "记录不存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "record %s not exists",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "未知错误，根据错误信息判断详情",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "成员账号查询加入企业组织邀请信息",
+    "tags": [
+     "成员"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "organization",
+   "x-version": "2022-01-01"
+  },
+  "/DescribeOrganization": {
+   "post": {
+    "description": "查询企业组织信息",
+    "operationId": "DescribeOrganization",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Organization": {
+           "$ref": "#/components/schemas/Organization"
+          },
+          "Owner": {
+           "$ref": "#/components/schemas/Owner"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询企业组织信息"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "RecordNotExists",
+           "type": "string"
+          },
+          "description": {
+           "example": "记录不存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "record %s not exists",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "未知错误，根据错误信息判断详情",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询企业组织信息",
+    "tags": [
+     "企业组织"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "organization",
+   "x-version": "2022-01-01"
+  },
+  "/DescribeOrganizationalUnit": {
+   "post": {
+    "description": "查询组织单元信息",
+    "operationId": "DescribeOrganizationalUnit",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "OrgUnitId": {
+          "description": "组织单元ID",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "OrgUnitId"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "OrganizationUnit": {
+           "$ref": "#/components/schemas/OrganizationUnit"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询组织单元信息"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParam",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数不合法",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter %v[%v] is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "无权限，没有对该资源进行该操作的权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "未知错误，根据错误信息判断详情",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询组织单元信息",
+    "tags": [
+     "组织单元"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "organization",
+   "x-version": "2022-01-01"
+  },
+  "/DescribeQuitApplication": {
+   "post": {
+    "description": "查询成员账号退出申请信息",
+    "operationId": "DescribeQuitApplication",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ApplicationId": {
+          "description": "退出申请ID",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "ApplicationId"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "OrgQuitApplication": {
+           "$ref": "#/components/schemas/OrgQuitApplication"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询成员账号退出申请信息"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "RecordNotExists",
+           "type": "string"
+          },
+          "description": {
+           "example": "记录不存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "record %s not exists",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "未知错误，根据错误信息判断详情",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询成员账号退出申请信息",
+    "tags": [
+     "成员"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "organization",
+   "x-version": "2022-01-01"
+  },
+  "/GetAccountSecureContactInfo": {
+   "post": {
+    "description": "查询成员账号安全信息",
+    "operationId": "GetAccountSecureContactInfo",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AccountId": {
+          "description": "账号ID",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "AccountId"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Email": {
+           "description": "安全邮箱",
+           "type": "string"
+          },
+          "EmailVerified": {
+           "description": "安全邮箱是否验证，1: 未验证，2: 已验证",
+           "format": "int32",
+           "type": "integer"
+          },
+          "NewEmail": {
+           "description": "变更的新邮箱，当有安全邮箱正在变更中记录时返回，没有相关数据返回空",
+           "type": "string"
+          },
+          "NewPhone": {
+           "description": "变更中的新手机号（脱敏），当有正在变更中记录时返回，没有相关数据返回空",
+           "type": "string"
+          },
+          "Phone": {
+           "description": "安全手机号（脱敏）",
+           "type": "string"
+          },
+          "PhoneVerified": {
+           "description": "手机号是否已验证，1: 未验证，2: 已验证",
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询成员账号安全信息"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "AccountInactive",
+             "type": "string"
+            },
+            "description": {
+             "example": "账号未激活",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The account inactive",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "无权限，没有对该资源进行该操作的权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "DLPMaskFailed",
+             "type": "string"
+            },
+            "description": {
+             "example": "内部错误，参数脱敏失败",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "DLP Mask Param[%v] failed",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ConcurrentException",
+             "type": "string"
+            },
+            "description": {
+             "example": "并发请求异常",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "concurrent request exception",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "未知错误，根据错误信息判断详情",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询成员账号安全信息",
+    "tags": [
+     "成员"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "organization",
+   "x-version": "2022-01-01"
+  },
+  "/GetServiceControlPolicy": {
+   "post": {
+    "description": "查询管控策略详情",
+    "operationId": "GetServiceControlPolicy",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "PolicyID": {
+          "description": "策略ID",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "PolicyID"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "CreateDate": {
+           "description": "创建时间",
+           "type": "string"
+          },
+          "Description": {
+           "description": "描述",
+           "type": "string"
+          },
+          "PolicyID": {
+           "description": "策略ID",
+           "type": "string"
+          },
+          "PolicyName": {
+           "description": "策略名称",
+           "type": "string"
+          },
+          "PolicyType": {
+           "description": "策略类型",
+           "type": "string"
+          },
+          "Statement": {
+           "description": "策略表达式",
+           "type": "string"
+          },
+          "UpdateDate": {
+           "description": "更新时间",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询管控策略详情"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "PermissionError",
+           "type": "string"
+          },
+          "description": {
+           "example": "无权限，没有对该资源进行该操作的权限",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 400,
+           "type": "integer"
+          },
+          "message": {
+           "example": "No permission to perform action[%s] on resource %s",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "未知错误，根据错误信息判断详情",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询管控策略详情",
+    "tags": [
+     "管控策略"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "organization",
+   "x-version": "2022-01-01"
+  },
+  "/GetServiceControlPolicyEnablement": {
+   "post": {
+    "description": "查询管控策略启用状态",
+    "operationId": "GetServiceControlPolicyEnablement",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "CanFullAccessDetach": {
+           "description": "是否可以解绑 FullAccess 策略",
+           "type": "boolean"
+          },
+          "Status": {
+           "description": "开启状态，Enabled Disabled PendingEnable PendingDisable",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询管控策略启用状态"
+     }
+    },
+    "summary": "查询管控策略启用状态",
+    "tags": [
+     "管控策略"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "organization",
+   "x-version": "2022-01-01"
+  },
+  "/ListAccounts": {
+   "post": {
+    "description": "获取企业组织内账号列表",
+    "operationId": "ListAccounts",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "IncludeTags": {
+          "description": "是否返回tags信息",
+          "example": false,
+          "type": "boolean",
+          "x-split-type": 0
+         },
+         "Limit": {
+          "description": "每一页显示数量，默认 10，最大 100",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "Offset": {
+          "description": "页数，起始值1",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "OrderBy": {
+          "description": "排序顺序，1.降序 2.升序,默认为1",
+          "enum": [
+           "1",
+           "2"
+          ],
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "OrgUnitId": {
+          "description": "组织单元ID",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "Search": {
+          "description": "显示名称或成员账号Id模糊查询",
+          "example": "id",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "VerificationId": {
+          "description": "认证主体ID",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AccountList": {
+           "description": "账号列表",
+           "example": [
+            "\"AccountList\": [\n      {\n        \"ID\": \"Z4CdjhMv0\"",
+            "\"CreatedTime\": \"7\"",
+            "\"UpdatedTime\": \"jT4Mn\"",
+            "\"DeletedTime\": \"jPyxH\"",
+            "\"Owner\": \"UOdHW1D1D\"",
+            "\"OrgID\": \"ufd5mYn7\"",
+            "\"OrgUnitID\": \"k\"",
+            "\"OrgVerificationID\": \"O5HpiM\"",
+            "\"AccountID\": \"Bed0Bi\"",
+            "\"AccountName\": \"CDpEwu37\"",
+            "\"ShowName\": \"pv\"",
+            "\"Description\": \"hNLqT2dC\"",
+            "\"IamRole\": \"23HY\"",
+            "\"JoinType\": 1",
+            "\"AllowExit\": 2",
+            "\"AllowConsole\": 2",
+            "\"OrgUnitName\": \"Xi3tND5NR\"",
+            "\"IsOwner\": 687",
+            "\"DeleteUk\": \"8z9Sbede\"",
+            "\"Tags\": [\n          {\n            \"Key\": \"86uthgqPVY\"",
+            "\"Value\": \"5\"\n          }\n        ]",
+            "\"OrgType\": 455\n      }\n    ]"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/AccountAndTag"
+           },
+           "type": "array"
+          },
+          "Limit": {
+           "description": "每一页显示数量",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Offset": {
+           "description": "页数",
+           "example": 1,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数",
+           "example": 100,
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取企业组织内账号列表"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "PermissionError",
+           "type": "string"
+          },
+          "description": {
+           "example": "无权限，没有对该资源进行该操作的权限",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 400,
+           "type": "integer"
+          },
+          "message": {
+           "example": "No permission to perform action[%s] on resource %s",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "RecordNotExists",
+           "type": "string"
+          },
+          "description": {
+           "example": "记录不存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "record %s not exists",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "未知错误，根据错误信息判断详情",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "获取企业组织内账号列表",
+    "tags": [
+     "成员"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "organization",
+   "x-version": "2022-01-01"
+  },
+  "/ListInvitations": {
+   "post": {
+    "description": "查询全部加入企业组织邀请",
+    "operationId": "ListInvitations",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Limit": {
+          "description": "分页大小，默认10，最大 100",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "Offset": {
+          "description": "分页，第一页为1",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "OrderBy": {
+          "description": "排序顺序，1.降序 2.升序，默认降序",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "OrderStr": {
+          "description": "排序字段，\"created_time\"，\"updated_time\"，默认created_time",
+          "example": "created_time",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "OrgUnitId": {
+          "description": "组织单元Id",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "Search": {
+          "description": "按显示名或账号Id模糊查询",
+          "example": "id",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "InvitationList": {
+           "description": "账号邀请详情",
+           "example": [
+            "\"InvitationList\": [\n      {\n        \"ID\": \"uwQQWzP\"",
+            "\"OrgUnitName\": \"jOp\"",
+            "\"ExTime\": \"J3RHyNMkGh\"",
+            "\"CreatedTime\": \"9\"",
+            "\"UpdatedTime\": \"Xi\"",
+            "\"DeletedTime\": \"t0JVSSNO4\"",
+            "\"Owner\": \"98csz0\"",
+            "\"OrgID\": \"kcm\"",
+            "\"OrgUnitID\": \"9oDGl\"",
+            "\"AccountID\": \"D8\"",
+            "\"AccountName\": \"zc2tlRnc\"",
+            "\"LinkID\": \"Gh1fTF24\"",
+            "\"Description\": \"fqbXwz\"",
+            "\"ShowName\": \"RPPG\"",
+            "\"AllowExit\": \"\"",
+            "\"Status\": \"\"",
+            "\"RejectReason\": \"mfmLY\"",
+            "\"DeleteUk\": \"LASwOeWQe0\"\n      }\n    ]"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/AccountInvitationAndOUName"
+           },
+           "type": "array"
+          },
+          "Limit": {
+           "description": "分页大小，默认10",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Offset": {
+           "description": "分页，第一页为1",
+           "example": 1,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数",
+           "example": 100,
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询全部加入企业组织邀请"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "无权限，没有对该资源进行该操作的权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParam",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数不合法",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter %v[%v] is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "RecordNotExists",
+           "type": "string"
+          },
+          "description": {
+           "example": "记录不存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "record %s not exists",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "未知错误，根据错误信息判断详情",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询全部加入企业组织邀请",
+    "tags": [
+     "成员"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "organization",
+   "x-version": "2022-01-01"
+  },
+  "/ListOrganizationalUnits": {
+   "post": {
+    "description": "获取企业组织所有单元列表\n",
+    "operationId": "ListOrganizationalUnits",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "SubUnitList": {
+           "description": "单元列表详情",
+           "example": [
+            "\"SubUnitList\": [\n  {\n    \"ID\": \"uuXUSAwQdmZ\"",
+            "\"CreatedTime\": \"aaxs\"",
+            "\"UpdatedTime\": \"R9gCri3E\"",
+            "\"DeletedTime\": \"8LQd\"",
+            "\"Owner\": \"Z6wxMsnUq81\"",
+            "\"OrgID\": \"8I0f2AIlNOJ\"",
+            "\"OrgType\": 474",
+            "\"ParentID\": \"gk\"",
+            "\"Depth\": 375",
+            "\"Name\": \"WF4i\"",
+            "\"Description\": \"B3vZTqZA\"",
+            "\"DeleteUk\": \"d5YG\"\n  }\n]"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/OrganizationUnit"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取企业组织所有单元列表\n"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParam",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数不合法",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter %v[%v] is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "无权限，没有对该资源进行该操作的权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "未知错误，根据错误信息判断详情",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "获取企业组织所有单元列表",
+    "tags": [
+     "组织单元"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "organization",
+   "x-version": "2022-01-01"
+  },
+  "/ListOrganizationalUnitsForParent": {
+   "post": {
+    "description": "获取企业组织单元列表",
+    "operationId": "ListOrganizationalUnitsForParent",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Limit": {
+          "description": "每一页显示数量, 默认 10，最大 100",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "Offset": {
+          "description": "页数，起始值1",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "ParentId": {
+          "description": "父组织单元ID",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "ParentId"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Limit": {
+           "description": "每一页显示数量",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Offset": {
+           "description": "页数",
+           "example": 1,
+           "format": "int32",
+           "type": "integer"
+          },
+          "SubUnitList": {
+           "description": "子单元列表详情",
+           "example": [
+            "\"SubUnitList\": [\n      {\n        \"ID\": \"7289189280256180268\"",
+            "\"CreatedTime\": \"2023-10-17T15:19:33+08:00\"",
+            "\"UpdatedTime\": \"2023-10-17T15:21:44+08:00\"",
+            "\"Owner\": \"2100245176\"",
+            "\"OrgID\": \"7167316755275595820\"",
+            "\"OrgType\": 1",
+            "\"ParentID\": \"7167316755275661356\"",
+            "\"Depth\": 1",
+            "\"Name\": \"name\"",
+            "\"Description\": \"\"\n      }\n    ]"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/OrganizationUnit"
+           },
+           "type": "array"
+          },
+          "Total": {
+           "description": "总数",
+           "example": 100,
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取企业组织单元列表"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParam",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数不合法",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter %v[%v] is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "无权限，没有对该资源进行该操作的权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "RecordNotExists",
+           "type": "string"
+          },
+          "description": {
+           "example": "记录不存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "record %s not exists",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "未知错误，根据错误信息判断详情",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "获取企业组织单元列表",
+    "tags": [
+     "组织单元"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "organization",
+   "x-version": "2022-01-01"
+  },
+  "/ListServiceControlPolicies": {
+   "post": {
+    "description": "获取管控策略列表",
+    "operationId": "ListServiceControlPolicies",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "PageNumber": {
+          "description": "页数",
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PageSize": {
+          "description": "分页大小",
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PolicyType": {
+          "description": "策略类型，System: 系统策略|Custom: 自定义策略",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "Query": {
+          "description": "查询字符串 策略名称或备注模糊匹配",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "SortBy": {
+          "description": "排序依据，CreateDate | UpdateDate",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "SortOrder": {
+          "description": "排序顺序，Desc | Asc",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "PageNumber": {
+           "description": "页数",
+           "format": "int32",
+           "type": "integer"
+          },
+          "PageSize": {
+           "description": "分页大小",
+           "format": "int32",
+           "type": "integer"
+          },
+          "ServiceControlPolicies": {
+           "description": "控制策略详情",
+           "items": {
+            "$ref": "#/components/schemas/ServiceControlPolicies"
+           },
+           "type": "array"
+          },
+          "TotalCount": {
+           "description": "总数",
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取管控策略列表"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "无权限，没有对该资源进行该操作的权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParam",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数不合法",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter %v[%v] is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "未知错误，根据错误信息判断详情",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "获取管控策略列表",
+    "tags": [
+     "管控策略"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "organization",
+   "x-version": "2022-01-01"
+  }
+ }
+}

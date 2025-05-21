@@ -1,0 +1,5839 @@
+{
+ "components": {
+  "schemas": {
+   "APIMeta": {
+    "description": "ListActions - APIMeta",
+    "properties": {
+     "Action": {
+      "description": "Action",
+      "type": "string"
+     },
+     "ActionGroup": {
+      "description": "Action 组",
+      "type": "string"
+     },
+     "Description": {
+      "description": "描述",
+      "type": "string"
+     },
+     "DisplayName": {
+      "description": "显示名称",
+      "type": "string"
+     },
+     "OperationType": {
+      "description": "操作类型",
+      "format": "int32",
+      "type": "integer"
+     },
+     "Resources": {
+      "description": "资源列表",
+      "items": {
+       "$ref": "#/components/schemas/ResourceMeta"
+      },
+      "type": "array"
+     },
+     "Status": {
+      "description": "删除状态",
+      "type": "string"
+     },
+     "Version": {
+      "description": "Version",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "OperationType",
+     "DisplayName",
+     "ActionGroup",
+     "Description",
+     "Status",
+     "Resources"
+    ],
+    "type": "object"
+   },
+   "AccessKey": {
+    "description": "访问密钥的数据结构。",
+    "properties": {
+     "AccessKeyId": {
+      "description": "密钥ID（Access Key Id）。",
+      "example": "WmprME5E**************************4WWpjME16Yw==",
+      "type": "string"
+     },
+     "CreateDate": {
+      "description": "密钥创建时间。时间格式为ISO8601。",
+      "example": "20180801T210558Z",
+      "type": "string"
+     },
+     "SecretAccessKey": {
+      "description": "私有密钥（Secret Access Key）。",
+      "example": "AKLTZjIwYz*****************************ZDAxYjE",
+      "type": "string"
+     },
+     "Status": {
+      "description": "密钥状态。active代表启用状态，inactive代表禁用状态。",
+      "example": "active",
+      "type": "string"
+     },
+     "UpdateDate": {
+      "description": "密钥更新时间。时间格式为ISO8601。",
+      "example": "20180801T210558Z",
+      "type": "string"
+     },
+     "UserName": {
+      "description": "用户名。如果是IAM用户的密钥，则显示其用户名；如果是主账号的密钥，则显示空字符串。",
+      "example": "Bob",
+      "type": "string"
+     }
+    },
+    "required": [
+     "SecretAccessKey",
+     "UserName",
+     "CreateDate",
+     "UpdateDate",
+     "Status",
+     "AccessKeyId"
+    ],
+    "type": "object"
+   },
+   "AccessKeyLastUsed": {
+    "description": "访问密钥的最后使用信息",
+    "properties": {
+     "Region": {
+      "description": "API密钥最后访问的地域。",
+      "example": "cn-beijing",
+      "type": "string"
+     },
+     "RequestTime": {
+      "description": "API密钥的最后使用的时间。",
+      "example": "20060102T150405Z",
+      "type": "string"
+     },
+     "Service": {
+      "description": "API密钥最后访问的服务的英文简称。",
+      "example": "ecs",
+      "type": "string"
+     }
+    },
+    "required": [
+     "RequestTime",
+     "Service",
+     "Region"
+    ],
+    "type": "object"
+   },
+   "AccessKeyMeta": {
+    "description": "访问密钥元数据的数据结构，不包含私有访问密钥的访问密钥相关信息。 在ListAccessKeys操作中作为响应元素被使用。",
+    "properties": {
+     "AccessKeyId": {
+      "description": "密钥ID（Access Key Id）。\n\n",
+      "example": "AKLTZjIwYzBjYzczNWQ4NDkwN******3NzViZTgzZDAxYjE",
+      "type": "string"
+     },
+     "CreateDate": {
+      "description": "密钥更新时间。时间格式为ISO8601。\n",
+      "example": "20240912T113532Z",
+      "type": "string"
+     },
+     "Status": {
+      "description": "密钥状态。active代表启用状态，inactive代表禁用状态。\n\n",
+      "example": "active",
+      "type": "string"
+     },
+     "UpdateDate": {
+      "description": "密钥创建时间。时间格式为ISO8601。\n\n",
+      "example": "20240912T113532Z",
+      "type": "string"
+     },
+     "UserName": {
+      "description": "如果是IAM用户的密钥，则显示其用户名；如果是主账户的密钥，则显示空字符串。\n\n",
+      "example": "Bob",
+      "type": "string"
+     }
+    },
+    "required": [
+     "AccessKeyId",
+     "UserName",
+     "Status",
+     "UpdateDate",
+     "CreateDate"
+    ],
+    "type": "object"
+   },
+   "Account": {
+    "description": "账号数据",
+    "properties": {
+     "AccountId": {
+      "description": "账号ID",
+      "format": "int32",
+      "type": "integer"
+     },
+     "AccountName": {
+      "description": "账号名称",
+      "type": "string"
+     },
+     "AccountNameModifiedTime": {
+      "description": "账号名修改时间",
+      "type": "string"
+     },
+     "CountryArea": {
+      "description": "国家地区",
+      "type": "string"
+     },
+     "CreateDate": {
+      "description": "创建日期",
+      "type": "string"
+     },
+     "CreateSource": {
+      "description": "创建来源",
+      "format": "int32",
+      "type": "integer"
+     },
+     "CreateType": {
+      "description": "创建类型",
+      "format": "int32",
+      "type": "integer"
+     },
+     "EmailVerified": {
+      "description": "邮箱已认证",
+      "format": "int32",
+      "type": "integer"
+     },
+     "SecurityEmail": {
+      "description": "安全邮箱",
+      "type": "string"
+     },
+     "SecurityTel": {
+      "description": "安全手机",
+      "type": "string"
+     },
+     "Site": {
+      "description": "所属站点",
+      "type": "string"
+     },
+     "Status": {
+      "description": "账号状态",
+      "type": "string"
+     },
+     "TelVerified": {
+      "description": "手机号已认证",
+      "format": "int32",
+      "type": "integer"
+     },
+     "UpdateDate": {
+      "description": "更新日期",
+      "type": "string"
+     }
+    },
+    "required": [
+     "AccountId",
+     "AccountName",
+     "SecurityTel",
+     "EmailVerified",
+     "TelVerified",
+     "AccountNameModifiedTime",
+     "Status",
+     "CreateDate",
+     "UpdateDate",
+     "Site",
+     "CountryArea",
+     "CreateType",
+     "CreateSource",
+     "SecurityEmail"
+    ],
+    "type": "object"
+   },
+   "ActionSecurity": {
+    "description": "操作保护配置",
+    "properties": {
+     "MfaAuthExemptDuration": {
+      "description": "操作免验时长",
+      "format": "int32",
+      "type": "integer"
+     },
+     "MfaAuthRequired": {
+      "description": "MFA开关状态",
+      "format": "int32",
+      "type": "integer"
+     },
+     "MfaAuthType": {
+      "description": "MFA验证方式",
+      "type": "string"
+     }
+    },
+    "required": [
+     "MfaAuthType",
+     "MfaAuthExemptDuration",
+     "MfaAuthRequired"
+    ],
+    "type": "object"
+   },
+   "AssociatedResourceSetting": {
+    "description": "关联资源配置",
+    "properties": {
+     "AssociatedResourceType": {
+      "description": "关联资源的资源类型",
+      "type": "string"
+     },
+     "AssociatedService": {
+      "description": "关联资源的服务名",
+      "type": "string"
+     },
+     "ResourceType": {
+      "description": "资源类型",
+      "example": "instance",
+      "type": "string"
+     },
+     "Service": {
+      "description": "服务",
+      "example": "ecs",
+      "type": "string"
+     },
+     "Status": {
+      "description": "关联资源设置开通状态",
+      "enum": [
+       "Enable",
+       "Disable"
+      ],
+      "example": "Enable",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Service",
+     "ResourceType",
+     "AssociatedService",
+     "AssociatedResourceType",
+     "Status"
+    ],
+    "type": "object"
+   },
+   "AttachedPolicy": {
+    "description": "被附加的策略的数据结构。",
+    "properties": {
+     "AttachDate": {
+      "description": "策略绑定时间。",
+      "example": "20240912T090631Z",
+      "type": "string"
+     },
+     "Description": {
+      "description": "策略描述。",
+      "example": "云服务器（ECS）完全管理权限",
+      "type": "string"
+     },
+     "PolicyName": {
+      "description": "策略名。",
+      "example": "ECSFullAccess",
+      "type": "string"
+     },
+     "PolicyScope": {
+      "description": "策略授权的作用范围，特指项目范围。",
+      "example": [
+       "请参考数据结构内具体参数示例值。"
+      ],
+      "items": {
+       "$ref": "#/components/schemas/PolicyScope"
+      },
+      "type": "array"
+     },
+     "PolicyTrn": {
+      "description": "策略的TRN。",
+      "example": "trn:iam::2000000000:policy/ECSFullAccess",
+      "type": "string"
+     },
+     "PolicyType": {
+      "description": "策略类型。System代表系统预设策略，Custom代表自定义策略。",
+      "example": "System",
+      "type": "string"
+     }
+    },
+    "required": [
+     "PolicyTrn",
+     "PolicyName",
+     "PolicyType",
+     "AttachDate",
+     "Description",
+     "PolicyScope"
+    ],
+    "type": "object"
+   },
+   "BeginWebauthnResponse": {
+    "description": "开始绑定webauthn返回的参数信息",
+    "properties": {
+     "AttestationPreference": {
+      "description": "从身份验证器返回的证明数据具有可用于跟踪用户的信息",
+      "type": "string"
+     },
+     "AuthenticatorSelection": {
+      "description": "允许注册的身份验证器的类型",
+      "type": "string"
+     },
+     "Challenge": {
+      "description": "挑战",
+      "type": "string"
+     },
+     "CredentialParameters": {
+      "description": "签名的算法集合",
+      "type": "string"
+     },
+     "RelyingPartyEntity": {
+      "description": "三方rp实体",
+      "type": "string"
+     },
+     "Timeout": {
+      "description": "超时时间",
+      "type": "string"
+     },
+     "UserEntity": {
+      "description": "用户实体信息",
+      "type": "string"
+     }
+    },
+    "required": [
+     "RelyingPartyEntity",
+     "UserEntity",
+     "Challenge",
+     "CredentialParameters",
+     "Timeout",
+     "AuthenticatorSelection",
+     "AttestationPreference"
+    ],
+    "type": "object"
+   },
+   "Certificate": {
+    "description": "SAML 证书",
+    "properties": {
+     "CertificateId": {
+      "description": "证书ID",
+      "type": "string"
+     },
+     "CreateDate": {
+      "description": "证书上传时间",
+      "example": "2024-02-27T17:23:32+08:00",
+      "type": "string"
+     },
+     "Issuer": {
+      "description": "证书颁发机构",
+      "type": "string"
+     },
+     "NotAfter": {
+      "description": "证书失效时间",
+      "example": "2024-10-19T10:40:26+08:00",
+      "type": "string"
+     },
+     "NotBefore": {
+      "description": "证书有效时间",
+      "example": "2023-10-20T10:40:26+08:00",
+      "type": "string"
+     },
+     "SerialNumber": {
+      "description": "证书序列号",
+      "type": "string"
+     },
+     "SignatureAlgorithm": {
+      "description": "证书签名算法",
+      "example": "SHA512-RSA",
+      "type": "string"
+     },
+     "Subject": {
+      "description": "证书主体",
+      "type": "string"
+     },
+     "UpdateDate": {
+      "description": "证书更新时间",
+      "example": "2024-02-27T17:23:32+08:00",
+      "type": "string"
+     },
+     "Version": {
+      "description": "证书版本",
+      "type": "string"
+     }
+    },
+    "required": [
+     "CertificateId",
+     "CreateDate",
+     "UpdateDate",
+     "SerialNumber",
+     "Issuer",
+     "Version",
+     "SignatureAlgorithm",
+     "NotBefore",
+     "NotAfter",
+     "Subject"
+    ],
+    "type": "object"
+   },
+   "ConditionMeta": {
+    "description": "ListActions - ConditionMeta",
+    "properties": {
+     "ConditionKey": {
+      "description": "Condition Key",
+      "type": "string"
+     },
+     "KeyFixed": {
+      "description": "KeyFixed",
+      "type": "string"
+     },
+     "Multivalued": {
+      "description": "是否为多值",
+      "type": "string"
+     },
+     "Operators": {
+      "description": "Operator 列表",
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Scope": {
+      "description": "Scope",
+      "type": "string"
+     },
+     "Type": {
+      "description": "类型",
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "ConditionKey",
+     "Scope",
+     "Multivalued",
+     "Type",
+     "Operators",
+     "KeyFixed"
+    ],
+    "type": "object"
+   },
+   "ConfigItem": {
+    "additionalProperties": true,
+    "description": "配置信息项",
+    "type": "object"
+   },
+   "Filter": {
+    "description": "过滤条件",
+    "properties": {
+     "Key": {
+      "description": "过滤条件键",
+      "type": "string"
+     },
+     "MatchType": {
+      "description": "匹配方式",
+      "type": "string"
+     },
+     "Values": {
+      "description": "过滤条件值，值之间查询逻辑为OR",
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Key"
+    ],
+    "type": "object"
+   },
+   "GroupOfUser": {
+    "description": "用户组加入的用户组的数据结构。",
+    "properties": {
+     "Description": {
+      "description": "用户组描述。",
+      "example": "开发组",
+      "type": "string"
+     },
+     "DisplayName": {
+      "description": "用户组显示名。",
+      "example": "开发组",
+      "type": "string"
+     },
+     "JoinDate": {
+      "description": "用户加入用户组的时间。",
+      "example": "20150123T123318Z",
+      "type": "string"
+     },
+     "UserGroupID": {
+      "description": "用户组ID。",
+      "example": 20000,
+      "format": "int32",
+      "type": "integer"
+     },
+     "UserGroupName": {
+      "description": "用户组名。",
+      "example": "dev-group",
+      "type": "string"
+     }
+    },
+    "required": [
+     "UserGroupID",
+     "UserGroupName",
+     "DisplayName",
+     "Description",
+     "JoinDate"
+    ],
+    "type": "object"
+   },
+   "IPItem": {
+    "description": "IP白名单的条目",
+    "properties": {
+     "Description": {
+      "description": "IP白名单的备注",
+      "type": "string"
+     },
+     "IP": {
+      "description": "IP地址",
+      "type": "string"
+     }
+    },
+    "required": [
+     "IP"
+    ],
+    "type": "object"
+   },
+   "IPList": {
+    "additionalProperties": true,
+    "description": "ip白名单的数据",
+    "type": "object"
+   },
+   "IdentityProvider": {
+    "description": "身份提供商信息",
+    "properties": {
+     "CreateDate": {
+      "description": "创建时间",
+      "example": "2024-01-03T16:10:57+08:00\n",
+      "type": "string"
+     },
+     "Description": {
+      "description": "身份提供商描述",
+      "type": "string"
+     },
+     "IdpType": {
+      "description": "身份提供商类型\n1. SAML\n2. OIDC（暂未支持）\n3. OAuth",
+      "enum": [
+       "1",
+       "2",
+       "3"
+      ],
+      "format": "int32",
+      "type": "integer"
+     },
+     "ProviderName": {
+      "description": "身份提供商名称",
+      "type": "string"
+     },
+     "SSOType": {
+      "description": "身份提供商 SSO 类型\n1. 角色 SSO\n2. 用户 SSO",
+      "enum": [
+       "1",
+       "2"
+      ],
+      "format": "int32",
+      "type": "integer"
+     },
+     "Status": {
+      "description": "身份提供商状态 (仅用户 SSO)\n1. 开启\n2. 开启并禁用其他登录方式\n3. 关闭",
+      "enum": [
+       "1",
+       "2",
+       "3"
+      ],
+      "format": "int32",
+      "type": "integer"
+     },
+     "Trn": {
+      "description": "身份提供商 Trn",
+      "example": "trn:iam::2100000000:saml-provider/my-provider\n",
+      "type": "string"
+     },
+     "UpdateDate": {
+      "description": "更新时间",
+      "example": "2024-01-03T16:10:57+08:00\n",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Trn",
+     "ProviderName",
+     "IdpType",
+     "SSOType",
+     "Status",
+     "Description",
+     "CreateDate",
+     "UpdateDate"
+    ],
+    "type": "object"
+   },
+   "ListConsoleServicesService": {
+    "description": "ListConsoleServices - Service",
+    "properties": {
+     "AccessKey": {
+      "description": "服务 Access Key",
+      "type": "string"
+     },
+     "SecretKey": {
+      "description": "服务 Secret Key",
+      "type": "string"
+     },
+     "Service": {
+      "description": "服务名",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Service",
+     "AccessKey",
+     "SecretKey"
+    ],
+    "type": "object"
+   },
+   "ListServicesWithSLRService": {
+    "description": "ListServicesWithSLR - Serivce",
+    "properties": {
+     "ServiceName": {
+      "description": "服务名",
+      "type": "string"
+     },
+     "ServiceNameCn": {
+      "description": "服务中文名",
+      "type": "string"
+     },
+     "WithServiceLinkedRoleTemplate": {
+      "description": "是否存在对应的服务关联角色",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "ServiceName",
+     "ServiceNameCn",
+     "WithServiceLinkedRoleTemplate"
+    ],
+    "type": "object"
+   },
+   "LoginProfile": {
+    "description": "登录配置数据类型，包含IAM用户实体的登录配置信息，例如用户名、密码创建时间和是否下次登录设置新密码等。",
+    "properties": {
+     "CreateDate": {
+      "description": "登录配置创建时间。",
+      "example": "20230614T095016Z",
+      "type": "string"
+     },
+     "LastLoginDate": {
+      "description": "上次登录时间。",
+      "example": "20240913T053436Z",
+      "type": "string"
+     },
+     "LastLoginIp": {
+      "description": "上次登录IP。",
+      "example": "211.**.**.155",
+      "type": "string"
+     },
+     "LastResetPasswordTime": {
+      "description": "上次重置密码的时间。0代表未设置过密码，非0代表过期时间的时间戳。",
+      "example": 1701763622,
+      "format": "int32",
+      "type": "integer"
+     },
+     "LoginAllowed": {
+      "description": "是否允许登录。true代表允许，false代表不允许。",
+      "example": true,
+      "type": "boolean"
+     },
+     "LoginLocked": {
+      "description": "登录是否被锁定。true代表已锁定，false代表未锁定。管理员设置错误密码重试次数限制后，用户命中后登录会被锁定。",
+      "example": false,
+      "type": "boolean"
+     },
+     "PasswordExpireAt": {
+      "description": "密码过期时间。0代表永不过期，非0代表过期时间的时间戳。",
+      "example": 0,
+      "format": "int32",
+      "type": "integer"
+     },
+     "PasswordResetRequired": {
+      "description": "下次登录是否需要重设密码。true代表允许，false代表不允许。",
+      "example": true,
+      "type": "boolean"
+     },
+     "SafeAuthExemptDuration": {
+      "description": "登录保护豁免时长。支持设置1至7（天），或1至168（小时），或5至1440（分钟）。单位设置请参考SafeAuthExemptUnit参数。",
+      "example": 15,
+      "format": "int32",
+      "type": "integer"
+     },
+     "SafeAuthExemptRequired": {
+      "description": "是否开启登录保护豁免。0代表不开启，1代表开启。开启登录保护豁免后，验证完成后一定时间内登录将不再进行验证。",
+      "example": 0,
+      "format": "int32",
+      "type": "integer"
+     },
+     "SafeAuthExemptUnit": {
+      "description": "登录保护豁免的时间单位。0代表分钟，1代表小时，2代表天。",
+      "example": 0,
+      "format": "int32",
+      "type": "integer"
+     },
+     "SafeAuthFlag": {
+      "description": "是否开启登录保护。true代表开启，false代表不开启。",
+      "example": false,
+      "type": "boolean"
+     },
+     "SafeAuthType": {
+      "description": "登录保护类型。phone代表手机验证，email代表邮箱验证，vmfa代表验证MFA设备验证。支持设置多种操作保护类型，以英文逗号分隔。",
+      "example": "phone",
+      "type": "string"
+     },
+     "UpdateDate": {
+      "description": "登录配置更新时间。",
+      "example": "20230614T095016Z",
+      "type": "string"
+     },
+     "UserId": {
+      "description": "用户ID。",
+      "example": 10000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "UserName": {
+      "description": "用户名。",
+      "example": "Bob",
+      "type": "string"
+     }
+    },
+    "required": [
+     "UserId",
+     "UserName",
+     "LoginAllowed",
+     "PasswordResetRequired",
+     "PasswordExpireAt",
+     "LastResetPasswordTime",
+     "LastLoginDate",
+     "LastLoginIp",
+     "LoginLocked",
+     "SafeAuthFlag",
+     "SafeAuthType",
+     "SafeAuthExemptRequired",
+     "SafeAuthExemptUnit",
+     "SafeAuthExemptDuration",
+     "CreateDate",
+     "UpdateDate"
+    ],
+    "type": "object"
+   },
+   "NewSecureContactInfo": {
+    "description": "变更中的安全联系信息\n",
+    "properties": {
+     "Email": {
+      "description": "邮箱",
+      "type": "string"
+     },
+     "Mobile": {
+      "description": "手机号",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Email",
+     "Mobile"
+    ],
+    "type": "object"
+   },
+   "OIDCProvider": {
+    "description": "OIDC 身份提供商",
+    "properties": {
+     "CreateDate": {
+      "description": "创建时间",
+      "type": "string"
+     },
+     "Description": {
+      "description": "身份提供商描述",
+      "type": "string"
+     },
+     "ProviderName": {
+      "description": "身份提供商名称",
+      "type": "string"
+     },
+     "Trn": {
+      "description": "身份提供商 Trn",
+      "type": "string"
+     },
+     "UpdateDate": {
+      "description": "更新时间",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Trn",
+     "ProviderName",
+     "Description",
+     "CreateDate",
+     "UpdateDate"
+    ],
+    "type": "object"
+   },
+   "Policy": {
+    "description": "策略的数据结构。",
+    "properties": {
+     "AttachmentCount": {
+      "description": "策略绑定的身份数量。",
+      "example": 10,
+      "format": "int32",
+      "type": "integer"
+     },
+     "Category": {
+      "description": "系统预设策略所属的分类，通常为服务代码（Service Code），例如访问控制的服务Code为iam。对于自定义策略该字段不会返回值。云服务对应的Service Code可参考 [https://www.volcengine.com/docs/6257/1276266](https://www.volcengine.com/docs/6257/1276266)。",
+      "example": "iam",
+      "type": "string"
+     },
+     "CreateDate": {
+      "description": "策略新建时间。",
+      "example": "20220912T061318Z",
+      "type": "string"
+     },
+     "Description": {
+      "description": "策略描述。",
+      "example": "访问控制（IAM）完全管理权限",
+      "type": "string"
+     },
+     "IsServiceRolePolicy": {
+      "description": "是否是服务关联角色的策略，0代表否，1代表是。",
+      "example": 0,
+      "format": "int32",
+      "type": "integer"
+     },
+     "PolicyDocument": {
+      "description": "策略语法内容。",
+      "example": "{\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"iam:*\"],\"Resource\":[\"*\"]}]}",
+      "type": "string"
+     },
+     "PolicyName": {
+      "description": "策略名。",
+      "example": "IAMFullAccess",
+      "type": "string"
+     },
+     "PolicyTrn": {
+      "description": "策略的TRN。",
+      "example": "trn:iam::2000000000:policy/IAMFullAccess",
+      "type": "string"
+     },
+     "PolicyType": {
+      "description": "策略类型。System代表系统预设策略，Custom代表自定义策略。",
+      "example": "System",
+      "type": "string"
+     },
+     "UpdateDate": {
+      "description": "策略更新时间。",
+      "example": "20220912T061318Z",
+      "type": "string"
+     }
+    },
+    "required": [
+     "PolicyName",
+     "PolicyTrn",
+     "PolicyType",
+     "Description",
+     "PolicyDocument",
+     "Category",
+     "AttachmentCount",
+     "IsServiceRolePolicy",
+     "CreateDate",
+     "UpdateDate"
+    ],
+    "type": "object"
+   },
+   "PolicyRole": {
+    "description": "策略绑定的角色的数据结构。",
+    "properties": {
+     "AttachDate": {
+      "description": "策略绑定角色的时间。",
+      "example": "20240912T090631Z",
+      "type": "string"
+     },
+     "Description": {
+      "description": "角色描述。",
+      "example": "运维角色",
+      "type": "string"
+     },
+     "DisplayName": {
+      "description": "角色显示名。",
+      "example": "运维角色",
+      "type": "string"
+     },
+     "Id": {
+      "description": "角色ID。",
+      "example": 30000,
+      "format": "int32",
+      "type": "integer"
+     },
+     "PolicyScope": {
+      "description": "策略授权的作用范围，特指项目范围。\n\n",
+      "example": [
+       "请参考数据结构内具体参数示例值。"
+      ],
+      "items": {
+       "$ref": "#/components/schemas/PolicyScope"
+      },
+      "type": "array"
+     },
+     "RoleName": {
+      "description": "角色名。",
+      "example": "ops-role",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Id",
+     "RoleName",
+     "DisplayName",
+     "Description",
+     "AttachDate",
+     "PolicyScope"
+    ],
+    "type": "object"
+   },
+   "PolicyScope": {
+    "description": "策略授权范围。",
+    "properties": {
+     "AttachDate": {
+      "description": "项目授权时间。",
+      "example": "20240912T090631Z",
+      "type": "string"
+     },
+     "PolicyScopeType": {
+      "description": "授权类型，Global代表全局授权（不限制项目），Project代表按项目授权。",
+      "example": "Project",
+      "type": "string"
+     },
+     "ProjectDisplayName": {
+      "description": "按项目授权时的项目显示名。",
+      "example": "游戏项目",
+      "type": "string"
+     },
+     "ProjectName": {
+      "description": "按项目授权时的项目名。",
+      "example": "game-project",
+      "type": "string"
+     }
+    },
+    "required": [
+     "PolicyScopeType",
+     "ProjectName",
+     "ProjectDisplayName",
+     "AttachDate"
+    ],
+    "type": "object"
+   },
+   "PolicyUser": {
+    "description": "策略关联的用户的数据结构。",
+    "properties": {
+     "AttachDate": {
+      "description": "策略绑定用户的时间。",
+      "example": "20240912T090631Z",
+      "type": "string"
+     },
+     "Description": {
+      "description": "用户描述。",
+      "example": "鲍勃",
+      "type": "string"
+     },
+     "DisplayName": {
+      "description": "用户显示名。",
+      "example": "鲍勃",
+      "type": "string"
+     },
+     "Id": {
+      "description": "用户ID。",
+      "example": 10000,
+      "format": "int32",
+      "type": "integer"
+     },
+     "PolicyScope": {
+      "description": "策略授权的作用范围，特指项目范围。\n\n",
+      "example": [
+       "请参考数据结构内具体参数示例值。"
+      ],
+      "items": {
+       "$ref": "#/components/schemas/PolicyScope"
+      },
+      "type": "array"
+     },
+     "UserName": {
+      "description": "用户名。",
+      "example": "Bob",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Id",
+     "UserName",
+     "DisplayName",
+     "Description",
+     "AttachDate",
+     "PolicyScope"
+    ],
+    "type": "object"
+   },
+   "PolicyUserGroup": {
+    "description": "策略绑定的用户组的数据结构。",
+    "properties": {
+     "AttachDate": {
+      "description": "策略绑定用户组的时间。",
+      "example": "20240912T090631Z",
+      "type": "string"
+     },
+     "Description": {
+      "description": "用户组描述。",
+      "example": "开发组",
+      "type": "string"
+     },
+     "DisplayName": {
+      "description": "用户组显示名。",
+      "example": "开发组",
+      "type": "string"
+     },
+     "Id": {
+      "description": "用户组ID。",
+      "example": 20000,
+      "format": "int32",
+      "type": "integer"
+     },
+     "PolicyScope": {
+      "description": "策略授权的作用范围，特指项目范围。\n\n",
+      "example": [
+       "请参考数据结构内具体参数示例值。"
+      ],
+      "items": {
+       "$ref": "#/components/schemas/PolicyScope"
+      },
+      "type": "array"
+     },
+     "UserGroupName": {
+      "description": "用户组名。",
+      "example": "dev-group",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Id",
+     "UserGroupName",
+     "DisplayName",
+     "Description",
+     "AttachDate",
+     "PolicyScope"
+    ],
+    "type": "object"
+   },
+   "Project": {
+    "description": "项目详情",
+    "properties": {
+     "AccountID": {
+      "description": "账号ID",
+      "format": "int64",
+      "type": "integer"
+     },
+     "CreateDate": {
+      "description": "创建时间",
+      "type": "string"
+     },
+     "Description": {
+      "description": "项目描述",
+      "type": "string"
+     },
+     "DisplayName": {
+      "description": "展示名称",
+      "type": "string"
+     },
+     "HasPermission": {
+      "description": "是否可见",
+      "example": true,
+      "type": "boolean"
+     },
+     "ParentProjectName": {
+      "description": "父项目名称",
+      "type": "string"
+     },
+     "Path": {
+      "description": "项目路径",
+      "type": "string"
+     },
+     "ProjectName": {
+      "description": "项目名称",
+      "type": "string"
+     },
+     "Status": {
+      "description": "启用状态",
+      "type": "string"
+     },
+     "UpdateDate": {
+      "description": "更新时间",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Project2": {
+    "description": "创建项目的返回体",
+    "properties": {
+     "CreateDate": {
+      "description": "创建时间",
+      "example": "00010101T000000Z",
+      "type": "string"
+     },
+     "Description": {
+      "description": "项目描述",
+      "type": "string"
+     },
+     "Id": {
+      "description": "项目ID",
+      "type": "string"
+     },
+     "ProjectName": {
+      "description": "项目名称",
+      "example": "00010101T000000Z",
+      "type": "string"
+     },
+     "Status": {
+      "description": "是否可用",
+      "example": "active",
+      "type": "string"
+     },
+     "UpdateDate": {
+      "description": "更新时间",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ProjectPolicy": {
+    "description": "项目关联策略",
+    "properties": {
+     "AttachDate": {
+      "description": "添加时间",
+      "example": "20230810T073747Z",
+      "type": "string"
+     },
+     "Description": {
+      "description": "策略描述",
+      "example": "账户内财务相关的内容管理权限（例如账单、订单等）",
+      "type": "string"
+     },
+     "IsServiceRolePolicy": {
+      "description": "是否为服务角色策略",
+      "example": 0,
+      "format": "int32",
+      "type": "integer"
+     },
+     "PolicyName": {
+      "description": "策略名称",
+      "example": "BillFullAccess",
+      "type": "string"
+     },
+     "PolicyTrn": {
+      "description": "策略trn",
+      "example": "trn:iam::0:policy/BillFullAccess",
+      "type": "string"
+     },
+     "PolicyType": {
+      "description": "策略类型",
+      "example": "System",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ProjectResources": {
+    "description": "项目资源",
+    "properties": {
+     "AccountID": {
+      "description": "账号ID",
+      "format": "int64",
+      "type": "integer"
+     },
+     "CreateDate": {
+      "description": "创建时间",
+      "type": "string"
+     },
+     "ProjectName": {
+      "description": "项目名称",
+      "type": "string"
+     },
+     "ResourceID": {
+      "description": "资源ID",
+      "type": "string"
+     },
+     "ResourceRegion": {
+      "description": "资源地域",
+      "type": "string"
+     },
+     "ResourceTrn": {
+      "description": "资源Trn",
+      "type": "string"
+     },
+     "ResourceType": {
+      "description": "资源类型",
+      "type": "string"
+     },
+     "ServiceName": {
+      "description": "服务名称",
+      "type": "string"
+     },
+     "UpdateDate": {
+      "description": "创建时间",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ProjectRoles": {
+    "description": "项目角色",
+    "properties": {
+     "Description": {
+      "description": "描述",
+      "type": "string"
+     },
+     "DisplayName": {
+      "description": "展示名",
+      "type": "string"
+     },
+     "Policy": {
+      "description": "策略",
+      "example": [
+       "{\n            \"PolicyTrn\": \"trn:iam::0:policy/BillFullAccess\"",
+       "\"PolicyName\": \"BillFullAccess\"",
+       "\"PolicyType\": \"System\"",
+       "\"Description\": \"账户内财务相关的内容管理权限（例如账单、订单等）\\t\"",
+       "\"AttachDate\": \"20230810T073747Z\"",
+       "\"IsServiceRolePolicy\": 0\n          }"
+      ],
+      "items": {
+       "$ref": "#/components/schemas/ProjectPolicy"
+      },
+      "type": "array"
+     },
+     "RoleName": {
+      "description": "角色名",
+      "type": "string"
+     },
+     "UpdateDate": {
+      "description": "更新时间",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ProjectUserGroup": {
+    "description": "项目用户组",
+    "properties": {
+     "Description": {
+      "description": "描述",
+      "type": "string"
+     },
+     "DisplayName": {
+      "description": "展示名称",
+      "type": "string"
+     },
+     "Policy": {
+      "description": "策略",
+      "example": [
+       "{\n            \"PolicyTrn\": \"trn:iam::0:policy/BillFullAccess\"",
+       "\"PolicyName\": \"BillFullAccess\"",
+       "\"PolicyType\": \"System\"",
+       "\"Description\": \"账户内财务相关的内容管理权限（例如账单、订单等）\\t\"",
+       "\"AttachDate\": \"20230810T073747Z\"",
+       "\"IsServiceRolePolicy\": 0\n          }"
+      ],
+      "items": {
+       "$ref": "#/components/schemas/ProjectPolicy"
+      },
+      "type": "array"
+     },
+     "UpdateDate": {
+      "description": "创建时间",
+      "type": "string"
+     },
+     "UserGroupName": {
+      "description": "用户组名称",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ProjectUsers": {
+    "description": "项目用户",
+    "properties": {
+     "Description": {
+      "description": "描述",
+      "type": "string"
+     },
+     "DisplayName": {
+      "description": "展示名",
+      "type": "string"
+     },
+     "Policy": {
+      "description": "策略",
+      "example": [
+       "{\n            \"PolicyTrn\": \"trn:iam::0:policy/BillFullAccess\"",
+       "\"PolicyName\": \"BillFullAccess\"",
+       "\"PolicyType\": \"System\"",
+       "\"Description\": \"账户内财务相关的内容管理权限（例如账单、订单等）\\t\"",
+       "\"AttachDate\": \"20230810T073747Z\"",
+       "\"IsServiceRolePolicy\": 0\n          }"
+      ],
+      "items": {
+       "$ref": "#/components/schemas/ProjectPolicy"
+      },
+      "type": "array"
+     },
+     "UpdateDate": {
+      "description": "更新时间",
+      "type": "string"
+     },
+     "UserName": {
+      "description": "用户名",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Resource": {
+    "description": "资源信息",
+    "properties": {
+     "AccountID": {
+      "description": "账号ID",
+      "format": "int32",
+      "type": "integer"
+     },
+     "CreateTime": {
+      "description": "创建时间",
+      "type": "string"
+     },
+     "ProjectName": {
+      "description": "项目名称",
+      "type": "string"
+     },
+     "Region": {
+      "description": "地域",
+      "type": "string"
+     },
+     "ResourceID": {
+      "description": "资源ID",
+      "type": "string"
+     },
+     "ResourceName": {
+      "description": "资源名称",
+      "type": "string"
+     },
+     "ResourceTRN": {
+      "description": "资源TRN",
+      "type": "string"
+     },
+     "ResourceType": {
+      "description": "资源类型",
+      "type": "string"
+     },
+     "Service": {
+      "description": "服务名",
+      "type": "string"
+     },
+     "Tags": {
+      "description": "标签",
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     },
+     "UpdateTime": {
+      "description": "更新时间",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Service",
+     "ResourceType",
+     "AccountID",
+     "ResourceID",
+     "ResourceTRN"
+    ],
+    "type": "object"
+   },
+   "ResourceMeta": {
+    "description": "ListActions - ResourceMeta",
+    "properties": {
+     "DisplayName": {
+      "description": "展示名称",
+      "type": "string"
+     },
+     "Name": {
+      "description": "名称",
+      "type": "string"
+     },
+     "TRN": {
+      "description": "资源 TRN",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "DisplayName",
+     "TRN"
+    ],
+    "type": "object"
+   },
+   "ResourceTag": {
+    "description": "Resource Tag",
+    "properties": {
+     "ResourceName": {
+      "description": "身份名称。",
+      "example": "Bob",
+      "type": "string"
+     },
+     "ResourceType": {
+      "description": "身份类型。User代表用户，Role代表角色。",
+      "enum": [
+       "User",
+       "Role"
+      ],
+      "example": "user",
+      "type": "string"
+     },
+     "TagKey": {
+      "description": "标签的标签键。",
+      "example": "department",
+      "type": "string"
+     },
+     "TagValue": {
+      "description": "标签的标签值。",
+      "example": "dev",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceType",
+     "ResourceName",
+     "TagKey",
+     "TagValue"
+    ],
+    "type": "object"
+   },
+   "ResourceType": {
+    "description": "资源类型",
+    "properties": {
+     "ResourceType": {
+      "description": "资源类型",
+      "type": "string"
+     },
+     "Service": {
+      "description": "服务名",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Service",
+     "ResourceType"
+    ],
+    "type": "object"
+   },
+   "Role": {
+    "description": "角色的数据结构。",
+    "properties": {
+     "CreateDate": {
+      "description": "角色创建时间。",
+      "example": "20240910T133549Z",
+      "type": "string"
+     },
+     "Description": {
+      "description": "角色描述。",
+      "example": "运维角色",
+      "type": "string"
+     },
+     "DisplayName": {
+      "description": "角色显示名。",
+      "example": "运维角色",
+      "type": "string"
+     },
+     "IsServiceLinkedRole": {
+      "description": "是否是服务关联角色，0代表否，1代表是。",
+      "example": 1,
+      "format": "int32",
+      "type": "integer"
+     },
+     "MaxSessionDuration": {
+      "description": "角色最大会话时长。",
+      "example": 3600,
+      "format": "int32",
+      "type": "integer"
+     },
+     "RoleId": {
+      "description": "角色ID。",
+      "example": 30000,
+      "format": "int32",
+      "type": "integer"
+     },
+     "RoleName": {
+      "description": "角色名。",
+      "example": "ops-role",
+      "type": "string"
+     },
+     "Tags": {
+      "description": "角色标签的数据结构。",
+      "example": [
+       "请参考数据结构内具体参数示例值。"
+      ],
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     },
+     "Trn": {
+      "description": "角色TRN。",
+      "example": "trn:iam::2000000000:role/ops-role",
+      "type": "string"
+     },
+     "TrustPolicyDocument": {
+      "description": "角色信任策略。",
+      "example": "{\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"sts:AssumeRole\"],\"Principal\":{\"IAM\":[\"trn:iam::2000000000:root\"]}}]}",
+      "type": "string"
+     },
+     "UpdateDate": {
+      "description": "角色更新时间。",
+      "example": "20240910T133549Z",
+      "type": "string"
+     }
+    },
+    "required": [
+     "RoleId",
+     "RoleName",
+     "Trn",
+     "DisplayName",
+     "Description",
+     "TrustPolicyDocument",
+     "MaxSessionDuration",
+     "IsServiceLinkedRole",
+     "CreateDate",
+     "UpdateDate"
+    ],
+    "type": "object"
+   },
+   "SAMLProvider": {
+    "description": "SAML 身份提供商信息",
+    "properties": {
+     "CreateDate": {
+      "description": "创建时间",
+      "example": "2024-01-03T16:10:57+08:00",
+      "type": "string"
+     },
+     "Description": {
+      "description": "身份提供商描述",
+      "type": "string"
+     },
+     "ProviderName": {
+      "description": "身份提供商名称",
+      "type": "string"
+     },
+     "SAMLProviderName": {
+      "description": "身份提供商的名称。",
+      "type": "string"
+     },
+     "SSOType": {
+      "description": "身份提供商 SSO 类型\n1. 角色 SSO\n2. 用户 SSO",
+      "enum": [
+       "1",
+       "2",
+       "3"
+      ],
+      "format": "int32",
+      "type": "integer"
+     },
+     "Status": {
+      "description": "身份提供商状态 (仅用户 SSO)\n1. 开启\n2. 开启并禁用其他登录方式\n3. 关闭",
+      "format": "int32",
+      "type": "integer"
+     },
+     "Trn": {
+      "description": "身份提供商 Trn",
+      "example": "trn:iam::2100000000:saml-provider/my-provider",
+      "type": "string"
+     },
+     "UpdateDate": {
+      "description": "更新时间",
+      "example": "2024-01-03T16:10:57+08:00",
+      "type": "string"
+     }
+    },
+    "required": [
+     "SAMLProviderName",
+     "Trn",
+     "ProviderName",
+     "SSOType",
+     "Status",
+     "Description",
+     "CreateDate",
+     "UpdateDate"
+    ],
+    "type": "object"
+   },
+   "SAMLResponseData": {
+    "description": "ParseAndValidateSAMLResponse - SAMLResponseData",
+    "properties": {
+     "AssertionId": {
+      "description": "Assertion ID",
+      "type": "string"
+     },
+     "Issuer": {
+      "description": "Issuer",
+      "type": "string"
+     },
+     "Recipient": {
+      "description": "Recipient",
+      "type": "string"
+     },
+     "SessionDuration": {
+      "description": "Session 有效时长",
+      "format": "int32",
+      "type": "integer"
+     },
+     "SessionName": {
+      "description": "Session Name",
+      "type": "string"
+     },
+     "SubjectNameId": {
+      "description": "Subject Name ID",
+      "type": "string"
+     },
+     "SubjectNameIdFormat": {
+      "description": "Subject Name ID Format",
+      "type": "string"
+     }
+    },
+    "required": [
+     "SessionName",
+     "SessionDuration",
+     "Issuer",
+     "AssertionId",
+     "SubjectNameId",
+     "SubjectNameIdFormat",
+     "Recipient"
+    ],
+    "type": "object"
+   },
+   "SAMLResponseIdentity": {
+    "description": "ParseAndValidateSAMLResponse - SAMLResponseIdentity",
+    "properties": {
+     "AccountId": {
+      "description": "账号 ID",
+      "format": "int64",
+      "type": "integer"
+     },
+     "IdentityName": {
+      "description": "身份名称",
+      "type": "string"
+     },
+     "IdentityProviderName": {
+      "description": "身份提供商名称",
+      "type": "string"
+     },
+     "IdentityProviderTrn": {
+      "description": "身份提供商 TRN",
+      "type": "string"
+     },
+     "IdentityTrn": {
+      "description": "身份 TRN",
+      "type": "string"
+     },
+     "IdentityType": {
+      "description": "身份类型",
+      "type": "string"
+     }
+    },
+    "required": [
+     "AccountId",
+     "IdentityType",
+     "IdentityName",
+     "IdentityTrn",
+     "IdentityProviderTrn",
+     "IdentityProviderName"
+    ],
+    "type": "object"
+   },
+   "SecureContactInfo": {
+    "description": "InnerGetUser - SecureContactInfo",
+    "properties": {
+     "Email": {
+      "description": "邮箱",
+      "type": "string"
+     },
+     "Mobile": {
+      "description": "手机号",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SecurityPreference": {
+    "description": "自主安全设置",
+    "properties": {
+     "AllowChangePassword": {
+      "description": "允许修改密码",
+      "format": "int32",
+      "type": "integer"
+     },
+     "AllowChangeUserInfo": {
+      "description": "允许修改子用户信息",
+      "format": "int32",
+      "type": "integer"
+     },
+     "AllowManageLoginType": {
+      "description": "允许修改第三方身份",
+      "format": "int32",
+      "type": "integer"
+     },
+     "AllowManageVMFA": {
+      "description": "允许修改MFA",
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "AllowChangeUserInfo",
+     "AllowChangePassword",
+     "AllowManageLoginType",
+     "AllowManageVMFA"
+    ],
+    "type": "object"
+   },
+   "Service": {
+    "description": "ListServices - Service",
+    "properties": {
+     "Category": {
+      "description": "分组",
+      "type": "string"
+     },
+     "CreatedTime": {
+      "description": "创建时间",
+      "type": "string"
+     },
+     "IsPolicyEditorPublic": {
+      "description": "策略编辑器可见性",
+      "type": "boolean"
+     },
+     "ServiceName": {
+      "description": "服务名",
+      "type": "string"
+     },
+     "ServiceNameCn": {
+      "description": "服务中文名",
+      "type": "string"
+     },
+     "UpdatedTime": {
+      "description": "更新时间",
+      "type": "string"
+     },
+     "WithServiceLinkedRoleTemplate": {
+      "description": "该服务是否存在服务关联角色模板",
+      "type": "boolean"
+     },
+     "WithSystemPolicy": {
+      "description": "该服务是否存在预置策略",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ServiceName",
+     "ServiceNameCn",
+     "WithSystemPolicy",
+     "WithServiceLinkedRoleTemplate",
+     "IsPolicyEditorPublic",
+     "Category",
+     "CreatedTime",
+     "UpdatedTime"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "description": "标签",
+    "properties": {
+     "Key": {
+      "description": "标签的键。",
+      "example": "department",
+      "type": "string"
+     },
+     "Value": {
+      "description": "标签的值。",
+      "example": "dev",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key"
+    ],
+    "type": "object"
+   },
+   "TagFilter": {
+    "additionalProperties": true,
+    "description": "标签过滤器的数据结构。",
+    "type": "object"
+   },
+   "TagFilters": {
+    "properties": {
+     "Key": {
+      "description": "按标签过滤的标签键。多个Key之间为“与”关系，同一个Key的不同Value为“或”关系。匹配模式为精确匹配。注：标签和身份名称不能同时进行过滤。",
+      "type": "string"
+     },
+     "Values": {
+      "description": "按标签过滤的标签值。多个Key之间为“与”关系，同一个Key的不同Value为“或”关系。匹配模式为精确匹配。注：标签和身份名称不能同时进行过滤。",
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Tags": {
+    "properties": {
+     "Key": {
+      "description": "给用户附加标签的标签键。使用UTF-8编码的Unicode，长度为1~128字符，允许任何语言文字、数字、空格和_ . : / = + - @符号。每个角色至多附加50对标签。\n\n",
+      "type": "string"
+     },
+     "Value": {
+      "description": "给用户附加标签的标签值。使用UTF-8编码的Unicode，长度为0~256字符（即Value可以为空），允许任何语言文字、数字、空格和_ . : / = + - @符号。每个角色至多附加50对标签。\n\n",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ThirdPartyEnterprise": {
+    "description": "ListThirdPartyEnterprise - ThirdPartyEnterprise",
+    "properties": {
+     "AccountId": {
+      "description": "账号 ID",
+      "format": "int64",
+      "type": "integer"
+     },
+     "CreateDate": {
+      "description": "创建时间",
+      "type": "string"
+     },
+     "EnterpriseID": {
+      "description": "企业 ID",
+      "type": "string"
+     },
+     "EnterpriseName": {
+      "description": "企业名称",
+      "type": "string"
+     },
+     "IDPType": {
+      "description": "身份提供商类型",
+      "type": "string"
+     },
+     "Status": {
+      "description": "状态",
+      "type": "string"
+     },
+     "UpdateDate": {
+      "description": "更新时间",
+      "type": "string"
+     }
+    },
+    "required": [
+     "CreateDate",
+     "UpdateDate",
+     "Status",
+     "AccountId",
+     "IDPType",
+     "EnterpriseID",
+     "EnterpriseName"
+    ],
+    "type": "object"
+   },
+   "ThirdPartyPersonalIdentity": {
+    "description": "ListThirdPartyPersonalIdentityByPlatformIdentity - ThirdPartyPersonalIdentity",
+    "properties": {
+     "IDPType": {
+      "description": "身份提供商类型",
+      "type": "string"
+     },
+     "ThirdPartyIdentityExtra": {
+      "description": "第三方身份附加信息",
+      "type": "string"
+     },
+     "ThirdPartyIdentityID": {
+      "description": "第三方身份 ID",
+      "type": "string"
+     },
+     "ThirdPartyIdentityName": {
+      "description": "第三方身份名称",
+      "type": "string"
+     }
+    },
+    "required": [
+     "IDPType",
+     "ThirdPartyIdentityID",
+     "ThirdPartyIdentityName",
+     "ThirdPartyIdentityExtra"
+    ],
+    "type": "object"
+   },
+   "User": {
+    "description": "用户的数据结构。",
+    "properties": {
+     "AccountId": {
+      "description": "用户所属主账号的ID。",
+      "example": 2000000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "CreateDate": {
+      "description": "用户创建时间。",
+      "example": "20240813T053809Z",
+      "type": "string"
+     },
+     "Description": {
+      "description": "用户备注。",
+      "example": "鲍勃",
+      "type": "string"
+     },
+     "DisplayName": {
+      "description": "用户显示名。",
+      "example": "鲍勃",
+      "type": "string"
+     },
+     "Email": {
+      "description": "用户电子邮件地址。",
+      "example": "abc**@**.com",
+      "type": "string"
+     },
+     "EmailIsVerify": {
+      "description": "用户电子邮件是否被验证。true代表已验证，false代表未验证。",
+      "example": true,
+      "type": "boolean"
+     },
+     "Id": {
+      "description": "用户ID。",
+      "example": 10000,
+      "format": "int32",
+      "type": "integer"
+     },
+     "MobilePhone": {
+      "description": "用户手机号。",
+      "example": "+86130******00",
+      "type": "string"
+     },
+     "MobilePhoneIsVerify": {
+      "description": "用户手机号是否被验证。true代表已验证，false代表未验证。",
+      "example": true,
+      "type": "boolean"
+     },
+     "Tags": {
+      "description": "用户标签的数据结构。",
+      "example": [
+       "请参考数据结构内具体参数示例值。"
+      ],
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     },
+     "Trn": {
+      "description": "用户TRN。",
+      "example": "trn:iam::2000000000:user/Bob",
+      "type": "string"
+     },
+     "UpdateDate": {
+      "description": "用户更新时间。",
+      "example": "20240813T053809Z",
+      "type": "string"
+     },
+     "UserName": {
+      "description": "用户名。",
+      "example": "Bob",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Id",
+     "UserName",
+     "AccountId",
+     "Trn",
+     "DisplayName",
+     "Description",
+     "MobilePhone",
+     "MobilePhoneIsVerify",
+     "Email",
+     "EmailIsVerify",
+     "CreateDate",
+     "UpdateDate"
+    ],
+    "type": "object"
+   },
+   "UserGroup": {
+    "description": "用户组的数据结构。",
+    "properties": {
+     "AccountID": {
+      "description": "用户组所属主账号的ID。",
+      "example": 2000000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "CreateDate": {
+      "description": "用户组创建时间。",
+      "example": "20150123T123318Z",
+      "type": "string"
+     },
+     "Description": {
+      "description": "用户组描述。",
+      "example": "开发组",
+      "type": "string"
+     },
+     "DisplayName": {
+      "description": "用户组显示名。",
+      "example": "开发组",
+      "type": "string"
+     },
+     "UpdateDate": {
+      "description": "用户组更新时间。",
+      "example": "20150123T123318Z",
+      "type": "string"
+     },
+     "UserGroupID": {
+      "description": "用户组ID。",
+      "example": 20000,
+      "format": "int32",
+      "type": "integer"
+     },
+     "UserGroupName": {
+      "description": "用户组名。",
+      "example": "dev-group",
+      "type": "string"
+     }
+    },
+    "required": [
+     "UserGroupID",
+     "AccountID",
+     "UserGroupName",
+     "DisplayName",
+     "Description",
+     "CreateDate",
+     "UpdateDate"
+    ],
+    "type": "object"
+   },
+   "UserOfGroup": {
+    "description": "用户组内用户的数据结构。",
+    "properties": {
+     "Description": {
+      "description": "用户描述。",
+      "example": "鲍勃",
+      "type": "string"
+     },
+     "DisplayName": {
+      "description": "用户显示名。",
+      "example": "鲍勃",
+      "type": "string"
+     },
+     "Id": {
+      "description": "用户ID。",
+      "example": 10000,
+      "format": "int32",
+      "type": "integer"
+     },
+     "JoinDate": {
+      "description": "用户加入用户组的时间。",
+      "example": "20240910T104553Z",
+      "type": "string"
+     },
+     "UserName": {
+      "description": "用户名。",
+      "example": "Bob",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Id",
+     "UserName",
+     "DisplayName",
+     "Description",
+     "JoinDate"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "API documentation for iam",
+  "title": "iam",
+  "version": "2018-01-01"
+ },
+ "openapi": "3.0.0",
+ "paths": {
+  "/CreateGroup": {
+   "get": {
+    "description": "创建用户组。",
+    "operationId": "CreateGroup",
+    "parameters": [
+     {
+      "description": "用户组名。",
+      "in": "query",
+      "name": "UserGroupName",
+      "required": true,
+      "schema": {
+       "description": "用户组名。",
+       "example": "dev-group",
+       "maxLength": 64,
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "用户组显示名。",
+      "in": "query",
+      "name": "DisplayName",
+      "schema": {
+       "description": "用户组显示名。",
+       "example": "开发组",
+       "maxLength": 64,
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "用户组描述。",
+      "in": "query",
+      "name": "Description",
+      "schema": {
+       "description": "用户组描述。",
+       "example": "开发组",
+       "maxLength": 128,
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "UserGroup": {
+           "$ref": "#/components/schemas/UserGroup"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "创建用户组。"
+     }
+    },
+    "summary": "创建用户组",
+    "tags": [
+     "用户组"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/CreatePolicy": {
+   "get": {
+    "description": "创建自定义策略。",
+    "operationId": "CreatePolicy",
+    "parameters": [
+     {
+      "description": "策略语法内容。语法可参考 [策略语法说明](https://www.volcengine.com/docs/6257/65040)。",
+      "in": "query",
+      "name": "PolicyDocument",
+      "required": true,
+      "schema": {
+       "description": "策略语法内容。语法可参考 [策略语法说明](https://www.volcengine.com/docs/6257/65040)。",
+       "example": "{\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"iam:*\",\"tag:*\"],\"Resource\":[\"*\"]}]}",
+       "maxLength": 6144,
+       "minLength": 1,
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "策略描述。",
+      "in": "query",
+      "name": "Description",
+      "schema": {
+       "description": "策略描述。",
+       "example": "示例策略",
+       "maxLength": 255,
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "策略名。",
+      "in": "query",
+      "name": "PolicyName",
+      "required": true,
+      "schema": {
+       "description": "策略名。",
+       "example": "example_policy",
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Policy": {
+           "$ref": "#/components/schemas/Policy"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "创建自定义策略。"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidPolicyName",
+             "type": "string"
+            },
+            "description": {
+             "example": "策略名不合法！",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Invalid PolicyName '%s', err: '%s'",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MissingPolicyDocument",
+             "type": "string"
+            },
+            "description": {
+             "example": "缺少策略内容！",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Missing policy document",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "策略语法不正确或存在服务不支持某些策略表达。查看帮助文档解决：https://www.volcengine.com/docs/6257/1274335",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter '%s' is invalid",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "409": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "PolicyAlreadyExist",
+           "type": "string"
+          },
+          "description": {
+           "example": "策略已存在！",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 409,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Policy '%s' already exists",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "创建策略",
+    "tags": [
+     "策略"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/CreateRole": {
+   "get": {
+    "description": "创建角色。",
+    "operationId": "CreateRole",
+    "parameters": [
+     {
+      "description": "角色最大会话时间。用于限制[角色扮演](https://www.volcengine.com/docs/6257/86374)产生的临时安全凭证的有效期的最大范围。取值范围：3600~43200，单位为秒，默认为43200。",
+      "in": "query",
+      "name": "MaxSessionDuration",
+      "schema": {
+       "description": "角色最大会话时间。用于限制[角色扮演](https://www.volcengine.com/docs/6257/86374)产生的临时安全凭证的有效期的最大范围。取值范围：3600~43200，单位为秒，默认为43200。",
+       "example": 3600,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "Tags",
+      "in": "query",
+      "name": "Tags",
+      "schema": {
+       "description": "Tags",
+       "items": {
+        "$ref": "#/components/schemas/Tags"
+       },
+       "type": "array",
+       "x-split-type": 3
+      }
+     },
+     {
+      "description": "角色显示名。",
+      "in": "query",
+      "name": "DisplayName",
+      "schema": {
+       "description": "角色显示名。",
+       "example": "运维角色",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "角色名。",
+      "in": "query",
+      "name": "RoleName",
+      "required": true,
+      "schema": {
+       "description": "角色名。",
+       "example": "ops-role",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "角色描述。",
+      "in": "query",
+      "name": "Description",
+      "schema": {
+       "description": "角色描述。",
+       "example": "运维角色",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "角色信任策略。信任策略遵循IAM的[策略语法](https://www.volcengine.com/docs/6257/65059)中基于资源的策略规则。\n- 以下是角色信任账号2000000001的信任策略示例：\n```json\n{\n    \"Statement\": [\n        {\n            \"Effect\": \"Allow\",\n            \"Action\": [\n                \"sts:AssumeRole\"\n            ],\n            \"Principal\": {\n                \"IAM\": [\n\t\t\t\t          \"trn:iam::2000000001:root\"\n\t\t\t          ]\n            }\n        }\n    ]\n}\n```\n- 以下是角色信任ecs服务的信任策略示例：\n```json\n{\n    \"Statement\": [\n        {\n            \"Effect\": \"Allow\",\n            \"Action\": [\n                \"sts:AssumeRole\"\n            ],\n            \"Principal\": {\n                \"Service\": [\n                    \"ecs\"\n                ]\n            }\n        }\n    ]\n}\n```",
+      "in": "query",
+      "name": "TrustPolicyDocument",
+      "schema": {
+       "description": "角色信任策略。信任策略遵循IAM的[策略语法](https://www.volcengine.com/docs/6257/65059)中基于资源的策略规则。\n- 以下是角色信任账号2000000001的信任策略示例：\n```json\n{\n    \"Statement\": [\n        {\n            \"Effect\": \"Allow\",\n            \"Action\": [\n                \"sts:AssumeRole\"\n            ],\n            \"Principal\": {\n                \"IAM\": [\n\t\t\t\t          \"trn:iam::2000000001:root\"\n\t\t\t          ]\n            }\n        }\n    ]\n}\n```\n- 以下是角色信任ecs服务的信任策略示例：\n```json\n{\n    \"Statement\": [\n        {\n            \"Effect\": \"Allow\",\n            \"Action\": [\n                \"sts:AssumeRole\"\n            ],\n            \"Principal\": {\n                \"Service\": [\n                    \"ecs\"\n                ]\n            }\n        }\n    ]\n}\n```",
+       "example": "{\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"sts:AssumeRole\"],\"Principal\":{\"IAM\":[\"trn:iam::2000000000:root\"]}}]}",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Role": {
+           "$ref": "#/components/schemas/Role"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "创建角色。"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidRoleName",
+             "type": "string"
+            },
+            "description": {
+             "example": "角色名不合法。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Invalid RoleName '%s', err: '%s'",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidTrustPolicyDoc",
+             "type": "string"
+            },
+            "description": {
+             "example": "角色信任策略不合法。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Invalid TrustPolicy, err: '%s'.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数不合法。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter '%s' is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "409": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "RoleAlreadyExists",
+           "type": "string"
+          },
+          "description": {
+           "example": "角色已存在。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 409,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Role '%s' already exists.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "创建角色",
+    "tags": [
+     "角色"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/CreateServiceLinkedRole": {
+   "get": {
+    "description": "创建服务关联角色。部分云服务可能会在您首次使用产品时要求授权云服务进行跨服务访问，该接口可用于新建服务关联角色以完成指定服务的跨服务访问授权。",
+    "operationId": "CreateServiceLinkedRole",
+    "parameters": [
+     {
+      "description": "需要创建的服务关联角色对应的Service。",
+      "in": "query",
+      "name": "ServiceName",
+      "required": true,
+      "schema": {
+       "description": "需要创建的服务关联角色对应的Service。",
+       "example": "cloud_trail",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "Tags",
+      "in": "query",
+      "name": "Tags",
+      "schema": {
+       "description": "Tags",
+       "items": {
+        "$ref": "#/components/schemas/Tags"
+       },
+       "type": "array",
+       "x-split-type": 3
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "创建服务关联角色。部分云服务可能会在您首次使用产品时要求授权云服务进行跨服务访问，该接口可用于新建服务关联角色以完成指定服务的跨服务访问授权。"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "RoleAlreadyExists",
+           "type": "string"
+          },
+          "description": {
+           "example": "已经完成角色授权，无需重复授权。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 400,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Role '%s' already exists.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "创建服务关联角色",
+    "tags": [
+     "角色"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/GetAccessKeyLastUsed": {
+   "get": {
+    "description": "查询指定API访问密钥的最后使用信息（包含最后使用时间、访问的服务、访问的地域）。",
+    "operationId": "GetAccessKeyLastUsed",
+    "parameters": [
+     {
+      "description": "密钥所属IAM用户的用户名。当IAM用户拥有密钥自管理权限时（AccessKeySelfManageAccess），如需查询自身的密钥的最后使用信息，则需要在请求中传递IAM用户自身的UserName。\n\n",
+      "in": "query",
+      "name": "UserName",
+      "schema": {
+       "description": "密钥所属IAM用户的用户名。当IAM用户拥有密钥自管理权限时（AccessKeySelfManageAccess），如需查询自身的密钥的最后使用信息，则需要在请求中传递IAM用户自身的UserName。\n\n",
+       "example": "Bob",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "密钥ID（Access Key Id）。\n\n",
+      "in": "query",
+      "name": "AccessKeyId",
+      "required": true,
+      "schema": {
+       "description": "密钥ID（Access Key Id）。\n\n",
+       "example": "AKLTZjIwYzBjYzczNWQ4NDkwN******3NzViZTgzZDAxYjE\n\n",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AccessKeyLastUsed": {
+           "$ref": "#/components/schemas/AccessKeyLastUsed"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询指定API访问密钥的最后使用信息（包含最后使用时间、访问的服务、访问的地域）。"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InvalidParameter",
+           "type": "string"
+          },
+          "description": {
+           "example": "无效参数！",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 400,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The parameter '%s' in request is invalid, error: %v.\n",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "AccessKeyNotExist",
+           "type": "string"
+          },
+          "description": {
+           "example": "Access Key Id 不存在！",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 403,
+           "type": "integer"
+          },
+          "message": {
+           "example": "AccessKey '%s' not exist",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询API密钥的最后使用信息",
+    "tags": [
+     "访问密钥"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/GetGroup": {
+   "get": {
+    "description": "查询指定用户组的详情信息。",
+    "operationId": "GetGroup",
+    "parameters": [
+     {
+      "description": "用户组名。",
+      "in": "query",
+      "name": "UserGroupName",
+      "required": true,
+      "schema": {
+       "description": "用户组名。",
+       "example": "dev-group",
+       "type": "string",
+       "x-split-type": 1
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "UserGroup": {
+           "$ref": "#/components/schemas/UserGroup"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询指定用户组的详情信息。"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "UserGroupNotExist",
+           "type": "string"
+          },
+          "description": {
+           "example": "",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "User Group '%s' does not exist.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "ServiceFailure",
+           "type": "string"
+          },
+          "description": {
+           "example": "内部服务错误。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The requested service failed due to an unknown error",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询用户组详情",
+    "tags": [
+     "用户组"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/GetLoginProfile": {
+   "get": {
+    "description": "查询指定IAM用户的登录配置。",
+    "operationId": "GetLoginProfile",
+    "parameters": [
+     {
+      "description": "用户名。",
+      "in": "query",
+      "name": "UserName",
+      "required": true,
+      "schema": {
+       "description": "用户名。",
+       "example": "Bob",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "LoginProfile": {
+           "$ref": "#/components/schemas/LoginProfile"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询指定IAM用户的登录配置。"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "AccessDenied",
+           "type": "string"
+          },
+          "description": {
+           "example": "用户无权限。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 403,
+           "type": "integer"
+          },
+          "message": {
+           "example": "User is not authorized to perform on resource",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "UserNotExist",
+           "type": "string"
+          },
+          "description": {
+           "example": "用户不存在。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "User does not exist",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "ServiceFailure",
+           "type": "string"
+          },
+          "description": {
+           "example": "内部服务错误。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The requested service failed due to an unknown error",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询IAM用户登录配置",
+    "tags": [
+     "用户"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/GetOAuthProvider": {
+   "get": {
+    "description": "查询 OAuth 身份提供商",
+    "operationId": "GetOAuthProvider",
+    "parameters": [
+     {
+      "description": "OAuth 身份提供商名称",
+      "in": "query",
+      "name": "OAuthProviderName",
+      "required": true,
+      "schema": {
+       "description": "OAuth 身份提供商名称",
+       "example": "my-provider",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AuthorizeTemplate": {
+           "description": "OAuth 授权地址访问模板",
+           "example": " ",
+           "type": "string"
+          },
+          "AuthorizeURL": {
+           "description": "OAuth 授权服务授权地址",
+           "example": " ",
+           "type": "string"
+          },
+          "ClientId": {
+           "description": "OAuth 应用 Client Id",
+           "example": " ",
+           "type": "string"
+          },
+          "ClientSecret": {
+           "description": "OAuth 授权应用秘钥",
+           "example": " ",
+           "type": "string"
+          },
+          "CreateDate": {
+           "description": "创建时间",
+           "example": "2024-01-03T16:10:57+08:00",
+           "type": "string"
+          },
+          "Description": {
+           "description": "身份提供商描述",
+           "example": " ",
+           "type": "string"
+          },
+          "IdentityMapType": {
+           "description": "OAuth 用户信息映射子用户方式\n1. 映射子用户名称\n2. 映射子用户安全手机",
+           "example": " ",
+           "format": "int32",
+           "type": "integer"
+          },
+          "IdpIdentityKey": {
+           "description": "OAauth 用户信息映射字段\n\n",
+           "example": " ",
+           "type": "string"
+          },
+          "OAuthProviderName": {
+           "description": "OAuth 身份提供商名称",
+           "example": "my-provider",
+           "type": "string"
+          },
+          "ProviderId": {
+           "description": "身份提供商 ID",
+           "example": "7236581599306055724",
+           "type": "string"
+          },
+          "SSOType": {
+           "description": "身份提供商 SSO 类型\n1. 角色 SSO\n2. 用户 SSO",
+           "example": " ",
+           "format": "int32",
+           "type": "integer"
+          },
+          "Scope": {
+           "description": "OAuth 授权服务范围，多个使用空格连接",
+           "example": " ",
+           "type": "string"
+          },
+          "Status": {
+           "description": "身份提供商状态 (仅用户 SSO)\n1. 开启\n2. 开启并禁用其他登录方式\n3. 关闭",
+           "example": " ",
+           "format": "int32",
+           "type": "integer"
+          },
+          "TokenURL": {
+           "description": "OAuth 授权服务 AccessToken 端点地址",
+           "example": " ",
+           "type": "string"
+          },
+          "Trn": {
+           "description": "身份提供商 Trn",
+           "example": "trn:iam::2100000000:saml-provider/my-provider",
+           "type": "string"
+          },
+          "UpdateDate": {
+           "description": "更新时间",
+           "example": "2024-01-03T16:10:57+08:00",
+           "type": "string"
+          },
+          "UserInfoURL": {
+           "description": "OAuth 授权服务用户信息端点地址",
+           "example": " ",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询 OAuth 身份提供商"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InvalidParameter",
+           "type": "string"
+          },
+          "description": {
+           "example": "接口参数不合法",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 400,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The specified parameter is invalid",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询 OAuth 身份提供商",
+    "tags": [
+     "身份提供商"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/GetOIDCProvider": {
+   "get": {
+    "description": "查询 OIDC 身份提供商信息",
+    "operationId": "GetOIDCProvider",
+    "parameters": [
+     {
+      "description": "身份提供商名称",
+      "in": "query",
+      "name": "OIDCProviderName",
+      "required": true,
+      "schema": {
+       "description": "身份提供商名称",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ClientIDs": {
+           "description": "客户端 ID 列表。由外部 IdP 提供",
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "CreateDate": {
+           "description": "创建时间",
+           "example": "2024-01-03T16:10:57+08:00",
+           "type": "string"
+          },
+          "Description": {
+           "description": "身份提供商描述",
+           "type": "string"
+          },
+          "IssuanceLimitTime": {
+           "description": "允许外部 IdP 颁发 ID Token 的最早签发时间",
+           "format": "int32",
+           "type": "integer"
+          },
+          "IssuerURL": {
+           "description": "OIDC 颁发者 URL",
+           "type": "string"
+          },
+          "OIDCProviderName": {
+           "description": "身份提供商名称",
+           "type": "string"
+          },
+          "Thumbprints": {
+           "description": "HTTPS 证书的验证指纹（SHA256）",
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "Trn": {
+           "description": "身份提供商 Trn",
+           "example": "trn:iam::2100000000:saml-provider/my-provider",
+           "type": "string"
+          },
+          "UpdateDate": {
+           "description": "更新时间",
+           "example": "2024-01-03T16:10:57+08:00",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询 OIDC 身份提供商信息"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "NotFound.OIDCProvider",
+           "type": "string"
+          },
+          "description": {
+           "example": "身份提供商不存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The specified OIDCProvider does not exist",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询 OIDC 身份提供商信息",
+    "tags": [
+     "身份提供商"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/GetPolicy": {
+   "get": {
+    "description": "查询指定策略的详情信息。",
+    "operationId": "GetPolicy",
+    "parameters": [
+     {
+      "description": "策略名。",
+      "in": "query",
+      "name": "PolicyName",
+      "required": true,
+      "schema": {
+       "description": "策略名。",
+       "example": "IAMFullAccess",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "策略类型。System代表系统策略，Custom代表自定义策略。",
+      "in": "query",
+      "name": "PolicyType",
+      "required": true,
+      "schema": {
+       "description": "策略类型。System代表系统策略，Custom代表自定义策略。",
+       "enum": [
+        "System",
+        "Custom"
+       ],
+       "example": "System",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Policy": {
+           "$ref": "#/components/schemas/Policy"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询指定策略的详情信息。"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InvalidPolicyType",
+           "type": "string"
+          },
+          "description": {
+           "example": "",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 400,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Invalid PolicyType '%s', err: '%s'",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "PolicyNotExist",
+           "type": "string"
+          },
+          "description": {
+           "example": "",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Policy '%s' does not exist or is not attachable.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询策略详情",
+    "tags": [
+     "策略"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/GetRole": {
+   "get": {
+    "description": "查询指定角色的详情信息。",
+    "operationId": "GetRole",
+    "parameters": [
+     {
+      "description": "角色名。",
+      "in": "query",
+      "name": "RoleName",
+      "required": true,
+      "schema": {
+       "description": "角色名。",
+       "example": "ops-role",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Role": {
+           "$ref": "#/components/schemas/Role"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询指定角色的详情信息。"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "RoleNotExist",
+           "type": "string"
+          },
+          "description": {
+           "example": "角色不存在。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Role '%s' cannot be found",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询角色详情",
+    "tags": [
+     "角色"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/GetSAMLProvider": {
+   "get": {
+    "description": "查询 SAML 身份提供商",
+    "operationId": "GetSAMLProvider",
+    "parameters": [
+     {
+      "description": "身份提供商名称",
+      "in": "query",
+      "name": "SAMLProviderName",
+      "required": true,
+      "schema": {
+       "description": "身份提供商名称",
+       "example": " ",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "CertificateExpireTime": {
+           "description": "SAML 证书过期提醒时间",
+           "example": "2024-09-17T16:12:15+08:00",
+           "type": "string"
+          },
+          "CreateDate": {
+           "description": "创建时间",
+           "example": "2024-01-03T16:10:57+08:00",
+           "type": "string"
+          },
+          "Description": {
+           "description": "身份提供商描述",
+           "example": " ",
+           "type": "string"
+          },
+          "EncodedSAMLMetadataDocument": {
+           "description": "SAML 身份提供商元数据文件 Base64 编码",
+           "example": " ",
+           "type": "string"
+          },
+          "ProviderName": {
+           "description": "身份提供商名称",
+           "example": " ",
+           "type": "string"
+          },
+          "SSOType": {
+           "description": "身份提供商 SSO 类型\n1. 角色 SSO\n2. 用户 SSO",
+           "example": " ",
+           "format": "int32",
+           "type": "integer"
+          },
+          "Status": {
+           "description": "身份提供商状态 (仅用户 SSO)\n1. 开启\n2. 开启并禁用其他登录方式\n3. 关闭",
+           "example": " ",
+           "format": "int32",
+           "type": "integer"
+          },
+          "Trn": {
+           "description": "身份提供商 Trn",
+           "example": "trn:iam::2100000000:saml-provider/my-provider",
+           "type": "string"
+          },
+          "UpdateDate": {
+           "description": "更新时间",
+           "example": "2024-01-03T16:10:57+08:00",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询 SAML 身份提供商"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InvalidParameter.SAMLProviderName",
+           "type": "string"
+          },
+          "description": {
+           "example": "身份提供商不存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 400,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The specified parameter SAMLProviderName is invalid: The SAML provider does not EXIST",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询 SAML 身份提供商",
+    "tags": [
+     "身份提供商"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/GetSecurityConfig": {
+   "post": {
+    "description": "查询指定IAM用户的操作保护配置",
+    "operationId": "GetSecurityConfig",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "UserName": {
+          "description": "用户名。",
+          "example": "Bob",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "UserName"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "SafeAuthClose": {
+           "description": "是否开启操作保护。0代表开启，1代表关闭。",
+           "example": 0,
+           "format": "int32",
+           "type": "integer"
+          },
+          "SafeAuthExemptDuration": {
+           "description": "操作保护的豁免时间，完成验证后在豁免时间内将不再进行验证。支持设置5至30，默认值为10。单位为分钟。\n\n",
+           "example": 30,
+           "format": "int32",
+           "type": "integer"
+          },
+          "SafeAuthType": {
+           "description": "操作保护类型。phone代表手机验证，email代表邮箱验证，vmfa代表验证MFA设备验证。多种操作保护类型以英文逗号分隔。\n\n",
+           "example": "email",
+           "type": "string"
+          },
+          "UserID": {
+           "description": "用户ID。",
+           "example": 10000,
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询指定IAM用户的操作保护配置"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "UserNotExist",
+             "type": "string"
+            },
+            "description": {
+             "example": "用户不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "User does not exist",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "SecurityConfigNotExist",
+             "type": "string"
+            },
+            "description": {
+             "example": "用户的安全设置不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "User security config does not exist",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "ServiceFailure",
+           "type": "string"
+          },
+          "description": {
+           "example": "内部服务错误。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The requested service failed due to an unknown error",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询IAM用户的操作保护配置",
+    "tags": [
+     "用户"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/GetUser": {
+   "get": {
+    "description": "查询指定IAM用户的详情信息。",
+    "operationId": "GetUser",
+    "parameters": [
+     {
+      "description": "用户Id。必须指定ID、UserName、AccessKeyID三个参数其一，不能同时指定。",
+      "in": "query",
+      "name": "ID",
+      "schema": {
+       "description": "用户Id。必须指定ID、UserName、AccessKeyID三个参数其一，不能同时指定。",
+       "example": 10000,
+       "format": "int64",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "用户密钥ID。必须指定ID、UserName、AccessKeyID三个参数其一，不能同时指定。",
+      "in": "query",
+      "name": "AccessKeyID",
+      "schema": {
+       "description": "用户密钥ID。必须指定ID、UserName、AccessKeyID三个参数其一，不能同时指定。",
+       "example": "AKLTZjIwYzBjYzczNWQ4NDkwN******3NzViZTgzZDAxYjE\n\n",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "用户名。长度1~64，仅支持英文、数字、下划线、\".\"、\"-\"、\"@\"、\",\"，必须指定ID、UserName、AccessKeyID三个参数其一，不能同时指定。",
+      "in": "query",
+      "name": "UserName",
+      "schema": {
+       "description": "用户名。长度1~64，仅支持英文、数字、下划线、\".\"、\"-\"、\"@\"、\",\"，必须指定ID、UserName、AccessKeyID三个参数其一，不能同时指定。",
+       "example": "Bob",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "User": {
+           "$ref": "#/components/schemas/User"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询指定IAM用户的详情信息。"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidUserName",
+             "type": "string"
+            },
+            "description": {
+             "example": "用户名称不合法。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Invalid UserName '%s', err: '%s'.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "Access Key Id不合法。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter 'AccessKeyID' is invalid",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询IAM用户详情",
+    "tags": [
+     "用户"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/ListAccessKeys": {
+   "get": {
+    "description": "获取主账号或IAM用户的密钥列表。因安全原因，该接口不返回Secret Access Key，请在首次创建密钥时保存好Secret Access Key。",
+    "operationId": "ListAccessKeys",
+    "parameters": [
+     {
+      "description": "用户名。用于获取指定IAM用户的密钥列表，未指定用户名时则获取当前请求身份的密钥列表（即主账号请求时获取主账号自身的密钥列表，IAM用户请求时获取IAM用户自身的密钥列表。注意：角色无法持有密钥，因此角色请求时，必须传递UserName以获取指定IAM用户的密钥列表）。当IAM用户拥有密钥自管理权限时（AccessKeySelfManageAccess），如需获取自身的密钥则需要在请求中传递自身的UserName。",
+      "in": "query",
+      "name": "UserName",
+      "schema": {
+       "description": "用户名。用于获取指定IAM用户的密钥列表，未指定用户名时则获取当前请求身份的密钥列表（即主账号请求时获取主账号自身的密钥列表，IAM用户请求时获取IAM用户自身的密钥列表。注意：角色无法持有密钥，因此角色请求时，必须传递UserName以获取指定IAM用户的密钥列表）。当IAM用户拥有密钥自管理权限时（AccessKeySelfManageAccess），如需获取自身的密钥则需要在请求中传递自身的UserName。",
+       "example": "Bob",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AccessKeyMetadata": {
+           "description": "密钥列表中的密钥的数据结构。因安全原因，不包含Secret Access Key，请在首次创建密钥时保存好Secret Access Key。",
+           "example": [
+            "请参考数据结构内具体参数示例值。"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/AccessKeyMeta"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取主账号或IAM用户的密钥列表。因安全原因，该接口不返回Secret Access Key，请在首次创建密钥时保存好Secret Access Key。"
+     }
+    },
+    "summary": "获取访问密钥列表",
+    "tags": [
+     "访问密钥"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/ListAttachedRolePolicies": {
+   "get": {
+    "description": "获取指定角色绑定的策略列表。",
+    "operationId": "ListAttachedRolePolicies",
+    "parameters": [
+     {
+      "description": "角色名。",
+      "in": "query",
+      "name": "RoleName",
+      "required": true,
+      "schema": {
+       "description": "角色名。",
+       "example": "dev-role",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AttachedPolicyMetadata": {
+           "description": "绑定的策略的数据结构。",
+           "example": [
+            "请参考数据结构内具体参数示例值。"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/AttachedPolicy"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取指定角色绑定的策略列表。"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "RoleNotExist",
+           "type": "string"
+          },
+          "description": {
+           "example": "",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Role '%s' cannot be found",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "获取角色绑定的策略列表",
+    "tags": [
+     "策略"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/ListAttachedUserGroupPolicies": {
+   "get": {
+    "description": "获取用户组绑定的策略列表。",
+    "operationId": "ListAttachedUserGroupPolicies",
+    "parameters": [
+     {
+      "description": "用户组名。",
+      "in": "query",
+      "name": "UserGroupName",
+      "required": true,
+      "schema": {
+       "description": "用户组名。",
+       "example": "dev-group",
+       "type": "string",
+       "x-split-type": 1
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AttachedPolicyMetadata": {
+           "description": "身份关联的的策略的数据结构。",
+           "example": [
+            "请参考数据结构内具体参数示例值。"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/AttachedPolicy"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取用户组绑定的策略列表。"
+     }
+    },
+    "summary": "获取用户组绑定的策略列表",
+    "tags": [
+     "策略"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/ListAttachedUserPolicies": {
+   "get": {
+    "description": "获取指定用户绑定的策略列表。",
+    "operationId": "ListAttachedUserPolicies",
+    "parameters": [
+     {
+      "description": "用户名。",
+      "in": "query",
+      "name": "UserName",
+      "required": true,
+      "schema": {
+       "description": "用户名。",
+       "example": "Bob",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AttachedPolicyMetadata": {
+           "description": "身份关联的策略的数据结构。",
+           "example": [
+            "请参考数据结构内具体参数示例值。"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/AttachedPolicy"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取指定用户绑定的策略列表。"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "UserNotExist",
+           "type": "string"
+          },
+          "description": {
+           "example": "用户不存在。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "User '%s' cannot be found.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "获取用户关联的策略列表",
+    "tags": [
+     "策略"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/ListEntitiesForPolicy": {
+   "get": {
+    "description": "获取指定策略所绑定的身份列表（包含用户、用户组或角色）。",
+    "operationId": "ListEntitiesForPolicy",
+    "parameters": [
+     {
+      "description": "分页条数，默认为10。\n",
+      "in": "query",
+      "name": "Limit",
+      "schema": {
+       "description": "分页条数，默认为10。\n",
+       "example": 10,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "分页起始索引，默认为0。",
+      "in": "query",
+      "name": "Offset",
+      "schema": {
+       "description": "分页起始索引，默认为0。",
+       "example": 0,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "策略类型。System代表系统预设策略，Custom代表自定义策略。",
+      "in": "query",
+      "name": "PolicyType",
+      "required": true,
+      "schema": {
+       "description": "策略类型。System代表系统预设策略，Custom代表自定义策略。",
+       "enum": [
+        "System",
+        "Custom"
+       ],
+       "example": "System",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "按身份类型筛选。User代表筛选绑定的用户，Role代表筛选绑定的角色，UserGroup代表筛选绑定的用户组。不传递时代表不按身份类型筛选，即获取策略所绑定的所有类型身份。",
+      "in": "query",
+      "name": "EntityFilter",
+      "schema": {
+       "description": "按身份类型筛选。User代表筛选绑定的用户，Role代表筛选绑定的角色，UserGroup代表筛选绑定的用户组。不传递时代表不按身份类型筛选，即获取策略所绑定的所有类型身份。",
+       "example": "User",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "策略名。",
+      "in": "query",
+      "name": "PolicyName",
+      "required": true,
+      "schema": {
+       "description": "策略名。",
+       "example": "ECSFullAccess",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Limit": {
+           "description": "分页条数。",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Offset": {
+           "description": "分页起始索引。",
+           "example": 0,
+           "format": "int32",
+           "type": "integer"
+          },
+          "PolicyRoles": {
+           "description": "策略绑定的角色列表，EntityFilter按Role筛选或不筛选时返回。",
+           "example": [
+            "请参考数据结构内具体参数示例值。"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/PolicyRole"
+           },
+           "type": "array"
+          },
+          "PolicyUserGroups": {
+           "description": "策略绑定的用户组列表，EntityFilter按UserGroup筛选或不筛选时返回。",
+           "example": [
+            "请参考数据结构内具体参数示例值。"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/PolicyUserGroup"
+           },
+           "type": "array"
+          },
+          "PolicyUsers": {
+           "description": "策略绑定的用户列表，EntityFilter按User筛选或不筛选时返回。",
+           "example": [
+            "请参考数据结构内具体参数示例值。"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/PolicyUser"
+           },
+           "type": "array"
+          },
+          "Total": {
+           "description": "总数。",
+           "example": 20,
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取指定策略所绑定的身份列表（包含用户、用户组或角色）。"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidPolicyEntityFilter",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Invalid Entity Filter users, error: EntityFilter should be User/Role/UserGroup/All",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidPolicyType",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Invalid PolicyType '%s', error: 'policy type should be System/Custom'",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ParameterNotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Parameter '%s' is not found.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidPolicyName",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Invalid PolicyName '%s', error: 'PolicyName must contain only alphanumeric character, Chinese character, space and/or the following: .@_-+='",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "PolicyNotExist",
+           "type": "string"
+          },
+          "description": {
+           "example": "策略不存在。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Policy '%s' does not exist or is not attachable.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "ServiceFailure",
+           "type": "string"
+          },
+          "description": {
+           "example": "内部服务错误。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The requested service failed due to an unknown error",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "获取策略关联的实体列表",
+    "tags": [
+     "策略"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/ListGroups": {
+   "get": {
+    "description": "获取用户组列表。",
+    "operationId": "ListGroups",
+    "parameters": [
+     {
+      "description": "模糊查询。可按用户组名、显示名、备注查询。",
+      "in": "query",
+      "name": "Query",
+      "schema": {
+       "description": "模糊查询。可按用户组名、显示名、备注查询。",
+       "example": "dev-group",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "分页条数，默认为10。",
+      "in": "query",
+      "name": "Limit",
+      "schema": {
+       "description": "分页条数，默认为10。",
+       "example": 10,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "分页起始索引，默认为0。",
+      "in": "query",
+      "name": "Offset",
+      "schema": {
+       "description": "分页起始索引，默认为0。",
+       "example": 0,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Limit": {
+           "description": "分页条数。",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Offset": {
+           "description": "分页起始索引。",
+           "example": 0,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数。",
+           "example": 20,
+           "format": "int32",
+           "type": "integer"
+          },
+          "UserGroups": {
+           "description": "用户组的数据结构。",
+           "example": [
+            "请参考数据结构内具体参数示例值。"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/UserGroup"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取用户组列表。"
+     }
+    },
+    "summary": "获取用户组列表",
+    "tags": [
+     "用户组"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/ListGroupsForUser": {
+   "get": {
+    "description": "获取指定用户加入的用户组列表。",
+    "operationId": "ListGroupsForUser",
+    "parameters": [
+     {
+      "description": "用户名。",
+      "in": "query",
+      "name": "UserName",
+      "required": true,
+      "schema": {
+       "description": "用户名。",
+       "example": "Bob",
+       "type": "string",
+       "x-split-type": 1
+      }
+     },
+     {
+      "description": "模糊查询，支持按用户组名、显示名、备注查询。",
+      "in": "query",
+      "name": "Query",
+      "schema": {
+       "description": "模糊查询，支持按用户组名、显示名、备注查询。",
+       "example": "dev-group",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "分页条数，默认为10。\n\n",
+      "in": "query",
+      "name": "Limit",
+      "schema": {
+       "description": "分页条数，默认为10。\n\n",
+       "example": 10,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "分页起始索引，默认为0。\n\n",
+      "in": "query",
+      "name": "Offset",
+      "schema": {
+       "description": "分页起始索引，默认为0。\n\n",
+       "example": 0,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Limit": {
+           "description": "分页条数。",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Offset": {
+           "description": "分页起始索引。",
+           "example": 0,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数。",
+           "example": 20,
+           "format": "int32",
+           "type": "integer"
+          },
+          "UserGroups": {
+           "description": "用户加入的用户组的数据结构。",
+           "example": [
+            "请参考数据结构内具体参数示例值。"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/GroupOfUser"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取指定用户加入的用户组列表。"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InvalidParameter",
+           "type": "string"
+          },
+          "description": {
+           "example": "无效参数！",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 400,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The parameter '%s' in request is invalid, error: %v.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "ServiceFailure",
+           "type": "string"
+          },
+          "description": {
+           "example": "内部服务错误。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The requested service failed due to an unknown error",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "获取用户加入的用户组列表",
+    "tags": [
+     "用户组"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/ListIdentityProviders": {
+   "get": {
+    "description": "查询身份提供商列表",
+    "operationId": "ListIdentityProviders",
+    "parameters": [
+     {
+      "description": "查询页数",
+      "in": "query",
+      "name": "Offset",
+      "schema": {
+       "description": "查询页数",
+       "example": " ",
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "页大小",
+      "in": "query",
+      "name": "Limit",
+      "schema": {
+       "description": "页大小",
+       "example": " ",
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "IdentityProviders": {
+           "description": "身份提供商列表",
+           "example": [
+            ""
+           ],
+           "items": {
+            "$ref": "#/components/schemas/IdentityProvider"
+           },
+           "type": "array"
+          },
+          "Limit": {
+           "description": "页大小",
+           "example": " ",
+           "format": "int32",
+           "type": "integer"
+          },
+          "Offset": {
+           "description": "查询页数",
+           "example": " ",
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "身份提供商总数",
+           "example": " ",
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询身份提供商列表"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InvalidParameter",
+           "type": "string"
+          },
+          "description": {
+           "example": "接口参数不合法",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 400,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The specified parameter is invalid",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询身份提供商列表",
+    "tags": [
+     "身份提供商"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/ListOIDCProviders": {
+   "get": {
+    "description": "查询 OIDC 身份提供商列表",
+    "operationId": "ListOIDCProviders",
+    "parameters": [
+     {
+      "description": "页大小",
+      "in": "query",
+      "name": "Limit",
+      "schema": {
+       "description": "页大小",
+       "format": "int32",
+       "maximum": 100,
+       "minimum": 0,
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "查询页数",
+      "in": "query",
+      "name": "Offset",
+      "schema": {
+       "description": "查询页数",
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Limit": {
+           "description": "页大小",
+           "format": "int32",
+           "type": "integer"
+          },
+          "OIDCProviders": {
+           "description": "OIDCProvider 列表",
+           "items": {
+            "$ref": "#/components/schemas/OIDCProvider"
+           },
+           "type": "array"
+          },
+          "Offset": {
+           "description": "查询页数",
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数",
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询 OIDC 身份提供商列表"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InvalidParameter",
+           "type": "string"
+          },
+          "description": {
+           "example": "无效参数！",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 400,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The parameter '%s' in request is invalid, error: %v.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询 OIDC 身份提供商列表",
+    "tags": [
+     "身份提供商"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/ListPolicies": {
+   "get": {
+    "description": "获取全部策略列表（包含系统预设策略和自定义策略）。",
+    "operationId": "ListPolicies",
+    "parameters": [
+     {
+      "description": "策略类型筛选。All代表全部策略类型，System代表系统预设策略，Custom代表自定义策略。默认值为All。",
+      "in": "query",
+      "name": "Scope",
+      "schema": {
+       "description": "策略类型筛选。All代表全部策略类型，System代表系统预设策略，Custom代表自定义策略。默认值为All。",
+       "example": "System",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "分页条数，默认为10。\n\n",
+      "in": "query",
+      "name": "Limit",
+      "schema": {
+       "description": "分页条数，默认为10。\n\n",
+       "example": 10,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "分页起始索引，默认为0。\n\n",
+      "in": "query",
+      "name": "Offset",
+      "schema": {
+       "description": "分页起始索引，默认为0。\n\n",
+       "example": 0,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "是否返回服务关联角色的策略。0代表不返回，1代表返回。默认值为0。\n",
+      "in": "query",
+      "name": "WithServiceRolePolicy",
+      "schema": {
+       "description": "是否返回服务关联角色的策略。0代表不返回，1代表返回。默认值为0。\n",
+       "example": 0,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Limit": {
+           "description": "分页条数。\n\n",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Offset": {
+           "description": "分页起始索引。\n\n",
+           "example": 0,
+           "format": "int32",
+           "type": "integer"
+          },
+          "PolicyMetadata": {
+           "description": "策略的数据结构。",
+           "example": [
+            "请参考数据结构内具体参数示例值。"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/Policy"
+           },
+           "type": "array"
+          },
+          "Total": {
+           "description": "总数。\n\n",
+           "example": 20,
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取全部策略列表（包含系统预设策略和自定义策略）。"
+     }
+    },
+    "summary": "获取策略列表",
+    "tags": [
+     "策略"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/ListRoles": {
+   "get": {
+    "description": "获取角色列表。",
+    "operationId": "ListRoles",
+    "parameters": [
+     {
+      "description": "分页起始索引，默认为0。",
+      "in": "query",
+      "name": "Offset",
+      "schema": {
+       "description": "分页起始索引，默认为0。",
+       "example": 5,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "模糊查询。可按角色名、显示名或备注查询。",
+      "in": "query",
+      "name": "Query",
+      "schema": {
+       "description": "模糊查询。可按角色名、显示名或备注查询。",
+       "example": "ops-role",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "分页条数，默认为10。",
+      "in": "query",
+      "name": "Limit",
+      "schema": {
+       "description": "分页条数，默认为10。",
+       "example": 10,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Limit": {
+           "description": "分页条数。",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Offset": {
+           "description": "分页起始索引。",
+           "example": 0,
+           "format": "int32",
+           "type": "integer"
+          },
+          "RoleMetadata": {
+           "description": "角色的数据结构。",
+           "example": [
+            "请参考数据结构内具体参数示例值。"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/Role"
+           },
+           "type": "array"
+          },
+          "Total": {
+           "description": "总数。",
+           "example": 20,
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取角色列表。"
+     }
+    },
+    "summary": "获取角色列表",
+    "tags": [
+     "角色"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/ListSAMLProviderCertificates": {
+   "get": {
+    "description": "查询身份提供商证书列表",
+    "operationId": "ListSAMLProviderCertificates",
+    "parameters": [
+     {
+      "description": "SAML 身份提供商名称",
+      "in": "query",
+      "name": "SAMLProviderName",
+      "required": true,
+      "schema": {
+       "description": "SAML 身份提供商名称",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Certificates": {
+           "description": "证书列表",
+           "items": {
+            "$ref": "#/components/schemas/Certificate"
+           },
+           "type": "array"
+          },
+          "Total": {
+           "description": "证书总数量",
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询身份提供商证书列表"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InvalidParameter.SAMLProviderName",
+           "type": "string"
+          },
+          "description": {
+           "example": "身份提供商不存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 400,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The specified parameter SAMLProviderName is invalid: The SAML provider does not EXIST",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询身份提供商证书列表",
+    "tags": [
+     "身份提供商"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/ListSAMLProviders": {
+   "get": {
+    "description": "查询 SAML 身份提供商列表",
+    "operationId": "ListSAMLProviders",
+    "parameters": [
+     {
+      "description": "页大小",
+      "in": "query",
+      "name": "Limit",
+      "schema": {
+       "description": "页大小",
+       "example": " ",
+       "format": "int32",
+       "maximum": 100,
+       "minimum": 0,
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "查询页数",
+      "in": "query",
+      "name": "Offset",
+      "schema": {
+       "description": "查询页数",
+       "format": "int64",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Limit": {
+           "description": "页大小",
+           "example": " ",
+           "format": "int32",
+           "type": "integer"
+          },
+          "Offset": {
+           "description": "查询页数",
+           "format": "int64",
+           "type": "integer"
+          },
+          "SAMLProviders": {
+           "description": "身份提供商列表",
+           "example": [
+            ""
+           ],
+           "items": {
+            "$ref": "#/components/schemas/SAMLProvider"
+           },
+           "type": "array"
+          },
+          "Total": {
+           "description": "身份提供商总数",
+           "example": " ",
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询 SAML 身份提供商列表"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InvalidParameter",
+           "type": "string"
+          },
+          "description": {
+           "example": "接口参数不合法",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 400,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The specified parameter is invalid",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询 SAML 身份提供商列表",
+    "tags": [
+     "身份提供商"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/ListTagsForResources": {
+   "get": {
+    "description": "查询指定用户或角色的标签列表。",
+    "operationId": "ListTagsForResources",
+    "parameters": [
+     {
+      "description": "需要查询的身份类型。User代表用户，Role代表角色。\n",
+      "in": "query",
+      "name": "ResourceType",
+      "required": true,
+      "schema": {
+       "description": "需要查询的身份类型。User代表用户，Role代表角色。\n",
+       "enum": [
+        "User",
+        "Role"
+       ],
+       "example": "User",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "需要查询的身份名称。\n",
+      "in": "query",
+      "name": "ResourceNames",
+      "schema": {
+       "description": "需要查询的身份名称。\n",
+       "example": [
+        "Bob"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "type": "array",
+       "x-split-type": 3
+      }
+     },
+     {
+      "description": "TagFilters",
+      "in": "query",
+      "name": "TagFilters",
+      "schema": {
+       "description": "TagFilters",
+       "items": {
+        "$ref": "#/components/schemas/TagFilters"
+       },
+       "type": "array",
+       "x-split-type": 3
+      }
+     },
+     {
+      "description": "分页起始索引。首次请求时无需传递。",
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "description": "分页起始索引。首次请求时无需传递。",
+       "example": "TDZLsdWEZDldsfEADSFdsWXZsdEWdfwXKOkdeybNSA",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "请求的最大返回数。默认为1000。",
+      "in": "query",
+      "name": "MaxResults",
+      "schema": {
+       "description": "请求的最大返回数。默认为1000。",
+       "example": 10,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "description": "分页起始索引。",
+           "example": "EIWsxhwSJKsOsWoPnXxahxVsdfwDfXeodfE",
+           "type": "string"
+          },
+          "ResourceTags": {
+           "description": "身份标签的数据结构。",
+           "example": [
+            "请参考数据结构内具体参数示例值。"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/ResourceTag"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询指定用户或角色的标签列表。"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "UserNotExist",
+             "type": "string"
+            },
+            "description": {
+             "example": "用户不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "User '{user}' does not exist.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "RoleNotExist",
+             "type": "string"
+            },
+            "description": {
+             "example": "角色不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Role '{role}' does not exist.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询标签",
+    "tags": [
+     "标签"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/ListUsers": {
+   "get": {
+    "description": "获取IAM用户列表。",
+    "operationId": "ListUsers",
+    "parameters": [
+     {
+      "description": "模糊查询。可按用户名、显示名或备注查询。\n",
+      "in": "query",
+      "name": "Query",
+      "schema": {
+       "description": "模糊查询。可按用户名、显示名或备注查询。\n",
+       "example": "Bob",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "分页起始索引，默认为0。\n\n",
+      "in": "query",
+      "name": "Offset",
+      "schema": {
+       "description": "分页起始索引，默认为0。\n\n",
+       "example": 0,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "分页条数，默认为10。\n\n",
+      "in": "query",
+      "name": "Limit",
+      "schema": {
+       "description": "分页条数，默认为10。\n\n",
+       "example": 10,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Limit": {
+           "description": "分页条数。",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Offset": {
+           "description": "分页起始索引。",
+           "example": 0,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数。",
+           "example": 20,
+           "format": "int32",
+           "type": "integer"
+          },
+          "UserMetadata": {
+           "description": "用户的数据结构。",
+           "example": [
+            "请参考数据结构内具体参数示例值。"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/User"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取IAM用户列表。"
+     }
+    },
+    "summary": "获取IAM用户列表",
+    "tags": [
+     "用户"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/ListUsersForGroup": {
+   "get": {
+    "description": "获取指定用户组内的用户列表。",
+    "operationId": "ListUsersForGroup",
+    "parameters": [
+     {
+      "description": "分页起始索引，默认为0。\n\n",
+      "in": "query",
+      "name": "Offset",
+      "schema": {
+       "description": "分页起始索引，默认为0。\n\n",
+       "example": 0,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "用户组名。",
+      "in": "query",
+      "name": "UserGroupName",
+      "required": true,
+      "schema": {
+       "description": "用户组名。",
+       "example": "dev-group",
+       "type": "string",
+       "x-split-type": 1
+      }
+     },
+     {
+      "description": "分页条数，默认为10。\n",
+      "in": "query",
+      "name": "Limit",
+      "schema": {
+       "description": "分页条数，默认为10。\n",
+       "example": 10,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Limit": {
+           "description": "分页条数。\n\n",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Offset": {
+           "description": "分页起始索引。\n\n",
+           "example": 0,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数。\n\n",
+           "example": 20,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Users": {
+           "description": "用户组内用户的数据结构。",
+           "example": [
+            "请参考数据结构内具体参数示例值。"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/UserOfGroup"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取指定用户组内的用户列表。"
+     }
+    },
+    "summary": "获取用户组下的用户列表",
+    "tags": [
+     "用户组"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  },
+  "/TagResources": {
+   "get": {
+    "description": "为用户或角色附加指定标签。",
+    "operationId": "TagResources",
+    "parameters": [
+     {
+      "description": "Tags",
+      "in": "query",
+      "name": "Tags",
+      "schema": {
+       "description": "Tags",
+       "items": {
+        "$ref": "#/components/schemas/Tags"
+       },
+       "type": "array",
+       "x-split-type": 3
+      }
+     },
+     {
+      "description": "需要附加标签的身份名称。\n",
+      "in": "query",
+      "name": "ResourceNames",
+      "required": true,
+      "schema": {
+       "description": "需要附加标签的身份名称。\n",
+       "example": [
+        "Bob"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "type": "array",
+       "x-split-type": 3
+      }
+     },
+     {
+      "description": "需要附加标签的身份的类型。User代表用户，Role代表角色。",
+      "in": "query",
+      "name": "ResourceType",
+      "required": true,
+      "schema": {
+       "description": "需要附加标签的身份的类型。User代表用户，Role代表角色。",
+       "enum": [
+        "User",
+        "Role"
+       ],
+       "example": "User",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "为用户或角色附加指定标签。"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InvalidParameter",
+           "type": "string"
+          },
+          "description": {
+           "example": "",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 400,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The parameter '%s' is invalid.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "UserNotExist",
+             "type": "string"
+            },
+            "description": {
+             "example": "用户不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "User '{user}' does not exist.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "RoleNotExist",
+             "type": "string"
+            },
+            "description": {
+             "example": "角色不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Role '{role}' does not exist.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "附加标签",
+    "tags": [
+     "标签"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "iam",
+   "x-version": "2018-01-01"
+  }
+ }
+}

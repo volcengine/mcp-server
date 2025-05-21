@@ -1,0 +1,12 @@
+service_code: sts
+transport: stdio  # 支持 stdio 和  sse
+sse_port: 8888 # sse 模式需要设定端口
+auth: none  # 支持 oauth 和 none
+credential: env # 支持 env 和  token
+
+#oauth:
+#  client_id: your client id
+#  client_secret: your client secret
+#  authorize_url: 'https://github.com/login/oauth/authorize'
+#  token_url: 'https://github.com/login/oauth/access_token'
+#  scope: [user]

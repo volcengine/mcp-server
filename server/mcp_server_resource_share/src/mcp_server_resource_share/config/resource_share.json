@@ -1,0 +1,3487 @@
+{
+ "components": {
+  "schemas": {
+   "PermissionVO": {
+    "description": "权限详情",
+    "properties": {
+     "CreateTime": {
+      "description": "创建时间",
+      "example": "2024-07-11T22:32:04+08:00",
+      "type": "string"
+     },
+     "Description": {
+      "description": "权限策略描述",
+      "example": "共享子网的默认权限",
+      "type": "string"
+     },
+     "Name": {
+      "description": "权限策略名称",
+      "example": "RSDefaultPermissionSubnet",
+      "type": "string"
+     },
+     "Permission": {
+      "description": "权限策略详情，包含具体的Statement",
+      "example": "{\"Effect\":\"Allow\",\"Action\":[\"vpc:DescribeSubnet*\"]}",
+      "type": "string"
+     },
+     "PermissionType": {
+      "description": "权限策略类型",
+      "example": "STSTEM",
+      "type": "string"
+     },
+     "ResourceType": {
+      "description": "权限策略所对应的资源类型，如：vpc:subnet",
+      "example": "vpc:subnet",
+      "type": "string"
+     },
+     "Trn": {
+      "description": "权限策略Trn",
+      "example": "trn:resource_share:::permission/RSDefaultPermissionSubnet",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrincipalVO": {
+    "description": "principal详情",
+    "properties": {
+     "External": {
+      "description": "是否是组织外的账号",
+      "example": true,
+      "type": "boolean"
+     },
+     "Id": {
+      "description": "principal对应的ID（principal是指被共享方，用户、组织或者组织单元）",
+      "example": "2000000000",
+      "type": "string"
+     },
+     "ResourceShares": {
+      "description": "相关联的资源共享列表",
+      "example": [
+       {
+        "ResourceShareName": "sharexxx",
+        "ResourceShareTrn": "trn:vpc:cn-beijing:2000000000:subnet/subnet-3***5147px00tanx",
+        "ShareTime": "2024-06-25T01:09:54+08:00"
+       }
+      ],
+      "items": {
+       "$ref": "#/components/schemas/RelatedResourceShareVO"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "RelatedResourceShareVO": {
+    "description": "共享单元简易信息",
+    "properties": {
+     "ResourceShareName": {
+      "description": "资源共享名称",
+      "example": "sharexxx",
+      "type": "string"
+     },
+     "ResourceShareTrn": {
+      "description": "资源共享trn",
+      "example": "trn:vpc:cn-beijing:2000000000:subnet/subnet-3***5147px00tanx",
+      "type": "string"
+     },
+     "ShareTime": {
+      "description": "资源共享时间",
+      "example": "2024-06-25T01:09:54+08:00",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceShareAssociationVO": {
+    "description": "资源共享关联详情",
+    "properties": {
+     "AssociateTime": {
+      "description": "关联时间",
+      "example": "2025-02-25T13:58:54+08:00",
+      "type": "string"
+     },
+     "AssociationEntity": {
+      "description": "关联的实体\n如果是PRINCIPAL，则此处返值AccountID、Ou（对应的Trn）、Org（对应的Trn）；如果是RESOURCE，则此处返值资源Trn",
+      "example": "trn:vpc:cn-beijing:2000000000:subnet/subnet-rr1***0x57crloqp",
+      "type": "string"
+     },
+     "AssociationType": {
+      "description": "关联类型，包含 PRINCIPAL - 共享接收者；RESOURCE - 共享资源",
+      "example": "RESOURCE",
+      "type": "string"
+     },
+     "External": {
+      "description": "是否是组织外的共享接收者",
+      "example": false,
+      "type": "boolean"
+     },
+     "ResourceShareId": {
+      "description": "共享单元ID",
+      "example": "rs-03***119c96",
+      "type": "string"
+     },
+     "ResourceShareName": {
+      "description": "共享单元名称",
+      "example": "sharexxx",
+      "type": "string"
+     },
+     "ResourceShareTrn": {
+      "description": "共享单元Trn",
+      "example": "trn:resource_share:cn-beijing:2000000000:resource_share/rs-03***119c96",
+      "type": "string"
+     },
+     "Status": {
+      "description": "关联状态，包含值 UNKNOWN - 未知状态；ASSOCIATING - 关联中；ASSOCIATED - 已关联；FAILED - 关联失败；DISASSOCIATING - 解除关联中；DISASSOCIATED - 已解除关联",
+      "example": "ASSOCIATED",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceShareInvitationVO": {
+    "description": "资源共享邀请详情",
+    "properties": {
+     "InvitatedTime": {
+      "description": "邀请时间",
+      "example": "2025-03-03T12:10:18+08:00",
+      "type": "string"
+     },
+     "OwningAccountId": {
+      "description": "资源共享发起者账号ID",
+      "example": 2000000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "ReceiverAccountId": {
+      "description": "资源共享接收者账号ID",
+      "example": 2000000001,
+      "format": "int64",
+      "type": "integer"
+     },
+     "ResourceShareId": {
+      "description": "共享单元ID",
+      "example": "rs-03***119c96",
+      "type": "string"
+     },
+     "ResourceShareInvitationTrn": {
+      "description": "共享邀请Trn",
+      "example": "trn:resource_share:cn-beijing:2000000000:invitation/i-06a***1e4772",
+      "type": "string"
+     },
+     "ResourceShareName": {
+      "description": "共享单元名称",
+      "example": "sharexxx",
+      "type": "string"
+     },
+     "ResourceShareTrn": {
+      "description": "共享单元Trn",
+      "example": "trn:resource_share:cn-beijing:2000000000:resource_share/rs-03***119c96",
+      "type": "string"
+     },
+     "Status": {
+      "description": "邀请状态，包含值：UNKNOWN - 未知状态；PENDING - 待处理状态；ACCEPTED - 已接受状态；REJECTED - 已拒绝状态；EXPIRED - 已过期状态",
+      "example": "PENDING",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceShareVO": {
+    "description": "资源共享详情",
+    "properties": {
+     "AllowShareType": {
+      "description": "共享类型，包含 ORG - 仅允许组织内部共享、ANY - 允许任意账号共享",
+      "example": "ANY",
+      "type": "string"
+     },
+     "CreateTime": {
+      "description": "创建时间",
+      "example": "2025-02-25T13:58:54+08:00",
+      "type": "string"
+     },
+     "OwningAccountId": {
+      "description": "共享单元创建人账号ID",
+      "example": 2000000000,
+      "format": "int64",
+      "type": "integer"
+     },
+     "ResourceShareId": {
+      "description": "共享单元ID",
+      "example": "rs-03***119c96",
+      "type": "string"
+     },
+     "ResourceShareName": {
+      "description": "共享单元名称",
+      "example": "sharexxx",
+      "type": "string"
+     },
+     "ResourceShareTrn": {
+      "description": "共享单元Trn",
+      "example": "trn:resource_share:cn-beijing:2000000000:resource_share/rs-03***119c96",
+      "type": "string"
+     },
+     "Status": {
+      "description": "共享单元状态，包含 UNKNOWN - 未知状态；ACTIVE - 活跃状态；DELETING - 删除中状态；DELETED - 已删除状态；FAILED - 共享失败状态；NEW - 新创建状态",
+      "example": "ACTIVE",
+      "type": "string"
+     },
+     "UpdateTime": {
+      "description": "更新时间",
+      "example": "2025-02-25T13:58:54+08:00",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceTypeVO": {
+    "description": "资源类型详情",
+    "properties": {
+     "RegionScope": {
+      "description": "资源类型所属Region",
+      "example": "cn-beijing",
+      "type": "string"
+     },
+     "ResourceType": {
+      "description": "资源类型Code，如：subnet",
+      "example": "subnet",
+      "type": "string"
+     },
+     "ResourceTypeName": {
+      "description": "资源类型名称",
+      "example": "子网",
+      "type": "string"
+     },
+     "Service": {
+      "description": "服务Code，如：vpc",
+      "example": "vpc",
+      "type": "string"
+     },
+     "ServiceName": {
+      "description": "服务名称",
+      "example": "私有网络",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SharedResourceVO": {
+    "description": "共享资源信息",
+    "properties": {
+     "RegionScope": {
+      "description": "资源所属Region",
+      "example": "cn-beijing",
+      "type": "string"
+     },
+     "ResourceShares": {
+      "description": "相关联的资源共享列表",
+      "example": [
+       {
+        "ResourceShareName": "sharexxx",
+        "ResourceShareTrn": "trn:vpc:cn-beijing:2000000000:subnet/subnet-3***5147px00tanx",
+        "ShareTime": "2024-06-25T01:09:54+08:00"
+       }
+      ],
+      "items": {
+       "$ref": "#/components/schemas/RelatedResourceShareVO"
+      },
+      "type": "array"
+     },
+     "ResourceType": {
+      "description": "资源类型，如：vpc:subnet",
+      "example": "vpc:subnet",
+      "type": "string"
+     },
+     "Status": {
+      "description": "关联状态，包含值 UNKNOWN - 未知状态；ASSOCIATING - 关联中；ASSOCIATED - 已关联；FAILED - 关联失败；DISASSOCIATING - 解除关联中；DISASSOCIATED - 已解除关联",
+      "example": "ASSOCIATED",
+      "type": "string"
+     },
+     "Trn": {
+      "description": "资源Trn",
+      "example": "trn:vpc:cn-beijing:2000000000:subnet/subnet-3***5147px00tanx",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Trn"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "API documentation for resource_share",
+  "title": "resource_share",
+  "version": "2024-01-01"
+ },
+ "openapi": "3.0.0",
+ "paths": {
+  "/AssociateResourceShare": {
+   "get": {
+    "description": "创建共享单元分享实体，实体可以是资源、主体",
+    "operationId": "AssociateResourceShare",
+    "parameters": [
+     {
+      "description": "共享单元Trn",
+      "in": "query",
+      "name": "ResourceShareTrn",
+      "required": true,
+      "schema": {
+       "description": "共享单元Trn",
+       "example": "trn:resource_share:cn-beijing:2000000000:resource_share/rs-03***119c96",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "需要关联的Principals列表（principal是指被共享方，用户、组织或者组织单元）",
+      "in": "query",
+      "name": "Principals",
+      "schema": {
+       "description": "需要关联的Principals列表（principal是指被共享方，用户、组织或者组织单元）",
+       "example": [
+        2000000001,
+        "trn:organization::2000000000:organization/74399***781619",
+        "trn:organization::2000000000:ou/747345***24402"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "type": "array",
+       "x-split-type": 2
+      }
+     },
+     {
+      "description": "需要关联的资源列表",
+      "in": "query",
+      "name": "ResourceTrns",
+      "schema": {
+       "description": "需要关联的资源列表",
+       "example": [
+        "trn:vpc:cn-beijing:2000000000:subnet/subnet-rr1***0x57crloqp",
+        "trn:vpc:cn-beijing:2000000000:subnet/subnet-rr1***qjdqi38j"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "type": "array",
+       "x-split-type": 2
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "创建共享单元分享实体，实体可以是资源、主体"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效的参数，具体无效的参数在会在Error Message中给出",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Parameter [%s] is invalid, error: %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MalformedPrincipal",
+             "type": "string"
+            },
+            "description": {
+             "example": "非法的Principal参数（principal是指被共享方，用户、组织或者组织单元）",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "principal[%v] is malformed",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MalformedResourceTrn",
+             "type": "string"
+            },
+            "description": {
+             "example": "非法的ResourceTrn参数",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "resource trn[%v] is malformed",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MissingParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺失，具体缺失的参数在会在Error Message中给出",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Required parameter[%v] is not found",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidResourceType",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源类型不支持被共享",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "resource-type[%v] is not supported to be shared",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "RegionNotSupport",
+             "type": "string"
+            },
+            "description": {
+             "example": "不支持的region",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "the region is not support",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "NoAvailablePermission",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前资源未绑定任何权限策略，请联系相关管理员进行处理",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "no available permission for resource-type[%v], please create a permission first",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidResourceShare",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效的共享单元，共享单元不存在或已被删除",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "the status of resource-share[%v] is not ACTIVE",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "SharePrincipalQuotaExceeded",
+             "type": "string"
+            },
+            "description": {
+             "example": "共享单元关联的Principal数量超出quota限制（principal是指被共享方，用户、组织或者组织单元）",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "the quota of principal association has been exceeded",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ShareResourceQuotaExceeded",
+             "type": "string"
+            },
+            "description": {
+             "example": "共享单元关联的资源数量超出quota限制",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "the quota of resource association has been exceeded",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ShareSelfNotSupport",
+             "type": "string"
+            },
+            "description": {
+             "example": "不支持将资源共享自己",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "you cannot share resource to yourself",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ShareExternalConflict",
+             "type": "string"
+            },
+            "description": {
+             "example": "共享单元设置了仅组织内部共享，因此不允许共享给外部账号",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "external account[%v] is not allowed to be shared in resource-share[%v]",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidOrganization",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效的组织，传入的是一个不存在的组织",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "organization[%v] is invalid",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidOrganizationUnit",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效的组织单元，传入的是一个不存在的组织单元",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "organization unit[%v] is invalid",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ShareWithoutOrganization",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前账号不在任何组织，无法发起组织类型的共享",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "you are not in any organization so you cannot share resources with [%v]",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ResourceConflict",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源已被共享",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "resource[%v] has already been shared in resource-share[%v]",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PrincipalConflict",
+             "type": "string"
+            },
+            "description": {
+             "example": "principal已被关联（principal是指被共享方，用户、组织或者组织单元）",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "principal[%v] has already been shared in resource-share[%v]",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ResourceShareExternalNotSupport",
+             "type": "string"
+            },
+            "description": {
+             "example": "由于系统设定，对应的资源不支持共享给外部账号",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "resource[%v] is not supported to be shared with external account[%v]",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ShareInvitationQuotaExceeded",
+             "type": "string"
+            },
+            "description": {
+             "example": "共享邀请数量超出quota限制",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "the quota of invitaiton has been exceeded",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "DuplicatedAssociation",
+             "type": "string"
+            },
+            "description": {
+             "example": "实体关联关系已存在",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "association entity[%v] already exist in resource-share[%v]",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "DuplicatedPermissionAssociation",
+             "type": "string"
+            },
+            "description": {
+             "example": "共享单元权限策略已关联",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "permission[%v] already associated in resource-share[%v]",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "DuplicatedInvitation",
+             "type": "string"
+            },
+            "description": {
+             "example": "共享邀请已存在",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "invitation for principal[%v] already exist in resource-share[%v]",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "RegionConflict",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源与共享单元的Region不一致",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "resource[%v] and resource-share[%v] is not in the same region",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ResourceShareNotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "找不到共享单元，传入的共享单元Trn不存在，或已被删除",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "resource-share[%v] not found",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ResourceNotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "找不到资源，资源Trn对应的账号与当前共享发起者对应不上，简而言之，共享发起者找不到对应资源",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "resource[%v] not found",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionNotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "找不到对应的权限策略，请确认传入的策略Trn是否正确",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "permission of resource-type[%v] not found, need to associate a permission for the resource-type first",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部系统错误，往往是由服务内部组件异常、网络异常或服务自身bug导致，请及时联系相关管理员进行排查确认",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Something went wrong in internal service, please try again later",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "创建共享单元分享实体",
+    "tags": [
+     "共享单元"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "resource_share",
+   "x-version": "2024-01-01"
+  },
+  "/CreateResourceShare": {
+   "get": {
+    "description": "创建共享单元",
+    "operationId": "CreateResourceShare",
+    "parameters": [
+     {
+      "description": "共享单元名称",
+      "in": "query",
+      "name": "Name",
+      "required": true,
+      "schema": {
+       "description": "共享单元名称",
+       "example": "sharexxx",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "共享单元类型，可传值 ORG - 仅允许组织内部共享；ANY - 允许任意账号共享2。默认ANY",
+      "in": "query",
+      "name": "AllowShareType",
+      "schema": {
+       "description": "共享单元类型，可传值 ORG - 仅允许组织内部共享；ANY - 允许任意账号共享2。默认ANY",
+       "example": "ANY",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "关联的Principals列表（principal是指被共享方，用户、组织或者组织单元）",
+      "in": "query",
+      "name": "Principals",
+      "schema": {
+       "description": "关联的Principals列表（principal是指被共享方，用户、组织或者组织单元）",
+       "example": [
+        2000000001,
+        "trn:organization::2000000000:organization/74399***781619",
+        "trn:organization::2000000000:ou/747345***24402"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "type": "array",
+       "x-split-type": 2
+      }
+     },
+     {
+      "description": "关联的资源列表",
+      "in": "query",
+      "name": "ResourceTrns",
+      "schema": {
+       "description": "关联的资源列表",
+       "example": [
+        "trn:vpc:cn-beijing:2000000000:subnet/subnet-rr1***0x57crloqp",
+        "trn:vpc:cn-beijing:2000000000:subnet/subnet-rr1***ldklj8d"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "type": "array",
+       "x-split-type": 2
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "创建共享单元"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "MissingParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺失，具体缺失的参数在会在Error Message中给出",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Required parameter[%v] is not found",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效的参数，具体无效的参数在会在Error Message中给出",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Parameter [%s] is invalid, error: %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MalformedResourceTrn",
+             "type": "string"
+            },
+            "description": {
+             "example": "非法的ResourceTrn参数",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "resource trn[%v] is malformed",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidResourceType",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源类型不支持被共享",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "resource-type[%v] is not supported to be shared",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "RegionNotSupport",
+             "type": "string"
+            },
+            "description": {
+             "example": "不支持的region",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "the region is not support",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "NoAvailablePermission",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前资源未绑定任何权限策略，请联系相关管理员进行处理",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "no available permission for resource-type[%v], please create a permission first",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidResourceShare",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效的共享单元，共享单元不存在或已被删除",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "the status of resource-share[%v] is not ACTIVE",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "SharePrincipalQuotaExceeded",
+             "type": "string"
+            },
+            "description": {
+             "example": "共享单元关联的Principal数量超出quota限制（principal是指被共享方，用户、组织或者组织单元）",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "the quota of principal association has been exceeded",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ShareQuotaExceeded",
+             "type": "string"
+            },
+            "description": {
+             "example": "共享单元数量超出quota限制",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "the quota of resource-share has been exceeded",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ShareResourceQuotaExceeded",
+             "type": "string"
+            },
+            "description": {
+             "example": "共享单元关联的资源数量超出quota限制",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "the quota of resource association has been exceeded",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ShareInvitationQuotaExceeded",
+             "type": "string"
+            },
+            "description": {
+             "example": "共享邀请数量超出quota限制",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "the quota of invitaiton has been exceeded",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "RegionConflict",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源与共享单元的Region不一致",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "resource[%v] and resource-share[%v] is not in the same region",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ShareSelfNotSupport",
+             "type": "string"
+            },
+            "description": {
+             "example": "不支持将资源共享自己",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "you cannot share resource to yourself",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ShareExternalConflict",
+             "type": "string"
+            },
+            "description": {
+             "example": "共享单元设置了仅组织内部共享，因此不允许共享给外部账号",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "external account[%v] is not allowed to be shared in resource-share[%v]",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidOrganization",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效的组织，传入的是一个不存在的组织",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "organization[%v] is invalid",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidOrganizationUnit",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效的组织单元，传入的是一个不存在的组织单元",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "organization unit[%v] is invalid",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ShareWithoutOrganization",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前账号不在任何组织，无法发起组织类型的共享",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "you are not in any organization so you cannot share resources with [%v]",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ResourceConflict",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源已被共享",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "resource[%v] has already been shared in resource-share[%v]",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PrincipalConflict",
+             "type": "string"
+            },
+            "description": {
+             "example": "principal已被关联（principal是指被共享方，用户、组织或者组织单元）",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "principal[%v] has already been shared in resource-share[%v]",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ResourceShareExternalNotSupport",
+             "type": "string"
+            },
+            "description": {
+             "example": "由于系统设定，对应的资源不支持共享给外部账号",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "resource[%v] is not supported to be shared with external account[%v]",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "DuplicatedAssociation",
+             "type": "string"
+            },
+            "description": {
+             "example": "实体关联关系已存在",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "association entity[%v] already exist in resource-share[%v]",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "DuplicatedPermissionAssociation",
+             "type": "string"
+            },
+            "description": {
+             "example": "共享单元权限策略已关联",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "permission[%v] already associated in resource-share[%v]",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "DuplicatedInvitation",
+             "type": "string"
+            },
+            "description": {
+             "example": "共享邀请已存在",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "invitation for principal[%v] already exist in resource-share[%v]",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ResourceNotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "找不到资源，资源Trn对应的账号与当前共享发起者对应不上，简而言之，共享发起者找不到对应资源",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "resource[%v] not found",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionNotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "找不到对应的权限策略，请确认传入的策略Trn是否正确",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "permission of resource-type[%v] not found, need to associate a permission for the resource-type first",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部系统错误，往往是由服务内部组件异常、网络异常或服务自身bug导致，请及时联系相关管理员进行排查确认",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Something went wrong in internal service, please try again later",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "创建共享单元",
+    "tags": [
+     "共享单元"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "resource_share",
+   "x-version": "2024-01-01"
+  },
+  "/DescribeResourceShareInvitations": {
+   "get": {
+    "description": "查询共享邀请",
+    "operationId": "DescribeResourceShareInvitations",
+    "parameters": [
+     {
+      "description": "查询当前页的Token",
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "description": "查询当前页的Token",
+       "example": "aljsakljca***asdjekdjqe",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "共享单元的状态，可传值，UNKNOWN - 状态未知；PENDING - 待处理；ACCEPTED - 已接受；REJECTED - 已拒绝；EXPIRED - 过期",
+      "in": "query",
+      "name": "Status",
+      "schema": {
+       "description": "共享单元的状态，可传值，UNKNOWN - 状态未知；PENDING - 待处理；ACCEPTED - 已接受；REJECTED - 已拒绝；EXPIRED - 过期",
+       "example": "PENDING",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "最大数量",
+      "in": "query",
+      "name": "MaxResults",
+      "schema": {
+       "description": "最大数量",
+       "example": 10,
+       "format": "int64",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "共享邀请的Trn列表",
+      "in": "query",
+      "name": "ResourceShareInvitationTrns",
+      "schema": {
+       "description": "共享邀请的Trn列表",
+       "example": [
+        "trn:resource_share:cn-beijing:2000000000:invitation/i-06a***1e4772",
+        "trn:resource_share:cn-beijing:2000000000:invitation/i-aljdw***lkjdkqwdj"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "type": "array",
+       "x-split-type": 2
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "description": "查询下一页的Token",
+           "example": "slxjal***jdiojdqoiwjd",
+           "type": "string"
+          },
+          "ResourceShareInvitations": {
+           "description": "共享邀请列表",
+           "example": [
+            {
+             "InvitatedTime": "2025-03-03T12:10:18+08:00",
+             "OwningAccountId": 2000000000,
+             "ReceiverAccountId": 2000000001,
+             "ResourceShareId": "rs-03***119c96",
+             "ResourceShareInvitationTrn": "trn:resource_share:cn-beijing:2000000000:invitation/i-06a***1e4772",
+             "ResourceShareName": "sharexxx",
+             "ResourceShareTrn": "trn:resource_share:cn-beijing:2000000000:resource_share/rs-03***119c96",
+             "Status": "PENDING"
+            }
+           ],
+           "items": {
+            "$ref": "#/components/schemas/ResourceShareInvitationVO"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询共享邀请"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效的参数，具体无效的参数在会在Error Message中给出",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Parameter [%s] is invalid, error: %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MissingParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺失，具体缺失的参数在会在Error Message中给出",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Required parameter[%v] is not found",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InvitationNotFound",
+           "type": "string"
+          },
+          "description": {
+           "example": "找不到共享邀请记录，请确认传入的InvitationTrn是否正确",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "invitation[%v] not found",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部系统错误，往往是由服务内部组件异常、网络异常或服务自身bug导致，请及时联系相关管理员进行排查确认",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Something went wrong in internal service, please try again later",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询共享邀请",
+    "tags": [
+     "共享邀请"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "resource_share",
+   "x-version": "2024-01-01"
+  },
+  "/DescribeResourceShares": {
+   "get": {
+    "description": "查询共享单元",
+    "operationId": "DescribeResourceShares",
+    "parameters": [
+     {
+      "description": "获取最大数量",
+      "in": "query",
+      "name": "MaxResults",
+      "schema": {
+       "description": "获取最大数量",
+       "example": 10,
+       "format": "int64",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "资源共享Trn列表",
+      "in": "query",
+      "name": "ResourceShareTrns",
+      "schema": {
+       "description": "资源共享Trn列表",
+       "example": [
+        "trn:resource_share:cn-beijing:2000000000:resource_share/rs-03***119c96",
+        "trn:resource_share:cn-beijing:2000000000:resource_share/rs-03***qoijio93j"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "type": "array",
+       "x-split-type": 2
+      }
+     },
+     {
+      "description": "资源共享的名称",
+      "in": "query",
+      "name": "Name",
+      "schema": {
+       "description": "资源共享的名称",
+       "example": "sharexxx",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "查询类型，可传值 OTHER - 其他用户创建的资源共享单元；SELF - 自己创建的共享单元",
+      "in": "query",
+      "name": "ResourceOwner",
+      "required": true,
+      "schema": {
+       "description": "查询类型，可传值 OTHER - 其他用户创建的资源共享单元；SELF - 自己创建的共享单元",
+       "example": "SELF",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "权限策略Trn",
+      "in": "query",
+      "name": "PermissionTrn",
+      "schema": {
+       "description": "权限策略Trn",
+       "example": "trn:resource_share:::permission/RSDefaultPermissionSubnet",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "共享单元状态，可传值 UNKNOWN - 未知状态；ACTIVE - 活跃状态；DELETING - 删除中；DELETED - 已删除；FAILED - 失败状态；NEW - 新建状态",
+      "in": "query",
+      "name": "ResourceShareStatus",
+      "schema": {
+       "description": "共享单元状态，可传值 UNKNOWN - 未知状态；ACTIVE - 活跃状态；DELETING - 删除中；DELETED - 已删除；FAILED - 失败状态；NEW - 新建状态",
+       "example": "ACTIVE",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "当前页的Token",
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "description": "当前页的Token",
+       "example": "aljsakljca***asdjekdjqe",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "description": "下一页的Token",
+           "example": "aljsakljca***qoieq8jk",
+           "type": "string"
+          },
+          "ResourceShares": {
+           "description": "共享单元列表",
+           "example": [
+            {
+             "AllowShareType": "ANY",
+             "CreateTime": "2025-02-25T13:58:54+08:00",
+             "OwningAccountId": 2000000000,
+             "ResourceShareId": "rs-03***119c96",
+             "ResourceShareName": "sharexxx",
+             "ResourceShareTrn": "trn:resource_share:cn-beijing:2000000000:resource_share/rs-03***119c96",
+             "Status": "ACTIVE",
+             "UpdateTime": "2025-02-25T13:58:54+08:00"
+            }
+           ],
+           "items": {
+            "$ref": "#/components/schemas/ResourceShareVO"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询共享单元"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效的参数，具体无效的参数在会在Error Message中给出",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Parameter [%s] is invalid, error: %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MissingParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺失，具体缺失的参数在会在Error Message中给出",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Required parameter[%v] is not found",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "ResourceShareNotFound",
+           "type": "string"
+          },
+          "description": {
+           "example": "找不到共享单元，传入的共享单元Trn不存在，或已被删除",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "resource-share[%v] not found",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部系统错误，往往是由服务内部组件异常、网络异常或服务自身bug导致，请及时联系相关管理员进行排查确认",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Something went wrong in internal service, please try again later",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询共享单元",
+    "tags": [
+     "共享单元"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "resource_share",
+   "x-version": "2024-01-01"
+  },
+  "/GetPermission": {
+   "get": {
+    "description": "获取权限详情",
+    "operationId": "GetPermission",
+    "parameters": [
+     {
+      "description": "权限策略的Trn",
+      "in": "query",
+      "name": "PermissionTrn",
+      "required": true,
+      "schema": {
+       "description": "权限策略的Trn",
+       "example": "trn:resource_share:::permission/RSDefaultPermissionSubnet",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Description": {
+           "description": "策略描述",
+           "example": "共享子网的默认权限",
+           "type": "string"
+          },
+          "Name": {
+           "description": "权限策略名称",
+           "example": "RSDefaultPermissionSubnet",
+           "type": "string"
+          },
+          "Permission": {
+           "description": "权限策略详情",
+           "example": "{\"Effect\":\"Allow\",\"Action\":[\"vpc:DescribeSubnet*\"]}",
+           "type": "string"
+          },
+          "PermissionType": {
+           "description": "权限策略类型",
+           "example": "Sys",
+           "type": "string"
+          },
+          "ResourceType": {
+           "description": "权限策略所绑定的资源类型",
+           "example": "vpc:subnet",
+           "type": "string"
+          },
+          "Trn": {
+           "description": "权限策略Trn",
+           "example": "trn:resource_share:::permission/RSDefaultPermissionSubnet",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取权限详情"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "MissingParameter",
+           "type": "string"
+          },
+          "description": {
+           "example": "参数缺失，具体缺失的参数在会在Error Message中给出",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 400,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Required parameter[%v] is not found",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部系统错误，往往是由服务内部组件异常、网络异常或服务自身bug导致，请及时联系相关管理员进行排查确认",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Something went wrong in internal service, please try again later",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "获取权限详情",
+    "tags": [
+     "共享权限"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "resource_share",
+   "x-version": "2024-01-01"
+  },
+  "/ListPermissions": {
+   "get": {
+    "description": "查询全部权限",
+    "operationId": "ListPermissions",
+    "parameters": [
+     {
+      "description": "资源类型",
+      "in": "query",
+      "name": "ResourceType",
+      "schema": {
+       "description": "资源类型",
+       "example": "vpc:subnet",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "当前页的Token",
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "description": "当前页的Token",
+       "example": "aljsakljca***asdjekdjqe",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "获取最大数量",
+      "in": "query",
+      "name": "MaxResults",
+      "schema": {
+       "description": "获取最大数量",
+       "example": 10,
+       "format": "int64",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "description": "下一页的Token",
+           "example": "aljsakljca***qijdqoi18h",
+           "type": "string"
+          },
+          "Permissions": {
+           "description": "权限策略列表",
+           "example": [
+            {
+             "CreateTime": "2024-07-11T22:32:04+08:00",
+             "Description": "共享子网的默认权限",
+             "Name": "RSDefaultPermissionSubnet",
+             "Permission": "{\"Effect\":\"Allow\",\"Action\":[\"vpc:DescribeSubnet*\"]}",
+             "PermissionType": "STSTEM",
+             "ResourceType": "vpc:subnet",
+             "Trn": "trn:resource_share:::permission/RSDefaultPermissionSubnet"
+            }
+           ],
+           "items": {
+            "$ref": "#/components/schemas/PermissionVO"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询全部权限"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效的参数，具体无效的参数在会在Error Message中给出",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Parameter [%s] is invalid, error: %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MissingParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺失，具体缺失的参数在会在Error Message中给出",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Required parameter[%v] is not found",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部系统错误，往往是由服务内部组件异常、网络异常或服务自身bug导致，请及时联系相关管理员进行排查确认",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Something went wrong in internal service, please try again later",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询全部权限",
+    "tags": [
+     "共享权限"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "resource_share",
+   "x-version": "2024-01-01"
+  },
+  "/ListPrincipals": {
+   "get": {
+    "description": "获取分享主体",
+    "operationId": "ListPrincipals",
+    "parameters": [
+     {
+      "description": "资源Trn",
+      "in": "query",
+      "name": "ResourceTrn",
+      "schema": {
+       "description": "资源Trn",
+       "example": "trn:vpc:cn-beijing:2000000000:subnet/subnet-rr1***0x57crloqp",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "资源类型",
+      "in": "query",
+      "name": "ResourceType",
+      "schema": {
+       "description": "资源类型",
+       "example": "vpc:subnet",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "当前页的Token",
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "description": "当前页的Token",
+       "example": "aljsakljca***asdjekdjqe",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "最大数量",
+      "in": "query",
+      "name": "MaxResults",
+      "schema": {
+       "description": "最大数量",
+       "example": 10,
+       "format": "int64",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "关联的Principals列表（Principal是指被共享方，用户、组织或者组织单元），如果是用户，传参用户id；如果是组织或组织单元，则传值组织或组织单元完整的五段式Trn",
+      "in": "query",
+      "name": "Principals",
+      "schema": {
+       "description": "关联的Principals列表（Principal是指被共享方，用户、组织或者组织单元），如果是用户，传参用户id；如果是组织或组织单元，则传值组织或组织单元完整的五段式Trn",
+       "example": [
+        2000000000,
+        "trn:organization::2000000000:organization/74399***781619",
+        "trn:organization::2000000000:ou/747345***24402"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "type": "array",
+       "x-split-type": 2
+      }
+     },
+     {
+      "description": "资源共享trn列表",
+      "in": "query",
+      "name": "ResourceShareTrns",
+      "schema": {
+       "description": "资源共享trn列表",
+       "example": [
+        "trn:resource_share:cn-beijing:2000000000:resource_share/rs-03***119c96",
+        "trn:resource_share:cn-beijing:2000000000:resource_share/rs-03***ijdiqo128kj"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "type": "array",
+       "x-split-type": 2
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "description": "下一页的Token",
+           "example": "aljsakljca***djoiqji13d",
+           "type": "string"
+          },
+          "Principals": {
+           "description": "关联的Principals列表",
+           "example": [
+            {
+             "External": false,
+             "Id": "2000000000",
+             "ResourceShares": [
+              {
+               "ResourceShareName": "sharexxx",
+               "ResourceShareTrn": "trn:vpc:cn-beijing:2000000000:subnet/subnet-3***5147px00tanx",
+               "ShareTime": "2024-06-25T01:09:54+08:00"
+              }
+             ]
+            }
+           ],
+           "items": {
+            "$ref": "#/components/schemas/PrincipalVO"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取分享主体"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效的参数，具体无效的参数在会在Error Message中给出",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Parameter [%s] is invalid, error: %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MissingParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺失，具体缺失的参数在会在Error Message中给出",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Required parameter[%v] is not found",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部系统错误，往往是由服务内部组件异常、网络异常或服务自身bug导致，请及时联系相关管理员进行排查确认",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Something went wrong in internal service, please try again later",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "获取分享主体",
+    "tags": [
+     "共享单元"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "resource_share",
+   "x-version": "2024-01-01"
+  },
+  "/ListResourceShareAssociations": {
+   "get": {
+    "description": "获取共享单元下关联实体",
+    "operationId": "ListResourceShareAssociations",
+    "parameters": [
+     {
+      "description": "关联类型，可传值，PRINCIPAL - 共享接收者（用户、组织或者组织单元）；RESOURCE - 资源",
+      "in": "query",
+      "name": "AssociationType",
+      "required": true,
+      "schema": {
+       "description": "关联类型，可传值，PRINCIPAL - 共享接收者（用户、组织或者组织单元）；RESOURCE - 资源",
+       "example": "PRINCIPAL",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "当前页的Token",
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "description": "当前页的Token",
+       "example": "aljsakljca***asdjekdjqe",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "获取最大数量",
+      "in": "query",
+      "name": "MaxResults",
+      "schema": {
+       "description": "获取最大数量",
+       "example": 10,
+       "format": "int64",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "资源共享trn",
+      "in": "query",
+      "name": "ResourceShareTrn",
+      "required": true,
+      "schema": {
+       "description": "资源共享trn",
+       "example": "trn:resource_share:cn-beijing:2000000000:resource_share/rs-03***119c96",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Associations": {
+           "description": "关联的实体列表",
+           "example": [
+            {
+             "AssociateTime": "2025-02-25T13:58:54+08:00",
+             "AssociationEntity": "trn:vpc:cn-beijing:2000000000:subnet/subnet-rr1***0x57crloqp",
+             "AssociationType": "RESOURCE",
+             "External": false,
+             "ResourceShareId": "rs-03***119c96",
+             "ResourceShareName": "sharexxx",
+             "ResourceShareTrn": "trn:resource_share:cn-beijing:2000000000:resource_share/rs-03***119c96",
+             "Status": "ASSOCIATED"
+            }
+           ],
+           "items": {
+            "$ref": "#/components/schemas/ResourceShareAssociationVO"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "description": "下一页的Token",
+           "example": "aljsakljca***idjq313da",
+           "type": "string"
+          },
+          "TotalPage": {
+           "description": "总页数",
+           "example": 3,
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取共享单元下关联实体"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效的参数，具体无效的参数在会在Error Message中给出",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Parameter [%s] is invalid, error: %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MissingParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺失，具体缺失的参数在会在Error Message中给出",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Required parameter[%v] is not found",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MalformedResourceTrn",
+             "type": "string"
+            },
+            "description": {
+             "example": "非法的ResourceTrn参数",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "resource trn[%v] is malformed",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "ResourceShareNotFound",
+           "type": "string"
+          },
+          "description": {
+           "example": "找不到共享单元，传入的共享单元Trn不存在，或已被删除",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "resource-share[%v] not found",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部系统错误，往往是由服务内部组件异常、网络异常或服务自身bug导致，请及时联系相关管理员进行排查确认",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Something went wrong in internal service, please try again later",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "获取共享单元下关联实体",
+    "tags": [
+     "共享单元"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "resource_share",
+   "x-version": "2024-01-01"
+  },
+  "/ListResourceSharePermissions": {
+   "get": {
+    "description": "查询共享单元绑定权限",
+    "operationId": "ListResourceSharePermissions",
+    "parameters": [
+     {
+      "description": "共享单元Trn",
+      "in": "query",
+      "name": "ResourceShareTrn",
+      "required": true,
+      "schema": {
+       "description": "共享单元Trn",
+       "example": "trn:resource_share:cn-beijing:2000000000:resource_share/rs-03***119c96",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "当前页的Token",
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "description": "当前页的Token",
+       "example": "aljsakljca***asdjekdjqe",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "获取最大数量",
+      "in": "query",
+      "name": "MaxResults",
+      "schema": {
+       "description": "获取最大数量",
+       "example": 10,
+       "format": "int64",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "description": "下一页的Token",
+           "example": "aljsakljca***woqidji8931j",
+           "type": "string"
+          },
+          "Permissions": {
+           "description": "权限策略列表",
+           "example": [
+            {
+             "CreateTime": "2024-07-11T22:32:04+08:00",
+             "Description": "共享子网的默认权限",
+             "Name": "RSDefaultPermissionSubnet",
+             "Permission": "{\"Effect\":\"Allow\",\"Action\":[\"vpc:DescribeSubnet*\"]}",
+             "PermissionType": "STSTEM",
+             "ResourceType": "vpc:subnet",
+             "Trn": "trn:resource_share:::permission/RSDefaultPermissionSubnet"
+            }
+           ],
+           "items": {
+            "$ref": "#/components/schemas/PermissionVO"
+           },
+           "type": "array"
+          },
+          "ResourceShareTrn": {
+           "description": "资源共享Trn",
+           "example": "trn:resource_share:cn-beijing:2000000000:resource_share/rs-03***119c96",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询共享单元绑定权限"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "MissingParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺失，具体缺失的参数在会在Error Message中给出",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Required parameter[%v] is not found",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效的参数，具体无效的参数在会在Error Message中给出",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Parameter [%s] is invalid, error: %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MalformedResourceTrn",
+             "type": "string"
+            },
+            "description": {
+             "example": "非法的ResourceTrn参数",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "resource trn[%v] is malformed",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "ResourceShareNotFound",
+           "type": "string"
+          },
+          "description": {
+           "example": "找不到共享单元，传入的共享单元Trn不存在，或已被删除",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "resource-share[%v] not found",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部系统错误，往往是由服务内部组件异常、网络异常或服务自身bug导致，请及时联系相关管理员进行排查确认",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Something went wrong in internal service, please try again later",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询共享单元绑定权限",
+    "tags": [
+     "共享权限"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "resource_share",
+   "x-version": "2024-01-01"
+  },
+  "/ListResourceTypes": {
+   "post": {
+    "description": "查询可分享资源类型",
+    "operationId": "ListResourceTypes",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ResourceTypes": {
+           "description": "可共享的资源类型列表",
+           "example": [
+            {
+             "RegionScope": "cn-beijing",
+             "ResourceType": "subnet",
+             "ResourceTypeName": "子网",
+             "Service": "vpc",
+             "ServiceName": "私有网络"
+            }
+           ],
+           "items": {
+            "$ref": "#/components/schemas/ResourceTypeVO"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询可分享资源类型"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "MissingParameter",
+           "type": "string"
+          },
+          "description": {
+           "example": "参数缺失，具体缺失的参数在会在Error Message中给出",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 400,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Required parameter[%v] is not found",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部系统错误，往往是由服务内部组件异常、网络异常或服务自身bug导致，请及时联系相关管理员进行排查确认",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Something went wrong in internal service, please try again later",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询可分享资源类型",
+    "tags": [
+     "共享单元"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "resource_share",
+   "x-version": "2024-01-01"
+  },
+  "/ListResources": {
+   "get": {
+    "description": "查询共享资源",
+    "operationId": "ListResources",
+    "parameters": [
+     {
+      "description": "最大数量",
+      "in": "query",
+      "name": "MaxResults",
+      "schema": {
+       "description": "最大数量",
+       "example": 10,
+       "format": "int64",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "资源trn列表",
+      "in": "query",
+      "name": "ResourceTrns",
+      "schema": {
+       "description": "资源trn列表",
+       "example": [
+        "trn:vpc:cn-beijing:2000000000:subnet/subnet-rr1***0x57crloqp",
+        "trn:vpc:cn-beijing:2000000000:subnet/subnet-rr1***klajckdj"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "type": "array",
+       "x-split-type": 2
+      }
+     },
+     {
+      "description": "资源共享trn列表",
+      "in": "query",
+      "name": "ResourceShareTrns",
+      "schema": {
+       "description": "资源共享trn列表",
+       "example": [
+        "trn:resource_share:cn-beijing:2000000000:resource_share/rs-03***119c96",
+        "trn:resource_share:cn-beijing:2000000000:resource_share/rs-03***qoidjqi13da"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "type": "array",
+       "x-split-type": 2
+      }
+     },
+     {
+      "description": "关联的Principal（被共享方，用户、组织或者组织单元），如果是用户，传参用户id；如果是组织或组织单元，则传值组织或组织单元完整的五段式Trn",
+      "in": "query",
+      "name": "Principal",
+      "schema": {
+       "description": "关联的Principal（被共享方，用户、组织或者组织单元），如果是用户，传参用户id；如果是组织或组织单元，则传值组织或组织单元完整的五段式Trn",
+       "example": "2000000000",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "资源类型",
+      "in": "query",
+      "name": "ResourceType",
+      "schema": {
+       "description": "资源类型",
+       "example": "vpc:subnet",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "当前页的Token",
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "description": "当前页的Token",
+       "example": "aljsakljca***asdjekdjqe",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "description": "下一页的Token",
+           "example": "diocilaj***doiqdquwi",
+           "type": "string"
+          },
+          "Resources": {
+           "description": "共享的资源列表",
+           "example": [
+            {
+             "RegionScope": "cn-beijing",
+             "ResourceShares": [
+              {
+               "ResourceShareName": "sharexxx",
+               "ResourceShareTrn": "trn:vpc:cn-beijing:2000000000:subnet/subnet-3***5147px00tanx",
+               "ShareTime": "2024-06-25T01:09:54+08:00"
+              }
+             ],
+             "ResourceType": "vpc:subnet",
+             "Status": "ASSOCIATED",
+             "Trn": "trn:vpc:cn-beijing:2000000000:subnet/subnet-3***5147px00tanx"
+            }
+           ],
+           "items": {
+            "$ref": "#/components/schemas/SharedResourceVO"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询共享资源"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效的参数，具体无效的参数在会在Error Message中给出",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Parameter [%s] is invalid, error: %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MissingParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺失，具体缺失的参数在会在Error Message中给出",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Required parameter[%v] is not found",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MalformedPrincipal",
+             "type": "string"
+            },
+            "description": {
+             "example": "非法的Principal参数（principal是指被共享方，用户、组织或者组织单元）",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "principal[%v] is malformed",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部系统错误，往往是由服务内部组件异常、网络异常或服务自身bug导致，请及时联系相关管理员进行排查确认",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Something went wrong in internal service, please try again later",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询共享资源",
+    "tags": [
+     "共享单元"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "resource_share",
+   "x-version": "2024-01-01"
+  }
+ }
+}

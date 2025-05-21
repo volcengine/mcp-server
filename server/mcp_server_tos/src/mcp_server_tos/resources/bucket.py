@@ -24,16 +24,19 @@ class BucketResource(TosResource):
         if self.configured_buckets:
             resp = await self.get(bucket="")
             configured_bucket_list = [
-                bucket for bucket in resp.json()["Buckets"]
+                bucket for bucket in resp.json().get("buckets", [])
                 if bucket['Name'] in self.configured_buckets
             ]
             return configured_bucket_list
         else:
             resp = await self.get(bucket="")
-            return resp.json()["Buckets"]
+            if resp.status_code == 200:
+                return resp.json().get("Buckets", [])
+            else:
+                raise Exception(f"list buckets failed, tos server return: {resp.json()}")
 
     async def list_objects(self, bucket: str, prefix: Optional[str] = None, start_after: Optional[str] = None,
-                           continuation_token: Optional[str] = None) -> List[dict]:
+                           continuation_token: Optional[str] = None) -> str:
         """
         调用 ListObjects 接口列举桶
         api: https://www.volcengine.com/docs/6349/357812
@@ -53,4 +56,7 @@ class BucketResource(TosResource):
             query["continuation-token"] = continuation_token
 
         resp = await self.get(bucket=bucket, params=query)
-        return resp.json()["Contents"]
+        if resp.status_code == 200:
+            return resp.json()
+        else:
+            raise Exception(f"list objects failed, tos server return: {resp.json()}")

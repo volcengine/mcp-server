@@ -1,4 +1,4 @@
-# MCP Server Product Name: VMP MCP Server ![Product Logo](./logo.svg)
+# VMP MCP Server ![Product Logo](./logo.svg)
 
 The Volcengine Managed Prometheus Service (VMP) is a new-generation cloud-native monitoring system that fully inherits and integrates with the open-source prometheus ecosystem. The VMP MCP Server provides functions such as prometheus workspace queries and metric queries, facilitating the natural-language-driven metrics query and analysis experience in scenarios like operational troubleshooting and data analysis.
 
@@ -25,9 +25,6 @@ The Volcengine Managed Prometheus Service (VMP) is a new-generation cloud-native
 This MCP Server product provides the following Tools (capabilities):
 
 ### Tool 1: list_workspaces
-
-#### Type
-SaaS
 
 #### Detailed Description
 Query all workspace information in the specified region under the current account.
@@ -57,9 +54,6 @@ Output:
 Please list all VMP workspace instances in the cn-beijing region.
 
 ### Tool 2: query_metrics
-
-#### Type
-SaaS
 
 #### Detailed Description
 Execute a specified PromQL instant query in the specified VMP workspace.
@@ -113,9 +107,6 @@ Output:
 Query the CPU usage at the current time in the VMP workspace instance b73766b5-2e63-4143-bcd1-8a1ba3a94746 in the cn-beijing region.
 
 ### Tool 3: query_range_metrics
-
-#### Type
-SaaS
 
 #### Detailed Description
 Execute a specified PromQL query within a specified time range in the specified VMP workspace.
@@ -180,9 +171,6 @@ Query the top 3 pods in terms of CPU usage in the last hour in the VMP workspace
 
 ### Tool 4: query_metric_names
 
-#### Type
-SaaS
-
 #### Detailed Description
 Query the list of metric names that match the specified filter conditions in the specified VMP workspace.
 
@@ -230,9 +218,6 @@ Output:
 What are the CPU related metrics in the VMP workspace b73766b5-2e63-4143-bcd1-8a1ba3a94746 ?
 
 ### Tool 5: query_metric_labels
-
-#### Type
-SaaS
 
 #### Detailed Description
 Query the list of all label names for a specified metric in the specified VMP workspace.
@@ -294,6 +279,13 @@ API Key ([Signature Mechanism](https://www.volcengine.com/docs/6731/942192))
   ```text
   powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
   ```
+
+### 环境变量
+| Environment Variable Name | Description | Default Value | Acquisition Method |
+| --- | --- | --- | --- |
+| VOLCENGINE_ACCESS_KEY | Volcengine Account ACCESS KEY | - | [Volcengine Access Console](https://console.volcengine.com/iam/keymanage/) |
+| VOLCENGINE_SECRET_KEY | Volcengine Account SECRET KEY | - | [Volcengine Access Console](https://console.volcengine.com/iam/keymanage/) |
+| VOLCENGINE_REGION | Volcengine Region | cn-beijing | - |
 
 ### Deployment
 UV

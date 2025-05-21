@@ -45,7 +45,7 @@ This MCP Server product provides the following Tools (capabilities):
 
 ## Compatible Platforms
 
-Ark, Python, Cursor
+Ark, Trae, Cursor
 
 ## Service Activation Link (Full Product)
 
@@ -95,7 +95,7 @@ The following environment variables can be used to configure the MCP server:
 ```json
 {
   "mcp-server": {
-    "tos-mcp": {
+    "veimagex-mcp": {
       "command": "uvx",
       "args": [
         "--from",

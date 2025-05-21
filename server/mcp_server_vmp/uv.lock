@@ -165,7 +165,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "mcp", extras = ["cli"], git = "https://github.com/zihengli-bytedance/python-sdk.git?rev=temp-for-volc" },
-    { name = "volcengine-python-sdk", specifier = ">=2.0.1" },
+    { name = "volcengine-python-sdk", specifier = ">=3.0.1" },
 ]
 
 [[package]]
@@ -450,7 +450,7 @@ wheels = [
 
 [[package]]
 name = "volcengine-python-sdk"
-version = "2.0.1"
+version = "3.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
@@ -458,4 +458,4 @@ dependencies = [
     { name = "six" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d7/19/e1ed3efc4a62025f41553a75802532e6abb1508c4fe8033e885b49453b63/volcengine-python-sdk-2.0.1.tar.gz", hash = "sha256:3bc2484edd615d19d74fb63ccb52c5b9c9ed5df737b38f51b4c32aa5dd0f4a09", size = 3981690, upload-time = "2025-04-28T12:30:53.035Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/44/cf/d841e615a6d541888545281b15ab381e73c098edc11375ef231b9ccde7a8/volcengine-python-sdk-3.0.1.tar.gz", hash = "sha256:2f1b95ec46a2ad74be298724692d025f35ff870b26584edebee3db89b8a10e55", size = 3981206, upload-time = "2025-05-14T03:47:24.545Z" }
