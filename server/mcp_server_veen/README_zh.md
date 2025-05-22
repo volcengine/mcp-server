@@ -110,8 +110,8 @@ uv run mcp-server-veen -t sse
         "mcp-server-veen"
       ],
       "env": {
-        "VOLC_ACCESSKEY": "<Your-Volcengine-AK>",
-        "VOLC_SECRETKEY": "<Your-Volcengine-SK>"
+        "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
+        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK"
       }
     }
   }

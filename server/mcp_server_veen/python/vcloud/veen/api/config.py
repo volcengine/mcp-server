@@ -213,7 +213,7 @@ api_info = {
 }
 service_info_map = {
     "cn-north-1": ServiceInfo(
-        "open.volcengineapi.com",
+        "veenedge.volcengineapi.com",
         {"Accept": "application/json", "x-tt-mcp": "volc"},
         Credentials("", "", "veenedge", "cn-north-1"),
         60,
