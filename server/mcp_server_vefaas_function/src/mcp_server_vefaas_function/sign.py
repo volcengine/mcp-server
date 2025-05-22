@@ -39,8 +39,8 @@ Host = "iam.volcengineapi.com"
 ContentType = "application/x-www-form-urlencoded"
 
 # 请求的凭证，从IAM或者STS服务中获取
-AK = os.getenv("VOLC_ACCESSKEY")
-SK = os.getenv("VOLC_SECRETKEY")
+AK = os.getenv("VOLCENGINE_ACCESS_KEY")
+SK = os.getenv("VOLCENGINE_SECRET_KEY")
 # 当使用临时凭证时，需要使用到SessionToken传入Header，并计算进SignedHeader中，请自行在header参数中添加X-Security-Token头
 # SessionToken = ""
 
@@ -187,10 +187,10 @@ def get_authorization_credentials(ctx: Context = None) -> tuple[str, str, str]:
         ValueError: If authorization information is missing or invalid
     """
     # First try environment variables
-    if "VOLC_ACCESSKEY" in os.environ and "VOLC_SECRETKEY" in os.environ:
+    if "VOLCENGINE_ACCESS_KEY" in os.environ and "VOLCENGINE_SECRET_KEY" in os.environ:
         return (
-            os.environ["VOLC_ACCESSKEY"],
-            os.environ["VOLC_SECRETKEY"],
+            os.environ["VOLCENGINE_ACCESS_KEY"],
+            os.environ["VOLCENGINE_SECRET_KEY"],
             ""  # No session token for static credentials
         )
 
