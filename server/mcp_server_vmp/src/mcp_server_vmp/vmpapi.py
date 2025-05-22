@@ -1,5 +1,7 @@
 import logging
+import os
 from dataclasses import dataclass
+from multiprocessing.pool import ThreadPool
 from re import Match
 from typing import List, Optional
 
@@ -31,11 +33,13 @@ class VMPApi:
 
     def __init__(self, conf: config.VMPConfig) -> None:
         self.conf = conf
-        self.client = utils.UniversalApi(volcenginesdkcore.ApiClient(configuration=conf.to_volc_configuration()))
+        client = volcenginesdkcore.ApiClient(configuration=conf.to_volc_configuration())
+        client._pool = ThreadPool(conf.pool_concurrency) # resize the thread pool to allow more concurrent requests
+        self.client = utils.UniversalApi(client)
 
-    def list_workspaces(self, dynamicConf: config.VMPConfig = None) -> dict[str, any] | None:
+    async def list_workspaces(self, dynamicConf: config.VMPConfig = None) -> dict[str, any] | None:
         """List workspaces."""
-        resp = self.client.do_call(
+        resp = await self.client.do_call_async(
             volcenginesdkcore.UniversalInfo(
                 method="POST", 
                 service=SERVICE_CODE, 
@@ -47,9 +51,9 @@ class VMPApi:
         )
         return resp
 
-    def query_instant_metrics(self, workspaceId: str, query: str, time: str = None, dynamicConf: config.VMPConfig = None) -> dict[str, any] | None:
+    async def query_instant_metrics(self, workspaceId: str, query: str, time: str = None, dynamicConf: config.VMPConfig = None) -> dict[str, any] | None:
         """instant query metrics."""
-        resp = self.client.do_call(
+        resp = await self.client.do_call_async(
             volcenginesdkcore.UniversalInfo(
                 method="POST",
                 service=SERVICE_CODE,
@@ -65,10 +69,10 @@ class VMPApi:
         )
         return resp
 
-    def query_range_metrics(self, workspaceId: str, query: str, start: str, end: str, 
+    async def query_range_metrics(self, workspaceId: str, query: str, start: str, end: str, 
         step: Optional[str] = None, dynamicConf: config.VMPConfig = None) -> dict[str, any] | None:
         """range query metrics."""
-        resp = self.client.do_call(
+        resp = await self.client.do_call_async(
             volcenginesdkcore.UniversalInfo(
                 method="POST",
                 service=SERVICE_CODE,
@@ -86,10 +90,10 @@ class VMPApi:
         )
         return resp
 
-    def query_label_values(self, workspaceId: str, label: str, start: Optional[str] = None, end: Optional[str] = None, 
+    async def query_label_values(self, workspaceId: str, label: str, start: Optional[str] = None, end: Optional[str] = None, 
         match: Optional[List[str]] = None, limit: Optional[int] = None, dynamicConf: config.VMPConfig = None) -> dict[str, any] | None:
         """label values."""
-        resp = self.client.do_call(
+        resp = await self.client.do_call_async(
             volcenginesdkcore.UniversalInfo(
                 method="POST",
                 service=SERVICE_CODE,
@@ -108,10 +112,10 @@ class VMPApi:
         )
         return resp
 
-    def query_label_names(self, workspaceId: str, start: Optional[str] = None, end: Optional[str] = None, 
+    async def query_label_names(self, workspaceId: str, start: Optional[str] = None, end: Optional[str] = None, 
         match: Optional[List[str]] = None, limit: Optional[int] = None, dynamicConf: config.VMPConfig = None) -> dict[str, any] | None:
         """label names."""
-        resp = self.client.do_call(
+        resp = await self.client.do_call_async(
             volcenginesdkcore.UniversalInfo(
                 method="POST",
                 service=SERVICE_CODE,

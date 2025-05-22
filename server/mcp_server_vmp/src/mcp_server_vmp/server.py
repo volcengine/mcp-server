@@ -36,7 +36,7 @@ async def list_workspaces(region: str = "cn-beijing") -> any:
         A list of prometheus workspaces
     """
     conf = init_auth_config(region)
-    return vmpApiClient.list_workspaces(conf)
+    return await vmpApiClient.list_workspaces(conf)
 
 @mcp.tool()
 async def query_metrics(workspaceId: str, query: str, time: Optional[str] = None, region: str = "cn-beijing") -> any:
@@ -52,7 +52,7 @@ async def query_metrics(workspaceId: str, query: str, time: Optional[str] = None
         Query result with type (vector, matrix, scalar, string) and values
     """
     conf = init_auth_config(region)
-    return vmpApiClient.query_instant_metrics(workspaceId, query, time, conf)
+    return await vmpApiClient.query_instant_metrics(workspaceId, query, time, conf)
 
 @mcp.tool()
 async def query_range_metrics(workspaceId: str, query: str, start: str, end: str, step: Optional[str] = None, region: str = "cn-beijing") -> any:
@@ -70,7 +70,7 @@ async def query_range_metrics(workspaceId: str, query: str, start: str, end: str
         Range query result with type (usually matrix) and values over time
     """
     conf = init_auth_config(region)
-    return vmpApiClient.query_range_metrics(workspaceId, query, start, end, step, conf)
+    return await vmpApiClient.query_range_metrics(workspaceId, query, start, end, step, conf)
 
 @mcp.tool()
 async def query_metric_names(workspaceId: str, match: Optional[str] = None, region: str = "cn-beijing") -> any:
@@ -85,7 +85,7 @@ async def query_metric_names(workspaceId: str, match: Optional[str] = None, regi
         A list of metric names
     """
     conf = init_auth_config(region)
-    return vmpApiClient.query_label_values(workspaceId, "__name__", match=[match], dynamicConf=conf)
+    return await vmpApiClient.query_label_values(workspaceId, "__name__", match=[match], dynamicConf=conf)
 
 @mcp.tool()
 async def query_metric_labels(workspaceId: str, metricName: str, region: str = "cn-beijing") -> any:
@@ -98,7 +98,7 @@ async def query_metric_labels(workspaceId: str, metricName: str, region: str = "
         A list of metric labels
     """
     conf = init_auth_config(region)
-    return vmpApiClient.query_label_names(workspaceId, match=[metricName], dynamicConf=conf)
+    return await vmpApiClient.query_label_names(workspaceId, match=[metricName], dynamicConf=conf)
 
 mcp.add_resource(HttpResource(
     uri="resource://vmp/metrics/dcgm",
@@ -169,7 +169,7 @@ def init_auth_config(region: str) -> config.VMPConfig:
 def main():
     """Start A Volcengine Managed Prometheus server."""
     load_dotenv()
-    parser = argparse.ArgumentParser(description="Run the Cloud Assistant MCP Server")
+    parser = argparse.ArgumentParser(description="Run the Volcengine Managed Prometheus MCP Server")
     parser.add_argument(
         "--transport",
         "-t",

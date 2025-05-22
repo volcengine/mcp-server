@@ -1,9 +1,8 @@
-# MCP Server 产品名称：TOS MCP Server![产品Logo](https://lf3-beecdn.bytetos.com/obj/ies-fe-bee-upload/bee_prod/biz_950/tos_d64ae2c316177f1d1b8108e38c106ae8.svg)
-
+# TOS MCP Server
 TOS 官方推出的 MCP Server 提供强大的查询能力，支持通过自然语言便捷地探索和检索 TOS 中存储的内容，提升了数据访问的直观性与效率。可以与火山引擎云产品
 MCP 组合，助力构建更智能的业务应用场景。
 
-| 版本 | v0.1.0                   | 
+| 版本 | v0.2.0                   | 
 |----|--------------------------|
 | 描述 | 基于 MCP 管理 TOS 资源，智能化探索数据 |
 | 分类 | 存储                       |
@@ -173,9 +172,9 @@ SaaS
 
 | 环境变量             | 描述                     | 默认值 |
 |------------------|------------------------|-----|
-| `VOLC_ACCESSKEY` | 火山引擎账号 ACCESS KEY      | -   |
-| `VOLC_SECRETKEY` | 火山引擎账号 SECRET KEY      | -   |
-| `REGION`         | 火山引擎 TOS region        | -   |
+| `VOLCENGINE_ACCESS_KEY` | 火山引擎账号 ACCESS KEY      | -   |
+| `VOLCENGINE_SECRET_KEY` | 火山引擎账号 SECRET KEY      | -   |
+| `VOLCENGINE_REGION`         | 火山引擎 TOS region        | -   |
 | `TOS_ENDPOINT`   | 火山引擎 TOS Endpoint      | -   |
 | `SECURITY_TOKEN` | 火山引擎 Security Token，可选 | -   |
 | `TOS_BUCKETS`    | 指定访问的 TOS 桶，可选         | -   |
@@ -247,10 +246,6 @@ use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run *mcp-server
 5. 去对应的Client的平台进行使用
    点击快捷跳转按钮，前往方舟平台的体验中心进行对应MCP Server的体验
 
-## 资源列表 - optional
-
-## 商业化 - optional
-
 ## 产品截图/视频 - optional
 
 ### Cursor
@@ -272,9 +267,9 @@ use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run *mcp-server
         "mcp-server-tos"
       ],
       "env": {
-        "VOLC_ACCESSKEY": "your access-key-id",
-        "VOLC_SECRETKEY": "your access-key-secret",
-        "REGION": "tos region",
+        "VOLCENGINE_ACCESS_KEY": "your access-key-id",
+        "VOLCENGINE_SECRET_KEY": "your access-key-secret",
+        "VOLCENGINE_REGION": "tos region",
         "TOS_ENDPOINT": "tos endpoint",
         "SECURITY_TOKEN": "your security token",
         "TOS_BUCKET": "your specific bucket"

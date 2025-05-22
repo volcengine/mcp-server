@@ -9,11 +9,11 @@ authors = [
 requires-python = ">=3.10"
 dependencies = [
     "mcp[cli]",
-    "volcengine-python-sdk>=2.0.1",
+    "volcengine-python-sdk>=3.0.1",
 ]
 
 [project.scripts]
-mcp-server-vmp = "mcp_server_vmp:main"
+mcp-server-vmp = "mcp_server_vmp.server:main"
 
 [build-system]
 requires = ["hatchling"]
