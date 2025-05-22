@@ -1,6 +1,5 @@
-# VEEN MCP Server
+# VEEN Edge MCP Server
 
-边缘计算节点
 
 ## Version Information
 
@@ -66,7 +65,7 @@ Python
 
 ## Service Activation Link
 
-https://go.larkoffice.com/approval/s/ia91twWs/
+https://console.volcengine.com/edge/veen
 
 ## Authentication Method
 

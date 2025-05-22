@@ -1,6 +1,5 @@
-# VEEN MCP Server
+# 边缘计算节点 MCP Server
 
-边缘计算节点
 
 ## 版本信息
 
@@ -66,7 +65,7 @@ Python
 
 ## 服务开通链接
 
-https://go.larkoffice.com/approval/s/ia91twWs/
+https://console.volcengine.com/edge/veen
 
 ## 鉴权方式
 
