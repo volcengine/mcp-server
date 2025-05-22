@@ -4,7 +4,7 @@ Volcano Engine CDN officially launches the MCP Server, which supports natural la
 
 |   Version   |                                        v0.1.0                                        |
 | :---------: | :----------------------------------------------------------------------------------: |
-| Description |                  cdn service management driven by natural language                   |
+| Description |                  CDN Service Management Driven By Natural Language                   |
 |  Category   |                                     CDN And Edge                                     |
 |    Tags     | CDN, Content Delivery Network, Business Data Analysis, Domain Configuration Analysis |
 
