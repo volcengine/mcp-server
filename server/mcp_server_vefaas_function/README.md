@@ -601,7 +601,7 @@ OAuth 2.0
 
 ### UVX
 
-请预先获取环境变量 VOLC_ACCESSKEY 和 VOLC_SECRETKEY。
+请预先获取环境变量 VOLCENGINE_ACCESS_KEY 和 VOLCENGINE_SECRET_KEY。
 
 ```json
 {
@@ -614,8 +614,8 @@ OAuth 2.0
         "mcp-server-vefaas-function"
       ],
       "env": {
-        "VOLC_ACCESSKEY": "xxx",
-        "VOLC_SECRETKEY": "xxx"
+        "VOLCENGINE_ACCESS_KEY": "xxx",
+        "VOLCENGINE_SECRET_KEY": "xxx"
       }
     }
   }
