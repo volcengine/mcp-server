@@ -21,8 +21,15 @@ import hmac
 import json
 import os
 from urllib.parse import quote
-
+import base64
 import requests
+import datetime
+import os
+import base64
+import json
+from mcp.server.session import ServerSession
+from mcp.server.fastmcp import Context
+from starlette.requests import Request
 
 # 以下参数视服务不同而不同，一个服务内通常是一致的
 Service = "apig"
@@ -64,16 +71,20 @@ def hash_sha256(content: str):
 
 
 # 第二步：签名请求函数
-def request(method, date, query, header, ak, sk, action, body):
+def request(method, date, query, header, ak, sk, token, action, body):
     # 第三步：创建身份证明。其中的 Service 和 Region 字段是固定的。ak 和 sk 分别代表
     # AccessKeyID 和 SecretAccessKey。同时需要初始化签名结构体。一些签名计算时需要的属性也在这里处理。
     # 初始化身份证明结构体
+
     credential = {
         "access_key_id": ak,
         "secret_access_key": sk,
         "service": Service,
         "region": Region,
     }
+
+    if token is not None:
+        credential["session_token"] = token
 
     content_type = ContentType
     version = Version
@@ -162,6 +173,62 @@ def request(method, date, query, header, ak, sk, action, body):
                          )
     return r.json()
 
+def get_authorization_credentials(ctx: Context = None) -> tuple[str, str, str]:
+    """
+    Gets authorization credentials from either environment variables or request headers.
+    
+    Args:
+        ctx: The server context object
+        
+    Returns:
+        tuple: (access_key, secret_key, session_token)
+        
+    Raises:
+        ValueError: If authorization information is missing or invalid
+    """
+    # First try environment variables
+    if "VOLC_ACCESSKEY" in os.environ and "VOLC_SECRETKEY" in os.environ:
+        return (
+            os.environ["VOLC_ACCESSKEY"],
+            os.environ["VOLC_SECRETKEY"],
+            ""  # No session token for static credentials
+        )
+
+    # Try getting auth from request or environment
+    _ctx: Context[ServerSession, object] = ctx
+    raw_request: Request = _ctx.request_context.request
+    auth = None
+    
+    if raw_request:
+        # Try to get authorization from request headers
+        auth = raw_request.headers.get("authorization", None)
+    
+    if auth is None:
+        # Try to get from environment if not in headers
+        auth = os.getenv("authorization", None)
+        
+    if auth is None:
+        raise ValueError("Missing authorization info.")
+
+    # Parse the authorization string
+    if ' ' in auth:
+        _, base64_data = auth.split(' ', 1)
+    else:
+        base64_data = auth
+
+    try:
+        # Decode Base64 and parse JSON
+        decoded_str = base64.b64decode(base64_data).decode('utf-8')
+        data = json.loads(decoded_str)
+
+        return (
+            data.get('AccessKeyId'),
+            data.get('SecretAccessKey'), 
+            data.get('SessionToken')
+        )
+    except Exception as e:
+        raise ValueError(f"Failed to decode authorization info: {str(e)}")
+
 
 if __name__ == "__main__":
     # response_body = request("Get", datetime.datetime.utcnow(), {}, {}, AK, SK, "ListUsers", None)
@@ -176,25 +243,16 @@ if __name__ == "__main__":
     # response_body = request("POST", now, {"Limit": "10"}, {}, AK, SK, "ListUsers", "UnUseParam=ASDF")
     # print(response_body)
 
-
-
-    # body = {
-    #     "Name":"test-trigger",
-    #     "GatewayId":"gcpasuc25pva6lvr0nuo0",
-    #     "SourceType":"VeFaas",
-    #     "UpstreamSpec": {
-    #         "VeFaas": {"FunctionId":"4lbf74q6"}}}
-
     body = {
-    "Name": "xxxxxx",
-    "GatewayId": "gciqjm7qahbthkcuum20g",
-    "SourceType": "VeFaas",
-    "UpstreamSpec": {
-        "VeFaas": {
-            "FunctionId": "vyyzl7kn"
+        "Name": "xxxxxx",
+        "GatewayId": "gciqjm7qahbthkcuufaked",
+        "SourceType": "VeFaas",
+        "UpstreamSpec": {
+            "VeFaas": {
+                "FunctionId": "vyyzfaked"
+            }
         }
     }
-}
 
     response_body = request("POST", now, {}, {}, AK, SK, "CreateUpstream", json.dumps(body))
     print(response_body)
