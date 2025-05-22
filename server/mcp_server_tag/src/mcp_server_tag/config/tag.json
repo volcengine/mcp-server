@@ -1,0 +1,597 @@
+{
+ "components": {
+  "schemas": {
+   "ResourceTagMappingList": {
+    "description": "资源标签映射列表",
+    "properties": {
+     "Region": {
+      "description": "地域",
+      "type": "string"
+     },
+     "ResourceID": {
+      "description": "资源ID",
+      "type": "string"
+     },
+     "ResourceTrn": {
+      "description": "资源Trn",
+      "type": "string"
+     },
+     "ResourceType": {
+      "description": "资源类型",
+      "type": "string"
+     },
+     "ServiceName": {
+      "description": "服务名称",
+      "type": "string"
+     },
+     "Tags": {
+      "description": "标签信息",
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "description": "标签",
+    "properties": {
+     "Key": {
+      "description": "标签键",
+      "type": "string"
+     },
+     "Type": {
+      "description": "标签类型",
+      "type": "string"
+     },
+     "Value": {
+      "description": "标签值",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagFilters": {
+    "properties": {
+     "Key": {
+      "description": "过滤标签键",
+      "type": "string"
+     },
+     "Values": {
+      "description": "过滤标签值",
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "TagKey": {
+    "description": "标签键",
+    "properties": {
+     "Category": {
+      "description": "标签分类",
+      "type": "string"
+     },
+     "TagKey": {
+      "description": "标签键",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagRes": {
+    "description": "标签",
+    "properties": {
+     "Key": {
+      "description": "标签键",
+      "type": "string"
+     },
+     "Type": {
+      "description": "标签类型",
+      "type": "string"
+     },
+     "Value": {
+      "description": "标签值",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagRes2": {
+    "description": "GetTag返回结果",
+    "properties": {
+     "Key": {
+      "description": "标签键",
+      "type": "string"
+     },
+     "ResourcesNum": {
+      "description": "资源数量",
+      "format": "int32",
+      "type": "integer"
+     },
+     "Type": {
+      "description": "标签类型",
+      "type": "string"
+     },
+     "Value": {
+      "description": "标签值",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tags": {
+    "properties": {
+     "Key": {
+      "description": "标签键",
+      "type": "string"
+     },
+     "Value": {
+      "description": "标签值",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "API documentation for tag",
+  "title": "tag",
+  "version": "2022-06-01"
+ },
+ "openapi": "3.0.0",
+ "paths": {
+  "/CreateTags": {
+   "get": {
+    "description": "创建预置标签",
+    "operationId": "CreateTags",
+    "parameters": [
+     {
+      "description": "Tags",
+      "in": "query",
+      "name": "Tags",
+      "required": true,
+      "schema": {
+       "description": "Tags",
+       "items": {
+        "$ref": "#/components/schemas/Tags"
+       },
+       "type": "array",
+       "x-split-type": 3
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "创建预置标签"
+     }
+    },
+    "summary": "创建预置标签",
+    "tags": [
+     "标签管理"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "tag",
+   "x-version": "2022-06-01"
+  },
+  "/GetResources": {
+   "get": {
+    "description": "查询资源及资源绑定标签信息",
+    "operationId": "GetResources",
+    "parameters": [
+     {
+      "description": "资源数量大小",
+      "in": "query",
+      "name": "MaxResults",
+      "schema": {
+       "description": "资源数量大小",
+       "example": 10,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "过滤资源类型",
+      "in": "query",
+      "name": "ResourceTypeFilters",
+      "schema": {
+       "description": "过滤资源类型",
+       "example": [
+        "ecs:instance"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "type": "array",
+       "x-split-type": 3
+      }
+     },
+     {
+      "description": "TagFilters",
+      "in": "query",
+      "name": "TagFilters",
+      "schema": {
+       "description": "TagFilters",
+       "items": {
+        "$ref": "#/components/schemas/TagFilters"
+       },
+       "type": "array",
+       "x-split-type": 3
+      }
+     },
+     {
+      "description": "资源列表",
+      "in": "query",
+      "name": "ResourceTrnList",
+      "schema": {
+       "description": "资源列表",
+       "example": [
+        "trn:ecs:cn-guilin-boe:2000000000:instance/i-ybndd8fy3rkdvbtuguu9"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "type": "array",
+       "x-split-type": 3
+      }
+     },
+     {
+      "description": "分页参数",
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "description": "分页参数",
+       "example": "eyJOZXh0SW5mbyI6IntcIklEXCI6NzgzODg2MzV9IiwiU2lnblRpbWUiOjE2OTIyNjUwODksIlNpZ25hdHVyZSI6IjQ4ZTc2OWRkZDcxMmNhNDJmNzkxNjI2NDRiZmZlODA3MzZhNmVmMDVjM2FlNWEyYmZjY2I3YjIwZTI3MTY2NGEifQ==",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "description": "分页参数",
+           "example": "eyJOZXh0SW5mbyI6IntcIklEXCI6NzgzODg2MzV9IiwiU2lnblRpbWUiOjE2OTIyNjUwODksIlNpZ25hdHVyZSI6IjQ4ZTc2OWRkZDcxMmNhNDJmNzkxNjI2NDRiZmZlODA3MzZhNmVmMDVjM2FlNWEyYmZjY2I3YjIwZTI3MTY2NGEifQ==",
+           "type": "string"
+          },
+          "ResourceTagMappingList": {
+           "description": "资源标签映射关系",
+           "example": [
+            "{\n        \"ResourceTrn\": \"trn:ecs:cn-guilin-boe:2000000000:instance/i-ybndd8fy3rkdvbtuguu9\"",
+            "\"ResourceID\": \"i-ybndd8fy3rkdvbtuguu9\"",
+            "\"ResourceType\": \"instance\"",
+            "\"ServiceName\": \"ecs\"",
+            "\"Region\": \"cn-beijing\"",
+            "\"Tags\": [\n          {\n            \"Key\": \"tagkey\"",
+            "\"Value\": \"tagvalue\"",
+            "\"Type\": \"Custom\"\n          }\n        ]\n      }"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/ResourceTagMappingList"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询资源及资源绑定标签信息"
+     }
+    },
+    "summary": "查询资源及资源绑定标签信息",
+    "tags": [
+     "标签管理"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "tag",
+   "x-version": "2022-06-01"
+  },
+  "/GetTagKeys": {
+   "get": {
+    "description": "获取标签键",
+    "operationId": "GetTagKeys",
+    "parameters": [
+     {
+      "description": "查询的标签类型",
+      "in": "query",
+      "name": "TagType",
+      "schema": {
+       "description": "查询的标签类型",
+       "example": "system",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "分页参数",
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "description": "分页参数",
+       "example": "eyJOZXh0SW5mbyI6IntcIklEXCI6NzgzODg2MzV9IiwiU2lnblRpbWUiOjE2OTIyNjM3NDUsIlNpZ25hdHVyZSI6ImEyYzY5YTFiNDhjZDdjZmFiZGZjZTBjNTNmNThjNDE0ZThkNjQwNjJkMDkxMGY4MjBmYTAxODg1OWZjYTk0NzUifQ==",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "获取的资源数量",
+      "in": "query",
+      "name": "MaxResults",
+      "schema": {
+       "description": "获取的资源数量",
+       "example": 10,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "description": "分页参数",
+           "example": "eyJOZXh0SW5mbyI6IntcIklEXCI6NzgzODg2MzV9IiwiU2lnblRpbWUiOjE2OTIyNjM3ODUsIlNpZ25hdHVyZSI6IjJiNmYwMmFlNTg3NmU0YzJhMGY2YTBmZGI2ZWY3NzBmZjdhMGJhMGQxOTUzYTZjYWEyODAxZWU4ZjFiN2YwYmUifQ==",
+           "type": "string"
+          },
+          "TagKeys": {
+           "description": "标签键信息",
+           "example": [
+            "{\n    \"TagKey\": \"222\"",
+            "\"Category\": \"Custom\"\n}"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/TagKey"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取标签键"
+     }
+    },
+    "summary": "获取标签键",
+    "tags": [
+     "标签管理"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "tag",
+   "x-version": "2022-06-01"
+  },
+  "/GetTagValues": {
+   "get": {
+    "description": "查询标签值",
+    "operationId": "GetTagValues",
+    "parameters": [
+     {
+      "description": "获取的资源数量",
+      "in": "query",
+      "name": "MaxResults",
+      "schema": {
+       "description": "获取的资源数量",
+       "example": 10,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "标签键",
+      "in": "query",
+      "name": "TagKeys",
+      "required": true,
+      "schema": {
+       "description": "标签键",
+       "example": [
+        "tagkey"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 20,
+       "type": "array",
+       "x-split-type": 3
+      }
+     },
+     {
+      "description": "分页参数",
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "description": "分页参数",
+       "example": "eyJOZXh0SW5mbyI6IntcIklEXCI6NzgzODg2MzV9IiwiU2lnblRpbWUiOjE2OTIyNjQwNjMsIlNpZ25hdHVyZSI6ImY0Y2ZiNjhiZDc4YzM0ZDE0YWRjMzQ0YWU4MjMxNjM2Nzk3YzE2NDkyMjcwMDNhYjZmMzg2MWYyZGY5NDljODQifQ==",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "description": "分页参数",
+           "example": "eyJOZXh0SW5mbyI6IntcIklEXCI6NzgzODg2MzV9IiwiU2lnblRpbWUiOjE2OTIyNjQwNjMsIlNpZ25hdHVyZSI6ImY0Y2ZiNjhiZDc4YzM0ZDE0YWRjMzQ0YWU4MjMxNjM2Nzk3YzE2NDkyMjcwMDNhYjZmMzg2MWYyZGY5NDljODQifQ==",
+           "type": "string"
+          },
+          "Tags": {
+           "description": "标签信息",
+           "example": [
+            "{\n        \"Key\": \"222\"",
+            "\"Value\": \"333\"",
+            "\"Type\": \"Custom\"\n}"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/TagRes"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询标签值"
+     }
+    },
+    "summary": "查询标签值",
+    "tags": [
+     "标签管理"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "tag",
+   "x-version": "2022-06-01"
+  },
+  "/GetTags": {
+   "get": {
+    "description": "查询标签键值对",
+    "operationId": "GetTags",
+    "parameters": [
+     {
+      "description": "标签键列表",
+      "in": "query",
+      "name": "TagKeys",
+      "schema": {
+       "description": "标签键列表",
+       "example": [
+        "tagkey"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 20,
+       "type": "array",
+       "x-split-type": 3
+      }
+     },
+     {
+      "description": "是否返回标签绑定的资源数量",
+      "in": "query",
+      "name": "CountResources",
+      "schema": {
+       "description": "是否返回标签绑定的资源数量",
+       "enum": [
+        "true",
+        "false"
+       ],
+       "example": true,
+       "type": "boolean",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "分页参数",
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "description": "分页参数",
+       "example": "eyJOZXh0SW5mbyI6IntcIklEXCI6NzgzODg2MzV9IiwiU2lnblRpbWUiOjE2OTIyNjQ2NzEsIlNpZ25hdHVyZSI6ImE0MjhkYmMzZmU3Njk1NzA5ZGJhNmQxYTU1NWQ5YjZiOTMxMjgzNTNlZGFhYzFmMWRhNjJiY2MyOGUzYWE2M2IifQ==",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "查询的标签类型",
+      "in": "query",
+      "name": "TagType",
+      "schema": {
+       "description": "查询的标签类型",
+       "example": "system",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "获取的资源数量",
+      "in": "query",
+      "name": "MaxResults",
+      "schema": {
+       "description": "获取的资源数量",
+       "example": 10,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "description": "分页参数",
+           "example": "eyJOZXh0SW5mbyI6IntcIklEXCI6NzgzODg2MzV9IiwiU2lnblRpbWUiOjE2OTIyNjQ4MjIsIlNpZ25hdHVyZSI6IjBkMjJlNjM2MTZjYmJkZTBjMjQzNTQ0Nzk1OGE2M2RkMWQzMDQ3MDEwMWRhY2QxNTdmZDRiNjlkNjFkMTdlZWYifQ==",
+           "type": "string"
+          },
+          "Tags": {
+           "description": "标签结果",
+           "example": [
+            "{\n        \"Key\": \"tagkey\"",
+            "\"Value\": \"tagvalue\"",
+            "\"Type\": \"Custom\"\n      }"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/TagRes2"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询标签键值对"
+     }
+    },
+    "summary": "查询标签键值对",
+    "tags": [
+     "标签管理"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "tag",
+   "x-version": "2022-06-01"
+  }
+ }
+}

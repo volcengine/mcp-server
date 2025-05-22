@@ -1,0 +1,681 @@
+{
+ "components": {
+  "schemas": {
+   "Filter": {
+    "description": "过滤条件",
+    "properties": {
+     "Key": {
+      "description": "过滤条件键",
+      "type": "string"
+     },
+     "MatchType": {
+      "description": "匹配方式",
+      "type": "string"
+     },
+     "Values": {
+      "description": "过滤条件值，值之间查询逻辑为OR",
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Key"
+    ],
+    "type": "object"
+   },
+   "Region": {
+    "description": "地域信息",
+    "properties": {
+     "Region": {
+      "description": "地域",
+      "type": "string"
+     },
+     "RegionName": {
+      "description": "地域名称",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Region",
+     "RegionName"
+    ],
+    "type": "object"
+   },
+   "Resource": {
+    "description": "资源信息",
+    "properties": {
+     "AccountID": {
+      "description": "账号ID",
+      "format": "int32",
+      "type": "integer"
+     },
+     "CreateTime": {
+      "description": "创建时间",
+      "type": "string"
+     },
+     "ProjectName": {
+      "description": "项目名称",
+      "type": "string"
+     },
+     "Region": {
+      "description": "地域",
+      "type": "string"
+     },
+     "ResourceID": {
+      "description": "资源ID",
+      "type": "string"
+     },
+     "ResourceName": {
+      "description": "资源名称",
+      "type": "string"
+     },
+     "ResourceType": {
+      "description": "资源类型",
+      "type": "string"
+     },
+     "Service": {
+      "description": "服务名",
+      "type": "string"
+     },
+     "Tags": {
+      "description": "标签",
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Service",
+     "ResourceType",
+     "AccountID",
+     "ResourceID"
+    ],
+    "type": "object"
+   },
+   "ResourceCount": {
+    "description": "资源统计",
+    "properties": {
+     "Count": {
+      "description": "资源数量",
+      "format": "int32",
+      "type": "integer"
+     },
+     "GroupName": {
+      "description": "分组名称",
+      "type": "string"
+     }
+    },
+    "required": [
+     "GroupName",
+     "Count"
+    ],
+    "type": "object"
+   },
+   "ResourceType": {
+    "description": "资源类型",
+    "properties": {
+     "ResourceType": {
+      "description": "资源类型",
+      "type": "string"
+     },
+     "ResourceTypeName": {
+      "description": "资源类型名称",
+      "type": "string"
+     },
+     "Service": {
+      "description": "服务",
+      "type": "string"
+     },
+     "ServiceName": {
+      "description": "服务名称",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Service",
+     "ServiceName",
+     "ResourceType",
+     "ResourceTypeName"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "description": "标签",
+    "properties": {
+     "Key": {
+      "description": "标签键",
+      "type": "string"
+     },
+     "Value": {
+      "description": "标签值",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "API documentation for resourcecenter",
+  "title": "resourcecenter",
+  "version": "2023-06-01"
+ },
+ "openapi": "3.0.0",
+ "paths": {
+  "/GetResourceCenterStatus": {
+   "post": {
+    "description": "查询资源中心服务状态。",
+    "operationId": "GetResourceCenterStatus",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "InitialStatus": {
+           "description": "初始化状态。取值：\n- Pending：准备中\n- Finished：就绪",
+           "example": "Pending",
+           "type": "string"
+          },
+          "ServiceStatus": {
+           "description": "服务状态。取值：\n- Enabled：已开通\n- Disabled：已关闭",
+           "example": "Enabled",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询资源中心服务状态。"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The request has failed due to an unknown error.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询资源中心服务状态",
+    "tags": [
+     "资源中心管理"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "resourcecenter",
+   "x-version": "2023-06-01"
+  },
+  "/GetResourceCounts": {
+   "post": {
+    "description": "查询当前账号下的资源数量",
+    "operationId": "GetResourceCounts",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Filter": {
+          "description": "过滤条件",
+          "example": [
+           {
+            "Key": "Region",
+            "Values": [
+             "cn-beijing"
+            ]
+           }
+          ],
+          "items": {
+           "$ref": "#/components/schemas/Filter"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "GroupByKey": {
+          "description": "资源数量统计的分组维度。取值：\n- ResourceType：资源类型\n- Region：地域",
+          "enum": [
+           "ResourceType",
+           "Region"
+          ],
+          "example": "ResourceType",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "GroupByKey"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Filter": {
+           "description": "过滤条件",
+           "example": [
+            {
+             "Key": "Region",
+             "MatchType": "Equals",
+             "Values": [
+              "cn-beijing"
+             ]
+            }
+           ],
+           "items": {
+            "$ref": "#/components/schemas/Filter"
+           },
+           "type": "array"
+          },
+          "GroupByKey": {
+           "description": "资源数量统计的分组维度",
+           "example": "ResourceType",
+           "type": "string"
+          },
+          "ResourceCounts": {
+           "description": "资源数量",
+           "example": [
+            {
+             "Count": 20,
+             "GroupName": "ecs:instance"
+            }
+           ],
+           "items": {
+            "$ref": "#/components/schemas/ResourceCount"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询当前账号下的资源数量"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter %s is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ServiceNotEnabled",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源中心服务暂未开通",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "ResourceCenter Service is not enabled.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The request has failed due to an unknown error.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询当前账号下的资源数量",
+    "tags": [
+     "资源检索"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "resourcecenter",
+   "x-version": "2023-06-01"
+  },
+  "/ListResourceTypes": {
+   "post": {
+    "description": "查询资源中心支持的资源类型。",
+    "operationId": "ListResourceTypes",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ResourceTypes": {
+           "description": "资源类型",
+           "example": [
+            {
+             "ResourceType": "instance",
+             "ResourceTypeName": "实例",
+             "Service": "ecs",
+             "ServiceName": "云服务器"
+            }
+           ],
+           "items": {
+            "$ref": "#/components/schemas/ResourceType"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询资源中心支持的资源类型。"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The request has failed due to an unknown error.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询资源中心支持的资源类型",
+    "tags": [
+     "资源检索"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "resourcecenter",
+   "x-version": "2023-06-01"
+  },
+  "/SearchResources": {
+   "post": {
+    "description": "搜索当前账号的资源",
+    "operationId": "SearchResources",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Filter": {
+          "description": "过滤条件",
+          "example": [
+           {
+            "Key": "Region",
+            "Values": [
+             "cn-beijing"
+            ]
+           }
+          ],
+          "items": {
+           "$ref": "#/components/schemas/Filter"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "MaxResults": {
+          "description": "每页最大数据条数；取值范围：1~100，默认值：10",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "NextToken": {
+          "description": "查询返回结果下一页的token",
+          "example": "eyJOZXh0SW5mbyI6IntcIkluZm9zXCI6XCJbMTY5NDcxNjkwNDAwMCxcXFwidHJuOm1vY2tfcHJvdmlkZXI6Y24tYmVpamluZzoyMTAwMDAxMjU1Omluc3RhbmNlL2ktM3RkYXNmcWVydnNpOS0xXFxcIl1cIn0iLCJTaWduVGltZSI6MTcxODMzNzU5OCwiU2lnbmF0dXJlIjoiOTZhMzk2YWY1ZTg5YjMyYWUyYmY5ZGZiYzA2YTg0MGMifQ",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "SortBy": {
+          "description": "排序条件。取值：\n- CreateTime，表示按资源创建时间排序",
+          "enum": [
+           "CreateTime"
+          ],
+          "example": "CreateTime",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "SortOrder": {
+          "description": "排序顺序。取值：Asc、Desc；默认Asc",
+          "enum": [
+           "Asc",
+           "Desc"
+          ],
+          "example": "Asc",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "description": "下一页 token",
+           "example": "eyJOZXh0SW5mbyI6IntcIkluZm9zXCI6XCJbMTY5NDcxNjkwNDAwMCxcXFwidHJuOm1vY2tfcHJvdmlkZXI6Y24tYmVpamluZzoyMTAwMDAxMjU1Omluc3RhbmNlL2ktM3RkYXNmcWVydnNpOS0xXFxcIl1cIn0iLCJTaWduVGltZSI6MTcxODMzNzU5OCwiU2lnbmF0dXJlIjoiOTZhMzk2YWY1ZTg5YjMyYWUyYmY5ZGZiYzA2YTg0MGMifQ",
+           "type": "string"
+          },
+          "Resources": {
+           "description": "资源信息",
+           "example": [
+            "i-3tdasfqervsi9"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/Resource"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "搜索当前账号的资源"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter %s is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ServiceNotEnabled",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源中心服务暂未开通",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "ResourceCenter Service is not enabled.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The request has failed due to an unknown error.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "搜索当前账号的资源",
+    "tags": [
+     "资源检索"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "resourcecenter",
+   "x-version": "2023-06-01"
+  }
+ }
+}

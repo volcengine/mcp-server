@@ -1,0 +1,1413 @@
+{
+ "components": {
+  "schemas": {
+   "DescribeTrailsResp": {
+    "description": "跟踪响应结构",
+    "properties": {
+     "CreatedTime": {
+      "description": "跟踪创建时间",
+      "type": "string"
+     },
+     "CreatorID": {
+      "description": "跟踪创建者账号id",
+      "format": "int64",
+      "type": "integer"
+     },
+     "EventRW": {
+      "description": "跟踪读写类型",
+      "type": "string"
+     },
+     "EventSources": {
+      "description": "跟踪事件源",
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "LatestDeliveryError": {
+      "description": "最新投递失败",
+      "type": "string"
+     },
+     "LatestDeliveryTime": {
+      "description": "最新投递时间",
+      "type": "string"
+     },
+     "LoggingStatus": {
+      "description": "跟踪开启状态",
+      "type": "string"
+     },
+     "OrganizationID": {
+      "description": "组织id",
+      "format": "int64",
+      "type": "integer"
+     },
+     "StartLoggingTime": {
+      "description": "跟踪开启时间",
+      "type": "string"
+     },
+     "StopLoggingTime": {
+      "description": "跟踪关闭时间",
+      "type": "string"
+     },
+     "TlsProjectName": {
+      "description": "TLS项目名",
+      "type": "string"
+     },
+     "TlsProjectRegion": {
+      "description": "TLS项目region",
+      "type": "string"
+     },
+     "TlsTopicName": {
+      "description": "TLS主题名",
+      "type": "string"
+     },
+     "TosBucketName": {
+      "description": "TOS桶名",
+      "type": "string"
+     },
+     "TosBucketRegion": {
+      "description": "TOS桶region",
+      "type": "string"
+     },
+     "TosKeyPrefix": {
+      "description": "TOS路径前缀",
+      "type": "string"
+     },
+     "TrailName": {
+      "description": "跟踪名",
+      "type": "string"
+     },
+     "TrailRegion": {
+      "description": "跟踪region",
+      "type": "string"
+     },
+     "TrailType": {
+      "description": "跟踪类型：0单账号，1多账号",
+      "format": "int32",
+      "type": "integer"
+     },
+     "UpdatedTime": {
+      "description": "跟踪更新时间",
+      "type": "string"
+     }
+    },
+    "required": [
+     "TrailRegion",
+     "EventRW",
+     "EventSources",
+     "TrailName",
+     "LatestDeliveryError",
+     "StopLoggingTime",
+     "StartLoggingTime",
+     "LoggingStatus",
+     "TrailType",
+     "LatestDeliveryTime",
+     "CreatedTime",
+     "UpdatedTime"
+    ],
+    "type": "object"
+   },
+   "EventDetail": {
+    "additionalProperties": true,
+    "description": "事件的详情代码。",
+    "type": "object"
+   },
+   "LookupCondition": {
+    "description": "查询条件",
+    "properties": {
+     "LookupConditionKey": {
+      "description": "查询条件键。",
+      "type": "string"
+     },
+     "LookupConditionValue": {
+      "description": "查询条件键对应的值。",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RelatedResourceResp": {
+    "description": "关联资源响应结构",
+    "properties": {
+     "IntegratedTrn": {
+      "description": "资源trn",
+      "type": "string"
+     },
+     "ResourceID": {
+      "description": "资源ID",
+      "type": "string"
+     },
+     "ResourceType": {
+      "description": "资源类型",
+      "type": "string"
+     },
+     "ResourceTypeDisplay": {
+      "description": "资源类型展示名",
+      "type": "string"
+     },
+     "ServiceCode": {
+      "description": "服务名",
+      "type": "string"
+     },
+     "SourceType": {
+      "description": "来源请求或者响应",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ServiceCode",
+     "IntegratedTrn",
+     "ResourceType",
+     "ResourceTypeDisplay",
+     "ResourceID",
+     "SourceType"
+    ],
+    "type": "object"
+   },
+   "TrailEventResp": {
+    "description": "审计事件响应结构",
+    "properties": {
+     "AccessKeyID": {
+      "description": "AccessKey",
+      "type": "string"
+     },
+     "ErrorCode": {
+      "description": "错误码",
+      "type": "string"
+     },
+     "EventDetail": {
+      "description": "事件内容",
+      "type": "string"
+     },
+     "EventID": {
+      "description": "事件ID",
+      "type": "string"
+     },
+     "EventName": {
+      "description": "事件名",
+      "type": "string"
+     },
+     "EventNameDisplay": {
+      "description": "事件名展示名",
+      "type": "string"
+     },
+     "EventSource": {
+      "description": "事件源",
+      "type": "string"
+     },
+     "EventSourceDisplay": {
+      "description": "事件源展示名",
+      "type": "string"
+     },
+     "EventTime": {
+      "description": "事件时间",
+      "type": "string"
+     },
+     "Region": {
+      "description": "请求region",
+      "type": "string"
+     },
+     "RelatedResources": {
+      "description": "关联资源",
+      "items": {
+       "$ref": "#/components/schemas/RelatedResourceResp"
+      },
+      "type": "array"
+     },
+     "RequestID": {
+      "description": "请求ID",
+      "type": "string"
+     },
+     "SourceIPAddress": {
+      "description": "源IP",
+      "type": "string"
+     },
+     "UserName": {
+      "description": "用户名",
+      "type": "string"
+     }
+    },
+    "required": [
+     "EventID",
+     "EventTime",
+     "EventName",
+     "RequestID",
+     "SourceIPAddress",
+     "EventSource",
+     "UserName",
+     "AccessKeyID",
+     "EventDetail",
+     "Region",
+     "ErrorCode",
+     "EventSourceDisplay",
+     "EventNameDisplay"
+    ],
+    "type": "object"
+   },
+   "Trails": {
+    "description": "审计事件的详情。",
+    "properties": {
+     "AccessKeyID": {
+      "description": "请求的AK。",
+      "type": "string"
+     },
+     "ErrorCode": {
+      "description": "事件结果的错误码。",
+      "type": "string"
+     },
+     "EventDetail": {
+      "$ref": "#/components/schemas/EventDetail"
+     },
+     "EventID": {
+      "description": "事件ID",
+      "type": "string"
+     },
+     "EventName": {
+      "description": "事件的名称。",
+      "type": "string"
+     },
+     "EventSource": {
+      "description": "事件源。",
+      "type": "string"
+     },
+     "EventTime": {
+      "description": "事件发生的时间。",
+      "type": "string"
+     },
+     "Region": {
+      "description": "事件发生的地域。",
+      "type": "string"
+     },
+     "RequestID": {
+      "description": "事件的RequestID。",
+      "type": "string"
+     },
+     "SourceIPAddress": {
+      "description": "事件发生的IP地址。",
+      "type": "string"
+     },
+     "UserName": {
+      "description": "请求的用户名。",
+      "type": "string"
+     }
+    },
+    "required": [
+     "EventTime",
+     "EventName",
+     "RequestID",
+     "SourceIPAddress",
+     "EventSource",
+     "UserName",
+     "AccessKeyID",
+     "Region",
+     "ErrorCode",
+     "EventDetail",
+     "EventID"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "API documentation for cloud_trail",
+  "title": "cloud_trail",
+  "version": "2018-01-01"
+ },
+ "openapi": "3.0.0",
+ "paths": {
+  "/CreateTrail": {
+   "get": {
+    "description": "创建跟踪",
+    "operationId": "CreateTrail",
+    "parameters": [
+     {
+      "description": "TLS主题名",
+      "in": "query",
+      "name": "TlsTopicName",
+      "schema": {
+       "description": "TLS主题名",
+       "example": "topic1",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "跟踪读写类型",
+      "in": "query",
+      "name": "EventRW",
+      "required": true,
+      "schema": {
+       "description": "跟踪读写类型",
+       "example": "All",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "TOS桶region",
+      "in": "query",
+      "name": "TosBucketRegion",
+      "schema": {
+       "description": "TOS桶region",
+       "example": "cn-beijing",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "TOS路径前缀",
+      "in": "query",
+      "name": "TosKeyPrefix",
+      "schema": {
+       "description": "TOS路径前缀",
+       "example": "prefix",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "TOS桶所属的iam项目",
+      "in": "query",
+      "name": "TosBucketProject",
+      "schema": {
+       "description": "TOS桶所属的iam项目",
+       "example": "\"\"",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "TLS项目region",
+      "in": "query",
+      "name": "TlsProjectRegion",
+      "schema": {
+       "description": "TLS项目region",
+       "example": "cn-beijing",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "TLS项目名",
+      "in": "query",
+      "name": "TlsProjectName",
+      "schema": {
+       "description": "TLS项目名",
+       "example": "project1",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "TLS项目主题所属的iam项目",
+      "in": "query",
+      "name": "TlsProjectTopicProject",
+      "schema": {
+       "description": "TLS项目主题所属的iam项目",
+       "example": "\"\"",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "跟踪名",
+      "in": "query",
+      "name": "TrailName",
+      "required": true,
+      "schema": {
+       "description": "跟踪名",
+       "example": "trail-test",
+       "type": "string",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "跟踪事件源",
+      "in": "query",
+      "name": "EventSources",
+      "required": true,
+      "schema": {
+       "description": "跟踪事件源",
+       "example": [
+        "iam"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "type": "array",
+       "x-split-type": 3
+      }
+     },
+     {
+      "description": "跟踪类型：0单账号，1多账号",
+      "in": "query",
+      "name": "TrailType",
+      "required": true,
+      "schema": {
+       "description": "跟踪类型：0单账号，1多账号",
+       "example": 0,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     },
+     {
+      "description": "TOS桶名",
+      "in": "query",
+      "name": "TosBucketName",
+      "schema": {
+       "description": "TOS桶名",
+       "example": "bucket1",
+       "type": "string",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "EventRW": {
+           "description": "跟踪读写类型",
+           "example": "All",
+           "type": "string"
+          },
+          "EventSources": {
+           "description": "跟踪事件源",
+           "example": [
+            "iam"
+           ],
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "TlsProjectName": {
+           "description": "TLS项目名",
+           "example": "project1",
+           "type": "string"
+          },
+          "TlsProjectRegion": {
+           "description": "TLS项目region",
+           "example": "cn-beijing",
+           "type": "string"
+          },
+          "TlsTopicName": {
+           "description": "TLS主题名",
+           "example": "topic1",
+           "type": "string"
+          },
+          "TosBucketName": {
+           "description": "TOS桶名",
+           "example": "bucket1",
+           "type": "string"
+          },
+          "TosBucketRegion": {
+           "description": "TOS桶region",
+           "example": "cn-beijing",
+           "type": "string"
+          },
+          "TosKeyPrefix": {
+           "description": "TOS路径前缀",
+           "example": "prefix",
+           "type": "string"
+          },
+          "TrailName": {
+           "description": "跟踪名",
+           "example": "trail-test",
+           "type": "string"
+          },
+          "TrailType": {
+           "description": "跟踪类型：0单账号，1多账号",
+           "example": 0,
+           "format": "int32",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "创建跟踪"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidEventSources",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified event source '%s' is invalid",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidTrailConfiguration",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "You must specify at least one TOS bucket or TLS project.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "TlsServiceDisabled",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Tls service is disabled for this account.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidTlsTopicName",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified TLS topic name is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidTlsProjectName",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified TLS project name is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "TosServiceDisabled",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Tos service is disabled for this account.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidTrailName",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified trail name '%s' is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidTosBucketName",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified TOS bucket name is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidTosBucketPrefix",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified TOS bucket prefix is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "TrailQuotaExceeded",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The number of specified trail has exceeded the quota",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter '%s' is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "SiteDoesNotMatch",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The site does not match the identity.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "AccessDenied",
+           "type": "string"
+          },
+          "description": {
+           "example": "",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 403,
+           "type": "integer"
+          },
+          "message": {
+           "example": "You have no permission for this action.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "409": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "TrailAlreadyExists",
+           "type": "string"
+          },
+          "description": {
+           "example": "",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 409,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Trail '%s' already exists.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "ServiceFailure",
+           "type": "string"
+          },
+          "description": {
+           "example": "",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The requested service failed due to an unknown error.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "创建跟踪",
+    "tags": [
+     "跟踪"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "cloud_trail",
+   "x-version": "2018-01-01"
+  },
+  "/DescribeTrails": {
+   "get": {
+    "description": "列出跟踪列表",
+    "operationId": "DescribeTrails",
+    "parameters": [
+     {
+      "description": "跟踪名",
+      "in": "query",
+      "name": "TrailNames",
+      "required": true,
+      "schema": {
+       "description": "跟踪名",
+       "example": [
+        "trail-test"
+       ],
+       "items": {
+        "type": "string"
+       },
+       "type": "array",
+       "x-split-type": 3
+      }
+     },
+     {
+      "description": "是否展示组织跟踪",
+      "in": "query",
+      "name": "IncludeOrganizationTrail",
+      "required": true,
+      "schema": {
+       "description": "是否展示组织跟踪",
+       "example": 1,
+       "format": "int32",
+       "type": "integer",
+       "x-split-type": 0
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Trails": {
+           "description": "跟踪",
+           "example": [],
+           "items": {
+            "$ref": "#/components/schemas/DescribeTrailsResp"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "列出跟踪列表"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidTrailName",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified trail name '%s' is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "SiteDoesNotMatch",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The site does not match the identity.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter '%s' is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "AccessDenied",
+           "type": "string"
+          },
+          "description": {
+           "example": "",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 403,
+           "type": "integer"
+          },
+          "message": {
+           "example": "You have no permission for this action.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "ServiceFailure",
+           "type": "string"
+          },
+          "description": {
+           "example": "",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The requested service failed due to an unknown error.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "列出跟踪列表",
+    "tags": [
+     "跟踪"
+    ]
+   },
+   "x-content-type": "text/plain",
+   "x-method": "GET",
+   "x-service-code": "cloud_trail",
+   "x-version": "2018-01-01"
+  },
+  "/LookupEvents": {
+   "post": {
+    "description": "查询审计事件列表。",
+    "operationId": "LookupEvents",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "EndTime": {
+          "description": "查询截止时间戳。",
+          "example": 1735578000,
+          "format": "int64",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "LookupConditions": {
+          "description": "查询条件。",
+          "example": [],
+          "items": {
+           "$ref": "#/components/schemas/LookupCondition"
+          },
+          "type": "array",
+          "x-split-type": 0
+         },
+         "MaxResults": {
+          "description": "允许返回的最大结果数。",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "NextToken": {
+          "description": "用于请求下一页结果。",
+          "example": "\"\"",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "StartTime": {
+          "description": "查询起始时间戳。",
+          "example": 1735574400,
+          "format": "int64",
+          "type": "integer",
+          "x-split-type": 0
+         }
+        },
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "description": "用于请求下一页结果。",
+           "example": "\"\"",
+           "type": "string"
+          },
+          "Trails": {
+           "description": "事件的列表。",
+           "example": [],
+           "items": {
+            "$ref": "#/components/schemas/TrailEventResp"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询审计事件列表。"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ParameterMissing",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request parameter %s is missing.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidTimeRange",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The end time must be later than the start time.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameterStartTime",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified StartTime is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameterEndTime",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified EndTime is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter '%s' is invalid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "SiteDoesNotMatch",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The site does not match the identity.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "BadRequest",
+             "type": "string"
+            },
+            "description": {
+             "example": "",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Bad Request",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "AccessDenied",
+           "type": "string"
+          },
+          "description": {
+           "example": "",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 403,
+           "type": "integer"
+          },
+          "message": {
+           "example": "You have no permission for this action.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The request has failed due to an unknown error.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询审计事件列表",
+    "tags": [
+     "事件"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloud_trail",
+   "x-version": "2021-09-01"
+  }
+ }
+}

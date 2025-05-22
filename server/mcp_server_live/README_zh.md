@@ -110,7 +110,7 @@ v1
 ```json
 {
     "mcpServers": {
-      "mcp-server": {
+      "mcp-live": {
         "command": "uv",
         "args": [
           "--directory",
@@ -134,7 +134,7 @@ OR
 ```json
 {
   "mcpServers": {
-    "mcp-server": {
+    "mcp-live": {
       "command": "uv",
       "args": [
         "--directory",
@@ -158,7 +158,7 @@ OR
 ```json
 {
   "mcp-server": {
-    "tos-mcp": {
+    "mcp-live": {
       "command": "uvx",
       "args": [
         "--from",

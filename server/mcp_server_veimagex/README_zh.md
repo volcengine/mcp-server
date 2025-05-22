@@ -1,4 +1,4 @@
-# MCP Server 产品名称：veImageX MCP Server
+# veImageX MCP Server
 
 veImageX的MCP Server实现，为MCP客户端提供与火山引擎veImageX服务交互的能力。可以基于自然语言管理veImageX云端资源，查询服务信息，集成了包括文生图、AIGC画质修复、图像扩展等图像处理能力。
 
@@ -45,7 +45,7 @@ veImageX的MCP Server实现，为MCP客户端提供与火山引擎veImageX服务
 
 ## 可适配平台
 
-方舟，python，cursor
+方舟，Trae，cursor
 
 ## 服务开通链接 (整体产品)
 
@@ -95,7 +95,7 @@ veImageX的MCP Server实现，为MCP客户端提供与火山引擎veImageX服务
 ```json
 {
   "mcp-server": {
-    "tos-mcp": {
+    "veimagex-mcp": {
       "command": "uvx",
       "args": [
         "--from",

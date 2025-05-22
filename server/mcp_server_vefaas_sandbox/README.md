@@ -4,10 +4,10 @@ veFaaS Code-Sandbox 的 mcp 实现，支持 python、go、java、bash等多种�
 
 | | |
 |------|------|
-| 版本 | v1 |
+| 版本 | v0.0.2 |
 | 描述 | 发送代码至沙盒服务运行，支持多种语言运行时 |
 | 分类 | 容器与中间件 |
-| 标签 | FaaS、函数服务、代码沙箱、Code Sandbox |
+| 标签 | veFaaS、函数服务、代码沙箱、Code Sandbox |
 
 ## Tools
 
@@ -40,45 +40,21 @@ saas
 
 ## 可适配平台
 
-方舟、cursor、python
+方舟、cursor、python、5ire macOS App
 
 ## 服务开通链接 (整体产品)
 
-服务类产品，无需开通
+<https://console.volcengine.com/vefaas>
 
 ## 鉴权方式
 
-OAuth
+OAuth 2.0
 
-## 安装部署
+## 部署配置
 
-[示例如下]
+### 获取 veFaaS Code-Sandbox 服务的访问入口
 
-### Using uv (recommended)
-
-When using [`uv`](https://docs.astral.sh/uv/) no specific installation is needed. We will
-use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run *mcp-server-git*.
-
-## 在不同平台的配置
-
-### 方舟
-
-#### 体验中心
-
-[示例如下]
-
-1. 查看MCP Server 详情
-   在大模型生态广场，选择合适的MCP Server，并查看详情
-2. 选择MCP Server即将运行的平台
-   检查当前MCP Server 已适配的平台，并选择合适的平台
-3. 查看并对比可用的Tools
-   仔细查看可用的Tools的功能描述与所需的输入参数，并尝试运行对应的功能。
-4. 获取专属的URL或代码示例
-   检查账号登录状态与服务开通情况，生成唯一URL
-5. 去对应的Client的平台进行使用
-   点击快捷跳转按钮，前往方舟平台的体验中心进行对应MCP Server的体验
-
-## 部署
+参考火山引擎 veFaaS [一键部署 Code Sandbox Agent 应用](https://www.volcengine.com/docs/6662/1538139)，获取 veFaaS Code Sandbox Agent 服务的访问入口，如 `xxxxxxxxxxx.apigateway-cn-beijing.volceapi.com`，获取 `xxxxxxxxxxx.apigateway-cn-beijing.volceapi.com`，用于下方的 `SANDBOX_API` 配置。
 
 ### uvx
 
@@ -102,4 +78,4 @@ use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run *mcp-server
 
 ## License
 
-volcengine/mcp-server is licensed under the MIT License.
+volcengine/mcp-server is licensed under the [MIT License](../../LICENSE).
