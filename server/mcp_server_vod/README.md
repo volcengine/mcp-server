@@ -1,18 +1,12 @@
 # VOD MCP Server
-![Product Logo](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/vod_small.svg)
+An efficient and convenient video editing assistant that enables various editing operations through conversational interaction, including multi-video timeline splicing, long video segmentation and splicing, and adding transition animations, lowering the technical barrier and operational costs of video editing.
 
-## Version Info
-v1
+| Version | v1.0.0                   | 
+|----|--------------------------|
+| Description | Volcano Engine VOD Intelligent Editing Assistant |
+| Category | Video Cloud, Video-on-Demand |
+| Tags | VOD, Video-on-Demand, Video Editing |
 
-## Product Description
-### Volcano Engine VOD Smart Editing Assistant
-An efficient and convenient video editing assistant that enables multi-video timeline splicing, long video segmentation and splicing, adding transition animations and other editing operations through conversational interaction, lowering the technical threshold and operational costs of video editing.
-
-## Category
-Video Cloud, Video on Demand
-
-## Tags
-VOD, Video on Demand, Video Editing
 
 ## Feature Demos
 - [Example of splicing multiple videos by timeline](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/多视频按时域拼接.mp4): In Trae, through conversation, two local videos are spliced together at specified time intervals to create a new address, and returns the playback address of the synthesized video (this step requires having configured a domain in Volcano Engine VOD service)
