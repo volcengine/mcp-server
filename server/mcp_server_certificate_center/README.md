@@ -1,20 +1,13 @@
-# MCP Server Product: Certificate Center MCP Server ![Product Logo](https://ti.volccdn.com/obj/net-fe/assets/log-colrtrlector.svg)
+# Certificate Center MCP Server
 
-
-## Version Information
-v1
-
-## Product Description
-### Short Description
-Certificate service management driven by natural language
-### Long Description
 The official Certificate Center MCP Server provides powerful certificate management capabilities, supporting convenient management of certificate-related services through natural language, enhancing the intuitiveness and efficiency of certificate management. It can be combined with Volcano Engine cloud products and MCP to help build smarter business application scenarios.
 
-## Category
-Enterprise Applications
+| Version | v0.1.0 |
+| :-: | :-: |
+| Description | Certificate service management driven by natural language |
+| Category | Enterprise Applications |
+| Tags | Certificate, SSL, PCA, Data Encryption |
 
-## Tags
-Certificate, SSL, PCA, Data Encryption
 
 ## Tools
 This MCP Server product provides the following Tools (capabilities):

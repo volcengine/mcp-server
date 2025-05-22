@@ -1,4 +1,4 @@
-# MCP Server Product Name: veImageX MCP Server
+# veImageX MCP Server
 
 The MCP Server implementation for veImageX provides clients with the capability to interact with Volcano Engine's veImageX service. It enables natural language-based management of veImageX cloud resources, service information queries, and integrates various image processing capabilities including text-to-image generation, AIGC quality enhancement, image expansion, and more.
 

@@ -1,8 +1,8 @@
 import base64
 import logging
 
-from mcp_server_tos.resources.service import TosResource
 from mcp_server_tos.config import TosConfig
+from mcp_server_tos.resources.service import TosResource
 
 logger = logging.getLogger(__name__)
 
@@ -26,8 +26,6 @@ class ObjectResource(TosResource):
         Returns:
             对象内容
         """
-        if self.configured_buckets and bucket_name not in self.configured_buckets:
-            raise ValueError(f"Bucket {bucket_name} not in configured bucket list")
         chunk_size = 69 * 1024  # Using same chunk size as example for proven performance
 
         response = None
@@ -47,7 +45,7 @@ class ObjectResource(TosResource):
                 else:
                     return base64.b64encode(content).decode()
             else:
-                return response.json()
+                raise Exception(f"get object failed, tos server return: {response.json()}")
         finally:
             if response is not None:
                 await response.aclose()
