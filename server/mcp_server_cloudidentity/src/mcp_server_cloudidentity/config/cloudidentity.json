@@ -1,0 +1,5521 @@
+{
+ "components": {
+  "schemas": {
+   "AccountAssignmentItem": {
+    "description": "ListAccountAssignmentsResp 列表 item 结构",
+    "properties": {
+     "CreatedTime": {
+      "description": "授权创建时间",
+      "example": "2024-07-22T21:53:54+08:00",
+      "type": "string"
+     },
+     "PermissionSetId": {
+      "description": "权限集 ID",
+      "example": "1",
+      "type": "string"
+     },
+     "PermissionSetName": {
+      "description": "权限集名",
+      "example": "name",
+      "type": "string"
+     },
+     "PrincipalId": {
+      "description": "云身份中心对象 ID",
+      "example": "1",
+      "type": "string"
+     },
+     "PrincipalName": {
+      "description": "云身份中心对象名",
+      "example": "name",
+      "type": "string"
+     },
+     "PrincipalType": {
+      "description": "云身份中心对象类型，User 或者 Group",
+      "example": "User",
+      "type": "string"
+     },
+     "TargetId": {
+      "description": "授权账号 ID",
+      "example": "1",
+      "type": "string"
+     },
+     "TargetName": {
+      "description": "授权账号名",
+      "example": "name",
+      "type": "string"
+     }
+    },
+    "required": [
+     "PermissionSetName",
+     "CreatedTime",
+     "TargetId",
+     "PrincipalType",
+     "PermissionSetId",
+     "TargetName",
+     "PrincipalId",
+     "PrincipalName"
+    ],
+    "type": "object"
+   },
+   "Department": {
+    "description": "部门信息",
+    "properties": {
+     "DepartmentId": {
+      "description": "部门Id",
+      "format": "int32",
+      "type": "integer"
+     },
+     "DepartmentName": {
+      "description": "部门名称",
+      "type": "string"
+     },
+     "IsLeaf": {
+      "description": "是否为叶子结点",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "DepartmentId",
+     "DepartmentName",
+     "IsLeaf"
+    ],
+    "type": "object"
+   },
+   "GroupItem": {
+    "description": "用户组信息",
+    "properties": {
+     "CreatedTime": {
+      "description": "创建时间",
+      "example": "2024-07-22T21:53:54+08:00",
+      "type": "string"
+     },
+     "Description": {
+      "description": "用户组描述",
+      "example": "desc",
+      "type": "string"
+     },
+     "DisplayName": {
+      "description": "用户组显示名",
+      "example": "displayname",
+      "type": "string"
+     },
+     "GroupId": {
+      "description": "用户组id",
+      "example": "1",
+      "type": "string"
+     },
+     "GroupName": {
+      "description": "用户组名称",
+      "example": "name",
+      "type": "string"
+     },
+     "JoinType": {
+      "description": "用户组类型",
+      "enum": [
+       "Manual",
+       "Auto"
+      ],
+      "example": "Manual",
+      "type": "string"
+     },
+     "Source": {
+      "description": "用户组来源",
+      "example": "Manual",
+      "type": "string"
+     },
+     "UpdatedTime": {
+      "description": "更新时间",
+      "example": "2024-07-22T21:53:54+08:00",
+      "type": "string"
+     }
+    },
+    "required": [
+     "GroupId",
+     "GroupName",
+     "DisplayName",
+     "Description",
+     "Source",
+     "CreatedTime",
+     "UpdatedTime",
+     "JoinType"
+    ],
+    "type": "object"
+   },
+   "GroupMember": {
+    "description": "用户组成员",
+    "properties": {
+     "Description": {
+      "description": "用户描述",
+      "example": "desc",
+      "type": "string"
+     },
+     "DisplayName": {
+      "description": "用户展示名",
+      "example": "displayname",
+      "type": "string"
+     },
+     "Email": {
+      "description": "邮箱",
+      "example": "email@email.com",
+      "type": "string"
+     },
+     "IdentityType": {
+      "description": "身份源类型",
+      "example": "Create",
+      "type": "string"
+     },
+     "JoinTime": {
+      "description": "加入用户组时间",
+      "example": "2024-07-22T21:53:54+08:00\n",
+      "type": "string"
+     },
+     "Phone": {
+      "description": "手机号",
+      "example": "1xxxx",
+      "type": "string"
+     },
+     "Source": {
+      "description": "用户来源",
+      "example": "Manual",
+      "type": "string"
+     },
+     "UserId": {
+      "description": "用户id",
+      "example": "1",
+      "type": "string"
+     },
+     "UserName": {
+      "description": "用户名称",
+      "example": "name",
+      "type": "string"
+     }
+    },
+    "required": [
+     "UserId",
+     "UserName",
+     "DisplayName",
+     "Description",
+     "Source",
+     "Email",
+     "Phone",
+     "IdentityType",
+     "JoinTime"
+    ],
+    "type": "object"
+   },
+   "IdpCertificate": {
+    "description": "证书列表 item",
+    "properties": {
+     "ID": {
+      "description": "ID",
+      "type": "string"
+     },
+     "NotAfter": {
+      "description": "证书过期时间",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ID",
+     "NotAfter"
+    ],
+    "type": "object"
+   },
+   "Instance": {
+    "description": "实例信息",
+    "properties": {
+     "InstanceID": {
+      "description": "实例ID",
+      "type": "string"
+     },
+     "Region": {
+      "description": "实例所属区域",
+      "type": "string"
+     },
+     "Status": {
+      "description": "实例状态",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InstanceOpen": {
+    "description": "获取企业身份中心状态接口中的实例信息结构",
+    "properties": {
+     "CreatedTime": {
+      "description": "实例创建时间",
+      "example": "2024-07-22T21:53:54+08:00",
+      "type": "string"
+     },
+     "InstanceId": {
+      "description": "实例id",
+      "example": "1",
+      "type": "string"
+     },
+     "InstanceName": {
+      "description": "实例名称",
+      "example": "name",
+      "type": "string"
+     },
+     "Region": {
+      "description": "所属区域",
+      "example": "cn-beijing",
+      "type": "string"
+     },
+     "Status": {
+      "description": "企业身份中心实例状态",
+      "enum": [
+       "Enable",
+       "PendingDisable"
+      ],
+      "example": "Enabled",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Status",
+     "CreatedTime",
+     "Region",
+     "InstanceName",
+     "InstanceId"
+    ],
+    "type": "object"
+   },
+   "PermissionPolicies": {
+    "description": "权限集关联策略",
+    "properties": {
+     "CreatedTime": {
+      "description": "添加时间",
+      "example": "2024-07-22T21:53:54+08:00",
+      "type": "string"
+     },
+     "PermissionPolicyDocument": {
+      "description": "策略语法内容。语法可参考 [策略语法说明](https://www.volcengine.com/docs/6257/65059)",
+      "example": "{\n    \"Statement\": [\n        {\n            \"Effect\": \"Allow\",\n            \"Action\": [\n                \"*\"\n            ],\n            \"Resource\": [\n                \"*\"\n            ]\n        }\n    ]\n}",
+      "type": "string"
+     },
+     "PermissionPolicyName": {
+      "description": "策略名",
+      "example": "name",
+      "type": "string"
+     },
+     "PermissionPolicyType": {
+      "description": "策略类型，System or Inline",
+      "enum": [
+       "System",
+       "Inline"
+      ],
+      "example": "System",
+      "type": "string"
+     }
+    },
+    "required": [
+     "PermissionPolicyName",
+     "PermissionPolicyDocument",
+     "CreatedTime",
+     "PermissionPolicyType"
+    ],
+    "type": "object"
+   },
+   "PermissionSetProvisionings": {
+    "description": "权限集部署列表",
+    "properties": {
+     "CreatedTime": {
+      "description": "创建时间",
+      "type": "string"
+     },
+     "PermissionSetId": {
+      "description": "权限集 ID",
+      "type": "string"
+     },
+     "PermissionSetName": {
+      "description": "权限集名",
+      "type": "string"
+     },
+     "ProvisioningStatus": {
+      "description": "权限集状态\nRunning：运行中\nReprovisionRequired：需要重新部署\nProvisionFailed：部署失败\nProvisioned：已部署",
+      "type": "string"
+     },
+     "TargetId": {
+      "description": "火山账号 ID",
+      "type": "string"
+     },
+     "TargetName": {
+      "description": "账号名",
+      "type": "string"
+     },
+     "UpdatedTime": {
+      "description": "更新时间",
+      "type": "string"
+     }
+    },
+    "required": [
+     "PermissionSetName",
+     "PermissionSetId",
+     "ProvisioningStatus",
+     "TargetId",
+     "TargetName",
+     "CreatedTime",
+     "UpdatedTime"
+    ],
+    "type": "object"
+   },
+   "PermissionSets": {
+    "description": "权限集返回结构体",
+    "properties": {
+     "CreatedTime": {
+      "description": "创建时间",
+      "type": "string"
+     },
+     "Description": {
+      "description": "描述",
+      "type": "string"
+     },
+     "Name": {
+      "description": "权限集名称",
+      "type": "string"
+     },
+     "PermissionSetId": {
+      "description": "权限集 ID",
+      "type": "string"
+     },
+     "RelayState": {
+      "description": "跳转的火山控制台 URL",
+      "type": "string"
+     },
+     "SessionDuration": {
+      "description": "session 过期时间，单位秒",
+      "format": "int64",
+      "type": "integer"
+     },
+     "StatusNotifications": {
+      "description": "权限集部署状态",
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "UpdatedTime": {
+      "description": "更新时间",
+      "type": "string"
+     }
+    },
+    "required": [
+     "PermissionSetId",
+     "Name",
+     "SessionDuration",
+     "RelayState",
+     "Description",
+     "StatusNotifications",
+     "CreatedTime",
+     "UpdatedTime"
+    ],
+    "type": "object"
+   },
+   "PortalLoginSettingsItem": {
+    "description": "门户登录方式列表 item",
+    "properties": {
+     "LoginType": {
+      "description": "登录方式，Password/SAMLSSO",
+      "type": "string"
+     },
+     "Status": {
+      "description": "状态，Enable/Disabled",
+      "type": "string"
+     }
+    },
+    "required": [
+     "LoginType",
+     "Status"
+    ],
+    "type": "object"
+   },
+   "TaskItem": {
+    "description": "ListTasks列表 item",
+    "properties": {
+     "CreatedTime": {
+      "description": "任务创建时间",
+      "type": "string"
+     },
+     "PermissionSetId": {
+      "description": "权限集 ID",
+      "type": "string"
+     },
+     "PermissionSetName": {
+      "description": "权限集名称",
+      "type": "string"
+     },
+     "PrincipalId": {
+      "description": "云身份中心对象 ID",
+      "type": "string"
+     },
+     "PrincipalName": {
+      "description": "云身份中心对象名称",
+      "type": "string"
+     },
+     "PrincipalType": {
+      "description": "云身份中心对象类型，User 或者 Group",
+      "type": "string"
+     },
+     "Status": {
+      "description": "任务状态，Running、Success、Failed",
+      "type": "string"
+     },
+     "TargetId": {
+      "description": "火山账号 ID",
+      "type": "string"
+     },
+     "TargetName": {
+      "description": "火山账号名",
+      "type": "string"
+     },
+     "TaskId": {
+      "description": "任务 ID",
+      "type": "string"
+     },
+     "TaskType": {
+      "description": "任务类型",
+      "type": "string"
+     },
+     "UpdatedTime": {
+      "description": "任务更新时间",
+      "type": "string"
+     }
+    },
+    "required": [
+     "TaskId",
+     "UpdatedTime",
+     "CreatedTime",
+     "Status",
+     "TaskType",
+     "PermissionSetName",
+     "PermissionSetId",
+     "PrincipalName",
+     "PrincipalType",
+     "PrincipalId",
+     "TargetName",
+     "TargetId"
+    ],
+    "type": "object"
+   },
+   "User": {
+    "description": "企业身份中心用户",
+    "properties": {
+     "CreatedTime": {
+      "description": "创建时间",
+      "example": "2006-01-02T15:04:05Z07:00",
+      "type": "string"
+     },
+     "Description": {
+      "description": "描述",
+      "example": "description",
+      "type": "string"
+     },
+     "DisplayName": {
+      "description": "用户显示名",
+      "example": "displayname",
+      "type": "string"
+     },
+     "Email": {
+      "description": "邮箱",
+      "example": "email",
+      "type": "string"
+     },
+     "Phone": {
+      "description": "手机",
+      "example": "phone",
+      "type": "string"
+     },
+     "Source": {
+      "description": "用户来源",
+      "enum": [
+       "Sync"
+      ],
+      "example": "数据源类型\nManual: 手动创建\nSync：身份源同步",
+      "type": "string"
+     },
+     "UpdatedTime": {
+      "description": "更新时间",
+      "example": "2006-01-02T15:04:05Z07:00",
+      "type": "string"
+     },
+     "UserId": {
+      "description": "用户Id",
+      "example": "1",
+      "type": "string"
+     },
+     "UserName": {
+      "description": "用户名",
+      "example": "username",
+      "type": "string"
+     }
+    },
+    "required": [
+     "UserId",
+     "UserName",
+     "DisplayName",
+     "Source",
+     "CreatedTime",
+     "UpdatedTime",
+     "Description",
+     "Email",
+     "Phone"
+    ],
+    "type": "object"
+   },
+   "UserProvision": {
+    "description": "用户SSO",
+    "properties": {
+     "CreatedTime": {
+      "description": "创建时间",
+      "example": "2006-01-02T15:04:05Z07:00",
+      "type": "string"
+     },
+     "DeletionStrategy": {
+      "description": "删除策略",
+      "enum": [
+       "Keep",
+       "Delete"
+      ],
+      "example": "Keep",
+      "type": "string"
+     },
+     "Description": {
+      "description": "描述",
+      "example": "desc",
+      "type": "string"
+     },
+     "DuplicationStrategy": {
+      "description": "冲突策略",
+      "enum": [
+       "KeepBoth",
+       "Takeover"
+      ],
+      "example": "KeepBoth",
+      "type": "string"
+     },
+     "DuplicationSuffix": {
+      "description": "冲突策略保留后缀",
+      "example": "suffix",
+      "type": "string"
+     },
+     "IdentitySourceStrategy": {
+      "description": "同源身份解决策略",
+      "enum": [
+       "Ignore",
+       "Create"
+      ],
+      "example": "Ignore",
+      "type": "string"
+     },
+     "PrincipalId": {
+      "description": "身份Id",
+      "example": "1",
+      "type": "string"
+     },
+     "PrincipalName": {
+      "description": "身份名",
+      "example": "name",
+      "type": "string"
+     },
+     "PrincipalType": {
+      "description": "身份类型",
+      "enum": [
+       "User"
+      ],
+      "example": "User",
+      "type": "string"
+     },
+     "ProvisionStatus": {
+      "description": "授权状态",
+      "example": "Provisioned 授权成功，Provisioning 正在授权，DeleteProvisioning 授权解除中，DeleteProvisioned 授权解除成功\n",
+      "type": "string"
+     },
+     "TargetId": {
+      "description": "账号id",
+      "example": "1",
+      "type": "string"
+     },
+     "UpdatedTime": {
+      "description": "更新时间",
+      "example": "2006-01-02T15:04:05Z07:00",
+      "type": "string"
+     },
+     "UserProvisioningId": {
+      "description": "用户SSO任务Id",
+      "example": "1",
+      "type": "string"
+     }
+    },
+    "required": [
+     "UserProvisioningId",
+     "PrincipalId",
+     "PrincipalType",
+     "DeletionStrategy",
+     "DuplicationStrategy",
+     "IdentitySourceStrategy",
+     "TargetId",
+     "CreatedTime",
+     "UpdatedTime",
+     "PrincipalName",
+     "ProvisionStatus",
+     "DuplicationSuffix",
+     "Description"
+    ],
+    "type": "object"
+   },
+   "UserProvisioningEvent": {
+    "description": "用户授权记录",
+    "properties": {
+     "CreatedTime": {
+      "description": "创建时间",
+      "example": "2024-07-22T21:53:54+08:00",
+      "type": "string"
+     },
+     "Description": {
+      "description": "描述",
+      "example": "desc",
+      "type": "string"
+     },
+     "EventStatus": {
+      "description": "授权记录状态：ProvisionFailed 授权失败； DeleteProvisionFailed 删除授权失败",
+      "example": "ProvisionFailed",
+      "type": "string"
+     },
+     "FailureReason": {
+      "description": "失败原因",
+      "example": "原因",
+      "type": "string"
+     },
+     "PrincipalType": {
+      "description": "身份类型：User，Group",
+      "example": "User",
+      "type": "string"
+     },
+     "TargetId": {
+      "description": "目标 ID",
+      "example": "1",
+      "type": "string"
+     },
+     "TargetName": {
+      "description": "目标名称",
+      "example": "name",
+      "type": "string"
+     },
+     "UpdatedTime": {
+      "description": "更新时间",
+      "example": "2024-07-22T21:53:54+08:00",
+      "type": "string"
+     },
+     "UserId": {
+      "description": "用户id",
+      "example": "1",
+      "type": "string"
+     },
+     "UserName": {
+      "description": "用户名称",
+      "example": "username",
+      "type": "string"
+     },
+     "UserProvisioningEventId": {
+      "description": "用户授权记录 id",
+      "example": "1",
+      "type": "string"
+     },
+     "UserProvisioningId": {
+      "description": "用户授权任务id",
+      "example": "1",
+      "type": "string"
+     }
+    },
+    "required": [
+     "UserProvisioningEventId",
+     "UserProvisioningId",
+     "UserId",
+     "UserName",
+     "FailureReason",
+     "TargetId",
+     "TargetName",
+     "CreatedTime",
+     "UpdatedTime",
+     "PrincipalType",
+     "EventStatus",
+     "Description"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "API documentation for cloudidentity",
+  "title": "cloudidentity",
+  "version": "2023-01-01"
+ },
+ "openapi": "3.0.0",
+ "paths": {
+  "/CreateAccountAssignment": {
+   "post": {
+    "description": "创建角色访问授权",
+    "operationId": "CreateAccountAssignment",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "PermissionSetId": {
+          "description": "权限集 ID",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "PrincipalId": {
+          "description": "被授权的云身份中心对象 ID，用户 ID 或者用户组 ID",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "PrincipalType": {
+          "description": "被授权的云身份中心对象类型，User 或者 Group",
+          "enum": [
+           "Group",
+           "User"
+          ],
+          "example": "User",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "TargetId": {
+          "description": "授权访问的火山账号 ID",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "PermissionSetId",
+         "TargetId",
+         "PrincipalId",
+         "PrincipalType"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "TaskId": {
+           "description": "任务 ID",
+           "example": "1",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "创建角色访问授权"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "AccountNotInOrg",
+             "type": "string"
+            },
+            "description": {
+             "example": "目标账号不在组织内",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Account[%v] is not in your organization",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "AccountAssignmentAlreadyExist",
+             "type": "string"
+            },
+            "description": {
+             "example": "授权已存在",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The account assignment is running or has been successful.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionSetProvisionRunning",
+             "type": "string"
+            },
+            "description": {
+             "example": "授权任务执行中",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The provision of permission set is running",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionSetNotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "权限集不存在",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Record permission set not found",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "创建角色访问授权",
+    "tags": [
+     "管理角色授权"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/CreateGroup": {
+   "post": {
+    "description": "创建用户组",
+    "operationId": "CreateGroup",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "description": "描述",
+          "example": "desc",
+          "maxLength": 128,
+          "type": "string",
+          "x-split-type": 0
+         },
+         "DisplayName": {
+          "description": "显示名",
+          "example": "displayName",
+          "maxLength": 64,
+          "type": "string",
+          "x-split-type": 0
+         },
+         "GroupName": {
+          "description": "用户组名称",
+          "example": "name",
+          "maxLength": 63,
+          "type": "string",
+          "x-split-type": 0
+         },
+         "JoinType": {
+          "description": "用户组类型",
+          "enum": [
+           "Manual",
+           "Auto"
+          ],
+          "example": "Manual",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "GroupName",
+         "JoinType"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "CreatedTime": {
+           "description": "创建时间",
+           "example": "2024-07-22T21:53:54+08:00",
+           "type": "string"
+          },
+          "Description": {
+           "description": "描述",
+           "example": "desc",
+           "type": "string"
+          },
+          "DisplayName": {
+           "description": "显示名",
+           "example": "displayname",
+           "type": "string"
+          },
+          "GroupId": {
+           "description": "用户组id",
+           "example": "1",
+           "type": "string"
+          },
+          "GroupName": {
+           "description": "用户组名称",
+           "example": "name",
+           "type": "string"
+          },
+          "JoinType": {
+           "description": "用户组类型",
+           "example": "Manual",
+           "type": "string"
+          },
+          "Source": {
+           "description": "用户组来源",
+           "example": "Manual",
+           "type": "string"
+          },
+          "UpdatedTime": {
+           "description": "更新时间",
+           "example": "2024-07-22T21:53:54+08:00",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "创建用户组"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ConcurrentException",
+             "type": "string"
+            },
+            "description": {
+             "example": "存在请求并发冲突",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Concurrent request exception",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ParamMissing",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺省",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Missing parameter %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ServiceStatusException",
+             "type": "string"
+            },
+            "description": {
+             "example": "企业身份中心实例不可用",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Can not perform action[%s] when service is %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "没有接口权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "409": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "GroupAlreadyExists",
+           "type": "string"
+          },
+          "description": {
+           "example": "用户组 %s 已经存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 409,
+           "type": "integer"
+          },
+          "message": {
+           "example": "User group %s already exists",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "429": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "ReachedQuotaLimit",
+           "type": "string"
+          },
+          "description": {
+           "example": "%s 数量达到最大额度",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 429,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The count of %s is exceeded quota limit",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部错误",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "创建用户组",
+    "tags": [
+     "管理用户组"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/CreateUser": {
+   "post": {
+    "description": "创建用户",
+    "operationId": "CreateUser",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "description": "描述",
+          "example": "description",
+          "maxLength": 255,
+          "type": "string",
+          "x-split-type": 0
+         },
+         "DisplayName": {
+          "description": "显示名",
+          "example": "displayname",
+          "maxLength": 64,
+          "type": "string",
+          "x-split-type": 0
+         },
+         "Email": {
+          "description": "邮箱",
+          "example": "email@email.com",
+          "maxLength": 128,
+          "type": "string",
+          "x-split-type": 0
+         },
+         "Phone": {
+          "description": "联系手机号",
+          "example": "1xxxx",
+          "maxLength": 20,
+          "type": "string",
+          "x-split-type": 0
+         },
+         "UserName": {
+          "description": "用户名",
+          "example": "username",
+          "maxLength": 54,
+          "minLength": 1,
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "UserName"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "CreatedTime": {
+           "description": "创建时间",
+           "example": "2024-07-22T21:53:54+08:00\n\n",
+           "type": "string"
+          },
+          "Description": {
+           "description": "描述",
+           "example": "description",
+           "type": "string"
+          },
+          "DisplayName": {
+           "description": "展示名",
+           "example": "displayname",
+           "type": "string"
+          },
+          "Email": {
+           "description": "邮箱",
+           "example": "email@email.com",
+           "type": "string"
+          },
+          "Phone": {
+           "description": "手机号",
+           "example": "1xxxxx",
+           "type": "string"
+          },
+          "Source": {
+           "description": "来源",
+           "example": "Manual 手动创建",
+           "type": "string"
+          },
+          "UpdatedTime": {
+           "description": "更新时间",
+           "example": "2024-07-22T21:53:54+08:00\n\n",
+           "type": "string"
+          },
+          "UserId": {
+           "description": "用户id",
+           "example": "1",
+           "type": "string"
+          },
+          "UserName": {
+           "description": "用户名",
+           "example": "username",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "创建用户"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "没有接口权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ParamIncludeSensitiveWord",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数 %s 存在敏感词",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter %v Include sensitive Word",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ConcurrentException",
+             "type": "string"
+            },
+            "description": {
+             "example": "存在请求并发冲突",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Concurrent request exception",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ServiceStatusException",
+             "type": "string"
+            },
+            "description": {
+             "example": "企业身份中心实例不可用",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Can not perform action[%s] when service is %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParam",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效参数",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter %v[%v] is invalid",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "UserNameAlreadyExists",
+           "type": "string"
+          },
+          "description": {
+           "example": "用户名存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "User name already exists",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "429": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "ReachedQuotaLimit",
+           "type": "string"
+          },
+          "description": {
+           "example": "%s 数量达到最大额度",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 429,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The count of %s is exceeded quota limit",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部错误",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "创建用户",
+    "tags": [
+     "管理用户"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/CreateUserProvisioning": {
+   "post": {
+    "description": "创建用户访问授权任务",
+    "operationId": "CreateUserProvisioning",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "DeletionStrategy": {
+          "description": "删除策略",
+          "enum": [
+           "Keep",
+           "Delete"
+          ],
+          "example": "Keep",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "Description": {
+          "description": "任务描述",
+          "example": "desc",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "DuplicationStrategy": {
+          "description": "用户名冲突策略",
+          "enum": [
+           "KeepBoth",
+           "Takeover"
+          ],
+          "example": "KeepBoth",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "DuplicationSuffix": {
+          "description": "本次同步IAM用户名称后缀（冲突策略若选择 KeepBoth 则必填）",
+          "example": "suffix",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "IdentitySourceStrategy": {
+          "description": "身份源冲突策略",
+          "enum": [
+           "Create",
+           "Ignore"
+          ],
+          "example": "Ignore",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "PrincipalId": {
+          "description": "身份id",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "PrincipalType": {
+          "description": "身份类型",
+          "enum": [
+           "User",
+           "Group"
+          ],
+          "example": "User",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "TargetId": {
+          "description": "目标id",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "TargetId",
+         "PrincipalType",
+         "PrincipalId",
+         "DuplicationStrategy",
+         "DeletionStrategy",
+         "IdentitySourceStrategy"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "DeletionStrategy": {
+           "description": "删除策略",
+           "example": "Keep",
+           "type": "string"
+          },
+          "Description": {
+           "description": "任务描述",
+           "example": "desc",
+           "type": "string"
+          },
+          "DuplicationStrategy": {
+           "description": "用户名冲突策略",
+           "example": "KeepBoth",
+           "type": "string"
+          },
+          "DuplicationSuffix": {
+           "description": "本次同步IAM用户名称后缀",
+           "example": "suffix",
+           "type": "string"
+          },
+          "IdentitySourceStrategy": {
+           "description": "身份源冲突策略",
+           "example": "Ignore",
+           "type": "string"
+          },
+          "PrincipalId": {
+           "description": "身份id",
+           "example": "1",
+           "type": "string"
+          },
+          "PrincipalType": {
+           "description": "身份类型",
+           "example": "User",
+           "type": "string"
+          },
+          "ProvisionStatus": {
+           "description": "授权任务状态",
+           "example": "Provisioned 授权成功，Provisioning 正在授权，DeleteProvisioning 授权解除中，DeleteProvisioned 授权解除成功",
+           "type": "string"
+          },
+          "Remark": {
+           "description": "任务结果说明",
+           "example": "ExistDuplicatedIamUser：重名用户、ExistHomologousIamUser：同源用户",
+           "type": "string"
+          },
+          "TargetId": {
+           "description": "目标id",
+           "example": "1",
+           "type": "string"
+          },
+          "UserProvisioningId": {
+           "description": "IAM 用户同步任务ID",
+           "example": "1",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "创建用户访问授权任务"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "AccountNotInOrg",
+             "type": "string"
+            },
+            "description": {
+             "example": "目标账号不是组织成员",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Account[%v] is not in your organization",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "UserNameLengthExceedLimit",
+             "type": "string"
+            },
+            "description": {
+             "example": "用户名长度过长",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "UserName length is out of limit",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ExceedBindPersonalIdpLimit",
+             "type": "string"
+            },
+            "description": {
+             "example": "已达到最大绑定限制数量",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Exceeded maximum account quota allowed bind to this third party account",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidIdentitySourceStatus",
+             "type": "string"
+            },
+            "description": {
+             "example": "实例状态不符合预期",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "identity source status is invalid",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "DisplayNameLengthExceedLimit",
+             "type": "string"
+            },
+            "description": {
+             "example": "显示名过长",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "DisplayName length is out of limit",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "没有接口权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ServiceStatusException",
+             "type": "string"
+            },
+            "description": {
+             "example": "企业身份中心实例不可用",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Can not perform action[%s] when service is %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "SensitiveWord",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数重存在敏感词",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Include sensitive Word",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ConcurrentException",
+             "type": "string"
+            },
+            "description": {
+             "example": "存在请求并发冲突",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Concurrent request exception",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ParamMissing",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺省",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Missing parameter %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParam",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效参数",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter %v[%v] is invalid",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "PermissionDenied",
+           "type": "string"
+          },
+          "description": {
+           "example": "无权限访问",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 403,
+           "type": "integer"
+          },
+          "message": {
+           "example": "No permission to perform action[%s]",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "UserGroupNotFound",
+           "type": "string"
+          },
+          "description": {
+           "example": "用户组不存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "User group is not found",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "409": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "UserProvisioningAlreadyExists",
+             "type": "string"
+            },
+            "description": {
+             "example": "用户同步任务已存在",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 409,
+             "type": "integer"
+            },
+            "message": {
+             "example": "UserProvisioning already exists",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "UserNameDuplicatedException",
+             "type": "string"
+            },
+            "description": {
+             "example": "创建 iam 用户，用户名冲突，且冲突策略无法解决冲突",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 409,
+             "type": "integer"
+            },
+            "message": {
+             "example": "There is same name IAM user in Target account and can not solve the conflict by duplication strategy",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部错误",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "创建用户访问授权任务",
+    "tags": [
+     "多账号访问管理"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/GetExternalSAMLIdentityProvider": {
+   "post": {
+    "description": "获取云身份中心中已经配置的外部SAML身份提供商信息。",
+    "operationId": "GetExternalSAMLIdentityProvider",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "CreatedTime": {
+           "description": "创建时间",
+           "example": "2024-07-22T21:53:54+08:00",
+           "type": "string"
+          },
+          "EncodedMetadataDocument": {
+           "description": "元数据（Base64编码）",
+           "example": "base64(saml metadata)",
+           "type": "string"
+          },
+          "EntityId": {
+           "description": "实体 ID",
+           "example": "entityId",
+           "type": "string"
+          },
+          "IdpCertificates": {
+           "description": "证书信息",
+           "example": [
+            "\\[\u003cbr\u003e\n    {\u003cbr\u003e\n        \"ID\": \"J4X1\"",
+            "\u003cbr\u003e\n        \"NotAfter\": \"7\"\u003cbr\u003e\n    }\u003cbr\u003e\n\\]"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/IdpCertificate"
+           },
+           "type": "array"
+          },
+          "UpdatedTime": {
+           "description": "更新时间",
+           "example": "2024-07-22T21:53:54+08:00",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取云身份中心中已经配置的外部SAML身份提供商信息。"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "ExternalIdpSAMLConfigNotExist",
+           "type": "string"
+          },
+          "description": {
+           "example": "身份提供商 SAML 配置不存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 400,
+           "type": "integer"
+          },
+          "message": {
+           "example": "External saml idp config not exist",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部错误",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "获取外部SAML身份提供商信息",
+    "tags": [
+     "管理门户登录配置"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/GetGroup": {
+   "post": {
+    "description": "查询用户组详情",
+    "operationId": "GetGroup",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "GroupId": {
+          "description": "用户组 id",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "GroupId"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "CreatedTime": {
+           "description": "创建时间",
+           "example": "2024-07-22T21:53:54+08:00",
+           "type": "string"
+          },
+          "Description": {
+           "description": "描述",
+           "example": "desc",
+           "type": "string"
+          },
+          "DisplayName": {
+           "description": "展示名",
+           "example": "displayname",
+           "type": "string"
+          },
+          "GroupId": {
+           "description": "用户组id",
+           "example": "1",
+           "type": "string"
+          },
+          "GroupName": {
+           "description": "用户组名称",
+           "example": "name",
+           "type": "string"
+          },
+          "JoinType": {
+           "description": "用户组类型",
+           "example": "Manual",
+           "type": "string"
+          },
+          "Source": {
+           "description": "用户组来源",
+           "example": "Manual",
+           "type": "string"
+          },
+          "UpdatedTime": {
+           "description": "更新时间",
+           "example": "2024-07-22T21:53:54+08:00",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询用户组详情"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ConcurrentException",
+             "type": "string"
+            },
+            "description": {
+             "example": "存在请求并发冲突",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Concurrent request exception",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ParamMissing",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺省",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Missing parameter %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ServiceStatusException",
+             "type": "string"
+            },
+            "description": {
+             "example": "企业身份中心实例不可用",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Can not perform action[%s] when service is %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "没有接口权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "UserGroupNotFound",
+           "type": "string"
+          },
+          "description": {
+           "example": "用户组未找到",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "User group is not found",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部错误",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询用户组详情",
+    "tags": [
+     "管理用户组"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/GetPermissionSet": {
+   "post": {
+    "description": "获取权限集信息",
+    "operationId": "GetPermissionSet",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "PermissionSetId": {
+          "description": "权限集 ID",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "PermissionSetId"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "CreatedTime": {
+           "description": "创建时间",
+           "example": "2024-07-22T21:53:54+08:00",
+           "type": "string"
+          },
+          "Description": {
+           "description": "描述",
+           "example": "desc",
+           "type": "string"
+          },
+          "Name": {
+           "description": "权限集名",
+           "example": "name",
+           "type": "string"
+          },
+          "PermissionSetId": {
+           "description": "权限集 ID",
+           "example": "1",
+           "type": "string"
+          },
+          "RelayState": {
+           "description": "跳转控制台 URL",
+           "example": "https://console.volcengine.com/home",
+           "type": "string"
+          },
+          "SessionDuration": {
+           "description": "session 过期时间，单位秒",
+           "example": 3600,
+           "format": "int64",
+           "type": "integer"
+          },
+          "UpdatedTime": {
+           "description": "更新时间",
+           "example": "2024-07-22T21:53:54+08:00",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取权限集信息"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "PermissionSetNotFound",
+           "type": "string"
+          },
+          "description": {
+           "example": "权限集不存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 400,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Record permission set not found",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "获取权限集信息",
+    "tags": [
+     "管理访问权限集"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/GetPortalLoginConfig": {
+   "post": {
+    "description": "获取登录配置",
+    "operationId": "GetPortalLoginConfig",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "LoginType": {
+           "description": "登录方式\nPassword： 账密\nSAMLSSO： saml sso",
+           "example": "Password",
+           "type": "string"
+          },
+          "PortalURL": {
+           "description": "门户登录地址",
+           "example": "https://xxx.yyyy.com",
+           "type": "string"
+          },
+          "Subdomain": {
+           "description": "门户登录地址三级域名",
+           "example": "xxx",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取登录配置"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "LoginSettingNotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "登录配置不存在",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "login setting is not found",
+             "type": "string"
+            }
+           },
+           "x-is-common": 0,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParam",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效参数",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter %v[%v] is invalid",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "获取登录配置",
+    "tags": [
+     "管理门户登录配置"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/GetSAMLServiceProvider": {
+   "post": {
+    "description": "获取云身份中心SAML服务提供商相关信息",
+    "operationId": "GetSAMLServiceProvider",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AcsUrl": {
+           "description": "服务提供商 ACS",
+           "example": "https://xxx.yyy.com/zzz",
+           "type": "string"
+          },
+          "EncodedMetadataDocument": {
+           "description": "服务提供商 SAML元数据",
+           "example": "base64(saml metadata)",
+           "type": "string"
+          },
+          "EntityId": {
+           "description": "实体 ID",
+           "example": "entityId",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取云身份中心SAML服务提供商相关信息"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "SamlConfigNotExist",
+           "type": "string"
+          },
+          "description": {
+           "example": "",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 400,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Saml config not exist",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "获取云身份中心SAML服务提供商相关信息",
+    "tags": [
+     "管理门户登录配置"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/GetServiceStatus": {
+   "post": {
+    "description": "获取云身份中心服务启用状态",
+    "operationId": "GetServiceStatus",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Instances": {
+           "description": "实例列表",
+           "example": [
+            {
+             "CreatedTime": "3VsIwPef",
+             "InstanceID": "e",
+             "InstanceName": "9EjiU",
+             "Region": "o9I",
+             "Status": "1Bhs8"
+            }
+           ],
+           "items": {
+            "$ref": "#/components/schemas/InstanceOpen"
+           },
+           "type": "array"
+          },
+          "PrerequisiteCheckResult": {
+           "description": "服务开启条件检查结果",
+           "example": "Success/Failed",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取云身份中心服务启用状态"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "没有接口权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ParamMissing",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺省",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Missing parameter %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ServiceStatusException",
+             "type": "string"
+            },
+            "description": {
+             "example": "企业身份中心实例不可用",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Can not perform action[%s] when service is %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParam",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效参数",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter %v[%v] is invalid",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ConcurrentException",
+             "type": "string"
+            },
+            "description": {
+             "example": "存在请求并发冲突",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Concurrent request exception",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ParamIncludeSensitiveWord",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数 %s 存在敏感词",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter %v Include sensitive Word",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部错误",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "获取云身份中心服务启用状态",
+    "tags": [
+     "管理实例"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/GetTaskStatus": {
+   "post": {
+    "description": "获取任务状态",
+    "operationId": "GetTaskStatus",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "TaskId": {
+          "description": "任务 ID",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "TaskId"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "CreatedTime": {
+           "description": "创建时间",
+           "example": "2024-07-22T21:53:54+08:00",
+           "type": "string"
+          },
+          "Status": {
+           "description": "任务状态\nRunning：运行中\nSuccess：成功\nFailed：失败\nInit：待执行",
+           "example": "Running",
+           "type": "string"
+          },
+          "TaskId": {
+           "description": "任务 ID",
+           "example": "1",
+           "type": "string"
+          },
+          "TaskType": {
+           "description": "任务类型\nCreateAssignment：创建角色访问授权\nDeleteAssignment：删除角色访问授权\nProvision：权限集部署\nDeprovision：解除限集部署",
+           "example": "CreateAssignment",
+           "type": "string"
+          },
+          "UpdatedTime": {
+           "description": "更新时间",
+           "example": "2024-07-22T21:53:54+08:00",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取任务状态"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部错误",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "获取任务状态",
+    "tags": [
+     "管理角色授权"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/GetUser": {
+   "post": {
+    "description": "查询用户信息",
+    "operationId": "GetUser",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "UserId": {
+          "description": "用户id",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "UserId"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "CreatedTime": {
+           "description": "创建时间",
+           "example": "2024-07-22T21:53:54+08:00\n\n",
+           "type": "string"
+          },
+          "Description": {
+           "description": "用户描述",
+           "example": "description",
+           "type": "string"
+          },
+          "DisplayName": {
+           "description": "用户显示名",
+           "example": "displayname",
+           "type": "string"
+          },
+          "Email": {
+           "description": "邮箱",
+           "example": "email",
+           "type": "string"
+          },
+          "IdentityType": {
+           "description": "身份类型",
+           "example": "Create",
+           "type": "string"
+          },
+          "Phone": {
+           "description": "手机号",
+           "example": "1xxxxx",
+           "type": "string"
+          },
+          "Source": {
+           "description": "用户来源",
+           "example": "Manual",
+           "type": "string"
+          },
+          "UpdatedTime": {
+           "description": "更新时间",
+           "example": "2024-07-22T21:53:54+08:00",
+           "type": "string"
+          },
+          "UserId": {
+           "description": "用户id",
+           "example": "1",
+           "type": "string"
+          },
+          "UserName": {
+           "description": "用户名",
+           "example": "username",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询用户信息"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ParamMissing",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺省",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Missing parameter %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ServiceStatusException",
+             "type": "string"
+            },
+            "description": {
+             "example": "企业身份中心实例不可用",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Can not perform action[%s] when service is %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "没有接口权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "UserNotFound",
+           "type": "string"
+          },
+          "description": {
+           "example": "用户不存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "User is not found",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部错误",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询用户信息",
+    "tags": [
+     "管理用户"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/GetUserProvisioning": {
+   "post": {
+    "description": "查看用户访问授权任务",
+    "operationId": "GetUserProvisioning",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "UserProvisioningId": {
+          "description": "IAM 同步任务id",
+          "example": "1874176",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "UserProvisioningId"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "CreatedTime": {
+           "description": "创建时间",
+           "example": "2024-07-22T21:53:54+08:00",
+           "type": "string"
+          },
+          "DeletionStrategy": {
+           "description": "删除策略",
+           "example": "xx",
+           "type": "string"
+          },
+          "Description": {
+           "description": "任务描述",
+           "example": "desc",
+           "type": "string"
+          },
+          "DuplicationStrategy": {
+           "description": "用户名冲突策略",
+           "example": "xx",
+           "type": "string"
+          },
+          "DuplicationSuffix": {
+           "description": "本次同步IAM用户名称后缀",
+           "example": "xx",
+           "type": "string"
+          },
+          "IdentitySourceStrategy": {
+           "description": "身份源冲突策略",
+           "example": "xx",
+           "type": "string"
+          },
+          "PrincipalId": {
+           "description": "身份id",
+           "example": "1",
+           "type": "string"
+          },
+          "PrincipalName": {
+           "description": "目标名称",
+           "example": "name",
+           "type": "string"
+          },
+          "PrincipalType": {
+           "description": "身份类型",
+           "example": "User",
+           "type": "string"
+          },
+          "ProvisionStatus": {
+           "description": "授权任务状态",
+           "example": "Provisioned 授权成功，Provisioning 正在授权，DeleteProvisioning 授权解除中，DeleteProvisioned 授权解除成功",
+           "type": "string"
+          },
+          "TargetId": {
+           "description": "目标id",
+           "example": "1",
+           "type": "string"
+          },
+          "UpdatedTime": {
+           "description": "更新时间",
+           "example": "2024-07-22T21:53:54+08:00",
+           "type": "string"
+          },
+          "UserProvisioningId": {
+           "description": "IAM 用户同步任务ID",
+           "example": "1",
+           "type": "string"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查看用户访问授权任务"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ConcurrentException",
+             "type": "string"
+            },
+            "description": {
+             "example": "存在请求并发冲突",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Concurrent request exception",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperateTooFrequentlyException",
+             "type": "string"
+            },
+            "description": {
+             "example": "频繁调用同一个接口",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Perform action[%s] too frequently",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "SensitiveWord",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数重存在敏感词",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Include sensitive Word",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ParamMissing",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺省",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Missing parameter %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "没有接口权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParam",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效参数",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter %v[%v] is invalid",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ServiceStatusException",
+             "type": "string"
+            },
+            "description": {
+             "example": "企业身份中心实例不可用",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Can not perform action[%s] when service is %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "PermissionDenied",
+           "type": "string"
+          },
+          "description": {
+           "example": "无权限访问",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 403,
+           "type": "integer"
+          },
+          "message": {
+           "example": "No permission to perform action[%s]",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "UserProvisionNotFound",
+           "type": "string"
+          },
+          "description": {
+           "example": "用户授权任务不存在",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "User provisioning is not found",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部错误",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查看用户访问授权任务",
+    "tags": [
+     "多账号访问管理"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/ListAccountAssignments": {
+   "post": {
+    "description": "获取角色访问授权列表",
+    "operationId": "ListAccountAssignments",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "PageNumber": {
+          "description": "页码，默认 1",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PageSize": {
+          "description": "分页大小，默认 10，[1,100]",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PermissionSetId": {
+          "description": "权限集 ID",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "PrincipalId": {
+          "description": "云身份中心对象 ID",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "PrincipalType": {
+          "description": "云身份中心对象类型，User 或者 Group",
+          "enum": [
+           "User",
+           "Group"
+          ],
+          "example": "User",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "TargetId": {
+          "description": "授权火山账号 ID",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AccountAssignments": {
+           "description": "角色授权记录",
+           "example": [
+            {
+             "CreatedTime": "NC",
+             "PermissionSetId": "Gr5gwb",
+             "PermissionSetName": "cFna9SvtI",
+             "PrincipalId": "xtofzoID",
+             "PrincipalName": "zIG9",
+             "PrincipalType": "l19p59",
+             "TargetId": "RMsdWHKD",
+             "TargetName": "rjSP8g"
+            }
+           ],
+           "items": {
+            "$ref": "#/components/schemas/AccountAssignmentItem"
+           },
+           "type": "array"
+          },
+          "PageNumber": {
+           "description": "页码",
+           "example": 1,
+           "format": "int32",
+           "type": "integer"
+          },
+          "PageSize": {
+           "description": "分页大小",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数",
+           "example": 100,
+           "format": "int64",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取角色访问授权列表"
+     }
+    },
+    "summary": "获取角色访问授权列表",
+    "tags": [
+     "管理角色授权"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/ListGroupMembers": {
+   "post": {
+    "description": "查询用户组成员",
+    "operationId": "ListGroupMembers",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "GroupId": {
+          "description": "用户组 id",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "PageNumber": {
+          "description": "页码，默认 1",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PageSize": {
+          "description": "单页数量",
+          "example": 10,
+          "format": "int32",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "QueryString": {
+          "description": "过滤参数。搜索用户名/显示名.",
+          "example": "name",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "GroupId"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Members": {
+           "description": "用户组成员列表",
+           "example": [
+            "\\[\u003cbr\u003e\n    {\u003cbr\u003e\n        \"UserId\": \"NxpcFXN\"",
+            "\u003cbr\u003e\n        \"UserName\": \"用户名称\"",
+            "\u003cbr\u003e\n        \"DisplayName\": \"FvQ5\"",
+            "\u003cbr\u003e\n        \"Description\": \"C8piPKkzJy\"",
+            "\u003cbr\u003e\n        \"Source\": \"H6Xk83FcMjq\"",
+            "\u003cbr\u003e\n        \"Email\": \"O\"",
+            "\u003cbr\u003e\n        \"Phone\": \"ySzjRlO1U\"",
+            "\u003cbr\u003e\n        \"IdentityType\": \"6Lakuqo\"",
+            "\u003cbr\u003e\n        \"JoinTime\": \"u1tZ\"\u003cbr\u003e\n    }\u003cbr\u003e\n\\]"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/GroupMember"
+           },
+           "type": "array"
+          },
+          "PageNumber": {
+           "description": "页码",
+           "example": 1,
+           "format": "int32",
+           "type": "integer"
+          },
+          "PageSize": {
+           "description": "分页大小",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数",
+           "example": 100,
+           "format": "int64",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询用户组成员"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ParamMissing",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺省",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Missing parameter %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ServiceStatusException",
+             "type": "string"
+            },
+            "description": {
+             "example": "企业身份中心实例不可用",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Can not perform action[%s] when service is %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "没有接口权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "UserGroupNotFound",
+           "type": "string"
+          },
+          "description": {
+           "example": "用户组未找到",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "User group is not found",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部错误",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询用户组成员",
+    "tags": [
+     "管理用户组"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/ListGroups": {
+   "post": {
+    "description": "查询用户组列表",
+    "operationId": "ListGroups",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "JoinType": {
+          "description": "用户组类型",
+          "enum": [
+           "Manual",
+           "Auto"
+          ],
+          "example": "Manual",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "PageNumber": {
+          "description": "页码，默认 1",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PageSize": {
+          "description": "分页大小，默认 10，[1,100]",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "QueryString": {
+          "description": "过滤参数。搜索用户组名/显示名.",
+          "example": "name",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Groups": {
+           "description": "用户组列表",
+           "example": [
+            "\\[\u003cbr\u003e\n    {\u003cbr\u003e\n        \"GroupId\": \"V6\"",
+            "\u003cbr\u003e\n        \"GroupName\": \"3Po\"",
+            "\u003cbr\u003e\n        \"DisplayName\": \"0fd3S\"",
+            "\u003cbr\u003e\n        \"Description\": \"CoQn\"",
+            "\u003cbr\u003e\n        \"Source\": \"Manual\"",
+            "\u003cbr\u003e\n        \"CreatedTime\": \"jzeT4d1p\"",
+            "\u003cbr\u003e\n        \"UpdatedTime\": \"Pt\"",
+            "\u003cbr\u003e\n        \"JoinType\": \"Manual\"\u003cbr\u003e\n    }\u003cbr\u003e\n\\]"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/GroupItem"
+           },
+           "type": "array"
+          },
+          "PageNumber": {
+           "description": "页码",
+           "example": 1,
+           "format": "int32",
+           "type": "integer"
+          },
+          "PageSize": {
+           "description": "分页大小",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数",
+           "example": 100,
+           "format": "int64",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询用户组列表"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ParamMissing",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺省",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Missing parameter %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ServiceStatusException",
+             "type": "string"
+            },
+            "description": {
+             "example": "企业身份中心实例不可用",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Can not perform action[%s] when service is %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "没有接口权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部错误",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询用户组列表",
+    "tags": [
+     "管理用户组"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/ListPermissionPoliciesInPermissionSet": {
+   "post": {
+    "description": "获取权限集策略列表",
+    "operationId": "ListPermissionPoliciesInPermissionSet",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "PageNumber": {
+          "description": "页码，默认 1",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PageSize": {
+          "description": "分页大小，默认 10，[1,100]",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PermissionPolicyType": {
+          "description": "策略类型，System or Inline",
+          "enum": [
+           "System",
+           "Inline"
+          ],
+          "example": "System",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "PermissionSetId": {
+          "description": "权限集 ID",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "PermissionSetId"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "PageNumber": {
+           "description": "页码",
+           "example": 1,
+           "format": "int32",
+           "type": "integer"
+          },
+          "PageSize": {
+           "description": "分页大小",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "PermissionPolicies": {
+           "description": "权限集关联策略",
+           "example": [
+            {
+             "CreatedTime": "O9ULHdDQspi",
+             "PermissionPolicyDocument": "blH4318Gv",
+             "PermissionPolicyName": "e78rci83osA",
+             "PermissionPolicyType": "ats2YDtGf"
+            }
+           ],
+           "items": {
+            "$ref": "#/components/schemas/PermissionPolicies"
+           },
+           "type": "array"
+          },
+          "Total": {
+           "description": "总数",
+           "example": 100,
+           "format": "int64",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取权限集策略列表"
+     }
+    },
+    "summary": "获取权限集策略列表",
+    "tags": [
+     "管理访问权限集"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/ListPermissionSetProvisionings": {
+   "post": {
+    "description": "获取权限集部署列表",
+    "operationId": "ListPermissionSetProvisionings",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "PageNumber": {
+          "description": "页码，默认 1",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PageSize": {
+          "description": "分页大小，默认 10，[1,100]",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PermissionSetId": {
+          "description": "权限集 ID",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "ProvisioningStatus": {
+          "description": "部署状态\nProvisioned 已部署\nProvisionFailed 部署失败\nReprovisionRequired 需要重新部署\nRunning 部署中",
+          "enum": [
+           "Provisioned",
+           "ReprovisionRequired",
+           "ProvisionFailed",
+           "Running"
+          ],
+          "example": "Provisioned",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "TargetId": {
+          "description": "火山账号 ID",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "PageNumber": {
+           "description": "页码",
+           "example": 1,
+           "format": "int32",
+           "type": "integer"
+          },
+          "PageSize": {
+           "description": "分页大小",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "PermissionSetProvisionings": {
+           "description": "部署列表",
+           "example": [
+            {
+             "CreatedTime": "l3l2I3BxoH1",
+             "PermissionSetId": "q",
+             "PermissionSetName": "f",
+             "ProvisioningStatus": "Q6wA",
+             "TargetId": "C",
+             "TargetName": "QoaFn9Z4",
+             "UpdatedTime": "cZzgwxu"
+            }
+           ],
+           "items": {
+            "$ref": "#/components/schemas/PermissionSetProvisionings"
+           },
+           "type": "array"
+          },
+          "Total": {
+           "description": "总数",
+           "example": 100,
+           "format": "int64",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取权限集部署列表"
+     }
+    },
+    "summary": "获取权限集部署列表",
+    "tags": [
+     "管理角色授权"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/ListPermissionSets": {
+   "post": {
+    "description": "获取权限集列表",
+    "operationId": "ListPermissionSets",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Filter": {
+          "description": "权限集名称过滤条件",
+          "example": "name",
+          "maxLength": 254,
+          "type": "string",
+          "x-split-type": 0
+         },
+         "PageNumber": {
+          "description": "页码，默认 1，",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PageSize": {
+          "description": "分页大小，默认 10，[1,100]",
+          "example": 10,
+          "format": "int32",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PermissionSetIds": {
+          "description": "权限集id，以英文逗号\",\"拼接",
+          "example": "\"1,2,3\"",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "PageNumber": {
+           "description": "页码",
+           "example": 1,
+           "format": "int32",
+           "type": "integer"
+          },
+          "PageSize": {
+           "description": "分页大小",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "PermissionSets": {
+           "description": "权限集列表",
+           "example": [
+            "\\[\u003cbr\u003e\n    {\u003cbr\u003e\n        \"PermissionSetId\": \"7ikMoGt2m\"",
+            "\u003cbr\u003e\n        \"Name\": \"pA\"",
+            "\u003cbr\u003e\n        \"SessionDuration\": 552",
+            "\u003cbr\u003e\n        \"RelayState\": \"B\"",
+            "\u003cbr\u003e\n        \"Description\": \"l0TZgUlEJ\"",
+            "\u003cbr\u003e\n        \"StatusNotifications\": \\[\u003cbr\u003e\n            \"R\"\u003cbr\u003e\n        \\]\u003cbr\u003e\n    }\u003cbr\u003e\n\\]"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/PermissionSets"
+           },
+           "type": "array"
+          },
+          "Total": {
+           "description": "权限集总数",
+           "example": 100,
+           "format": "int64",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取权限集列表"
+     }
+    },
+    "summary": "获取权限集列表",
+    "tags": [
+     "管理访问权限集"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/ListPortalLoginSettings": {
+   "post": {
+    "description": "查询门户登录配置列表",
+    "operationId": "ListPortalLoginSettings",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "PortalLoginSettings": {
+           "description": "登录配置列表",
+           "example": [
+            "\\[\u003cbr\u003e\n    {\u003cbr\u003e\n        \"LoginType\": \"Password\"",
+            "\u003cbr\u003e\n        \"Status\": \"Enable\"\u003cbr\u003e\n    }\u003cbr\u003e\n\\]"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/PortalLoginSettingsItem"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询门户登录配置列表"
+     }
+    },
+    "summary": "查询门户登录配置列表",
+    "tags": [
+     "管理门户登录配置"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/ListTasks": {
+   "post": {
+    "description": "获取任务列表",
+    "operationId": "ListTasks",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Filter": {
+          "description": "过滤条件，云身份中心用户名或者用户组名称",
+          "example": "name",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "PageNumber": {
+          "description": "页码，默认 1",
+          "example": 1,
+          "format": "int32",
+          "minimum": 1,
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PageSize": {
+          "description": "分页大小，默认 10，[1,100]",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PrincipalType": {
+          "description": "云身份中心对象类型，User 或者 Group",
+          "enum": [
+           "User",
+           "Group"
+          ],
+          "example": "User",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "TaskStatus": {
+          "description": "任务状态，Init/Running/Success/Failed",
+          "enum": [
+           "Init",
+           "Running",
+           "Success",
+           "Failed"
+          ],
+          "example": "Success",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "TaskType": {
+          "description": "任务类型\n1: 授权\n2: 解除授权\n3: 部署\n4: 解除部署",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         }
+        },
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "PageNumber": {
+           "description": "页码",
+           "example": 1,
+           "format": "int32",
+           "type": "integer"
+          },
+          "PageSize": {
+           "description": "分页大小",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Tasks": {
+           "description": "任务列表",
+           "example": [
+            {
+             "CreatedTime": "PTD",
+             "PermissionSetId": "q1Hyk",
+             "PermissionSetName": "0t",
+             "PrincipalId": "M41g",
+             "PrincipalName": "rFzJ1aYd",
+             "PrincipalType": "qfIRPtBD",
+             "Status": "sH2s0",
+             "TargetId": "mvNHv12BJT",
+             "TargetName": "x",
+             "TaskId": "5LTDL",
+             "TaskType": "fQK7V",
+             "UpdatedTime": "lVl"
+            }
+           ],
+           "items": {
+            "$ref": "#/components/schemas/TaskItem"
+           },
+           "type": "array"
+          },
+          "Total": {
+           "description": "总数",
+           "example": 100,
+           "format": "int64",
+           "type": "integer"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "获取任务列表"
+     }
+    },
+    "summary": "获取任务列表",
+    "tags": [
+     "管理角色授权"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/ListUserProvisioningEvents": {
+   "post": {
+    "description": "授权记录列表",
+    "operationId": "ListUserProvisioningEvents",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "EventStatus": {
+          "description": "授权记录状态",
+          "enum": [
+           "ProvisionFailed",
+           "DeleteProvisionFailed"
+          ],
+          "example": [
+           "ProvisionFailed"
+          ],
+          "items": {
+           "type": "string"
+          },
+          "type": "array",
+          "x-split-type": 1
+         },
+         "PageNumber": {
+          "description": "页码，默认 1",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PageSize": {
+          "description": "分页大小，默认 10，[1,100]",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "QueryString": {
+          "description": "用户名或者用户显示名",
+          "example": "name",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "PageNumber": {
+           "description": "页码\n",
+           "example": 1,
+           "format": "int64",
+           "type": "integer"
+          },
+          "PageSize": {
+           "description": "分页大小",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数",
+           "example": 100,
+           "format": "int64",
+           "type": "integer"
+          },
+          "UserProvisioningEvent": {
+           "description": "用户授权记录列表",
+           "example": [
+            {
+             "CreatedTime": "Ev1",
+             "Description": "sM",
+             "EventStatus": "ProvisionFailed",
+             "FailureReason": "yXoiJRrX",
+             "PrincipalType": "User",
+             "TargetId": "jt7aF4",
+             "TargetName": "5dQomC",
+             "UpdatedTime": "M71R0uVR9c",
+             "UserId": "bG5tUnXXhrV",
+             "UserName": "lPfm28j",
+             "UserProvisioningEventId": "C8f",
+             "UserProvisioningId": "B"
+            }
+           ],
+           "items": {
+            "$ref": "#/components/schemas/UserProvisioningEvent"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "授权记录列表"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ConcurrentException",
+             "type": "string"
+            },
+            "description": {
+             "example": "存在请求并发冲突",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Concurrent request exception",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ParamMissing",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺省",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Missing parameter %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ServiceStatusException",
+             "type": "string"
+            },
+            "description": {
+             "example": "企业身份中心实例不可用",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Can not perform action[%s] when service is %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "没有接口权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部错误",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "授权记录列表",
+    "tags": [
+     "管理用户授权"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/ListUserProvisionings": {
+   "post": {
+    "description": "查看用户访问授权任务列表",
+    "operationId": "ListUserProvisionings",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AccountId": {
+          "description": "成员账号id",
+          "example": "1",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "PageNumber": {
+          "description": "页码，默认 1",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PageSize": {
+          "description": "分页大小，默认 10，[1,100]",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         }
+        },
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "PageNumber": {
+           "description": "当前页数",
+           "example": 1,
+           "format": "int32",
+           "type": "integer"
+          },
+          "PageSize": {
+           "description": "页长度",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数",
+           "example": 100,
+           "format": "int64",
+           "type": "integer"
+          },
+          "UserProvisionings": {
+           "description": "用户SSO同步任务列表",
+           "example": [
+            "\\[\u003cbr\u003e\n    {\u003cbr\u003e\n        \"UserProvisioningId\": \"1Y3fcN\"",
+            "\u003cbr\u003e\n        \"PrincipalId\": \"PSUk\"",
+            "\u003cbr\u003e\n        \"PrincipalType\": \"JwKoEy9W\"",
+            "\u003cbr\u003e\n        \"DeletionStrategy\": \"6TSAIQyAK\"",
+            "\u003cbr\u003e\n        \"DuplicationStrategy\": \"keBVyqdXXCk\"",
+            "\u003cbr\u003e\n        \"DuplicationSuffix\": \"8ycNm7A\"",
+            "\u003cbr\u003e\n        \"IdentitySourceStrategy\": \"PneEm\"",
+            "\u003cbr\u003e\n        \"TargetId\": \"81\"",
+            "\u003cbr\u003e\n        \"CreatedTime\": \"2006-01-02T15:04:05Z07:00\"",
+            "\u003cbr\u003e\n        \"UpdatedTime\": \"2006-01-02T15:04:05Z07:00\"",
+            "\u003cbr\u003e\n        \"PrincipalName\": \"UzrGnW\"",
+            "\u003cbr\u003e\n        \"Description\": \"FpNzPzFwEkL\"",
+            "\u003cbr\u003e\n        \"ProvisionStatus\": \"Provisioned 授权成功，Provisioning 正在授权，DeleteProvisioning 授权解除中，DeleteProvisioned 授权解除成功\\\\n\"\u003cbr\u003e\n    }\u003cbr\u003e\n\\]"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/UserProvision"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查看用户访问授权任务列表"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "SensitiveWord",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数重存在敏感词",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Include sensitive Word",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ServiceStatusException",
+             "type": "string"
+            },
+            "description": {
+             "example": "企业身份中心实例不可用",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Can not perform action[%s] when service is %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperateTooFrequentlyException",
+             "type": "string"
+            },
+            "description": {
+             "example": "频繁调用同一个接口",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Perform action[%s] too frequently",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ConcurrentException",
+             "type": "string"
+            },
+            "description": {
+             "example": "存在请求并发冲突",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Concurrent request exception",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ParamMissing",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数缺省",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Missing parameter %v",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParam",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效参数",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter %v[%v] is invalid",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "没有接口权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "PermissionDenied",
+           "type": "string"
+          },
+          "description": {
+           "example": "无权限访问",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 403,
+           "type": "integer"
+          },
+          "message": {
+           "example": "No permission to perform action[%s]",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部错误",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查看用户访问授权任务列表",
+    "tags": [
+     "多账号访问管理"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  },
+  "/ListUsers": {
+   "post": {
+    "description": "查询用户列表",
+    "operationId": "ListUsers",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "PageNumber": {
+          "description": "页数",
+          "example": 1,
+          "format": "int32",
+          "minimum": 1,
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PageSize": {
+          "description": "单页数量",
+          "example": 10,
+          "format": "int32",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "QueryString": {
+          "description": "过滤参数。搜索用户名/显示名.",
+          "example": "name",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "Source": {
+          "description": "数据源类型\nManual: 手动创建\nSync：身份源同步",
+          "enum": [
+           "Sync",
+           "Manual"
+          ],
+          "example": "Manual",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "UserName": {
+          "description": "用户名匹配",
+          "example": "username",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "PageNumber": {
+           "description": "页数",
+           "example": 1,
+           "format": "int32",
+           "type": "integer"
+          },
+          "PageSize": {
+           "description": "页大小",
+           "example": 10,
+           "format": "int32",
+           "type": "integer"
+          },
+          "Total": {
+           "description": "总数",
+           "example": 100,
+           "format": "int64",
+           "type": "integer"
+          },
+          "Users": {
+           "description": "用户列表",
+           "example": [
+            "\"Users\": [\n      {\n        \"UserId\": \"EmqnzDiD\"",
+            "\"UserName\": \"x6dg\"",
+            "\"DisplayName\": \"NztHMMIXMk0\"",
+            "\"Description\": \"t\"",
+            "\"CreatedTime\": \"2006-01-02T15:04:05Z07:00\"",
+            "\"UpdatedTime\": \"2006-01-02T15:04:05Z07:00\"",
+            "\"Source\": \"4TY9XP1NPh\"",
+            "\"Email\": \"fJ\"",
+            "\"Phone\": \"G\"",
+            "\"IdentityType\": \"fPWS1zTB6Bf\"\n      }\n    ]",
+            ""
+           ],
+           "items": {
+            "$ref": "#/components/schemas/User"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "查询用户列表"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ServiceStatusException",
+             "type": "string"
+            },
+            "description": {
+             "example": "企业身份中心实例不可用",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Can not perform action[%s] when service is %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "PermissionError",
+             "type": "string"
+            },
+            "description": {
+             "example": "没有接口权限",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "No permission to perform action[%s] on resource %s",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParam",
+             "type": "string"
+            },
+            "description": {
+             "example": "无效参数",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The parameter %v[%v] is invalid",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "服务内部错误",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "Unknown internal error: %v",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询用户列表",
+    "tags": [
+     "管理用户"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "cloudidentity",
+   "x-version": "2023-01-01"
+  }
+ }
+}

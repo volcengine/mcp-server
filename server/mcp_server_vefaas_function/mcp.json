@@ -8,8 +8,8 @@
         "mcp-server-vefaas-function"
       ],
       "env": {
-        "VOLC_ACCESSKEY": "xxx",
-        "VOLC_SECRETKEY": "xxx"
+        "VOLCENGINE_ACCESS_KEY": "xxx",
+        "VOLCENGINE_SECRET_KEY": "xxx"
       }
     }
   }
