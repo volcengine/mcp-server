@@ -65,8 +65,8 @@ IGA MCP Server 支持查询并分析业务数据信息和域名配置信息，�
 ## 示例
 Cursor 中使用示例
 ![域名查询](https://lf3-static.bytednsdoc.com/obj/eden-cn/uvzhlzeh7pbyubz/mcp-server-iga/image.png)
-![统计数据](https://lf3-static.bytednsdoc.com/obj/eden-cn/uvzhlzeh7pbyubz/mcp-server-iga/statistic.png)
 ![IP排行](https://lf3-static.bytednsdoc.com/obj/eden-cn/uvzhlzeh7pbyubz/mcp-server-iga/topip.jpeg)
+![统计数据](https://lf3-static.bytednsdoc.com/obj/eden-cn/uvzhlzeh7pbyubz/mcp-server-iga/statistic.png)
 
 ## License
 MIT
