@@ -52,7 +52,6 @@ def get_credential_from_request():
         if not ak or not sk or not session_token:
             raise ValueError("Invalid credentials ak, sk, session_token is null")
 
-        logger.info(f"Loaded credentials: {ak},{current_time}, {expired_time}")
         return Credential(ak, sk, session_token, expired_time)
     except Exception as e:
         logger.error(f"Error get credentials: {str(e)}")

@@ -25,7 +25,7 @@ def main():
 
     try:
         # Run the MCP server
-        logger.info(f"Starting TOS MCP Server with {args.transport} transport, region is {TOS_CONFIG.region}")
+        logger.info(f"Starting TOS MCP Server with {args.transport} transport")
 
         mcp.run(transport=args.transport)
     except Exception as e:

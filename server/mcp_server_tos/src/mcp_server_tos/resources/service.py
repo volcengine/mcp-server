@@ -67,7 +67,8 @@ class TosResource:
                     await response.aclose()
                     attempt += 1
                     if attempt < 3:
-                        logger.warning(f'Retry {attempt}/3 for {bucket}/{key}, Status: {response.status_code}')
+                        logger.warning(
+                            f'Retry {attempt}/3, Status: {response.status_code}, request-id: {response.headers.get("x-tos-request-id", "")}')
                         await asyncio.sleep(2 ** attempt)
                         continue
                     else:
@@ -124,8 +125,6 @@ async def call(self, method: str, bucket: str, key: str = None, data=None, heade
                     await asyncio.sleep(2 * try_count)
                     continue
                 else:
-                    error_msg = f'Failed to call {url_str}: {str(e)}'
-                    logger.error(error_msg)
                     raise e
             else:
                 if response.status_code == 200 or response.status_code == 206:
