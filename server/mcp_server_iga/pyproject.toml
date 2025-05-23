@@ -1,6 +1,6 @@
 
 [project]
-name = "mcp_iga"
+name = "mcp_server_iga"
 version = "0.1.0"
 description = "MCP server for dcdn"
 readme = "README.md"
@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.scripts]
-mcp_iga= "src.dcdn.server:main"
+mcp_server_iga= "src.dcdn.server:main"
 
 
 [build-system]
