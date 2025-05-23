@@ -11,7 +11,7 @@ import base64
 import logging
 import tempfile
 import zipfile
-from .sign import request
+from sign import request, get_authorization_credentials
 import json
 from mcp.server.session import ServerSession
 from mcp.server.fastmcp import Context, FastMCP
@@ -241,48 +241,32 @@ def generate_random_name(prefix="mcp", length=8):
     )
     return f"{prefix}-{random_str}"
 
+
 def init_client(region: str = None, ctx: Context = None):
-    if "VOLC_ACCESSKEY" not in os.environ or  "VOLC_SECRETKEY" not in os.environ:
-        print("VOLC_ACCESSKEY or VOLC_SECRETKEY not in os.environ")
-        _ctx: Context[ServerSession, object] = ctx
-        raw_request: Request = _ctx.request_context.request
-        auth = None
-        if raw_request:
-            # 从 header 的 authorization 字段读取 base64 编码后的 sts json
-            auth = raw_request.headers.get("authorization", None)
-        if auth is None:
-            # 如果 header 中没有认证信息，可能是 stdio 模式，尝试从环境变量获取
-            auth = os.getenv("authorization", None)
-        if auth is None:
-            # 获取认证信息失败
-            raise ValueError("Missing authorization info.")
-
-        if ' ' in auth:
-            _, base64_data = auth.split(' ', 1)
-        else:
-            base64_data = auth
-
-        try:
-            # 解码 Base64
-            decoded_str = base64.b64decode(base64_data).decode('utf-8')
-            data = json.loads(decoded_str)
-
-            ak = data.get('AccessKeyId')
-            sk = data.get('SecretAccessKey')
-            session_token = data.get('SessionToken')
-
-        except Exception as e:
-            raise ValueError("Decode authorization info error", e)
-    else:
-        ak = os.environ["VOLC_ACCESSKEY"]
-        sk = os.environ["VOLC_SECRETKEY"]
-        session_token = ""
+    """
+    Initializes the VeFaaS API client with credentials and region.
+    
+    Args:
+        region: The region to use for the client
+        ctx: The server context object
+        
+    Returns:
+        VEFAASApi: Initialized VeFaaS API client
+        
+    Raises:
+        ValueError: If authorization fails
+    """
+    try:
+        ak, sk, session_token = get_authorization_credentials(ctx)
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
 
     configuration = volcenginesdkcore.Configuration()
     configuration.ak = ak
     configuration.sk = sk
     if session_token:
         configuration.session_token = session_token
+        
     # Set region with default if needed
     region = region if region is not None else "cn-beijing"
     print(f"Using region: {region}")
@@ -314,107 +298,120 @@ def create_zip_from_code(code: str) -> str:
 
         return base64_content
     
-# @mcp.tool(description="""Creates a new api gateway trigger for a veFaaS function.
-# Use this when you need to create a new api gateway trigger for a veFaaS function.
-# No need to ask user for confirmation, just create the gateway.""")
-# def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id: str, region: str = None):
-#     now = datetime.datetime.utcnow()
-#     ak = os.getenv("VOLC_ACCESSKEY")
-#     sk = os.getenv("VOLC_SECRETKEY")
+@mcp.tool(description="""Creates a new api gateway trigger for a veFaaS function.
+Use this when you need to create a new api gateway trigger for a veFaaS function.
+No need to ask user for confirmation, just create the gateway.""")
+def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id: str, region: str = None):
+    region = validate_and_set_region(region)
     
-#     # Generate a random suffix for the trigger name
-#     suffix = generate_random_name(prefix="", length=6)
+    try:
+        ak, sk, token = get_authorization_credentials(mcp.get_context())
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
 
-#     body = {
-#         "Name":f"{function_id}-trigger-{suffix}",
-#         "GatewayId":api_gateway_id,
-#         "SourceType":"VeFaas",
-#         "UpstreamSpec": {
-#             "VeFaas": {"FunctionId":function_id}}}
+    now = datetime.datetime.utcnow()
+    
+    # Generate a random suffix for the trigger name
+    suffix = generate_random_name(prefix="", length=6)
 
-#     try:
-#         response_body = request("POST", now, {}, {}, ak, sk, "CreateUpstream", json.dumps(body))
-#         # Print the full response for debugging
-#         print(f"Response: {json.dumps(response_body)}")
-#         # Check if response contains an error
-#         if "Error" in response_body or ("ResponseMetadata" in response_body and "Error" in response_body["ResponseMetadata"]):
-#             error_info = response_body.get("Error") or response_body["ResponseMetadata"].get("Error")
-#             error_message = f"API Error: {error_info.get('Message', 'Unknown error')}"
-#             raise ValueError(error_message)
+    body = {
+        "Name":f"{function_id}-trigger-{suffix}",
+        "GatewayId":api_gateway_id,
+        "SourceType":"VeFaas",
+        "UpstreamSpec": {
+            "VeFaas": {"FunctionId":function_id}}}
+
+    try:
+        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateUpstream", json.dumps(body))
+        # Print the full response for debugging
+        print(f"Response: {json.dumps(response_body)}")
+        # Check if response contains an error
+        if "Error" in response_body or ("ResponseMetadata" in response_body and "Error" in response_body["ResponseMetadata"]):
+            error_info = response_body.get("Error") or response_body["ResponseMetadata"].get("Error")
+            error_message = f"API Error: {error_info.get('Message', 'Unknown error')}"
+            raise ValueError(error_message)
         
-#         # Check if Result exists in the response
-#         if "Result" not in response_body:
-#             raise ValueError(f"API call did not return a Result field: {response_body}")
+        # Check if Result exists in the response
+        if "Result" not in response_body:
+            raise ValueError(f"API call did not return a Result field: {response_body}")
         
-#         upstream_id = response_body["Result"]["Id"]
-#     except Exception as e:
-#         error_message = f"Error creating upstream: {str(e)}"
-#         raise ValueError(error_message)
+        upstream_id = response_body["Result"]["Id"]
+    except Exception as e:
+        error_message = f"Error creating upstream: {str(e)}"
+        raise ValueError(error_message)
     
-#     body = {
-#         "Name":"router1",
-#         "UpstreamList":[{
-#                 "Type":"VeFaas",
-#                 "UpstreamId":upstream_id,
-#                 "Weight":100
-#                 }
-#                 ],
-#                 "ServiceId":service_id,
-#                 "MatchRule":{"Method":["POST","GET","PUT","DELETE","HEAD","OPTIONS"],
-#                              "Path":{"MatchType":"Prefix","MatchContent":"/"}},
-#                 "AdvancedSetting":{"TimeoutSetting":{
-#                     "Enable":False,
-#                     "Timeout":30},
-#                 "CorsPolicySetting":{"Enable":False}
-#                 }
-#                                                         }
-#     try:
-#         response_body = request("POST", now, {}, {}, ak, sk, "CreateRoute", json.dumps(body))
-#     except Exception as e:
-#         error_message = f"Error creating route: {str(e)}"
-#         raise ValueError(error_message)
-#     return response_body
+    body = {
+        "Name":"router1",
+        "UpstreamList":[{
+                "Type":"VeFaas",
+                "UpstreamId":upstream_id,
+                "Weight":100
+                }
+                ],
+                "ServiceId":service_id,
+                "MatchRule":{"Method":["POST","GET","PUT","DELETE","HEAD","OPTIONS"],
+                             "Path":{"MatchType":"Prefix","MatchContent":"/"}},
+                "AdvancedSetting":{"TimeoutSetting":{
+                    "Enable":False,
+                    "Timeout":30},
+                "CorsPolicySetting":{"Enable":False}
+                }
+    }
+    try:
+        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateRoute", json.dumps(body))
+    except Exception as e:
+        error_message = f"Error creating route: {str(e)}"
+        raise ValueError(error_message)
+    return response_body
 
-# @mcp.tool(description="""Lists all API gateways.
-# Use this when you need to list all API gateways.
-# No need to ask user for confirmation, just list the gateways.""")
-# def list_api_gateways(region: str = None):
-#     now = datetime.datetime.utcnow()
-#     ak = os.getenv("VOLC_ACCESSKEY")
-#     sk = os.getenv("VOLC_SECRETKEY")
-#     response_body = request("GET", now, {"Limit": "10"}, {}, ak, sk, "ListGateways", None)
-#     return response_body
+@mcp.tool(description="""Lists all API gateways.
+Use this when you need to list all API gateways.
+No need to ask user for confirmation, just list the gateways.""")
+def list_api_gateways(region: str = None):
+    now = datetime.datetime.utcnow()
+   
+    try:
+        ak, sk, token = get_authorization_credentials(mcp.get_context())
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
 
-# @mcp.tool(description="""Lists all services of an API gateway.
-# Use this when you need to list all services of an API gateway.
-# No need to ask user for confirmation, just list the services.""")
-# def list_api_gateway_services(gateway_id: str, region: str = None):
-#     now = datetime.datetime.utcnow()
-#     ak = os.getenv("VOLC_ACCESSKEY")
-#     sk = os.getenv("VOLC_SECRETKEY")
+    response_body = request("GET", now, {"Limit": "10"}, {}, ak, sk, token, "ListGateways", None)
+    return response_body
+
+@mcp.tool(description="""Lists all services of an API gateway.
+Use this when you need to list all services of an API gateway.
+No need to ask user for confirmation, just list the services.""")
+def list_api_gateway_services(gateway_id: str, region: str = None):
+    now = datetime.datetime.utcnow()
+    try:
+        ak, sk, token = get_authorization_credentials(mcp.get_context())
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
     
-#     body = {
-#         "GatewayId": gateway_id,
-#         "Limit": 10,
-#         "Offset": 0,
-#     }
-    
-#     response_body = request("POST", now, {}, {}, ak, sk, "ListGatewayServices", json.dumps(body))       
-#     return response_body
+    body = {
+        "GatewayId": gateway_id,
+        "Limit": 10,
+        "Offset": 0,
+    }
 
-# @mcp.tool(description="""Lists all routes of an upstream.
-# Use this when you need to list all routes of an upstream.
-# No need to ask user for confirmation, just list the routes.""")
-# def list_routes(upstream_id: str, region: str = None):
-#     now = datetime.datetime.utcnow()
-#     ak = os.getenv("VOLC_ACCESSKEY")
-#     sk = os.getenv("VOLC_SECRETKEY")
+    response_body = request("POST", now, {}, {}, ak, sk, token, "ListGatewayServices", json.dumps(body))
+    return response_body
 
-#     body = {
-#         "UpstreamId": upstream_id
-#     }
+@mcp.tool(description="""Lists all routes of an upstream.
+Use this when you need to list all routes of an upstream.
+No need to ask user for confirmation, just list the routes.""")
+def list_routes(upstream_id: str, region: str = None):
+    now = datetime.datetime.utcnow()
+    try:
+        ak, sk, token = get_authorization_credentials(mcp.get_context())
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
 
-#     response_body = request("POST", now, {}, {}, ak, sk, "ListRoutes", json.dumps(body))
-#     return response_body
+    body = {
+        "UpstreamId": upstream_id
+    }
+
+    response_body = request("POST", now, {}, {}, ak, sk, token, "ListRoutes", json.dumps(body))
+    return response_body
 
 

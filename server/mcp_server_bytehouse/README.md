@@ -52,8 +52,6 @@ mcp-bytehouse --transport sse
       "args": [
             "--from",
             "git+https://github.com/volcengine/mcp-server@main#subdirectory=server/mcp_server_bytehouse",
-            "--python",
-            "3.13",
             "mcp_bytehouse",
       ],
       "env": {

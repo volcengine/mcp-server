@@ -1,8 +1,9 @@
+
 [project]
 name = "mcp-server-veen"
 version = "0.1.0"
-description = "Apply, configure, and query for edge computing nodes, including virtual machines, images, bare metal, and corresponding network configurations."
-readme = "../README.md"
+description = "MCP server for veen"
+readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "mcp>=1.6.0",
@@ -12,6 +13,10 @@ dependencies = [
     "starlette>=0.46.2",
     "volcengine>=1.0.180",
 ]
+
+[project.scripts]
+mcp-server-veen= "vcloud.veen.server:main"
+
 
 [build-system]
 requires = ["setuptools>=61.0"]

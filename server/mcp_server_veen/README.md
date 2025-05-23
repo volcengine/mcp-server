@@ -1,6 +1,5 @@
-# VEEN MCP Server
+# VEEN Edge MCP Server
 
-边缘计算节点
 
 ## Version Information
 
@@ -66,7 +65,7 @@ Python
 
 ## Service Activation Link
 
-https://go.larkoffice.com/approval/s/ia91twWs/
+https://console.volcengine.com/edge/veen
 
 ## Authentication Method
 
@@ -110,8 +109,8 @@ Use a client to interact with the server:
         "mcp-server-veen"
       ],
       "env": {
-        "VOLC_ACCESSKEY": "<Your-Volcengine-AK>",
-        "VOLC_SECRETKEY": "<Your-Volcengine-SK>"
+        "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
+        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK"
       }
     }
   }

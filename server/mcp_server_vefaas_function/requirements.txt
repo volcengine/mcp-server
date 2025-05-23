@@ -63,7 +63,6 @@ starlette==0.46.2
     #   sse-starlette
 typing-extensions==4.13.2
     # via
-    #   anyio
     #   pydantic
     #   pydantic-core
     #   typing-inspection
@@ -77,5 +76,5 @@ urllib3==2.4.0
     #   volcengine-python-sdk
 uvicorn==0.34.2
     # via mcp
-volcengine-python-sdk==3.0.1
+volcengine-python-sdk==3.0.2
     # via mcp-server-vefaas-function (pyproject.toml)

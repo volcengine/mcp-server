@@ -8,7 +8,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def main():
-    logger.info("cloudmonitor MCP Server started")
+    logger.info("CloudMonitor MCP Server started")
     
     mcp.run(transport="stdio")
 

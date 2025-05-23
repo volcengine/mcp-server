@@ -1,21 +1,15 @@
 # CDN MCP Server
 
-## Version Information
-v0.1.0
-
-## Product Description
-
 Volcano Engine CDN officially launches the MCP Server, which supports natural language queries and analysis of business data and domain configuration information. It is suitable for scenarios such as operation and maintenance troubleshooting, data analysis, etc., helping to build more intelligent cloud business operation and maintenance scenarios.
 
-## Category
+|   Version   |                                        v0.1.0                                        |
+| :---------: | :----------------------------------------------------------------------------------: |
+| Description |                  CDN Service Management Driven By Natural Language                   |
+|  Category   |                                     CDN And Edge                                     |
+|    Tags     | CDN, Content Delivery Network, Business Data Analysis, Domain Configuration Analysis |
 
-Content Delivery Network
 
-## Tags
-
-CDN, Content Delivery Network, Business Data Analysis, Domain Configuration Analysis
-
-## Available Tools
+## Tools
 
 The CDN MCP Server supports querying and analyzing business data information and domain configuration information, providing the following tools.
 
