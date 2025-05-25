@@ -412,7 +412,7 @@ mv .env_example .env
             "command": "uvx",
             "args": [
                 "--from",
-                "git+https://github.com/volcengine/mcp-server#subdirectory=mcp_server_tls",
+                "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_tls",
                 "mcp-server-tls"
             ],
             "env": {
