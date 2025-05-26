@@ -67,8 +67,6 @@ class TosResource:
                     await response.aclose()
                     attempt += 1
                     if attempt < 3:
-                        logger.warning(
-                            f'Retry {attempt}/3, Status: {response.status_code}, request-id: {response.headers.get("x-tos-request-id", "")}')
                         await asyncio.sleep(2 ** attempt)
                         continue
                     else:
@@ -78,7 +76,6 @@ class TosResource:
             except Exception as e:
                 attempt += 1
                 if attempt < 3:
-                    logger.warning(f'Failed to get {bucket}/{key}: {str(e)}, attempt: {attempt}')
                     await asyncio.sleep(2 ** attempt)
                     continue
                 else:
@@ -134,8 +131,7 @@ async def call(self, method: str, bucket: str, key: str = None, data=None, heade
                     await asyncio.sleep(2 * try_count)
                     continue
                 else:
-                    raise Exception(f'Call tos url: {url_str} return: {str(response.status_code)}, '
-                                    f'request_id: {response.headers.get("x-tos-request-id")}')
+                    raise Exception(f'Call tos failed')
 
 
 def _to_case_insensitive_dict(self, headers: dict):
