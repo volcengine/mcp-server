@@ -1,5 +1,3 @@
-from volcengine.example.viking_knowledgebase.example import collection_namefrom server.mcp_server_knowledgebase.src.mcp_server_knowledgebase.server import list_collections
-
 # Viking Knowledge Base MCP Server
 
 This MCP server provides a tool to interact with the VolcEngine Viking Knowledge Base Service, allowing you to search and retrieve knowledge from your collections, meanwhile,

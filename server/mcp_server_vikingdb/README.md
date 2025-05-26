@@ -1,5 +1,3 @@
-from volcengine.bioos.doc.source.conf import project
-
 # VikingDB MCP Server
 
 This MCP server provides a tool to interact with the VolcEngine VikingDB Service, allowing you to search index from your collections.
