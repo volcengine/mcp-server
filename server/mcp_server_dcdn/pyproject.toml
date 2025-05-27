@@ -1,6 +1,6 @@
 
 [project]
-name = "mcp_server_dcdn"
+name = "mcp-server-dcdn"
 version = "0.1.0"
 description = "MCP server for dcdn"
 readme = "README.md"
@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.scripts]
-mcp_server_dcdn= "src.dcdn.server:main"
+mcp-server-dcdn= "src.dcdn.server:main"
 
 
 [build-system]
