@@ -27,13 +27,14 @@ def search_vikingdb(
         query: str,
         limit: int = 3,
 ) -> Dict:
-    """Search from the Vikingdb service And return Top limit related chunks of your query.
-    This tool allows you to search index in provided collection based on the given query.
+    """Use the MCP Server to search within the Vikingdb service and retrieve the top `limit` relevant data records based on your query.
+    This tool enables you to search text data within the provided collection using the specified query.
 
     Args:
-        query: the search query string.
-        limit: the maximum number of results to return (default: 3).
+        query: The text string used for the search.
+        limit: The maximum number of search results to be returned. The default value is 3.
     """
+
     logger.info(f"Received search_vikingdb request with query: {query}, limit: {limit}")
 
     try:

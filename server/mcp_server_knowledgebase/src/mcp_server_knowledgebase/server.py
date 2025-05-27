@@ -39,11 +39,11 @@ def get_collection(
         description: the description of the knowledge base collection.
         status: the status of the knowledge base collection.
         status：
-            -1:    待构建构建
-            0:     构建中
-            1:     构建完成
-            2:     构建失败
-            3:     变更中
+            -1: To be built
+            0: Building
+            1: Build completed
+            2: Build failed
+            3: Changing
 
     """
 

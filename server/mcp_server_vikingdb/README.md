@@ -37,6 +37,7 @@ The server requires the following environment variables:
 - `VIKING_DB_INDEX_NAME`: Your vikingdb index name
 
 Optional environment variables:
+- `VIKING_DB_REGION`: Your vikingdb region (default: cn-north-1)
 - `PORT`: Port for the FastMCP server (default: 8000)
 
 ## Usage
@@ -74,7 +75,7 @@ Parameters:
 - `query` (required): The search query string
 - `limit` (optional): Maximum number of results to return (default: 3)
 - `collection_name` (optional): vikingdb collection name to search. If not provided, uses the globally configured collection
-- `index_name` (optional): vikingdb index name to search. If not provided, uses the globally configured collection
+- `index_name` (optional): vikingdb index name of the collection to search. If not provided, uses the globally configured index name
 
 ## MCP Integration
 
@@ -94,7 +95,8 @@ To add this server to your MCP configuration, add the following to your MCP sett
         "VOLCENGINE_ACCESS_KEY": "your-access-key",
         "VOLCENGINE_SECRET_KEY": "your-secret-key",
         "VIKING_DB_COLLECTION_NAME": "your-vikingdb-collection-name",
-        "VIKING_DB_INDEX_NAME": "your-vikingdb-index-name"
+        "VIKING_DB_INDEX_NAME": "your-vikingdb-index-name", 
+        "VIKING_DB_REGION": "your-vikingdb-collection-region"
       },
     }
   }
@@ -134,4 +136,4 @@ Please ensure your code follows the project's coding standards and includes appr
 
 ## License
 
-This project is licensed under the terms specified by VolcEngine.
+volcengine/mcp-server is licensed under the [MIT License](https://github.com/volcengine/mcp-server/blob/main/LICENSE).

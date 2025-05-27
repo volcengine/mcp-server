@@ -5,6 +5,7 @@ import requests
 from volcengine.auth.SignerV4 import SignerV4
 from volcengine.base.Request import Request
 from volcengine.Credentials import Credentials
+from mcp_server_knowledgebase.config import config
 
 def prepare_request(method, path, ak, sk, params=None, data=None, doseq=0):
     if params:
@@ -33,7 +34,6 @@ def prepare_request(method, path, ak, sk, params=None, data=None, doseq=0):
     r.set_path(path)
     if data is not None:
         r.set_body(json.dumps(data))
-    # 生成签名
-    credentials = Credentials(ak, sk, "air", "cn-north-1")
+    credentials = Credentials(ak, sk, "air", config.region)
     SignerV4.sign(r, credentials)
     return r

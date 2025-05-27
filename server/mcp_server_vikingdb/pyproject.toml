@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [project.scripts]
-mcp-server-knowledgebase = "mcp_server_vikingdb.server:main"
+mcp-server-vikingdb = "mcp_server_vikingdb.server:main"
 
 [build-system]
 requires = ["hatchling"]

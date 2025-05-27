@@ -36,9 +36,8 @@ The server requires the following environment variables:
 - `VOLCENGINE_SECRET_KEY`: Your VolcEngine secret key
 
 Optional environment variables:
-
-- `VIKING_KB_COLLECTION_NAME`: The name of your knowledge base collection, if not specified, the request specified collection will be used
-- `VIKING_KB_HOST`: API host (default: "api-knowledgebase.mlp.cn-beijing.volces.com")
+- `KNOWLEDGE_BASE_PROJECT`: Your viking knowledge base project name
+- `KNOWLEDGE_BASE_REGION`: Your viking knowledge base region,if not provided, will use `cn-north-1` as default
 - `PORT`: Port for the FastMCP server (default: 8000)
 
 ## Usage
@@ -117,7 +116,8 @@ To add this server to your MCP configuration, add the following to your MCP sett
       "env": {
         "VOLCENGINE_ACCESS_KEY": "your-access-key",
         "VOLCENGINE_SECRET_KEY": "your-secret-key", 
-        "KNOWLEDGE_BASE_PROJECT": "your-project-name"
+        "KNOWLEDGE_BASE_PROJECT": "your-project-name",
+        "KNOWLEDGE_BASE_REGION": "your-region"
       },
     }
   }
@@ -157,4 +157,4 @@ Please ensure your code follows the project's coding standards and includes appr
 
 ## License
 
-This project is licensed under the terms specified by VolcEngine.
+volcengine/mcp-server is licensed under the [MIT License](https://github.com/volcengine/mcp-server/blob/main/LICENSE).

@@ -13,6 +13,7 @@ class VikingdbConfig:
     sk: str
     vikingdb_collection_name: str
     vikingdb_index_name: str
+    region: str = "cn-north-1"
 
 def load_config() -> VikingdbConfig:
     """Load configuration from environment variables."""
@@ -21,6 +22,7 @@ def load_config() -> VikingdbConfig:
         "VOLCENGINE_SECRET_KEY",
         "VIKING_DB_COLLECTION_NAME",
         "VIKING_DB_INDEX_NAME",
+        "VIKING_DB_REGION"
     ]
 
     # Check if all required environment variables are set
@@ -36,6 +38,7 @@ def load_config() -> VikingdbConfig:
         sk=os.environ["VOLCENGINE_SECRET_KEY"],
         vikingdb_collection_name=os.environ["VIKING_DB_COLLECTION_NAME"],
         vikingdb_index_name=os.environ["VIKING_DB_INDEX_NAME"],
+        region=os.environ.get("VIKING_DB_REGION", "cn-north-1")
     )
 
 
