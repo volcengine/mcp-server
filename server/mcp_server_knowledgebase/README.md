@@ -58,6 +58,44 @@ python -m mcp_server_knowledgebase.server --transport sse
 
 ### Available Tools
 
+#### add_doc
+
+Add a document to a collection in your project.
+
+```python
+add_doc(
+    collection_name="collection_name",
+    add_type="url",
+    doc_id="_mcp_server_auto_gen_doc_id_xxxxxxx",
+    doc_name="doc_xxxx",
+    doc_type="pdf",
+    url="http://xxxxx.pdf"
+)
+```
+
+Parameters:
+- `collection_name` (required): the name of the collection you want to add document .
+- `add_type` (required): the type of the document to add. so far only support "url" now. 
+- `doc_id` (required): you should generate a unique doc_id based on user's given url and timestamp, the doc_id can only use English letters, numbers, and underscores , and must start with an English letter. It cannot be empty. Length requirement: [1, 128], you can use a format like "_mcp_server_auto_gen_doc_id_xxxxxxx.
+- `doc_name` (required): the name of the document to add. you can1 generate a unique doc_name based on user given url and timestamp. the length of doc_name must between 1 and 256. you can use a format like "_mcp_server_auto_gen_doc_name_xxxxxxx.
+- `doc_type` (required): the type of the document to add. for structured document, we support xlsx, csv,jsonl, for unstructured document, wu support txt, doc, docx, pdf, markdown, faq.xlsx, pptx". you should judge the doc_type based on user's given url and judge if we support this doc type. if supported, assign this parameter.
+- `url` (required): the url of the document to add. user should give a valid url, we will add the doc to the collection.
+
+#### get_doc
+
+Get information about document by collection_name and doc_id .
+
+```python
+get_doc(
+    collection_name="collection_name",
+    doc_id="_mcp_server_auto_gen_doc_id_xxxxxxx",
+)
+```
+
+Parameters:
+- `collection_name` (required): the name of the collection you want to get information .
+- `doc_id` (required): the doc_id of document user want to get information .
+
 #### get_collection
 
 Get information about a viking knowledge base collection from your project .

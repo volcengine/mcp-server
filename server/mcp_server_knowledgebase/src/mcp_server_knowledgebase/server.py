@@ -20,9 +20,143 @@ g_knowledge_base_domain = "api-knowledgebase.mlp.cn-beijing.volces.com"
 search_knowledge_path = "/api/knowledge/collection/search_knowledge"
 list_collections_path = "/api/knowledge/collection/list"
 get_collections_path = "/api/knowledge/collection/info"
+doc_add_path = "/api/knowledge/doc/add"
+doc_info_path = "/api/knowledge/doc/info"
 
 # Create MCP server
 mcp = FastMCP("Knowledgebase MCP Server", port=int(os.getenv("PORT", "8000")))
+
+@mcp.tool()
+def add_doc(
+        collection_name:str,
+        add_type:str,
+        doc_id: str,
+        doc_name: str,
+        doc_type: str,
+        url: str,
+) -> Dict:
+    """
+    Add a document to a collection in your project.
+    This tool allows you to add a document to a collection in your project by collection_name.
+    Args:
+         collection_name: the name of the knowledge base collection to add document to.
+         add_type: the type of the document to add. so far only support "url" now. so you must assign this parameter to "url".
+         doc_id: you should generate a unique doc_id based on user's given url and timestamp, the doc_id can only use English letters, numbers, and underscores , and must start with an English letter. It cannot be empty.
+                Length requirement: [1, 128], you can use a format like "_mcp_server_auto_gen_doc_id_xxxxxxx.
+         doc_name: the name of the document to add. you can1 generate a unique doc_name based on user given url and timestamp. the length of doc_name must between 1 and 256. you can use a
+                format like "_mcp_server_auto_gen_doc_name_xxxxxxx.
+         doc_type: the type of the document to add. for structured document, we support xlsx, csv,jsonl, for unstructured document, wu support txt, doc, docx, pdf, markdown, faq.xlsx, pptx".
+                   you should judge the doc_type based on user's given url and judge if we support this doc type. if supported, assign this parameter.
+         url: the url of the document to add. user should give a valid url, we will add the doc to the collection.
+
+    Returns:
+        collection_name: the name of the knowledge base collection.
+        doc_id: the doc_id of document user added to collection.
+
+    """
+    try:
+        if not collection_name:
+            raise ValueError("Collection name cannot be empty.")
+
+        request_params = {
+            "collection_name": collection_name,
+            "project": config.project,
+            "add_type": add_type,
+            "doc_id": doc_id,
+            "doc_name": doc_name,
+            "doc_type": doc_type,
+            "url": url,
+        }
+
+        doc_add_req = prepare_request(method="POST", path=doc_add_path, ak=config.ak, sk=config.sk, data=request_params)
+        rsp = requests.request(
+            method=doc_add_req.method,
+            url="https://{}{}".format(g_knowledge_base_domain, doc_add_req.path),
+            headers=doc_add_req.headers,
+            data=doc_add_req.body)
+
+        result = rsp.json()
+        if result['code'] != 0:
+            logger.error(f"Error in add_doc: {result['message']}")
+            return {"error": result['message']}
+
+        doc_add_data = result['data']
+        if not doc_add_data:
+            raise ValueError(f"doc {doc_id} has no data.")
+
+        return {
+            "collection_name": collection_name,
+            "doc_id": doc_id,
+        }
+
+    except Exception as e:
+        logger.error(f"Error in add_doc: {str(e)}")
+        return {"error": str(e)}
+
+
+@mcp.tool()
+def get_doc(
+        collection_name: str,
+        doc_id: str,
+) -> Dict:
+    """
+    Get information about a document from your collection.
+    This tool allows you to get information about a document from your project by collection_name and doc_id.
+    Args:
+         collection_name: the name of the knowledge base collection to get document from.
+         doc_id: the doc_id of document user want to get information.
+    Returns:
+        collection_name: the name of the knowledge base collection.
+        doc_id: the doc_id of document user added to collection.
+        doc_name: the name of the document.
+        doc_type: the type of the document.
+        url: the url of the document.
+        add_type: the type how to add document.
+        create_time: the time when document added to collection.
+        update_time: the time when document updated.
+        point_num: The number of points extracted from the document.
+        status: the status of the document. the status struct has two fields:
+            - process_status: The processing status of the document.
+                                0 means the processing is completed,
+                                1 means the processing failed,
+                                2 or 3 means it is in queue,
+                                5 means it is being deleted,
+                                and 6 means it is processing.
+            - failed_code: the status message of the document.
+    """
+
+    try:
+        if not collection_name:
+            raise ValueError("Collection name cannot be empty.")
+
+        request_params = {
+            "collection_name": collection_name,
+            "project": config.project,
+            "doc_id": doc_id,
+        }
+
+        doc_info_req = prepare_request(method="POST", path=doc_info_path, ak=config.ak, sk=config.sk, data=request_params)
+        rsp = requests.request(
+            method=doc_info_req.method,
+            url="https://{}{}".format(g_knowledge_base_domain, doc_info_req.path),
+            headers=doc_info_req.headers,
+            data=doc_info_req.body)
+
+        result = rsp.json()
+        if result['code'] != 0:
+            logger.error(f"Error in add_doc: {result['message']}")
+            return {"error": result['message']}
+
+        doc_info_data = result['data']
+        if not doc_info_data:
+            raise ValueError(f"doc {doc_id} not found.")
+
+        return doc_info_data
+
+    except Exception as e:
+        logger.error(f"Error in get_doc: {str(e)}")
+        return {"error": str(e)}
+
 
 @mcp.tool()
 def get_collection(
