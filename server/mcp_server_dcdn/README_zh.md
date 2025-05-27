@@ -39,10 +39,25 @@ IGA MCP Server 支持查询并分析业务数据信息和域名配置信息，�
 
 ## 安装部署  
 ### 环境要求
-- Python 3.13+
-- 火山引擎账号及AccessKey/SecretKey
+- 安装 Python 3.10 或者更高版本
+- 安装 uv
+    - 如果是linux系统
+    ```
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
+    - 如果是window系统
+    ```
+    powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+    ```
+    - 同步依赖项并更uv.lock:
+    ```bash
+    uv sync
+    ```
+    - 构建mcp server:
+    ```bash
+    uv build
+    ```
 
-## 部署
 ### 在 MCP Client 中集成
 
 ```json

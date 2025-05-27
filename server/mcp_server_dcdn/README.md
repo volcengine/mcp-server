@@ -39,10 +39,24 @@ Obtain AccessKey and SecretKey from the [Volcengine Console - Access Control](ht
 
 ## Installation and Deployment
 ### Environment Requirements
-- Python 3.13+
-- Volcengine account and AccessKey/SecretKey
-
-## Deployment
+- Install Python 3.10 or higher
+- Install uv
+    - For Linux systems:
+    ```bash
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    ```
+    - For Windows systems:
+    ```powershell
+    powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+    ```
+    - Sync dependencies and update uv.lock:
+    ```bash
+    uv sync
+    ```
+    - Build mcp server:
+    ```bash
+    uv build
+    ```
 ### Integrate into MCP Client
 
 ```json
@@ -62,8 +76,9 @@ Obtain AccessKey and SecretKey from the [Volcengine Console - Access Control](ht
     }
   }
 }
-## 示例
-Cursor 中使用示例
+
+## Examples
+Usage examples in Cursor
 ![Domain Query](https://lf3-static.bytednsdoc.com/obj/eden-cn/uvzhlzeh7pbyubz/mcp-server-iga/image.png)
 ![Top IP](https://lf3-static.bytednsdoc.com/obj/eden-cn/uvzhlzeh7pbyubz/mcp-server-iga/topip.jpeg)
 ![Statistics Data](https://lf3-static.bytednsdoc.com/obj/eden-cn/uvzhlzeh7pbyubz/mcp-server-iga/statistic.png)
