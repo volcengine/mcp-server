@@ -1,6 +1,6 @@
 
 [project]
-name = "mcp_server_ga"
+name = "mcp-server-ga"
 version = "0.1.0"
 description = "MCP server for ga"
 readme = "README.md"
@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.scripts]
-mcp_server_ga= "src.ga.server:main"
+mcp-server-ga= "src.ga.server:main"
 
 
 [build-system]
