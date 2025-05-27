@@ -1,4 +1,4 @@
-from vefaas_server import mcp
+from .vefaas_server import mcp
 import logging
 
 logging.basicConfig(
