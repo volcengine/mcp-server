@@ -11,7 +11,7 @@ import base64
 import logging
 import tempfile
 import zipfile
-from sign import request, get_authorization_credentials
+from .sign import request, get_authorization_credentials
 import json
 from mcp.server.session import ServerSession
 from mcp.server.fastmcp import Context, FastMCP
