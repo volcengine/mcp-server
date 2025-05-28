@@ -8,7 +8,7 @@
 
 
 ## Tools
-IGA MCP Server 支持查询并分析业务数据信息和域名配置信息，提供如下工具。
+DCDN MCP Server 支持查询并分析业务数据信息和域名配置信息，提供如下工具。
 
 域名配置查询
 - `ListDomainConfig`: [查询域名配置](https://www.volcengine.com/docs/6559/1171745)
