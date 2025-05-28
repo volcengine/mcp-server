@@ -32,14 +32,9 @@ DNS，Domain
 
 ### Tool 2: create_zone
 
-添加域名。
-添加完毕后，后续可以通过 `create_record` 工具来添加解析。
+添加域名配置。
 
-### Tool 3: create_record
-
-给指定域名增加解析记录。
-
-### Tool 4: list_records
+### Tool 3: list_records
 
 获取域名的全部解析记录列表。
 

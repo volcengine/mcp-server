@@ -57,17 +57,17 @@ def create_mcp_server():
 
         return HandlerVolcResponse(reqs)
 
-    @mcp.tool()
-    def create_record() -> str:
-        """
-        本接口用于给指定域名增加解析记录。
-        Call steps:
-        1. Pass "create_record" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  create_record
-        """
-        reqs = service.mcp_post("McpStartCloudServer", {}, json.dumps({}))
+    # @mcp.tool()
+    # def create_record() -> str:
+    #     """
+    #     本接口用于给指定域名增加解析记录。
+    #     Call steps:
+    #     1. Pass "create_record" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+    #     2. After obtaining the parameter description, invoke  create_record
+    #     """
+    #     reqs = service.mcp_post("McpStartCloudServer", {}, json.dumps({}))
 
-        return HandlerVolcResponse(reqs)
+    #     return HandlerVolcResponse(reqs)
 
     @mcp.tool()
     def list_records() -> str:

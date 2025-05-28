@@ -32,14 +32,9 @@ List DNS on TrafficRoute.
 
 ### Tool 2: create_zone
 
-Add a domain.
-After adding, you can use `create-record` to add DNS record.
+Add a domain configuration.
 
-### Tool 3: create_record
-
-Add a DNS record.
-
-### Tool 4: list_records
+### Tool 3: list_records
 
 Get all records of the specific DNS.
 
