@@ -1,8 +1,8 @@
 
 [project]
-name = "mcp-server-dcdn"
+name = "mcp-server-ga"
 version = "0.1.0"
-description = "MCP server for dcdn"
+description = "MCP server for ga"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.scripts]
-mcp-server-dcdn= "src.dcdn.server:main"
+mcp-server-ga= "src.ga.server:main"
 
 
 [build-system]

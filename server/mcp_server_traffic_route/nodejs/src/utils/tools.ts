@@ -120,6 +120,16 @@ const store = {
 }
 
 /**
+ * Gets the access key ID and secret key from environment variables.
+ */
+function aksk() {
+  return {
+    ak: process.env.VOLCENGINE_ACCESS_KEY ?? process.env.VOLC_ACCESS_KEY_ID,
+    sk: process.env.VOLCENGINE_SECRET_KEY ?? process.env.VOLC_ACCESS_KEY_SECRET,
+  }
+}
+
+/**
  * Generates the tool result by text.
  * @param value The input text to convert.
  */
@@ -180,9 +190,10 @@ export function registerService(key: string | undefined, service: Service | Serv
     }
     
     const obj = new Service(service);
-    if (process.env.VOLC_ACCESS_KEY_ID && process.env.VOLC_ACCESS_KEY_SECRET) {
-      obj.setAccessKeyId(process.env.VOLC_ACCESS_KEY_ID);
-      obj.setSecretKey(process.env.VOLC_ACCESS_KEY_SECRET);
+    const { ak, sk } = aksk();
+    if (ak && sk) {
+      obj.setAccessKeyId(ak);
+      obj.setSecretKey(sk);
     }
 
     store.services[key] = obj;
@@ -194,13 +205,14 @@ export function registerService(key: string | undefined, service: Service | Serv
  * Update credential of each service.
  */
 export function batchUpdateAccessKey() {
-  if (!process.env.VOLC_ACCESS_KEY_ID || !process.env.VOLC_ACCESS_KEY_SECRET) return;
+  const { ak, sk } = aksk();
+  if (!ak || !sk) return;
   for (const key in store.services) {
     if (typeof key !== 'string') continue;
     const service = store.services[key];
     if (service instanceof Service) {
-      service.setAccessKeyId(process.env.VOLC_ACCESS_KEY_ID);
-      service.setSecretKey(process.env.VOLC_ACCESS_KEY_SECRET);
+      service.setAccessKeyId(ak);
+      service.setSecretKey(sk);
     }
   }
 }

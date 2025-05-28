@@ -1,8 +1,9 @@
-from vcloud.base.base_service import BaseService
+from src.base.base_service import BaseService
 from .config import *
 import os
 
-class TrafficRouteAPI(BaseService):
+
+class GaAPI(BaseService):
 
     def __init__(self):
         if os.getenv("VOLCENGINE_REGION") is None:

@@ -36,11 +36,11 @@ export const trafficRouteTools: IProxyToolModel[] = [
     name: 'create-record',
     description: '给指定域名增加解析记录。',
     args: {
-      ZID: z.number(),
-      Host: z.string(),
-      Type: z.string(),
-      Value: z.string(),
-      TTL: z.number().default(600).optional(),
+      ZID: z.number().describe('关联的域名 ID'),
+      Host: z.string().describe('主机名'),
+      Type: z.string().describe('解析记录类型'),
+      Value: z.string().describe('解析记录值'),
+      TTL: z.number().default(600).optional().describe('生存时间，单位为秒'),
       Weight: z.number().default(1).optional().describe('权重'),
     },
     action: 'CreateRecord',
@@ -54,8 +54,8 @@ export const trafficRouteTools: IProxyToolModel[] = [
       RecordID: z.string().describe('解析记录 ID'),
       Host: z.string().describe('域名'),
       Line: z.string(),
-      Type: z.string(),
-      Value: z.string(),
+      Type: z.string().describe('解析记录类型'),
+      Value: z.string().describe('解析记录值'),
       TTL: z.number().default(600).optional(),
       Weight: z.number().default(1).optional().describe('权重'),
     },
@@ -67,7 +67,7 @@ export const trafficRouteTools: IProxyToolModel[] = [
     name: 'list-records',
     description: '获取域名的全部解析记录列表。',
     args: {
-      ZID: z.number()
+      ZID: z.number().describe('关联的域名 ID')
     },
     action: 'ListRecords',
     service: trafficRouteService,
