@@ -6,7 +6,7 @@ import requests
 from typing import Dict, Optional, Final, Any
 from mcp.server import FastMCP
 from mcp_server_vikingdb.config import config
-from common.auth import prepare_request
+from mcp_server_vikingdb.common.auth import prepare_request
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
