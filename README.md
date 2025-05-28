@@ -75,7 +75,6 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 
 - **[CDN MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_cdn)**：火山引擎 CDN 智能分析助手。  
 - **[边缘计算节点 MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_veen)**：申请、配置、查阅在边缘计算节点，包括虚拟机、镜像、裸金属，及对应的网络配置。  
-- **[Traffic Route MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_traffic_route)**：各种类型的 DNS 节点链路配置。  
 
 
 ### **大数据**  
@@ -101,6 +100,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 
 - **[证书中心 MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_certificate_center)**：通过自然语言驱动管理证书服务。  
 - **[域名服务 MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_domain_service)**：通过自然语言高效查询并注册域名。  
+- **[TrafficRoute MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_traffic_route)**：各种类型的 DNS 节点链路配置。
 
 
 ### **管理与治理**  

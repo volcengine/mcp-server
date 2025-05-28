@@ -8,11 +8,11 @@ v0.1
 
 ###  Short Description
 
-The DNS routing service that allows users to configure DNS rules to ensure that requests from clients reach the desired service nodes.
+Support for configuring DNS routing rules to ensure that requests from clients reach the desired service nodes.
 
 ### Long Description
 
-The DNS routing service that allows users to configure DNS rules to ensure that requests from clients reach the desired service nodes.
+The DNS routing service that allows users to configure DNS routing rules to ensure that requests from clients reach the desired service nodes.
 
 ## Category
 
@@ -26,20 +26,15 @@ DNS，Domain
 
 This MCP Server product provides the following Tools (capabilities):
 
-### Tool 1: list-zones
+### Tool 1: list_zones
 
 List DNS on TrafficRoute.
 
-### Tool 2: create-zone
+### Tool 2: create_zone
 
-Add a domain.
-After adding, you can use `create-record` to add DNS record.
+Add a domain configuration.
 
-### Tool 3: create-record
-
-Add a DNS record.
-
-### Tool 4: list-records
+### Tool 3: list_records
 
 Get all records of the specific DNS.
 
@@ -89,8 +84,8 @@ Use a client to interact with the server:
         "mcp-server-traffic-route"
       ],
       "env": {
-        "VOLC_ACCESSKEY": "<Your-Volcengine-AK>",
-        "VOLC_SECRETKEY": "<Your-Volcengine-SK>"
+        "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
+        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK"
       }
     }
   }
