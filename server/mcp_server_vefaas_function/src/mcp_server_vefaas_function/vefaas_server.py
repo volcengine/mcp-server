@@ -1,4 +1,8 @@
 from __future__ import print_function
+
+import io
+from typing import Union
+
 from mcp.server.fastmcp import FastMCP
 import datetime
 import volcenginesdkcore
@@ -25,7 +29,7 @@ mcp = FastMCP("VeFaaS")
 @mcp.tool(description="""Lists all supported runtimes for veFaaS functions.
 Use this when you need to list all supported runtimes for veFaaS functions.""")
 def supported_runtimes():
-    return ["python3.8/v1", "python3.9/v1", "python3.10/v1", "python3.12/v1",
+    return ["python3.8/v1", "python3.9/v1", "python3.10/v1", "python3.12/v1", "native-python3.12/v1",
             "golang/v1",
             "node14/v1", "node20/v1",
             "nodeprime14/v1",
@@ -54,8 +58,16 @@ def validate_and_set_region(region: str = None) -> str:
 
 @mcp.tool(description="""Creates a new VeFaaS function with a random name if no name is provided.
 region is the region where the function will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`, 
-          `cn-shanghai`, `cn-guangzhou` as well.""")
-def create_function(name: str = None, region: str = None, runtime: str = None, command: str = None, 
+          `cn-shanghai`, `cn-guangzhou` as well.
+Note: 
+1. The runtime parameter must be one of the values returned by the supported_runtimes. Please ensure you call that tool first to get the valid options.
+2.	If the function is intended to serve as a web service, you must:
+	•	Write code to start an HTTP server that listens on port 8000 (e.g., using Python’s http.server, Node’s http, or Flask)).
+	•	Provide a launch script such as run.sh that starts the server (e.g., python3 server.py) and keeps it running.
+	•	Set the Command parameter to point to this script (e.g., ./run.sh) in the function config.
+	•	Only native runtimes support the Command field. Use supported_runtimes to ensure the chosen runtime allows it.
+""")
+def create_function(name: str = None, region: str = None, runtime: str = None, command: str = None, source: str = None,
                     image: str = None, envs: dict = None, description: str = None) -> str:
     # Validate region
     region = validate_and_set_region(region)
@@ -73,6 +85,23 @@ def create_function(name: str = None, region: str = None, runtime: str = None, c
 
     if command:
         create_function_request.command = command
+
+    source_type = None
+
+    if source:
+        # Determine source type based on the format
+        if ":" not in source:
+            # If no colon, assume it's a base64 encoded zip
+            source_type = "zip"
+        elif source.count(":") == 1 and "/" not in source:
+            # Format: bucket_name:object_key
+            source_type = "tos"
+        elif "/" in source and ":" in source:
+            # Format: host/namespace/repo:tag
+            source_type = "image"
+
+        create_function_request.source = source
+        create_function_request.source_type = source_type
 
     if envs:
         env_list = []
@@ -97,6 +126,7 @@ def create_function(name: str = None, region: str = None, runtime: str = None, c
 Use this when asked to update a VeFaaS function's code.
 Region is the region where the function will be updated, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`, 
 `cn-shanghai`, `cn-guangzhou` as well.
+After updating the function, you need to release it again for the changes to take effect.
 No need to ask user for confirmation, just update the function.""")
 def update_function(function_id: str, source: str = None, region: str = None, command: str = None,
                     envs: dict = None):
@@ -153,7 +183,9 @@ def update_function(function_id: str, source: str = None, region: str = None, co
 Use this when asked to release, publish, or deploy a VeFaaS function.
 Region is the region where the function will be released, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`, 
 `cn-shanghai`, `cn-guangzhou` as well.
-No need to ask user for confirmation, just release the function.""")
+After releasing, you should call list_release_records to check the release status.
+No need to ask user for confirmation, just release the function.
+If you want the function to be accessible from the public internet, you also need to call create_api_gateway_trigger after releasing to create an API Gateway trigger.""")
 def release_function(function_id: str, region: str = None):
     region = validate_and_set_region(region)
 
@@ -276,30 +308,29 @@ def init_client(region: str = None, ctx: Context = None):
     volcenginesdkcore.Configuration.set_default(configuration)
     return volcenginesdkvefaas.VEFAASApi()
 
-@mcp.tool(description="""Creates a base64-encoded zip file containing a Python script.
-Use this when you need to package Python code into a base64-encoded zip file.""")
-def create_zip_from_code(code: str) -> str:
-    # Create a temporary directory
-    with tempfile.TemporaryDirectory() as temp_dir:
-        # Create index.py with the provided code
-        index_path = os.path.join(temp_dir, "index.py")
-        with open(index_path, "w") as f:
-            f.write(code)
 
-        # Create zip file
-        zip_path = os.path.join(temp_dir, "function.zip")
-        with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
-            zf.write(index_path, "index.py")
+@mcp.tool(description="""Compresses multiple in-memory files into a single ZIP archive and returns its base64-encoded string.
+Use this when you need to package multiple files and pass them to other interfaces (e.g., function creation or update) in a base64-encoded ZIP format.
+The input should be a dictionary where keys are filenames and values are file contents in str. No files are written to disk.""")
+def create_zip_base64(file_dict: dict[str, Union[str, bytes]]) -> str:
+    zip_buffer = io.BytesIO()
 
-        # Read and encode the zip file
-        with open(zip_path, "rb") as f:
-            zip_content = f.read()
-            base64_content = base64.b64encode(zip_content).decode("utf-8")
+    with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zip_file:
+        for filename, content in file_dict.items():
+            info = zipfile.ZipInfo(filename)
+            info.date_time = datetime.datetime.now().timetuple()[:6]
+            info.external_attr = 0o777 << 16
+            zip_file.writestr(info, content)
 
-        return base64_content
-    
+    zip_bytes = zip_buffer.getvalue()
+    zip_base64 = base64.b64encode(zip_bytes).decode("utf-8")
+
+    return zip_base64
+
+
 @mcp.tool(description="""Creates a new api gateway trigger for a veFaaS function.
 Use this when you need to create a new api gateway trigger for a veFaaS function.
+It is recommended that each gateway service is used for only one function.
 No need to ask user for confirmation, just create the gateway.""")
 def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id: str, region: str = None):
     region = validate_and_set_region(region)
