@@ -72,7 +72,7 @@ OAuth 2.0
 
 参考火山引擎 veFaaS [一键部署 Browser Use Agent 应用](https://www.volcengine.com/docs/6662/1537697)，获取 veFaaS Browser Use Agent 服务的访问入口，如 `https://xxxxxxxxxxx.apigateway-cn-beijing.volceapi.com/tasks`，请去掉 URL 里的路径，获取 `https://xxxxxxxxxxx.apigateway-cn-beijing.volceapi.com`，用于下方的 `BROWSER_USE_ENDPOINT` 配置。
 
-### stdio
+### Stdio
 
 ```json
 {
@@ -92,7 +92,7 @@ OAuth 2.0
 }
 ```
 
-### sse
+### SSE
 
 ```json
 {
