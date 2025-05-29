@@ -42,9 +42,9 @@ def add_doc(
          collection_name: the name of the knowledge base collection to add document to.
          add_type: the type of the document to add. so far only support "url" now. so you must assign this parameter to "url".
          doc_id: you should generate a unique doc_id based on user's given url and timestamp, the doc_id can only use English letters, numbers, and underscores , and must start with an English letter. It cannot be empty.
-                Length requirement: [1, 128], you can use a format like "_mcp_server_auto_gen_doc_id_xxxxxxx.
+                Length requirement: [1, 128], you can use a format like "mcp_server_auto_gen_doc_id_xxxxxxx.
          doc_name: the name of the document to add. you can1 generate a unique doc_name based on user given url and timestamp. the length of doc_name must between 1 and 256. you can use a
-                format like "_mcp_server_auto_gen_doc_name_xxxxxxx.
+                format like "mcp_server_auto_gen_doc_name_xxxxxxx.
          doc_type: the type of the document to add. for structured document, we support xlsx, csv,jsonl, for unstructured document, wu support txt, doc, docx, pdf, markdown, faq.xlsx, pptx".
                    you should judge the doc_type based on user's given url and judge if we support this doc type. if supported, assign this parameter.
          url: the url of the document to add. user should give a valid url, we will add the doc to the collection.
