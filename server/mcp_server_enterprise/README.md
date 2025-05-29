@@ -93,7 +93,7 @@ Obtain Volcengine Access Key ID and Secret Access Key from the Volcengine manage
 ```json
 {
   "mcpServers": {
-    "Enterprise MCP": {
+    "mcp-server-enterprise": {
       "command": "uvx",
       "args": [
         "--from",

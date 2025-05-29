@@ -7,7 +7,7 @@ import json
 def create_mcp_server():
     service = TrademarkAPI()
     mcp = FastMCP(
-        "Enterprise MCP",
+        "mcp-server-enterprise",
         description="Volcengine(火山引擎) 企业服务-商标服务 MCP , 你的商标注册、管理助手",
     )
 

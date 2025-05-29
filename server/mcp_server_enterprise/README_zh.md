@@ -93,7 +93,7 @@
 ```json
 {
   "mcpServers": {
-    "Enterprise MCP": {
+    "mcp-server-enterprise": {
       "command": "uvx",
       "args": [
         "--from",
