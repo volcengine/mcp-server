@@ -45,7 +45,7 @@ def load_config() -> NetworkAdvisorConfig:
         access_key=os.getenv("VOLCENGINE_ACCESS_KEY", ""),
         secret_key=os.getenv("VOLCENGINE_SECRET_KEY", ""),
         region=os.getenv("VOLCENGINE_REGION", ""),
-        host=os.getenv("VOLCENGINE_HOST", ""),
+        host=os.getenv("VOLCENGINE_ENDPOINT", ""),
     )
     logger.info(f"Success to Loaded configuration")
 

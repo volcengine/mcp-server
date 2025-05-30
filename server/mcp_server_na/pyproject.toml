@@ -3,7 +3,7 @@ name = "mcp-server-na"
 version = "1.0"
 description = "MCP Server for NetworkAdvisor"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 dependencies = [
     "volcengine-python-sdk>=1.1.2",
     "volcengine>=1.0.175",
