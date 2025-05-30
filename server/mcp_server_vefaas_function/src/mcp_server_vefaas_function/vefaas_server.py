@@ -183,7 +183,7 @@ def update_function(function_id: str, source: str = None, region: str = None, co
 Use this when asked to release, publish, or deploy a VeFaaS function.
 Region is the region where the function will be released, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`, 
 `cn-shanghai`, `cn-guangzhou` as well.
-After releasing, you should call list_release_records to check the release status.
+After releasing, you should call get_function_release_status to check the release status.
 No need to ask user for confirmation, just release the function.
 If you want the function to be accessible from the public internet, you also need to call create_api_gateway_trigger after releasing to create an API Gateway trigger.""")
 def release_function(function_id: str, region: str = None):
@@ -311,7 +311,7 @@ def init_client(region: str = None, ctx: Context = None):
 
 @mcp.tool(description="""Compresses multiple in-memory files into a single ZIP archive and returns its base64-encoded string.
 Use this when you need to package multiple files and pass them to other interfaces (e.g., function creation or update) in a base64-encoded ZIP format.
-The input should be a dictionary where keys are filenames and values are file contents in str. No files are written to disk.""")
+The input should be a dictionary where keys are filenames and values are file contents in either str or bytes. No files are written to disk.""")
 def create_zip_base64(file_dict: dict[str, Union[str, bytes]]) -> str:
     zip_buffer = io.BytesIO()
 
