@@ -30,7 +30,7 @@ def validate_local_required_vars():
     ValueError: If any required environment variable is missing.
     """
     missing_vars = []
-    for var in ["VOLCENGINE_ACCESS_KEY", "VOLCENGINE_SECRET_KEY", "VOLCENGINE_REGION"]:
+    for var in ["VOLCENGINE_ACCESS_KEY", "VOLCENGINE_SECRET_KEY", "VOLCENGINE_REGION", "VOLCENGINE_ENDPOINT"]:
         if var not in os.environ:
             missing_vars.append(var)
 
@@ -47,7 +47,7 @@ def load_config() -> NetworkAdvisorConfig:
         region=os.getenv("VOLCENGINE_REGION", ""),
         host=os.getenv("VOLCENGINE_ENDPOINT", ""),
     )
-    logger.info(f"Success to Loaded configuration")
+    logger.info("Success to Loaded configuration")
 
     return config
 

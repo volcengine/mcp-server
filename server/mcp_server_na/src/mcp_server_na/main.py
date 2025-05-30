@@ -26,7 +26,7 @@ def main():
         logger.info(f"Starting NetworkAdvisor MCP Server with {args.transport} transport")
         mcp.run(transport=args.transport)
     except Exception as e:
-        logger.error(f"Error starting NetworkAdvisor MCP Server: {str(e)}")
+        logger.exception(f"Error starting NetworkAdvisor MCP Server: {str(e)}")
         raise
 
 
