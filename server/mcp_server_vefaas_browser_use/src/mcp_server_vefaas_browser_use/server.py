@@ -1,5 +1,6 @@
 from __future__ import print_function
 from mcp.server.fastmcp import FastMCP
+import argparse
 import os
 import logging
 import requests
@@ -117,8 +118,17 @@ def get_browser_use_task_result(task_id: str):
 
 def main():
     logger.info("Starting veFaaS browser use MCP Server")
+    parser = argparse.ArgumentParser(description="Run the veFaaS browser use MCP Server")
+    parser.add_argument(
+        "--transport",
+        "-t",
+        choices=["sse", "stdio"],
+        default="stdio",
+        help="Transport protocol to use (sse or stdio)",
+    )
+    args = parser.parse_args()
     
-    mcp.run(transport="stdio")
+    mcp.run(transport=args.transport)
 
 if __name__ == "__main__":
     main()

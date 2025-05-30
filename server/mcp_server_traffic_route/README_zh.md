@@ -8,11 +8,11 @@ v0.1
 
 ### 短描述
 
-TrafficRoute 用于配置 DNS 规则，以确保终端请求能够正确快捷到达对应的服务节点。
+支持对各种类型的 DNS 节点链路进行配置。
 
 ### 长描述
 
-TrafficRoute 用于配置 DNS 规则，以确保终端请求能够正确快捷到达对应的服务节点。
+TrafficRoute 用于配置 DNS 链路规则，以确保终端请求能够正确快捷到达对应的服务节点。
 
 ## 分类
 
@@ -26,20 +26,15 @@ DNS，Domain
 
 本 MCP Server 产品提供以下 Tools (工具/能力):
 
-### Tool 1: list-zones
+### Tool 1: list_zones
 
 获取在 TrafficRoute 上的解析域名列表。
 
-### Tool 2: create-zone
+### Tool 2: create_zone
 
-添加域名。
-添加完毕后，后续可以通过 `create-record` 工具来添加解析。
+添加域名配置。
 
-### Tool 3: create-record
-
-给指定域名增加解析记录。
-
-### Tool 4: list-records
+### Tool 3: list_records
 
 获取域名的全部解析记录列表。
 
@@ -89,8 +84,8 @@ uv run mcp-server-traffic-route -t sse
         "mcp-server-traffic-route"
       ],
       "env": {
-        "VOLC_ACCESSKEY": "<Your-Volcengine-AK>",
-        "VOLC_SECRETKEY": "<Your-Volcengine-SK>"
+        "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
+        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK"
       }
     }
   }
