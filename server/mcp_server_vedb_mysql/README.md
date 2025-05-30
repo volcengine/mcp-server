@@ -1,125 +1,87 @@
 # veDB MySQL MCP Server
+> 云数据库 veDB MySQL 版采用计算存储分离架构，100%兼容MySQL，最多支持 200TiB 的超大容量结构化数据存储，单个数据库集群最多可扩展至 16 个计算节点。支持实例管理、账号管理、数据库管理、备份恢复、白名单、数据迁移、数据同步、读写分离、安全审计、高可用、版本升级、备份恢复等关键特性。
 
-This MCP server provides a tool to interact with the VolcEngine veDB MySQL Service, allowing you to search and retrieve knowledge from your collections.
+---
 
-## Features
 
-- list_vedb_mysql_instances
-> Retrieve a list of all veDB MySQL instances for the user, including a batch of instance IDs and basic information
-- describe_vedb_mysql_detail
-> Retrieve detailed information about a specific veDB MySQL instance
-- list_vedb_mysql_instance_databases
-> Retrieve a list of databases created in a specific veDB MySQL instance, including privileges info
-- list_vedb_mysql_instance_accounts
-> Obtain a list of accounts in a single veDB MySQL instance, with their privilege details
-- modify_vedb_mysql_instance_alias
-> Modify a specific veDB MySQL instance's alias
+| 项目 | 详情 |
+| ---- | ---- |
+| 版本 | v1.0.0 |
+| 描述 | 火山引擎 veDB MySQL 版即开即用、稳定可靠的关系型数据库服务 |
+| 分类 | 数据库 |
+| 标签 | MySQL, RDS, 关系型数据库, 数据库 |
 
-## Setup
+---
 
-### Prerequisites
+## Tools
 
-- Python 3.10 or higher
-- API credentials (AK/SK)
+### 1. `create_vedb_mysql_instance`
+- **详细描述**：创建一个新实例
+- **触发示例**：`"创建一个新的vedbm实例，参数参考我的其他实例。并告诉我mysql连接串"`
 
-### Installation
+### 2. `list_vedb_mysql_instances`
+- **详细描述**：获取用户的veDB MySQL实例列表，包括实例ID，以及实例的基本信息
+- **触发示例**：`"列出我的vedbm实例"`
 
-1. Install the package:
+### 3. `describe_vedb_mysql_detail`
+- **详细描述**：获取指定实例的实例详情
+- **触发示例**：`"查看实例ID为vedbm-hylviolixpvu的详细信息"`
 
-```bash
-pip install -e .
-```
+### 4. `list_vedb_mysql_instance_databases`
+- **详细描述**：获取指定实例中数据库列表，包括数据库的权限信息
+- **触发示例**：`"查看实例vedbm-hylviolixpvu实例中的数据库列表"`
 
-Or with uv (recommended):
+### 5. `list_vedb_mysql_instance_accounts`
+- **详细描述**：获取指定实例中账号信息，包括账号的权限详情
+- **触发示例**：`"查看实例vedbm-hylviolixpvu实例中的账号列表"`
 
-```bash
-uv pip install -e .
-```
+### 6. `modify_vedb_mysql_instance_alias`
+- **详细描述**：更新指定实例的别名
+- **触发示例**：`"将实例vedbm-hylviolixpvu的别名改为生产数据库"`
 
-### Configuration
+### 7. `create_vedb_mysql_allowlist`
+- **详细描述**：创建一个veDB MySQL网络白名单
+- **触发示例**：`"创建一个仅用于我的ECS实例的veDB MySQL网络白名单"`
 
-The server requires the following environment variables:
+### 8. `bind_allowlist_to_vedb_mysql_instances`
+- **详细描述**：将veDB MySQL网络白名单绑定到实例
+- **触发示例**：`"绑定上一步创建的白名单 到我的veDB MySQL实例上"`
 
-- `VOLC_ACCESSKEY`: Your VolcEngine access key
-- `VOLC_SECRETKEY`: Your VolcEngine secret key
-- `REGION`: Your VolcEngine region (e.g., "cn-beijing")
+---
 
-Optional environment variables:
+## 服务开通链接
+[点击前往火山引擎veDB MySQL服务开通页面](https://console.volcengine.com/db/vedb-mysql)
 
-- `PORT`: Port for the FastMCP server (default: 8000)
+---
 
-## Usage
+## 鉴权方式
+在火山引擎管理控制台获取访问密钥 ID、秘密访问密钥和区域，采用 API Key 鉴权。需要在配置文件中设置 `VOLC_ACCESSKEY` 和 `VOLC_SECRETKEY`。
 
-### Running the Server
+---
 
-The server can be run with either stdio transport (for MCP integration) or SSE transport:
-
-```bash
-python -m mcp_server_vedb_mysql.server --transport stdio
-```
-
-Or:
-
-```bash
-python -m mcp_server_vedb_mysql.server --transport sse
-```
-
-## MCP Integration
-
-To add this server to your MCP configuration, add the following to your MCP settings file:
-
+## 部署
+火山引擎veDB MySQL服务接入地址：https://www.volcengine.com/docs/6357/66583
 ```json
 {
-   "mcpServers": {
-      "veDB_mysql": {
-         "command": "uvx",
-         "args": [
-            "--from",
-            "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vedb_mysql",
-            "mcp-server-vedb-mysql"
-         ],
-         "env": {
-            "VOLC_ACCESSKEY": "your-access-key",
-            "VOLC_SECRETKEY": "your-secret-key",
-            "REGION": "cn-beijing",
-            "PORT": "8000",
-            "ENDPOINT": "vedbm.cn-beijing.volcengineapi.com"
-         }
+  "mcpServers": {
+    "vedb_mysql": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vedb_mysql",
+        "mcp-server-vedb-mysql"
+      ],
+      "env": {
+        "VOLC_ACCESSKEY": "your-access-key",
+        "VOLC_SECRETKEY": "your-secret-key",
+        "REGION": "<REGION>",
+        "PORT": "<PORT>",
+        "ENDPOINT": "<ENDPOINT>"
       }
-   }
+    }
+  }
 }
 ```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Authentication Errors**
-   - Verify your AK/SK credentials are correct
-   - Check that you have the necessary permissions for the collection
-
-2. **Connection Timeouts**
-   - Check your network connection to the VolcEngine API
-   - Verify the host configuration is correct
-
-3. **Empty Results**
-   - Verify the collection name is correct
-   - Try broadening your search query
-
-### Logging
-
-The server uses Python's logging module with INFO level by default. You can see detailed logs in `/tmp/mcp.vedbmysql.log` when running the server.
-
-## Contributing
-
-Contributions to improve the Viking Knowledge Base MCP Server are welcome. Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-Please ensure your code follows the project's coding standards and includes appropriate tests.
 
 ## License
 
