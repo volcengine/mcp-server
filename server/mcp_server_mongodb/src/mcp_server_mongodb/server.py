@@ -10,7 +10,6 @@ from mcp_server_mongodb.resource.mongo_resource import MongoDBSDK
 # 初始化MCP服务
 mcp_server = FastMCP("mongodb_mcp_server", port=int(os.getenv("PORT", "8000")))
 logger = logging.getLogger("mongodb_mcp_server")
-volc_region = os.getenv('VOLC_REGION')
 mongo_resource = MongoDBSDK(
     region=os.getenv('VOLC_REGION'), ak=os.getenv('VOLC_ACCESSKEY'), sk=os.getenv('VOLC_SECRETKEY'), host=os.getenv('HOST')
 )
@@ -169,12 +168,10 @@ def create_db_instance(zone_id: str = Field(description="可用区ID, 可以调�
 
 
 @mcp_server.tool(name="describe_azs", description="获取实例创建可用区")
-def describe_azs(region_id: str = volc_region) -> dict[str, Any]:
+def describe_azs() -> dict[str, Any]:
     """获取实例创建可用区
-       Args:
-           region_id (str): 地区ID
     """
-    req = {"region_id": region_id}
+    req = {"region_id": os.getenv('VOLC_REGION')}
     try:
         resp = mongo_resource.describe_azs(req)
         return resp.to_dict()
