@@ -58,8 +58,8 @@ Obtain your Access Key ID, Secret Access Key, and Region from the Volcano Engine
 Set the following variables in your configuration file:
 
 ```
-VOLC_ACCESSKEY  = <Your Access Key ID>
-VOLC_SECRETKEY  = <Your Secret Access Key>
+VOLCENGINE_ACCESS_KEY  = <Your Access Key ID>
+VOLCENGINE_SECRET_KEY  = <Your Secret Access Key>
 ```
 
 ## Deploy
@@ -75,11 +75,11 @@ Volcano Engine veDB MySQL service access address: <https://www.volcengine.com/do
         "mcp-server-vedb-mysql"
       ],
       "env": {
-        "VOLC_ACCESSKEY": "your-access-key",
-        "VOLC_SECRETKEY": "your-secret-key",
-        "REGION": "<REGION>",
-        "PORT": "<PORT>",
-        "ENDPOINT": "<ENDPOINT>"
+        "VOLCENGINE_ACCESS_KEY": "your-access-key",
+        "VOLCENGINE_SECRET_KEY": "your-secret-key",
+        "VOLCENGINE_REGION": "<VOLCENGINE_REGION>",
+        "MCP_SERVER_PORT": "<PORT>",
+        "VOLCENGINE_ENDPOINT": "<ENDPOINT>"
       }
     }
   }

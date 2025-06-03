@@ -1,8 +1,8 @@
 import os
 import logging
-import json  # 新增导入
+import json
 from dataclasses import dataclass
-from pathlib import Path  # 新增导入
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -28,27 +28,27 @@ def load_config(config_path: str = None) -> VedbMysqlConfig:
                 env_vars = config_data.get('env', {})
                 
                 return VedbMysqlConfig(
-                    region=env_vars.get("REGION", os.getenv("REGION", "cn-beijing")),
-                    access_key_id=env_vars.get("VOLC_ACCESSKEY", os.environ["VOLC_ACCESSKEY"]),
-                    access_key_secret=env_vars.get("VOLC_SECRETKEY", os.environ["VOLC_SECRETKEY"]),
-                    account_id=env_vars.get("ACCOUNT_ID", os.getenv("ACCOUNT_ID", "")),
-                    endpoint=env_vars.get("ENDPOINT", os.getenv("ENDPOINT", "")),
-                    zone=env_vars.get("ZONE", os.getenv("ZONE", ""))
+                    region=env_vars.get("VOLCENGINE_REGION", os.getenv("VOLCENGINE_REGION", "cn-beijing")),
+                    access_key_id=env_vars.get("VOLCENGINE_ACCESS_KEY", os.environ["VOLCENGINE_ACCESS_KEY"]),
+                    access_key_secret=env_vars.get("VOLCENGINE_SECRET_KEY", os.environ["VOLCENGINE_SECRET_KEY"]),
+                    account_id="",
+                    endpoint=env_vars.get("VOLCENGINE_ENDPOINT", os.getenv("VOLCENGINE_ENDPOINT", "")),
+                    zone=""
                 )
         except Exception as e:
             logger.warning(f"Failed to load config file, fallback to env vars: {str(e)}")
     
     # 从环境变量加载
-    required_vars = ["VOLC_ACCESSKEY", "VOLC_SECRETKEY", "REGION"]
+    required_vars = ["VOLCENGINE_ACCESS_KEY", "VOLCENGINE_SECRET_KEY", "VOLCENGINE_REGION"]
     missing_vars = [var for var in required_vars if not os.environ.get(var)]
     if missing_vars:
         raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}")
         
     return VedbMysqlConfig(
-        region=os.getenv("REGION", "cn-beijing"),
-        access_key_id=os.environ["VOLC_ACCESSKEY"],
-        access_key_secret=os.environ["VOLC_SECRETKEY"],
-        account_id=os.getenv("ACCOUNT_ID", ""),
-        endpoint=os.getenv("ENDPOINT", ""),
-        zone=os.getenv("ZONE", "")
+        region=os.getenv("VOLCENGINE_REGION", "cn-beijing"),
+        access_key_id=os.environ["VOLCENGINE_ACCESS_KEY"],
+        access_key_secret=os.environ["VOLCENGINE_SECRET_KEY"],
+        account_id="",
+        endpoint=os.getenv("VOLCENGINE_ENDPOINT", ""),
+        zone=""
     )
