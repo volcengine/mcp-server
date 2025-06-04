@@ -12,7 +12,7 @@ mcp_server = FastMCP("mongodb_mcp_server", port=int(os.getenv("PORT", "8000")))
 logger = logging.getLogger("mongodb_mcp_server")
 
 mongo_resource = MongoDBSDK(
-    region=os.getenv('VOLCENGINE_REGION'), ak=os.getenv('VOLCENGINE_ACCESS_KEY'), sk=os.getenv('VOLCENGINE_SECRET_KEY'), host=os.getenv('VOLCENGIN_HOST')
+    region=os.getenv('VOLCENGINE_REGION'), ak=os.getenv('VOLCENGINE_ACCESS_KEY'), sk=os.getenv('VOLCENGINE_SECRET_KEY'), host=os.getenv('VOLCENGINE_HOST')
 )
 
 @mcp_server.tool(name="describe_db_instances", description="查询MongoDB实例列表")
