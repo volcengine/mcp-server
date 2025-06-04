@@ -1,6 +1,10 @@
+import base64
+import io
 import unittest
 import os
-from vefaas_server import does_function_exist
+import zipfile
+
+from vefaas_server import does_function_exist, create_zip_base64
 
 
 class TestVeFaaSServerIntegration(unittest.TestCase):
@@ -24,6 +28,27 @@ class TestVeFaaSServerIntegration(unittest.TestCase):
         # known_function_id = "your-real-function-id"
         # result = does_function_exist(known_function_id, "cn-beijing")
         # self.assertTrue(result)
+
+    def test_create_zip_base64(self):
+        test_files = {
+            "hello.txt": "Hello, world!",
+            "data.json": b'{"key": "value"}'
+        }
+
+        zip_b64 = create_zip_base64(test_files)
+
+        zip_bytes = base64.b64decode(zip_b64)
+
+        with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zip_file:
+            names = zip_file.namelist()
+            assert "hello.txt" in names
+            assert "data.json" in names
+
+            assert zip_file.read("hello.txt").decode("utf-8") == "Hello, world!"
+            assert zip_file.read("data.json") == b'{"key": "value"}'
+
+            for info in zip_file.infolist():
+                self.assertEqual((info.external_attr >> 16), 0o777)
 
 
 if __name__ == "__main__":
