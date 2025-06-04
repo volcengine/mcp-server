@@ -1,20 +1,13 @@
-# MCP Server Product: Domain Service MCP Server ![Product Logo](https://ti.volccdn.com/obj/net-fe/assets/Internet.svg)
+# Domain Service MCP Server
 
-
-## Version Information
-v1
-
-## Product Description
-### Short Description
-Efficiently query and register domains through natural language
-### Long Description
 The newly launched MCP Server for Domain Service features efficient domain registration capabilities, supporting easy querying of various domain prices through natural language interaction, and completing domain registration with one click, greatly simplifying the domain acquisition process and significantly improving domain registration efficiency and convenience.
 
-## Category
-Enterprise Applications
+| Version | v0.1.0 |
+| :-: | :-: |
+| Description | Efficiently query and register domains through natural language |
+| Category | Enterprise Applications |
+| Tags | Domain |
 
-## Tags
-Domain
 
 ## Tools
 This MCP Server product provides the following Tools (capabilities):

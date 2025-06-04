@@ -1,4 +1,7 @@
 from __future__ import print_function
+
+import io
+from typing import Union
 from mcp.server.fastmcp import FastMCP
 import datetime
 import volcenginesdkcore
@@ -9,13 +12,20 @@ import string
 import os
 import base64
 import logging
-import tempfile
 import zipfile
-from .sign import request
+from .sign import request, get_authorization_credentials
 import json
 from mcp.server.session import ServerSession
 from mcp.server.fastmcp import Context, FastMCP
 from starlette.requests import Request
+import os
+import subprocess
+import zipfile
+import pyzipper
+from io import BytesIO
+from typing import Tuple
+import requests
+import shutil
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -25,7 +35,7 @@ mcp = FastMCP("VeFaaS")
 @mcp.tool(description="""Lists all supported runtimes for veFaaS functions.
 Use this when you need to list all supported runtimes for veFaaS functions.""")
 def supported_runtimes():
-    return ["python3.8/v1", "python3.9/v1", "python3.10/v1", "python3.12/v1",
+    return ["python3.8/v1", "python3.9/v1", "python3.10/v1", "python3.12/v1", "native-python3.12/v1",
             "golang/v1",
             "node14/v1", "node20/v1",
             "nodeprime14/v1",
@@ -54,8 +64,16 @@ def validate_and_set_region(region: str = None) -> str:
 
 @mcp.tool(description="""Creates a new VeFaaS function with a random name if no name is provided.
 region is the region where the function will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`, 
-          `cn-shanghai`, `cn-guangzhou` as well.""")
-def create_function(name: str = None, region: str = None, runtime: str = None, command: str = None, 
+          `cn-shanghai`, `cn-guangzhou` as well.
+Note: 
+1. The runtime parameter must be one of the values returned by the supported_runtimes. Please ensure you call that tool first to get the valid options.
+2.	If the function is intended to serve as a web service, you must:
+	•	Write code to start an HTTP server that listens on port 8000 (e.g., using Python’s http.server, Node’s http, or Flask)).
+	•	Provide a launch script such as run.sh that starts the server (e.g., python3 server.py) and keeps it running.
+	•	Set the Command parameter to point to this script (e.g., ./run.sh) in the function config.
+	•	Only native runtimes support the Command field. Use supported_runtimes to ensure the chosen runtime allows it.
+""")
+def create_function(name: str = None, region: str = None, runtime: str = None, command: str = None, source: str = None,
                     image: str = None, envs: dict = None, description: str = None) -> str:
     # Validate region
     region = validate_and_set_region(region)
@@ -73,6 +91,23 @@ def create_function(name: str = None, region: str = None, runtime: str = None, c
 
     if command:
         create_function_request.command = command
+
+    source_type = None
+
+    if source:
+        # Determine source type based on the format
+        if ":" not in source:
+            # If no colon, assume it's a base64 encoded zip
+            source_type = "zip"
+        elif source.count(":") == 1 and "/" not in source:
+            # Format: bucket_name:object_key
+            source_type = "tos"
+        elif "/" in source and ":" in source:
+            # Format: host/namespace/repo:tag
+            source_type = "image"
+
+        create_function_request.source = source
+        create_function_request.source_type = source_type
 
     if envs:
         env_list = []
@@ -97,6 +132,7 @@ def create_function(name: str = None, region: str = None, runtime: str = None, c
 Use this when asked to update a VeFaaS function's code.
 Region is the region where the function will be updated, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`, 
 `cn-shanghai`, `cn-guangzhou` as well.
+After updating the function, you need to release it again for the changes to take effect.
 No need to ask user for confirmation, just update the function.""")
 def update_function(function_id: str, source: str = None, region: str = None, command: str = None,
                     envs: dict = None):
@@ -153,7 +189,9 @@ def update_function(function_id: str, source: str = None, region: str = None, co
 Use this when asked to release, publish, or deploy a VeFaaS function.
 Region is the region where the function will be released, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`, 
 `cn-shanghai`, `cn-guangzhou` as well.
-No need to ask user for confirmation, just release the function.""")
+After releasing, you should call get_function_release_status to check the release status.
+No need to ask user for confirmation, just release the function.
+If you want the function to be accessible from the public internet, you also need to call create_api_gateway_trigger after releasing to create an API Gateway trigger.""")
 def release_function(function_id: str, region: str = None):
     region = validate_and_set_region(region)
 
@@ -241,48 +279,32 @@ def generate_random_name(prefix="mcp", length=8):
     )
     return f"{prefix}-{random_str}"
 
+
 def init_client(region: str = None, ctx: Context = None):
-    if "VOLC_ACCESSKEY" not in os.environ or  "VOLC_SECRETKEY" not in os.environ:
-        print("VOLC_ACCESSKEY or VOLC_SECRETKEY not in os.environ")
-        _ctx: Context[ServerSession, object] = ctx
-        raw_request: Request = _ctx.request_context.request
-        auth = None
-        if raw_request:
-            # 从 header 的 authorization 字段读取 base64 编码后的 sts json
-            auth = raw_request.headers.get("authorization", None)
-        if auth is None:
-            # 如果 header 中没有认证信息，可能是 stdio 模式，尝试从环境变量获取
-            auth = os.getenv("authorization", None)
-        if auth is None:
-            # 获取认证信息失败
-            raise ValueError("Missing authorization info.")
-
-        if ' ' in auth:
-            _, base64_data = auth.split(' ', 1)
-        else:
-            base64_data = auth
-
-        try:
-            # 解码 Base64
-            decoded_str = base64.b64decode(base64_data).decode('utf-8')
-            data = json.loads(decoded_str)
-
-            ak = data.get('AccessKeyId')
-            sk = data.get('SecretAccessKey')
-            session_token = data.get('SessionToken')
-
-        except Exception as e:
-            raise ValueError("Decode authorization info error", e)
-    else:
-        ak = os.environ["VOLC_ACCESSKEY"]
-        sk = os.environ["VOLC_SECRETKEY"]
-        session_token = ""
+    """
+    Initializes the VeFaaS API client with credentials and region.
+    
+    Args:
+        region: The region to use for the client
+        ctx: The server context object
+        
+    Returns:
+        VEFAASApi: Initialized VeFaaS API client
+        
+    Raises:
+        ValueError: If authorization fails
+    """
+    try:
+        ak, sk, session_token = get_authorization_credentials(ctx)
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
 
     configuration = volcenginesdkcore.Configuration()
     configuration.ak = ak
     configuration.sk = sk
     if session_token:
         configuration.session_token = session_token
+        
     # Set region with default if needed
     region = region if region is not None else "cn-beijing"
     print(f"Using region: {region}")
@@ -292,129 +314,287 @@ def init_client(region: str = None, ctx: Context = None):
     volcenginesdkcore.Configuration.set_default(configuration)
     return volcenginesdkvefaas.VEFAASApi()
 
-@mcp.tool(description="""Creates a base64-encoded zip file containing a Python script.
-Use this when you need to package Python code into a base64-encoded zip file.""")
-def create_zip_from_code(code: str) -> str:
-    # Create a temporary directory
-    with tempfile.TemporaryDirectory() as temp_dir:
-        # Create index.py with the provided code
-        index_path = os.path.join(temp_dir, "index.py")
-        with open(index_path, "w") as f:
-            f.write(code)
 
-        # Create zip file
-        zip_path = os.path.join(temp_dir, "function.zip")
-        with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
-            zf.write(index_path, "index.py")
+@mcp.tool(description="""Compresses multiple in-memory files into a single ZIP archive and returns its base64-encoded string.
+Use this when you need to package multiple files and pass them to other interfaces (e.g., function creation or update) in a base64-encoded ZIP format.
+The input should be a dictionary where keys are filenames and values are file contents in either str or bytes. No files are written to disk.""")
+def create_zip_base64(file_dict: dict[str, Union[str, bytes]]) -> str:
+    zip_buffer = io.BytesIO()
 
-        # Read and encode the zip file
-        with open(zip_path, "rb") as f:
-            zip_content = f.read()
-            base64_content = base64.b64encode(zip_content).decode("utf-8")
+    with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zip_file:
+        for filename, content in file_dict.items():
+            info = zipfile.ZipInfo(filename)
+            info.date_time = datetime.datetime.now().timetuple()[:6]
+            info.external_attr = 0o777 << 16
+            zip_file.writestr(info, content)
 
-        return base64_content
+    zip_bytes = zip_buffer.getvalue()
+    zip_base64 = base64.b64encode(zip_bytes).decode("utf-8")
+
+    return zip_base64
+
+
+@mcp.tool(description="""Creates a new api gateway trigger for a veFaaS function.
+Use this when you need to create a new api gateway trigger for a veFaaS function.
+It is recommended that each gateway service is used for only one function.
+No need to ask user for confirmation, just create the gateway.""")
+def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id: str, region: str = None):
+    region = validate_and_set_region(region)
     
-# @mcp.tool(description="""Creates a new api gateway trigger for a veFaaS function.
-# Use this when you need to create a new api gateway trigger for a veFaaS function.
-# No need to ask user for confirmation, just create the gateway.""")
-# def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id: str, region: str = None):
-#     now = datetime.datetime.utcnow()
-#     ak = os.getenv("VOLC_ACCESSKEY")
-#     sk = os.getenv("VOLC_SECRETKEY")
+    try:
+        ak, sk, token = get_authorization_credentials(mcp.get_context())
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
+
+    now = datetime.datetime.utcnow()
     
-#     # Generate a random suffix for the trigger name
-#     suffix = generate_random_name(prefix="", length=6)
+    # Generate a random suffix for the trigger name
+    suffix = generate_random_name(prefix="", length=6)
 
-#     body = {
-#         "Name":f"{function_id}-trigger-{suffix}",
-#         "GatewayId":api_gateway_id,
-#         "SourceType":"VeFaas",
-#         "UpstreamSpec": {
-#             "VeFaas": {"FunctionId":function_id}}}
+    body = {
+        "Name":f"{function_id}-trigger-{suffix}",
+        "GatewayId":api_gateway_id,
+        "SourceType":"VeFaas",
+        "UpstreamSpec": {
+            "VeFaas": {"FunctionId":function_id}}}
 
-#     try:
-#         response_body = request("POST", now, {}, {}, ak, sk, "CreateUpstream", json.dumps(body))
-#         # Print the full response for debugging
-#         print(f"Response: {json.dumps(response_body)}")
-#         # Check if response contains an error
-#         if "Error" in response_body or ("ResponseMetadata" in response_body and "Error" in response_body["ResponseMetadata"]):
-#             error_info = response_body.get("Error") or response_body["ResponseMetadata"].get("Error")
-#             error_message = f"API Error: {error_info.get('Message', 'Unknown error')}"
-#             raise ValueError(error_message)
+    try:
+        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateUpstream", json.dumps(body))
+        # Print the full response for debugging
+        print(f"Response: {json.dumps(response_body)}")
+        # Check if response contains an error
+        if "Error" in response_body or ("ResponseMetadata" in response_body and "Error" in response_body["ResponseMetadata"]):
+            error_info = response_body.get("Error") or response_body["ResponseMetadata"].get("Error")
+            error_message = f"API Error: {error_info.get('Message', 'Unknown error')}"
+            raise ValueError(error_message)
         
-#         # Check if Result exists in the response
-#         if "Result" not in response_body:
-#             raise ValueError(f"API call did not return a Result field: {response_body}")
+        # Check if Result exists in the response
+        if "Result" not in response_body:
+            raise ValueError(f"API call did not return a Result field: {response_body}")
         
-#         upstream_id = response_body["Result"]["Id"]
-#     except Exception as e:
-#         error_message = f"Error creating upstream: {str(e)}"
-#         raise ValueError(error_message)
+        upstream_id = response_body["Result"]["Id"]
+    except Exception as e:
+        error_message = f"Error creating upstream: {str(e)}"
+        raise ValueError(error_message)
     
-#     body = {
-#         "Name":"router1",
-#         "UpstreamList":[{
-#                 "Type":"VeFaas",
-#                 "UpstreamId":upstream_id,
-#                 "Weight":100
-#                 }
-#                 ],
-#                 "ServiceId":service_id,
-#                 "MatchRule":{"Method":["POST","GET","PUT","DELETE","HEAD","OPTIONS"],
-#                              "Path":{"MatchType":"Prefix","MatchContent":"/"}},
-#                 "AdvancedSetting":{"TimeoutSetting":{
-#                     "Enable":False,
-#                     "Timeout":30},
-#                 "CorsPolicySetting":{"Enable":False}
-#                 }
-#                                                         }
-#     try:
-#         response_body = request("POST", now, {}, {}, ak, sk, "CreateRoute", json.dumps(body))
-#     except Exception as e:
-#         error_message = f"Error creating route: {str(e)}"
-#         raise ValueError(error_message)
-#     return response_body
+    body = {
+        "Name":"router1",
+        "UpstreamList":[{
+                "Type":"VeFaas",
+                "UpstreamId":upstream_id,
+                "Weight":100
+                }
+                ],
+                "ServiceId":service_id,
+                "MatchRule":{"Method":["POST","GET","PUT","DELETE","HEAD","OPTIONS"],
+                             "Path":{"MatchType":"Prefix","MatchContent":"/"}},
+                "AdvancedSetting":{"TimeoutSetting":{
+                    "Enable":False,
+                    "Timeout":30},
+                "CorsPolicySetting":{"Enable":False}
+                }
+    }
+    try:
+        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateRoute", json.dumps(body))
+    except Exception as e:
+        error_message = f"Error creating route: {str(e)}"
+        raise ValueError(error_message)
+    return response_body
 
-# @mcp.tool(description="""Lists all API gateways.
-# Use this when you need to list all API gateways.
-# No need to ask user for confirmation, just list the gateways.""")
-# def list_api_gateways(region: str = None):
-#     now = datetime.datetime.utcnow()
-#     ak = os.getenv("VOLC_ACCESSKEY")
-#     sk = os.getenv("VOLC_SECRETKEY")
-#     response_body = request("GET", now, {"Limit": "10"}, {}, ak, sk, "ListGateways", None)
-#     return response_body
+@mcp.tool(description="""Lists all API gateways.
+Use this when you need to list all API gateways.
+No need to ask user for confirmation, just list the gateways.""")
+def list_api_gateways(region: str = None):
+    now = datetime.datetime.utcnow()
+   
+    try:
+        ak, sk, token = get_authorization_credentials(mcp.get_context())
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
 
-# @mcp.tool(description="""Lists all services of an API gateway.
-# Use this when you need to list all services of an API gateway.
-# No need to ask user for confirmation, just list the services.""")
-# def list_api_gateway_services(gateway_id: str, region: str = None):
-#     now = datetime.datetime.utcnow()
-#     ak = os.getenv("VOLC_ACCESSKEY")
-#     sk = os.getenv("VOLC_SECRETKEY")
+    response_body = request("GET", now, {"Limit": "10"}, {}, ak, sk, token, "ListGateways", None)
+    return response_body
+
+@mcp.tool(description="""Lists all services of an API gateway.
+Use this when you need to list all services of an API gateway.
+No need to ask user for confirmation, just list the services.""")
+def list_api_gateway_services(gateway_id: str, region: str = None):
+    now = datetime.datetime.utcnow()
+    try:
+        ak, sk, token = get_authorization_credentials(mcp.get_context())
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
     
-#     body = {
-#         "GatewayId": gateway_id,
-#         "Limit": 10,
-#         "Offset": 0,
-#     }
+    body = {
+        "GatewayId": gateway_id,
+        "Limit": 10,
+        "Offset": 0,
+    }
+
+    response_body = request("POST", now, {}, {}, ak, sk, token, "ListGatewayServices", json.dumps(body))
+    return response_body
+
+@mcp.tool(description="""Lists all routes of an upstream.
+Use this when you need to list all routes of an upstream.
+No need to ask user for confirmation, just list the routes.""")
+def list_routes(upstream_id: str, region: str = None):
+    now = datetime.datetime.utcnow()
+    try:
+        ak, sk, token = get_authorization_credentials(mcp.get_context())
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
+
+    body = {
+        "UpstreamId": upstream_id
+    }
+
+    response_body = request("POST", now, {}, {}, ak, sk, token, "ListRoutes", json.dumps(body))
+    return response_body
+
+
+def zip_and_encode_folder(folder_path: str) -> Tuple[bytes, int, Exception]:
+    """
+    Zips a folder with system zip command (if available) or falls back to Python implementation.
+    Returns (zip_data, size_in_bytes, error) tuple.
+    """
+    # Check for system zip first
+    if not shutil.which('zip'):
+        print("System zip command not found, using Python implementation")
+        try:
+            data = python_zip_implementation(folder_path)
+            return data, len(data), None
+        except Exception as e:
+            return None, 0, e
+
+    print(f"Zipping folder: {folder_path}")
+    try:
+        # Create zip process with explicit arguments
+        proc = subprocess.Popen(
+            ['zip', '-r', '-q', '-', '.', '-x', '*.git*', '-x', '*.venv*', '-x', '*__pycache__*', '-x', '*.pyc'],
+            cwd=folder_path,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            bufsize=1024 * 8  # 8KB buffer
+        )
+
+        # Collect output with proper error handling
+        try:
+            stdout, stderr = proc.communicate(timeout=30)
+            if proc.returncode != 0:
+                print(f"Zip error: {stderr.decode()}")
+                data = python_zip_implementation(folder_path)
+                return data, len(data), None
+            
+            if stdout:
+                size = len(stdout)
+                print(f"Zip finished, size: {size / 1024 / 1024:.2f} MB")
+                return stdout, size, None
+            else:
+                print("No data from zip command, falling back to Python implementation")
+                data = python_zip_implementation(folder_path)
+                return data, len(data), None
+
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait(timeout=5)  # Give it 5 seconds to cleanup
+            print("Zip process timed out, falling back to Python implementation")
+            try:
+                data = python_zip_implementation(folder_path)
+                return data, len(data), None
+            except Exception as e:
+                return None, 0, e
+
+    except Exception as e:
+        print(f"System zip error: {str(e)}")
+        try:
+            data = python_zip_implementation(folder_path)
+            return data, len(data), None
+        except Exception as e2:
+            return None, 0, e2
+
+def python_zip_implementation(folder_path: str) -> bytes:
+    """Pure Python zip implementation with permissions support"""
+    buffer = BytesIO()
     
-#     response_body = request("POST", now, {}, {}, ak, sk, "ListGatewayServices", json.dumps(body))       
-#     return response_body
+    with pyzipper.AESZipFile(buffer, 'w', compression=pyzipper.ZIP_LZMA) as zipf:
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                arcname = os.path.relpath(file_path, folder_path)
+                
+                # Skip excluded paths and binary/cache files
+                if any(excl in arcname for excl in ['.git', '.venv', '__pycache__', '.pyc']):
+                    continue
+                
+                # Get file permissions
+                st = os.stat(file_path)
+                mode = st.st_mode | 0o755  # Add read/exec permissions
+                
+                try:
+                    # Add to zip with permissions
+                    zipf.write(file_path, arcname)
+                    zipf.setinfo(arcname, zipfile.ZipInfo.from_file(file_path))
+                    zipf.getinfo(arcname).external_attr = (mode & 0xFFFF) << 16  # Unix attributes
+                except Exception as e:
+                    print(f"Warning: Skipping file {arcname} due to error: {str(e)}")
 
-# @mcp.tool(description="""Lists all routes of an upstream.
-# Use this when you need to list all routes of an upstream.
-# No need to ask user for confirmation, just list the routes.""")
-# def list_routes(upstream_id: str, region: str = None):
-#     now = datetime.datetime.utcnow()
-#     ak = os.getenv("VOLC_ACCESSKEY")
-#     sk = os.getenv("VOLC_SECRETKEY")
+    print(f"Python zip finished, size: {buffer.tell() / 1024 / 1024:.2f} MB")
+    return buffer.getvalue()
 
-#     body = {
-#         "UpstreamId": upstream_id
-#     }
+@mcp.tool(description="""Uploads a code folder to tos and returns the TOS object URL.
+          After it is uploaded, ask the user to release the function again for the changes to take effect.
+Use this when you need to upload a code folder to TOS for a veFaaS function.""")
+def upload_to_tos(region: str, folder_path: str, function_id: str) -> bytes:
+    region = validate_and_set_region(region)
+    
+    api_instance = init_client(region, mcp.get_context())
 
-#     response_body = request("POST", now, {}, {}, ak, sk, "ListRoutes", json.dumps(body))
-#     return response_body
+    data, size, error = zip_and_encode_folder(folder_path)
 
+    if error:
+        raise ValueError(f"Error zipping folder: {error}")
+    if not data:
+        raise ValueError("No data returned from zipping folder")
+    if size == 0:
+        raise ValueError("Zipped data size is 0, nothing to upload")
+
+    req = volcenginesdkvefaas.GetCodeUploadAddressRequest(
+            function_id=function_id,
+            content_length=size
+        )
+
+    response = api_instance.get_code_upload_address(req)  
+    upload_url = response.upload_address
+
+    headers = {
+        "Content-Type": "application/zip",
+    }
+
+    response = requests.put(url=upload_url, data=data, headers=headers)
+    if response.status_code >= 200 and response.status_code < 300:
+        print(f"Upload successful! Size: {size / 1024 / 1024:.2f} MB")
+    else:
+        error_message = f"Upload failed with status code {response.status_code}: {response.text}"
+        raise ValueError(error_message)
+
+    try:
+        ak, sk, token = get_authorization_credentials(mcp.get_context())
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
+
+    now = datetime.datetime.utcnow()
+    
+    # Generate a random suffix for the trigger name
+    suffix = generate_random_name(prefix="", length=6)
+
+    body = {
+        "FunctionId":function_id
+    }
+
+    try:
+        response_body = request("POST", now, {}, {}, ak, sk, token, "CodeUploadCallback", json.dumps(body))
+        return response_body
+    except Exception as e:
+        error_message = f"Error creating upstream: {str(e)}"
+        raise ValueError(error_message)
 

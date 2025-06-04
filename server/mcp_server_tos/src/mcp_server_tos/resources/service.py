@@ -5,6 +5,7 @@ from typing import List, Dict
 from urllib.parse import quote
 
 import httpx
+from httpx import Limits
 from mcp_server_tos.config import TosConfig
 from requests.structures import CaseInsensitiveDict
 from tos import TosClientV2, exceptions, HttpMethodType
@@ -15,7 +16,14 @@ TOS_USER_AGENT = 've-tos-python-sdk/v2.8.1 (linux/amd64;python3.12.0) -- TOS/MCP
 
 logger = logging.getLogger(__name__)
 
-_global_client = httpx.AsyncClient()
+_global_client = httpx.AsyncClient(
+    limits=Limits(
+        max_connections=200,
+        max_keepalive_connections=50,
+        keepalive_expiry=30
+    ),
+    timeout=30.0,
+)
 
 
 class TosResource:
@@ -59,7 +67,6 @@ class TosResource:
                     await response.aclose()
                     attempt += 1
                     if attempt < 3:
-                        logger.warning(f'Retry {attempt}/3 for {bucket}/{key}, Status: {response.status_code}')
                         await asyncio.sleep(2 ** attempt)
                         continue
                     else:
@@ -69,7 +76,6 @@ class TosResource:
             except Exception as e:
                 attempt += 1
                 if attempt < 3:
-                    logger.warning(f'Failed to get {bucket}/{key}: {str(e)}, attempt: {attempt}')
                     await asyncio.sleep(2 ** attempt)
                     continue
                 else:
@@ -116,8 +122,6 @@ async def call(self, method: str, bucket: str, key: str = None, data=None, heade
                     await asyncio.sleep(2 * try_count)
                     continue
                 else:
-                    error_msg = f'Failed to call {url_str}: {str(e)}'
-                    logger.error(error_msg)
                     raise e
             else:
                 if response.status_code == 200 or response.status_code == 206:
@@ -127,8 +131,7 @@ async def call(self, method: str, bucket: str, key: str = None, data=None, heade
                     await asyncio.sleep(2 * try_count)
                     continue
                 else:
-                    raise Exception(f'Call tos url: {url_str} return: {str(response.status_code)}, '
-                                    f'request_id: {response.headers.get("x-tos-request-id")}')
+                    raise Exception(f'Call tos failed')
 
 
 def _to_case_insensitive_dict(self, headers: dict):

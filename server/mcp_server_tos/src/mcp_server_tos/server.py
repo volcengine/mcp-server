@@ -52,7 +52,6 @@ def get_credential_from_request():
         if not ak or not sk or not session_token:
             raise ValueError("Invalid credentials ak, sk, session_token is null")
 
-        logger.info(f"Loaded credentials: {ak},{current_time}, {expired_time}")
         return Credential(ak, sk, session_token, expired_time)
     except Exception as e:
         logger.error(f"Error get credentials: {str(e)}")
@@ -88,14 +87,13 @@ async def list_buckets() -> list[dict]:
         tos_resource = BucketResource(config)
         buckets = await tos_resource.list_buckets()
         return buckets
-    except Exception as e:
-        logger.error(f"Error listing buckets: {e}")
+    except Exception:
         raise
 
 
 @mcp.tool()
 async def list_objects(bucket: str, prefix: Optional[str] = None, start_after: Optional[str] = None,
-                       continuation_token: Optional[str] = None) -> list[dict]:
+                       continuation_token: Optional[str] = None) -> str:
     """
     List all objects in a bucket.
     Args:
@@ -111,8 +109,7 @@ async def list_objects(bucket: str, prefix: Optional[str] = None, start_after: O
         tos_resource = BucketResource(config)
         objects = await tos_resource.list_objects(bucket, prefix, start_after, continuation_token)
         return objects
-    except Exception as e:
-        logger.error(f"Error listing objects: {e}")
+    except Exception:
         raise
 
 
@@ -132,6 +129,5 @@ async def get_object(bucket: str, key: str) -> str:
         tos_resource = ObjectResource(config)
         content = await tos_resource.get_object(bucket, key)
         return content
-    except Exception as e:
-        logger.error(f"Error getting object: {e}")
+    except Exception:
         raise

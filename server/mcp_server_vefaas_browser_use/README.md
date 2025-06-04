@@ -4,7 +4,7 @@ veFaaS Browser-Use MCP server 可以让用户仅输入检索任务，就可以�
 
 | | |
 |------|------|
-| 版本 | v0.0.2 |
+| 版本 | v0.0.3 |
 | 描述 | veFaaS Browser-Use MCP server 自动化你的浏览器操作任务 |
 | 分类 | 容器与中间件 |
 | 标签 | veFaaS，函数服务，Browser-Use，浏览器 |
@@ -33,6 +33,27 @@ veFaaS Browser-Use MCP server 可以让用户仅输入检索任务，就可以�
 查看今日北京天气
 ```
 
+### Tool 2: get_browser_use_task_status
+
+#### 类型
+
+查询
+
+#### 详细描述
+
+查询浏览器操作任务的执行状态和结果。
+
+输出：
+
+- 返回任务当前状态（如进行中、已完成、失败等）
+- 如已完成，返回任务结果
+
+#### 最容易被唤起的 Prompt示例
+
+```
+查询刚才浏览器任务的执行状态
+```
+
 ## 可适配平台  
 
 Python, Cursor, Claude macOS App, Cline
@@ -51,7 +72,7 @@ OAuth 2.0
 
 参考火山引擎 veFaaS [一键部署 Browser Use Agent 应用](https://www.volcengine.com/docs/6662/1537697)，获取 veFaaS Browser Use Agent 服务的访问入口，如 `https://xxxxxxxxxxx.apigateway-cn-beijing.volceapi.com/tasks`，请去掉 URL 里的路径，获取 `https://xxxxxxxxxxx.apigateway-cn-beijing.volceapi.com`，用于下方的 `BROWSER_USE_ENDPOINT` 配置。
 
-### UVX
+### Stdio
 
 ```json
 {
@@ -70,6 +91,30 @@ OAuth 2.0
   }
 }
 ```
+
+### SSE
+
+```json
+{
+  "mcpServers": {
+    "vefaas-browser-use": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vefaas_browser_use",
+        "mcp-server-vefaas-browser-use",
+        "-t",
+        "sse"
+      ],
+      "env": {
+        "BROWSER_USE_ENDPOINT": "https://xxxxxxxxxxx.apigateway-cn-beijing.volceapi.com"
+      }
+    }
+  }
+}
+```
+
+
 
 ## License
 

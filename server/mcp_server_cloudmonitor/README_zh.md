@@ -160,19 +160,42 @@ OAuth 2.0
 
 请预先获取环境变量 VOLCENGINE_ACCESS_KEY 和 VOLCENGINE_SECRET_KEY。
 
+sse方式
+
 ```json
 {
   "mcpServers": {
-    "cloudmonitor": {
+    "mcp-server-cloudmonitor-sse": {
       "command": "uvx",
       "args": [
         "--from",
         "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_cloudmonitor",
-        "mcp-server-cloudmonitor"
+        "mcp-server-cloudmonitor-sse"
       ],
       "env": {
-        "VOLCENGINE_ACCESS_KEY": "xxx",
-        "VOLCENGINE_SECRET_KEY": "xxx"
+        "VOLCENGINE_ACCESS_KEY": "your volcengine access key",
+        "VOLCENGINE_SECRET_KEY": "your volcengine secret key"
+      }
+    }
+  }
+}
+```
+
+stdio方式
+
+```json
+{
+  "mcpServers": {
+    "mcp-server-cloudmonitor-stdio": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_cloudmonitor",
+        "mcp-server-cloudmonitor-stdio"
+      ],
+      "env": {
+        "VOLCENGINE_ACCESS_KEY": "your volcengine access key",
+        "VOLCENGINE_SECRET_KEY": "your volcengine secret key"
       }
     }
   }

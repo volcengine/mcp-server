@@ -10,7 +10,8 @@ dependencies = [
 ]
 
 [project.scripts]
-mcp-server-cloudmonitor = "mcp_server_cloudmonitor:main"
+mcp-server-cloudmonitor-stdio = "mcp_server_cloudmonitor.stdio:main"
+mcp-server-cloudmonitor-sse = "mcp_server_cloudmonitor.sse:main"
 
 [build-system]
 requires = ["hatchling"]

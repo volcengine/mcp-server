@@ -1,10 +1,14 @@
 # Computer Use Mcp Server 
 
+## Version
+v0.1.0
+
 ## Overview
 
-An model context protocol server for MCP client(like Claude Desktop) to control your computer. With this MCP server, clients are capable of interacting with tools that can manipulate a computer desktop environment.
+Computer Use Mcp Server is a model context protocol server that provides MCP clients with the ability to control computers. It can issue commands to computers based on natural language, such as move mouse, click mouse, type text, screenshots, etc.
 
-## Features
+## 分类
+Computer Use
 
 - Trigger mouse events (move, click, scroll, and drag)
 - Trigger keyboard events (key press, type text)
@@ -56,9 +60,13 @@ uv run mcp-server-computer-use -t sse
 ```
 
 #### Connect to the sandbox
-Sandbox means the actual computer you are using. The request to mcp server will be transfered to the tool server on sandbox, which actually operating the os. So, you need to create a sandbox before use this mcp server, and configure the tool server client endpoint in the mcp server as followed.
+Sandbox means the actual computer you are using. The request to mcp server will be transfered to the tool server on sandbox, which actually operating the os. So, you need to create a sandbox before operating mcp server, and configure the tool server client endpoint in the mcp server as followed.
 
-TODO 补充下apikey + endpoint ｜ 模板配置阐述 | endpoint示例修改
+
+You can deploy the Computer Use Agent application with one click through the Volcngine Function Compute Platform. For detailed steps, please refer to the [Volcengine Official Document](https://www.volcengine.com/docs/6662/1555156?QualityCheckDocumentID=23876)。
+
+
+To help you understand how to properly deploy and configure MCP Server, we provide detailed [Video Tutorial](https://lf3-static.bytednsdoc.com/obj/eden-cn/lm_sth/ljhwZthlaukjlkulzlp/ark/assistant/videos/0522.mp4)
 
 
 ## Configuration
@@ -103,8 +111,6 @@ uv run mcp-server-computer-use
 
 ```
 
-
-# Contributing
 
 # License
 volcengine/mcp-server is licensed under the [MIT License](https://github.com/volcengine/mcp-server/blob/main/LICENSE).

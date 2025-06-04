@@ -1,21 +1,20 @@
 # Volc Mongo SDK MCP Server 
+> 火山引擎 MongoDB 版是由火山引擎提供的完全兼容开源 MongoDB 数据库服务，支持实例管理、账号管理、数据库管理、备份恢复、白名单、透明数据加密、数据迁移、数据同步、读写分离、安全审计、高可用、版本升级、备份恢复等关键特性。
 [https://www.volcengine.com/product/mongodb]
 
-## 版本信息
-v1
 
-## 产品描述
-### 短描述
-mongo管控面sdk mcp server
+---
 
-### 长描述
-火山 mongo 管控面 sdk 的 mcp server，使客户可以自然语言的方式调用SDK
+| 项目 | 详情                               |
+| ---- |----------------------------------|
+| 版本 | v1.0.0                           |
+| 描述 | 火山引擎 MongoDB 版即开即用、稳定可靠的关系型数据库服务 |
+| 分类 | 数据库                              |
+| 标签 | MongoDB 关系型数据库, 数据库              |
 
-## 分类
-数据库
+---
 
-## 标签
-#存储#数据库#文档型#MongoDB
+
 ## Tools
 本 MCP Server 产品提供以下 Tools (工具/能力):
 ### describe_db_instances
@@ -170,9 +169,9 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
         "server.py"
       ],
       "env": {
-        "VOLC_ACCESSKEY": "your-access-key-id",
-        "VOLC_SECRETKEY": "your-access-key-secret",
-        "VOLC_REGION": "VOLC_REGION"
+        "VOLCENGINE_ACCESS_KEY": "your-access-key-id",
+        "VOLCENGINE_SECRET_KEY": "your-access-key-secret",
+        "VOLCENGINE_REGION": "VOLC_REGION"
       },
       "transportType": "stdio"
     }
