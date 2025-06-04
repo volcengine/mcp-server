@@ -172,7 +172,7 @@ def create_db_instance(zone_id: str = Field(description="可用区ID, 可以调�
 def describe_azs() -> dict[str, Any]:
     """获取实例创建可用区
     """
-    req = {"region_id": os.getenv('VOLC_REGION')}
+    req = {"region_id": os.getenv('VOLCENGINE_REGION')}
     try:
         resp = mongo_resource.describe_azs(req)
         return resp.to_dict()
