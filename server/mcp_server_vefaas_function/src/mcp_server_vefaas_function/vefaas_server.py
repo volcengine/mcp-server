@@ -2,7 +2,6 @@ from __future__ import print_function
 
 import io
 from typing import Union
-
 from mcp.server.fastmcp import FastMCP
 import datetime
 import volcenginesdkcore
@@ -13,13 +12,20 @@ import string
 import os
 import base64
 import logging
-import tempfile
 import zipfile
 from .sign import request, get_authorization_credentials
 import json
 from mcp.server.session import ServerSession
 from mcp.server.fastmcp import Context, FastMCP
 from starlette.requests import Request
+import os
+import subprocess
+import zipfile
+import pyzipper
+from io import BytesIO
+from typing import Tuple
+import requests
+import shutil
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -445,4 +451,150 @@ def list_routes(upstream_id: str, region: str = None):
     response_body = request("POST", now, {}, {}, ak, sk, token, "ListRoutes", json.dumps(body))
     return response_body
 
+
+def zip_and_encode_folder(folder_path: str) -> Tuple[bytes, int, Exception]:
+    """
+    Zips a folder with system zip command (if available) or falls back to Python implementation.
+    Returns (zip_data, size_in_bytes, error) tuple.
+    """
+    # Check for system zip first
+    if not shutil.which('zip'):
+        print("System zip command not found, using Python implementation")
+        try:
+            data = python_zip_implementation(folder_path)
+            return data, len(data), None
+        except Exception as e:
+            return None, 0, e
+
+    print(f"Zipping folder: {folder_path}")
+    try:
+        # Create zip process with explicit arguments
+        proc = subprocess.Popen(
+            ['zip', '-r', '-q', '-', '.', '-x', '*.git*', '-x', '*.venv*', '-x', '*__pycache__*', '-x', '*.pyc'],
+            cwd=folder_path,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            bufsize=1024 * 8  # 8KB buffer
+        )
+
+        # Collect output with proper error handling
+        try:
+            stdout, stderr = proc.communicate(timeout=30)
+            if proc.returncode != 0:
+                print(f"Zip error: {stderr.decode()}")
+                data = python_zip_implementation(folder_path)
+                return data, len(data), None
+            
+            if stdout:
+                size = len(stdout)
+                print(f"Zip finished, size: {size / 1024 / 1024:.2f} MB")
+                return stdout, size, None
+            else:
+                print("No data from zip command, falling back to Python implementation")
+                data = python_zip_implementation(folder_path)
+                return data, len(data), None
+
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait(timeout=5)  # Give it 5 seconds to cleanup
+            print("Zip process timed out, falling back to Python implementation")
+            try:
+                data = python_zip_implementation(folder_path)
+                return data, len(data), None
+            except Exception as e:
+                return None, 0, e
+
+    except Exception as e:
+        print(f"System zip error: {str(e)}")
+        try:
+            data = python_zip_implementation(folder_path)
+            return data, len(data), None
+        except Exception as e2:
+            return None, 0, e2
+
+def python_zip_implementation(folder_path: str) -> bytes:
+    """Pure Python zip implementation with permissions support"""
+    buffer = BytesIO()
+    
+    with pyzipper.AESZipFile(buffer, 'w', compression=pyzipper.ZIP_LZMA) as zipf:
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                arcname = os.path.relpath(file_path, folder_path)
+                
+                # Skip excluded paths and binary/cache files
+                if any(excl in arcname for excl in ['.git', '.venv', '__pycache__', '.pyc']):
+                    continue
+                
+                # Get file permissions
+                st = os.stat(file_path)
+                mode = st.st_mode | 0o755  # Add read/exec permissions
+                
+                try:
+                    # Add to zip with permissions
+                    zipf.write(file_path, arcname)
+                    zipf.setinfo(arcname, zipfile.ZipInfo.from_file(file_path))
+                    zipf.getinfo(arcname).external_attr = (mode & 0xFFFF) << 16  # Unix attributes
+                except Exception as e:
+                    print(f"Warning: Skipping file {arcname} due to error: {str(e)}")
+
+    print(f"Python zip finished, size: {buffer.tell() / 1024 / 1024:.2f} MB")
+    return buffer.getvalue()
+
+@mcp.tool(description="""Uploads a code folder to tos and returns the TOS object URL.
+          After it is uploaded, ask the user to release the function again for the changes to take effect.
+Use this when you need to upload a code folder to TOS for a veFaaS function.""")
+def upload_to_tos(region: str, folder_path: str, function_id: str) -> bytes:
+    region = validate_and_set_region(region)
+    
+    api_instance = init_client(region, mcp.get_context())
+
+    data, size, error = zip_and_encode_folder(folder_path)
+
+    if error:
+        raise ValueError(f"Error zipping folder: {error}")
+    if not data:
+        raise ValueError("No data returned from zipping folder")
+    if size == 0:
+        raise ValueError("Zipped data size is 0, nothing to upload")
+
+    req = volcenginesdkvefaas.GetCodeUploadAddressRequest(
+            function_id=function_id,
+            content_length=size
+        )
+
+    response = api_instance.get_code_upload_address(req)  
+    upload_url = response.upload_address
+
+    headers = {
+        "Content-Type": "application/zip",
+    }
+
+    response = requests.put(url=upload_url, data=data, headers=headers)
+    if response.status_code >= 200 and response.status_code < 300:
+        print(f"Upload successful! Size: {size / 1024 / 1024:.2f} MB")
+    else:
+        error_message = f"Upload failed with status code {response.status_code}: {response.text}"
+        raise ValueError(error_message)
+
+    try:
+        ak, sk, token = get_authorization_credentials(mcp.get_context())
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
+
+    now = datetime.datetime.utcnow()
+    
+    # Generate a random suffix for the trigger name
+    suffix = generate_random_name(prefix="", length=6)
+
+    body = {
+        "FunctionId":function_id
+    }
+
+    try:
+        response_body = request("POST", now, {}, {}, ak, sk, token, "CodeUploadCallback", json.dumps(body))
+        return response_body
+    except Exception as e:
+        error_message = f"Error creating upstream: {str(e)}"
+        raise ValueError(error_message)
 

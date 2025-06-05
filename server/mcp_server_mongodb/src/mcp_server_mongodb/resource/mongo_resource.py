@@ -2,7 +2,9 @@ import volcenginesdkcore
 from volcenginesdkmongodb.api.mongodb_api import MONGODBApi
 from volcenginesdkmongodb.models import DescribeDBInstancesRequest, DescribeDBInstancesResponse, \
     DescribeDBInstanceDetailRequest, DescribeDBInstanceDetailResponse, DescribeBackupsRequest, DescribeBackupsResponse, \
-    DescribeDBInstanceParametersRequest, DescribeDBInstanceParametersResponse, DescribeSlowLogsRequest, DescribeSlowLogsResponse
+    DescribeDBInstanceParametersRequest, DescribeDBInstanceParametersResponse, DescribeSlowLogsRequest, DescribeSlowLogsResponse, \
+    CreateDBInstanceRequest, CreateDBInstanceResponse, DescribeAvailabilityZonesRequest, DescribeAvailabilityZonesResponse, \
+    DescribeAllowListsRequest, DescribeAllowListsResponse, DescribeNodeSpecsRequest, DescribeNodeSpecsResponse
 
 
 class MongoDBSDK:
@@ -31,4 +33,16 @@ class MongoDBSDK:
 
     def describe_db_slow_logs(self, args: dict) -> DescribeSlowLogsResponse:
         return self.client.describe_slow_logs(DescribeSlowLogsRequest(**args))
+
+    def describe_allow_lists(self, args: dict) -> DescribeAllowListsResponse:
+        return self.client.describe_allow_lists(DescribeAllowListsRequest(**args))
+
+    def create_db_instance(self, args: dict) -> CreateDBInstanceResponse:
+        return self.client.create_db_instance(CreateDBInstanceRequest(**args))
+
+    def describe_azs(self, args: dict) -> DescribeAvailabilityZonesResponse:
+        return self.client.describe_availability_zones(DescribeAvailabilityZonesRequest(**args))
+
+    def describe_node_spec(self, args: dict) -> DescribeNodeSpecsResponse:
+        return self.client.describe_node_specs(DescribeNodeSpecsRequest(**args))
 
