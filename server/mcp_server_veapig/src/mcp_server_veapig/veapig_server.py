@@ -83,6 +83,33 @@ def handle_request(method, query, header, action, body) -> str:
     response_body = request(method, date, query, header, ak, sk, token, action, json.dumps(body))
     return response_body
 
+# Tool 1: list_gateways
+@mcp.tool(description="""Retrieves a list of VeAPIG gateways.
+Use this when you need to obtain a list of all VeAPIG gateways in a specific region.
+region is the region where the gateways are located, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`, 
+`cn-shanghai`, `cn-guangzhou` as well.
+""")
+def list_gateways(region: str = "cn-beijing") -> str:
+
+    # Validate region parameter
+    region = validate_and_set_region(region)
+
+    # Construct the request parameter body of the tool in JSON format
+    body = {
+        "Top": {
+            "Region": region
+        },
+        "PageNumber": 1,
+        "PageSize": 100
+    }
+
+    # Set the action for the request
+    action = "ListGateways"
+
+    # Send the request and return the response body 
+    response_body = handle_request("POST", {}, {}, action, body)
+    return response_body
+
 # Tool 2: get_gateway
 @mcp.tool(description="""Retrieves detailed information about a specific VeAPIG gateway.
 Use this when you need to obtain detailed information about a particular VeAPIG gateway.
@@ -90,7 +117,7 @@ region is the region where the gateway is located, default is cn-beijing. It acc
 `cn-shanghai`, `cn-guangzhou` as well.
 Note: 
 1. The `id` parameter is required to identify the specific gateway you want to query.""")
-def get_gateway(id: str = None, region: string = None) -> str:
+def get_gateway(id: str = "", region: str = "cn-beijing") -> str:
 
     # Validate region parameter
     region = validate_and_set_region(region)
@@ -111,7 +138,62 @@ def get_gateway(id: str = None, region: string = None) -> str:
     return response_body
 
 
+# Tool 4: list_gateway_services
+@mcp.tool(description="""Query the list of services under a specified gateway instance.
+Use this tool when you need to retrieve all services under a specific gateway instance in a particular region.
+The gateway_id parameter is required to specify the gateway instance for which you want to query the service list.
+region indicates the region where the gateway instance is located, defaulting to cn-beijing. It also supports ap-southeast-1, cn-shanghai, and cn-guangzhou.
+Note:
+1. The gateway_id parameter is mandatory and used to identify the specific gateway instance whose service list you want to query.""")
+def list_gateway_services(gateway_id: str = "", region: str = "cn-beijing") -> str:
+    # Validate region parameter
+    region = validate_and_set_region(region)
 
+    # Construct the request parameter body of the tool in JSON format
+    body = {
+        "Top": {
+            "Region": region
+        },
+        "PageNumber": 1,
+        "PageSize": 100,
+        "GatewayId": gateway_id
+    }
+
+    # Set the action for the request
+    action = "ListGatewayServices"
+
+    # Send the request and return the response body
+    response_body = handle_request("POST", {}, {}, action, body)
+    return response_body
+
+
+# Tool 7: list_gateway_routes
+@mcp.tool(description="""Query the list of routes under a specified gateway instance.
+Use this tool when you need to retrieve all routes under a specific gateway instance in a particular region.
+The gateway_id parameter is required to specify the gateway instance for which you want to query the route list.
+region indicates the region where the gateway instance is located, defaulting to cn-beijing. It also supports ap-southeast-1, cn-shanghai, and cn-guangzhou.
+Note:
+1. The gateway_id parameter is mandatory and used to identify the specific gateway instance whose route list you want to query.""")
+def list_gateway_routes(gateway_id: str = "", region: str = "cn-beijing") -> str:
+    # Validate region parameter
+    region = validate_and_set_region(region)
+
+    # Construct the request parameter body of the tool in JSON format
+    body = {
+        "Top": {
+            "Region": region
+        },
+        "PageNumber": 1,
+        "PageSize": 100,
+        "GatewayId": gateway_id
+    }
+
+    # Set the action for the request
+    action = "ListRoutes"
+
+    # Send the request and return the response body
+    response_body = handle_request("POST", {}, {}, action, body)
+    return response_body    
 
 
 
