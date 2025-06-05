@@ -36,7 +36,7 @@ Service = "apig"
 Version = "2021-03-03"
 Region = "cn-beijing"
 Host = "iam.volcengineapi.com"
-ContentType = "application/x-www-form-urlencoded"
+ContentType = "application/json"
 
 # 请求的凭证，从IAM或者STS服务中获取
 AK = os.getenv("VOLCENGINE_ACCESS_KEY")
@@ -71,7 +71,7 @@ def hash_sha256(content: str):
 
 
 # 第二步：签名请求函数
-def request(method, date, query, header, ak, sk, token, action, body):
+def request(method, date, query, header, region, ak, sk, token, action, body):
     # 第三步：创建身份证明。其中的 Service 和 Region 字段是固定的。ak 和 sk 分别代表
     # AccessKeyID 和 SecretAccessKey。同时需要初始化签名结构体。一些签名计算时需要的属性也在这里处理。
     # 初始化身份证明结构体
@@ -80,21 +80,15 @@ def request(method, date, query, header, ak, sk, token, action, body):
         "access_key_id": ak,
         "secret_access_key": sk,
         "service": Service,
-        "region": Region,
+        "region": region,
     }
 
     if token is not None:
         credential["session_token"] = token
 
-    if action == "CodeUploadCallback":
-        credential["service"] = "vefaas"
-
     content_type = ContentType
     version = Version
-    if method == "POST":
-        content_type = "application/json"
-
-    if action == "CreateRoute" or action == "ListRoutes":
+    if action == "CreateRoute" or action == "ListRoutes" or action == "GetRoute":
         version = "2022-11-12"
 
     # 初始化签名结构体
@@ -165,7 +159,7 @@ def request(method, date, query, header, ak, sk, token, action, body):
         signed_headers_str,
         signature,
     )
-    header = {**header, **sign_result}
+    header = {"Region": region, **header, **sign_result}
     header = {**header, **{"X-Security-Token": token}}
     # 第六步：将 Signature 签名写入 HTTP Header 中，并发送 HTTP 请求。
     r = requests.request(method=method,
@@ -179,13 +173,13 @@ def request(method, date, query, header, ak, sk, token, action, body):
 def get_authorization_credentials(ctx: Context = None) -> tuple[str, str, str]:
     """
     Gets authorization credentials from either environment variables or request headers.
-    
+
     Args:
         ctx: The server context object
-        
+
     Returns:
         tuple: (access_key, secret_key, session_token)
-        
+
     Raises:
         ValueError: If authorization information is missing or invalid
     """
@@ -201,15 +195,15 @@ def get_authorization_credentials(ctx: Context = None) -> tuple[str, str, str]:
     _ctx: Context[ServerSession, object] = ctx
     raw_request: Request = _ctx.request_context.request
     auth = None
-    
+
     if raw_request:
         # Try to get authorization from request headers
         auth = raw_request.headers.get("authorization", None)
-    
+
     if auth is None:
         # Try to get from environment if not in headers
         auth = os.getenv("authorization", None)
-        
+
     if auth is None:
         raise ValueError("Missing authorization info.")
 
@@ -226,7 +220,7 @@ def get_authorization_credentials(ctx: Context = None) -> tuple[str, str, str]:
 
         return (
             data.get('AccessKeyId'),
-            data.get('SecretAccessKey'), 
+            data.get('SecretAccessKey'),
             data.get('SessionToken')
         )
     except Exception as e:
@@ -234,28 +228,4 @@ def get_authorization_credentials(ctx: Context = None) -> tuple[str, str, str]:
 
 
 if __name__ == "__main__":
-    # response_body = request("Get", datetime.datetime.utcnow(), {}, {}, AK, SK, "ListUsers", None)
-    # print(response_body)
-
-    now = datetime.datetime.utcnow()
-
-    # Body的格式需要配合Content-Type，API使用的类型请阅读具体的官方文档，如:json格式需要json.dumps(obj)
-    # response_body = request("GET", now, {"Limit": "2"}, {}, AK, SK, "ListGateways", None)
-    # print(response_body)
-
-    # response_body = request("POST", now, {"Limit": "10"}, {}, AK, SK, "ListUsers", "UnUseParam=ASDF")
-    # print(response_body)
-
-    body = {
-        "Name": "xxxxxx",
-        "GatewayId": "gciqjm7qahbthkcuufaked",
-        "SourceType": "VeFaas",
-        "UpstreamSpec": {
-            "VeFaas": {
-                "FunctionId": "vyyzfaked"
-            }
-        }
-    }
-
-    response_body = request("POST", now, {}, {}, AK, SK, "CreateUpstream", json.dumps(body))
-    print(response_body)
+    pass
