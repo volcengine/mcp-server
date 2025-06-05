@@ -65,7 +65,7 @@ saas
 
 ## 可适配平台
 
-方舟，cursor，python
+方舟，Trae，cursor，python
 
 ## 服务开通链接 (整体产品)
 
@@ -73,13 +73,13 @@ saas
 
 ## 鉴权方式
 
-火山引擎的aksk鉴权体系
+火山引擎的AKSK鉴权体系
 
 ## 安装部署
 
 ### 前置准备
 
-- Python 3.12+
+- Python 3.13+
 - UV
 
 **Linux/macOS:**
