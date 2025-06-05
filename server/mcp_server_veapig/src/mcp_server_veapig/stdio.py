@@ -1,4 +1,4 @@
-from .vefaas_server import mcp
+from .veapig_server import mcp
 import logging
 
 logging.basicConfig(
@@ -7,7 +7,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def main():
-    logger.info("veFaaS MCP Server started")
+    logger.info("veAPIG MCP Server started")
     
     mcp.run(transport="stdio")
 

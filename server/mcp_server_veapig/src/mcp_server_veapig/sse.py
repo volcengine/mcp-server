@@ -1,4 +1,4 @@
-from vefaas_server import mcp
+from veapig_server import mcp
 
 def main():
     mcp.run(transport="sse")

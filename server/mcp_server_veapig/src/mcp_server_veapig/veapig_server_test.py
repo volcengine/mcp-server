@@ -4,10 +4,10 @@ import unittest
 import os
 import zipfile
 
-from vefaas_server import does_function_exist, create_zip_base64
+from veapig_server import does_function_exist, create_zip_base64
 
 
-class TestVeFaaSServerIntegration(unittest.TestCase):
+class TestAPIGServerIntegration(unittest.TestCase):
     def setUp(self):
         # Check if credentials are available
         self.ak = os.environ.get("VOLCENGINE_ACCESS_KEY")
