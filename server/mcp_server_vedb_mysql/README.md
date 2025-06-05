@@ -72,7 +72,7 @@ Volcano Engine veDB MySQL service access address: <https://www.volcengine.com/do
       "args": [
         "--from",
         "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vedb_mysql",
-        "mcp-server-vedb-mysql"
+        "mcp-server-vedbm"
       ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "your-access-key",
