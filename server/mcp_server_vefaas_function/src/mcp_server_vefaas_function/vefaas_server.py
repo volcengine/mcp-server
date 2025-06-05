@@ -47,10 +47,10 @@ def validate_and_set_region(region: str = None) -> str:
 
     Args:
         region: The region to validate
-        
+
     Returns:
         A valid region string
-        
+
     Raises:
         ValueError: If the provided region is invalid
     """
@@ -63,9 +63,9 @@ def validate_and_set_region(region: str = None) -> str:
     return region
 
 @mcp.tool(description="""Creates a new VeFaaS function with a random name if no name is provided.
-region is the region where the function will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`, 
+region is the region where the function will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
           `cn-shanghai`, `cn-guangzhou` as well.
-Note: 
+Note:
 1. The runtime parameter must be one of the values returned by the supported_runtimes. Please ensure you call that tool first to get the valid options.
 2.	If the function is intended to serve as a web service, you must:
 	•	Write code to start an HTTP server that listens on port 8000 (e.g., using Python’s http.server, Node’s http, or Flask)).
@@ -77,7 +77,7 @@ def create_function(name: str = None, region: str = None, runtime: str = None, c
                     image: str = None, envs: dict = None, description: str = None) -> str:
     # Validate region
     region = validate_and_set_region(region)
-    
+
     api_instance = init_client(region, mcp.get_context())
     function_name = name if name else generate_random_name()
     create_function_request = volcenginesdkvefaas.CreateFunctionRequest(
@@ -130,21 +130,21 @@ def create_function(name: str = None, region: str = None, runtime: str = None, c
 
 @mcp.tool(description="""Updates a VeFaaS function's code.
 Use this when asked to update a VeFaaS function's code.
-Region is the region where the function will be updated, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`, 
+Region is the region where the function will be updated, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
 `cn-shanghai`, `cn-guangzhou` as well.
 After updating the function, you need to release it again for the changes to take effect.
 No need to ask user for confirmation, just update the function.""")
 def update_function(function_id: str, source: str = None, region: str = None, command: str = None,
                     envs: dict = None):
-    
+
     region = validate_and_set_region(region)
-    
+
     api_instance = init_client(region, mcp.get_context())
 
     update_request = volcenginesdkvefaas.UpdateFunctionRequest(
             id=function_id,
         )
-    
+
     source_type = None
 
     if source:
@@ -162,10 +162,10 @@ def update_function(function_id: str, source: str = None, region: str = None, co
         #     raise ValueError(
         #         "Invalid source format. Must be one of: base64 zip, bucket_name:object_key, or host/namespace/repo:tag"
         #     )
-        
+
         update_request.source = source
         update_request.source_type = source_type
-    
+
     if command != "":
         update_request.command = command
 
@@ -187,7 +187,7 @@ def update_function(function_id: str, source: str = None, region: str = None, co
 
 @mcp.tool(description="""Releases a VeFaaS function to make it available for production use.
 Use this when asked to release, publish, or deploy a VeFaaS function.
-Region is the region where the function will be released, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`, 
+Region is the region where the function will be released, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
 `cn-shanghai`, `cn-guangzhou` as well.
 After releasing, you should call get_function_release_status to check the release status.
 No need to ask user for confirmation, just release the function.
@@ -209,7 +209,7 @@ def release_function(function_id: str, region: str = None):
 
 @mcp.tool(description="""Deletes a VeFaaS function.
 Use this when asked to delete, remove, or uninstall a VeFaaS function.
-Region is the region where the function will be deleted, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`, 
+Region is the region where the function will be deleted, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
 `cn-shanghai`, `cn-guangzhou` as well.
 No need to ask user for confirmation, just delete the function.""")
 def delete_function(function_id: str, region: str = None):
@@ -229,7 +229,7 @@ def delete_function(function_id: str, region: str = None):
 
 @mcp.tool(description="""Checks the release status of a VeFaaS function.
 Use this when you need to check the release status of a VeFaaS function.
-Region is the region where the function exists, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`, 
+Region is the region where the function exists, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
 `cn-shanghai`, `cn-guangzhou` as well.
 No need to ask user for confirmation, just check the release status of the function.""")
 def get_function_release_status(function_id: str, region: str = None):
@@ -283,14 +283,14 @@ def generate_random_name(prefix="mcp", length=8):
 def init_client(region: str = None, ctx: Context = None):
     """
     Initializes the VeFaaS API client with credentials and region.
-    
+
     Args:
         region: The region to use for the client
         ctx: The server context object
-        
+
     Returns:
         VEFAASApi: Initialized VeFaaS API client
-        
+
     Raises:
         ValueError: If authorization fails
     """
@@ -304,12 +304,12 @@ def init_client(region: str = None, ctx: Context = None):
     configuration.sk = sk
     if session_token:
         configuration.session_token = session_token
-        
+
     # Set region with default if needed
     region = region if region is not None else "cn-beijing"
     print(f"Using region: {region}")
     configuration.region = region
-    
+
     # set default configuration
     volcenginesdkcore.Configuration.set_default(configuration)
     return volcenginesdkvefaas.VEFAASApi()
@@ -340,14 +340,14 @@ It is recommended that each gateway service is used for only one function.
 No need to ask user for confirmation, just create the gateway.""")
 def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id: str, region: str = None):
     region = validate_and_set_region(region)
-    
+
     try:
         ak, sk, token = get_authorization_credentials(mcp.get_context())
     except ValueError as e:
         raise ValueError(f"Authorization failed: {str(e)}")
 
     now = datetime.datetime.utcnow()
-    
+
     # Generate a random suffix for the trigger name
     suffix = generate_random_name(prefix="", length=6)
 
@@ -367,16 +367,16 @@ def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id
             error_info = response_body.get("Error") or response_body["ResponseMetadata"].get("Error")
             error_message = f"API Error: {error_info.get('Message', 'Unknown error')}"
             raise ValueError(error_message)
-        
+
         # Check if Result exists in the response
         if "Result" not in response_body:
             raise ValueError(f"API call did not return a Result field: {response_body}")
-        
+
         upstream_id = response_body["Result"]["Id"]
     except Exception as e:
         error_message = f"Error creating upstream: {str(e)}"
         raise ValueError(error_message)
-    
+
     body = {
         "Name":"router1",
         "UpstreamList":[{
@@ -406,7 +406,7 @@ Use this when you need to list all API gateways.
 No need to ask user for confirmation, just list the gateways.""")
 def list_api_gateways(region: str = None):
     now = datetime.datetime.utcnow()
-   
+
     try:
         ak, sk, token = get_authorization_credentials(mcp.get_context())
     except ValueError as e:
@@ -414,6 +414,96 @@ def list_api_gateways(region: str = None):
 
     response_body = request("GET", now, {"Limit": "10"}, {}, ak, sk, token, "ListGateways", None)
     return response_body
+
+@mcp.tool(
+    description="""Creates a new VeApig serverless gateway.
+gateway_name is the name of the serverless gateway. If not provided, a random name will be generated.
+region is the region where the serverless gateway will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
+`cn-shanghai`, `cn-guangzhou` as well.
+"""
+)
+def create_serverless_gateway(name: str = None, region: str = "cn-beijing") -> str:
+    """
+    Creates a new VeApig serverless gateway.
+
+    Args:
+        name (str): The name of the serverless gateway. If not provided, a random name will be generated.
+        region (str): The region where the serverless gateway will be created. Default is cn-beijing.
+
+    Returns:
+        str: The response body of the request.
+    """
+    gateway_name = name if name else generate_random_name()
+    region = validate_and_set_region(region)
+    body = {
+        "Name": gateway_name,
+        "Region": region,
+        "Type": "serverless",
+        "ResourceSpec": {
+            "Replicas": 2,
+            "InstanceSpecCode": "1c2g",
+            "CLBSpecCode": "small_1",
+            "PublicNetworkBillingType": "traffic",
+            "NetworkType": {"EnablePublicNetwork": True, "EnablePrivateNetwork": False},
+        },
+    }
+
+    now = datetime.datetime.utcnow()
+    try:
+        ak, sk, token = get_authorization_credentials(mcp.get_context())
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
+
+    try:
+        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateGateway", json.dumps(body))
+        return response_body
+    except Exception as e:
+        return f"Failed to create VeApig serverless gateway with name {gateway_name}: {str(e)}"
+
+
+@mcp.tool(
+    description="""Creates a new VeApig serverless gateway service with a random name if no name is provided.
+gateway_id is the id of the serverless gateway where the service will be created. The gateway_id is required.
+region is the region where the serverless gateway service will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
+`cn-shanghai`, `cn-guangzhou` as well.
+"""
+)
+def create_gateway_service(
+    gateway_id: str, name: str = None, region: str = "cn-beijing"
+) -> str:
+    """
+    Creates a new VeApig serverless gateway service.
+
+    Args:
+        gateway_id (str): The id of the serverless gateway where the service will be created.
+        name (str): The name of the serverless gateway service. If not provided, a random name will be generated.
+        region (str): The region where the serverless gateway service will be created. Default is cn-beijing.
+
+    Returns:
+        str: The response body of the request.
+    """
+
+    service_name = name if name else generate_random_name()
+    region = validate_and_set_region(region)
+    body = {
+        "ServiceName": service_name,
+        "GatewayId": gateway_id,
+        "Protocol": ["HTTP", "HTTPS"],
+        "AuthSpec": {"Enable": False},
+    }
+
+    now = datetime.datetime.utcnow()
+    try:
+        ak, sk, token = get_authorization_credentials(mcp.get_context())
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
+
+    try:
+        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateGatewayService", json.dumps(body))
+        return response_body
+    except Exception as e:
+        return f"Failed to create VeApig serverless gateway service with name {service_name}: {str(e)}"
+
 
 @mcp.tool(description="""Lists all services of an API gateway.
 Use this when you need to list all services of an API gateway.
@@ -424,7 +514,7 @@ def list_api_gateway_services(gateway_id: str, region: str = None):
         ak, sk, token = get_authorization_credentials(mcp.get_context())
     except ValueError as e:
         raise ValueError(f"Authorization failed: {str(e)}")
-    
+
     body = {
         "GatewayId": gateway_id,
         "Limit": 10,
@@ -484,7 +574,7 @@ def zip_and_encode_folder(folder_path: str) -> Tuple[bytes, int, Exception]:
                 print(f"Zip error: {stderr.decode()}")
                 data = python_zip_implementation(folder_path)
                 return data, len(data), None
-            
+
             if stdout:
                 size = len(stdout)
                 print(f"Zip finished, size: {size / 1024 / 1024:.2f} MB")
@@ -515,21 +605,21 @@ def zip_and_encode_folder(folder_path: str) -> Tuple[bytes, int, Exception]:
 def python_zip_implementation(folder_path: str) -> bytes:
     """Pure Python zip implementation with permissions support"""
     buffer = BytesIO()
-    
+
     with pyzipper.AESZipFile(buffer, 'w', compression=pyzipper.ZIP_LZMA) as zipf:
         for root, dirs, files in os.walk(folder_path):
             for file in files:
                 file_path = os.path.join(root, file)
                 arcname = os.path.relpath(file_path, folder_path)
-                
+
                 # Skip excluded paths and binary/cache files
                 if any(excl in arcname for excl in ['.git', '.venv', '__pycache__', '.pyc']):
                     continue
-                
+
                 # Get file permissions
                 st = os.stat(file_path)
                 mode = st.st_mode | 0o755  # Add read/exec permissions
-                
+
                 try:
                     # Add to zip with permissions
                     zipf.write(file_path, arcname)
@@ -546,7 +636,7 @@ def python_zip_implementation(folder_path: str) -> bytes:
 Use this when you need to upload a code folder to TOS for a veFaaS function.""")
 def upload_to_tos(region: str, folder_path: str, function_id: str) -> bytes:
     region = validate_and_set_region(region)
-    
+
     api_instance = init_client(region, mcp.get_context())
 
     data, size, error = zip_and_encode_folder(folder_path)
@@ -563,7 +653,7 @@ def upload_to_tos(region: str, folder_path: str, function_id: str) -> bytes:
             content_length=size
         )
 
-    response = api_instance.get_code_upload_address(req)  
+    response = api_instance.get_code_upload_address(req)
     upload_url = response.upload_address
 
     headers = {
@@ -583,7 +673,7 @@ def upload_to_tos(region: str, folder_path: str, function_id: str) -> bytes:
         raise ValueError(f"Authorization failed: {str(e)}")
 
     now = datetime.datetime.utcnow()
-    
+
     # Generate a random suffix for the trigger name
     suffix = generate_random_name(prefix="", length=6)
 
@@ -597,4 +687,3 @@ def upload_to_tos(region: str, folder_path: str, function_id: str) -> bytes:
     except Exception as e:
         error_message = f"Error creating upstream: {str(e)}"
         raise ValueError(error_message)
-
