@@ -41,7 +41,7 @@ git clone git@github.com:volcengine/mcp-server.git
 ```
 ## 运行 MCP-Server 指南
 ### 1. 配置文件
-`server/mcp_server_sts/src/mcp_server_sts/config/config.yaml`
+`server/mcp_server_sts/src/mcp_server_sts/config/cfg.yaml`
 
 ### 2. 火山访问凭证
 因为MCP-Server需要调用火山OpenAPI，因此要提供火山访问凭证信息

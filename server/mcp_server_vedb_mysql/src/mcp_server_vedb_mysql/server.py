@@ -2,14 +2,14 @@
 import argparse
 import logging
 import os
-from typing import Dict, Optional, Final, Any
+import time
+from pydantic import Field
+from typing import Final, Any, Literal
 
 import volcenginesdkcore
 import volcenginesdkvedbm
-
-from mcp_server_vedb_mysql.config import load_config
 from mcp.server.fastmcp import FastMCP
-
+from mcp_server_vedb_mysql.config import load_config
 
 openapi_cli = None
 
@@ -21,7 +21,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Create MCP server
-mcp = FastMCP("VeDB MySQL MCP Server", port=int(os.getenv("PORT", "8000")))
+mcp = FastMCP("VeDB MySQL MCP Server", port=int(os.getenv("MCP_SERVER_PORT", "8000")))
 
 
 @mcp.tool(
@@ -157,6 +157,82 @@ def modify_vedb_mysql_instance_alias(
     except Exception as e:
         logger.error(f"Error in describe: {str(e)}")
         return {"error": str(e)}
+
+
+@mcp.tool(
+    description="Create a Network AllowList for VeDB MySQL",
+)
+def create_vedb_mysql_allowlist(
+        name: str,
+        contents: str = "0.0.0.0/0,127.0.0.1"
+) -> str:
+    req = volcenginesdkvedbm.models.CreateAllowListRequest(
+        allow_list=contents,
+        allow_list_name=name,
+    )
+    return "allow_list_id: " + openapi_cli.create_allow_list(req).allow_list_id
+
+
+@mcp.tool(
+    description="Bind a Network AllowList to VeDB MySQL instances",
+)
+def bind_allowlist_to_vedb_mysql_instances(
+        allow_list_id: str,
+        instances_id: set[str],
+) -> str:
+    req = volcenginesdkvedbm.models.AssociateAllowListRequest(
+        allow_list_ids=[allow_list_id],
+        instance_ids=list(instances_id),
+    )
+    openapi_cli.associate_allow_list(req)
+    return "bind success"
+
+
+@mcp.tool(
+    description="Create a VeDB MySQL instance",
+)
+def create_vedb_mysql_instance(
+    instance_alias: str,
+    zone_id: str,
+    vpc_id: str,
+    subnet_id: str,
+    db_version: Literal["MySQL_8_0", "MySQL_5_7"] = "MySQL_8_0",
+    lower_case_table_names: bool = False,
+) -> dict[str, Any]:
+    logger.info("create_vedb_mysql_instance")
+
+    req = volcenginesdkvedbm.models.CreateDBInstanceRequest(
+        charge_type="PostPaid",
+        instance_name=instance_alias,
+        db_engine_version=db_version,
+        db_minor_version="3.0" if db_version == "MySQL_8_0" else "2.0",
+        node_spec="vedb.mysql.g4.large",
+        node_number=2,
+        lower_case_table_names="0" if lower_case_table_names else "1",
+        vpc_id=vpc_id,
+        subnet_id=subnet_id,
+        zone_ids=zone_id,
+    )
+
+    instance_id = openapi_cli.create_db_instance(req).instance_id
+
+    # wait running
+    start_at = time.time()
+    running = False
+    while time.time() - start_at < 20*60:
+        rsp = describe_vedb_mysql_detail(instance_id=instance_id)
+        if 'error' not in rsp and rsp['instance_detail']['instance_status'] == 'Running':
+            running = True
+            break
+        time.sleep(3)
+
+    rsp = {
+        "instance_id": instance_id,
+        "suggests": ["Create a network AllowList", "Bind AllowList for " + instance_id]
+    }
+    if not running:
+        rsp["suggests"] = "Wait for instance creating finish (Running status)"
+    return rsp
 
 
 def main():

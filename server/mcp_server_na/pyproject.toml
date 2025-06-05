@@ -1,0 +1,22 @@
+[project]
+name = "mcp-server-na"
+version = "1.0"
+description = "MCP Server for NetworkAdvisor"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "volcengine-python-sdk>=1.1.2",
+    "volcengine>=1.0.175",
+    "mcp[cli]>=1.6.0",
+    "requests==2.32.3",
+]
+
+[project.scripts]
+mcp-server-na = "mcp_server_na.main:main"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

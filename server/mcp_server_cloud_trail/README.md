@@ -45,7 +45,7 @@ git clone git@github.com:volcengine/mcp-server.git
 ```
 ## 运行 MCP-Server 指南
 ### 1. 配置文件
-`server/mcp_server_cloud_trail/src/mcp_server_cloud_trail/config/config.yaml`
+`server/mcp_server_cloud_trail/src/mcp_server_cloud_trail/config/cfg.yaml`
 
 ### 2. 协议切换
 对应配置中 `transport` 参数：

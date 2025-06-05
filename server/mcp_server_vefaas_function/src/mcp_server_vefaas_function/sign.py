@@ -86,6 +86,9 @@ def request(method, date, query, header, ak, sk, token, action, body):
     if token is not None:
         credential["session_token"] = token
 
+    if action == "CodeUploadCallback":
+        credential["service"] = "vefaas"
+
     content_type = ContentType
     version = Version
     if method == "POST":
@@ -163,7 +166,7 @@ def request(method, date, query, header, ak, sk, token, action, body):
         signature,
     )
     header = {**header, **sign_result}
-    # header = {**header, **{"X-Security-Token": SessionToken}}
+    header = {**header, **{"X-Security-Token": token}}
     # 第六步：将 Signature 签名写入 HTTP Header 中，并发送 HTTP 请求。
     r = requests.request(method=method,
                          url="https://{}{}".format(request_param["host"], request_param["path"]),
