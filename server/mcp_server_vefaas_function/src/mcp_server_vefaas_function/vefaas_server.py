@@ -325,7 +325,7 @@ def create_zip_base64(file_dict: dict[str, Union[str, bytes]]) -> str:
         for filename, content in file_dict.items():
             info = zipfile.ZipInfo(filename)
             info.date_time = datetime.datetime.now().timetuple()[:6]
-            info.external_attr = 0o777 << 16
+            info.external_attr = 0o755 << 16
             zip_file.writestr(info, content)
 
     zip_bytes = zip_buffer.getvalue()
@@ -558,23 +558,52 @@ def upload_to_tos(region: str, folder_path: str, function_id: str) -> bytes:
     if size == 0:
         raise ValueError("Zipped data size is 0, nothing to upload")
 
-    req = volcenginesdkvefaas.GetCodeUploadAddressRequest(
-            function_id=function_id,
-            content_length=size
-        )
+    return upload_code_zip_for_function(api_instance=api_instance, function_id=function_id, code_zip_size=size, zip_bytes=data)
 
-    response = api_instance.get_code_upload_address(req)  
+
+@mcp.tool(description="""Uploads multiple in-memory files to TOS and returns the resulting TOS object URL.
+Use this when you have a mapping of filenames to file contents (in str or bytes) that needs to be packaged and uploaded for a veFaaS function.
+After the upload completes, remind the user to release the function again for the changes to take effect.""")
+def upload_code_for_function(region: str, function_id: str, file_dict: dict[str, Union[str, bytes]]) -> bytes:
+    region = validate_and_set_region(region)
+
+    api_instance = init_client(region, mcp.get_context())
+
+    zip_buffer = io.BytesIO()
+
+    with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zip_file:
+        for filename, content in file_dict.items():
+            info = zipfile.ZipInfo(filename)
+            info.date_time = datetime.datetime.now().timetuple()[:6]
+            info.external_attr = 0o755 << 16
+            zip_file.writestr(info, content)
+
+    zip_bytes = zip_buffer.getvalue()
+    size = len(zip_bytes)
+
+    if not zip_bytes:
+        raise ValueError("No files provided in file_dict, upload aborted.")
+    return upload_code_zip_for_function(api_instance=api_instance, function_id=function_id, code_zip_size=size, zip_bytes=zip_bytes)
+
+
+def upload_code_zip_for_function(api_instance: object, function_id: str, code_zip_size: int, zip_bytes, ) -> bytes:
+    req = volcenginesdkvefaas.GetCodeUploadAddressRequest(
+        function_id=function_id,
+        content_length=code_zip_size
+    )
+
+    response = api_instance.get_code_upload_address(req)
     upload_url = response.upload_address
 
     headers = {
         "Content-Type": "application/zip",
     }
 
-    response = requests.put(url=upload_url, data=data, headers=headers)
-    if response.status_code >= 200 and response.status_code < 300:
-        print(f"Upload successful! Size: {size / 1024 / 1024:.2f} MB")
+    response = requests.put(url=upload_url, data=zip_bytes, headers=headers)
+    if 200 <= response.status_code < 300:
+        print(f"Upload successful! Size: {code_zip_size / 1024 / 1024:.2f} MB")
     else:
-        error_message = f"Upload failed with status code {response.status_code}: {response.text}"
+        error_message = f"Upload failed to {upload_url} with status code {response.status_code}: {response.text}"
         raise ValueError(error_message)
 
     try:
@@ -583,12 +612,12 @@ def upload_to_tos(region: str, folder_path: str, function_id: str) -> bytes:
         raise ValueError(f"Authorization failed: {str(e)}")
 
     now = datetime.datetime.utcnow()
-    
+
     # Generate a random suffix for the trigger name
     suffix = generate_random_name(prefix="", length=6)
 
     body = {
-        "FunctionId":function_id
+        "FunctionId": function_id
     }
 
     try:
@@ -597,4 +626,3 @@ def upload_to_tos(region: str, folder_path: str, function_id: str) -> bytes:
     except Exception as e:
         error_message = f"Error creating upstream: {str(e)}"
         raise ValueError(error_message)
-
