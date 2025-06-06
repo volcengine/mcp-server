@@ -170,10 +170,11 @@ class VikingDBMemoryService(Service):
     def search_memory(self, collection_name, query, filter, limit=10):
         params = {
             "collection_name": collection_name,
-            "query": query,
             "limit": limit,
             "filter": filter,
         }
+        if query:
+            params["query"] = query
         res = self.json("SearchMemory", {}, json.dumps(params))
         return json.loads(res)
 
