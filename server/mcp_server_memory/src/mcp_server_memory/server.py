@@ -101,7 +101,7 @@ def search_memory(
             rsp = vm.search_memory(collection_name=collection_name, query='sys_profile_v1', filter=filter, limit=limit)
             result += f'''
 用户画像：
-{rsp.get('data').get('result_list')}
+{[item.get('memory_info') for item in rsp.get('data').get('result_list')]}
 '''
             print(rsp)
         except Exception as e:
@@ -119,7 +119,7 @@ def search_memory(
 
             result += f'''
 事件记忆：
-{rsp.get('data').get('result_list')}
+{[item.get('memory_info') for item in rsp.get('data').get('result_list')]}
 '''
             print(rsp)
         except Exception as e:
