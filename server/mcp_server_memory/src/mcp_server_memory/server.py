@@ -45,13 +45,11 @@ except Exception as e:
 
 @mcp.tool()
 def add_memories(
-        user_name: str,
         text: str
 ) -> str:
     """
     添加新记忆。每当用户告知任何关于他们自己的信息、他们的偏好，或任何具有可在未来对话中派上用场的相关信息时，都会调用此方法。当用户要求你记住某事时，也可调用此方法。
     Args:
-         user_name: 用户名
          text: 用户说的话
     Returns:
 
@@ -64,7 +62,7 @@ def add_memories(
             {"role": "user", "content": text}
         ]
         metadata = {
-            "default_user_id": user_name,
+            "default_user_id": config.user_id,
             "default_assistant_id": 'assistant',
             "time": int(time.time() * 1000)
         }
@@ -84,13 +82,11 @@ def add_memories(
 
 @mcp.tool()
 def search_memory(
-        user_name: str,
         query: str
 ) -> str:
     """
     搜索已存储的记忆。每当用户提出任何问题时，都会调用此方法。
     Args:
-         user_name: 用户名
          query: 用户提出的任何问题.
     Returns:
         用户与query相关的记忆
@@ -99,10 +95,9 @@ def search_memory(
     try:
 
         # 搜索记忆
-        query = "我们聊过静夜思吗？"
         limit = 5
         filter = {
-            "user_id": user_name,
+            "user_id": config.user_id,
             "memory_type": [builtin_event_type],
         }
         try:

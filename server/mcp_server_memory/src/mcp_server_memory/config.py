@@ -11,6 +11,7 @@ class MemoryConfig:
     """Configuration for Viking Knowledge Base MCP Server."""
     ak: str
     sk: str
+    user_id: str
     project: Optional[str] = None
     region: str = "cn-north-1"
 
@@ -35,6 +36,7 @@ def load_config() -> MemoryConfig:
     return MemoryConfig(
         ak=os.environ.get("VOLCENGINE_ACCESS_KEY"),
         sk=os.environ.get("VOLCENGINE_SECRET_KEY"),
+        user_id=os.environ.get("MEMORY_USER_ID"),
         project=os.environ.get("MEMORY_PROJECT","default"),
         region=os.environ.get("MEMORY_REGION", "cn-north-1")
     )
