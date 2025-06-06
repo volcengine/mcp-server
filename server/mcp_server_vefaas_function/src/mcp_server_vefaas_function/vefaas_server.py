@@ -407,10 +407,15 @@ def list_api_gateways(region: str = None):
     return response_body
 
 @mcp.tool(
-    description="""Creates a new VeApig gateway.
-gateway_name is the name of the gateway. If not provided, a random name will be generated.
-region is the region where the gateway will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
-`cn-shanghai`, `cn-guangzhou` as well.
+    description="""
+Creates a new VeApig API gateway in the specified region.
+
+- `name`: Optional custom name for the gateway. If not provided, a random name will be auto-generated.
+- `region`: Target region for gateway creation. Defaults to `cn-beijing`. Supported values include `cn-beijing`, `cn-shanghai`, `cn-guangzhou`, and `ap-southeast-1`.
+
+Note: This is an **asynchronous** operation and may take up to **5 minutes** to complete.  
+After calling this tool, you must use the `list_api_gateways` tool to check the status of the gateway.  
+Only when the status is `Running` does the gateway creation complete successfully.
 """
 )
 def create_api_gateway(name: str = None, region: str = "cn-beijing") -> str:
