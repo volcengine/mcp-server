@@ -105,6 +105,7 @@ def search_memory(
 '''
             print(rsp)
         except Exception as e:
+            result+=str(e)
             print(f"search_memory occurs error: {e}")
 
         try:
@@ -124,6 +125,7 @@ def search_memory(
 '''
             print(rsp)
         except Exception as e:
+            result += str(e)
             print(f"search_memory occurs error: {e}")
 
         return result
