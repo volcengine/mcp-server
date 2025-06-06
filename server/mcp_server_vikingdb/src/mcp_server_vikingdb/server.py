@@ -35,8 +35,6 @@ def search_vikingdb(
         limit: The maximum number of search results to be returned. The default value is 3.
     """
 
-    logger.info(f"Received search_vikingdb request with query: {query}, limit: {limit}")
-
     try:
         request_params = {
             "collection_name": config.vikingdb_collection_name,
