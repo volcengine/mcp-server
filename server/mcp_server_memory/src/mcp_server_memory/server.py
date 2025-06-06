@@ -33,10 +33,7 @@ vm = VikingDBMemoryService(ak=config.ak, sk=config.sk) # 替换成你的ak sk
 
 
 # 创建 collection
-collection_name="test_case"
-builtin_event_type="sys_common"
-
-
+collection_name="public_test_collection"
 
 @mcp.tool()
 def add_memories(
@@ -51,15 +48,7 @@ def add_memories(
 
     """
 
-    try:
-        rsp = vm.create_collection(
-            collection_name='public_test_collection', description="公共记忆库",
-            builtin_event_types=['sys_profile_collect_v1', 'sys_event_v1'],
-            builtin_entity_types=['sys_profile_v1']
-        )
-        print(rsp)
-    except Exception as e:
-        print(f"create_collection occurs error: {e}")
+
 
     try:
         # 添加消息
@@ -101,23 +90,47 @@ def search_memory(
 
     try:
 
-        # 搜索记忆
-        limit = 5
-        filter = {
-            "user_id": config.user_id,
-            "memory_type": [builtin_event_type],
-        }
+        result = ""
+
         try:
-            rsp = vm.search_memory(collection_name=collection_name, query=query, filter=filter, limit=limit)
+            limit = 1
+            filter = {
+                "user_id": config.user_id,
+                "memory_type": ['sys_profile_v1'],
+            }
+            rsp = vm.search_memory(collection_name=collection_name, query=None, filter=filter, limit=limit)
+            result += f'''
+用户画像：
+{rsp.get('data').get('result_list')}
+'''
             print(rsp)
         except Exception as e:
             print(f"search_memory occurs error: {e}")
 
-        return str(rsp)
+        try:
+            # 搜索记忆
+            limit = 5
+            filter = {
+                "user_id": config.user_id,
+                "memory_type": ['sys_event_v1'],
+            }
+
+
+            rsp = vm.search_memory(collection_name=collection_name, query=query, filter=filter, limit=limit)
+
+            result += f'''
+事件记忆：
+{rsp.get('data').get('result_list')}
+'''
+            print(rsp)
+        except Exception as e:
+            print(f"search_memory occurs error: {e}")
+
+        return result
 
     except Exception as e:
         logger.error(f"Error in get_doc: {str(e)}")
-        return {"error": str(e)}
+        return str(e)
 
 
 def main():
