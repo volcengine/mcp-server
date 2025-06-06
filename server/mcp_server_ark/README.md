@@ -1,38 +1,125 @@
-# ARK MCP Server
+# 零代码 Bot MCP
 
-An MCP server for the Volcengine ARK API. This server allows you to interact with ARK's AI capabilities, including chat completions and specialized tools.
+## 功能
 
-## Features
+1. 通过 bot_chat API 与 ARK 机器人进行对话
+2. 使用 link_reader 工具从 URL（网页、PDF、抖音视频）中提取内容
+3. 借助 caculator 工具计算数学表达式
+4. 通过 ARK 网页插件实现网络搜索功能
 
-- Chat with ARK bots using the bot_chat API
-- Extract content from URLs (web pages, PDFs, Douyin videos) using the link_reader tool
-- Evaluate mathematical expressions using the caculator tool
-- Web search capability through ARK's web plugin
+## Tools
 
-## Setup
+本 MCP Server 产品提供以下 Tools (工具/能力):
 
-### Creating a Zero-Code Intelligent Agent
+### Tool 1: bot_chat
 
-To use the web_search capability:
+#### 类型
 
-1. Go to the ARK official website and create a zero-code intelligent agent
-2. Enable the web plugin for your agent
-3. Record the bot ID for configuration
+bot_chat
 
-## Configuration
+#### 详细描述
 
-The server requires the following environment variables to be set:
+使用配置的 Bot ID 聊天。
 
-- `ARK_API_KEY`: Required, API key for authentication with the ARK service
-- `ARK_BOT_ID`: Optional, The ID of the ARK bot to use for chat completions
-- `ARK_BOT_NAME`: Required if ARK_BOT_ID is set, the name of the ARK bot
-- `ARK_BOT_DESCRIPTION`: Required if ARK_BOT_ID is set, the description of the ARK bot
-- `ARK_TOOL_LINK_READER`: Optional, set to "true" or "1" to enable the link reader tool
-- `ARK_TOOL_CACULATOR`: Optional, set to "true" or "1" to enable the calculator tool
+#### 调试所需的输入参数，
 
-You can set these environment variables in your shell or use a `.env` file.
+输入：
 
-### MCP Settings Configuration
+- `message`（字符串）：发送给bot的消息
+
+```json
+{
+  "message": "Hello, how can you help me today?"
+}
+```
+
+
+### Tool 2: web_search
+
+#### 详细描述
+
+使用联网插件进行搜索。当使用启用了联网插件的 Bot 时，可以通过 Bot 聊天工具使用此功能。使用网络搜索：
+1. 创建并配置应用
+2. 开启联网插件插件
+3. 在 MCP 设置中配置工具名称和描述
+
+```shell
+export ARK_BOT_ID=your bod id
+export ARK_BOT_DESCRIPTION=这是联网搜索工具，如果需要搜索互联网上的内容，请使用此工具。输入为查询语句
+export ARK_BOT_NAME=web_search
+```
+
+#### 调试所需的输入参数，
+输入：
+```json
+{
+  "message": "关于人工智能的最新消息是什么？"
+}
+```
+
+
+
+
+### Tool 3: caculator
+
+#### 详细描述
+
+使用 ARK 计算器工具计算数学表达式。
+
+#### 调试所需的输入参数，
+
+输入：
+- `input` (string): 采用 Wolfram 语言 InputForm 格式的数学表达式
+
+```json
+
+{
+  "input": "2 + 2 * 3"
+}
+```
+
+
+
+### Tool 4: link_reader
+
+#### 详细描述
+
+从 URL 中提取内容，支持网页、PDF 和抖音视频。
+
+
+#### 调试所需的输入参数，
+
+输入：
+- `url_list` (array of strings): 需要提取内容的 URL 列表（最多 3 个）
+
+```json
+{
+  "url_list": ["https://example.com", "https://example.org/document.pdf"]
+}
+```
+
+
+## 可适配平台  
+
+sse: 方舟，Python, Cline
+stdio: Python, Cline
+
+## 服务开通链接 (整体产品)  
+
+<https://console.volcengine.com/ark>
+
+## 鉴权方式  
+
+OAuth 2.0
+
+## 在不同平台的配置
+
+### UVX
+
+请预先获取环境变量 ARK_API_KEY 和 ARK_BOT_ID
+
+stdio方式
+
 
 ```json
 {
@@ -57,98 +144,6 @@ You can set these environment variables in your shell or use a `.env` file.
 }
 ```
 
-## Usage
-
-### Running the Server
-
-```bash
-# Run the server with stdio transport (default)
-mcp-server-ark
-
-# Run the server with SSE transport
-mcp-server-ark --transport sse
-```
-
-### MCP Tools
-
-The server provides the following MCP tools:
-
-#### bot_chat
-
-Chat with an ARK bot using the configured bot ID.
-
-Parameters:
-- `message` (string): The message to send to the bot
-
-Example:
-```json
-{
-  "message": "Hello, how can you help me today?"
-}
-```
-
-#### link_reader
-
-Extract content from URLs, including web pages, PDFs, and Douyin videos.
-
-Parameters:
-- `url_list` (array of strings): List of URLs to extract content from (maximum 3)
-
-Example:
-```json
-{
-  "url_list": ["https://example.com", "https://example.org/document.pdf"]
-}
-```
-
-#### caculator
-
-Evaluate mathematical expressions using the ARK Calculator tool.
-
-Parameters:
-- `input` (string): The mathematical expression in Wolfram Language InputForm
-
-Example:
-```json
-{
-  "input": "2 + 2 * 3"
-}
-```
-
-#### web_search
-
-Search the web using ARK's web plugin. This capability is available through the bot_chat tool when using a bot with the web plugin enabled.
-
-To use web search:
-1. Configure your ARK bot with the web plugin enabled
-3. Config your tool name and description in MCP settings
-```shell
-export ARK_BOT_ID=your bod id
-export ARK_BOT_DESCRIPTION=这是联网搜索工具，如果需要搜索互联网上的内容，请使用此工具。输入为查询语句
-export ARK_BOT_NAME=web_search
-```
-
-2. Use the bot_chat tool with a query that requires web search
-
-Example:
-```json
-{
-  "message": "What are the latest news about artificial intelligence?"
-}
-```
-
-## Debugging
-
-Since MCP servers run over stdio, debugging can be challenging. For the best debugging experience, we strongly recommend using the MCP Inspector.
-
-You can launch the MCP Inspector via npm with this command:
-
-```shell
-npx @modelcontextprotocol/inspector uv --directory {{your source code local directory}}/mcp-server-ark run mcp-server-ark
-```
-
-Upon launching, the Inspector will display a URL that you can access in your browser to begin debugging.
-
 ## License
 
-This project is licensed under the MIT License.
+volcengine/mcp-server is licensed under the MIT License.
