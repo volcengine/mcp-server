@@ -1,7 +1,7 @@
 # Viking Knowledge Base MCP Server
 
 This MCP server provides a tool to interact with the VolcEngine Viking Knowledge Base Service, allowing you to search and retrieve knowledge from your collections, meanwhile,
-allowing you to add doc to your collections and get doc processing info by doc_id.
+allowing  you to add doc to your collections and get doc processing info by doc_id.
 
 ## Features
 
