@@ -262,7 +262,7 @@ region is the region where the serverless gateway will be created, default is cn
 `cn-shanghai`, `cn-guangzhou` as well.
 """
 )
-def create_serverless_gateway(name: str = None, region: str = "cn-beijing") -> str:
+def create_serverless_gateway(name: str = "", region: str = "cn-beijing") -> str:
     """
     Creates a new VeApig serverless gateway.
 
@@ -273,7 +273,7 @@ def create_serverless_gateway(name: str = None, region: str = "cn-beijing") -> s
     Returns:
         str: The response body of the request.
     """
-    gateway_name = name if name else generate_random_name()
+    gateway_name = name if name != "" else generate_random_name()
     region = validate_and_set_region(region)
     body = {
         "Name": gateway_name,
@@ -302,7 +302,7 @@ region is the region where the serverless gateway service will be created, defau
 """
 )
 def create_gateway_service(
-    gateway_id: str, name: str = None, region: str = "cn-beijing"
+    gateway_id: str, name: str = "", region: str = "cn-beijing"
 ) -> str:
     """
     Creates a new VeApig serverless gateway service.
@@ -316,7 +316,7 @@ def create_gateway_service(
         str: The response body of the request.
     """
 
-    service_name = name if name else generate_random_name()
+    service_name = name if name != "" else generate_random_name()
     region = validate_and_set_region(region)
     body = {
         "ServiceName": service_name,
