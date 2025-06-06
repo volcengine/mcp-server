@@ -484,7 +484,7 @@ cli = [
 ]
 
 [[package]]
-name = "mcp-server-knowledgebase"
+name = "mcp-server-memory"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

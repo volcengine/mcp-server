@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-mcp-server-knowledgebase = "mcp_server_knowledgebase.server:main"
+mcp-server-memory = "mcp_server_memory.server:main"
 
 [build-system]
 requires = ["hatchling"]

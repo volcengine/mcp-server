@@ -47,13 +47,13 @@ Optional environment variables:
 The server can be run with either stdio transport (for MCP integration) or SSE transport:
 
 ```bash
-python -m mcp_server_knowledgebase.server --transport stdio
+python -m mcp_server_memory.server --transport stdio
 ```
 
 Or:
 
 ```bash
-python -m mcp_server_knowledgebase.server --transport sse
+python -m mcp_server_memory.server --transport sse
 ```
 
 ### Available Tools
@@ -144,12 +144,12 @@ To add this server to your MCP configuration, add the following to your MCP sett
 ```json
 {
   "mcpServers": {
-    "knowledgebase": {
+    "memory": {
       "command": "uvx",
         "args": [
           "--from",
-          "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_knowledgebase",
-          "mcp-server-knowledgebase",
+          "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_memory",
+          "mcp-server-memory",
         ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "your-access-key",

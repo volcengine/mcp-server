@@ -33,11 +33,11 @@ git clone git@github.com:volcengine/mcp-server.git
 
 #### UV
 ```bash
-cd mcp-server/server/mcp_server_knowledgebase
-uv run mcp-server-knowledgebase
+cd mcp-server/server/mcp_server_memory
+uv run mcp-server-memory
 
 # 使用sse模式启动(默认为stdio)
-uv run mcp-server-knowledgebase -t sse
+uv run mcp-server-memory -t sse
 ```
 
 使用客户端与服务器交互:
@@ -142,12 +142,12 @@ Parameters:
 ```json
 {
   "mcpServers": {
-    "knowledgebase": {
+    "memory": {
       "command": "uvx",
         "args": [
           "--from",
-          "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_knowledgebase",
-          "mcp-server-knowledgebase",
+          "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_memory",
+          "mcp-server-memory",
         ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "your-access-key",
