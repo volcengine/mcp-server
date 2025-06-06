@@ -98,7 +98,7 @@ def search_memory(
                 "user_id": config.user_id,
                 "memory_type": ['sys_profile_v1'],
             }
-            rsp = vm.search_memory(collection_name=collection_name, query=None, filter=filter, limit=limit)
+            rsp = vm.search_memory(collection_name=collection_name, query='sys_profile_v1', filter=filter, limit=limit)
             result += f'''
 用户画像：
 {rsp.get('data').get('result_list')}
@@ -115,8 +115,6 @@ def search_memory(
                 "user_id": config.user_id,
                 "memory_type": ['sys_event_v1'],
             }
-
-
             rsp = vm.search_memory(collection_name=collection_name, query=query, filter=filter, limit=limit)
 
             result += f'''
