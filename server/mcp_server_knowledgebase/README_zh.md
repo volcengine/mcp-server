@@ -147,14 +147,14 @@ Parameters:
         "args": [
           "--from",
           "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_knowledgebase",
-          "mcp-server-knowledgebase",
+          "mcp-server-knowledgebase"
         ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "your-access-key",
         "VOLCENGINE_SECRET_KEY": "your-secret-key", 
         "KNOWLEDGE_BASE_PROJECT": "your-project-name",
         "KNOWLEDGE_BASE_REGION": "your-region"
-      },
+      }
     }
   }
 }

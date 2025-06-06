@@ -29,8 +29,13 @@ SaaS
 {
   "inputSchema": {
     "type": "object",
-    "required": [],
-    "properties": {}
+    "properties": {
+      "region": {
+        "description": "区域，默认为 cn-beijing",
+        "type": "string"
+      }
+    },
+    "required": []
   },
   "name": "list_gateways",
   "description": "查询您账号下拥有的所有网关实例的列表。"
@@ -46,6 +51,335 @@ SaaS
 ```
 列举火山引擎 APIG 的实例列表。
 ```
+
+
+### Tool 2: get_gateway
+
+#### 类型
+
+SaaS
+
+#### 详细描述
+
+该工具允许您便捷查看火山引擎APIG的实例详情。
+
+#### 调试所需的输入参数:
+
+输入：
+
+```json 
+{
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+       "id": {
+         "description": "The ID of the gateway instance to query.",
+         "type": "string"
+       },
+      "region": {
+        "description": "区域，默认为 cn-beijing",
+        "type": "string"
+      }
+    },
+    "required": [
+      "id"
+    ]
+  },
+  "name": "get_gateway",
+  "description": "查询您账号下拥有的网关实例的详情。"
+}
+```
+
+输出：
+
+- 返回您账号下拥有的网关实例详情，包含实例名称、实例ID、创建时间等信息。
+
+#### 最容易被唤起的 Prompt示例
+
+```
+查询火山引擎 APIG 的实例详情。
+```
+
+### Tool 3: create_serverless_gateway
+
+#### 类型
+
+SaaS
+
+#### 详细描述
+
+该工具允许您便捷创建火山引擎APIG实例。
+
+#### 调试所需的输入参数:
+
+输入：
+
+```json 
+{
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+       "name": {
+           "description": "The name of the gateway instance to create, if not provided, a random name will be generated.",
+           "type": "string"
+       },
+      "region": {
+        "description": "区域，默认为 cn-beijing",
+        "type": "string"
+      }
+    },
+    "required": [
+    ]
+  },
+  "name": "create_serverless_gateway",
+  "description": "创建 serverless 网关实例"
+}
+```
+
+输出：
+
+- 返回您账号下创建的网关实例 ID。
+
+#### 最容易被唤起的 Prompt 示例
+
+```
+创建火山引擎 APIG 网关实例。
+```
+
+### Tool 4: list_gateway_services 
+
+#### 类型
+
+SaaS
+
+#### 详细描述
+
+该工具允许您便捷查看火山引擎APIG的实例下的服务列表。
+
+#### 调试所需的输入参数:
+
+输入：
+
+```json 
+{
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "gateway_id": {
+         "description": "The id of the gateway instance to query.",
+         "type": "string"
+       },
+      "region": {
+        "description": "区域，默认为 cn-beijing",
+        "type": "string"
+      }
+    },
+    "required": [
+      "gateway_id"
+    ]
+  },
+  "name": "list_gateway_services",
+  "description": "查询您账号下拥有的网关实例的服务列表。"
+}
+```
+
+输出：
+
+- 返回您账号下拥有的网关实例下的服务列表，包含服务名称、服务ID、域名、创建时间等信息。
+
+#### 最容易被唤起的 Prompt 示例
+
+```
+列举火山引擎 APIG 的服务列表。
+```
+
+### Tool 5: get_gateway_service
+
+#### 类型
+
+SaaS
+
+#### 详细描述
+
+该工具允许您便捷查看火山引擎APIG的服务详情。
+
+#### 调试所需的输入参数:
+
+输入：
+
+```json 
+{
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+       "id": {
+         "description": "The id of the gateway service to query.",
+         "type": "string"
+       },
+      "region": {
+        "description": "区域，默认为 cn-beijing",
+        "type": "string"
+      }
+    },
+    "required": [
+      "id"
+    ]
+  },
+  "name": "get_gateway_service",
+  "description": "查询您账号下拥有的网关服务详情。"
+}
+```
+
+输出：
+
+- 返回您账号下拥有的网关服务详情，包含服务名称、实例ID、域名、创建时间等信息。
+
+#### 最容易被唤起的 Prompt示例
+
+```
+查询火山引擎 APIG 的服务详情。
+```
+
+### Tool 6: create_gateway_service
+
+#### 类型
+
+SaaS
+
+#### 详细描述
+
+该工具允许您便捷创建火山引擎APIG服务。
+
+#### 调试所需的输入参数:
+
+输入：
+
+```json 
+{
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+       "name": {
+           "description": "The name of the gateway service to create, if not provided, a random name will be generated.",
+           "type": "string"
+       },
+      "region": {
+        "description": "区域，默认为 cn-beijing",
+        "type": "string"
+      }
+    },
+    "required": [
+    ]
+  },
+  "name": "create_gateway_service",
+  "description": "创建网关服务"
+}
+```
+
+输出：
+
+- 返回您账号下创建的网关服务 ID。
+
+#### 最容易被唤起的 Prompt 示例
+
+```
+创建火山引擎 APIG 网关服务。
+```
+
+### Tool 7: list_gateway_routes
+
+#### 类型
+
+SaaS
+
+#### 详细描述
+
+该工具允许您便捷查看火山引擎APIG的实例下的路由列表。
+
+#### 调试所需的输入参数:
+
+输入：
+
+```json 
+{
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "gateway_id": {
+         "description": "The id of the gateway instance to query.",
+         "type": "string"
+       },
+      "region": {
+        "description": "区域，默认为 cn-beijing",
+        "type": "string"
+      }
+    },
+    "required": [
+      "gateway_id"
+    ]
+  },
+  "name": "list_gateway_routes",
+  "description": "查询您账号下拥有的网关实例的路由列表。"
+}
+```
+
+输出：
+
+- 返回您账号下拥有的网关实例下的路由列表，包含路由名称、路由ID、域名、创建时间等信息。
+
+#### 最容易被唤起的 Prompt 示例
+
+```
+列举火山引擎 APIG 的路由列表。
+```
+
+### Tool 8: get_gateway_route
+
+#### 类型
+
+SaaS
+
+#### 详细描述
+
+该工具允许您便捷查看火山引擎APIG的路由详情。
+
+#### 调试所需的输入参数:
+
+输入：
+
+```json 
+{
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+       "id": {
+         "description": "The id of the gateway route to query.",
+         "type": "string"
+       },
+      "region": {
+        "description": "区域，默认为 cn-beijing",
+        "type": "string"
+      }
+    },
+    "required": [
+      "id"
+    ]
+  },
+  "name": "get_gateway_route",
+  "description": "查询您账号下拥有的网关路由详情。"
+}
+```
+
+输出：
+
+- 返回您账号下拥有的网关路由详情，包含路由名称、路由ID、域名、创建时间等信息。
+
+#### 最容易被唤起的 Prompt 示例
+
+```
+查询火山引擎 APIG 的路由详情。
+```
+
 
 ## 可适配平台
 
@@ -67,10 +401,9 @@ SaaS
 |------------------|------------------------|-----|
 | `VOLCENGINE_ACCESS_KEY` | 火山引擎账号 ACCESS KEY      | -   |
 | `VOLCENGINE_SECRET_KEY` | 火山引擎账号 SECRET KEY      | -   |
-| `VOLCENGINE_REGION`         | 火山引擎 TOS region        | -   |
-| `TOS_ENDPOINT`   | 火山引擎 TOS Endpoint      | -   |
-| `SECURITY_TOKEN` | 火山引擎 Security Token，可选 | -   |
-| `TOS_BUCKETS`    | 指定访问的 TOS 桶，可选         | -   |
+| `VOLCENGINE_REGION`         | 火山引擎 APIG region       | -   |
+| `VOLCENGINE_ENDPOINT` | Volcengine endpoint | - |
+| `MCP_SERVER_PORT` | MCP server listening port | `8000` |
 
 ## 安装部署
 
@@ -163,9 +496,8 @@ use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run *mcp-server
         "VOLCENGINE_ACCESS_KEY": "your access-key-id",
         "VOLCENGINE_SECRET_KEY": "your access-key-secret",
         "VOLCENGINE_REGION": "veapig region",
-        "TOS_ENDPOINT": "veapig endpoint",
-        "SECURITY_TOKEN": "your security token",
-        "TOS_BUCKET": "your specific bucket"
+        "VOLCENGINE_ENDPOINT": "volcengine endpoint",
+        "MCP_SERVER_PORT": "8000"
       }
     }
   }
