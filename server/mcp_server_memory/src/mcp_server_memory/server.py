@@ -35,12 +35,7 @@ vm = VikingDBMemoryService(ak=config.ak, sk=config.sk) # 替换成你的ak sk
 # 创建 collection
 collection_name="test_case"
 builtin_event_type="sys_common"
-try:
-    rsp = vm.create_collection(collection_name=collection_name, description="", builtin_event_types=[builtin_event_type])
-    print(rsp)
-except Exception as e:
-    print(f"create_collection occurs error: {e}")
-# rsp {'ResponseMetadata': {'Action': '', 'Region': 'cn-beijing', 'RequestId': 'xxx', 'Service': 'knowledge_base_server', 'Version': ''}, 'Result': {'resource_id': 'mem-xxx'}}
+
 
 
 @mcp.tool()
@@ -55,6 +50,17 @@ def add_memories(
 
 
     """
+
+    try:
+        rsp = vm.create_collection(
+            collection_name='public_test_collection', description="公共记忆库",
+            builtin_event_types=['sys_profile_collect_v1', 'sys_event_v1'],
+            builtin_entity_types=['sys_profile_v1']
+        )
+        print(rsp)
+    except Exception as e:
+        print(f"create_collection occurs error: {e}")
+
     try:
         # 添加消息
         session_id = "test_id"
