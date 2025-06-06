@@ -70,10 +70,11 @@ def add_memories(
             rsp = vm.add_messages(collection_name=collection_name, session_id=session_id, messages=messages,
                                   metadata=metadata)
             print(rsp)
+            return str(rsp)
         except Exception as e:
             print(f"add_messages occurs error: {e}")
         # rsp {'code': 0, 'data': {}, 'message': 'success', 'request_id': 'xxxx'}
-        return '记忆已更新'
+
 
     except Exception as e:
         logger.error(f"Error in add_doc: {str(e)}")
