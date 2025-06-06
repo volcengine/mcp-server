@@ -416,19 +416,19 @@ def list_api_gateways(region: str = None):
     return response_body
 
 @mcp.tool(
-    description="""Creates a new VeApig serverless gateway.
-gateway_name is the name of the serverless gateway. If not provided, a random name will be generated.
-region is the region where the serverless gateway will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
+    description="""Creates a new VeApig gateway.
+gateway_name is the name of the gateway. If not provided, a random name will be generated.
+region is the region where the gateway will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
 `cn-shanghai`, `cn-guangzhou` as well.
 """
 )
-def create_serverless_gateway(name: str = None, region: str = "cn-beijing") -> str:
+def create_api_gateway(name: str = None, region: str = "cn-beijing") -> str:
     """
-    Creates a new VeApig serverless gateway.
+    Creates a new VeApig gateway.
 
     Args:
-        name (str): The name of the serverless gateway. If not provided, a random name will be generated.
-        region (str): The region where the serverless gateway will be created. Default is cn-beijing.
+        name (str): The name of the gateway. If not provided, a random name will be generated.
+        region (str): The region where the gateway will be created. Default is cn-beijing.
 
     Returns:
         str: The response body of the request.
@@ -458,13 +458,13 @@ def create_serverless_gateway(name: str = None, region: str = "cn-beijing") -> s
         response_body = request("POST", now, {}, {}, ak, sk, token, "CreateGateway", json.dumps(body))
         return response_body
     except Exception as e:
-        return f"Failed to create VeApig serverless gateway with name {gateway_name}: {str(e)}"
+        return f"Failed to create VeApig gateway with name {gateway_name}: {str(e)}"
 
 
 @mcp.tool(
-    description="""Creates a new VeApig serverless gateway service with a random name if no name is provided.
-gateway_id is the id of the serverless gateway where the service will be created. The gateway_id is required.
-region is the region where the serverless gateway service will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
+    description="""Creates a new VeApig gateway service with a random name if no name is provided.
+gateway_id is the id of the gateway where the service will be created. The gateway_id is required.
+region is the region where the gateway service will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
 `cn-shanghai`, `cn-guangzhou` as well.
 """
 )
@@ -472,12 +472,12 @@ def create_gateway_service(
     gateway_id: str, name: str = None, region: str = "cn-beijing"
 ) -> str:
     """
-    Creates a new VeApig serverless gateway service.
+    Creates a new VeApig gateway service.
 
     Args:
-        gateway_id (str): The id of the serverless gateway where the service will be created.
-        name (str): The name of the serverless gateway service. If not provided, a random name will be generated.
-        region (str): The region where the serverless gateway service will be created. Default is cn-beijing.
+        gateway_id (str): The id of the gateway where the service will be created.
+        name (str): The name of the gateway service. If not provided, a random name will be generated.
+        region (str): The region where the gateway service will be created. Default is cn-beijing.
 
     Returns:
         str: The response body of the request.
@@ -502,7 +502,7 @@ def create_gateway_service(
         response_body = request("POST", now, {}, {}, ak, sk, token, "CreateGatewayService", json.dumps(body))
         return response_body
     except Exception as e:
-        return f"Failed to create VeApig serverless gateway service with name {service_name}: {str(e)}"
+        return f"Failed to create VeApig gateway service with name {service_name}: {str(e)}"
 
 
 @mcp.tool(description="""Lists all services of an API gateway.
