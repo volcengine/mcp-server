@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 import io
-from typing import Union
+from typing import Union, Optional
 from mcp.server.fastmcp import FastMCP
 import datetime
 import volcenginesdkcore
@@ -631,27 +631,45 @@ def python_zip_implementation(folder_path: str) -> bytes:
     print(f"Python zip finished, size: {buffer.tell() / 1024 / 1024:.2f} MB")
     return buffer.getvalue()
 
-@mcp.tool(description="""Uploads a code folder to tos and returns the TOS object URL.
-          After it is uploaded, ask the user to release the function again for the changes to take effect.
-Use this when you need to upload a code folder to TOS for a veFaaS function.""")
-def upload_to_tos(region: str, folder_path: str, function_id: str) -> bytes:
+@mcp.tool(description="""
+Uploads code to TOS for a veFaaS function deployment.
+
+You may provide:
+- 'local_folder_path': for uploading a local code directory (recommended for large or structured projects).
+- 'file_dict': for in-memory code files, suitable for simple or lightweight use cases.
+
+Note:
+If the MCP Server is deployed remotely (e.g., via SSE), local paths are not accessible. In such cases, use 'file_dict' instead of 'local_folder_path'.
+
+After uploading, remind the user to release the function for changes to take effect.
+""")
+def upload_code(region: str, function_id: str, local_folder_path: Optional[str] = None, file_dict: Optional[dict[str, Union[str, bytes]]] = None) -> bytes:
     region = validate_and_set_region(region)
 
     api_instance = init_client(region, mcp.get_context())
 
-    data, size, error = zip_and_encode_folder(folder_path)
+    if local_folder_path:
+        data, size, error = zip_and_encode_folder(local_folder_path)
+        if error:
+            raise ValueError(f"Error zipping folder: {error}")
+        if not data or size == 0:
+            raise ValueError("Zipped folder is empty, nothing to upload")
+    elif file_dict:
+        data = build_zip_bytes_for_file_dict(file_dict)
+        size = len(data)
+        if not data:
+            raise ValueError("No files provided in file_dict, upload aborted.")
+    else:
+        raise ValueError("Either local_folder_path or file_dict must be provided.")
 
-    if error:
-        raise ValueError(f"Error zipping folder: {error}")
-    if not data:
-        raise ValueError("No data returned from zipping folder")
-    if size == 0:
-        raise ValueError("Zipped data size is 0, nothing to upload")
+    return upload_code_zip_for_function(api_instance=api_instance, function_id=function_id, code_zip_size=size, zip_bytes=data)
 
+
+def upload_code_zip_for_function(api_instance: object, function_id: str, code_zip_size: int, zip_bytes, ) -> bytes:
     req = volcenginesdkvefaas.GetCodeUploadAddressRequest(
-            function_id=function_id,
-            content_length=size
-        )
+        function_id=function_id,
+        content_length=code_zip_size
+    )
 
     response = api_instance.get_code_upload_address(req)
     upload_url = response.upload_address
@@ -660,11 +678,11 @@ def upload_to_tos(region: str, folder_path: str, function_id: str) -> bytes:
         "Content-Type": "application/zip",
     }
 
-    response = requests.put(url=upload_url, data=data, headers=headers)
-    if response.status_code >= 200 and response.status_code < 300:
-        print(f"Upload successful! Size: {size / 1024 / 1024:.2f} MB")
+    response = requests.put(url=upload_url, data=zip_bytes, headers=headers)
+    if 200 <= response.status_code < 300:
+        print(f"Upload successful! Size: {code_zip_size / 1024 / 1024:.2f} MB")
     else:
-        error_message = f"Upload failed with status code {response.status_code}: {response.text}"
+        error_message = f"Upload failed to {upload_url} with status code {response.status_code}: {response.text}"
         raise ValueError(error_message)
 
     try:
@@ -678,7 +696,7 @@ def upload_to_tos(region: str, folder_path: str, function_id: str) -> bytes:
     suffix = generate_random_name(prefix="", length=6)
 
     body = {
-        "FunctionId":function_id
+        "FunctionId": function_id
     }
 
     try:
@@ -687,3 +705,14 @@ def upload_to_tos(region: str, folder_path: str, function_id: str) -> bytes:
     except Exception as e:
         error_message = f"Error creating upstream: {str(e)}"
         raise ValueError(error_message)
+
+def build_zip_bytes_for_file_dict(file_dict):
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zip_file:
+        for filename, content in file_dict.items():
+            info = zipfile.ZipInfo(filename)
+            info.date_time = datetime.datetime.now().timetuple()[:6]
+            info.external_attr = 0o755 << 16
+            zip_file.writestr(info, content)
+    zip_bytes = zip_buffer.getvalue()
+    return zip_bytes
