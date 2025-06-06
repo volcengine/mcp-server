@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "vefaas": {
+    "veapig": {
       "command": "uvx",
       "args": [
         "--from",
