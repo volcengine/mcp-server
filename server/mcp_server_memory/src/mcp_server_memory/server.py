@@ -50,7 +50,7 @@ def add_memories(
 
     try:
         # 添加消息
-        session_id = str(uuid.uuid4())
+        session_id = str(uuid.uuid4().hex)
         messages = [
             {"role": "user", "content": text}
         ]
