@@ -15,15 +15,10 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 import time
-# knowledge base domain
-g_knowledge_base_domain = "api-memory.mlp.cn-beijing.volces.com"
+from datetime import datetime
 
-# paths
-search_knowledge_path = "/api/knowledge/collection/search_knowledge"
-list_collections_path = "/api/knowledge/collection/list"
-get_collections_path = "/api/knowledge/collection/info"
-doc_add_path = "/api/knowledge/doc/add"
-doc_info_path = "/api/knowledge/doc/info"
+
+
 
 # Create MCP server
 mcp = FastMCP("Memory MCP Server", port=int(os.getenv("PORT", "8000")))
@@ -42,6 +37,25 @@ def generate_random_letters(length):
     letters = string.ascii_letters
     return ''.join(random.choice(letters) for _ in range(length))
 
+
+def format_milliseconds(timestamp_ms):
+    """
+    将毫秒级时间戳转换为 'YYYYMMDD HH:MM:SS' 格式的字符串
+
+    参数:
+    - timestamp_ms: 毫秒级时间戳（整数或浮点数）
+
+    返回:
+    - 格式化后的时间字符串
+    """
+    # 将毫秒转换为秒
+    timestamp_seconds = timestamp_ms / 1000
+
+    # 转换为 datetime 对象
+    dt = datetime.fromtimestamp(timestamp_seconds)
+
+    # 按照指定格式输出
+    return dt.strftime('%Y%m%d %H:%M:%S')
 
 @mcp.tool()
 def add_memories(
@@ -108,7 +122,7 @@ def search_memory(
             rsp = vm.search_memory(collection_name=collection_name, query='sys_profile_v1', filter=filter, limit=limit)
             result += f'''
 用户画像：
-{[item.get('memory_info') for item in rsp.get('data').get('result_list')]}
+{[item.get('memory_info').get('user_profile') for item in rsp.get('data').get('result_list')]}
 trace_id = {rsp.get('request_id')}
 '''
             print(rsp)
@@ -127,7 +141,7 @@ trace_id = {rsp.get('request_id')}
 
             result += f'''
 事件记忆：
-{[(item.get('time'), item.get('memory_info')) for item in rsp.get('data').get('result_list')]}
+{[f'{format_milliseconds(item.get("time"))} - {item.get("memory_info").get("summary")}' for item in rsp.get('data').get('result_list')]}
 trace_id = {rsp.get('request_id')}
 '''
             print(rsp)
