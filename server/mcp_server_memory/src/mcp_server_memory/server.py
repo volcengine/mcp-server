@@ -123,10 +123,10 @@ def search_memory(
             profiles = [item.get('memory_info').get('user_profile') for item in rsp.get('data').get('result_list')]
             if len(profiles)>0:
                 result += f'''
-用户画像：
+用户画像 (trace_id = {rsp.get('request_id')})：
 {profiles[0]}
 
-trace_id = {rsp.get('request_id')}
+
     '''
             print(rsp)
         except Exception as e:
@@ -144,10 +144,8 @@ trace_id = {rsp.get('request_id')}
             content = "\n".join([f'{format_milliseconds(item.get("time"))} - {item.get("memory_info").get("summary")}' for item in
                        rsp.get('data').get('result_list')])
             result += f'''
-事件记忆：
+事件记忆 (trace_id = {rsp.get('request_id')})：
 {content}
-
-trace_id = {rsp.get('request_id')}
 '''
             print(rsp)
         except Exception as e:
