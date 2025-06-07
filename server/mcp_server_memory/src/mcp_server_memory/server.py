@@ -118,7 +118,7 @@ trace_id = {rsp.get('request_id')}
 
         try:
             # 搜索记忆
-            limit = 10
+            limit = 5
             filter = {
                 "user_id": config.user_id,
                 "memory_type": ['sys_event_v1'],
@@ -127,7 +127,7 @@ trace_id = {rsp.get('request_id')}
 
             result += f'''
 事件记忆：
-{[item.get('memory_info') for item in rsp.get('data').get('result_list')]}
+{[(item.get('time'), item.get('memory_info')) for item in rsp.get('data').get('result_list')]}
 trace_id = {rsp.get('request_id')}
 '''
             print(rsp)
