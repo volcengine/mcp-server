@@ -121,7 +121,7 @@ def search_memory(
             }
             rsp = vm.search_memory(collection_name=collection_name, query='sys_profile_v1', filter=filter, limit=limit)
             profiles = [item.get('memory_info').get('user_profile') for item in rsp.get('data').get('result_list')]
-            if len(profiles>0):
+            if len(profiles)>0:
                 result += f'''
 用户画像：
 {profiles[0]}
