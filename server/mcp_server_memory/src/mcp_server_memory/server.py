@@ -3,6 +3,8 @@ import logging
 import os
 import requests
 import uuid
+import string
+import random
 from typing import Dict, Optional, Final, Any
 from mcp.server import FastMCP
 from mcp_server_memory.config import config
@@ -35,6 +37,12 @@ vm = VikingDBMemoryService(ak=config.ak, sk=config.sk) # 替换成你的ak sk
 # 创建 collection
 collection_name="public_test_collection"
 
+def generate_random_letters(length):
+    # 生成包含所有大小写字母的字符集
+    letters = string.ascii_letters
+    return ''.join(random.choice(letters) for _ in range(length))
+
+
 @mcp.tool()
 def add_memories(
         text: str
@@ -50,7 +58,7 @@ def add_memories(
 
     try:
         # 添加消息
-        session_id = str(uuid.uuid4().hex)
+        session_id = generate_random_letters(10)
         messages = [
             {"role": "user", "content": text}
         ]
