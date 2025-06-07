@@ -48,8 +48,6 @@ def add_memories(
 
     """
 
-
-
     try:
         # 添加消息
         session_id = str(uuid.uuid4())
@@ -68,6 +66,7 @@ def add_memories(
             return str(rsp)
         except Exception as e:
             print(f"add_messages occurs error: {e}")
+            return str(e)
         # rsp {'code': 0, 'data': {}, 'message': 'success', 'request_id': 'xxxx'}
 
 
