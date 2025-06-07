@@ -120,11 +120,14 @@ def search_memory(
                 "memory_type": ['sys_profile_v1'],
             }
             rsp = vm.search_memory(collection_name=collection_name, query='sys_profile_v1', filter=filter, limit=limit)
-            result += f'''
+            profiles = [item.get('memory_info').get('user_profile') for item in rsp.get('data').get('result_list')]
+            if len(profiles>0):
+                result += f'''
 用户画像：
-{[item.get('memory_info').get('user_profile') for item in rsp.get('data').get('result_list')]}
+{profiles[0]}
+
 trace_id = {rsp.get('request_id')}
-'''
+    '''
             print(rsp)
         except Exception as e:
             result+=str(e)
@@ -138,10 +141,12 @@ trace_id = {rsp.get('request_id')}
                 "memory_type": ['sys_event_v1'],
             }
             rsp = vm.search_memory(collection_name=collection_name, query=query, filter=filter, limit=limit)
-
+            content = "\n".join([f'{format_milliseconds(item.get("time"))} - {item.get("memory_info").get("summary")}' for item in
+                       rsp.get('data').get('result_list')])
             result += f'''
 事件记忆：
-{[f'{format_milliseconds(item.get("time"))} - {item.get("memory_info").get("summary")}' for item in rsp.get('data').get('result_list')]}
+{content}
+
 trace_id = {rsp.get('request_id')}
 '''
             print(rsp)
