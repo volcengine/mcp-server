@@ -2,7 +2,7 @@ import argparse
 import logging
 import os
 import requests
-
+import uuid
 from typing import Dict, Optional, Final, Any
 from mcp.server import FastMCP
 from mcp_server_memory.config import config
@@ -52,7 +52,7 @@ def add_memories(
 
     try:
         # 添加消息
-        session_id = "test_id"
+        session_id = str(uuid.uuid4())
         messages = [
             {"role": "user", "content": text}
         ]
