@@ -17,7 +17,7 @@
 
 本 MCP Server提供以下 Tools (工具/能力):
 
-## Tool 1: bot\_chat
+## Tool 1: bot_chat
 
 该工具允许你与特定Bot ID的零代码应用进行对话。使用前请在火山方舟创建零代码应用，并记录应用 ID 以便进行配置。零代码应用操作指南详见[产品文档](https://www.volcengine.com/docs/82379/1267885)
 
@@ -35,7 +35,7 @@
 
 <br>
 
-## Tool 2: web\_search
+## Tool 2: web_search
 
 使用联网插件进行搜索。当使用启用了配置有联网插件的零代码Bot时，可以通过 bot\_chat 工具使用此功能。操作步骤如下，零代码应用创建步骤详细可见[零代码操作指南](https://www.volcengine.com/docs/82379/1267885)
 
@@ -63,7 +63,7 @@ export ARK_BOT_NAME=web_search
 
 <br>
 
-## Tool 3: link\_reader
+## Tool 3: link_reader
 
 [网页解析](https://www.volcengine.com/docs/82379/1284852)，可获取和解析 url 链接下的标题和内容。支持用户快速提取和检索网页、pdf等内容中有价值的信息。使用前需开通并在零代码中配置
 
