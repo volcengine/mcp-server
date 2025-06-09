@@ -1,4 +1,4 @@
-# 联网问答agent MCP Server
+# 联网问答Agent MCP Server
 
 ## 版本信息
 
@@ -14,9 +14,8 @@ v0.1.0
 
 ## 标签
 
-- AI问答
+- 人工智能与机器学习
 - 联网搜索
-- 问答智能体
 
 ## Tools
 
@@ -65,7 +64,7 @@ saas
 
 ## 可适配平台
 
-方舟，Trae，cursor，python
+Trae，Cursor，Python
 
 ## 服务开通链接 (整体产品)
 
@@ -115,28 +114,6 @@ uv run mcp-server-askecho
 # 使用sse模式启动(默认为stdio)
 uv run mcp-server-askecho -t sse
 ```
-
-## 在不同平台的配置
-
-### 方舟
-
-#### 体验中心
-
-1. 查看MCP Server 详情
-
-   在大模型生态广场，选择合适的MCP Server，并查看详情
-2. 选择MCP Server即将运行的平台
-
-   检查当前MCP Server 已适配的平台，并选择合适的平台
-3. 查看并对比可用的Tools
-
-   仔细查看可用的Tools的功能描述与所需的输入参数，并尝试运行对应的功能。
-4. 获取专属的URL或代码示例
-
-   检查账号登录状态与服务开通情况，生成唯一URL。如果没有开通agent，需要到火山控制台开通 联网agent lite版，并获取对应的bot_id。
-5. 去对应的Client的平台进行使用
-
-   点击快捷跳转按钮，前往方舟平台的体验中心进行对应MCP Server的体验
 
 ## 部署
 
