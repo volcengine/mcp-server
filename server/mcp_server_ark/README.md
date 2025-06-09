@@ -122,7 +122,7 @@ export ARK_BOT_NAME=web_search
 
 # 安装部署
 
-**环境变量****设置与获取：** 
+**环境变量**设置与获取：
 
 - `ARK_API_KEY`：必填，用于火山方舟服务身份验证的 API 密钥
 	
