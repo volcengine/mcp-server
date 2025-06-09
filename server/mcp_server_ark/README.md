@@ -1,4 +1,4 @@
-# 零代码bot MCP Server
+# 零代码Bot MCP Server
 
 火山方舟[零代码应用](https://www.volcengine.com/docs/82379/1262003)，支持通过表单化创建及开箱即用的基础插件，快速实现零代码应用的搭建与体验，您可在零代码中配置联网搜索、网页解析、计算器等插件。该MCP Server能够通过 BotAPI 调用已创建的零代码应用。
 
