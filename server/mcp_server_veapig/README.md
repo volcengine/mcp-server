@@ -1,7 +1,7 @@
-# APIG MCP Server 
+# APIG MCP Server
 APIG MCP Server 是一个模型上下文协议(Model Context Protocol)服务器，为MCP客户端(如Claude Desktop)提供与火山引擎APIG服务交互的能力。可以基于自然语言对云端实例资源进行全链路管理，支持实例、服务、路由的查询操作，实现APIG资源的高效管理。
 
-| 版本 | v0.2.0                    | 
+| 版本 | v0.2.0                    |
 |----|---------------------------|
 | 描述 | 基于 MCP 管理 APIG 资源，智能化流量管理 |
 | 分类 | 容器与中间件                    |
@@ -25,7 +25,7 @@ SaaS
 
 输入：
 
-```json 
+```json
 {
   "inputSchema": {
     "type": "object",
@@ -67,7 +67,7 @@ SaaS
 
 输入：
 
-```json 
+```json
 {
   "inputSchema": {
     "type": "object",
@@ -114,7 +114,7 @@ SaaS
 
 输入：
 
-```json 
+```json
 {
   "inputSchema": {
     "type": "object",
@@ -146,7 +146,7 @@ SaaS
 创建火山引擎 APIG 网关实例。
 ```
 
-### Tool 4: list_gateway_services 
+### Tool 4: list_gateway_services
 
 #### 类型
 
@@ -160,7 +160,7 @@ SaaS
 
 输入：
 
-```json 
+```json
 {
   "inputSchema": {
     "type": "object",
@@ -207,7 +207,7 @@ SaaS
 
 输入：
 
-```json 
+```json
 {
   "inputSchema": {
     "type": "object",
@@ -254,11 +254,15 @@ SaaS
 
 输入：
 
-```json 
+```json
 {
   "inputSchema": {
     "type": "object",
     "properties": {
+      "gateway_id": {
+         "description": "The id of the gateway instance to create the service.",
+         "type": "string"
+       },
        "name": {
            "description": "The name of the gateway service to create, if not provided, a random name will be generated.",
            "type": "string"
@@ -269,6 +273,7 @@ SaaS
       }
     },
     "required": [
+      "gateway_id"
     ]
   },
   "name": "create_gateway_service",
@@ -300,7 +305,7 @@ SaaS
 
 输入：
 
-```json 
+```json
 {
   "inputSchema": {
     "type": "object",
@@ -347,7 +352,7 @@ SaaS
 
 输入：
 
-```json 
+```json
 {
   "inputSchema": {
     "type": "object",
@@ -494,10 +499,7 @@ use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run *mcp-server
       ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "your access-key-id",
-        "VOLCENGINE_SECRET_KEY": "your access-key-secret",
-        "VOLCENGINE_REGION": "veapig region",
-        "VOLCENGINE_ENDPOINT": "volcengine endpoint",
-        "MCP_SERVER_PORT": "8000"
+        "VOLCENGINE_SECRET_KEY": "your access-key-secret"
       }
     }
   }
@@ -507,5 +509,3 @@ use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run *mcp-server
 ## License
 
 volcengine/mcp-server is licensed under the [MIT License](https://github.com/volcengine/mcp-server/blob/main/LICENSE).
-
-
