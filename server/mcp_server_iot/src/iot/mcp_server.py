@@ -45,54 +45,6 @@ def create_mcp_server():
         return reqs
 
     @mcp.tool()
-    def create_device(params: dict, body: dict) -> str:
-        """
-        添加一个新设备，主要包含设备名称，所属产品等
-        Call steps:
-        1. Pass "create_device" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  create_device
-        """
-        reqs = service.mcp_post("McpCreateDevice", params, json.dumps(body))
-
-        return reqs
-
-    @mcp.tool()
-    def delete_device(params: dict, body: dict) -> str:
-        """
-        删除设备，支持产品下批量
-        Call steps:
-        1. Pass "delete_device" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  delete_device
-        """
-        reqs = service.mcp_post("McpDeleteDevice", params, json.dumps(body))
-
-        return reqs
-
-    @mcp.tool()
-    def disable_device(params: dict, body: dict) -> str:
-        """
-        禁用设备，支持产品下批量
-        Call steps:
-        1. Pass "disable_device" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  disable_device
-        """
-        reqs = service.mcp_post("McpDisableDevice", params, json.dumps(body))
-
-        return reqs
-
-    @mcp.tool()
-    def enable_device(params: dict, body: dict) -> str:
-        """
-        启用设备，支持产品下批量
-        Call steps:
-        1. Pass "enable_device" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  enable_device
-        """
-        reqs = service.mcp_post("McpEnableDevice", params, json.dumps(body))
-
-        return reqs
-
-    @mcp.tool()
     def get_all_last_device_property_value(params: dict, body: dict) -> str:
         """
         获取所有模块，所有属性的最新上报值
@@ -299,18 +251,6 @@ def create_mcp_server():
         2. After obtaining the parameter description, invoke  set_property
         """
         reqs = service.mcp_post("McpSetProperty", params, json.dumps(body))
-
-        return reqs
-
-    @mcp.tool()
-    def update_device(params: dict, body: dict) -> str:
-        """
-        更新设备备注名称
-        Call steps:
-        1. Pass "update_device" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  update_device
-        """
-        reqs = service.mcp_post("McpUpdateDevice", params, json.dumps(body))
 
         return reqs
 

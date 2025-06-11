@@ -19,59 +19,6 @@ note = {
         OutputData ( JSON Map ): 服务调用输出参数 
         TraceID ( String ): 一次服务调用唯一ID 
     """,
-    "create_device": r""" 
-    Args: 
-        params: A JSON structure
-             参数 ( 类型 ): 是否必选  描述 
-             ---- ( ---- ): ----  ---- 
-        body: A JSON structure
-             参数 ( 类型 ): 是否必选  描述 
-             ---- ( ---- ): ----  ---- 
-             ExtraName ( String ): 否  备注名称，支持中文、英文字母、数字、和特殊字符_-@()，长度限制 0~32个字符 
-             InstanceID ( String ): 是  实例ID 
-             Name ( String ): 否  名称,支持英文大小写字母、数字、下划线(_)、中划线(-)、点号(.)、半角冒号(:)、特殊字符(@)，长度为1-128字符 
-             ProductKey ( String ): 是  产品标示 
-   Returns: 
-        参数 ( 类型 ): 描述 
-        ---- ( ---- ): ---- 
-        DeviceName ( String ): 设备名称 
-    """,
-    "delete_device": r""" 
-    Args: 
-        params: A JSON structure
-             参数 ( 类型 ): 是否必选  描述 
-             ---- ( ---- ): ----  ---- 
-        body: A JSON structure
-             参数 ( 类型 ): 是否必选  描述 
-             ---- ( ---- ): ----  ---- 
-             DeviceNames ( Array of String ): 是  设备名称列表 
-             InstanceID ( String ): 是  实例ID 
-             ProductKey ( String ): 是  产品标示 
-    """,
-    "disable_device": r""" 
-    Args: 
-        params: A JSON structure
-             参数 ( 类型 ): 是否必选  描述 
-             ---- ( ---- ): ----  ---- 
-        body: A JSON structure
-             参数 ( 类型 ): 是否必选  描述 
-             ---- ( ---- ): ----  ---- 
-             DeviceNames ( Array of String ): 是  设备名称列表 
-             InstanceID ( String ): 是  实例ID 
-             ProductKey ( String ): 是  产品标示 
-    """,
-    "enable_device": r""" 
-    Args: 
-        params: A JSON structure
-             参数 ( 类型 ): 是否必选  描述 
-             ---- ( ---- ): ----  ---- 
-        body: A JSON structure
-             参数 ( 类型 ): 是否必选  描述 
-             ---- ( ---- ): ----  ---- 
-             DeviceNames ( Array of String ): 是  设备名称列表 
-             InstanceID ( String ): 是  实例ID 
-             ProductKey ( String ): 是  产品标示 
-    """,
     "get_all_last_device_property_value": r""" 
     Args: 
         params: A JSON structure
@@ -701,18 +648,5 @@ note = {
              InstanceID ( String ): 是  实例ID 
              Params ( JSON Map ): 是  属性值，最外层key为ModuleKey，内层key为功能的identifier，value为参数的值 
              ProductKey ( String ): 是  产品标示 
-    """,
-    "update_device": r""" 
-    Args: 
-        params: A JSON structure
-             参数 ( 类型 ): 是否必选  描述 
-             ---- ( ---- ): ----  ---- 
-        body: A JSON structure
-             参数 ( 类型 ): 是否必选  描述 
-             ---- ( ---- ): ----  ---- 
-             DeviceName ( String ): 是  设备名称 
-             ExtraName ( String ): 否  备注名称，支持中文、英文字母、数字、和特殊字符_-@()，长度限制 0~128个字符 
-             InstanceID ( String ): 是  实例ID 
-             ProductKey ( String ): 是  设备产品标识 
     """,
 }

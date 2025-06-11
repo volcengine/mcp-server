@@ -30,11 +30,6 @@
 - `get_device_detail`: [根据设备标识查询设备信息]()
 - `get_device_status`: [设备状态查询，如果有异常默认返回Disable，状态枚举：Online/Offline/NeverConnected/Disable，在线/离线/未激活/禁用]()
 - `get_device_overview`: [获取设备总览信息，包括当前有多少设备，多少离线，多少在线，多少未激活，多少禁用]()
-- `create_device`: [添加一个新设备]()
-- `delete_device`: [删除设备]()
-- `enable_device`: [启用设备]()
-- `disable_device`: [禁用设备]()
-- `update_device`: [更新设备备注名称]()
 
 ## 鉴权方式
 从[ 火山引擎控制台-访问控制 ](https://console.volcengine.com/iam/keymanage)获取 AccessKey 和 SecretKey。
@@ -64,46 +59,16 @@
     uv build
     ```
 
-## 使用 uv（推荐）
-使用 uv 时无需特别安装，我们将直接通过 uvx 运行 mcp-server-iot。
-
-### 本地配置
-- 添加以下配置到你的 mcp settings 文件中
-
+### 在 MCP Client 中集成
 ```json
 {
   "mcpServers": {
     "iot": {
-      "command": "uv",
+      "command": "uvx",
       "args": [
-        "--directory",
-        "/ABSOLUTE/PATH/TO/PARENT/mcp_server_iot/src/iot",
-        "run",
+        "--from",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_iot",
         "mcp-server-iot"
-      ],
-      "env": {
-        "VOLCENGINE_ACCESS_KEY": "your access-key-id",
-        "VOLCENGINE_SECRET_KEY": "your access-key-secret",
-        "VOLCENGINE_REGION": "your region"
-      }
-    }
-  }
-}
-```
-
-OR
-
-- 添加以下配置到你的 mcp settings 文件中
-```json
-{
-  "mcpServers": {
-    "iot": {
-      "command": "uv",
-      "args": [
-        "--directory",
-        "/ABSOLUTE/PATH/TO/PARENT/mcp_server_iot/src/iot",
-        "run",
-        "server.py"
       ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "your access-key-id",

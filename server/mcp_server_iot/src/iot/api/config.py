@@ -6,18 +6,6 @@ api_info = {
     "McpCallService": ApiInfo(
         "POST", "/", {"Action": "CallService", "Version": "2021-12-14"}, {}, {}
     ),
-    "McpCreateDevice": ApiInfo(
-        "POST", "/", {"Action": "CreateDevice", "Version": "2021-12-14"}, {}, {}
-    ),
-    "McpDeleteDevice": ApiInfo(
-        "POST", "/", {"Action": "DeleteDevice", "Version": "2021-12-14"}, {}, {}
-    ),
-    "McpDisableDevice": ApiInfo(
-        "POST", "/", {"Action": "DisableDevice", "Version": "2021-12-14"}, {}, {}
-    ),
-    "McpEnableDevice": ApiInfo(
-        "POST", "/", {"Action": "EnableDevice", "Version": "2021-12-14"}, {}, {}
-    ),
     "McpGetAllLastDevicePropertyValue": ApiInfo(
         "POST",
         "/",
@@ -88,9 +76,6 @@ api_info = {
     ),
     "McpSetProperty": ApiInfo(
         "POST", "/", {"Action": "SetProperty", "Version": "2021-12-14"}, {}, {}
-    ),
-    "McpUpdateDevice": ApiInfo(
-        "POST", "/", {"Action": "UpdateDevice", "Version": "2021-12-14"}, {}, {}
     ),
 }
 service_info_map = {
