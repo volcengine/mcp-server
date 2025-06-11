@@ -40,7 +40,14 @@ Get all records of the specific DNS.
 
 ## Compatible Platforms
 
-Python
+- Python
+- Node.js
+
+## Service Activation Link
+
+You need to activate the TrafficRoute DNS suite in your Volcengine account.
+
+https://console.volcengine.com/TrafficRoute/
 
 ## Authentication Method
 
@@ -63,9 +70,9 @@ Note: The Access Key ID and Secret Access Key must have permissions for the Open
 
 ### Dependencies
 
-- Python 3.11 or higher.
+- [Python](https://www.python.org/downloads/) 3.11 or higher.
 - [`uv`](https://docs.astral.sh/uv/) and [`uvx`](https://docs.astral.sh/uv/guides/tools/) packages for running the server.
-- For Windows OS user, please refer to [PyCryptodome documentation](https://pycryptodome.readthedocs.io/en/latest/src/installation.html#windows-from-sources) to configure the compilation environment of this library, otherwise the MCP service will not start normally.
+- For Windows NT OS user, please refer to [PyCryptodome documentation](https://pycryptodome.readthedocs.io/en/latest/src/installation.html#windows-from-sources) to configure the compilation environment of this library, otherwise the MCP server will not start normally.
 
 ### Deployment and configuration
 
@@ -88,11 +95,13 @@ Note: The Access Key ID and Secret Access Key must have permissions for the Open
 }
 ```
 
+> P.S. Please replace `Your Volcengine AK` and `Your Volcengine SK` above with your own Access Key ID and Secret Access Key.
+
 ## Node.js - MCP Server
 
 ### Dependencies
 
-- Node.js 22.14.1 or higher
+- [Node.js](https://nodejs.org/en/download) 22.14.1 or higher
 
 ### Deployment and configuration
 
@@ -115,15 +124,18 @@ Note: The Access Key ID and Secret Access Key must have permissions for the Open
 }
 ```
 
+> P.S. Please replace `Your Volcengine AK` and `Your Volcengine SK` above with your own Access Key ID and Secret Access Key.
+
 ### Using a client
 
 Use a client to interact with the server.
 
-- Cline
 - Cursor
 - [Trae](https://www.trae.com.cn/)
 - Claude Desktop
 - 方舟
+
+Also support [Cline](https://cline.bot/).
 
 ## License
 

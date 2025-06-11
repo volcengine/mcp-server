@@ -63,7 +63,7 @@ CDN与边缘
 
 ## 服务开通链接
 
-您的火山引擎账号需要开通边缘计算节点服务。
+需要先为火山引擎账号开通边缘计算节点服务。
 
 https://console.volcengine.com/edge/veen
 
@@ -75,14 +75,14 @@ AK&amp;SK
 
 从[火山引擎控制台](https://console.volcengine.com/iam/identitymanage/user)获取 Access Key ID 和 Secret Access Key。
 
-注意：此 Access Key ID 和 Secret Access Key 须具有相关 OpenAPIs 访问权限。
+注：此 Access Key ID 和 Secret Access Key 须具有相关 OpenAPIs 访问权限。
 
 ### 环境变量配置
 
 | 变量名 | 值 |
 | ---------- | ---------- |
-| `VOLCENGINE_ACCESS_KEY` | 账户对应的火山引擎 Access Key ID |
-| `VOLCENGINE_SECRET_KEY` | 账户对应的火山引擎 Secret Access Key |
+| `VOLCENGINE_ACCESS_KEY` | 火山引擎账号 Access Key ID |
+| `VOLCENGINE_SECRET_KEY` | 火山引擎账号 Secret Access Key |
 
 ## Python 版 MCP server
 
@@ -90,9 +90,9 @@ AK&amp;SK
 
 运行 MCP server 的设备需要安装以下依赖项。
 
-- Python 3.11 或更高版本。
-- [`uv`](https://docs.astral.sh/uv/) &amp; [`uvx`](https://docs.astral.sh/uv/guides/tools/)
-- 对于 Windows 操作系统，还需要参考 [PyCryptodome 文档](https://pycryptodome.readthedocs.io/en/latest/src/installation.html#windows-from-sources) 配置该库编译环境，否则 MCP 服务无法正常启动。
+- [Python](https://www.python.org/downloads/) 3.11 或更高版本。
+- [`uv`](https://docs.astral.sh/uv/) &amp; [`uvx`](https://docs.astral.sh/uv/guides/tools/)。
+- 对于 Windows 操作系统，还需要参考 [PyCryptodome 文档](https://pycryptodome.readthedocs.io/en/latest/src/installation.html#windows-from-sources) 配置该库编译环境。
 
 ### 部署与配置
 
@@ -117,13 +117,15 @@ AK&amp;SK
 }
 ```
 
+> 注：请将上方 `Your Volcengine AK` 和 `Your Volcengine SK` 分别替换为火山引擎账号对应的 Access Key ID 和 Secret Access Key。
+
 ## Node.js 版 MCP server
 
 ### 依赖项
 
 运行 MCP server 的设备需要安装以下依赖项。
 
-- Node.js 22.14.1 或更高版本。
+- [Node.js](https://nodejs.org/zh-cn/download) 22.14.1 或更高版本
 
 ### 部署与配置
 
@@ -146,15 +148,18 @@ AK&amp;SK
 }
 ```
 
+> 注：请将上方 `Your Volcengine AK` 和 `Your Volcengine SK` 分别替换为火山引擎账号对应的 Access Key ID 和 Secret Access Key。
+
 ## 使用客户端
 
 支持通过以下客户端与 MCP Server 交互，具体配置可查阅该客户端文档。
 
-- Cline
 - Cursor
 - [Trae](https://www.trae.com.cn/)
 - Claude Desktop
 - 方舟
+
+支持 [Cline](https://cline.bot/) 插件。
 
 ## 对话发起示例
 
