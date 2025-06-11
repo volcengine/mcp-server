@@ -46,32 +46,30 @@ Python
 
 AK&amp;SK
 
-## Installation
+### Get AK&amp;SK
 
-### Using uv
+Obtain AccessKey and SecretKey from [Access control in Volcengine Console](https://console.volcengine.com/iam/identitymanage/user).
 
-When using [`uv`](https://docs.astral.sh/uv/) no specific installation is needed.
-We will use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run.
+Note: AccessKey and SecretKey must have permissions for the OpenAPIs (available tools).
 
-```bash
-cd mcp-server/server/mcp_server_traffic_route
-uv run mcp-server-traffic-route
+### Environment Variable Configuration
 
-# Start with sse mode (default is stdio)
-uv run mcp-server-traffic-route -t sse
-```
+| Variable Name | Value |
+| ---------- | ---------- |
+| `VOLCENGINE_ACCESS_KEY` | Volcengine AccessKey |
+| `VOLCENGINE_SECRET_KEY` | Volcengine SecretKey |
 
-### Using a client
+## Python - MCP Server
 
-Use a client to interact with the server:
+### Dependencies
 
-- 方舟
-- Trae
-- Cursor
+Require following dependencies to run MCP server.
 
-## Deployment
+- Python 3.11 or higher.
+- [`uv`](https://docs.astral.sh/uv/) and [`uvx`](https://docs.astral.sh/uv/guides/tools/) packages for running the server.
+- For Windows OS user, please refer to [PyCryptodome documentation](https://pycryptodome.readthedocs.io/en/latest/src/installation.html#windows-from-sources) to configure the compilation environment of this library, otherwise the MCP service will not start normally.
 
-### Integration in MCP Client
+### Deployment and configuration
 
 ```json
 {
@@ -80,7 +78,7 @@ Use a client to interact with the server:
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_traffic_route",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_traffic_route/python",
         "mcp-server-traffic-route"
       ],
       "env": {
@@ -92,6 +90,45 @@ Use a client to interact with the server:
 }
 ```
 
+## Node.js - MCP Server
+
+### Dependencies
+
+Require following dependencies to run MCP server.
+
+- Node.js 22.14.1 or higher
+
+### Deployment and configuration
+
+```json
+{
+  "mcpServers": {
+    "mcp-server-traffic-route": {
+      "command": "node",
+      "args": [
+        "--from",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_traffic_route/nodejs",
+        "mcp-server-traffic-route"
+      ],
+      "env": {
+        "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
+        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK"
+      }
+    }
+  }
+}
+```
+
+### Using a client
+
+Use a client to interact with the server.
+
+- Cline
+- Cursor
+- [Trae](https://www.trae.com.cn/)
+- Claude Desktop
+- 方舟
+
 ## License
 
-MIT
+[MIT](../../LICENSE)
