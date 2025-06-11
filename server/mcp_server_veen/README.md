@@ -73,22 +73,20 @@ AK&amp;SK
 
 ### Get AK&amp;SK
 
-Obtain AccessKey and SecretKey from [Access control in Volcengine Console](https://console.volcengine.com/iam/identitymanage/user).
+Obtain Access Key ID and Secret Access Key from [Access control in Volcengine Console](https://console.volcengine.com/iam/identitymanage/user).
 
-Note: AccessKey and SecretKey must have permissions for the OpenAPIs (available tools).
+Note: the Access Key ID and Secret Access Key must have permissions for the OpenAPIs (available tools).
 
 ### Environment Variable Configuration
 
 | Variable Name | Value |
 | ---------- | ---------- |
-| `VOLCENGINE_ACCESS_KEY` | Volcengine AccessKey |
-| `VOLCENGINE_SECRET_KEY` | Volcengine SecretKey |
+| `VOLCENGINE_ACCESS_KEY` | Your Volcengine Access Key ID |
+| `VOLCENGINE_SECRET_KEY` | Your Volcengine Secret Access Key |
 
 ## Python - MCP Server
 
 ### Dependencies
-
-Require following dependencies to run MCP server.
 
 - Python 3.11 or higher.
 - [`uv`](https://docs.astral.sh/uv/) and [`uvx`](https://docs.astral.sh/uv/guides/tools/) packages for running the server.
@@ -120,8 +118,6 @@ Require following dependencies to run MCP server.
 ## Node.js - MCP Server
 
 ### Dependencies
-
-Require following dependencies to run MCP server.
 
 - Node.js 22.14.1 or higher
 

@@ -49,16 +49,16 @@ AK&amp;SK
 
 ### 获取 AK&amp;SK
 
-从[火山引擎控制台](https://console.volcengine.com/iam/identitymanage/user)获取 AccessKey 和 SecretKey。
+从[火山引擎控制台](https://console.volcengine.com/iam/identitymanage/user)获取 Access Key ID 和 Secret Access Key。
 
-注意：此 AccessKey 和 SecretKey 须具有相关 OpenAPIs 访问权限。
+注意：此 Access Key ID 和 Secret Access Key 须具有相关 OpenAPIs 访问权限。
 
 ### 环境变量配置
 
 | 变量名 | 值 |
 | ---------- | ---------- |
-| `VOLCENGINE_ACCESS_KEY` | 火山引擎 AccessKey |
-| `VOLCENGINE_SECRET_KEY` | 火山引擎 SecretKey |
+| `VOLCENGINE_ACCESS_KEY` | 账户对应的火山引擎 Access Key ID |
+| `VOLCENGINE_SECRET_KEY` | 账户对应的火山引擎 Secret Access Key |
 
 ## Python 版 MCP server
 

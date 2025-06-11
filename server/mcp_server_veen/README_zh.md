@@ -73,16 +73,16 @@ AK&amp;SK
 
 ### 获取 AK&amp;SK
 
-从[火山引擎控制台](https://console.volcengine.com/iam/identitymanage/user)获取 AccessKey 和 SecretKey。
+从[火山引擎控制台](https://console.volcengine.com/iam/identitymanage/user)获取 Access Key ID 和 Secret Access Key。
 
-注意：此 AccessKey 和 SecretKey 须具有相关 OpenAPIs 访问权限。
+注意：此 Access Key ID 和 Secret Access Key 须具有相关 OpenAPIs 访问权限。
 
 ### 环境变量配置
 
 | 变量名 | 值 |
 | ---------- | ---------- |
-| `VOLCENGINE_ACCESS_KEY` | 火山引擎 AccessKey |
-| `VOLCENGINE_SECRET_KEY` | 火山引擎 SecretKey |
+| `VOLCENGINE_ACCESS_KEY` | 账户对应的火山引擎 Access Key ID |
+| `VOLCENGINE_SECRET_KEY` | 账户对应的火山引擎 Secret Access Key |
 
 ## Python 版 MCP server
 
@@ -90,7 +90,7 @@ AK&amp;SK
 
 运行 MCP server 的设备需要安装以下依赖项。
 
-- Python 3.11 或更高版本
+- Python 3.11 或更高版本。
 - [`uv`](https://docs.astral.sh/uv/) &amp; [`uvx`](https://docs.astral.sh/uv/guides/tools/)
 - 对于 Windows 操作系统，还需要参考 [PyCryptodome 文档](https://pycryptodome.readthedocs.io/en/latest/src/installation.html#windows-from-sources) 配置该库编译环境，否则 MCP 服务无法正常启动。
 
@@ -123,7 +123,7 @@ AK&amp;SK
 
 运行 MCP server 的设备需要安装以下依赖项。
 
-- Node.js 22.14.1 或更高版本
+- Node.js 22.14.1 或更高版本。
 
 ### 部署与配置
 
