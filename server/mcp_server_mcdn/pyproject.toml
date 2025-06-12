@@ -1,0 +1,26 @@
+
+[project]
+name = "mcp_server_mcdn"
+version = "0.1.0"
+description = "MCP server for mcdn"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp>=1.6.0",
+    "pydantic>=2.11.3",
+    "python-dotenv>=1.1.0",
+    "retry>=0.9.2",
+    "starlette>=0.46.2",
+    "volcengine>=1.0.180",
+]
+
+[project.scripts]
+mcp_server_mcdn= "src.mcdn.server:main"
+
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
