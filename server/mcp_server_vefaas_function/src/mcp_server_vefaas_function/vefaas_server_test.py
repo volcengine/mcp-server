@@ -1,10 +1,13 @@
 import base64
 import io
+import tempfile
 import unittest
 import os
 import zipfile
 
-from vefaas_server import does_function_exist, create_zip_base64
+import pyzipper
+
+from vefaas_server import does_function_exist, create_zip_base64, python_zip_implementation
 
 
 class TestVeFaaSServerIntegration(unittest.TestCase):
@@ -51,6 +54,30 @@ class TestVeFaaSServerIntegration(unittest.TestCase):
 
             for info in zip_file.infolist():
                 self.assertEqual((info.external_attr >> 16), 0o777)
+
+    def test_python_zip_implementation(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            file_path = os.path.join(tmpdir, "test.sh")
+            with open(file_path, "w") as f:
+                f.write("#!/bin/bash\necho hello\n")
+            os.chmod(file_path, 0o644)
+
+            zip_bytes = python_zip_implementation(tmpdir)
+
+            zip_path = os.path.join(tmpdir, "test.zip")
+            with open(zip_path, "wb") as fzip:
+                fzip.write(zip_bytes)
+
+            with pyzipper.AESZipFile(zip_path, 'r') as zipf:
+                namelist = zipf.namelist()
+                assert "test.sh" in namelist
+
+                info = zipf.getinfo("test.sh")
+                perm = (info.external_attr >> 16) & 0o777
+                assert perm == 0o755, f"Expected 755 permission but got {oct(perm)}"
+
+                content = zipf.read("test.sh").decode()
+                assert "echo hello" in content
 
 
 if __name__ == "__main__":
