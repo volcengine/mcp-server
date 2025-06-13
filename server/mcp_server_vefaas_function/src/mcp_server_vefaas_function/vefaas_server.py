@@ -1,6 +1,8 @@
 from __future__ import print_function
 
 import io
+import platform
+import sys
 from typing import Union, Optional
 from mcp.server.fastmcp import FastMCP
 import datetime
@@ -537,6 +539,12 @@ def list_routes(upstream_id: str, region: str = None):
     response_body = request("POST", now, {}, {}, ak, sk, token, "ListRoutes", json.dumps(body))
     return response_body
 
+def ensure_executable_permissions(folder_path: str):
+    for root, _, files in os.walk(folder_path):
+        for fname in files:
+            full_path = os.path.join(root, fname)
+            if fname.endswith('.sh') or fname in ('run.sh',):
+                os.chmod(full_path, 0o755)
 
 def zip_and_encode_folder(folder_path: str) -> Tuple[bytes, int, Exception]:
     """
@@ -554,6 +562,7 @@ def zip_and_encode_folder(folder_path: str) -> Tuple[bytes, int, Exception]:
 
     print(f"Zipping folder: {folder_path}")
     try:
+        ensure_executable_permissions(folder_path)
         # Create zip process with explicit arguments
         proc = subprocess.Popen(
             ['zip', '-r', '-q', '-', '.', '-x', '*.git*', '-x', '*.venv*', '-x', '*__pycache__*', '-x', '*.pyc'],
@@ -602,7 +611,7 @@ def python_zip_implementation(folder_path: str) -> bytes:
     """Pure Python zip implementation with permissions support"""
     buffer = BytesIO()
 
-    with pyzipper.AESZipFile(buffer, 'w', compression=pyzipper.ZIP_LZMA) as zipf:
+    with zipfile.ZipFile(buffer, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:
         for root, dirs, files in os.walk(folder_path):
             for file in files:
                 file_path = os.path.join(root, file)
@@ -612,15 +621,18 @@ def python_zip_implementation(folder_path: str) -> bytes:
                 if any(excl in arcname for excl in ['.git', '.venv', '__pycache__', '.pyc']):
                     continue
 
-                # Get file permissions
-                st = os.stat(file_path)
-                mode = st.st_mode | 0o755  # Add read/exec permissions
-
                 try:
-                    # Add to zip with permissions
-                    zipf.write(file_path, arcname)
-                    zipf.setinfo(arcname, zipfile.ZipInfo.from_file(file_path))
-                    zipf.getinfo(arcname).external_attr = (mode & 0xFFFF) << 16  # Unix attributes
+
+                    st = os.stat(file_path)
+                    dt = datetime.datetime.fromtimestamp(st.st_mtime)
+                    date_time = (dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
+
+                    info = zipfile.ZipInfo(arcname)
+                    info.external_attr = (0o755 << 16)  # rwxr-xr-x
+                    info.date_time = date_time
+
+                    with open(file_path, 'rb') as f:
+                        zipf.writestr(info, f.read())
                 except Exception as e:
                     print(f"Warning: Skipping file {arcname} due to error: {str(e)}")
 
