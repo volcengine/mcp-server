@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 import argparse
 import json
 import os
@@ -14,10 +15,17 @@ Sandbox_API_BASE = (
 
 # send http reqeust to SandboxFusion run_code api
 def send_request(payload):
+    auth_token = os.getenv("AUTH_TOKEN")
+
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json, text/plain, */*",
     }
+
+    if auth_token:
+        headers["Authorization"] = f"Bearer {auth_token}"
+    else:
+        logger.warning("AUTH_TOKEN environment variable not set. Request will be sent without Authorization header.")
     sandbox_api = os.getenv("SANDBOX_API", Sandbox_API_BASE)
     conn = http.client.HTTPSConnection(sandbox_api)
 
