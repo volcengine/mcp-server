@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [project.scripts]
-mcp-server-nacos = "mcp_server_nacos.stdio:main"
+mcp-server-nacos = "mcp_server_nacos.main:main"
 
 [build-system]
 requires = ["hatchling"]
