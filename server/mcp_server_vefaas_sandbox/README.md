@@ -54,7 +54,7 @@ OAuth 2.0
 
 ### 获取 veFaaS Code-Sandbox 服务的访问入口
 
-参考火山引擎 veFaaS [一键部署 Code Sandbox Agent 应用](https://www.volcengine.com/docs/6662/1538139)，完成一下配置：
+参考火山引擎 veFaaS [一键部署 Code Sandbox Agent 应用](https://www.volcengine.com/docs/6662/1538139)，完成以下配置：
 1. 获取 veFaaS Code Sandbox Agent 服务的访问入口，如 `xxxxxxxxxxx.apigateway-cn-beijing.volceapi.com`，获取 `xxxxxxxxxxx.apigateway-cn-beijing.volceapi.com`，用于下方的 `SANDBOX_API` 配置。
 2. 获取auth token用于下方的`AUTH_TOKEN`配置。
 
