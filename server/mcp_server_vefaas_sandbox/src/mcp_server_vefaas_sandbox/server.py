@@ -13,7 +13,7 @@ Sandbox_API_BASE = (
     "xxx.apigateway-cn-beijing.volceapi.com"  # 替换为用户沙盒服务 APIG 地址
 )
 
-# send http reqeust to SandboxFusion run_code api
+# send http request to SandboxFusion run_code api
 def send_request(payload):
     auth_token = os.getenv("AUTH_TOKEN")
 
