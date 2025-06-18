@@ -184,7 +184,7 @@ def update_registry_info(id: str = "", name: str = "", region: str = "cn-beijing
 
     Args:
         id (str): The ID of the nacos registry to retrieve.
-        name (str): The newname of the nacos registry.
+        name (str): The new name of the nacos registry.
         region (str): The region where the nacos registry is located.
 
     Returns:
