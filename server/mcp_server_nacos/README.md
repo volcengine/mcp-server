@@ -176,6 +176,48 @@ SaaS
 
 
 
+### Tool 4: list_nacos_registries
+
+#### 类型
+
+SaaS
+
+#### 详细描述
+
+该工具允许您便捷查看火山引擎Nacos注册中心实例列表。
+
+#### 调试所需的输入参数:
+
+输入：
+
+```json
+{
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "region": {
+        "description": "区域，默认为 cn-beijing",
+        "type": "string"
+      }
+    },
+    "required": []
+  },
+  "name": "list_nacos_registries",
+  "description": "查询您账号下拥有的所有Nacos注册中心实例的列表。"
+}
+```
+
+输出：
+
+- 返回您账号下拥有的Nacos实例列表，包含实例名称、实例ID、创建时间等信息。
+
+#### 最容易被唤起的 Prompt 示例
+
+```
+列举火山引擎 Nacos 的实例列表。
+```
+
+
 ## 可适配平台
 
 方舟，python，cursor

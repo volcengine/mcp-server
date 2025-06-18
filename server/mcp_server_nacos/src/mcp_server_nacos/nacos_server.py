@@ -211,3 +211,35 @@ def update_registry_info(id: str = "", name: str = "", region: str = "cn-beijing
     except Exception as e:
         return f"Failed to update Nacos Registry's info with id {id}: {str(e)}"
 
+@mcp.tool(
+    description="""Retrieves a list of Nacos Registries.
+Use this when you need to obtain a list of all Nacos Registries in a specific region.
+region is the region where the gateways are located, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
+`cn-shanghai`, `cn-guangzhou` as well."""
+)
+def list_nacos_registries(region: str = "cn-beijing") -> str:
+    """
+    This function is used to retrieve a list of all Nacos registries in a specific region.
+
+    Parameters:
+    region (str): The region where the gateway is located, with a default value of "cn-beijing". Supported values include "ap-southeast-1", "cn-beijing", "cn-shanghai", and "cn-guangzhou".
+
+    Returns:
+    str: If the request is successful, returns the response body; if it fails, returns an error message.
+    """
+
+    # Validate region parameter
+    region = validate_and_set_region(region)
+
+    # Construct the request parameter body of the tool in JSON format
+    body = {"PageNumber": 1, "PageSize": 100}
+
+    # Set the action for the request
+    action = "ListNacosRegistries"
+
+    try:
+        response_body = handle_request(region, action, body)
+        return response_body
+    except Exception as e:
+        return f"Failed to get List of Nacos Registry: {str(e)}"
+
