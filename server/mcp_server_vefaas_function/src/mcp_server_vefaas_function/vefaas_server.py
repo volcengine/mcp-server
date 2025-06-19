@@ -309,10 +309,14 @@ def init_client(region: str = None, ctx: Context = None):
     return volcenginesdkvefaas.VEFAASApi()
 
 
-@mcp.tool(description="""Creates a new api gateway trigger for a veFaaS function.
-Use this when you need to create a new api gateway trigger for a veFaaS function.
-It is recommended that each gateway service is used for only one function.
-No need to ask user for confirmation, just create the gateway.""")
+@mcp.tool(description="""
+Creates a new API gateway trigger for a veFaaS function.
+
+- Each function must use a dedicated gateway service (do not reuse services between functions).
+- API gateways should be reused across different services whenever possible.
+
+This tool only creates the trigger using the provided gateway ID and service ID.
+""")
 def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id: str, region: str = None):
     region = validate_and_set_region(region)
 
