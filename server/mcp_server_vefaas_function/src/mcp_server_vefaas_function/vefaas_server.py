@@ -394,6 +394,7 @@ def list_api_gateways(region: str = None):
     response_body = request("GET", now, {"Limit": "10"}, {}, ak, sk, token, "ListGateways", None)
     return response_body
 
+
 @mcp.tool(
     description="""
 Creates a new VeApig API gateway in the specified region.
@@ -404,6 +405,9 @@ Creates a new VeApig API gateway in the specified region.
 Note: This is an **asynchronous** operation and may take up to **5 minutes** to complete.  
 After calling this tool, you must use the `list_api_gateways` tool to check the status of the gateway.  
 Only when the status is `Running` does the gateway creation complete successfully.
+
+Recommendation: A single API gateway can be reused across multiple functions and services.  
+Before creating a new gateway, consider reusing an existing one using `list_api_gateways`.
 """
 )
 def create_api_gateway(name: str = None, region: str = "cn-beijing") -> str:
