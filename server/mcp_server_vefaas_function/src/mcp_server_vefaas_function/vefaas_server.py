@@ -316,6 +316,7 @@ Creates a new API gateway trigger for a veFaaS function.
 - API gateways should be reused across different services whenever possible.
 
 This tool only creates the trigger using the provided gateway ID and service ID.
+After creation, you can use the `list_api_gateway_services` tool to retrieve the access address.
 """)
 def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id: str, region: str = None):
     region = validate_and_set_region(region)
