@@ -59,13 +59,15 @@ def validate_and_set_region(region: str = None) -> str:
 @mcp.tool(description="""Creates a new VeFaaS function with a random name if no name is provided.
 region is the region where the function will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
           `cn-shanghai`, `cn-guangzhou` as well.
+
 Note:
 1. The runtime parameter must be one of the values returned by the supported_runtimes. Please ensure you call that tool first to get the valid options.
-2.	If the function is intended to serve as a web service, you must:
-	•	Write code to start an HTTP server that listens on port 8000 (e.g., using Python’s http.server, Node’s http, or Flask)).
-	•	Provide a launch script such as run.sh that starts the server (e.g., python3 server.py) and keeps it running.
-	•	Set the Command parameter to point to this script (e.g., ./run.sh) in the function config.
-	•	Only native runtimes support the Command field. Use supported_runtimes to ensure the chosen runtime allows it.
+2. If the function is intended to serve as a web service, you must:
+   • Write code to start an HTTP server that listens on port 8000 (e.g., using Python’s http.server, Node’s http, or Flask).
+   • Provide a launch script such as run.sh that starts the server (e.g., python3 server.py) and keeps it running.
+   • Set the Command parameter to point to this script (e.g., ./run.sh) in the function config.
+   • Only native runtimes support the Command field. Use supported_runtimes to ensure the chosen runtime allows it.
+3. After creating the function, you can use the `upload_code` tool to upload the function code and related files.
 """)
 def create_function(name: str = None, region: str = None, runtime: str = None, command: str = None, source: str = None,
                     image: str = None, envs: dict = None, description: str = None) -> str:
