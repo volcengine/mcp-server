@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class RdsMysqlConfig:
-    """Configuration for Storage EBS MCP Server."""
     region: str
     zone: str
     access_key_id: str
