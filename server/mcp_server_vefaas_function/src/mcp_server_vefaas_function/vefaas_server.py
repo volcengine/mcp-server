@@ -8,7 +8,6 @@ import volcenginesdkvefaas
 from volcenginesdkcore.rest import ApiException
 import random
 import string
-import base64
 import logging
 from .sign import request, get_authorization_credentials
 import json
@@ -33,7 +32,7 @@ def supported_runtimes():
             "golang/v1",
             "node14/v1", "node20/v1",
             "nodeprime14/v1",
-            "native-node14/v1", "native-node20/v1"]
+            "native-node20/v1"]
 
 def validate_and_set_region(region: str = None) -> str:
     """
