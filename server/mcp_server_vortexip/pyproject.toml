@@ -1,0 +1,21 @@
+[project]
+name = "mcp-server-vortexip"
+version = "1.0"
+description = "MCP Server for VortexIP"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "mcp[cli] @ git+https://github.com/zihengli-bytedance/python-sdk.git@temp-for-volc",
+    "pydantic==2.10.6",
+    "volcengine-python-sdk>=3.0.4",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[project.scripts]
+mcp-server-vortexip = "mcp_server_vortexip.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

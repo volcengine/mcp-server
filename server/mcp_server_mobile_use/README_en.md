@@ -8,7 +8,7 @@
 - **Version**: v0.0.1
 - **Category**: Video Cloud, Cloud Phone
 - **Tags**: OS-Agent, Cloud Phone, Mobile
-- **Description**: This toolkit is implemented based on MCP (Multi-Cloud Platform) protocol, featuring excellent scalability and compatibility with Volcano Engine's Cloud Phone products. All tools are exposed through standard interfaces for easy integration into various automation platforms and business systems.
+- **Description**: This toolkit is implemented based on MCP (Model Context Protocol) protocol, featuring excellent scalability and compatibility with Volcano Engine's Cloud Phone products. All tools are exposed through standard interfaces for easy integration into various automation platforms and business systems.
 
 ## MCP Tools
 ### Tools List

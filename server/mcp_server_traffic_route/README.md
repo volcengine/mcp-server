@@ -8,11 +8,11 @@ v0.1
 
 ###  Short Description
 
-The DNS routing service that allows users to configure DNS rules to ensure that requests from clients reach the desired service nodes.
+Support for configuring DNS routing rules to ensure that requests from clients reach the desired service nodes.
 
 ### Long Description
 
-The DNS routing service that allows users to configure DNS rules to ensure that requests from clients reach the desired service nodes.
+The DNS routing service that allows users to configure DNS routing rules to ensure that requests from clients reach the desired service nodes.
 
 ## Category
 
@@ -26,57 +26,55 @@ DNS，Domain
 
 This MCP Server product provides the following Tools (capabilities):
 
-### Tool 1: list-zones
+### Tool 1: list_zones
 
 List DNS on TrafficRoute.
 
-### Tool 2: create-zone
+### Tool 2: create_zone
 
-Add a domain.
-After adding, you can use `create-record` to add DNS record.
+Add a domain configuration.
 
-### Tool 3: create-record
-
-Add a DNS record.
-
-### Tool 4: list-records
+### Tool 3: list_records
 
 Get all records of the specific DNS.
 
 ## Compatible Platforms
 
-Python
+- Python
+- Node.js
+
+## Service Activation Link
+
+You need to activate the TrafficRoute DNS suite in your Volcengine account.
+
+https://console.volcengine.com/TrafficRoute/
 
 ## Authentication Method
 
 AK&amp;SK
 
-## Installation
+### Get AK&amp;SK
 
-### Using uv
+Obtain Access Key ID and Secret Access Key from [Access control in Volcengine Console](https://console.volcengine.com/iam/identitymanage/user).
 
-When using [`uv`](https://docs.astral.sh/uv/) no specific installation is needed.
-We will use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run.
+Note: The Access Key ID and Secret Access Key must have permissions for the OpenAPIs (available tools).
 
-```bash
-cd mcp-server/server/mcp_server_traffic_route
-uv run mcp-server-traffic-route
+### Environment Variable Configuration
 
-# Start with sse mode (default is stdio)
-uv run mcp-server-traffic-route -t sse
-```
+| Variable Name | Value |
+| ---------- | ---------- |
+| `VOLCENGINE_ACCESS_KEY` | Your Volcengine Access Key ID |
+| `VOLCENGINE_SECRET_KEY` | Your Volcengine Secret Access Key |
 
-### Using a client
+## Python - MCP Server
 
-Use a client to interact with the server:
+### Dependencies
 
-- 方舟
-- Trae
-- Cursor
+- [Python](https://www.python.org/downloads/) 3.11 or higher.
+- [`uv`](https://docs.astral.sh/uv/) and [`uvx`](https://docs.astral.sh/uv/guides/tools/) packages for running the server.
+- For Windows NT OS user, please refer to [PyCryptodome documentation](https://pycryptodome.readthedocs.io/en/latest/src/installation.html#windows-from-sources) to configure the compilation environment of this library, otherwise the MCP server will not start normally.
 
-## Deployment
-
-### Integration in MCP Client
+### Deployment and configuration
 
 ```json
 {
@@ -85,18 +83,60 @@ Use a client to interact with the server:
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_traffic_route",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_traffic_route/python",
         "mcp-server-traffic-route"
       ],
       "env": {
-        "VOLC_ACCESSKEY": "<Your-Volcengine-AK>",
-        "VOLC_SECRETKEY": "<Your-Volcengine-SK>"
+        "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
+        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK"
       }
     }
   }
 }
 ```
 
+> P.S. Please replace `Your Volcengine AK` and `Your Volcengine SK` above with your own Access Key ID and Secret Access Key.
+
+## Node.js - MCP Server
+
+### Dependencies
+
+- [Node.js](https://nodejs.org/en/download) 22.14.1 or higher
+
+### Deployment and configuration
+
+```json
+{
+  "mcpServers": {
+    "mcp-server-traffic-route": {
+      "command": "node",
+      "args": [
+        "--from",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_traffic_route/nodejs",
+        "mcp-server-traffic-route"
+      ],
+      "env": {
+        "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
+        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK"
+      }
+    }
+  }
+}
+```
+
+> P.S. Please replace `Your Volcengine AK` and `Your Volcengine SK` above with your own Access Key ID and Secret Access Key.
+
+### Using a client
+
+Use a client to interact with the server.
+
+- Cursor
+- [Trae](https://www.trae.com.cn/)
+- Claude Desktop
+- 方舟
+
+Also support [Cline](https://cline.bot/).
+
 ## License
 
-MIT
+[MIT](../../LICENSE)

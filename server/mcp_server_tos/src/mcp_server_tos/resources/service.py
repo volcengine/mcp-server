@@ -55,6 +55,11 @@ class TosResource:
         if self.client is None:
             raise exceptions.TosClientError("TosClient is not initialized")
 
+        if headers is None:
+            headers = {"User-Agent": self.user_agent}
+        else:
+            headers["User-Agent"] = self.user_agent
+
         # 通过变量赋值,防止动态调整 auth endpoint 出现并发问题
         sign_out = self.client.pre_signed_url(HttpMethodType.Http_Method_Get, bucket, key, 3600, headers, params)
         attempt = 0
@@ -67,7 +72,6 @@ class TosResource:
                     await response.aclose()
                     attempt += 1
                     if attempt < 3:
-                        logger.warning(f'Retry {attempt}/3 for {bucket}/{key}, Status: {response.status_code}')
                         await asyncio.sleep(2 ** attempt)
                         continue
                     else:
@@ -77,7 +81,6 @@ class TosResource:
             except Exception as e:
                 attempt += 1
                 if attempt < 3:
-                    logger.warning(f'Failed to get {bucket}/{key}: {str(e)}, attempt: {attempt}')
                     await asyncio.sleep(2 ** attempt)
                     continue
                 else:
@@ -124,8 +127,6 @@ async def call(self, method: str, bucket: str, key: str = None, data=None, heade
                     await asyncio.sleep(2 * try_count)
                     continue
                 else:
-                    error_msg = f'Failed to call {url_str}: {str(e)}'
-                    logger.error(error_msg)
                     raise e
             else:
                 if response.status_code == 200 or response.status_code == 206:
@@ -135,8 +136,7 @@ async def call(self, method: str, bucket: str, key: str = None, data=None, heade
                     await asyncio.sleep(2 * try_count)
                     continue
                 else:
-                    raise Exception(f'Call tos url: {url_str} return: {str(response.status_code)}, '
-                                    f'request_id: {response.headers.get("x-tos-request-id")}')
+                    raise Exception(f'Call tos failed')
 
 
 def _to_case_insensitive_dict(self, headers: dict):

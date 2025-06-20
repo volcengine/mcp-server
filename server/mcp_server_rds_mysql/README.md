@@ -63,7 +63,7 @@
 ---
 
 ## 鉴权方式
-在火山引擎管理控制台获取访问密钥 ID、秘密访问密钥和区域，采用 API Key 鉴权。需要在配置文件中设置 `VOLC_ACCESSKEY` 和 `VOLC_SECRETKEY`。
+在火山引擎管理控制台获取访问密钥 ID、秘密访问密钥和区域，采用 API Key 鉴权。需要在配置文件中设置 `VOLCENGINE_ACCESS_KEY` 和 `VOLCENGINE_SECRET_KEY`。
 
 ---
 

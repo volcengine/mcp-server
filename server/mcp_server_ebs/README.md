@@ -167,7 +167,7 @@ To add this server to your MCP configuration, add the following to your MCP sett
         "VOLCENGINE_REGION": "your-resource-region",
         "PORT": "8000",
         "ENDPOINT": "api-endpoint"
-      },
+      }
     }
   }
 }
