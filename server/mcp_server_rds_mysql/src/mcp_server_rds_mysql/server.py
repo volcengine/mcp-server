@@ -58,7 +58,7 @@ def describe_db_instance_engine_minor_versions(instance_ids: list[str]) -> dict[
     req = {
         "instance_ids": instance_ids,
     }
-    resp = rds_mysql_resource.describe_backups_request(req)
+    resp = rds_mysql_resource.describe_db_instance_engine_minor_versions(req)
     return resp.to_dict()
 
 
@@ -82,22 +82,22 @@ def describe_db_accounts(
     """
     # 构建请求参数
     req = {
-        "InstanceId": instance_id,
-        "PageNumber": page_number,
-        "PageSize": page_size
+        "instance_id": instance_id,
+        "page_number": page_number,
+        "page_size": page_size
     }
 
     # 添加可选参数
     if account_name is not None:
-        req["AccountName"] = account_name
+        req["account_name"] = account_name
 
     # 发送请求
     resp = rds_mysql_resource.describe_db_accounts(req)
     return resp.to_dict()
 
 @mcp_server.tool(
-    name="describe_db_accounts_by_db",
-    description="根据数据库名称查询RDS MySQL实例的账号"
+    name="describe_databases",
+    description="根据指定RDS MySQL 实例ID 查看数据库列表"
 )
 def describe_databases(
         instance_id: str,
@@ -115,35 +115,43 @@ def describe_databases(
     """
     # 构建请求参数
     req = {
-        "InstanceId": instance_id,
-        "PageNumber": page_number,
-        "PageSize": page_size
+        "instance_id": instance_id,
+        "page_number": page_number,
+        "page_size": page_size
     }
 
     # 添加可选参数DBName
     if db_name is not None:
-        req["DBName"] = db_name
+        req["db_name"] = db_name
 
     # 发送请求
     resp = rds_mysql_resource.describe_databases(req)
     return resp.to_dict()
 
+
 @mcp_server.tool(
     name="describe_db_instance_parameters",
-    description="获取RDSMySQL实例参数列表"
+    description="获取RDS MySQL实例参数列表"
 )
-def describe_db_instance_parameters(instance_id: str,
-                                    parameter_role: Literal["Node", "Shard", "ConfigServer", "Mongos"] = None,
-                                    ) -> dict[str, Any]:
-    """获取RDSMySQL实例参数列表
+def describe_db_instance_parameters(
+        instance_id: str,
+        parameter_name: str = None,
+        node_id: str = None
+) -> dict[str, Any]:
+    """
+    获取RDS MySQL实例参数列表
 
-            Args:
-                instance_id (str): 实例ID
-                parameter_role (Literal["Node", "Shard", "ConfigServer", "Mongos"]) "RDSMySQL实例组件角色, 副本集对应Node, 分片集群的各个组件对应Shard, ConfigServer, Mongos
-        """
+    Args:
+        instance_id (str): 实例ID
+        parameter_name (str, optional): 参数名
+        node_id (str, optional): 查询指定节点的参数设置，如不设置该字段，只返回主节点和备节点的参数设置
+    """
     req = {
-        "instance_id": instance_id, "parameter_role": parameter_role,
+        "InstanceId": instance_id,
+        "ParameterName": parameter_name,
+        "NodeId": node_id
     }
+    req = {k: v for k, v in req.items() if v is not None}
     resp = rds_mysql_resource.describe_db_instance_parameters(req)
     return resp.to_dict()
 
