@@ -16,18 +16,83 @@ rds_mysql_resource = RDSMySQLSDK(
     region=os.getenv('VOLCENGINE_REGION'), ak=os.getenv('VOLCENGINE_ACCESS_KEY'), sk=os.getenv('VOLCENGINE_SECRET_KEY'), host=os.getenv('VOLCENGINE_HOST')
 )
 
-@mcp_server.tool(name = "describe_db_instances",description = "查询RDSMySQL实例列表")
-def describe_db_instances(page_number: int, instance_id: str = None, instance_name: str = None) -> dict[str, Any]:
-    """查询RDSMySQL实例列表
+from typing import List, Dict, Any, Optional
+
+@mcp_server.tool(
+    name="describe_db_instances",
+    description="查询RDS MySQL实例列表"
+)
+def describe_db_instances(
+        page_number: int = 1,
+        page_size: int = 10,
+        instance_id: str = None,
+        instance_name: str = None,
+        instance_status: str = None,
+        db_engine_version: str = None,
+        create_time_start: str = None,
+        create_time_end: str = None,
+        zone_id: str = None,
+        charge_type: str = None,
+        instance_type: str = None,
+        node_spec: str = None,
+        tag_filters: List[Dict[str, str]] = None,
+        project_name: str = None,
+        private_network_ip_address: str = None,
+        kernel_version: List[str] = None,
+        private_network_vpc_id: str = None,
+        storage_type: str = None
+) -> dict[str, Any]:
+    """
+    查询RDS MySQL实例列表
 
     Args:
-        instance_id (str): 实例ID
-        instance_name (str): 实例名称
-        page_number (int): 实例列表页数
+        page_number (int, optional): 当前页页码，取值最小为1，默认值为1
+        page_size (int, optional): 每页记录数，最小值为1，最大值不超过1000，默认值为10
+        instance_id (str, optional): 实例ID
+        instance_name (str, optional): 实例名称
+        instance_status (str, optional): 实例状态，如Running、Creating等
+        db_engine_version (str, optional): 兼容版本，如MySQL_5_7、MySQL_8_0
+        create_time_start (str, optional): 查询创建实例的开始时间
+        create_time_end (str, optional): 查询创建实例的结束时间
+        zone_id (str, optional): 实例所属可用区
+        charge_type (str, optional): 计费类型，如PostPaid、PrePaid
+        instance_type (str, optional): 实例类型，如DoubleNode
+        node_spec (str, optional): 主节点规格
+        tag_filters (List[Dict[str, str]], optional): 用于查询筛选的标签键值对数组
+        project_name (str, optional): 项目名称
+        private_network_ip_address (str, optional): 实例默认终端的IP地址
+        kernel_version (List[str], optional): 内核小版本列表
+        private_network_vpc_id (str, optional): 私有网络的ID
+        storage_type (str, optional): 实例存储类型，如LocalSSD
     """
     req = {
-        "instance_id": instance_id, "instance_name": instance_name, "page_number": page_number, "page_size": 20,
+        "instance_id": instance_id,
+        "instance_name": instance_name,
+        "instance_status": instance_status,
+        "db_engine_version": db_engine_version,
+        "create_time_start": create_time_start,
+        "create_time_end": create_time_end,
+        "zone_id": zone_id,
+        "charge_type": charge_type,
+        "instance_type": instance_type,
+        "node_spec": node_spec,
+        "tag_filters": tag_filters,
+        "project_name": project_name,
+        "page_number": page_number,
+        "page_size": page_size,
+        "private_network_ip_address": private_network_ip_address,
+        "kernel_version": kernel_version,
+        "private_network_vpc_id": private_network_vpc_id,
+        "storage_type": storage_type
     }
+
+    req = {k: v for k, v in req.items() if v is not None}
+
+    if tag_filters is not None:
+        for filter_item in tag_filters:
+            if not isinstance(filter_item, dict) or 'Key' not in filter_item:
+                raise ValueError("TagFilters中的每个元素必须是包含Key字段的字典")
+
     resp = rds_mysql_resource.describe_db_instances(req)
     return resp.to_dict()
 
