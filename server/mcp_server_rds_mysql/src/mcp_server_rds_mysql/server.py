@@ -377,82 +377,108 @@ def modify_db_account_description(
     resp = rds_mysql_resource.modify_db_account_description(req)
     return resp.to_dict()
 
+
 @mcp_server.tool(
     name="create_rds_mysql_instance",
     description="创建 RDS MySQL 实例"
 )
 def create_rds_mysql_instance(
-        vpc_id: str = Field(description="私有网络 ID"),
-        subnet_id: str = Field(description="子网 ID"),
-        instance_name: Optional[str] = Field(default="", description="实例名称，默认为系统自动生成"),
-        db_engine_version: str = Field(default="MySQL_8_0", description="数据库版本，例如 'MySQL_8_0'"),
-        # 主节点配置
-        primary_zone: str = Field(default="cn-beijing-a", description="主节点可用区"),
-        primary_spec: str = Field(default="rds.mysql.1c2g", description="主节点规格，格式如 'rds.mysql.1c2g'"),
-        # 备节点配置
-        secondary_count: int = Field(default=1, description="备节点数量"),
-        secondary_zone: Optional[str] = Field(default=None, description="备节点可用区，默认与主节点不同区"),
-        secondary_spec: str = Field(default="rds.mysql.1c2g", description="备节点规格"),
-        # 只读节点配置
-        read_only_count: int = Field(default=0, description="只读节点数量"),
-        read_only_zone: str = Field(default="cn-beijing-a", description="只读节点可用区"),
-        read_only_spec: str = Field(default="rds.mysql.1c2g", description="只读节点规格"),
-        # 存储配置
-        storage_space: int = Field(default=20, description="存储空间大小(GB)"),
-        storage_type: str = Field(default="LocalSSD", description="存储类型，默认本地SSD"),
-        # 付费配置
-        charge_type: str = Field(default="PostPaid", description="付费类型，默认后付费")
+        vpc_id: str,
+        subnet_id: str,
+        db_engine_version: str = "MySQL_8_0",
+        instance_name: Optional[str] = None,
+        primary_zone: str = "cn-beijing-a",
+        primary_spec: str = "rds.mysql.1c2g",
+        secondary_count: int = 1,
+        secondary_zone: Optional[str] = None,
+        secondary_spec: str = "rds.mysql.1c2g",
+        read_only_count: int = 0,
+        read_only_zone: str = "cn-beijing-a",
+        read_only_spec: str = "rds.mysql.1c2g",
+        storage_space: int = 20,
+        storage_type: str = "LocalSSD",
+        charge_type: str = "PostPaid",
+        auto_renew: Optional[bool] = None,
+        period_unit: Optional[str] = None,
+        period: Optional[int] = None,
+        instance_type: str = "DoubleNode",
+        super_account_name: Optional[str] = None,
+        super_account_password: Optional[str] = None,
+        lower_case_table_names: str = "1",
+        db_time_zone: Optional[str] = None,
+        db_param_group_id: Optional[str] = None,
+        project_name: Optional[str] = None,
+        allow_list_ids: Optional[list[str]] = None,
+        port: int = 3306,
+        instance_tags: Optional[list[dict]] = None,
+        maintenance_window: Optional[dict] = None,
+        number: int = 1
 ) -> dict[str, Any]:
     """创建 RDS MySQL 实例
 
     Args:
         vpc_id: 私有网络 ID
         subnet_id: 子网 ID
+        db_engine_version: 数据库版本，默认 MySQL_8_0
         instance_name: 实例名称
-        db_engine_version: 数据库版本
-        primary_zone: 主节点可用区
-        primary_spec: 主节点规格
-        secondary_count: 备节点数量
-        secondary_zone: 备节点可用区
-        secondary_spec: 备节点规格
-        read_only_count: 只读节点数量
-        read_only_zone: 只读节点可用区
-        read_only_spec: 只读节点规格
-        storage_space: 存储空间大小(GB)
-        storage_type: 存储类型
-        charge_type: 付费类型
+        primary_zone: 主节点可用区，默认 cn-beijing-a
+        primary_spec: 主节点规格，默认 rds.mysql.1c2g
+        secondary_count: 备节点数量，默认 1
+        secondary_zone: 备节点可用区，默认与主节点相同
+        secondary_spec: 备节点规格，默认 rds.mysql.1c2g
+        read_only_count: 只读节点数量，默认 0
+        read_only_zone: 只读节点可用区，默认 cn-beijing-a
+        read_only_spec: 只读节点规格，默认 rds.mysql.1c2g
+        storage_space: 存储空间大小(GB)，默认 20
+        storage_type: 存储类型，默认 LocalSSD
+        charge_type: 付费类型，默认 PostPaid
+        auto_renew: 预付费场景下是否自动续费
+        period_unit: 预付费场景下的购买周期(Month/Year)
+        period: 预付费场景下的购买时长
+        instance_type: 实例类型，默认 DoubleNode
+        super_account_name: 高权限账号名称
+        super_account_password: 高权限账号密码
+        lower_case_table_names: 表名是否区分大小写，默认 1
+        db_time_zone: 时区
+        db_param_group_id: 参数模板 ID
+        project_name: 实例所属项目
+        allow_list_ids: 白名单 ID 列表
+        port: 默认终端的私网端口，默认 3306
+        instance_tags: 实例标签列表
+        maintenance_window: 维护窗口配置
+        deletion_protection: 是否启用删除保护，默认 Disabled
+        enable_storage_auto_scale: 是否开启自动扩容，默认 True
+        storage_threshold: 触发自动扩容的可用存储空间占比，默认 20%
+        storage_upper_bound: 自动扩容的存储空间上限，默认 3000GB
+        number: 实例购买数量，默认 1
 
     Returns:
         dict: 创建结果，包含实例ID和订单号等信息
     """
-    # 构建节点信息列表
     node_info = []
 
-    # 添加主节点
     node_info.append({
-        "node_type": "Primary",
-        "zone_id": primary_zone,
-        "node_spec": primary_spec
+        "NodeType": "Primary",
+        "ZoneId": primary_zone,
+        "NodeSpec": primary_spec
     })
 
-    # 添加备节点
-    for _ in range(secondary_count):
-        zone = secondary_zone or primary_zone  # 备节点默认同主节点可用区
+    for i in range(secondary_count):
+        zone = secondary_zone or primary_zone
         node_info.append({
-            "node_type": "Secondary",
-            "zone_id": zone,
-            "node_spec": secondary_spec
+            "NodeType": "Secondary",
+            "ZoneId": zone,
+            "NodeSpec": secondary_spec
         })
 
-    # 添加只读节点
-    for _ in range(read_only_count):
+
+    for i in range(read_only_count):
         node_info.append({
-            "node_type": "ReadOnly",
-            "zone_id": read_only_zone,
-            "node_spec": read_only_spec
+            "NodeType": "ReadOnly",
+            "ZoneId": read_only_zone,
+            "NodeSpec": read_only_spec
         })
 
-    # 构建请求数据
     data = {
         "db_engine_version": db_engine_version,
         "node_info": node_info,
@@ -460,14 +486,47 @@ def create_rds_mysql_instance(
         "storage_space": storage_space,
         "vpc_id": vpc_id,
         "subnet_id": subnet_id,
-        "charge_info": {"charge_type": charge_type},
+        "instance_type": instance_type,
+        "lower_case_table_names": lower_case_table_names,
+        "deletion_protection": deletion_protection,
+        "number": number,
+        "port": port,
+        "charge_info": {
+            "ChargeType": charge_type,
+            "AutoRenew": auto_renew,
+            "PeriodUnit": period_unit,
+            "Period": period
+        }
     }
 
-    # 添加可选的实例名称
-    if instance_name:
+
+    if instance_name is not None:
         data["instance_name"] = instance_name
 
-    # 发送创建请求
+    if super_account_name is not None:
+        data["super_account_name"] = super_account_name
+
+    if super_account_password is not None:
+        data["super_account_password"] = super_account_password
+
+    if db_time_zone is not None:
+        data["db_time_zone"] = db_time_zone
+
+    if db_param_group_id is not None:
+        data["db_param_group_id"] = db_param_group_id
+
+    if project_name is not None:
+        data["project_name"] = project_name
+
+    if allow_list_ids is not None:
+        data["allow_list_ids"] = allow_list_ids
+
+    if instance_tags is not None:
+        data["instance_tags"] = instance_tags
+
+    if maintenance_window is not None:
+        data["maintenance_window"] = maintenance_window
+
     resp = rds_mysql_resource.create_db_instance(data)
     return resp.to_dict()
 
