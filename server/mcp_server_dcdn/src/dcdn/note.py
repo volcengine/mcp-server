@@ -322,6 +322,7 @@ note = {
             - 回源协议为 HTTP 时：回源端口为80。 
             - 回源协议为 HTTPS 时：回源端口为443。 
         Type ( String ): 当您的回源地址同时存在IP类型和域名类型时（BackupOriginType 为 IP_Domain），该值表示源站地址的类型。 
+        Strategy ( String ): 当源站为域名时，您可自定义单源站策略。不填默认为轮询 
        "字段"： OriginHost
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
@@ -640,21 +641,21 @@ note = {
              ---- ( ---- ): ----  ---- 
              StartTime ( String ): 是  查询起始时间。 
              EndTime ( String ): 是  查询结束时间。 
-             Domain ( String ): 是  域名名称。 
-             ProjectName ( Array of String ): 否  指定查询域名所属的项目，为空代表查询当前用户所有项目。 
+             Domain ( String ): 否  指定需查询的加速域名，为空代表查询当前账号下所有加速域名。需要指定完整加速域名，不支持域名部分匹配。 
+             ProjectName ( Array of String ): 否  指定需查询的加速域名所属项目，为空代表查询当前用户所有项目。 
    Returns: 
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
         DomainName ( String ): 域名。 
         StartTime ( String ): 查询起始时间。 
         EndTime ( String ): 查询结束时间。 
-        DataInterval ( Integer ): 时间间隔，单位：秒，固定为3600。 
-        Results ( Array of Results ): 详细PV值。 
+        DataInterval ( Integer ): 采样时间间隔。单位：秒。当前仅支持 3600（1小时一个采样样本）。 
+        Results ( Array of Results ): 加速域名的PV样本数据。集合中每个对象对应一个加速域名在某小时内的PV值。 
        "字段"： Results
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
-        Domain ( String ): 域名。 
-        TimeStamp ( String ): 此时段的开始时间。 
+        Domain ( String ): 样本对应的加速域名。 
+        TimeStamp ( String ): 样本时间段（小时）的开始时间点。 
         Value ( Integer ): PV值。 
     """,
     "describe_realtime_data": r""" 
@@ -665,85 +666,84 @@ note = {
         body: A JSON structure
              参数 ( 类型 ): 是否必选  描述 
              ---- ( ---- ): ----  ---- 
-             StartTime ( String ): 是  查询起始时间。 
+             StartTime ( String ): 是  查询起始时间。您可以查询到7天以内的数据。查询时间跨度（StartTime和EndTime之间时长）不能超过24小时。 
              EndTime ( String ): 是  查询结束时间，结束时间大于起始时间。 
-             ProjectName ( Array of String ): 否  指定查询域名所属的项目，为空代表查询当前用户所有项目。 
-             Area ( String ): 否  客户端所在区域，不填表示查询所有区域，支持参数： 
-                   - China：中国大陆。 
-                   - Global：全球。 
-             Domains ( Array of String ): 是  指定查询域名列表，为空代表查询当前用户所有域名。 
-             Metrics ( Array of String ): 是  指定查询指标，支持取值： 
+             Domains ( Array of String ): 否  指定域名列表，为空时表示查询当前用户所有域名。 
+             ProjectName ( Array of String ): 否  指定域名所属的项目，为空时表示查询当前用户所有项目。 
+             Metrics ( Array of String ): 是  指定返回的监控指标，支持取值： 
                    - all：全部指标。 
-                   - traffic：流量，单位为 byte 。 
-                   - bandwidth：峰值带宽，单位为 bps 。 
-                   - request: 请求数，单位为次 。 
-                   - QPS: 峰值QPS，单位为次/s 。 
+                   - traffic：流量，单位为 byte。 
+                   - bandwidth：峰值带宽，单位为 bps。 
+                   - request：请求数。 
+                   - QPS：峰值QPS。 
                    - RequestHitRate：请求数命中率。 
                    - TrafficHitRate：流量命中率。 
-                   - 2xx：返回 2xx 状态码汇总或者 2 开头状态码数据，单位为个 。 
-                   - 3xx：返回 3xx 状态码汇总或者 3 开头状态码数据，单位为个 。 
-                   - 4xx：返回 4xx 状态码汇总或者 4 开头状态码数据，单位为个 。 
-                   - 5xx：返回 5xx 状态码汇总或者 5 开头状态码数据，单位为个 。 
-                   - ResponseTime：平均响应时间，单位为毫秒 。 
-             IspNameEn ( Array of String ): 否  指定运营商，为空时表示查询所有运营商，支持参数： 
-                   - unicom 
-                   - telecom 
-                   - mobile 
-                   - guangdian 
-                   - edu 
-                   - tietong 
-                   - pengboshi 
-                   - other 
-             AcceleratingRegion ( String ): 否  加速区域，不填表示查询所有区域，支持参数： 
-                   - CHN：中国大陆。 
-                   - EU（白名单可见）：欧洲。 
-                   - NA（白名单可见）：北美。 
-                   - SA（白名单可见）：南美。 
-                   - ME（白名单可见）：中东。 
-                   - AP1（白名单可见）：亚太1。 
-                   - AP2（白名单可见）：亚太2。 
-                   - AP3（白名单可见）：亚太3。 
-             AcceleratingScope ( String ): 否  加速区域范围，不填表示查询全球范围，支持参数： 
-                   - mainland：中国境内。 
-                   - overseas：中国境外。 
-             Region ( Array of String ): 否  指定区域，为空时表示查询所有区域。当 Area为 China 或 Global 时，Region 支持的区域详见下表。 
-             Protocol ( Array of String ): 否  指定客户端请求应用层和传输层协议查询，为空时表示查询所有协议，支持参数： 
-                   - ALL 
-                   - HTTP 
-                   - HTTPS 
-                   - QUIC 
-                   - WebSocket 
-             Type ( String ): 否  指定访问类型，不填时表示查询所有类型，返回总和（相当于all），支持参数： 
+                   - 2xx：返回 2xx 状态码的请求数。返回结果会提供 2xx 状态码总请求数以及单个 2xx 状态码的总请求数。 
+                   - 3xx：返回 3xx 状态码的请求数。返回结果会提供 3xx 状态码总请求数以及单个 3xx 状态码的总请求数。 
+                   - 4xx：返回 4xx 状态码的请求数。返回结果会提供 4xx 状态码总请求数以及单个 4xx 状态码的总请求数。 
+                   - 5xx：返回 5xx 状态码的请求数。返回结果会提供 5xx 状态码总请求数以及单个 5xx 状态码的总请求数。 
+             IspNameEn ( Array of String ): 否  指定运营商，为空时表示查询所有运营商，支持取值： 
+                   - unicom：联通 
+                   - telecom：电信 
+                   - mobile：移动 
+                   - guangdian：广电 
+                   - edu：教育网 
+                   - tietong：铁通 
+                   - pengboshi：鹏博士 
+                   - other：其他运营商 
+             AcceleratingRegion ( String ): 否  指定加速区域，为空时表示查询所有区域，支持取值： 
+                   - CHN：中国内地 
+                   - EU（仅对开通此功能的客户可见）：欧洲 
+                   - NA（仅对开通此功能的客户可见）：北美 
+                   - SA（仅对开通此功能的客户可见）：南美 
+                   - ME（仅对开通此功能的客户可见）：中东 
+                   - AP1（仅对开通此功能的客户可见）：亚太1 
+                   - AP2（仅对开通此功能的客户可见）：亚太2 
+                   - AP3（仅对开通此功能的客户可见）：亚太3 
+             AcceleratingScope ( String ): 否  指定加速区域范围，为空时表示查询全球范围，支持取值： 
+                   - mainland：中国内地。 
+                   - overseas：海外（中国内地以外区域） 
+             Area ( String ): 否  指定客户端所在区域，为空时表示查询所有区域，支持取值： 
+                   - China：中国大陆 
+                   - Global：全球 
+             Region ( Array of String ): 否  指定客户端所在详细区域，为空时表示查询所有区域。当 Area 为 China 或 Global 时，Region 支持的区域详见下方表格。 
+             Protocol ( Array of String ): 否  指定客户端请求应用层和传输层协议查询，为空时表示查询所有协议，支持取值： 
+                   - ALL：全部协议 
+                   - HTTP：HTTP协议 
+                   - HTTPS：HTTPS协议 
+                   - QUIC：QUIC协议 
+                   - WS：WebSocket协议 
+             Type ( String ): 否  指定访问请求类型，不填时表示查询所有类型（相当于all）。支持取值： 
                    - all：所有类型。 
-                   - dynamic：指定查询动态对应指标。 
-                   - static：指定查询静态对应指标。 
-             IPVersion ( String ): 否  指定ip类型查询，不填时表示查询所有类型，支持参数： 
+                   - dynamic：仅查询动态请求对应指标。 
+                   - static：仅查询静态请求对应指标。 
+             IPVersion ( String ): 否  指定IP协议类型查询。不填时表示查询所有类型，支持取值： 
                    - all：所有类型。 
-                   - ipv4 
-                   - ipv6 
+                   - ipv4：通过 IPv4 访问DCDN的请求 
+                   - ipv6：通过 IPv6 访问DCDN的请求 
    Returns: 
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
         DomainCount ( Integer ): 查询域名中有效域名的数量。 
         StartTime ( String ): 查询起始时间。 
         EndTime ( String ): 查询结束时间。 
-        Metrics ( Array of String ): 查询时选择展示的字段。 
-        Results ( Array of Results ): 查询数据明细。 
+        Metrics ( Array of String ): 回显查询时选择展示的统计指标。 
+        Results ( Array of Results ): 以一分钟为颗粒度的样本集合，集合中每个对象对应一分钟时长的统计数据。 
        "字段"： Results
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
-        TimeStamp ( String ): 当前数据段起始时间。 
-        RealTimeResults ( Array of RealTimeResults ): 当前时间段内的详细数据。 
+        TimeStamp ( String ): 当前一分钟样本的起始时间。 
+        RealTimeResults ( Array of RealTimeResults ): 当前一分钟样本的详细数据。 
        "字段"： RealTimeResults
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
-        DomainName ( String ): 当前数据所在的域名。 
-        DetailInfo ( Array of DetailInfo ): 对应该域名的具体指标。 
+        DomainName ( String ): 当前数据所对应的域名。 
+        DetailInfo ( Array of DetailInfo ): 请求中Metrics字段指定的各个统计指标的数据集合，集合中每个对象为一个名值对。 
        "字段"： DetailInfo
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
-        Name ( String ): 在请求时选择的 Metrics 中的字段。 
-        Value ( Float ): 对应该字段的值。 
+        Name ( String ): 统计指标名称。 
+        Value ( Float ): 统计指标的值。 
     """,
     "describe_domain_uv_data": r""" 
     Args: 
@@ -755,21 +755,21 @@ note = {
              ---- ( ---- ): ----  ---- 
              StartTime ( String ): 是  查询起始时间。 
              EndTime ( String ): 是  查询结束时间。 
-             Domain ( String ): 是  域名名称。 
+             Domain ( String ): 否  指定需查询的加速域名，为空代表查询当前账号下所有加速域名。需要指定完整加速域名，不支持域名部分匹配。 
              ProjectName ( Array of String ): 否  指定查询域名所属的项目，为空代表查询当前用户所有项目。 
    Returns: 
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
-        DomainName ( String ): 域名。 
+        DomainName ( String ): 回显请求中查询的加速域名。 
         StartTime ( String ): 查询起始时间。 
         EndTime ( String ): 查询结束时间。 
-        DataInterval ( Integer ): 时间间隔，单位：秒，固定为3600。 
-        Results ( Array of Results ): 详细UV值。 
+        DataInterval ( Integer ): 采样时间间隔。单位：秒。当前仅支持 3600（1小时一个采样样本）。 
+        Results ( Array of Results ): 加速域名的UV样本数据。集合中每个对象对应一个加速域名在某小时内的UV值。 
        "字段"： Results
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
-        Domain ( String ): 域名。 
-        TimeStamp ( String ): 此时段的开始时间。 
+        Domain ( String ): 样本对应的加速域名。 
+        TimeStamp ( String ): 样本时间段（小时）的开始时间点。 
         Value ( Integer ): UV值。 
     """,
     "describe_origin_statistics_detail": r""" 
@@ -781,60 +781,27 @@ note = {
              参数 ( 类型 ): 是否必选  描述 
              ---- ( ---- ): ----  ---- 
              StartTime ( String ): 是  查询起始时间。 
-             EndTime ( String ): 是  查询结束时间，结束时间大于起始时间。 
+             EndTime ( String ): 是  查询结束时间。 
              ProjectName ( Array of String ): 否  指定查询域名所属的项目，为空代表查询当前用户所有项目。 
-             Domains ( Array of String ): 是  指定查询域名列表，为空代表查询当前用户所有域名。 
-             Metrics ( Array of String ): 否  指定查询指标，支持取值： 
-                   - all：全部指标。 
-                   - traffic：流量，单位为 byte 。 
-                   - bandwidth：峰值带宽，单位为 bps 。 
-                   - request: 请求数，单位为次 。 
-                   - QPS: 峰值QPS，单位为次/s 。 
-                   - 2xx：返回 2xx 状态码汇总或者 2 开头状态码数据，单位为个 。 
-                   - 3xx：返回 3xx 状态码汇总或者 3 开头状态码数据，单位为个 。 
-                   - 4xx：返回 4xx 状态码汇总或者 4 开头状态码数据，单位为个 。 
-                   - 5xx：返回 5xx 状态码汇总或者 5 开头状态码数据，单位为个 。 
-             Interval ( Integer ): 否  时间粒度，单位为秒 ，支持参数： 
-                   - 3 天以内（不含3）：支持 300、3600、 86400，不传该参数时，默认值为300。 
-                   - 3 - 31 天（不含31）： 支持 3600 和 86400，不传该参数时，默认值为3600。 
-                   - 31 天及以上： 支持 86400，不传该参数，默认值为 86400。 
-             Protocol ( Array of String ): 否  指定客户端请求应用层和传输层协议查询，为空时表示查询所有协议，支持参数： 
-                   - ALL 
-                   - HTTP 
-                   - HTTPS 
-                   - QUIC 
-                   - WebSocket 
-             Type ( String ): 否  指定访问类型，不填时表示查询所有类型，返回总和（相当于all），支持参数： 
-                   - all：所有类型。 
-                   - dynamic：指定查询动态对应指标。 
-                   - static：指定查询静态对应指标。 
-             IPVersion ( String ): 否  指定ip类型查询，不填时表示查询所有类型，支持参数： 
-                   - all：所有类型。 
-                   - ipv4 
-                   - ipv6 
+             Domain ( String ): 是  域名。 
+             PageNum ( Integer ): 否  页码，默认1，从 1 开始计数，可取 >= 1的任意整数。 
+             PageSize ( Integer ): 否  每页条数，默认20，取值范围 1 ~ 1000 。 
    Returns: 
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
-        DomainCount ( Integer ): 查询域名中有效域名的数量。 
-        StartTime ( String ): 查询起始时间。 
-        EndTime ( String ): 查询结束时间。 
-        Metrics ( Array of String ): 查询时选择展示的字段。 
-        Results ( Array of Results ): 查询数据明细。 
-       "字段"： Results
+        FileLists ( Array of FileLists ): 日志详情列表。 
+        FilesCount ( Integer ): 日志总数据条数。 
+        PageNum ( Integer ): 指定的页码。 
+        PageSize ( Integer ): 指定的每页条数。 
+       "字段"： FileLists
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
-        TimeStamp ( String ): 当前数据段起始时间。 
-        StatisticResults ( Array of StatisticResults ): 当前时间段内的域名详细数据。 
-       "字段"： StatisticResults
-        参数 ( 类型 ): 描述 
-        ---- ( ---- ): ---- 
-        DomainName ( String ): 当前数据所在的域名。 
-        DetailInfo ( Array of DetailInfo ): 对应该域名的具体指标。 
-       "字段"： DetailInfo
-        参数 ( 类型 ): 描述 
-        ---- ( ---- ): ---- 
-        Name ( String ): 在请求时选择的 Metrics 中的字段。 
-        Value ( Float ): 对应该字段的值。 
+        DomainName ( String ): 域名。 
+        StartTime ( String ): 日志起始时间。 
+        EndTime ( String ): 日志结束时间。 
+        FilePath ( String ): 日志下载地址。 
+        FileSize ( Float ): 日志包大小，单位为 byte 。 
+        FileName ( String ): 日志包名称。 
     """,
     "describe_origin_realtime_data": r""" 
     Args: 
@@ -844,55 +811,55 @@ note = {
         body: A JSON structure
              参数 ( 类型 ): 是否必选  描述 
              ---- ( ---- ): ----  ---- 
-             StartTime ( String ): 是  查询起始时间。 
+             StartTime ( String ): 是  查询起始时间。您可以查询到7天以内的数据。查询时间跨度（StartTime和EndTime之间时长）不能超过24小时。 
              EndTime ( String ): 是  查询结束时间，结束时间大于起始时间。 
-             Domains ( Array of String ): 是  指定查询域名列表，为空代表查询当前用户所有域名。 
-             Metrics ( Array of String ): 是  指定查询指标，支持取值： 
+             Domains ( Array of String ): 否  指定域名列表，为空时表示查询当前用户所有域名。 
+             Metrics ( Array of String ): 是  指定返回的监控指标，支持取值： 
                    - all：全部指标。 
-                   - traffic：流量，单位为 byte 。 
-                   - bandwidth：峰值带宽，单位为 bps 。 
-                   - request: 请求数，单位为次 。 
-                   - QPS: 峰值QPS，单位为次/s 。 
-                   - 2xx：返回 2xx 状态码汇总或者 2 开头状态码数据，单位为个 。 
-                   - 3xx：返回 3xx 状态码汇总或者 3 开头状态码数据，单位为个 。 
-                   - 4xx：返回 4xx 状态码汇总或者 4 开头状态码数据，单位为个 。 
-                   - 5xx：返回 5xx 状态码汇总或者 5 开头状态码数据，单位为个 。 
-             Protocol ( Array of String ): 否  指定客户端请求应用层和传输层协议查询，为空时表示查询所有协议，支持参数： 
-                   - ALL 
+                   - traffic：流量，单位为 byte。 
+                   - bandwidth：峰值带宽，单位为 bps。 
+                   - request：请求数。 
+                   - QPS：峰值QPS。 
+                   - 2xx：返回 2xx 状态码的请求数。返回结果会提供 2xx 状态码总请求数以及单个 2xx 状态码的总请求数。 
+                   - 3xx：返回 3xx 状态码的请求数。返回结果会提供 3xx 状态码总请求数以及单个 3xx 状态码的总请求数。 
+                   - 4xx：返回 4xx 状态码的请求数。返回结果会提供 4xx 状态码总请求数以及单个 4xx 状态码的总请求数。 
+                   - 5xx：返回 5xx 状态码的请求数。返回结果会提供 5xx 状态码总请求数以及单个 5xx 状态码的总请求数。 
+             Protocol ( Array of String ): 否  指定回源请求的应用层协议，为空时表示查询所有协议，支持取值： 
+                   - ALL：所有协议 
                    - HTTP 
                    - HTTPS 
-             Type ( String ): 否  指定访问类型，不填时表示查询所有类型，返回总和（相当于all），支持参数： 
+             Type ( String ): 否  指定访问请求类型，不填时表示查询所有类型（相当于all）。支持取值： 
                    - all：所有类型。 
-                   - dynamic：指定查询动态内容对应指标。 
-                   - static：指定查询静态内容对应指标。 
-             IPVersion ( String ): 否  指定ip类型查询，不填时表示查询所有类型，支持参数： 
+                   - dynamic：仅查询动态请求对应指标。 
+                   - static：仅查询静态请求对应指标。 
+             IPVersion ( String ): 否  指定IP协议类型查询。不填时表示查询所有类型，支持取值： 
                    - all：所有类型。 
-                   - ipv4 
-                   - ipv6 
-             ProjectName ( Array of String ): 否  指定查询域名所属的项目，为空代表查询当前用户所有项目。 
+                   - ipv4：通过 IPv4 访问DCDN的请求 
+                   - ipv6：通过 IPv6 访问DCDN的请求 
+             ProjectName ( Array of String ): 否  指定域名所属的项目，为空时表示查询当前用户所有项目。 
    Returns: 
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
         DomainCount ( Integer ): 查询域名中有效域名的数量。 
         StartTime ( String ): 查询起始时间。 
         EndTime ( String ): 查询结束时间。 
-        Metrics ( Array of String ): 查询时选择展示的字段。 
-        Results ( Array of Results ): 查询数据明细。 
+        Metrics ( Array of String ): 回显查询时选择展示的统计指标。 
+        Results ( Array of Results ): 以一分钟为颗粒度的样本集合，集合中每个对象对应一分钟时长的统计数据。 
        "字段"： Results
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
-        TimeStamp ( String ): 当前数据段起始时间。 
-        RealTimeResults ( Array of RealTimeResults ): 当前时间段内的详细数据。 
+        TimeStamp ( String ): 当前一分钟样本的起始时间。 
+        RealTimeResults ( Array of RealTimeResults ): 当前一分钟样本的详细数据。 
        "字段"： RealTimeResults
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
-        DomainName ( String ): 当前数据所在的域名。 
-        DetailInfo ( Array of DetailInfo ): 对应该域名的具体指标。 
+        DomainName ( String ): 当前数据所对应的域名。 
+        DetailInfo ( Array of DetailInfo ): 请求中Metrics字段指定的各个统计指标的数据集合，集合中每个对象为一个名值对。 
        "字段"： DetailInfo
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
-        Name ( String ): 在请求时选择的 Metrics 中的字段。 
-        Value ( Float ): 对应该字段的值。 
+        Name ( String ): 统计指标名称。 
+        Value ( Float ): 统计指标的值。 
     """,
     "describe_origin_statistics": r""" 
     Args: 
@@ -902,156 +869,58 @@ note = {
         body: A JSON structure
              参数 ( 类型 ): 是否必选  描述 
              ---- ( ---- ): ----  ---- 
-             StartTime ( String ): 是  查询起始时间。 
+             StartTime ( String ): 是  查询起始时间。您可以查询过去90天内的数据。查询时间跨度（StartTime和EndTime之间时长）不能超过31天。基于您指定的时间跨度，您可以选择数据样本的时间粒度（Interval 参数）会相应不同。 
              EndTime ( String ): 是  查询结束时间，结束时间大于起始时间。 
-             Domains ( Array of String ): 是  指定查询域名列表，为空代表查询当前用户所有域名。 
-             Metrics ( Array of String ): 否  指定查询指标，支持取值： 
+             Metrics ( Array of String ): 是  指定返回的监控指标，支持取值： 
                    - all：全部指标。 
-                   - traffic：流量，单位为 byte 。 
-                   - bandwidth：峰值带宽，单位为 bps 。 
-                   - request: 请求数，单位为次 。 
-                   - QPS: 峰值QPS，单位为次/s 。 
-                   - 2xx：返回 2xx 状态码汇总或者 2 开头状态码数据，单位为个 。 
-                   - 3xx：返回 3xx 状态码汇总或者 3 开头状态码数据，单位为个 。 
-                   - 4xx：返回 4xx 状态码汇总或者 4 开头状态码数据，单位为个 。 
-                   - 5xx：返回 5xx 状态码汇总或者 5 开头状态码数据，单位为个 。 
-             Interval ( Integer ): 否  时间粒度，单位为秒 ，支持参数： 
-                   - 3 天以内（不含3）：支持 300、3600、 86400，不传该参数时，默认值为300。 
-                   - 3 - 31 天（不含31）： 支持 3600 和 86400，不传该参数时，默认值为3600。 
-                   - 31 天及以上： 支持 86400，不传该参数，默认值为 86400。 
-             Protocol ( Array of String ): 否  指定客户端请求应用层和传输层协议查询，为空时表示查询所有协议，支持参数： 
-                   - ALL 
-                   - HTTP 
-                   - HTTPS 
-                   - QUIC 
-                   - WebSocket 
-             Type ( String ): 否  指定访问类型，不填时表示查询所有类型，返回总和（相当于all），支持参数： 
+                   - traffic：流量，单位为 byte。 
+                   - bandwidth：峰值带宽，单位为 bps。 
+                   - request：请求数。 
+                   - QPS：峰值QPS。 
+                   - 2xx：返回 2xx 状态码的请求数。返回结果会提供 2xx 状态码总请求数以及单个 2xx 状态码的总请求数。 
+                   - 3xx：返回 3xx 状态码的请求数。返回结果会提供 3xx 状态码总请求数以及单个 3xx 状态码的总请求数。 
+                   - 4xx：返回 4xx 状态码的请求数。返回结果会提供 4xx 状态码总请求数以及单个 4xx 状态码的总请求数。 
+                   - 5xx：返回 5xx 状态码的请求数。返回结果会提供 5xx 状态码总请求数以及单个 5xx 状态码的总请求数。 
+             Domains ( Array of String ): 否  指定查询域名列表。为空时代表查询当前用户所有域名。 
+             Interval ( Integer ): 否  时间粒度，单位为秒 。支持取值： 
+                   - 查询时间段跨度 3 天以内（不含3）：支持 300、3600、 86400。不传该参数时，默认值为300。 
+                   - 查询时间段跨度 3 - 31 天（不含31）： 支持 3600 和 86400。不传该参数时，默认值为 3600。 
+                   - 查询时间段跨度 31 天： 支持 86400。不传该参数，默认值为 86400。 
+             Protocol ( Array of String ): 否  指定客户端请求应用层和传输层协议查询，为空时表示查询所有协议，支持取值： 
+                   - ALL：全部协议 
+                   - HTTP：HTTP协议 
+                   - HTTPS：HTTPS协议 
+                   - QUIC：QUIC协议 
+                   - WS：WebSocket协议 
+             Type ( String ): 否  指定访问请求类型，为空时表示查询所有类型（相当于all）。支持取值： 
                    - all：所有类型。 
-                   - dynamic：指定查询动态对应指标。 
-                   - static：指定查询静态对应指标。 
-             IPVersion ( String ): 否  指定ip类型查询，不填时表示查询所有类型，支持参数： 
+                   - dynamic：仅查询动态请求对应指标。 
+                   - static：仅查询静态请求对应指标。 
+             IPVersion ( String ): 否  指定IP协议类型查询。为空时表示查询所有类型，支持取值： 
                    - all：所有类型。 
-                   - ipv4 
-                   - ipv6 
-             ProjectName ( Array of String ): 否  指定查询域名所属的项目，为空代表查询当前用户所有项目。 
+                   - ipv4：通过 IPv4 访问DCDN的请求 
+                   - ipv6：通过 IPv6 访问DCDN的请求 
+             ProjectName ( Array of String ): 否  指定域名所属的项目，为空时表示查询当前用户所有项目。 
    Returns: 
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
         DomainCount ( Integer ): 查询域名中有效域名的数量。 
         StartTime ( String ): 查询起始时间。 
         EndTime ( String ): 查询结束时间。 
-        Metrics ( Array of String ): 查询时选择展示的字段。 
+        Metrics ( Array of String ): 回显查询时选择展示的统计指标。 
         Results ( Array of Results ): 查询数据明细。 
        "字段"： Results
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
-        TimeStamp ( String ): 当前数据段起始时间。 
-        DetailInfo ( Array of DetailInfo ): 当前时间段内的详细数据。 
+        TimeStamp ( String ): 当前样本时间段的开始时间点。 
+        DetailInfo ( Array of DetailInfo ): 当前样本时间段的详细数据。 
        "字段"： DetailInfo
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
-        Name ( String ): 在请求时选择的 Metrics 中的字段。 
-        Value ( Float ): 对应该字段的值。 
+        Name ( String ): 统计指标名称。 
+        Value ( Float ): 统计指标的值。 
     """,
     "describe_top_domains": r""" 
-    Args: 
-        params: A JSON structure
-             参数 ( 类型 ): 是否必选  描述 
-             ---- ( ---- ): ----  ---- 
-        body: A JSON structure
-             参数 ( 类型 ): 是否必选  描述 
-             ---- ( ---- ): ----  ---- 
-             AcceleratingRegion ( String ): 否  加速区域，不填表示查询所有区域，支持参数： 
-                   - CHN：中国大陆。 
-                   - EU（白名单可见）：欧洲。 
-                   - NA（白名单可见）：北美。 
-                   - SA（白名单可见）：南美。 
-                   - ME（白名单可见）：中东。 
-                   - AP1（白名单可见）：亚太1。 
-                   - AP2（白名单可见）：亚太2。 
-                   - AP3（白名单可见）：亚太3。 
-             AcceleratingScope ( String ): 否   
-             Area ( String ): 否  客户端所在区域，不填表示查询所有区域，支持参数： 
-                   - China：中国大陆。 
-                   - Global：全球。 
-             Domains ( Array of String ): 否  指定查询域名列表，不填代表查询当前用户所有域名。 
-             EndTime ( String ): 否  查询结束时间，结束时间大于起始时间。 
-             IPVersion ( String ): 否  指定ip类型查询，不填时表示查询所有类型，支持参数： 
-                   - all：所有类型。 
-                   - ipv4 
-                   - ipv6 
-             IspNameEn ( Array of String ): 否  指定运营商，为空时表示查询所有运营商，支持参数： 
-                   - unicom 
-                   - telecom 
-                   - mobile 
-                   - guangdian 
-                   - edu 
-                   - tietong 
-                   - pengboshi 
-                   - other 
-             Limit ( Integer ): 否  域名获取数量限制，默认为20，取值支持1~100 。 
-             ProjectName ( Array of String ): 否  指定查询域名所属的项目，为空代表查询当前用户所有项目。 
-             Protocol ( Array of String ): 否  指定客户端请求应用层和传输层协议查询，为空时表示查询所有协议，支持参数： 
-                   - ALL：全部协议。 
-                   - HTTP：HTTP协议。 
-                   - HTTPS：HTTPS协议。 
-                   - QUIC：QUIC协议。 
-                   - WS：WebSocket协议。 
-             Region ( Array of String ): 否  指定区域，为空时表示查询所有区域。当 Area为 China 或 Global 时，Region 支持的区域详见下表。 
-             ResourceTagFilter ( Object of ResourceTagFilter ): 否   
-             Sort ( String ): 否  指定排序指标，可指定值： 
-                   traffic：流量。 
-                   bandwidth：峰值带宽。 
-                   request: 请求数。 
-                   QPS: 峰值 QPS 。 
-                   2xx: 2xx状态码数量 。 
-                   3xx: 3xx状态码数量 。 
-                   4xx:4xx状态码数量 。 
-                   5xx: 5xx状态码数量 。 
-             StartTime ( String ): 否  查询起始时间。 
-             Type ( String ): 否  指定访问类型，不填时表示查询所有类型，返回总和（相当于all），支持参数： 
-                   - all：所有类型。 
-                   - dynamic：指定查询动态对应指标。 
-                   - static：指定查询静态对应指标。 
-             ServiceType ( String ): 否   
-            "字段"： ResourceTagFilter
-             参数 ( 类型 ): 是否必选  描述 
-             ---- ( ---- ): ----  ---- 
-             FilterType ( String ): 否   
-             ResourceTags ( Array of ResourceTags ): 否   
-            "字段"： ResourceTags
-             参数 ( 类型 ): 是否必选  描述 
-             ---- ( ---- ): ----  ---- 
-             Key ( String ): 是  标签名称，支持大/小写字母、数字和中文组成，支持"+-=@/._"等特殊字符，长度不超过 128 个字符，不允许以volc开头。 
-             Value ( String ): 是  标签名称对应的值，由大/小写字母、数字和中文组成，支持"+-=@/._"等特殊字符，长度不超过 256个字符。 
-   Returns: 
-        参数 ( 类型 ): 描述 
-        ---- ( ---- ): ---- 
-        DomainCount ( Integer ): 查询域名中有效域名的数量。 
-        StartTime ( String ): 查询起始时间。 
-        EndTime ( String ): 查询结束时间。 
-        TopDomains ( Array of TopDomains ): Domain排名列表。 
-       "字段"： TopDomains
-        参数 ( 类型 ): 描述 
-        ---- ( ---- ): ---- 
-        DomainName ( String ): 域名名称。 
-        Rank ( Float ): 查询到的域名对应的排名。 
-        Request ( Float ): 请求数。 
-        Traffic ( Float ): 流量。 
-        Bandwidth ( Float ): 带宽峰值。 
-        QPS ( Float ): 峰值 QPS 。 
-        StatusCode2xx ( Float ): 2xx状态码数量。 
-        StatusCode2xxRatio ( Float ): 2xx状态码占比，小于1。 
-        StatusCode3xx ( Float ): 3xx状态码数量。 
-        StatusCode3xxRatio ( Float ): 3xx状态码占比，小于1。 
-        StatusCode4xx ( Float ): 4xx状态码数量。 
-        StatusCode4xxRatio ( Float ): 4xx状态码占比，小于1。 
-        StatusCode5xx ( Float ): 5xx状态码数量。 
-        StatusCode5xxRatio ( Float ): 5xx状态码占比，小于1。 
-        StatusCode1xx ( Float ): 1xx状态码数量。 
-        StatusCode1xxRatio ( Float ): 1xx状态码占比，小于1。 
-    """,
-    "describe_top_i_ps": r""" 
     Args: 
         params: A JSON structure
              参数 ( 类型 ): 是否必选  描述 
@@ -1066,18 +935,135 @@ note = {
                    - bandwidth：峰值带宽。 
                    - request: 请求数。 
                    - QPS: 峰值 QPS 。 
+                   - 2xx: 2xx状态码数量 。 
+                   - 3xx: 3xx状态码数量 。 
+                   - 4xx:4xx状态码数量 。 
+                   - 5xx: 5xx状态码数量 。 
+             Domains ( Array of String ): 否  指定查询域名列表。为空代表查询当前用户所有域名。 
              Limit ( Integer ): 否  域名获取数量限制，默认为20，取值支持1~100 。 
              ProjectName ( Array of String ): 否  指定查询域名所属的项目，为空代表查询当前用户所有项目。 
-             Domain ( String ): 否  指定查询域名，不填默认全选。 
-             StatusCode ( Array of String ): 否  指定查询状态码，2xx,3xx,4xx,5xx。 
+             IspNameEn ( Array of String ): 否  指定运营商，为空时表示查询所有运营商，支持取值： 
+                   - unicom：联通 
+                   - telecom：电信 
+                   - mobile：移动 
+                   - guangdian：广电 
+                   - edu：教育网 
+                   - tietong：铁通 
+                   - pengboshi：鹏博士 
+                   - other：其他运营商 
+             ServiceType ( String ): 否  指定加速域名关联的加速场景，支持取值： 
+                   - ai：AI 加速 
+                   - upload：上传加速 
+                   - page：页面加速 
+                   - api：API 加速 
+                   - other：其他 
+             AcceleratingRegion ( String ): 否  加速区域，不填表示查询所有区域，支持的参数如下所示 
+                   - CHN：中国内地 
+                   - EU（仅对开通此功能的客户可见）：欧洲 
+                   - NA（仅对开通此功能的客户可见）：北美 
+                   - SA（仅对开通此功能的客户可见）：南美 
+                   - ME（仅对开通此功能的客户可见）：中东 
+                   - AP1（仅对开通此功能的客户可见）：亚太1 
+                   - AP2（仅对开通此功能的客户可见）：亚太2 
+                   - AP3（仅对开通此功能的客户可见）：亚太3 
+             AcceleratingScope ( String ): 否  指定加速区域范围，为空时表示查询全球范围，支持取值： 
+                   - mainland：中国内地。 
+                   - overseas：海外（中国内地以外区域） 
+             Area ( String ): 否  客户端所在区域，不填表示查询所有区域，支持参数： 
+                   - China：中国大陆； 
+                   - Global：全球。 
+             Region ( Array of String ): 否  指定区域，为空时表示查询所有区域。当 Area 为 China 或 Global 时，Region 支持的区域详见下方表格。 
+             Protocol ( Array of String ): 否  指定客户端请求应用层和传输层协议查询，为空时表示查询所有协议，支持参数： 
+                   - ALL：全部协议； 
+                   - HTTP：HTTP协议； 
+                   - HTTPS：HTTPS协议； 
+                   - QUIC：QUIC协议； 
+                   - WS：WebSocket协议。 
+             Type ( String ): 否  指定访问类型，不填时表示查询所有类型（相当于all），支持参数： 
+                   - all：所有类型。 
+                   - dynamic：指定查询动态对应指标。 
+                   - static：指定查询静态对应指标。 
+             IPVersion ( String ): 否  指定ip类型查询，不填时表示查询所有类型，支持参数： 
+                   - all：所有类型； 
+                   - ipv4：IPv4 类型； 
+                   - ipv6：IPv6 类型。 
+             Metrics ( Array of String ): 否  指定返回的监控指标，支持取值： 
+                   - all：全部指标。 
+                   - traffic：流量，单位为 byte。 
+                   - bandwidth：峰值带宽，单位为 bps。 
+                   - request：请求数。 
+                   - QPS：峰值QPS。 
+                   - 2xx：返回 2xx 状态码的请求数。返回结果会提供 2xx 状态码总请求数以及单个 2xx 状态码的总请求数。 
+                   - 3xx：返回 3xx 状态码的请求数。返回结果会提供 3xx 状态码总请求数以及单个 3xx 状态码的总请求数。 
+                   - 4xx：返回 4xx 状态码的请求数。返回结果会提供 4xx 状态码总请求数以及单个 4xx 状态码的总请求数。 
+                   - 5xx：返回 5xx 状态码的请求数。返回结果会提供 5xx 状态码总请求数以及单个 5xx 状态码的总请求数。 
+             ResourceTagFilter ( Object of ResourceTagFilter ): 否  指定加速域名关联的资源标签。可以调用 ListResourceTags 查看资源标签列表。 
+            "字段"： ResourceTagFilter
+             参数 ( 类型 ): 是否必选  描述 
+             ---- ( ---- ): ----  ---- 
+             FilterType ( String ): 否  当您指定了多个资源标签时，该参数指定标签组合的逻辑： 
+                   - and：同时具有所有指定标签 
+                   - or：具有任一指定标签 
+             ResourceTags ( Array of ResourceTags ): 否  指定的资源标签的集合，每个对象为一个名值对格式的标签。 
+            "字段"： ResourceTags
+             参数 ( 类型 ): 是否必选  描述 
+             ---- ( ---- ): ----  ---- 
+             Key ( String ): 是  标签名称。 
+             Value ( String ): 是  标签名称对应的值。 
    Returns: 
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
-        IP ( String ): IP 。 
-        Rank ( Float ): 排名。 
+        DomainCount ( Integer ): 查询域名中有效域名的数量。 
+        StartTime ( String ): 查询起始时间。 
+        EndTime ( String ): 查询结束时间。 
+        TopDomains ( Array of TopDomains ): 域名排名列表。 
+       "字段"： TopDomains
+        参数 ( 类型 ): 描述 
+        ---- ( ---- ): ---- 
+        DomainName ( String ): 域名。 
+        Rank ( Float ): 查询到的域名对应的排名。 
         Request ( Float ): 请求数。 
         Traffic ( Float ): 流量。 
-        Bandwidth ( Float ): 峰值带宽。 
+        Bandwidth ( Float ): 带宽峰值。 
+        QPS ( Float ): 峰值 QPS 。 
+        StatusCode2xx ( Float ): 2xx状态码数量。 
+        StatusCode3xx ( Float ): 3xx状态码数量。 
+        StatusCode4xx ( Float ): 4xx状态码数量。 
+        StatusCode5xx ( Float ): 5xx状态码数量。 
+        StatusCode2xxRatio ( Float ): 2xx状态码占比，小于等于1。 
+        StatusCode3xxRatio ( Float ): 3xx状态码占比，小于等于1。 
+        StatusCode4xxRatio ( Float ): 4xx状态码占比，小于等于1。 
+        StatusCode5xxRatio ( Float ): 5xx状态码占比，小于等于1。 
+        StatusCode1xx ( Float ): 1xx状态码数量。 
+        StatusCode1xxRatio ( Float ): 1xx状态码占比，小于等于1。 
+    """,
+    "describe_top_i_ps": r""" 
+    Args: 
+        params: A JSON structure
+             参数 ( 类型 ): 是否必选  描述 
+             ---- ( ---- ): ----  ---- 
+        body: A JSON structure
+             参数 ( 类型 ): 是否必选  描述 
+             ---- ( ---- ): ----  ---- 
+             StartTime ( String ): 是  查询起始时间。 
+             EndTime ( String ): 是  查询结束时间。 
+             Sort ( String ): 是  指定排序指标。取值： 
+                   - traffic：流量。 
+                   - bandwidth：峰值带宽。 
+                   - request: 请求数。 
+                   - QPS: 峰值 QPS 。 
+             Limit ( Integer ): 否  域名获取数量限制，默认为20，取值支持1~100 。 
+             ProjectName ( Array of String ): 否  指定查询域名所属的项目，为空代表查询当前用户所有项目。 
+             Domain ( String ): 否  指定查询域名，不填默认全选。需要指定完整加速域名，不支持域名部分匹配。 
+             StatusCode ( Array of String ): 否  指定查询状态码：2xx、3xx、4xx、5xx。 
+   Returns: 
+        参数 ( 类型 ): 描述 
+        ---- ( ---- ): ---- 
+        IP ( String ): 客户端 IP 地址。 
+        Rank ( Float ): 排名。 
+        Request ( Float ): 请求数。 
+        Traffic ( Float ): 流量。单位：byte。 
+        Bandwidth ( Float ): 带宽峰值。单位：bps。 
         QPS ( Float ): 峰值 QPS 。 
     """,
     "describe_top_referers": r""" 
@@ -1090,23 +1076,23 @@ note = {
              ---- ( ---- ): ----  ---- 
              StartTime ( String ): 是  查询起始时间。 
              EndTime ( String ): 是  查询结束时间。 
-             Sort ( String ): 是  指定排序指标，可指定值： 
+             Sort ( String ): 是  指定排序指标。取值： 
                    - traffic：流量。 
                    - bandwidth：峰值带宽。 
                    - request: 请求数。 
                    - QPS: 峰值 QPS 。 
              Limit ( Integer ): 否  域名获取数量限制，默认为20，取值支持1~100 。 
              ProjectName ( Array of String ): 否  指定查询域名所属的项目，为空代表查询当前用户所有项目。 
-             Domain ( String ): 否  指定查询域名，不填默认全选。 
-             StatusCode ( Array of String ): 否  指定查询状态码，2xx,3xx,4xx,5xx。 
+             Domain ( String ): 否  指定查询域名，不填默认全选。需要指定完整加速域名，不支持域名部分匹配。 
+             StatusCode ( Array of String ): 否  指定查询状态码：2xx、3xx、4xx、5xx。 
    Returns: 
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
-        Referer ( String ): Http referer 。 
+        Referer ( String ): HTTP referer。 
         Rank ( Float ): 排名。 
         Request ( Float ): 请求数。 
-        Traffic ( Float ): 流量。 
-        Bandwidth ( Float ): 峰值带宽。 
+        Traffic ( Float ): 流量。单位：byte。 
+        Bandwidth ( Float ): 带宽峰值。单位：bps。 
         QPS ( Float ): 峰值 QPS 。 
     """,
     "describe_top_urls": r""" 
@@ -1119,15 +1105,15 @@ note = {
              ---- ( ---- ): ----  ---- 
              StartTime ( String ): 是  查询起始时间。 
              EndTime ( String ): 是  查询结束时间。 
-             Sort ( String ): 是  指定排序指标，可指定值： 
+             Sort ( String ): 是  指定排序指标。取值： 
                    - traffic：流量。 
                    - bandwidth：峰值带宽。 
                    - request: 请求数。 
                    - QPS: 峰值 QPS 。 
-             Limit ( Integer ): 否  域名获取数量限制，默认为20，取值支持1~100 。 
+             Limit ( Integer ): 否  域名获取数量限制，默认为20，取值 1~100。 
              ProjectName ( Array of String ): 否  指定查询域名所属的项目，为空代表查询当前用户所有项目。 
-             Domain ( String ): 否  指定查询域名，不填默认全选。 
-             StatusCode ( Array of String ): 否  指定查询状态码，2xx,3xx,4xx,5xx。 
+             Domain ( String ): 否  指定查询域名，不填默认全选。需要指定完整加速域名，不支持域名部分匹配。 
+             StatusCode ( Array of String ): 否  指定查询状态码：2xx、3xx、4xx、5xx。 
    Returns: 
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
@@ -1147,8 +1133,8 @@ note = {
              参数 ( 类型 ): 是否必选  描述 
              ---- ( ---- ): ----  ---- 
              MatchDomain ( String ): 否  查询某个域名绑定的证书。通过输入的加速域名，查询与该加速域名绑定的证书信息。 
-             PageNumber ( Integer ): 否  分页页号，最大10000，最小1，不填默认为1。 
-             PageSize ( Integer ): 否  分页页号，分页页大小，最大100，不填默认为20。 
+             PageNumber ( Integer ): 否  分页页号，最大 10000，最小 1。默认为 1。 
+             PageSize ( Integer ): 否  分页每页记录数，最大100，不填默认为20。 
              CertStatus ( String ): 否  筛选不同状态的证书，支持： 
                    - Expired：已过期 
                    - Expiring：即将过期，距离真正过期时间少于30天时展示的状态 
@@ -1158,28 +1144,30 @@ note = {
                    - bound：查询在全站加速服务上，已与加速域名相绑定的证书。 
              ProjectName ( Array of String ): 否  证书所在的项目列表，最多允许填写一个。 
              ContainDomain ( Boolean ): 否  是否包含DCDN的域名绑定关系，开启后可能会增加该接口的访问时间。 
-             ExpireSortOrder ( String ): 否  证书过期时间排序，默认不排序，支持： 
-                   - ascending 
-                   - descending 
-             CertSource ( String ): 否  证书源类型，支持以下两种： 
+             BindDomain ( String ): 否  过滤绑定在某域名上的证书，模糊匹配。 
+             CertId ( String ): 否  证书 ID。 
+             CertName ( String ): 否  证书的描述性名称。 
+             CertSource ( String ): 否  证书托管位置，支持取值： 
                    - volc：证书中心托管证书 
                    - self：DCDN托管证书 
-                   默认查询火山证书中心托管证书 
-             BindDomain ( String ): 否  过滤绑定在某域名上的证书，模糊匹配。 
-             CertUsage ( String ): 否  查询的证书用途，为空时默认查询服务端证书，支持：'server' 'ca'。 
-             CertId ( String ): 否  证书ID 
-             CertName ( String ): 否  证书备注名称 
+                   默认查询证书中心托管证书 
+             CertUsage ( String ): 否  查询的证书用途，为空时默认查询服务器证书，支持取值： 
+                   - server：服务器证书 
+                   - ca： CA 证书 
+             ExpireSortOrder ( String ): 否  按证书过期时间排序，默认不排序，支持取值： 
+                   - ascending：升序 
+                   - descending：降序 
    Returns: 
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
-        Total ( Integer ): 证书数量。 
+        CertList ( Array of CertList ): 与加速域名绑定的证书信息列表。 
         PageNumber ( Integer ): 当前页号。 
         PageSize ( Integer ): 当前页大小。 
-        CertList ( Array of CertList ): 与加速域名绑定的证书信息列表。 
+        Total ( Integer ): 证书数量。 
        "字段"： CertList
         参数 ( 类型 ): 描述 
         ---- ( ---- ): ---- 
-        CertSource ( String ): 证书的来源，具体来源如下： 
+        CertSource ( String ): 证书的托管位置，具体来源如下： 
             - volc：证书在火山证书中心上托管。 
             - self：证书在DCDN上托管。 
         CertId ( String ): 证书的 ID 。 
@@ -1190,12 +1178,12 @@ note = {
             - Expired: 已过期。 
             - Expiring: 即将过期，距离真正过期时间少于30天。 
             - Running: 运行中。 
-        MatchDomain ( Array of String ): 该证书能匹配上的域名 
+        IsCA ( Boolean ): 是否是CA证书 
         KeyType ( String ): 密钥算法。该参数有以下取值： 
             - rsa：RSA算法 
             - ecc：ECC算法 
             - SM2：SM2（国密）算法 
-        IsCA ( Boolean ): 是否是CA证书 
+        MatchDomain ( Array of String ): 该证书能匹配上的域名 
     """,
     "list_cert_bind": r""" 
     Args: 
@@ -1226,59 +1214,6 @@ note = {
             - Waiting：未部署。 
             - Deploying： 部署中。 
         Expire ( String ): 过期时间。 
-    """,
-    "describe_statistics": r""" 
-    Args: 
-        params: A JSON structure
-             参数 ( 类型 ): 是否必选  描述 
-             ---- ( ---- ): ----  ---- 
-        body: A JSON structure
-             参数 ( 类型 ): 是否必选  描述 
-             ---- ( ---- ): ----  ---- 
-             InputIdType ( String ): 是  查询ID类型，支持参数：AcceleratorId,ListenerId 
-             InputId ( Array of String ): 是  查询ID列表 
-             Interval ( Integer ): 是  查询时间粒度，单位：秒，支持参数：60,300 
-             StartTime ( String ): 是  查询起始时间 
-             EndTime ( String ): 是  查询结束时间 
-             Metrics ( Array of String ): 否  查询指标列表 
-             Region ( Array of String ): 否  查询区域列表 
-             GroupByListener ( Boolean ): 否  按指定监听器聚合 
-             GroupByRegion ( Boolean ): 否  按指定加速区域聚合 
-             RegionType ( String ): 否  加速区域 
-             GroupByAccelerator ( Boolean ): 否  按指定加速器聚合 
-   Returns: 
-        参数 ( 类型 ): 描述 
-        ---- ( ---- ): ---- 
-        Results ( Array of Results ): 查询结果列表 
-        TotalStatisticResults ( Array of TotalStatisticResults ): 汇总数据 
-       "字段"： Results
-        参数 ( 类型 ): 描述 
-        ---- ( ---- ): ---- 
-        StatisticsResults ( Array of StatisticsResults ): 统计结果 
-        TimeStamp ( String ): 时间戳 
-        TimeStampInt ( Integer ):  
-       "字段"： TotalStatisticResults
-        参数 ( 类型 ): 描述 
-        ---- ( ---- ): ---- 
-        AcceleratorId ( String ): 加速器ID 
-        ListenerId ( String ): 监听器ID 
-        MaxBandwidth ( Float ): 最大带宽 
-        MaxBandwidth95 ( Float ): 最大95带宽 
-        MaxConnectionNum ( Float ): 最大连接数 
-        Region ( String ): 区域 
-        TotalTraffic ( Float ): 总流量 
-       "字段"： StatisticsResults
-        参数 ( 类型 ): 描述 
-        ---- ( ---- ): ---- 
-        AcceleratorId ( String ): 加速器ID 
-        DetailInfo ( Array of DetailInfo ): 明细数据列表 
-        ListenerId ( String ): 监听器ID 
-        Region ( String ): 区域 
-       "字段"： DetailInfo
-        参数 ( 类型 ): 描述 
-        ---- ( ---- ): ---- 
-        Name ( String ): 在请求时选择的 Metrics 中的字段。 
-        Value ( Float ): 对应该字段的值。 
     """,
     "describe_domain_region_data": r""" 
     Args: 
@@ -1313,5 +1248,91 @@ note = {
         Request ( Float ): 请求数。 
         RequestProportion ( Float ): 该区域请求数占本次查询结果总量的百分比，例如返回90即为90%。 
         AvgResponseTime ( Float ): 平均响应时间。单位：毫秒 
+    """,
+    "describe_statistics": r""" 
+    Args: 
+        params: A JSON structure
+             参数 ( 类型 ): 是否必选  描述 
+             ---- ( ---- ): ----  ---- 
+        body: A JSON structure
+             参数 ( 类型 ): 是否必选  描述 
+             ---- ( ---- ): ----  ---- 
+             StartTime ( String ): 是  查询起始时间。您可以查询过去90天内的数据。查询时间跨度（StartTime和EndTime之间时长）不能超过31天。基于您指定的时间跨度，您可以选择数据样本的时间粒度（Interval 参数）会相应不同。 
+             EndTime ( String ): 是  查询结束时间，结束时间大于起始时间。 
+             Metrics ( Array of String ): 否  指定返回的监控指标，支持取值： 
+                   - all：全部指标。 
+                   - traffic：流量，单位为 byte。 
+                   - bandwidth：峰值带宽，单位为 bps。 
+                   - request：请求数。 
+                   - QPS：峰值QPS。 
+                   - RequestHitRate：请求数命中率。 
+                   - TrafficHitRate：流量命中率。 
+                   - 2xx：返回 2xx 状态码的请求数。返回结果会提供 2xx 状态码总请求数以及单个 2xx 状态码的总请求数。 
+                   - 3xx：返回 3xx 状态码的请求数。返回结果会提供 3xx 状态码总请求数以及单个 3xx 状态码的总请求数。 
+                   - 4xx：返回 4xx 状态码的请求数。返回结果会提供 4xx 状态码总请求数以及单个 4xx 状态码的总请求数。 
+                   - 5xx：返回 5xx 状态码的请求数。返回结果会提供 5xx 状态码总请求数以及单个 5xx 状态码的总请求数。 
+             Domains ( Array of String ): 是  指定查询域名列表。为空时代表查询当前用户所有域名。 
+             Interval ( Integer ): 否  时间样本粒度，单位为秒 。支持取值： 
+                   - 查询时间段跨度 3 天以内（不含3）：支持 300、3600、 86400。不传该参数时，默认值为300。 
+                   - 查询时间段跨度 3 - 31 天（不含31）： 支持 3600 和 86400。不传该参数时，默认值为 3600。 
+                   - 查询时间段跨度 31 天： 支持 86400。不传该参数，默认值为 86400。 
+             Protocol ( Array of String ): 否  指定客户端请求应用层和传输层协议查询，为空时表示查询所有协议，支持取值： 
+                   - ALL：全部协议 
+                   - HTTP：HTTP协议 
+                   - HTTPS：HTTPS协议 
+                   - QUIC：QUIC协议 
+                   - WS：WebSocket协议 
+             Area ( String ): 否  客户端所在区域，不填表示查询所有区域，支持参数： 
+                   - China：中国大陆； 
+                   - Global：全球。 
+             Region ( Array of String ): 否  指定客户端所在详细区域，为空时表示查询所有区域。当 Area 为 China 或 Global 时，Region 支持的区域详见下方表格。 
+             ProjectName ( Array of String ): 否  指定域名所属的项目，为空时表示查询当前用户所有项目。 
+             IspNameEn ( Array of String ): 否  指定运营商，为空时表示查询所有运营商，支持的运营商如下所示。 
+                   - unicom：中国联通； 
+                   - telecom：中国电信； 
+                   - mobile：中国移动； 
+                   - guangdian：广电； 
+                   - edu：教育网； 
+                   - tietong：铁通； 
+                   - pengboshi：鹏博士； 
+                   - other：其他运营商。 
+             AcceleratingRegion ( String ): 否  指定加速区域，为空时表示查询所有区域，支持取值： 
+                   - CHN：中国内地 
+                   - EU（仅对开通此功能的客户可见）：欧洲 
+                   - NA（仅对开通此功能的客户可见）：北美 
+                   - SA（仅对开通此功能的客户可见）：南美 
+                   - ME（仅对开通此功能的客户可见）：中东 
+                   - AP1（仅对开通此功能的客户可见）：亚太1 
+                   - AP2（仅对开通此功能的客户可见）：亚太2 
+                   - AP3（仅对开通此功能的客户可见）：亚太3 
+             AcceleratingScope ( String ): 否  指定加速区域范围，为空时表示查询全球范围，支持取值： 
+                   - mainland：中国内地。 
+                   - overseas：海外（中国内地以外区域） 
+             Type ( String ): 否  指定访问请求类型，为空时表示查询所有类型（相当于all）。支持取值： 
+                   - all：所有类型。 
+                   - dynamic：仅查询动态请求对应指标。 
+                   - static：仅查询静态请求对应指标。 
+             IPVersion ( String ): 否  指定IP协议类型查询。不填时表示查询所有类型，支持取值： 
+                   - all：所有类型。 
+                   - ipv4：通过 IPv4 访问DCDN的请求 
+                   - ipv6：通过 IPv6 访问DCDN的请求 
+   Returns: 
+        参数 ( 类型 ): 描述 
+        ---- ( ---- ): ---- 
+        DomainCount ( Integer ): 查询域名中有效域名的数量。 
+        StartTime ( String ): 查询起始时间。 
+        EndTime ( String ): 查询结束时间。 
+        Metrics ( Array of String ): 回显查询时选择展示的统计指标。 
+        Results ( Array of Results ): 统计指标的明细。基于请求中Interval参数指定的时间样本粒度，以时间序列结构展示。 
+       "字段"： Results
+        参数 ( 类型 ): 描述 
+        ---- ( ---- ): ---- 
+        TimeStamp ( String ): 当前样本时间段起始时间，以字符串格式呈现。 
+        DetailInfo ( Array of DetailInfo ): 当前样本时间段的详细数据。 
+       "字段"： DetailInfo
+        参数 ( 类型 ): 描述 
+        ---- ( ---- ): ---- 
+        Name ( String ): 统计指标名称。 
+        Value ( Float ): 标签名称对应的值。 
     """,
 }
