@@ -488,7 +488,6 @@ def create_rds_mysql_instance(
         "subnet_id": subnet_id,
         "instance_type": instance_type,
         "lower_case_table_names": lower_case_table_names,
-        "deletion_protection": deletion_protection,
         "number": number,
         "port": port,
         "charge_info": {
