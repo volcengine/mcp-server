@@ -131,7 +131,7 @@ def create_function(name: str = None, region: str = None, runtime: str = None, c
         vpc_config = volcenginesdkvefaas.VpcConfigForUpdateFunctionInput(
             enable_vpc=True, vpc_id=vpc_id, subnet_ids=subnet_ids, security_group_ids=security_group_ids,
         )
-        create_function_request.vpc_config(vpc_config)
+        create_function_request.vpc_config = vpc_config
 
     if description:
         create_function_request.description = description
@@ -204,7 +204,7 @@ def update_function(function_id: str, source: str = None, region: str = None, co
         vpc_config = volcenginesdkvefaas.VpcConfigForUpdateFunctionInput(
             enable_vpc=True, vpc_id=vpc_id, subnet_ids=subnet_ids, security_group_ids=security_group_ids,
         )
-        update_request.vpc_config(vpc_config)
+        update_request.vpc_config = vpc_config
 
     try:
         response = api_instance.update_function(update_request)
