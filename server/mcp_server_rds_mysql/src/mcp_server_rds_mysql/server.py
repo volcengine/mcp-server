@@ -145,7 +145,6 @@ def describe_db_accounts(
         page_number (int): 当前页页码，最小值为1，默认1
         page_size (int): 每页记录数，范围1-1000，默认10
     """
-    # 构建请求参数
     req = {
         "instance_id": instance_id,
         "page_number": page_number,
@@ -156,7 +155,6 @@ def describe_db_accounts(
     if account_name is not None:
         req["account_name"] = account_name
 
-    # 发送请求
     resp = rds_mysql_resource.describe_db_accounts(req)
     return resp.to_dict()
 
@@ -178,14 +176,12 @@ def describe_databases(
         page_number (int): 当前页页码，最小值为1，默认1
         page_size (int): 每页记录数，范围1-1000，默认10
     """
-    # 构建请求参数
     req = {
         "instance_id": instance_id,
         "page_number": page_number,
         "page_size": page_size
     }
 
-    # 添加可选参数DBName
     if db_name is not None:
         req["db_name"] = db_name
 
@@ -212,14 +208,176 @@ def describe_db_instance_parameters(
         node_id (str, optional): 查询指定节点的参数设置，如不设置该字段，只返回主节点和备节点的参数设置
     """
     req = {
-        "InstanceId": instance_id,
-        "ParameterName": parameter_name,
-        "NodeId": node_id
+        "instance_id": instance_id,
+        "parameter_name": parameter_name,
+        "node_id": node_id
     }
     req = {k: v for k, v in req.items() if v is not None}
     resp = rds_mysql_resource.describe_db_instance_parameters(req)
     return resp.to_dict()
 
+
+@mcp_server.tool(
+    name="list_parameter_templates",
+    description="查询MySQL实例的参数模板列表"
+)
+def list_parameter_templates(
+    template_category: str = None,
+    template_type: str = "Mysql",
+    template_type_version: str = None,
+    template_source: str = None,
+    limit: int = 10,
+    offset: int = 0,
+    project_name: str = None,
+    template_name: str = None
+) -> dict[str, Any]:
+    """
+    查询MySQL实例的参数模板列表
+
+    Args:
+        template_category (str, optional): 模板类别，取值为 DBEngine（数据库引擎参数）
+        template_type (str, optional): 参数模板的数据库类型，默认值为 Mysql
+        template_type_version (str, optional): 参数模板的数据库版本，如 MySQL_5_7 或 MySQL_8_0
+        template_source (str, optional): 参数模板来源，取值范围：System（系统）、User（用户）
+        limit (int, optional): 每页记录数，范围1-100，默认10
+        offset (int, optional): 当前页查询偏移量，默认0
+        project_name (str, optional): 所属项目名称
+        template_name (str, optional): 模板名称
+    """
+    req = {
+        "template_category": template_category,
+        "template_type": template_type,
+        "template_type_version": template_type_version,
+        "template_source": template_source,
+        "limit": limit,
+        "offset": offset,
+        "project_name": project_name,
+        "template_name": template_name
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+
+    if 'Limit' in req and not (1 <= req['Limit'] <= 100):
+        raise ValueError("Limit参数必须在1-100之间")
+
+    if 'Offset' in req and req['Offset'] < 0:
+        raise ValueError("Offset参数必须大于等于0")
+
+    resp = rds_mysql_resource.list_parameter_templates(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_parameter_template",
+    description="查询指定的参数模板详情"
+)
+def describe_parameter_template(
+    template_id: str,
+    project_name: str = None
+) -> dict[str, Any]:
+    """
+    查询指定的参数模板详情
+
+    Args:
+        template_id (str): 参数模板 ID
+        project_name (str, optional): 所属项目名称
+    """
+    req = {
+        "template_id": template_id,
+        "project_name": project_name
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+
+    # 验证必选参数
+    if not template_id:
+        raise ValueError("template_id是必选参数")
+
+    # 调用接口
+    resp = rds_mysql_resource.describe_parameter_template(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="modify_db_instance_name",
+    description="修改RDS MySQL实例名称"
+)
+def modify_db_instance_name(
+        instance_id: str,
+        instance_new_name: str
+) -> dict[str, Any]:
+    """
+    修改RDS MySQL实例名称
+
+    Args:
+        instance_id (str): 实例 ID
+        instance_new_name (str): 实例的新名称。命名规则：
+            - 不能以数字、中划线开头
+            - 只能包含中文、字母、数字、下划线和中划线
+            - 长度限制在 1~128 之间
+    """
+    if not instance_id:
+        raise ValueError("instance_id是必选参数")
+
+    if not instance_new_name:
+        raise ValueError("instance_new_name是必选参数")
+
+    import re
+    if not re.match(r'^[^\d-][\w\-\u4e00-\u9fa5]{0,127}$', instance_new_name):
+        raise ValueError("实例名称不符合命名规则：不能以数字、中划线开头，只能包含中文、字母、数字、下划线和中划线，长度1~128")
+
+    req = {
+        "instance_id": instance_id,
+        "instance_new_name": instance_new_name
+    }
+
+    resp = rds_mysql_resource.modify_db_instance_name(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="modify_db_account_description",
+    description="修改RDS MySQL实例账号的描述信息"
+)
+def modify_db_account_description(
+        instance_id: str,
+        account_name: str,
+        host: str = "%",
+        account_desc: str = None
+) -> dict[str, Any]:
+    """
+    修改RDS MySQL实例账号的描述信息
+
+    Args:
+        instance_id (str): 实例 ID
+        account_name (str): 数据库账号名称
+        host (str, optional): 指定账号访问数据库的 IP 地址，默认值为 %。
+            - 若指定为 %，允许该账号从任意 IP 地址访问数据库
+            - 支持使用通配符设定可访问数据库的 IP 地址段
+            - 如指定 Host 为 192.10.10.%，则表示该账号可从 192.10.10.0~192.10.10.255 之间的 IP 地址访问数据库
+            - 指定的 Host 需要添加在实例所绑定的白名单中
+            - 如创建的账号类型为高权限账号，主机 IP 只能指定为 %
+        account_desc (str, optional): 数据库账号的描述信息，长度不超过 256 个字符。
+            - 该字段可选，如果不设置该字段，或者设置了该字段但传入空字符串（即长度为 0），则会清空原有备注
+    """
+    if not instance_id:
+        raise ValueError("instance_id是必选参数")
+
+    if not account_name:
+        raise ValueError("account_name是必选参数")
+
+    if account_desc is not None and len(account_desc) > 256:
+        raise ValueError("account_desc长度不能超过256个字符")
+
+    req = {
+        "instance_id": instance_id,
+        "account_name": account_name,
+        "host": host,
+        "account_desc": account_desc
+    }
+
+    req = {k: v for k, v in req.items() if v is not None}
+
+    resp = rds_mysql_resource.modify_db_account_description(req)
+    return resp.to_dict()
 
 @mcp_server.tool(
     name="create_rds_mysql_instance",
@@ -274,107 +432,363 @@ def create_rds_mysql_instance(
 
     # 添加主节点
     node_info.append({
-        "NodeType": "Primary",
-        "ZoneId": primary_zone,
-        "NodeSpec": primary_spec
+        "node_type": "Primary",
+        "zone_id": primary_zone,
+        "node_spec": primary_spec
     })
 
     # 添加备节点
     for _ in range(secondary_count):
         zone = secondary_zone or primary_zone  # 备节点默认同主节点可用区
         node_info.append({
-            "NodeType": "Secondary",
-            "ZoneId": zone,
-            "NodeSpec": secondary_spec
+            "node_type": "Secondary",
+            "zone_id": zone,
+            "node_spec": secondary_spec
         })
 
     # 添加只读节点
     for _ in range(read_only_count):
         node_info.append({
-            "NodeType": "ReadOnly",
-            "ZoneId": read_only_zone,
-            "NodeSpec": read_only_spec
+            "node_type": "ReadOnly",
+            "zone_id": read_only_zone,
+            "node_spec": read_only_spec
         })
 
     # 构建请求数据
     data = {
-        "DBEngineVersion": db_engine_version,
-        "NodeInfo": node_info,
-        "StorageType": storage_type,
-        "StorageSpace": storage_space,
-        "VpcId": vpc_id,
-        "SubnetId": subnet_id,
-        "ChargeInfo": {"ChargeType": charge_type},
+        "db_engine_version": db_engine_version,
+        "node_info": node_info,
+        "storage_type": storage_type,
+        "storage_space": storage_space,
+        "vpc_id": vpc_id,
+        "subnet_id": subnet_id,
+        "charge_info": {"charge_type": charge_type},
     }
 
     # 添加可选的实例名称
     if instance_name:
-        data["InstanceName"] = instance_name
+        data["instance_name"] = instance_name
 
     # 发送创建请求
     resp = rds_mysql_resource.create_db_instance(data)
     return resp.to_dict()
-@mcp_server.tool(
-    name="describe_azs",
-    description="获取实例创建可用区"
-)
-def describe_azs() -> dict[str, Any]:
-    """获取实例创建可用区
-    """
-    req = {"region_id": os.getenv('VOLCENGINE_REGION')}
-    try:
-        resp = rds_mysql_resource.describe_azs(req)
-        return resp.to_dict()
-    except Exception as e:
-        raise Exception(str(e) + str(req))
 
 
 @mcp_server.tool(
-    name="describe_allow_lists",
-    description="获取RDSMySQL实例白名单"
+    name="create_database",
+    description="创建RDS MySQL实例数据库"
 )
-def describe_allow_lists(region_id: str) -> dict[str, Any]:
-    """获取RDSMySQL实例白名单
-       Args:
-           region_id (str): 地区ID
-       Returns:
-       {
-            "AllowLists": [] 白名单列表
-       }
+def create_database(
+        instance_id: str,
+        db_name: str,
+        character_set_name: str = "utf8mb4",
+        database_privileges: list[dict] = None,
+        db_desc: str = None
+) -> dict[str, Any]:
     """
-    req = {"region_id": region_id}
-    resp = rds_mysql_resource.describe_allow_lists(req)
-    return resp.to_dict()
+    创建RDS MySQL实例数据库
 
-
-@mcp_server.tool(
-    name="describe_node_specs",
-    description="获取实例部署规格"
-)
-def describe_node_specs(region_id: str) -> dict[str, Any]:
-    """
     Args:
-        region_id (str): 地区ID
-
-    Returns:
-    {
-        "ResponseMetadata": {}
-        "Result": {
-            "ConfigServerNodeSpecs": []  config-server组件可选规格
-            "MongosNodeSpecs": [] mongos组件可选规格
-            "NodeSpecs": [] 副本集节点可选规格
-            "ShardNodeSpecs": [] 分片集群可选规格
-        }
-    }
+        instance_id (str): 实例 ID
+        db_name (str): 数据库名称。命名规则：
+            - 名称唯一
+            - 长度为 2~64 个字符
+            - 以字母开头，以字母或数字结尾
+            - 由字母、数字、下划线（_）或中划线（-）组成
+            - 不能使用某些预留字，包括 root、admin 等
+        character_set_name (str, optional): 数据库字符集，默认为 utf8mb4。支持：utf8、utf8mb4、latin1、ascii
+        database_privileges (list[dict], optional): 授权数据库权限信息，每个权限项包含：
+            - AccountName (str): 需授权的账号名称（必选）
+            - Host (str, optional): 指定的数据库账号可以访问数据库的 IP 地址，默认值为 %
+            - AccountPrivilege (str): 授予的账号权限类型，取值：ReadWrite、ReadOnly、DDLOnly、DMLOnly、Custom
+            - AccountPrivilegeDetail (str, optional): 当 AccountPrivilege 为 Custom 时必填，指定具体权限
+        db_desc (str, optional): 数据库的描述信息，长度不超过 256 个字符
     """
-    req = {"region_id": region_id}
-    resp = rds_mysql_resource.describe_node_spec(req)
+    if not instance_id:
+        raise ValueError("instance_id是必选参数")
+
+    if not db_name:
+        raise ValueError("db_name是必选参数")
+
+    valid_charsets = {"utf8", "utf8mb4", "latin1", "ascii"}
+    if character_set_name not in valid_charsets:
+        raise ValueError(f"无效的字符集: {character_set_name}，支持的字符集为: {', '.join(valid_charsets)}")
+
+    if db_desc is not None and len(db_desc) > 256:
+        raise ValueError("db_desc长度不能超过256个字符")
+
+    req = {
+        "instance_id": instance_id,
+        "db_name": db_name,
+        "character_set_name": character_set_name,
+        "database_privileges": database_privileges,
+        "db_desc": db_desc
+    }
+
+    req = {k: v for k, v in req.items() if v is not None}
+
+    resp = rds_mysql_resource.create_database(req)
     return resp.to_dict()
 
+
+@mcp_server.tool(
+    name="create_allow_list",
+    description="创建RDS MySQL实例白名单"
+)
+def create_allow_list(
+        allow_list_name: str,
+        allow_list_desc: str = None,
+        allow_list_type: str = "IPv4",
+        allow_list: str = None,
+        security_group_ids: list[str] = None,
+        security_group_bind_infos: list[dict] = None,
+        allow_list_category: str = "Ordinary",
+        user_allow_list: str = None,
+        project_name: str = None
+) -> dict[str, Any]:
+    """
+    创建RDS MySQL实例白名单
+
+    Args:
+        allow_list_name (str): 白名单名称，需满足：
+            - 不能以数字或中划线（-）开头
+            - 只能包含中文、字母、数字、下划线（_）和中划线（-）
+            - 长度需为 1~128 个字符
+        allow_list_desc (str, optional): 白名单的备注信息，长度不可超过 200 个字符
+        allow_list_type (str, optional): 白名单内的 IP 地址类型，当前仅支持 IPv4 地址
+        allow_list (str, optional): 输入 IP 地址或 CIDR 格式的 IP 地址段，多个地址间用英文逗号（,）隔开
+            - 每个白名单分组中最多支持设置 300 个 IP 地址或 CIDR 格式的 IP 地址段
+            - 不允许设置重复的地址
+            - 该字段不能与 UserAllowList 字段同时使用
+        security_group_ids (list[str], optional): 需要关联的安全组 ID 列表，单个白名单单次最多可选择添加 10 个安全组
+            - 该字段不能与 SecurityGroupBindInfos 同时使用
+        security_group_bind_infos (list[dict], optional): 白名单关联的安全组的信息，每个信息包含：
+            - BindMode (str): 关联安全组的模式，取值：IngressDirectionIp（入方向 IP）、AssociateEcsIp（关联 ECSIP）
+            - SecurityGroupId (str): 安全组 ID
+            - IpList (list[str], optional): 安全组的 IP
+            - SecurityGroupName (str, optional): 安全组名称
+            - 该字段不能与 SecurityGroupIds 同时使用
+        allow_list_category (str, optional): 白名单分类，取值：Ordinary（普通白名单）、Default（默认白名单），默认值为 Ordinary
+        user_allow_list (str, optional): 安全组之外的、需要加入白名单的 IP 地址，可输入 IP 地址或 CIDR 格式的 IP 地址段
+            - 该字段不能与 AllowList 字段同时使用
+        project_name (str, optional): 所属的项目
+    """
+    # 验证必选参数
+    if not allow_list_name:
+        raise ValueError("allow_list_name是必选参数")
+
+    # 验证白名单名称格式
+    import re
+    if not re.match(r'^[^\d-][\w\-\u4e00-\u9fa5]{0,127}$', allow_list_name):
+        raise ValueError(
+            "白名单名称不符合命名规则：不能以数字或中划线开头，只能包含中文、字母、数字、下划线和中划线，长度1~128")
+
+    # 验证描述信息长度
+    if allow_list_desc is not None and len(allow_list_desc) > 200:
+        raise ValueError("allow_list_desc长度不能超过200个字符")
+
+    # 验证IP地址类型
+    valid_allow_list_types = {"IPv4"}
+    if allow_list_type not in valid_allow_list_types:
+        raise ValueError(f"无效的allow_list_type: {allow_list_type}，支持的类型为: {', '.join(valid_allow_list_types)}")
+
+    # 验证白名单分类
+    valid_categories = {"Ordinary", "Default"}
+    if allow_list_category not in valid_categories:
+        raise ValueError(
+            f"无效的allow_list_category: {allow_list_category}，支持的分类为: {', '.join(valid_categories)}")
+
+    # 验证AllowList和UserAllowList不能同时存在
+    if allow_list is not None and user_allow_list is not None:
+        raise ValueError("allow_list和user_allow_list字段不能同时使用")
+
+    # 验证SecurityGroupIds和SecurityGroupBindInfos不能同时存在
+    if security_group_ids is not None and security_group_bind_infos is not None:
+        raise ValueError("security_group_ids和security_group_bind_infos字段不能同时使用")
+
+    # 验证SecurityGroupIds长度
+    if security_group_ids is not None and len(security_group_ids) > 10:
+        raise ValueError("security_group_ids最多只能包含10个安全组ID")
+
+    req = {
+        "allow_list_name": allow_list_name,
+        "allow_list_desc": allow_list_desc,
+        "allow_list_type": allow_list_type,
+        "allow_list": allow_list,
+        "security_group_ids": security_group_ids,
+        "security_group_bind_infos": security_group_bind_infos,
+        "allow_list_category": allow_list_category,
+        "user_allow_list": user_allow_list,
+        "project_name": project_name
+    }
+
+    req = {k: v for k, v in req.items() if v is not None}
+
+    # 调用接口
+    resp = rds_mysql_resource.create_allow_list(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="associate_allow_list",
+    description="绑定RDS MySQL实例与白名单"
+)
+def associate_allow_list(
+        instance_ids: list[str],
+        allow_list_ids: list[str]
+) -> dict[str, Any]:
+    """
+    绑定RDS MySQL实例与白名单
+
+    Args:
+        instance_ids (list[str]): 需要绑定白名单的实例 ID 列表
+            - 支持一次传入多个实例 ID，单次最多可传入 200 个实例 ID
+            - 不支持同时传入多个实例 ID 和多个白名单 ID，仅允许：
+                - 将多个实例同时绑定到同一个白名单（此时 allow_list_ids 长度应为 1）
+                - 或将一个实例同时绑定到多个白名单（此时 instance_ids 长度应为 1）
+        allow_list_ids (list[str]): 需要绑定实例的白名单 ID 列表
+            - 支持一次传入多个白名单 ID，单次最多可传入 100 个白名单 ID
+            - 不支持同时传入多个实例 ID 和多个白名单 ID，仅允许：
+                - 将多个实例同时绑定到同一个白名单（此时 allow_list_ids 长度应为 1）
+                - 或将一个实例同时绑定到多个白名单（此时 instance_ids 长度应为 1）
+    """
+    if not instance_ids:
+        raise ValueError("instance_ids是必选参数，不能为空列表")
+
+    if not allow_list_ids:
+        raise ValueError("allow_list_ids是必选参数，不能为空列表")
+
+    if len(instance_ids) > 200:
+        raise ValueError("单次最多可传入200个实例ID")
+
+    if len(allow_list_ids) > 100:
+        raise ValueError("单次最多可传入100个白名单ID")
+
+    if len(instance_ids) > 1 and len(allow_list_ids) > 1:
+        raise ValueError(
+            "不支持同时传入多个实例ID和多个白名单ID，仅允许：将多个实例绑定到同一个白名单，或将一个实例绑定到多个白名单")
+
+    req = {
+        "instance_ids": instance_ids,
+        "allow_list_ids": allow_list_ids
+    }
+
+    resp = rds_mysql_resource.associate_allow_list(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="create_db_account",
+    description="创建RDS MySQL实例数据库账号"
+)
+def create_db_account(
+        instance_id: str,
+        account_name: str,
+        account_password: str,
+        account_type: str,
+        account_desc: str = None,
+        host: str = "%",
+        account_privileges: list[dict] = None,
+        dry_run: bool = False,
+        table_column_privileges: list[dict] = None
+) -> dict[str, Any]:
+    """
+    创建RDS MySQL实例数据库账号
+
+    Args:
+        instance_id (str): 实例 ID
+        account_name (str): 数据库账号名称。命名规则：
+            - 长度为 2~32 个字符
+            - 以字母开头，以字母或数字结尾
+            - 由字母、数字、下划线（_）和中划线（-）组成
+            - 账号名称在实例内必须是唯一的
+            - 不能使用某些预留字（高权限账号除外）
+        account_password (str): 数据库账号的密码。规则：
+            - 长度为 8~32 个字符
+            - 由大写字母、小写字母、数字、特殊字符中的至少三种组成
+            - 特殊字符为 !@#$%^&*()_+-=,.&?|/
+        account_type (str): 数据库账号类型，取值范围：
+            - Super：高权限账号，一个实例只能创建一个
+            - Normal：普通账号
+        account_desc (str, optional): 账号信息描述信息，长度不超过 256 个字符
+        host (str, optional): 指定账号访问数据库的 IP 地址，默认值为 %。
+            - 若指定为 %，允许该账号从任意 IP 地址访问数据库
+            - 如创建的账号类型为高权限账号，主机 IP 只能指定为 %
+        account_privileges (list[dict], optional): 账号的指定数据库权限信息，每个权限项包含：
+            - DBName (str): 需修改账号授权的或账号已有权限的数据库名称
+            - AccountPrivilege (str): 数据库权限的类型，取值：ReadWrite、ReadOnly、DDLOnly、DMLOnly、Custom、Global、None
+            - AccountPrivilegeDetail (str, optional): 账号的权限信息，当 AccountPrivilege 为 Custom 或 Global 时必填
+        dry_run (bool, optional): 是否预览创建账号的 SQL 语句，默认值为 false
+        table_column_privileges (list[dict], optional): 账号的表列权限设置，包含：
+            - DBName (str): 对账号进行权限设置的表所属的数据库的名称
+            - TablePrivileges (list[dict], optional): 账号的表权限信息，包含：
+                - TableName (str): 表名
+                - AccountPrivilegeDetail (str): 表权限，如 "ALTER,CREATE"
+            - ColumnPrivileges (list[dict], optional): 账号的列权限信息，包含：
+                - TableName (str): 表名
+                - ColumnName (str): 列名
+                - AccountPrivilegeDetail (str): 列权限，如 "UPDATE,INSERT"
+    """
+    if not instance_id:
+        raise ValueError("instance_id是必选参数")
+
+    if not account_name:
+        raise ValueError("account_name是必选参数")
+
+    if not account_password:
+        raise ValueError("account_password是必选参数")
+
+    if not account_type:
+        raise ValueError("account_type是必选参数")
+
+    import re
+    if not re.match(r'^[a-zA-Z][a-zA-Z0-9_-]{0,30}[a-zA-Z0-9]$', account_name):
+        raise ValueError(
+            "账号名称不符合命名规则：长度为2~32个字符，以字母开头，以字母或数字结尾，由字母、数字、下划线或中划线组成")
+
+    if not (8 <= len(account_password) <= 32):
+        raise ValueError("密码长度必须为8~32个字符")
+
+    conditions = [
+        bool(re.search(r'[A-Z]', account_password)),  # 大写字母
+        bool(re.search(r'[a-z]', account_password)),  # 小写字母
+        bool(re.search(r'[0-9]', account_password)),  # 数字
+        bool(re.search(r'[!@#$%^&*()_+\-=,.&?|/]', account_password))  # 特殊字符
+    ]
+
+    if sum(conditions) < 3:
+        raise ValueError("密码必须包含大写字母、小写字母、数字、特殊字符中的至少三种")
+
+    valid_account_types = {"Super", "Normal"}
+    if account_type not in valid_account_types:
+        raise ValueError(f"无效的account_type: {account_type}，支持的类型为: {', '.join(valid_account_types)}")
+
+    if account_type == "Super" and host != "%":
+        raise ValueError("当account_type为Super时，Host的取值只能为%")
+
+    if account_desc is not None and len(account_desc) > 256:
+        raise ValueError("account_desc长度不能超过256个字符")
+
+    req = {
+        "instance_id": instance_id,
+        "account_name": account_name,
+        "account_desc": account_desc,
+        "host": host,
+        "account_password": account_password,
+        "account_type": account_type,
+        "account_privileges": account_privileges,
+        "dry_run": dry_run,
+        "table_column_privileges": table_column_privileges
+    }
+
+    req = {k: v for k, v in req.items() if v is not None}
+
+    resp = rds_mysql_resource.create_db_account(req)
+    return resp.to_dict()
 
 def main():
     """Main entry point for the MCP server."""
-    parser = argparse.ArgumentParser(description="Run the RDSMySQL MCP Server")
+    parser = argparse.ArgumentParser(description="Run the RDS MySQL MCP Server")
     parser.add_argument(
         "--transport",
         "-t",
@@ -385,10 +799,10 @@ def main():
 
     args = parser.parse_args()
     try:
-        logger.info(f"Starting RDSMySQL MCP Server with {args.transport} transport")
+        logger.info(f"Starting RDS MySQL MCP Server with {args.transport} transport")
         mcp_server.run(transport=args.transport)
     except Exception as e:
-        logger.error(f"Error starting RDSMySQL MCP Server: {str(e)}")
+        logger.error(f"Error starting RDS MySQL MCP Server: {str(e)}")
         raise
 
 
