@@ -412,7 +412,6 @@ def create_rds_mysql_instance(
         port: int = 3306,
         instance_tags: Optional[list[dict]] = None,
         maintenance_window: Optional[dict] = None,
-        number: int = 1
 ) -> dict[str, Any]:
     """创建 RDS MySQL 实例
 
@@ -446,11 +445,9 @@ def create_rds_mysql_instance(
         port: 默认终端的私网端口，默认 3306
         instance_tags: 实例标签列表
         maintenance_window: 维护窗口配置
-        deletion_protection: 是否启用删除保护，默认 Disabled
         enable_storage_auto_scale: 是否开启自动扩容，默认 True
         storage_threshold: 触发自动扩容的可用存储空间占比，默认 20%
         storage_upper_bound: 自动扩容的存储空间上限，默认 3000GB
-        number: 实例购买数量，默认 1
 
     Returns:
         dict: 创建结果，包含实例ID和订单号等信息
@@ -488,7 +485,6 @@ def create_rds_mysql_instance(
         "subnet_id": subnet_id,
         "instance_type": instance_type,
         "lower_case_table_names": lower_case_table_names,
-        "number": number,
         "port": port,
         "charge_info": {
             "ChargeType": charge_type,
