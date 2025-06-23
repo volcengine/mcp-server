@@ -128,10 +128,10 @@ def create_function(name: str = None, region: str = None, runtime: str = None, c
     if enable_vpc:
         if not vpc_id or not subnet_ids or not security_group_ids:
             raise ValueError("vpc_id or subnet_ids and security_group_ids must be provided.")
-        create_function_request.enable_vpc = True
-        create_function_request.vpc_id = vpc_id
-        create_function_request.subnet_ids = subnet_ids
-        create_function_request.security_group_ids = security_group_ids
+        vpc_config = volcenginesdkvefaas.VpcConfigForUpdateFunctionInput(
+            enable_vpc=True, vpc_id=vpc_id, subnet_ids=subnet_ids, security_group_ids=security_group_ids,
+        )
+        create_function_request.vpc_config(vpc_config)
 
     if description:
         create_function_request.description = description
@@ -201,10 +201,10 @@ def update_function(function_id: str, source: str = None, region: str = None, co
     if enable_vpc:
         if not vpc_id or not subnet_ids or not security_group_ids:
             raise ValueError("vpc_id or subnet_ids and security_group_ids must be provided.")
-        update_request.enable_vpc = True
-        update_request.vpc_id = vpc_id
-        update_request.subnet_ids = subnet_ids
-        update_request.security_group_ids = security_group_ids
+        vpc_config = volcenginesdkvefaas.VpcConfigForUpdateFunctionInput(
+            enable_vpc=True, vpc_id=vpc_id, subnet_ids=subnet_ids, security_group_ids=security_group_ids,
+        )
+        update_request.vpc_config(vpc_config)
 
     try:
         response = api_instance.update_function(update_request)
