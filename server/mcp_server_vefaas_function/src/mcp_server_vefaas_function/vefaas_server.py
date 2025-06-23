@@ -722,12 +722,13 @@ def handle_dependency(api_instance: VEFAASApi, function_id: str, local_folder_pa
     is_native_nodejs = 'native-node' in runtime
 
     has_requirements = (
-        os.path.exists(os.path.join(local_folder_path, "requirements.txt"))
-        or "requirements.txt" in file_dict
+            os.path.exists(os.path.join(local_folder_path, "requirements.txt"))
+            or (file_dict is not None and "requirements.txt" in file_dict)
     )
+
     has_package_json = (
-        os.path.exists(os.path.join(local_folder_path, "package.json"))
-        or "package.json" in file_dict
+            os.path.exists(os.path.join(local_folder_path, "package.json"))
+            or (file_dict is not None and "package.json" in file_dict)
     )
 
     if is_native_python and not has_requirements:
