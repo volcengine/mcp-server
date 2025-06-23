@@ -526,7 +526,12 @@ def create_database(
     req = {k: v for k, v in req.items() if v is not None}
 
     resp = rds_mysql_resource.create_database(req)
-    return resp.to_dict()
+    if isinstance(resp, dict):
+        return resp
+    elif hasattr(resp, 'to_dict'):
+        return resp.to_dict()
+    else:
+        raise ValueError(f"无法处理的响应类型: {type(resp)}")
 
 
 @mcp_server.tool(
@@ -672,7 +677,12 @@ def associate_allow_list(
     }
 
     resp = rds_mysql_resource.associate_allow_list(req)
-    return resp.to_dict()
+    if isinstance(resp, dict):
+        return resp
+    elif hasattr(resp, 'to_dict'):
+        return resp.to_dict()
+    else:
+        raise ValueError(f"无法处理的响应类型: {type(resp)}")
 
 
 @mcp_server.tool(
@@ -782,85 +792,13 @@ def create_db_account(
     req = {k: v for k, v in req.items() if v is not None}
 
     resp = rds_mysql_resource.create_db_account(req)
-    return resp.to_dict()
+    if isinstance(resp, dict):
+        return resp
+    elif hasattr(resp, 'to_dict'):
+        return resp.to_dict()
+    else:
+        raise ValueError(f"无法处理的响应类型: {type(resp)}")
 
-
-@mcp_server.tool(
-    name="describe_vpcs",
-    description="查询满足指定条件的VPC"
-)
-def describe_vpcs(
-        vpc_ids: list[str] = None,
-        vpc_name: str = None,
-        project_name: str = None,
-        tag_filters: dict[str, list[str]] = None,
-        is_default: bool = None,
-        vpc_owner_id: int = None,
-        page_number: int = None,
-        page_size: int = None,
-        next_token: str = None,
-        max_results: int = None
-) -> dict[str, Any]:
-    """
-    查询满足指定条件的VPC
-
-    Args:
-        vpc_ids (list[str], optional): VPC的ID列表，单次调用数量上限为100个
-        vpc_name (str, optional): VPC的名称
-        project_name (str, optional): VPC所属项目的名称
-        tag_filters (dict[str, list[str]], optional): 标签过滤器，格式为 {标签键: [标签值1, 标签值2]}
-            - 标签键最多支持10个，多个标签键之间的关系为逻辑“与（AND）”
-            - 每个标签键的标签值最多支持3个，同一标签键多个标签值之间的关系为逻辑“或(OR)”
-        is_default (bool, optional): 该VPC是否为默认VPC
-        vpc_owner_id (int, optional): 私有网络所属主账号的ID
-        page_number (int, optional): 列表的页码，默认值为1（即将下线，建议使用NextToken和MaxResults）
-        page_size (int, optional): 分页查询时每页的行数，最大值为100，默认值为20（即将下线，建议使用NextToken和MaxResults）
-        next_token (str, optional): 分页查询凭证，用于标记分页的位置
-        max_results (int, optional): 查询的数量，默认为10，最大为100
-    """
-    # 验证VPC ID数量限制
-    if vpc_ids is not None and len(vpc_ids) > 100:
-        raise ValueError("单次调用VpcIds数量上限为100个")
-
-    # 验证标签过滤器
-    if tag_filters is not None:
-        if len(tag_filters) > 10:
-            raise ValueError("标签键最多支持10个")
-
-        for key, values in tag_filters.items():
-            if len(values) > 3:
-                raise ValueError(f"标签键 '{key}' 的标签值最多支持3个")
-
-    # 验证分页参数
-    if page_size is not None and (page_size < 1 or page_size > 100):
-        raise ValueError("PageSize取值范围为1~100")
-
-    if max_results is not None and (max_results < 1 or max_results > 100):
-        raise ValueError("MaxResults取值范围为1~100")
-
-    # 构建请求参数
-    req = {
-        "Action": "DescribeVpcs",
-        "Version": "2020-04-01",
-        "VpcName": vpc_name,
-        "ProjectName": project_name,
-        "IsDefault": is_default,
-        "VpcOwnerId": vpc_owner_id,
-        "PageNumber": page_number,
-        "PageSize": page_size,
-        "NextToken": next_token,
-        "MaxResults": max_results
-    }
-
-    # 添加VPC IDs参数
-    if vpc_ids is not None:
-        for i, vpc_id in enumerate(vpc_ids, 1):
-            req[f"VpcIds.{i}"] = vpc_id
-
-    req = {k: v for k, v in req.items() if v is not None}
-
-    resp = rds_mysql_resource.describe_vpcs(req)
-    return resp.to_dict()
 def main():
     """Main entry point for the MCP server."""
     parser = argparse.ArgumentParser(description="Run the RDS MySQL MCP Server")
