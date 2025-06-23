@@ -526,12 +526,10 @@ def create_database(
     req = {k: v for k, v in req.items() if v is not None}
 
     resp = rds_mysql_resource.create_database(req)
-    if isinstance(resp, dict):
-        return resp
-    elif hasattr(resp, 'to_dict'):
-        return resp.to_dict()
-    else:
-        raise ValueError(f"无法处理的响应类型: {type(resp)}")
+    if resp is None:
+        return {
+            "Message": "Success"
+        }
 
 
 @mcp_server.tool(
@@ -677,12 +675,10 @@ def associate_allow_list(
     }
 
     resp = rds_mysql_resource.associate_allow_list(req)
-    if isinstance(resp, dict):
-        return resp
-    elif hasattr(resp, 'to_dict'):
-        return resp.to_dict()
-    else:
-        raise ValueError(f"无法处理的响应类型: {type(resp)}")
+    if resp is None:
+        return {
+            "Message": "Success"
+        }
 
 
 @mcp_server.tool(
@@ -792,12 +788,10 @@ def create_db_account(
     req = {k: v for k, v in req.items() if v is not None}
 
     resp = rds_mysql_resource.create_db_account(req)
-    if isinstance(resp, dict):
-        return resp
-    elif hasattr(resp, 'to_dict'):
-        return resp.to_dict()
-    else:
-        raise ValueError(f"无法处理的响应类型: {type(resp)}")
+    if resp is None:
+        return {
+            "Message": "Success"
+        }
 
 def main():
     """Main entry point for the MCP server."""

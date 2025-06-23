@@ -13,7 +13,8 @@ from volcenginesdkrdsmysqlv2.models import DescribeDBInstancesRequest, DescribeD
     ModifyDBAccountDescriptionRequest,ModifyDBAccountDescriptionResponse,\
     CreateDatabaseRequest, CreateDatabaseResponse, \
     CreateAllowListRequest, CreateAllowListResponse, \
-    AssociateAllowListRequest, AssociateAllowListResponse
+    AssociateAllowListRequest, AssociateAllowListResponse, \
+    CreateDBAccountRequest, CreateDBAccountResponse
 
 class RDSMySQLSDK:
     """初始化 volc RDS MySQL client"""
@@ -68,4 +69,7 @@ class RDSMySQLSDK:
 
     def associate_allow_list(self, args: dict) -> AssociateAllowListResponse:
         return self.client.associate_allow_list(AssociateAllowListRequest(**args))
+
+    def create_db_account(self, args: dict) -> CreateDBAccountResponse:
+        return self.client.create_db_account(CreateDBAccountRequest(**args))
 
