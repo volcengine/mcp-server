@@ -1,18 +1,18 @@
 [project]
-name = "mcp-server-vefaas-function"
+name = "mcp-server-nacos"
 version = "0.0.1"
-description = "MCP server for managing veFaaS (Volc Engine Function as a Service) functions"
+description = "MCP server for managing Nacos"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "mcp>=1.9.4",
-    "volcengine-python-sdk>=3.0.8",
+    "volcengine-python-sdk>=3.0.14",
     "requests==2.32.3",
     "pyzipper==0.3.6",
+    "mcp>=1.9.4",
 ]
 
 [project.scripts]
-mcp-server-vefaas-function = "mcp_server_vefaas_function.stdio:main"
+mcp-server-nacos = "mcp_server_nacos.main:main"
 
 [build-system]
 requires = ["hatchling"]

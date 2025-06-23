@@ -36,8 +36,18 @@ api_info = {
     "McpDescribeListener": ApiInfo(
         "POST", "/", {"Action": "DescribeListener", "Version": "2022-03-01"}, {}, {}
     ),
+    "McpDescribeListenerLogs": ApiInfo(
+        "POST", "/", {"Action": "DescribeListenerLogs", "Version": "2022-03-01"}, {}, {}
+    ),
     "McpDescribeStatistics": ApiInfo(
         "POST", "/", {"Action": "DescribeStatistics", "Version": "2022-03-01"}, {}, {}
+    ),
+    "McpDescribeTopStatistics": ApiInfo(
+        "POST",
+        "/",
+        {"Action": "DescribeTopStatistics", "Version": "2022-03-01"},
+        {},
+        {},
     ),
     "McpGetAcceleratorDimension": ApiInfo(
         "POST",
@@ -48,6 +58,23 @@ api_info = {
     ),
     "McpGetBandwidthPackage": ApiInfo(
         "POST", "/", {"Action": "GetBandwidthPackage", "Version": "2022-03-01"}, {}, {}
+    ),
+    "McpGetBasicEndpointRelatedAccInstanceInfos": ApiInfo(
+        "POST",
+        "/",
+        {"Action": "GetBasicEndpointRelatedAccInstanceInfos", "Version": "2022-03-01"},
+        {},
+        {},
+    ),
+    "McpGetEndpointRelatedAccInstanceInfos": ApiInfo(
+        "POST",
+        "/",
+        {"Action": "GetEndpointRelatedAccInstanceInfos", "Version": "2022-03-01"},
+        {},
+        {},
+    ),
+    "McpListAccelerateAreas": ApiInfo(
+        "GET", "/", {"Action": "ListAccelerateAreas", "Version": "2022-03-01"}, {}, {}
     ),
     "McpListAccelerators": ApiInfo(
         "POST", "/", {"Action": "ListAccelerators", "Version": "2022-03-01"}, {}, {}

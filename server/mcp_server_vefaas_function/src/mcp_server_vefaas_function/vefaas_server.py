@@ -59,13 +59,15 @@ def validate_and_set_region(region: str = None) -> str:
 @mcp.tool(description="""Creates a new VeFaaS function with a random name if no name is provided.
 region is the region where the function will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
           `cn-shanghai`, `cn-guangzhou` as well.
+
 Note:
 1. The runtime parameter must be one of the values returned by the supported_runtimes. Please ensure you call that tool first to get the valid options.
-2.	If the function is intended to serve as a web service, you must:
-	•	Write code to start an HTTP server that listens on port 8000 (e.g., using Python’s http.server, Node’s http, or Flask)).
-	•	Provide a launch script such as run.sh that starts the server (e.g., python3 server.py) and keeps it running.
-	•	Set the Command parameter to point to this script (e.g., ./run.sh) in the function config.
-	•	Only native runtimes support the Command field. Use supported_runtimes to ensure the chosen runtime allows it.
+2. If the function is intended to serve as a web service, you must:
+   • Write code to start an HTTP server that listens on port 8000 (e.g., using Python’s http.server, Node’s http, or Flask).
+   • Provide a launch script such as run.sh that starts the server (e.g., python3 server.py) and keeps it running.
+   • Set the Command parameter to point to this script (e.g., ./run.sh) in the function config.
+   • Only native runtimes support the Command field. Use supported_runtimes to ensure the chosen runtime allows it.
+3. After creating the function, you can use the `upload_code` tool to upload the function code and related files.
 """)
 def create_function(name: str = None, region: str = None, runtime: str = None, command: str = None, source: str = None,
                     image: str = None, envs: dict = None, description: str = None) -> str:
@@ -309,10 +311,15 @@ def init_client(region: str = None, ctx: Context = None):
     return volcenginesdkvefaas.VEFAASApi()
 
 
-@mcp.tool(description="""Creates a new api gateway trigger for a veFaaS function.
-Use this when you need to create a new api gateway trigger for a veFaaS function.
-It is recommended that each gateway service is used for only one function.
-No need to ask user for confirmation, just create the gateway.""")
+@mcp.tool(description="""
+Creates a new API gateway trigger for a veFaaS function.
+
+- Each function must use a dedicated gateway service (do not reuse services between functions).
+- API gateways should be reused across different services whenever possible.
+
+This tool only creates the trigger using the provided gateway ID and service ID.
+After creation, you can use the `list_api_gateway_services` tool to retrieve the access address.
+""")
 def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id: str, region: str = None):
     region = validate_and_set_region(region)
 
@@ -390,6 +397,7 @@ def list_api_gateways(region: str = None):
     response_body = request("GET", now, {"Limit": "10"}, {}, ak, sk, token, "ListGateways", None)
     return response_body
 
+
 @mcp.tool(
     description="""
 Creates a new VeApig API gateway in the specified region.
@@ -400,6 +408,9 @@ Creates a new VeApig API gateway in the specified region.
 Note: This is an **asynchronous** operation and may take up to **5 minutes** to complete.  
 After calling this tool, you must use the `list_api_gateways` tool to check the status of the gateway.  
 Only when the status is `Running` does the gateway creation complete successfully.
+
+Recommendation: A single API gateway can be reused across multiple functions and services.  
+Before creating a new gateway, consider reusing an existing one using `list_api_gateways`.
 """
 )
 def create_api_gateway(name: str = None, region: str = "cn-beijing") -> str:
