@@ -23,24 +23,24 @@ from typing import List, Dict, Any, Optional
     description="查询RDS MySQL实例列表"
 )
 def describe_db_instances(
-        page_number: int = 1,
-        page_size: int = 10,
-        instance_id: str = None,
-        instance_name: str = None,
-        instance_status: str = None,
-        db_engine_version: str = None,
-        create_time_start: str = None,
-        create_time_end: str = None,
-        zone_id: str = None,
-        charge_type: str = None,
-        instance_type: str = None,
-        node_spec: str = None,
-        tag_filters: List[Dict[str, str]] = None,
-        project_name: str = None,
-        private_network_ip_address: str = None,
-        kernel_version: List[str] = None,
-        private_network_vpc_id: str = None,
-        storage_type: str = None
+        page_number: int = Field(default=1, description="当前页页码，取值最小为1"),
+        page_size: int = Field(default=10, description="每页记录数，最小值为1，最大值不超过1000"),
+        instance_id: Optional[str] = Field(default=None, description="实例ID"),
+        instance_name: Optional[str] = Field(default=None, description="实例名称"),
+        instance_status: Optional[str] = Field(default=None, description="实例状态，如Running、Creating等"),
+        db_engine_version: Optional[str] = Field(default=None, description="兼容版本，如MySQL_5_7、MySQL_8_0"),
+        create_time_start: Optional[str] = Field(default=None, description="查询创建实例的开始时间"),
+        create_time_end: Optional[str] = Field(default=None, description="查询创建实例的结束时间"),
+        zone_id: Optional[str] = Field(default=None, description="实例所属可用区"),
+        charge_type: Optional[str] = Field(default=None, description="计费类型，如PostPaid、PrePaid"),
+        instance_type: Optional[str] = Field(default=None, description="实例类型，如DoubleNode"),
+        node_spec: Optional[str] = Field(default=None, description="主节点规格"),
+        tag_filters: Optional[List[Dict[str, str]]] = Field(default=None, description="用于查询筛选的标签键值对数组"),
+        project_name: Optional[str] = Field(default=None, description="项目名称"),
+        private_network_ip_address: Optional[str] = Field(default=None, description="实例默认终端的IP地址"),
+        kernel_version: Optional[List[str]] = Field(default=None, description="内核小版本列表"),
+        private_network_vpc_id: Optional[str] = Field(default=None, description="私有网络的ID"),
+        storage_type: Optional[str] = Field(default=None, description="实例存储类型，如LocalSSD")
 ) -> dict[str, Any]:
     """
     查询RDS MySQL实例列表
@@ -98,7 +98,9 @@ def describe_db_instances(
 
 
 @mcp_server.tool(name="describe_db_instance_detail", description="查询RDSMySQL实例详情")
-def describe_db_instance_detail(instance_id: str) -> dict[str, Any]:
+def describe_db_instance_detail(
+        instance_id: str = Field(description="实例ID")
+) -> dict[str, Any]:
     """查询RDSMySQL实例详情
        Args:
            instance_id (str): 实例ID
@@ -114,7 +116,9 @@ def describe_db_instance_detail(instance_id: str) -> dict[str, Any]:
     name="describe_db_instance_engine_minor_versions",
     description="查询RDSMySQL实例可升级的内核小版本"
 )
-def describe_db_instance_engine_minor_versions(instance_ids: list[str]) -> dict[str, Any]:
+def describe_db_instance_engine_minor_versions(
+        instance_ids: List[str] = Field(description="实例ID列表")
+) -> dict[str, Any]:
     """查询RDSMySQL实例可升级的内核小版本
 
         Args:
@@ -132,10 +136,10 @@ def describe_db_instance_engine_minor_versions(instance_ids: list[str]) -> dict[
     description="查询RDS MySQL实例的数据库账号"
 )
 def describe_db_accounts(
-        instance_id: str,
-        account_name: Optional[str] = None,
-        page_number: int = 1,
-        page_size: int = 10
+        instance_id: str = Field(description="实例ID"),
+        account_name: Optional[str] = Field(default=None, description="数据库账号名称，支持模糊查询"),
+        page_number: int = Field(default=1, description="当前页页码，最小值为1"),
+        page_size: int = Field(default=10, description="每页记录数，范围1-1000")
 ) -> dict[str, Any]:
     """查询RDS MySQL实例的数据库账号列表
 
@@ -163,10 +167,10 @@ def describe_db_accounts(
     description="根据指定RDS MySQL 实例ID 查看数据库列表"
 )
 def describe_databases(
-        instance_id: str,
-        db_name: Optional[str] = None,
-        page_number: int = 1,
-        page_size: int = 10
+        instance_id: str = Field(description="实例ID"),
+        db_name: Optional[str] = Field(default=None, description="数据库名称，支持模糊查询"),
+        page_number: int = Field(default=1, description="当前页页码，最小值为1"),
+        page_size: int = Field(default=10, description="每页记录数，范围1-1000")
 ) -> dict[str, Any]:
     """根据指定RDS MySQL 实例ID 查看数据库列表
 
@@ -195,9 +199,10 @@ def describe_databases(
     description="获取RDS MySQL实例参数列表"
 )
 def describe_db_instance_parameters(
-        instance_id: str,
-        parameter_name: str = None,
-        node_id: str = None
+        instance_id: str = Field(description="实例ID"),
+        parameter_name: Optional[str] = Field(default=None, description="参数名"),
+        node_id: Optional[str] = Field(default=None,
+                                       description="查询指定节点的参数设置，如不设置该字段，只返回主节点和备节点的参数设置")
 ) -> dict[str, Any]:
     """
     获取RDS MySQL实例参数列表
@@ -222,14 +227,14 @@ def describe_db_instance_parameters(
     description="查询MySQL实例的参数模板列表"
 )
 def list_parameter_templates(
-    template_category: str = None,
-    template_type: str = "Mysql",
-    template_type_version: str = None,
-    template_source: str = None,
-    limit: int = 10,
-    offset: int = 0,
-    project_name: str = None,
-    template_name: str = None
+    template_category: Optional[str] = Field(default=None, description="模板类别，取值为 DBEngine（数据库引擎参数）"),
+    template_type: str = Field(default="Mysql", description="参数模板的数据库类型"),
+    template_type_version: Optional[str] = Field(default=None, description="参数模板的数据库版本，如 MySQL_5_7 或 MySQL_8_0"),
+    template_source: Optional[str] = Field(default=None, description="参数模板来源，取值范围：System（系统）、User（用户）"),
+    limit: int = Field(default=10, description="每页记录数，范围1-100"),
+    offset: int = Field(default=0, description="当前页查询偏移量"),
+    project_name: Optional[str] = Field(default=None, description="所属项目名称"),
+    template_name: Optional[str] = Field(default=None, description="模板名称")
 ) -> dict[str, Any]:
     """
     查询MySQL实例的参数模板列表
@@ -271,8 +276,8 @@ def list_parameter_templates(
     description="查询指定的参数模板详情"
 )
 def describe_parameter_template(
-    template_id: str,
-    project_name: str = None
+        template_id: str = Field(description="参数模板 ID"),
+        project_name: Optional[str] = Field(default=None, description="所属项目名称")
 ) -> dict[str, Any]:
     """
     查询指定的参数模板详情
@@ -299,8 +304,9 @@ def describe_parameter_template(
     description="修改RDS MySQL实例名称"
 )
 def modify_db_instance_name(
-        instance_id: str,
-        instance_new_name: str
+        instance_id: str = Field(description="实例 ID"),
+        instance_new_name: str = Field(
+            description="实例的新名称。命名规则：不能以数字、中划线开头，只能包含中文、字母、数字、下划线和中划线，长度限制在 1~128 之间")
 ) -> dict[str, Any]:
     """
     修改RDS MySQL实例名称
@@ -336,10 +342,10 @@ def modify_db_instance_name(
     description="修改RDS MySQL实例账号的描述信息"
 )
 def modify_db_account_description(
-        instance_id: str,
-        account_name: str,
-        host: str = "%",
-        account_desc: str = None
+        instance_id: str = Field(description="实例 ID"),
+        account_name: str = Field(description="数据库账号名称"),
+        host: str = Field(default="%", description="指定账号访问数据库的 IP 地址，默认值为 %"),
+        account_desc: Optional[str] = Field(default=None, description="数据库账号的描述信息，长度不超过 256 个字符")
 ) -> dict[str, Any]:
     """
     修改RDS MySQL实例账号的描述信息
@@ -383,35 +389,35 @@ def modify_db_account_description(
     description="创建 RDS MySQL 实例"
 )
 def create_rds_mysql_instance(
-        vpc_id: str,
-        subnet_id: str,
-        db_engine_version: str = "MySQL_8_0",
-        instance_name: Optional[str] = None,
-        primary_zone: str = "cn-beijing-a",
-        primary_spec: str = "rds.mysql.1c2g",
-        secondary_count: int = 1,
-        secondary_zone: Optional[str] = None,
-        secondary_spec: str = "rds.mysql.1c2g",
-        read_only_count: int = 0,
-        read_only_zone: str = "cn-beijing-a",
-        read_only_spec: str = "rds.mysql.1c2g",
-        storage_space: int = 20,
-        storage_type: str = "LocalSSD",
-        charge_type: str = "PostPaid",
-        auto_renew: Optional[bool] = None,
-        period_unit: Optional[str] = None,
-        period: Optional[int] = None,
-        instance_type: str = "DoubleNode",
-        super_account_name: Optional[str] = None,
-        super_account_password: Optional[str] = None,
-        lower_case_table_names: str = "1",
-        db_time_zone: Optional[str] = None,
-        db_param_group_id: Optional[str] = None,
-        project_name: Optional[str] = None,
-        allow_list_ids: Optional[list[str]] = None,
-        port: int = 3306,
-        instance_tags: Optional[list[dict]] = None,
-        maintenance_window: Optional[dict] = None,
+        vpc_id: str = Field(description="私有网络 ID"),
+        subnet_id: str = Field(description="子网 ID"),
+        db_engine_version: str = Field(default="MySQL_8_0", description="数据库版本"),
+        instance_name: Optional[str] = Field(default=None, description="实例名称"),
+        primary_zone: str = Field(default="cn-beijing-a", description="主节点可用区"),
+        primary_spec: str = Field(default="rds.mysql.1c2g", description="主节点规格"),
+        secondary_count: int = Field(default=1, description="备节点数量"),
+        secondary_zone: Optional[str] = Field(default=None, description="备节点可用区，默认与主节点相同"),
+        secondary_spec: str = Field(default="rds.mysql.1c2g", description="备节点规格"),
+        read_only_count: int = Field(default=0, description="只读节点数量"),
+        read_only_zone: str = Field(default="cn-beijing-a", description="只读节点可用区"),
+        read_only_spec: str = Field(default="rds.mysql.1c2g", description="只读节点规格"),
+        storage_space: int = Field(default=20, description="存储空间大小(GB)"),
+        storage_type: str = Field(default="LocalSSD", description="存储类型"),
+        charge_type: str = Field(default="PostPaid", description="付费类型"),
+        auto_renew: Optional[bool] = Field(default=None, description="预付费场景下是否自动续费"),
+        period_unit: Optional[str] = Field(default=None, description="预付费场景下的购买周期(Month/Year)"),
+        period: Optional[int] = Field(default=None, description="预付费场景下的购买时长"),
+        instance_type: str = Field(default="DoubleNode", description="实例类型"),
+        super_account_name: Optional[str] = Field(default=None, description="高权限账号名称"),
+        super_account_password: Optional[str] = Field(default=None, description="高权限账号密码"),
+        lower_case_table_names: str = Field(default="1", description="表名是否区分大小写"),
+        db_time_zone: Optional[str] = Field(default=None, description="时区"),
+        db_param_group_id: Optional[str] = Field(default=None, description="参数模板 ID"),
+        project_name: Optional[str] = Field(default=None, description="实例所属项目"),
+        allow_list_ids: Optional[List[str]] = Field(default=None, description="白名单 ID 列表"),
+        port: int = Field(default=3306, description="默认终端的私网端口"),
+        instance_tags: Optional[List[Dict]] = Field(default=None, description="实例标签列表"),
+        maintenance_window: Optional[Dict] = Field(default=None, description="维护窗口配置")
 ) -> dict[str, Any]:
     """创建 RDS MySQL 实例
 
@@ -445,9 +451,6 @@ def create_rds_mysql_instance(
         port: 默认终端的私网端口，默认 3306
         instance_tags: 实例标签列表
         maintenance_window: 维护窗口配置
-        enable_storage_auto_scale: 是否开启自动扩容，默认 True
-        storage_threshold: 触发自动扩容的可用存储空间占比，默认 20%
-        storage_upper_bound: 自动扩容的存储空间上限，默认 3000GB
 
     Returns:
         dict: 创建结果，包含实例ID和订单号等信息
@@ -531,11 +534,11 @@ def create_rds_mysql_instance(
     description="创建RDS MySQL实例数据库"
 )
 def create_database(
-        instance_id: str,
-        db_name: str,
-        character_set_name: str = "utf8mb4",
-        database_privileges: list[dict] = None,
-        db_desc: str = None
+        instance_id: str = Field(description="实例 ID"),
+        db_name: str = Field(description="数据库名称。命名规则：名称唯一，长度为 2~64 个字符，以字母开头，以字母或数字结尾，由字母、数字、下划线或中划线组成，不能使用预留字"),
+        character_set_name: str = Field(default="utf8mb4", description="数据库字符集，支持：utf8、utf8mb4、latin1、ascii"),
+        database_privileges: Optional[List[Dict]] = Field(default=None, description="授权数据库权限信息"),
+        db_desc: Optional[str] = Field(default=None, description="数据库的描述信息，长度不超过 256 个字符")
 ) -> dict[str, Any]:
     """
     创建RDS MySQL实例数据库
@@ -591,15 +594,15 @@ def create_database(
     description="创建RDS MySQL实例白名单"
 )
 def create_allow_list(
-        allow_list_name: str,
-        allow_list_desc: str = None,
-        allow_list_type: str = "IPv4",
-        allow_list: str = None,
-        security_group_ids: list[str] = None,
-        security_group_bind_infos: list[dict] = None,
-        allow_list_category: str = "Ordinary",
-        user_allow_list: str = None,
-        project_name: str = None
+        allow_list_name: str = Field(..., title="白名单名称", description="需满足：不能以数字或中划线（-）开头，只能包含中文、字母、数字、下划线（_）和中划线（-），长度需为 1~128 个字符"),
+        allow_list_desc: str = Field(None, description="长度不可超过 200 个字符"),
+        allow_list_type: str = Field("IPv4", description="白名单内的 IP 地址类型，当前仅支持 IPv4 地址"),
+        allow_list: str = Field(None, description="输入 IP 地址或 CIDR 格式的 IP 地址段，多个地址间用英文逗号（,）隔开，每个白名单分组中最多支持设置 300 个 IP 地址或 CIDR 格式的 IP 地址段，不允许设置重复的地址，该字段不能与 UserAllowList 字段同时使用"),
+        security_group_ids: list[str] = Field(None, description="需要关联的安全组 ID 列表，单个白名单单次最多可选择添加 10 个安全组，该字段不能与 SecurityGroupBindInfos 同时使用"),
+        security_group_bind_infos: list[dict] = Field(None, description="白名单关联的安全组的信息，每个信息包含：BindMode (str): 关联安全组的模式，取值：IngressDirectionIp（入方向 IP）、AssociateEcsIp（关联 ECSIP）；SecurityGroupId (str): 安全组 ID；IpList (list[str], optional): 安全组的 IP；SecurityGroupName (str, optional): 安全组名称；该字段不能与 SecurityGroupIds 同时使用"),
+        allow_list_category: str = Field("Ordinary", description="白名单分类，取值：Ordinary（普通白名单）、Default（默认白名单），默认值为 Ordinary"),
+        user_allow_list: str = Field(None, description="安全组之外的、需要加入白名单的 IP 地址，可输入 IP 地址或 CIDR 格式的 IP 地址段，该字段不能与 AllowList 字段同时使用"),
+        project_name: str = Field(None, description="所属的项目")
 ) -> dict[str, Any]:
     """
     创建RDS MySQL实例白名单
@@ -689,8 +692,30 @@ def create_allow_list(
     description="绑定RDS MySQL实例与白名单"
 )
 def associate_allow_list(
-        instance_ids: list[str],
-        allow_list_ids: list[str]
+    instance_ids: list[str] = Field(
+            title="实例ID列表",
+            description=(
+                "需要绑定白名单的实例ID列表\n"
+                "- 支持一次传入多个实例ID，单次最多可传入200个实例ID\n"
+                "- 不支持同时传入多个实例ID和多个白名单ID，仅允许：\n"
+                "  - 将多个实例同时绑定到同一个白名单（此时allow_list_ids长度应为1）\n"
+                "  - 或将一个实例同时绑定到多个白名单（此时instance_ids长度应为1）"
+            ),
+            min_items=1,
+            max_items=200
+        ),
+    allow_list_ids: list[str] = Field(
+            title="白名单ID列表",
+            description=(
+                "需要绑定实例的白名单ID列表\n"
+                "- 支持一次传入多个白名单ID，单次最多可传入100个白名单ID\n"
+                "- 不支持同时传入多个实例ID和多个白名单ID，仅允许：\n"
+                "  - 将多个实例同时绑定到同一个白名单（此时allow_list_ids长度应为1）\n"
+                "  - 或将一个实例同时绑定到多个白名单（此时instance_ids长度应为1）"
+            ),
+            min_items=1,
+            max_items=100
+        )
 ) -> dict[str, Any]:
     """
     绑定RDS MySQL实例与白名单
@@ -740,15 +765,74 @@ def associate_allow_list(
     description="创建RDS MySQL实例数据库账号"
 )
 def create_db_account(
-        instance_id: str,
-        account_name: str,
-        account_password: str,
-        account_type: str,
-        account_desc: str = None,
-        host: str = "%",
-        account_privileges: list[dict] = None,
-        dry_run: bool = False,
-        table_column_privileges: list[dict] = None
+    instance_id: str = Field(
+            title="实例ID",
+            description="需要创建账号的RDS MySQL实例ID"
+        ),
+    account_name: str = Field(
+            title="数据库账号名称",
+            description=(
+                "数据库账号名称，规则：\n"
+                "- 长度为2~32个字符\n"
+                "- 以字母开头，以字母或数字结尾\n"
+                "- 由字母、数字、下划线（_）和中划线（-）组成\n"
+                "- 账号名称在实例内必须唯一\n"
+                "- 不能使用某些预留字（高权限账号除外）"
+            )
+        ),
+    account_password: str = Field(
+            title="数据库账号密码",
+            description=(
+                "数据库账号密码，规则：\n"
+                "- 长度为8~32个字符\n"
+                "- 由大写字母、小写字母、数字、特殊字符中的至少三种组成\n"
+                "- 特殊字符为!@#$%^&*()_+-=,.&?|/"
+            )
+        ),
+    account_type:  str = Field(
+            title="数据库账号类型",
+            description="取值范围：Super（高权限账号，一个实例只能创建一个）或Normal（普通账号）"
+        ),
+    account_desc: str = Field(
+            None,
+            title="账号描述",
+            description="账号信息描述，长度不超过256个字符",
+            max_length=256
+        ),
+    host: str = Field(
+            "%",
+            title="访问IP地址",
+            description=(
+                "指定账号访问数据库的IP地址，默认值为%。\n"
+                "若指定为%，允许从任意IP地址访问；\n"
+                "高权限账号的主机IP只能指定为%"
+            )
+        ),
+    account_privileges: str = Field(
+            None,
+            title="数据库权限信息",
+            description=(
+                "账号的指定数据库权限信息，每个权限项包含：\n"
+                "- DBName (str): 数据库名称\n"
+                "- AccountPrivilege (str): 权限类型（ReadWrite、ReadOnly等）\n"
+                "- AccountPrivilegeDetail (str, optional): 当权限类型为Custom或Global时必填"
+            )
+        ),
+    dry_run: bool = Field(
+            False,
+            title="是否预览SQL",
+            description="是否预览创建账号的SQL语句，默认值为false"
+        ),
+    table_column_privileges: list[dict] = Field(
+            None,
+            title="表列权限设置",
+            description=(
+                "账号的表列权限设置，包含：\n"
+                "- DBName (str): 数据库名称\n"
+                "- TablePrivileges (list[dict], optional): 表权限信息\n"
+                "- ColumnPrivileges (list[dict], optional): 列权限信息"
+            )
+        )
 ) -> dict[str, Any]:
     """
     创建RDS MySQL实例数据库账号
