@@ -88,7 +88,7 @@
 ```json
 {
   "mcpServers": {
-    "rds_mysql": {
+    "rds_postgresql": {
       "command": "uvx",
       "args": [
         "--from",
