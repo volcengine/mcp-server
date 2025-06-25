@@ -4,10 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"mcp_server_mobile_use/internal/mobile_use/config"
-	"mcp_server_mobile_use/internal/mobile_use/consts"
-	"mcp_server_mobile_use/internal/mobile_use/service"
-
+	"code.byted.org/videoarch/phone-use/internal/mobile_use/config"
+	"code.byted.org/videoarch/phone-use/internal/mobile_use/consts"
+	"code.byted.org/videoarch/phone-use/internal/mobile_use/service"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
@@ -107,4 +106,15 @@ func GetInt64Param(args map[string]interface{}, key string) (int64, error) {
 	default:
 		return 0, fmt.Errorf("%s must be an integer, got %T", key, val)
 	}
+}
+
+func CheckArgs(args any) (map[string]interface{}, error) {
+	if args == nil {
+		return nil, fmt.Errorf("args is nil")
+	}
+	res, ok := args.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("args is invalid")
+	}
+	return res, nil
 }

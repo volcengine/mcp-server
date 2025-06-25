@@ -1,9 +1,11 @@
-module mcp_server_mobile_use
+module code.byted.org/videoarch/phone-use
 
 go 1.23.6
 
 require (
-	github.com/mark3labs/mcp-go v0.26.0
+	github.com/mark3labs/mcp-go v0.32.0
+	github.com/satori/go.uuid v1.2.0
+	github.com/volcengine/ve-tos-golang-sdk/v2 v2.7.11
 	github.com/volcengine/volc-sdk-golang v1.0.202
 )
 
@@ -14,5 +16,6 @@ require (
 	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	golang.org/x/net v0.33.0 // indirect
+	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 )

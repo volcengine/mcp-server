@@ -3,7 +3,7 @@ package tool
 import (
 	"context"
 
-	"mcp_server_mobile_use/internal/mobile_use/consts"
+	"code.byted.org/videoarch/phone-use/internal/mobile_use/consts"
 
 	"github.com/mark3labs/mcp-go/mcp"
 )

@@ -10,10 +10,9 @@ import (
 	"strings"
 	"sync"
 
-	"mcp_server_mobile_use/internal/mobile_use/config"
-	"mcp_server_mobile_use/internal/mobile_use/consts"
-	"mcp_server_mobile_use/internal/mobile_use/tool"
-
+	"code.byted.org/videoarch/phone-use/internal/mobile_use/config"
+	"code.byted.org/videoarch/phone-use/internal/mobile_use/consts"
+	"code.byted.org/videoarch/phone-use/internal/mobile_use/tool"
 	mcp_srv "github.com/mark3labs/mcp-go/server"
 )
 
@@ -122,6 +121,23 @@ func (s *MobileUseServer) StartSSEWithServer(addr string, baseUrl string) error 
 		close(s.doneCh)
 	}()
 
+	return nil
+}
+
+func (s *MobileUseServer) StartStreamableHTTPServer(addr string) error {
+	server := mcp_srv.NewStreamableHTTPServer(s.server,
+		mcp_srv.WithHTTPContextFunc(authFromRequest),
+	)
+
+	// Start HTTP server in a goroutine
+	go func() {
+		err := server.Start(addr)
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			// If error is not due to server shutdown, signal server is done
+			s.cancel()
+		}
+		close(s.doneCh)
+	}()
 	return nil
 }
 
