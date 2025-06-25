@@ -63,7 +63,7 @@ region is the region where the function will be created, default is cn-beijing. 
 Note:
 1. The runtime parameter must be one of the values returned by the supported_runtimes. Please ensure you call that tool first to get the valid options.
 2. If the function is intended to serve as a web service, you must:
-   • Write code to start an HTTP server that listens on port 8000 (e.g., using Python’s http.server, Node’s http, or Flask).
+   • Write code to start an HTTP server that listens on port 8000 (e.g., using Python's http.server, Node's http, or Flask).
    • Provide a launch script such as run.sh that starts the server (e.g., python3 server.py) and keeps it running.
    • Set the Command parameter to point to this script (e.g., ./run.sh) in the function config.
    • Only native runtimes support the Command field. Use supported_runtimes to ensure the chosen runtime allows it.
@@ -405,11 +405,11 @@ Creates a new VeApig API gateway in the specified region.
 - `name`: Optional custom name for the gateway. If not provided, a random name will be auto-generated.
 - `region`: Target region for gateway creation. Defaults to `cn-beijing`. Supported values include `cn-beijing`, `cn-shanghai`, `cn-guangzhou`, and `ap-southeast-1`.
 
-Note: This is an **asynchronous** operation and may take up to **5 minutes** to complete.  
-After calling this tool, you must use the `list_api_gateways` tool to check the status of the gateway.  
+Note: This is an **asynchronous** operation and may take up to **5 minutes** to complete.
+After calling this tool, you must use the `list_api_gateways` tool to check the status of the gateway.
 Only when the status is `Running` does the gateway creation complete successfully.
 
-Recommendation: A single API gateway can be reused across multiple functions and services.  
+Recommendation: A single API gateway can be reused across multiple functions and services.
 Before creating a new gateway, consider reusing an existing one using `list_api_gateways`.
 """
 )
@@ -632,18 +632,34 @@ def python_zip_implementation(folder_path: str) -> bytes:
     print(f"Python zip finished, size: {buffer.tell() / 1024 / 1024:.2f} MB")
     return buffer.getvalue()
 
-@mcp.tool(description="""
-Uploads code to TOS for a veFaaS function deployment.
+def _get_upload_code_description() -> str:
+    """Generate a dynamic description for the `upload_code` tool based on the active transport mode."""
+    base_desc = (
+        "Uploads code to TOS for a veFaaS function deployment.\n\n"
+        "You may provide:\n"
+        "- 'local_folder_path': path to a local directory that will be zipped and uploaded (recommended for large or structured projects).\n"
+        "- 'file_dict': an in-memory mapping of filename ➜ content (handy for lightweight uploads or when local paths are not accessible).\n\n"
+    )
 
-You may provide:
-- 'local_folder_path': for uploading a local code directory (recommended for large or structured projects).
-- 'file_dict': for in-memory code files, suitable for simple or lightweight use cases.
+    # Detect run mode via FASTMCP_* environment variables.
+    is_network_transport = os.getenv("FASTMCP_STATELESS_HTTP") == "true" or os.getenv("FASTMCP_HOST") or os.getenv("FASTMCP_PORT")
 
-Note:
-If the MCP Server is deployed remotely (e.g., via SSE), local paths are not accessible. In such cases, use 'file_dict' instead of 'local_folder_path'.
+    if is_network_transport:
+        note = (
+            "Note: The MCP server is running over a network transport (SSE or streamable-http) and cannot access the local file system. "
+            "You must therefore supply code via 'file_dict'; 'local_folder_path' will be ignored.\n\n"
+        )
+    else:
+        note = (
+            "Note: The MCP server is running via STDIO locally and can access your file system. "
+            "It is recommended to use 'local_folder_path' for convenience, though 'file_dict' is still supported.\n\n"
+        )
 
-After uploading, remind the user to release the function for changes to take effect.
-""")
+    tail = "After the upload completes, call 'release_function' to publish the new code."
+
+    return base_desc + note + tail
+
+@mcp.tool(description=_get_upload_code_description())
 def upload_code(region: str, function_id: str, local_folder_path: Optional[str] = None, file_dict: Optional[dict[str, Union[str, bytes]]] = None) -> bytes:
     region = validate_and_set_region(region)
 
