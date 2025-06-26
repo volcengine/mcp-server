@@ -745,11 +745,19 @@ def handle_dependency(api_instance: VEFAASApi, function_id: str, local_folder_pa
             or (file_dict is not None and "package.json" in file_dict)
     )
 
+    has_node_modules = (
+            (local_folder_path is not None and os.path.exists(os.path.join(local_folder_path, "node_modules")))
+            or (file_dict is not None and "node_modules" in file_dict)
+    )
+
     if is_native_python and not has_requirements:
         print("Python runtime detected, but no requirements.txt found. Skipping dependency install.")
         return
     if is_native_nodejs and not has_package_json:
         print("Node.js runtime detected, but no package.json found. Skipping dependency install.")
+        return
+    if is_native_nodejs and has_package_json and has_node_modules:
+        print("Node.js runtime detected, package.json found, but has node_modules. Skipping dependency install.")
         return
     if not is_native_python and not is_native_nodejs:
         print("Runtime is not native-python or native-nodejs. Skipping dependency install.")
