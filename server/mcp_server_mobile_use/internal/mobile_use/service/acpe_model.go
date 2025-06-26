@@ -15,3 +15,9 @@ type TosConfig struct {
 	Region       string
 	Endpoint     string
 }
+
+type ScreenShotResult struct {
+	ScreenshotURL string `json:"screenshot_url"`
+	Width         int    `json:"width"`
+	Height        int    `json:"height"`
+}
