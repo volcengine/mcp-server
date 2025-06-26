@@ -1,15 +1,18 @@
 from __future__ import print_function
 
 import io
-from typing import Union, Optional
+import time
+from typing import Union, Optional, List
 import datetime
 import volcenginesdkcore
 import volcenginesdkvefaas
 from volcenginesdkcore.rest import ApiException
 import random
 import string
-import base64
 import logging
+
+from volcenginesdkvefaas import VEFAASApi
+
 from .sign import request, get_authorization_credentials
 import json
 from mcp.server.fastmcp import Context, FastMCP
@@ -33,7 +36,7 @@ def supported_runtimes():
             "golang/v1",
             "node14/v1", "node20/v1",
             "nodeprime14/v1",
-            "native-node14/v1", "native-node20/v1"]
+            "native-node20/v1"]
 
 def validate_and_set_region(region: str = None) -> str:
     """
@@ -65,12 +68,18 @@ Note:
 2. If the function is intended to serve as a web service, you must:
    • Write code to start an HTTP server that listens on port 8000 (e.g., using Python's http.server, Node's http, or Flask).
    • Provide a launch script such as run.sh that starts the server (e.g., python3 server.py) and keeps it running.
-   • Set the Command parameter to point to this script (e.g., ./run.sh) in the function config.
-   • Only native runtimes support the Command field. Use supported_runtimes to ensure the chosen runtime allows it.
+   • Set the `command` parameter to point to this script (e.g., ./run.sh) in the function config.
+   • Only **native runtimes** support the `command` field. Use `supported_runtimes` to ensure compatibility.
 3. After creating the function, you can use the `upload_code` tool to upload the function code and related files.
+
+4. If `enable_vpc` is set to `true`, the following parameters are **required**:
+   • `vpc_id`: The target VPC ID  
+   • `subnet_ids`: A list of subnet IDs (at least one)  
+   • `security_group_ids`: A list of security group IDs
 """)
 def create_function(name: str = None, region: str = None, runtime: str = None, command: str = None, source: str = None,
-                    image: str = None, envs: dict = None, description: str = None) -> str:
+                    image: str = None, envs: dict = None, description: str = None, enable_vpc = False,
+                    vpc_id: str = None, subnet_ids: List[str] = None, security_group_ids: List[str] = None,) -> str:
     # Validate region
     region = validate_and_set_region(region)
 
@@ -114,6 +123,14 @@ def create_function(name: str = None, region: str = None, runtime: str = None, c
             })
         create_function_request.envs = env_list
 
+    if enable_vpc:
+        if not vpc_id or not subnet_ids or not security_group_ids:
+            raise ValueError("vpc_id or subnet_ids and security_group_ids must be provided.")
+        vpc_config = volcenginesdkvefaas.VpcConfigForUpdateFunctionInput(
+            enable_vpc=True, vpc_id=vpc_id, subnet_ids=subnet_ids, security_group_ids=security_group_ids,
+        )
+        create_function_request.vpc_config = vpc_config
+
     if description:
         create_function_request.description = description
 
@@ -128,10 +145,15 @@ def create_function(name: str = None, region: str = None, runtime: str = None, c
 Use this when asked to update a VeFaaS function's code.
 Region is the region where the function will be updated, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
 `cn-shanghai`, `cn-guangzhou` as well.
+If `enable_vpc` is set to `true`, the following parameters are **required**:
+   • `vpc_id`: The target VPC ID  
+   • `subnet_ids`: A list of subnet IDs (at least one)  
+   • `security_group_ids`: A list of security group IDs
 After updating the function, you need to release it again for the changes to take effect.
 No need to ask user for confirmation, just update the function.""")
 def update_function(function_id: str, source: str = None, region: str = None, command: str = None,
-                    envs: dict = None):
+                    envs: dict = None, enable_vpc = False, vpc_id: str = None, subnet_ids: List[str] = None,
+                    security_group_ids: List[str] = None,):
 
     region = validate_and_set_region(region)
 
@@ -173,6 +195,14 @@ def update_function(function_id: str, source: str = None, region: str = None, co
                 "value": value
             })
         update_request.envs = env_list
+
+    if enable_vpc:
+        if not vpc_id or not subnet_ids or not security_group_ids:
+            raise ValueError("vpc_id or subnet_ids and security_group_ids must be provided.")
+        vpc_config = volcenginesdkvefaas.VpcConfigForUpdateFunctionInput(
+            enable_vpc=True, vpc_id=vpc_id, subnet_ids=subnet_ids, security_group_ids=security_group_ids,
+        )
+        update_request.vpc_config = vpc_config
 
     try:
         response = api_instance.update_function(update_request)
@@ -665,6 +695,11 @@ def upload_code(region: str, function_id: str, local_folder_path: Optional[str] 
 
     api_instance = init_client(region, mcp.get_context())
 
+    try:
+        ak, sk, token = get_authorization_credentials(mcp.get_context())
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
+
     if local_folder_path:
         data, size, error = zip_and_encode_folder(local_folder_path)
         if error:
@@ -678,11 +713,81 @@ def upload_code(region: str, function_id: str, local_folder_path: Optional[str] 
             raise ValueError("No files provided in file_dict, upload aborted.")
     else:
         raise ValueError("Either local_folder_path or file_dict must be provided.")
+    response_body = upload_code_zip_for_function(api_instance=api_instance, function_id=function_id, code_zip_size=size,
+                                                 zip_bytes=data, ak=ak, sk=sk, token=token)
+    handle_dependency(api_instance=api_instance, function_id=function_id, local_folder_path=local_folder_path,
+                      file_dict= file_dict, ak=ak, sk=sk, token=token)
+    return response_body
 
-    return upload_code_zip_for_function(api_instance=api_instance, function_id=function_id, code_zip_size=size, zip_bytes=data)
+def handle_dependency(api_instance: VEFAASApi, function_id: str, local_folder_path, file_dict,
+                      ak: str, sk: str, token: str):
+    req = volcenginesdkvefaas.GetFunctionRequest(
+        id=function_id
+    )
+
+    try:
+        response = api_instance.get_function(req)
+        runtime = response.runtime
+        print('runtime:', runtime)
+    except ApiException as e:
+        raise ValueError(f"Failed to get VeFaaS function: {str(e)}")
+
+    is_native_python = 'native-python' in runtime
+    is_native_nodejs = 'native-node' in runtime
+
+    has_requirements = (
+            (local_folder_path is not None and os.path.exists(os.path.join(local_folder_path, "requirements.txt")))
+            or (file_dict is not None and "requirements.txt" in file_dict)
+    )
+
+    has_package_json = (
+            (local_folder_path is not None and os.path.exists(os.path.join(local_folder_path, "package.json")))
+            or (file_dict is not None and "package.json" in file_dict)
+    )
+
+    if is_native_python and not has_requirements:
+        print("Python runtime detected, but no requirements.txt found. Skipping dependency install.")
+        return
+    if is_native_nodejs and not has_package_json:
+        print("Node.js runtime detected, but no package.json found. Skipping dependency install.")
+        return
+    if not is_native_python and not is_native_nodejs:
+        print("Runtime is not native-python or native-nodejs. Skipping dependency install.")
+        return
+
+    body = {"FunctionId": function_id}
+    now = datetime.datetime.utcnow()
+
+    try:
+        response_body = request("POST", now, {}, {}, ak, sk, token,
+                                "CreateDependencyInstallTask", json.dumps(body))
+        print(response_body)
+
+        timeout_seconds = 300
+        start_time = time.time()
+        while True:
+            status_resp = request("POST", now, {}, {}, ak, sk, token,
+                                  "GetDependencyInstallTaskStatus", json.dumps(body))
+            print(status_resp)
+
+            status = status_resp['Result']['Status']
+            if status == 'Failed':
+                # log_download_resp = request("POST", now, {}, {}, ak, sk, token,
+                #                       "GetDependencyInstallTaskLogDownloadURI", json.dumps(body))
+                # url = log_download_resp['Result']['DownloadURL']
+                raise ValueError("Dependency installation failed.")
+            elif status == 'Succeeded':
+                print("Dependency installation succeeded.")
+                break
+            if time.time() - start_time > timeout_seconds:
+                raise TimeoutError("Dependency installation timed out after {} seconds".format(timeout_seconds))
+            time.sleep(5)
+    except Exception as e:
+        raise ValueError(f"Error handling dependency: {str(e)}")
 
 
-def upload_code_zip_for_function(api_instance: object, function_id: str, code_zip_size: int, zip_bytes, ) -> bytes:
+def upload_code_zip_for_function(api_instance: VEFAASApi(object), function_id: str, code_zip_size: int, zip_bytes,
+                                 ak: str, sk: str, token: str,) -> bytes:
     req = volcenginesdkvefaas.GetCodeUploadAddressRequest(
         function_id=function_id,
         content_length=code_zip_size
@@ -701,11 +806,6 @@ def upload_code_zip_for_function(api_instance: object, function_id: str, code_zi
     else:
         error_message = f"Upload failed to {upload_url} with status code {response.status_code}: {response.text}"
         raise ValueError(error_message)
-
-    try:
-        ak, sk, token = get_authorization_credentials(mcp.get_context())
-    except ValueError as e:
-        raise ValueError(f"Authorization failed: {str(e)}")
 
     now = datetime.datetime.utcnow()
 
