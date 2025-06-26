@@ -1,14 +1,14 @@
 import os
 import asyncio
-from typing import Optional
+import re
 from pydantic import Field
 import logging
 import argparse
-from typing import Any, Literal
+from typing import Optional, List, Dict, Any, Literal
 from mcp.server.fastmcp import FastMCP
 from mcp_server_rds_postgresql.resource.rds_postgresql_resource import RDSPostgreSQLSDK
 
-# 初始化MCP服务
+# Initialize the MCP service
 mcp_server = FastMCP("rds_postgresql_mcp_server", port=int(os.getenv("MCP_SERVER_PORT", "8000")))
 logger = logging.getLogger("rds_postgresql_mcp_server")
 
@@ -16,11 +16,9 @@ rds_postgresql_resource = RDSPostgreSQLSDK(
     region=os.getenv('VOLCENGINE_REGION'), ak=os.getenv('VOLCENGINE_ACCESS_KEY'), sk=os.getenv('VOLCENGINE_SECRET_KEY'), host=os.getenv('VOLCENGINE_ENDPOINT')
 )
 
-from typing import List, Dict, Any, Optional
-
 @mcp_server.tool(
     name="describe_db_instances",
-    description="查询RDS PostgreSQL实例列表"
+    description="Query the list of RDS PostgreSQL instances"
 )
 def describe_db_instances(
         page_number: int = 1,
@@ -37,21 +35,21 @@ def describe_db_instances(
         tag_filters: List[Dict[str, str]] = None
 ) -> dict[str, Any]:
     """
-    查询RDS PostgreSQL实例列表
+    Query the list of RDS PostgreSQL instances
 
     Args:
-        page_number (int, optional): 当前页页码，取值最小为1，默认值为1
-        page_size (int, optional): 每页记录数，最小值为1，最大值不超过1000，默认值为10
-        instance_id (str, optional): 实例ID
-        instance_name (str, optional): 实例名称
-        instance_status (str, optional): 实例状态，如Running、Creating等
-        db_engine_version (str, optional): 兼容版本，如PostgreSQL_15、PostgreSQL_16
-        create_time_start (str, optional): 查询创建实例的开始时间
-        create_time_end (str, optional): 查询创建实例的结束时间
-        zone_id (str, optional): 实例所属可用区
-        charge_type (str, optional): 计费类型，如PostPaid、PrePaid
-        tag_filters (List[Dict[str, str]], optional): 用于查询筛选的标签键值对数组
-        project_name (str, optional): 项目名称
+        page_number (int, optional): The current page number, with a minimum value of 1. The default value is 1.
+        page_size (int, optional): The number of records per page, with a minimum value of 1 and a maximum value not exceeding 1000. The default value is 10.
+        instance_id (str, optional): The instance ID.
+        instance_name (str, optional): The instance name.
+        instance_status (str, optional): The instance status, such as Running, Creating, etc.
+        db_engine_version (str, optional): The compatible version, such as PostgreSQL_15, PostgreSQL_16.
+        create_time_start (str, optional): The start time for querying instance creation.
+        create_time_end (str, optional): The end time for querying instance creation.
+        zone_id (str, optional): The availability zone to which the instance belongs.
+        charge_type (str, optional): The billing type, such as PostPaid, PrePaid.
+        tag_filters (List[Dict[str, str]], optional): An array of tag key - value pairs used for query filtering.
+        project_name (str, optional): The project name.
     """
     req = {
         "instance_id": instance_id,
@@ -73,17 +71,17 @@ def describe_db_instances(
     if tag_filters is not None:
         for filter_item in tag_filters:
             if not isinstance(filter_item, dict) or 'Key' not in filter_item:
-                raise ValueError("TagFilters中的每个元素必须是包含Key字段的字典")
+                raise ValueError("Each element in TagFilters must be a dictionary containing the Key field")
 
     resp = rds_postgresql_resource.describe_db_instances(req)
     return resp.to_dict()
 
 
-@mcp_server.tool(name="describe_db_instance_detail", description="查询RDS PostgreSQL实例详情")
+@mcp_server.tool(name="describe_db_instance_detail", description="Query the details of an RDS PostgreSQL instance")
 def describe_db_instance_detail(instance_id: str) -> dict[str, Any]:
-    """查询RDS PostgreSQL实例详情
+    """Query the details of an RDS PostgreSQL instance
        Args:
-           instance_id (str): 实例ID
+           instance_id (str): The instance ID
    """
     req = {
         "instance_id": instance_id,
@@ -94,7 +92,7 @@ def describe_db_instance_detail(instance_id: str) -> dict[str, Any]:
 
 @mcp_server.tool(
     name="describe_databases",
-    description="获取指定RDS PostgreSQL实例的数据库列表"
+    description="Get the list of databases for a specified RDS PostgreSQL instance"
 )
 def describe_databases(
         instance_id: str,
@@ -103,13 +101,13 @@ def describe_databases(
         db_name: str = None,
 ) -> dict[str, Any]:
     """
-    获取指定RDS PostgreSQL实例的数据库列表
+    Get the list of databases for a specified RDS PostgreSQL instance
 
     Args:
-        page_number (int, optional): 当前页页码，取值最小为1，默认值为1
-        page_size (int, optional): 每页记录数，最小值为1，最大值不超过1000，默认值为10
-        instance_id (str): 实例ID
-        db_name (str, optional): 数据库名称
+        page_number (int, optional): The current page number, with a minimum value of 1. The default value is 1.
+        page_size (int, optional): The number of records per page, with a minimum value of 1 and a maximum value not exceeding 1000. The default value is 10.
+        instance_id (str): The instance ID.
+        db_name (str, optional): The database name.
     """
     req = {
         "page_number": page_number,
@@ -123,7 +121,7 @@ def describe_databases(
 
 @mcp_server.tool(
     name="describe_db_accounts",
-    description="获取指定RDS PostgreSQL实例的账号列表"
+    description="Get the list of accounts for a specified RDS PostgreSQL instance"
 )
 def describe_db_accounts(
         instance_id: str,
@@ -132,13 +130,13 @@ def describe_db_accounts(
         account_name: str = None,
 ) -> dict[str, Any]:
     """
-    获取指定RDS PostgreSQL实例的账号列表
+    Get the list of accounts for a specified RDS PostgreSQL instance
 
     Args:
-        page_number (int, optional): 当前页页码，取值最小为1，默认值为1
-        page_size (int, optional): 每页记录数，最小值为1，最大值不超过1000，默认值为10
-        instance_id (str): 实例ID
-        account_name (str, optional): 账号名称，支持模糊查询
+        page_number (int, optional): The current page number, with a minimum value of 1. The default value is 1.
+        page_size (int, optional): The number of records per page, with a minimum value of 1 and a maximum value not exceeding 1000. The default value is 10.
+        instance_id (str): The instance ID.
+        account_name (str, optional): The account name, supporting fuzzy queries.
     """
     req = {
         "instance_id": instance_id,
@@ -152,7 +150,7 @@ def describe_db_accounts(
 
 @mcp_server.tool(
     name="describe_schemas",
-    description="获取指定RDS PostgreSQL实例的schema列表"
+    description="Get the list of schemas for a specified RDS PostgreSQL instance"
 )
 def describe_schemas(
         instance_id: str,
@@ -161,13 +159,13 @@ def describe_schemas(
         db_name: str = None,
 ) -> dict[str, Any]:
     """
-    获取指定RDS PostgreSQL实例的schema列表
+    Get the list of schemas for a specified RDS PostgreSQL instance
 
     Args:
-        page_number (int, optional): 当前页页码，取值最小为1，默认值为1
-        page_size (int, optional): 每页记录数，最小值为1，最大值不超过1000，默认值为10
-        instance_id (str): 实例ID
-        db_name (str, optional): 数据库名称
+        page_number (int, optional): The current page number, with a minimum value of 1. The default value is 1.
+        page_size (int, optional): The number of records per page, with a minimum value of 1 and a maximum value not exceeding 1000. The default value is 10.
+        instance_id (str): The instance ID.
+        db_name (str, optional): The database name.
     """
     req = {
         "instance_id": instance_id,
@@ -181,18 +179,18 @@ def describe_schemas(
 
 @mcp_server.tool(
     name="describe_db_instance_parameters",
-    description="获取指定RDS PostgreSQL实例参数列表"
+    description="Get the list of parameters for a specified RDS PostgreSQL instance"
 )
 def describe_db_instance_parameters(
         instance_id: str,
         parameter_name: str = None,
 ) -> dict[str, Any]:
     """
-    获取指定RDS PostgreSQL实例参数列表
+    Get the list of parameters for a specified RDS PostgreSQL instance
 
     Args:
-        instance_id (str): 实例ID
-        parameter_name (str, optional): 参数名称，支持模糊查询
+        instance_id (str): The instance ID.
+        parameter_name (str, optional): The parameter name, supporting fuzzy queries.
     """
     req = {
         "instance_id": instance_id,
@@ -204,18 +202,18 @@ def describe_db_instance_parameters(
 
 @mcp_server.tool(
     name="describe_allow_lists",
-    description="获取RDS PostgreSQL指定地域下的白名单列表"
+    description="Get RDS PostgreSQL specified region's white list"
 )
 def describe_allow_lists(
         region_id: str,
         instance_id: str = None,
 ) -> dict[str, Any]:
     """
-    获取RDS PostgreSQL指定地域下的白名单列表
+    Get RDS PostgreSQL specified region's white list
 
     Args:
-        region_id (str): 地域ID
-        instance_id (str, optional): 实例ID
+        region_id (str): Region ID
+        instance_id (str, optional): Instance ID
     """
     req = {
         "region_id": region_id,
@@ -228,16 +226,16 @@ def describe_allow_lists(
 
 @mcp_server.tool(
     name="describe_allow_list_detail",
-    description="获取RDS PostgreSQL白名单详情"
+    description="Get RDS PostgreSQL white list detail"
 )
 def describe_allow_list_detail(
         allow_list_id: str
 ) -> dict[str, Any]:
     """
-    获取RDS PostgreSQL白名单详情
+    Get RDS PostgreSQL white list detail
 
     Args:
-        allow_list_id (str): 白名单的 ID
+        allow_list_id (str): White list ID
     """
     req = {
         "allow_list_id": allow_list_id
@@ -248,7 +246,7 @@ def describe_allow_list_detail(
 
 @mcp_server.tool(
     name="describe_backups",
-    description="获取指定RDS PostgreSQL实例备份列表"
+    description="Get RDS PostgreSQL instance backup list"
 )
 def describe_backups(
         instance_id: str,
@@ -261,22 +259,22 @@ def describe_backups(
         backup_type: str = None,
 ) -> dict[str, Any]:
     """
-    获取指定RDS PostgreSQL实例备份列表
+    Get RDS PostgreSQL instance backup list
 
     Args:
-        page_number (int, optional): 当前页页码，取值最小为1，默认值为1
-        page_size (int, optional): 每页记录数，最小值为1，最大值不超过1000，默认值为10
-        instance_id (str): 实例ID
-        backup_id (str, optional): 备份ID
-        backup_start_time (str, optional): 备份创建最早时间，格式为 yyyy-MM-ddTHH:mm:ss.sssZ（UTC 时间）
-        backup_end_time (str, optional): 备份创建最晚时间，格式为 yyyy-MM-ddTHH:mm:ss.sssZ（UTC 时间）
-        backup_status (str, optional): 备份状态，枚举值：
-            - Success: 备份成功
-            - Failed: 备份失败
-            - Running: 备份中
-        backup_type (str, optional): 备份类型，枚举值：
-            - Full: 全量备份
-            - Increment: 增量备份
+        page_number (int, optional): Current page number, with a minimum value of 1, default value is 1
+        page_size (int, optional): Number of records per page, with a minimum value of 1, maximum value not exceeding 1000, default value is 10
+        instance_id (str): Instance ID
+        backup_id (str, optional): Backup ID
+        backup_start_time (str, optional): Backup created earliest time, format is yyyy-MM-ddTHH:mm:ss.sssZ（UTC time）
+        backup_end_time (str, optional): Backup created latest time, format is yyyy-MM-ddTHH:mm:ss.sssZ（UTC time）
+        backup_status (str, optional): Backup status, enum value：
+            - Success: Backup success
+            - Failed: Backup failed
+            - Running: Backup in progress
+        backup_type (str, optional): Backup type, enum value：
+            - Full: Full backup
+            - Increment: Incremental backup
     """
     req = {
         "instance_id": instance_id,
@@ -294,16 +292,16 @@ def describe_backups(
 
 @mcp_server.tool(
     name="describe_backup_policy",
-    description="获取指定RDS PostgreSQL实例备份策略"
+    description="Get RDS PostgreSQL instance backup policy"
 )
 def describe_backup_policy(
         instance_id: str
 ) -> dict[str, Any]:
     """
-    获取指定RDS PostgreSQL实例备份策略
+    Get RDS PostgreSQL instance backup policy
 
     Args:
-        instance_id (str): 实例ID
+        instance_id (str): Instance ID
     """
     req = {
         "instance_id": instance_id
@@ -314,7 +312,7 @@ def describe_backup_policy(
 
 @mcp_server.tool(
     name="create_db_instance",
-    description="创建RDS PostgreSQL实例"
+    description="Create RDS PostgreSQL instance"
 )
 def create_db_instance(
         vpc_id: str,
@@ -339,29 +337,29 @@ def create_db_instance(
         number: Optional[int] = None,
 ) -> dict[str, Any]:
     """
-    创建RDS PostgreSQL实例
+    Create RDS PostgreSQL instance
     
     Args:
         vpc_id (str): VPC ID
-        subnet_id (str): 子网 ID
-        db_engine_version (str): 数据库引擎版本，默认值为 PostgreSQL_14
-        storage_space (int, optional): 存储空间，单位为 GB，默认值为 100
-        storage_type (str): 存储类型，默认值为 LocalSSD
-        instance_name (str, optional): 实例名称
-        project_name (str, optional): 项目名称
-        tags (list[dict], optional): 标签列表
-        primary_zone (str): 主节点可用区
-        primary_spec (str): 主节点规格，默认值为 rds.postgres.1c2g
-        secondary_zone (str): 备节点可用区
-        secondary_spec (str): 备节点规格，默认值为 rds.postgres.1c2g
-        read_only_zone (str): 只读节点可用区
-        read_only_spec (str): 只读节点规格，默认值为 rds.postgres.1c2g
-        read_only_count (int, optional): 只读节点数量，默认值为 0
-        charge_type (str): 计费类型，默认值为 PostPaid
-        auto_renew (bool, optional): 是否自动续费，默认值为 False
-        period_unit (str, optional): 预付费场景下的购买周期，默认值为 Month
-        period (int, optional): 预付费场景下的购买时长，默认值为 1
-        number (int, optional): 实例购买数量。可取 1~20 之间的整数值，默认值为 1
+        subnet_id (str): Subnet ID
+        db_engine_version (str): Database engine version, default value is PostgreSQL_14
+        storage_space (int, optional): Storage space in GB, default value is 100
+        storage_type (str): Storage type, default value is LocalSSD
+        instance_name (str, optional): Instance name
+        project_name (str, optional): Project name
+        tags (list[dict], optional): Tag list
+        primary_zone (str): Primary node availability zone
+        primary_spec (str): Primary node specification, default value is rds.postgres.1c2g
+        secondary_zone (str): Secondary node availability zone
+        secondary_spec (str): Secondary node specification, default value is rds.postgres.1c2g
+        read_only_zone (str): Read - only node availability zone
+        read_only_spec (str): Read - only node specification, default value is rds.postgres.1c2g
+        read_only_count (int, optional): Number of read - only nodes, default value is 0
+        charge_type (str): Billing type, default value is PostPaid
+        auto_renew (bool, optional): Whether to auto - renew, default value is False
+        period_unit (str, optional): Purchase cycle in prepaid scenarios, default value is Month
+        period (int, optional): Purchase duration in prepaid scenarios, default value is 1
+        number (int, optional): Number of instances to purchase. Can take integer values between 1 and 20, default value is 1
     """
     node_info = []
 
@@ -406,7 +404,7 @@ def create_db_instance(
 
 @mcp_server.tool(
     name="create_database",
-    description="创建RDS PostgreSQL数据库"
+    description="Create RDS PostgreSQL database"
 )
 def create_database(
         instance_id: str,
@@ -417,15 +415,15 @@ def create_database(
         owner: Optional[str] = None,
 ) -> dict[str, Any]:
     """
-    创建RDS PostgreSQL数据库
+    Create RDS PostgreSQL database
     
     Args:
-        instance_id (str): 实例 ID
-        db_name (str): 数据库名称
-        character_set_name (str, optional): 数据库字符集，目前支持的字符集包含：utf8（默认）、latin1、ascii
-        c_type (str, optional): 字符分类，取值范围： C（默认）、C.UTF-8、en_US.utf8、zh_CN.utf8 和 POSIX
-        collate (str, optional): 排序规则，取值范围：C（默认）、C.UTF-8、en_US.utf8、zh_CN.utf8 和 POSIX
-        owner (str, optional): 数据库的 owner
+        instance_id (str): Instance ID
+        db_name (str): Database name
+        character_set_name (str, optional): Database character set. Currently supported character sets include: utf8 (default), latin1, ascii
+        c_type (str, optional): Character classification. Valid values: C (default), C.UTF-8, en_US.utf8, zh_CN.utf8, and POSIX
+        collate (str, optional): Sorting rule. Valid values: C (default), C.UTF-8, en_US.utf8, zh_CN.utf8, and POSIX
+        owner (str, optional): Database owner
     """
     data = {
         "instance_id": instance_id,
@@ -437,21 +435,21 @@ def create_database(
     }
 
     if not instance_id:
-        raise ValueError("instance_id是必选参数")
+        raise ValueError("instance_id is a required parameter")
     if not db_name:
-        raise ValueError("db_name是必选参数")
+        raise ValueError("db_name is a required parameter")
     
     valid_charsets = {"utf8", "latin1", "ascii"}
     if character_set_name and character_set_name not in valid_charsets:
-        raise ValueError(f"无效的字符集: {character_set_name}，支持的字符集为: {', '.join(valid_charsets)}")
+        raise ValueError(f"Invalid character set: {character_set_name}, supported character sets are: {', '.join(valid_charsets)}")
     
     valid_c_types = {"C", "C.UTF-8", "en_US.utf8", "zh_CN.utf8", "POSIX"}
     if c_type and c_type not in valid_c_types:
-        raise ValueError(f"无效的字符分类: {c_type}，支持的字符分类为: {', '.join(valid_c_types)}")
+        raise ValueError(f"Invalid character classification: {c_type}, supported character classifications are: {', '.join(valid_c_types)}")
 
     valid_collates = {"C", "C.UTF-8", "en_US.utf8", "zh_CN.utf8", "POSIX"}
     if collate and collate not in valid_collates:
-        raise ValueError(f"无效的排序规则: {collate}，支持的排序规则为: {', '.join(valid_collates)}")
+        raise ValueError(f"Invalid sorting rule: {collate}, supported sorting rules are: {', '.join(valid_collates)}")
 
     resp = rds_postgresql_resource.create_database(data)
 
@@ -463,7 +461,7 @@ def create_database(
 
 @mcp_server.tool(
     name="create_db_account",
-    description="创建RDS PostgreSQL数据库账号"
+    description="Create RDS PostgreSQL database account"
 )
 def create_db_account(
         instance_id: str,
@@ -473,66 +471,65 @@ def create_db_account(
         account_privileges: Optional[str] = None,
 ) -> dict[str, Any]:
     """
-    创建RDS PostgreSQL数据库账号
+    Create RDS PostgreSQL database account
     
     Args:
-        instance_id (str): 实例 ID
-        account_name (str): 数据库账号名称。账号名称的设置规则如下：
-            - 长度 2~63 个字符
-            - 由字母、数字、下划线（_）或中划线（-）组成
-            - 以字母开头，字母或数字结尾
-            - 不能以 pg_ 开头
-            - 不能使用保留关键字，所有被禁用的关键词请参见 [禁用关键词](https://www.volcengine.com/docs/6438/80243)
-        account_password (str): 数据库账号的密码。数据库账号密码的设置规则如下：
-            - 长度为 8~32 个字符
-            - 由大写字母、小写字母、数字、特殊字符中的任意三种组成
-            - 特殊字符为 !@#$%^*()&_+-=
-        account_type (str, optional): 数据库账号类型，取值范围如下：
-            - Super：高权限账号
-            - Normal：普通账号
-            - InstanceReadOnly：实例只读账号
-        account_privileges (str, optional): 账号权限信息。多个权限中间以英文逗号（,）分隔。取值：
-            - Login：登录权限
-            - Inherit：继承权限
-            - CreateRole：创建角色权限
-            - CreateDB：创建数据库权限
+        instance_id (str): Instance ID
+        account_name (str): Database account name. The rules for setting the account name are as follows:
+            - 2 to 63 characters in length
+            - Consists of letters, numbers, underscores (_), or hyphens (-)
+            - Starts with a letter and ends with a letter or number
+            - Cannot start with pg_
+            - Cannot use reserved keywords. All prohibited keywords can be found in [Prohibited Keywords](https://www.volcengine.com/docs/6438/80243)
+        account_password (str): Database account password. The rules for setting the database account password are as follows:
+            - 8 to 32 characters in length
+            - Consists of any three of uppercase letters, lowercase letters, numbers, and special characters
+            - Special characters are !@#$%^*()&_+-=
+        account_type (str, optional): Database account type. Valid values are as follows:
+            - Super: High - privilege account
+            - Normal: Normal account
+            - InstanceReadOnly: Instance read - only account
+        account_privileges (str, optional): Account permission information. Multiple permissions are separated by English commas (,). Valid values:
+            - Login: Login permission
+            - Inherit: Inheritance permission
+            - CreateRole: Create role permission
+            - CreateDB: Create database permission
     """
     if not instance_id:
-        raise ValueError("instance_id是必选参数")
+        raise ValueError("instance_id is a required parameter")
     if not account_name:
-        raise ValueError("account_name是必选参数")
+        raise ValueError("account_name is a required parameter")
     if not account_password:
-        raise ValueError("account_password是必选参数")
+        raise ValueError("account_password is a required parameter")
 
-    import re
     if account_name.startswith("pg_"):
-        raise ValueError("账号名称不能以 pg_ 开头")
+        raise ValueError("Account name cannot start with pg_")
     if not re.match(r'^[a-zA-Z][a-zA-Z0-9_-]{0,61}[a-zA-Z0-9]$', account_name):
         raise ValueError(
-            "账号名称不符合命名规则：长度为2~63个字符，以字母开头，以字母或数字结尾，由字母、数字、下划线或中划线组成，不能使用保留关键字，所有被禁用的关键词请参见 [禁用关键词](https://www.volcengine.com/docs/6438/80243)")
+            "Account name does not meet the naming rules: 2 to 63 characters in length, starts with a letter, ends with a letter or number, consists of letters, numbers, underscores, or hyphens, and cannot use reserved keywords. All prohibited keywords can be found in [Prohibited Keywords](https://www.volcengine.com/docs/6438/80243)")
 
     if not (8 <= len(account_password) <= 32):
-        raise ValueError("密码长度必须为8~32个字符")
+        raise ValueError("Password length must be between 8 and 32 characters")
 
     conditions = [
-        bool(re.search(r'[A-Z]', account_password)),  # 大写字母
-        bool(re.search(r'[a-z]', account_password)),  # 小写字母
-        bool(re.search(r'[0-9]', account_password)),  # 数字
-        bool(re.search(r'[!@#$%^&*()_+\-=,.&?|/]', account_password))  # 特殊字符
+        bool(re.search(r'[A-Z]', account_password)),  # Uppercase letters
+        bool(re.search(r'[a-z]', account_password)),  # Lowercase letters
+        bool(re.search(r'[0-9]', account_password)),  # Numbers
+        bool(re.search(r'[!@#$%^&*()_+\-=,.&?|/]', account_password))  # Special characters
     ]
 
     if sum(conditions) < 3:
-        raise ValueError("密码必须包含大写字母、小写字母、数字、特殊字符中的至少三种")
+        raise ValueError("Password must contain at least three of uppercase letters, lowercase letters, numbers, and special characters")
 
     valid_account_types = {"Super", "Normal", "InstanceReadOnly"}
     if account_type and account_type not in valid_account_types:
-        raise ValueError(f"无效的账号类型: {account_type}，支持的账号类型为: {', '.join(valid_account_types)}")
+        raise ValueError(f"Invalid account type: {account_type}, supported account types are: {', '.join(valid_account_types)}")
     
     if account_privileges:
         valid_privileges = {"Login", "Inherit", "CreateRole", "CreateDB"}
         privileges = set(account_privileges.split(','))
         if not privileges.issubset(valid_privileges):
-            raise ValueError(f"无效的权限信息: {account_privileges}，支持的权限信息为: {', '.join(valid_privileges)}")
+            raise ValueError(f"Invalid permission information: {account_privileges}, supported permission information are: {', '.join(valid_privileges)}")
 
     data = {
         "instance_id": instance_id,
@@ -551,7 +548,7 @@ def create_db_account(
 
 @mcp_server.tool(
     name="create_schema",
-    description="创建RDS PostgreSQL数据库Schema"
+    description="Create RDS PostgreSQL database Schema"
 )
 def create_schema(
         instance_id: str,
@@ -560,35 +557,35 @@ def create_schema(
         owner: str,
 ) -> dict[str, Any]:
     """
-    创建RDS PostgreSQL数据库Schema
+    Create RDS PostgreSQL database Schema
     
     Args:
-        instance_id (str): 实例 ID
-        db_name (str): 数据库名称
-        schema_name (str): Schema 名称
-            - 长度 2~63 个字符
-            - 由字母、数字、下划线（_）或中划线（-）组成
-            - 以字母开头，字母或数字结尾
-            - 不能使用保留关键字，所有被禁用的关键词请参见[禁用关键词](https://www.volcengine.com/docs/6438/80243)
-            - 不能以 pg_ 开头
-        owner (str): Schema 的 owner
+        instance_id (str): Instance ID
+        db_name (str): Database name
+        schema_name (str): Schema name
+            - 2 to 63 characters in length
+            - Consists of letters, numbers, underscores (_), or hyphens (-)
+            - Starts with a letter and ends with a letter or number
+            - Cannot use reserved keywords. All prohibited keywords can be found in [Prohibited Keywords](https://www.volcengine.com/docs/6438/80243)
+            - Cannot start with pg_
+        owner (str): Schema owner
     """
     if not instance_id:
-        raise ValueError("instance_id是必选参数")
+        raise ValueError("instance_id is a required parameter")
     if not db_name:
-        raise ValueError("db_name是必选参数")
+        raise ValueError("db_name is a required parameter")
     if not schema_name:
-        raise ValueError("schema_name是必选参数")
+        raise ValueError("schema_name is a required parameter")
     if not owner:
-        raise ValueError("owner是必选参数")
+        raise ValueError("owner is a required parameter")
 
     if schema_name.startswith("pg_"):
-        raise ValueError("Schema 名称不能以 pg_ 开头")
+        raise ValueError("Schema name cannot start with pg_")
 
     import re
     if not re.match(r'^[a-zA-Z][a-zA-Z0-9_-]{0,61}[a-zA-Z0-9]$', schema_name):
         raise ValueError(
-            "Schema 名称不符合命名规则：长度为2~63个字符，以字母开头，以字母或数字结尾，由字母、数字、下划线或中划线组成，不能使用保留关键字，所有被禁用的关键词请参见 [禁用关键词](https://www.volcengine.com/docs/6438/80243)")
+            "Schema name does not meet the naming rules: 2 to 63 characters in length, starts with a letter, ends with a letter or number, consists of letters, numbers, underscores, or hyphens, and cannot use reserved keywords. All prohibited keywords can be found in [Prohibited Keywords](https://www.volcengine.com/docs/6438/80243)")
 
     data = {
         "instance_id": instance_id,

@@ -1,90 +1,89 @@
 # RDS PostgreSQL MCP Server
-> 火山引擎 RDS PostgreSQL 版是由火山引擎提供的完全兼容开源 PostgreSQL 的关系型数据库服务，支持实例管理、数据库管理、账号管理、Schema管理、连接管理、参数管理、备份恢复、日志管理、事件管理、数据安全等关键特性。
+> Volcengine RDS PostgreSQL is a relational database service provided by Volcengine that is fully compatible with open - source PostgreSQL. It supports key features such as instance management, database management, account management, Schema management, connection management, parameter management, backup and recovery, log management, event management, and data security.
 
 ---
 
-
-| 项目 | 详情 |
+| Item | Details |
 | ---- | ---- |
-| 版本 | v1.0.0 |
-| 描述 | 火山引擎 RDS PostgreSQL 版即开即用、稳定可靠的关系型数据库服务 |
-| 分类 | 数据库 |
-| 标签 | PostgreSQL, RDS, 关系型数据库, 数据库 |
+| Version | v1.0.0 |
+| Description | Volcengine RDS PostgreSQL is a ready - to - use and reliable relational database service. |
+| Category | Database |
+| Tags | PostgreSQL, RDS, Relational Database, Database |
 
 ---
 
 ## Tools
 
 ### 1. `describe_db_instances`
-- **详细描述**：查看用户的 RDS PostgreSQL 实例列表，支持分页查询。
-- **触发示例**：`"列出我的 RDS PostgreSQL 实例"`
+- **Detailed Description**: View the list of a user's RDS PostgreSQL instances, supporting pagination queries.
+- **Trigger Example**: `"List my RDS PostgreSQL instances"`
 
 ### 2. `describe_db_instance_detail`
-- **详细描述**：根据指定 RDS PostgreSQL 实例 ID 查看实例详情。
-- **触发示例**：`"查看实例ID 为 postgres-123456 的详细信息"`
+- **Detailed Description**: View the details of a specified RDS PostgreSQL instance by its ID.
+- **Trigger Example**: `"View the details of the instance with ID postgres-123456"`
 
 ### 3. `describe_databases`
-- **详细描述**：获取指定RDS PostgreSQL实例的数据库列表。
-- **触发示例**：`"获取 postgres-123456 实例的数据库列表"`
+- **Detailed Description**: Get the list of databases for a specified RDS PostgreSQL instance.
+- **Trigger Example**: `"Get the database list of the postgres-123456 instance"`
 
 ### 4. `describe_db_accounts`
-- **详细描述**：获取指定RDS PostgreSQL实例的账号列表。
-- **触发示例**：`"获取 postgres-123456 实例的账号列表"`
+- **Detailed Description**: Get the list of accounts for a specified RDS PostgreSQL instance.
+- **Trigger Example**: `"Get the account list of the postgres-123456 instance"`
 
 ### 5. `describe_schemas`
-- **详细描述**：获取指定RDS PostgreSQL实例的schema列表。
-- **触发示例**：`"获取 postgres-123456 实例的 schema 列表"`
+- **Detailed Description**: Get the list of schemas for a specified RDS PostgreSQL instance.
+- **Trigger Example**: `"Get the schema list of the postgres-123456 instance"`
 
 ### 6. `describe_db_instance_parameters`
-- **详细描述**：获取指定RDS PostgreSQL实例参数列表。
-- **触发示例**：`"获取 postgres-123456 实例的参数列表"`
+- **Detailed Description**: Get the list of parameters for a specified RDS PostgreSQL instance.
+- **Trigger Example**: `"Get the parameter list of the postgres-123456 instance"`
 
 ### 7. `describe_allow_lists`
-- **详细描述**：获取RDS PostgreSQL指定地域下的白名单列表。
-- **触发示例**：`"获取 cn-beijing 地域下的白名单列表"`
+- **Detailed Description**: Get the list of allow lists in a specified region for RDS PostgreSQL.
+- **Trigger Example**: `"Get the allow list in the cn-beijing region"`
 
 ### 8. `describe_allow_list_detail`
-- **详细描述**：获取RDS PostgreSQL白名单详情。
-- **触发示例**：`"获取白名单 acl-123456 的详情"`
+- **Detailed Description**: Get the details of an RDS PostgreSQL allow list.
+- **Trigger Example**: `"Get the details of the allow list acl-123456"`
 
 ### 9. `describe_backups`
-- **详细描述**：获取指定RDS PostgreSQL实例备份列表。
-- **触发示例**：`"获取 postgres-123456 实例的备份列表"`
+- **Detailed Description**: Get the list of backups for a specified RDS PostgreSQL instance.
+- **Trigger Example**: `"Get the backup list of the postgres-123456 instance"`
 
 ### 10. `describe_backup_policy`
-- **详细描述**：获取指定RDS PostgreSQL实例备份策略。
-- **触发示例**：`"获取 postgres-123456 实例的备份策略"`
+- **Detailed Description**: Get the backup policy for a specified RDS PostgreSQL instance.
+- **Trigger Example**: `"Get the backup policy of the postgres-123456 instance"`
 
 ### 11. `create_db_instance`
-- **详细描述**：创建RDS PostgreSQL实例。
-- **触发示例**：`"创建一个 RDS PostgreSQL 实例"`
+- **Detailed Description**: Create an RDS PostgreSQL instance.
+- **Trigger Example**: `"Create an RDS PostgreSQL instance"`
 
 ### 12. `create_database`
-- **详细描述**：创建RDS PostgreSQL数据库。
-- **触发示例**：`"在 postgres-123456 实例中创建一个数据库为 testdb"`
+- **Detailed Description**: Create an RDS PostgreSQL database.
+- **Trigger Example**: `"Create a database named testdb in the postgres-123456 instance"`
 
 ### 13. `create_db_account`
-- **详细描述**：创建RDS PostgreSQL数据库账号。
-- **触发示例**：`"在 postgres-123456 实例中创建一个账号为 testuser 的数据库账号"`
+- **Detailed Description**: Create an RDS PostgreSQL database account.
+- **Trigger Example**: `"Create a database account named testuser in the postgres-123456 instance"`
 
 ### 14. `create_schema`
-- **详细描述**：创建RDS PostgreSQL数据库Schema。
-- **触发示例**：`"在 postgres-123456 实例的 testdb 数据库中创建一个 schema 为 testschema"`
+- **Detailed Description**: Create an RDS PostgreSQL database Schema.
+- **Trigger Example**: `"Create a schema named testschema in the testdb database of the postgres-123456 instance"`
 
 ---
 
-## 服务开通链接
-[点击前往火山引擎 RDS PostgreSQL 服务开通页面](https://console.volcengine.com/db/rds-pg)
+## Service Activation Link
+[Click to go to the Volcengine RDS PostgreSQL service activation page](https://console.volcengine.com/db/rds-pg)
 
 ---
 
-## 鉴权方式
-在火山引擎管理控制台获取访问密钥 ID、秘密访问密钥和区域，采用 API Key 鉴权。需要在配置文件中设置 `VOLCENGINE_ACCESS_KEY` 和 `VOLCENGINE_SECRET_KEY`。
+## Authentication Method
+Obtain the access key ID, secret access key, and region from the Volcengine Management Console, and use API Key authentication. You need to set `VOLCENGINE_ACCESS_KEY` and `VOLCENGINE_SECRET_KEY` in the configuration file.
 
 ---
 
-## 部署
-火山引擎RDS PostgreSQL 服务接入地址：https://www.volcengine.com/docs/6438/69237
+## Deployment
+Volcengine RDS PostgreSQL service access address: https://www.volcengine.com/docs/6438/69237
 ```json
 {
   "mcpServers": {
@@ -97,11 +96,11 @@
       ],
       "transportType": "stdio",
       "env": {
-        "VOLCENGINE_ENDPOINT": "火山引擎endpoint",
-        "VOLCENGINE_REGION": "火山引擎资源region",
-        "VOLCENGINE_ACCESS_KEY": "火山引擎账号ACCESSKEY",
-        "VOLCENGINE_SECRET_KEY": "火山引擎账号SECRETKEY",
-        "MCP_SERVER_PORT": "MCP server监听端口"
+        "VOLCENGINE_ENDPOINT": "Volcengine endpoint",
+        "VOLCENGINE_REGION": "Volcengine resource region",
+        "VOLCENGINE_ACCESS_KEY": "Volcengine account ACCESSKEY",
+        "VOLCENGINE_SECRET_KEY": "Volcengine account SECRETKEY",
+        "MCP_SERVER_PORT": "MCP server listening port"
       }
     }
   }
@@ -109,7 +108,4 @@
 ```
 
 ## License
-
 volcengine/mcp-server is licensed under the [MIT License](https://github.com/volcengine/mcp-server/blob/main/LICENSE).
-
-
