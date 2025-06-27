@@ -966,7 +966,7 @@ def describe_subnets(
             "cn-beijing-a",
             description="可用区ID，默认为cn-beijing-a",
         ),
-) -> List[str]:
+) -> dict[str, Any]:
     if not zone_id:
         zone_id = "cn-beijing-a"
     query_params = {
