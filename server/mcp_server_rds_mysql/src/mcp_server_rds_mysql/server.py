@@ -933,7 +933,7 @@ def create_db_account(
 
 
 
-@mcp.tool(
+@mcp_server.tool(
     description="查询满足指定条件的VPC"
 )
 def describe_vpcs(
@@ -952,7 +952,7 @@ def describe_vpcs(
     resp = rds_mysql_resource.describe_subnets(query_params)
     return resp.to_dict()
 
-@mcp.tool(
+@mcp_server.tool(
     description="查询满足指定条件的子网"
 )
 def describe_subnets(
