@@ -289,8 +289,6 @@ def search_knowledge(
         content: the content of the knowledge base chunk.
     """
 
-    logger.info(f"Received search_knowledge request with query: {query}, limit: {limit}")
-
     try:
         if not collection_name:
             raise ValueError("Collection name cannot be empty.")

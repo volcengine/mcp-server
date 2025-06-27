@@ -55,6 +55,11 @@ class TosResource:
         if self.client is None:
             raise exceptions.TosClientError("TosClient is not initialized")
 
+        if headers is None:
+            headers = {"User-Agent": self.user_agent}
+        else:
+            headers["User-Agent"] = self.user_agent
+
         # 通过变量赋值,防止动态调整 auth endpoint 出现并发问题
         sign_out = self.client.pre_signed_url(HttpMethodType.Http_Method_Get, bucket, key, 3600, headers, params)
         attempt = 0

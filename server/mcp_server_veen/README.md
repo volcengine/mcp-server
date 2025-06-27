@@ -1,5 +1,6 @@
-# VEEN Edge MCP Server
+# VEEN MCP Server
 
+> Volcengine Edge Computing Node MCP Server
 
 ## Version Information
 
@@ -27,43 +28,42 @@ Edge Computing, Virtual Machine, Image, Storage
 
 This MCP Server product provides the following Tools (capabilities):
 
-### Tool 1: start_cloud_server
-
-Start the cloud server by the specific ID.
-
-### Tool 2: get_cloud_server
+### Tool 1: get_cloud_server
 
 Get details of the cloud server by the specific ID.
 
-### Tool 3: start_instances
+### Tool 2: start_instances
 
 Start the edge computing node instance by the specific ID.
 
-### Tool 4: get_instance
+### Tool 3: get_instance
 
 Get details of the edge computing node instance by the specific ID.
 
-### Tool 5: list_instances
+### Tool 4: list_instances
 
 List the edge computing node instances.
 
-### Tool 6: get_image
+### Tool 5: get_image
 
 Get details of the container image by the specific ID.
 
-### Tool 7: list_instance_internal_ips
+### Tool 6: list_instance_internal_ips
 
 List all internal IP addresses of the specific edge computing node.
 
-### Tool 8: list_instance_types
+### Tool 7: list_instance_types
 
 List all the available spec types of the specific edge computing node.
 
 ## Compatible Platforms
 
-Python
+- Python
+- Node.js
 
 ## Service Activation Link
+
+You need to activate the VEEN service in your Volcengine account.
 
 https://console.volcengine.com/edge/veen
 
@@ -71,32 +71,30 @@ https://console.volcengine.com/edge/veen
 
 AK&amp;SK
 
-## Installation
+### Get AK&amp;SK
 
-### Using uv
+Obtain Access Key ID and Secret Access Key from [Access control in Volcengine Console](https://console.volcengine.com/iam/identitymanage/user).
 
-When using [`uv`](https://docs.astral.sh/uv/) no specific installation is needed.
-We will use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run.
+Note: the Access Key ID and Secret Access Key must have permissions for the OpenAPIs (available tools).
 
-```bash
-cd mcp-server/server/mcp_server_veen
-uv run mcp-server-veen
+### Environment Variable Configuration
 
-# Start with sse mode (default is stdio)
-uv run mcp-server-veen -t sse
-```
+| Variable Name | Value |
+| ---------- | ---------- |
+| `VOLCENGINE_ACCESS_KEY` | Your Volcengine Access Key ID |
+| `VOLCENGINE_SECRET_KEY` | Your Volcengine Secret Access Key |
 
-### Using a client
+## Python - MCP Server
 
-Use a client to interact with the server:
+### Dependencies
 
-- 方舟
-- Trae
-- Cursor
+- [Python](https://www.python.org/downloads/) 3.11 or higher.
+- [`uv`](https://docs.astral.sh/uv/) and [`uvx`](https://docs.astral.sh/uv/guides/tools/) packages for running the server.
+- For Windows NT OS user, please refer to [PyCryptodome documentation](https://pycryptodome.readthedocs.io/en/latest/src/installation.html#windows-from-sources) to configure the compilation environment of this library, otherwise the MCP server will not start normally.
 
-## Deployment
+### Deployment and configuration
 
-### Integration in MCP Client
+![Configuration sample in Cline](./assets/cline_mcp_add.jpg)
 
 ```json
 {
@@ -105,7 +103,7 @@ Use a client to interact with the server:
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_veen",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_veen/python",
         "mcp-server-veen"
       ],
       "env": {
@@ -117,6 +115,52 @@ Use a client to interact with the server:
 }
 ```
 
+> P.S. Please replace `Your Volcengine AK` and `Your Volcengine SK` above with your own Access Key ID and Secret Access Key.
+
+## Node.js - MCP Server
+
+### Dependencies
+
+- [Node.js](https://nodejs.org/en/download) 22.14.1 or higher
+
+### Deployment and configuration
+
+```json
+{
+  "mcpServers": {
+    "mcp-server-veen": {
+      "command": "node",
+      "args": [
+        "--from",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_veen/nodejs",
+        "mcp-server-veen"
+      ],
+      "env": {
+        "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
+        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK"
+      }
+    }
+  }
+}
+```
+
+> P.S. Please replace `Your Volcengine AK` and `Your Volcengine SK` above with your own Access Key ID and Secret Access Key.
+
+### Using a client
+
+Use a client to interact with the server.
+
+- Cursor
+- [Trae](https://www.trae.com.cn/)
+- Claude Desktop
+- 方舟
+
+Also support [Cline](https://cline.bot/).
+
+## Usage Examples
+
+- List all stopped edge instances.
+
 ## License
 
-MIT
+[MIT](../../LICENSE)

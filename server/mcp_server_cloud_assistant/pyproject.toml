@@ -5,12 +5,9 @@ description = "Cloud Assistant MCP Server"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "mcp[cli]>=1.6.0",
+    "mcp>=1.9.4",
     "volcengine-python-sdk>=3.0.1",
 ]
-
-[tool.uv.sources]
-mcp = { git = "https://github.com/zihengli-bytedance/python-sdk.git", rev = "temp-for-volc" }
 
 [build-system]
 requires = ["hatchling"]

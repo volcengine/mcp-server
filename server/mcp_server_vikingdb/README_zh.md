@@ -89,7 +89,7 @@ Parameters:
         "args": [
           "--from",
           "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vikingdb",
-          "mcp-server-vikingdb",
+          "mcp-server-vikingdb"
         ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "your-access-key",
@@ -97,7 +97,7 @@ Parameters:
         "VIKING_DB_COLLECTION_NAME": "your-vikingdb-collection-name",
         "VIKING_DB_INDEX_NAME": "your-vikingdb-index-name", 
         "VIKING_DB_REGION": "your-vikingdb-collection-region"
-      },
+      }
     }
   }
 }
