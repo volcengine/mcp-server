@@ -1,4 +1,4 @@
-# 域名服务 MCP Server
+# 企业服务 MCP Server
 
 企业服务全新推出的 MCP Server，具备商标查询等功能，支持通过自然语言交互轻松查询商标信息，申请人信息，需求信息。
 
@@ -61,7 +61,7 @@
 
 ### search_trademark
 
-我想查询下 火山引擎 商标的状态
+我想查询下【火山引擎】商标的状态
 
 ### list_trademarks
 

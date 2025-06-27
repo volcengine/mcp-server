@@ -71,7 +71,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_domain_pv_data(params: dict, body: dict) -> str:
         """
-        查询PV统计数据
+        查询PV统计数据。
         Call steps:
         1. Pass "describe_domain_pv_data" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_domain_pv_data
@@ -83,7 +83,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_realtime_data(params: dict, body: dict) -> str:
         """
-        查询访问实时监控
+        查询访问实时监控数据。
         Call steps:
         1. Pass "describe_realtime_data" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_realtime_data
@@ -95,7 +95,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_domain_uv_data(params: dict, body: dict) -> str:
         """
-        查询UV统计数据
+        查询UV统计数据。
         Call steps:
         1. Pass "describe_domain_uv_data" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_domain_uv_data
@@ -121,7 +121,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_origin_realtime_data(params: dict, body: dict) -> str:
         """
-        查询回源实时监控
+        查询回源实时监控数据。
         Call steps:
         1. Pass "describe_origin_realtime_data" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_origin_realtime_data
@@ -135,7 +135,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_origin_statistics(params: dict, body: dict) -> str:
         """
-        查询回源资源用量
+        查询回源资源概况。
         Call steps:
         1. Pass "describe_origin_statistics" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_origin_statistics
@@ -147,7 +147,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_top_domains(params: dict, body: dict) -> str:
         """
-        查询域名排行统计数据
+        查询域名排行统计数据。
         Call steps:
         1. Pass "describe_top_domains" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_top_domains
@@ -159,7 +159,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_top_i_ps(params: dict, body: dict) -> str:
         """
-        查询IP排行统计数据
+        查询客户端 IP 排行统计数据。
         Call steps:
         1. Pass "describe_top_i_ps" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_top_i_ps
@@ -171,7 +171,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_top_referers(params: dict, body: dict) -> str:
         """
-        查询Referer排行统计数据
+        查询 Referer 排行统计数据。
         Call steps:
         1. Pass "describe_top_referers" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_top_referers
@@ -183,7 +183,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_top_urls(params: dict, body: dict) -> str:
         """
-        查询URL排行统计数据
+        查询URL排行统计数据。可根据流量、峰值带宽、请求数、峰值QPS排行。
         Call steps:
         1. Pass "describe_top_urls" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_top_urls
@@ -198,7 +198,7 @@ def create_mcp_server():
         API描述
         API名称：ListCert。
         API域名：open.volcengineapi.com。
-        API描述：查询用户在火山平台拥有的证书。
+        API描述：查询用户在火山引擎拥有的证书。
         Call steps:
         1. Pass "list_cert" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  list_cert
@@ -223,18 +223,6 @@ def create_mcp_server():
         return reqs
 
     @mcp.tool()
-    def describe_statistics(params: dict, body: dict) -> str:
-        """
-        查询全球加速监控数据
-        Call steps:
-        1. Pass "describe_statistics" as an input parameter to invoke the `get_note` method to obtain the parameter description.
-        2. After obtaining the parameter description, invoke  describe_statistics
-        """
-        reqs = service.mcp_post("McpDescribeStatistics", params, json.dumps(body))
-
-        return reqs
-
-    @mcp.tool()
     def describe_domain_region_data(params: dict, body: dict) -> str:
         """
         查询域名的区域分布统计数据。
@@ -243,6 +231,18 @@ def create_mcp_server():
         2. After obtaining the parameter description, invoke  describe_domain_region_data
         """
         reqs = service.mcp_post("McpDescribeDomainRegionData", params, json.dumps(body))
+
+        return reqs
+
+    @mcp.tool()
+    def describe_statistics(params: dict, body: dict) -> str:
+        """
+        查询客户端访问视角的监控统计数据。
+        Call steps:
+        1. Pass "describe_statistics" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+        2. After obtaining the parameter description, invoke  describe_statistics
+        """
+        reqs = service.mcp_post("McpDescribeStatistics", params, json.dumps(body))
 
         return reqs
 
