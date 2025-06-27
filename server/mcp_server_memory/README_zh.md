@@ -58,6 +58,7 @@ Trae | Cursor ｜ Claude Desktop | Cline | ...
 | `MEMORY_PROJECT` | 记忆库所属项目         | -          |
 | `MEMORY_REGION`  | 记忆库区域           | cn-north-1 |
 | `MEMORY_COLLECTION_NAME`  | 记忆库名称           | -          |
+| `MEMORY_USER_ID`  | 记忆所属于的用户名       | -          |
 
 
 ## 可用工具
@@ -105,7 +106,8 @@ Parameters:
         "VOLCENGINE_SECRET_KEY": "your-secret-key",
         "MEMORY_PROJECT": "your-project-name",
         "MEMORY_REGION": "your-region",
-        "MEMORY_COLLECTION_NAME": "your-memory-collection"
+        "MEMORY_COLLECTION_NAME": "your-memory-collection",
+        "MEMORY_USER_ID": "your-user-id"
       }
     }
   }

@@ -39,6 +39,7 @@ Optional environment variables:
 - `MEMORY_PROJECT`: Your viking memory project name
 - `MEMORY_REGION`: Your viking memory region,if not provided, will use `cn-north-1` as default
 - `MEMORY_COLLECTION_NAME`: Your viking memory collection name
+- `MEMORY_USER_ID`: Your userid
 
 ## Usage
 
@@ -103,7 +104,8 @@ To add this server to your MCP configuration, add the following to your MCP sett
         "VOLCENGINE_SECRET_KEY": "your-secret-key",
         "MEMORY_PROJECT": "your-project-name",
         "MEMORY_REGION": "your-region",
-        "MEMORY_COLLECTION_NAME": "your-memory-collection"
+        "MEMORY_COLLECTION_NAME": "your-memory-collection", 
+        "MEMORY_USER_ID": "your-user-id"
       }
     }
   }
