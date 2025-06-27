@@ -94,7 +94,7 @@ def request(method, date, query, header, ak, sk, token, action, body):
     if token is not None:
         credential["session_token"] = token
 
-    if action == "CodeUploadCallback":
+    if action in ['CodeUploadCallback', 'CreateDependencyInstallTask', 'GetDependencyInstallTaskStatus']:
         credential["service"] = "vefaas"
 
     content_type = ContentType
