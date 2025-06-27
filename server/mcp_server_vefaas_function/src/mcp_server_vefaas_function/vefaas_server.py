@@ -780,10 +780,13 @@ def handle_dependency(api_instance: VEFAASApi, function_id: str, local_folder_pa
 
             status = status_resp['Result']['Status']
             if status == 'Failed':
-                # log_download_resp = request("POST", now, {}, {}, ak, sk, token,
-                #                       "GetDependencyInstallTaskLogDownloadURI", json.dumps(body))
-                # url = log_download_resp['Result']['DownloadURL']
-                raise ValueError("Dependency installation failed.")
+                log_download_resp = request("POST", now, {}, {}, ak, sk, token,
+                                      "GetDependencyInstallTaskLogDownloadURI", json.dumps(body))
+                url = log_download_resp['Result']['DownloadURL']
+                url = url.replace("\\u0026", "&")
+                response = requests.get(url, timeout=30)
+                install_log = response.text
+                raise ValueError("Dependency installation failed. Install log \n" + install_log)
             elif status == 'Succeeded':
                 print("Dependency installation succeeded.")
                 break
