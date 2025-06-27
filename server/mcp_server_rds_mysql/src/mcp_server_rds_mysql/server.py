@@ -389,8 +389,8 @@ def modify_db_account_description(
     description="创建 RDS MySQL 实例"
 )
 def create_rds_mysql_instance(
-        vpc_id: str = Field(description="私有网络 ID"),
-        subnet_id: str = Field(description="子网 ID"),
+        vpc_id: str = Field(title="私有网络 ID", description="需要使用describe_vpcs获取"),
+        subnet_id: str = Field(title="子网 ID", description="需要使用describe_subnets获取"),
         db_engine_version: str = Field(default="MySQL_8_0", description="数据库版本"),
         instance_name: Optional[str] = Field(default=None, description="实例名称"),
         primary_zone: str = Field(default="cn-beijing-a", description="主节点可用区"),
@@ -934,11 +934,12 @@ def create_db_account(
 
 
 @mcp_server.tool(
-    description="查询满足指定条件的VPC"
+    name="describe_vpcs",
+    description="查询满足指定条件的VPC，用于创建实例"
 )
 def describe_vpcs(
-        page_number: int = 1,
-        page_size: int = 5
+        page_number: int = Field(default=1, description="当前页页码，最小值为1"),
+        page_size: int = Field(default=5, description="每页记录数，范围1-1000")
 ) -> dict[str, Any]:
     if not page_number:
         page_number = 1
@@ -953,14 +954,19 @@ def describe_vpcs(
     return resp.to_dict()
 
 @mcp_server.tool(
-    description="查询满足指定条件的子网"
+    name="describe_subnets",
+    description="查询满足指定条件的子网，用于创建实例"
 )
 def describe_subnets(
-        vpc_id: str,
-        zone_id: str = "cn-beijing-a"
+        vpc_id: str = Field(
+            ...,
+            description="VPC ID",
+        ),
+        zone_id: str = Field(
+            "cn-beijing-a",
+            description="可用区ID，默认为cn-beijing-a",
+        ),
 ) -> List[str]:
-    logger.info(f"Received describe_subnets request")
-
     if not zone_id:
         zone_id = "cn-beijing-a"
     query_params = {
