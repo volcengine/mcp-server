@@ -16,6 +16,10 @@ from volcenginesdkrdsmysqlv2.models import DescribeDBInstancesRequest, DescribeD
     AssociateAllowListRequest, AssociateAllowListResponse, \
     CreateDBAccountRequest, CreateDBAccountResponse
 
+from volcenginesdkvpc.api.vpc_api import VPCApi
+from volcenginesdkvpc.models import DescribeVpcsRequest, DescribeVpcsResponse, DescribeSubnetsRequest,DescribeSubnetsResponse
+
+
 class RDSMySQLSDK:
     """初始化 volc RDS MySQL client"""
 
@@ -27,6 +31,7 @@ class RDSMySQLSDK:
         if host is not None:
             configuration.host = host
         self.client = RDSMYSQLV2Api(volcenginesdkcore.ApiClient(configuration))
+        self.vpcClient = VPCApi(volcenginesdkcore.ApiClient(configuration))
 
     def describe_db_instances(self, args: dict) -> DescribeDBInstancesResponse:
         return self.client.describe_db_instances(DescribeDBInstancesRequest(**args))
@@ -72,4 +77,11 @@ class RDSMySQLSDK:
 
     def create_db_account(self, args: dict) -> CreateDBAccountResponse:
         return self.client.create_db_account(CreateDBAccountRequest(**args))
+
+    def describe_vpcs(self, args: dict) -> DescribeVpcsResponse:
+        return self.vpcClient.describe_vpcs(DescribeVpcsRequest(**args))
+
+    def describe_subnets(self, args: dict) -> DescribeSubnetsResponse:
+        return self.vpcClient.describe_subnets(DescribeSubnetsRequest(**args))
+
 
