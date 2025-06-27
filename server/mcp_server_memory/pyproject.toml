@@ -1,7 +1,7 @@
 [project]
 name = "mcp-server-memory"
 version = "0.1.0"
-description = "MCP server for Viking Knowledge Base Service"
+description = "MCP server for Viking Memory Service"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}

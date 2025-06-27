@@ -1,11 +1,11 @@
-# Viking Knowledge Base MCP Server
+# Viking Memory MCP Server
 
-This MCP server provides a tool to interact with the VolcEngine Viking Knowledge Base Service, allowing you to search and retrieve knowledge from your collections, meanwhile,
-allowing you to add doc to your collections and get doc processing info by doc_id.
+This MCP server provides a tool to interact with the VolcEngine Viking Memory Service, allowing you to add and search memory from your collections. 
+
 
 ## Features
 
-- Search knowledge based on queries with customizable parameters
+- Search memory on queries with customizable parameters
 
 ## Setup
 
@@ -36,9 +36,9 @@ The server requires the following environment variables:
 - `VOLCENGINE_SECRET_KEY`: Your VolcEngine secret key
 
 Optional environment variables:
-- `KNOWLEDGE_BASE_PROJECT`: Your viking knowledge base project name
-- `KNOWLEDGE_BASE_REGION`: Your viking knowledge base region,if not provided, will use `cn-north-1` as default
-- `PORT`: Port for the FastMCP server (default: 8000)
+- `MEMORY_PROJECT`: Your viking memory project name
+- `MEMORY_REGION`: Your viking memory region,if not provided, will use `cn-north-1` as default
+- `MEMORY_COLLECTION_NAME`: Your viking memory collection name
 
 ## Usage
 
@@ -58,84 +58,31 @@ python -m mcp_server_memory.server --transport sse
 
 ### Available Tools
 
-#### add_doc
+#### add_memories
 
-Add a document to a collection in your project.
+Add memory to a collection in your project.
 
 ```python
-add_doc(
-    collection_name="collection_name",
-    add_type="url",
-    doc_id="_mcp_server_auto_gen_doc_id_xxxxxxx",
-    doc_name="doc_xxxx",
-    doc_type="pdf",
-    url="http://xxxxx.pdf"
+add_memories(
+    text="some memory"
 )
 ```
 
 Parameters:
-- `collection_name` (required): the name of the collection you want to add document .
-- `add_type` (required): the type of the document to add. so far only support "url" now. 
-- `doc_id` (required): you should generate a unique doc_id based on user's given url and timestamp, the doc_id can only use English letters, numbers, and underscores , and must start with an English letter. It cannot be empty. Length requirement: [1, 128], you can use a format like "_mcp_server_auto_gen_doc_id_xxxxxxx.
-- `doc_name` (required): the name of the document to add. you can1 generate a unique doc_name based on user given url and timestamp. the length of doc_name must between 1 and 256. you can use a format like "_mcp_server_auto_gen_doc_name_xxxxxxx.
-- `doc_type` (required): the type of the document to add. for structured document, we support xlsx, csv,jsonl, for unstructured document, wu support txt, doc, docx, pdf, markdown, faq.xlsx, pptx". you should judge the doc_type based on user's given url and judge if we support this doc type. if supported, assign this parameter.
-- `url` (required): the url of the document to add. user should give a valid url, we will add the doc to the collection.
+- `text` (required): memory text .
 
-#### get_doc
+#### search_memory
 
-Get information about document by collection_name and doc_id .
+Search memory by query .
 
 ```python
-get_doc(
-    collection_name="collection_name",
-    doc_id="_mcp_server_auto_gen_doc_id_xxxxxxx",
+search_memory(
+    query="query"
 )
 ```
 
 Parameters:
-- `collection_name` (required): the name of the collection you want to get information .
-- `doc_id` (required): the doc_id of document user want to get information .
-
-#### get_collection
-
-Get information about a viking knowledge base collection from your project .
-
-```python
-get_collection(
-    collection_name="collection_name",
-)
-```
-
-Parameters:
-- `collection_name` (required): the name of the collection you want to get information .
-
-
-#### list_collections
-
-List all knowledge base collections of the globally configured project .
-
-```python
-list_collections(
-)
-```
-
-
-#### search_knowledge
-
-Search for knowledge in the configured collection based on a query.
-
-```python
-search_knowledge(
-    query="How to reset my password?",
-    limit=3,
-    collection_name=None
-)
-```
-
-Parameters:
-- `query` (required): The search query string
-- `limit` (optional): Maximum number of results to return (default: 3)
-- `collection_name` (optional): Knowledge base collection name to search. If not provided, llm will choose some collections to search based on the description of collection
+- `query` (required): the query wants to retrieve from the memory store .
 
 ## MCP Integration
 
@@ -149,14 +96,15 @@ To add this server to your MCP configuration, add the following to your MCP sett
         "args": [
           "--from",
           "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_memory",
-          "mcp-server-memory",
+          "mcp-server-memory"
         ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "your-access-key",
-        "VOLCENGINE_SECRET_KEY": "your-secret-key", 
-        "KNOWLEDGE_BASE_PROJECT": "your-project-name",
-        "KNOWLEDGE_BASE_REGION": "your-region"
-      },
+        "VOLCENGINE_SECRET_KEY": "your-secret-key",
+        "MEMORY_PROJECT": "your-project-name",
+        "MEMORY_REGION": "your-region",
+        "MEMORY_COLLECTION_NAME": "your-memory-collection"
+      }
     }
   }
 }
@@ -184,7 +132,7 @@ The server uses Python's logging module with INFO level by default. You can see 
 
 ## Contributing
 
-Contributions to improve the Viking Knowledge Base MCP Server are welcome. Please follow these steps:
+Contributions to improve the Viking Memory MCP Server are welcome. Please follow these steps:
 
 1. Fork the repository
 2. Create a feature branch

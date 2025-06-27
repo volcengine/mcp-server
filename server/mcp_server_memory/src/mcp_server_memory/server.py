@@ -28,9 +28,8 @@ mcp = FastMCP("Memory MCP Server", port=int(os.getenv("PORT", "8000")))
 vm = VikingDBMemoryService(ak=config.ak, sk=config.sk) # 替换成你的ak sk
 
 
-
 # 创建 collection
-collection_name="public_test_collection"
+collection_name=config.collection_name
 
 def generate_random_letters(length):
     # 生成包含所有大小写字母的字符集
@@ -162,8 +161,8 @@ def search_memory(
 
 
 def main():
-    """Main entry point for the Knowledgebase MCP server."""
-    parser = argparse.ArgumentParser(description='Run the Viking Knowledgebase MCP Server')
+    """Main entry point for the Memory MCP server."""
+    parser = argparse.ArgumentParser(description='Run the Viking Memory MCP Server')
     parser.add_argument(
         "--transport",
         "-t",
@@ -172,15 +171,15 @@ def main():
         help="Transport protocol to use (sse or stdio)",
     )
     args = parser.parse_args()
-    logger.info(f"Starting Knowledgebase MCP Server with {args.transport} transport")
+    logger.info(f"Starting Memory MCP Server with {args.transport} transport")
 
     try:
         # Run the MCP server
-        logger.info( f"Starting Viking Knowledge Base MCP Server with {args.transport} transport")
+        logger.info( f"Starting Viking Memory MCP Server with {args.transport} transport")
 
         mcp.run(transport=args.transport)
     except Exception as e:
-        logger.error(f"Error starting Knowledgebase MCP Server: {str(e)}")
+        logger.error(f"Error starting Memory MCP Server: {str(e)}")
         raise
 
 if __name__ == "__main__":
