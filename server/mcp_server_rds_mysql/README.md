@@ -55,7 +55,7 @@
 - **详细描述**：修改 RDS MySQL 实例的数据库账号的描述信息。
 - **触发示例**：`"将账号 admin 的描述改为管理员账号"`
 
-### 11. `create_rds_mysql_instance`
+### 11. `create_db_instance`
 - **详细描述**：创建 RDS MySQL 实例。
 - **触发示例**：`"创建一个RDS MySQL实例"`
 
@@ -70,6 +70,18 @@
 ### 14. `create_db_account`
 - **详细描述**：创建RDS MySQL实例数据库账号。
 - **触发示例**：`"创建RDS MySQL实例数据库账号"`
+
+### 15. `create_database`
+- **详细描述**：创建RDS MySQL实例数据库。
+- **触发示例**：`"创建RDS MySQL实例数据库"`
+
+### 16. `describe_vpcs`
+- **详细描述**：查询满足指定条件的VPC，用于创建实例。
+- **触发示例**：`"有哪些VPC"`
+
+### 17. `describe_subnets`
+- **详细描述**：查询满足指定条件的子网，用于创建实例。
+- **触发示例**：`"某个VPC下有哪些子网"`
 
 ---
 
