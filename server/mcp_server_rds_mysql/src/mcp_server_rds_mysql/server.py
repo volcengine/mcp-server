@@ -950,7 +950,7 @@ def describe_vpcs(
         "page_size": page_size
     }
 
-    resp = rds_mysql_resource.describe_subnets(query_params)
+    resp = rds_mysql_resource.describe_vpcs(query_params)
     return resp.to_dict()
 
 @mcp_server.tool(
