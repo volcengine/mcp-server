@@ -521,7 +521,7 @@ def create_gateway_service(
 
     try:
         response_body = request("POST", now, {}, {}, ak, sk, token, "CreateGatewayService", json.dumps(body))
-        return response_body
+        return json.dumps(response_body, ensure_ascii=False, indent=2)
     except Exception as e:
         return f"Failed to create VeApig gateway service with name {service_name}: {str(e)}"
 
@@ -690,7 +690,7 @@ def _get_upload_code_description() -> str:
     return base_desc + note + tail
 
 @mcp.tool(description=_get_upload_code_description())
-def upload_code(region: str, function_id: str, local_folder_path: Optional[str] = None, file_dict: Optional[dict[str, Union[str, bytes]]] = None) -> bytes:
+def upload_code(region: str, function_id: str, local_folder_path: Optional[str] = None, file_dict: Optional[dict[str, Union[str, bytes]]] = None) -> str:
     region = validate_and_set_region(region)
 
     api_instance = init_client(region, mcp.get_context())
@@ -717,7 +717,7 @@ def upload_code(region: str, function_id: str, local_folder_path: Optional[str] 
                                                  zip_bytes=data, ak=ak, sk=sk, token=token)
     handle_dependency(api_instance=api_instance, function_id=function_id, local_folder_path=local_folder_path,
                       file_dict= file_dict, ak=ak, sk=sk, token=token)
-    return response_body
+    return json.dumps(response_body, ensure_ascii=False, indent=2)
 
 def handle_dependency(api_instance: VEFAASApi, function_id: str, local_folder_path, file_dict,
                       ak: str, sk: str, token: str):
