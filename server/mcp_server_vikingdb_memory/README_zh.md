@@ -94,12 +94,12 @@ Parameters:
 ```json
 {
   "mcpServers": {
-    "mcp-server-memory": {
+    "mcp-server-vikingdb-memory": {
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/chenjw/mcp-server#subdirectory=server/mcp_server_memory",
-        "mcp-server-memory"
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vikingdb_memory",
+        "mcp-server-vikingdb-memory"
       ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "your-access-key",
