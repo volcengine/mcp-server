@@ -164,9 +164,9 @@ def main():
     parser.add_argument(
         "--transport",
         "-t",
-        choices=["sse", "stdio"],
+        choices=["stdio", "streamable-http"],
         default="stdio",
-        help="Transport protocol to use (sse or stdio)",
+        help="Transport protocol to use (stdio or streamable-http)",
     )
     args = parser.parse_args()
     logger.info(f"Starting Memory MCP Server with {args.transport} transport")
