@@ -1,11 +1,11 @@
 [project]
-name = "mcp-server-web-search"
+name = "mcp-server-vortexip-webscraper"
 version = "1.0"
-description = "Web Search MCP Server"
+description = "VortexIP WebScraper MCP Server"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "mcp>=1.9.4",
+    "mcp==1.9.4",
     "requests==2.32.3",
 ]
 
@@ -13,7 +13,7 @@ dependencies = [
 allow-direct-references = true
 
 [project.scripts]
-mcp-server-web-search = "mcp_server_web_search.main:main"
+mcp-server-vortexip-webscraper = "mcp_server_vortexip_webscraper.main:main"
 
 [build-system]
 requires = ["hatchling"]

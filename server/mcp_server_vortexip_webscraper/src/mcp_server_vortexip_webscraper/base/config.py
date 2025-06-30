@@ -8,8 +8,8 @@ LOCAL_DEPLOY_MODE = "local"
 
 
 @dataclass
-class WebSearchConfig:
-    """Configuration for Web Search MCP Server.
+class WebScraperConfig:
+    """Configuration for Web Scraper MCP Server.
 
     Required environment variables:
         ENDPOINT: The access endpoint
@@ -19,9 +19,9 @@ class WebSearchConfig:
     token: str
 
 
-def load_config() -> WebSearchConfig:
+def load_config() -> WebScraperConfig:
 
-    config = WebSearchConfig(
+    config = WebScraperConfig(
         endpoint=os.getenv("ENDPOINT", ""),
         token=os.getenv("TOKEN", ""),
     )
@@ -30,4 +30,4 @@ def load_config() -> WebSearchConfig:
     return config
 
 
-WEB_SEARCH_CONFIG = load_config()
+WEB_SCRAPER_CONFIG = load_config()

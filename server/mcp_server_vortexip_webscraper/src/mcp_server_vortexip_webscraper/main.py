@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from mcp_server_web_search.server import mcp
+from mcp_server_vortexip_webscraper.server import mcp
 
 
 # Configure logging
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run the Web Search MCP Server")
+    parser = argparse.ArgumentParser(description="Run the Web Scraper MCP Server")
     parser.add_argument(
         "--transport", "-t",
         choices=["stdio", "streamable-http"],
@@ -23,10 +23,10 @@ def main():
 
     try:
         # Run the MCP server
-        logger.info(f"Starting Web Search MCP Server with {args.transport} transport")
+        logger.info(f"Starting Web Scraper MCP Server with {args.transport} transport")
         mcp.run(transport=args.transport)
     except Exception as e:
-        logger.error(f"Error starting Web Search MCP Server: {str(e)}")
+        logger.error(f"Error starting Web Scraper MCP Server: {str(e)}")
         raise
 
 

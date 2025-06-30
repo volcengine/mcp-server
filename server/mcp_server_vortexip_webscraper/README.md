@@ -1,11 +1,11 @@
-# Web Search MCP Server 
+# Web Scraper MCP Server 
 
 ## 版本信息
 v1.0
 
 ## 产品描述
 
-Web Search MCP Server 是一个模型上下文协议(Model Context Protocol)服务器，为MCP客户端(如Claude Desktop)提供面向AI的、实时的、增强检索的搜索引擎结果，支持返回结构化数据，协助提升LLM回答的准确性和时效性。
+Web Scraper MCP Server 是一个模型上下文协议(Model Context Protocol)服务器，为MCP客户端(如Claude Desktop)提供面向AI的、实时的、增强检索的搜索引擎结果，支持返回结构化数据，协助提升LLM回答的准确性和时效性。
 目前本产品仅在柔佛地域提供服务。
 
 ## 分类
@@ -14,7 +14,7 @@ Web Search MCP Server 是一个模型上下文协议(Model Context Protocol)服�
 ## Tools
 本 MCP Server 产品提供以下 Tools (工具/能力):
 
-### Tool 1: web_search
+### Tool 1: webscraper_serp
 
 #### 类型
 
@@ -40,7 +40,7 @@ SaaS
         }
     }
   },
-  "name": "web_search",
+  "name": "webscraper_serp",
   "description": "查询搜索引擎并获取结果。"
 }
 ```
@@ -72,10 +72,10 @@ python，cursor
 
 以下环境变量可用于配置MCP服务器:
 
-| 环境变量       | 描述                     | 必填  | 默认值 |
-|------------|------------------------|-----|-----|
-| `ENDPOINT` | Web_Search实例访问Endpoint | 否   | -   |
-| `TOKEN`    | Web_Search实例鉴权Token    | 是   | -   |
+| 环境变量       | 描述                      | 必填  | 默认值 |
+|------------|-------------------------|-----|-----|
+| `ENDPOINT` | Web_Scraper实例访问Endpoint | 否   | -   |
+| `TOKEN`    | Web_Scraper实例鉴权Token    | 是   | -   |
 
 ## 安装部署
 
@@ -103,7 +103,7 @@ python，cursor
 ### Using uv (recommended)
 
 When using [`uv`](https://docs.astral.sh/uv/) no specific installation is needed. We will
-use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run *mcp-server-web-search*.
+use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run *mcp-server-vortexip-webscraper*.
 
 #### 本地配置
 
@@ -112,16 +112,16 @@ use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run *mcp-server
 ```json
 {
   "mcpServers": {
-    "mcp-server-web-search": {
+    "mcp-server-vortexip-webscraper": {
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_web_search",
-        "mcp-server-web-search"
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vortexip_webscraper",
+        "mcp-server-vortexip-webscraper"
       ],
       "env": {
-        "ENDPOINT": "web search instance endpoint",
-        "TOKEN": "web search instance token"
+        "ENDPOINT": "web scraper instance endpoint",
+        "TOKEN": "web scraper instance token"
       }
     }
   }

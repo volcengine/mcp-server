@@ -4,25 +4,25 @@ import requests
 
 from typing import Any
 from mcp.server.fastmcp import Context, FastMCP
-from mcp_server_web_search.base.config import WEB_SEARCH_CONFIG
+from mcp_server_vortexip_webscraper.base.config import WEB_SCRAPER_CONFIG
 
 logger = logging.getLogger(__name__)
 
 # Initialize FastMCP server
-mcp = FastMCP("Web Search MCP Server", port=int(os.getenv("PORT", "8000")))
+mcp = FastMCP("Web Scraper MCP Server", port=int(os.getenv("PORT", "8000")))
 
 
 @mcp.tool()
-def web_search(query: str = None) -> str:
-    """query a single keyword from some search engineer"""
+def webscraper_serp(query: str = None) -> str:
+    """query keyword from some search engine"""
 
     try:
-        url = f"https://{WEB_SEARCH_CONFIG.endpoint}/v1/queries"
+        url = f"https://{WEB_SCRAPER_CONFIG.endpoint}/v1/queries"
 
         headers = {
             "Content-Type": "application/json",
             "X-VE-Source": "google_search",
-            "X-VE-API-Key": WEB_SEARCH_CONFIG.token,
+            "X-VE-API-Key": WEB_SCRAPER_CONFIG.token,
         }
         data = {
             "query": query,
