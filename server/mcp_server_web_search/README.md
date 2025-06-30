@@ -6,6 +6,7 @@ v1.0
 ## 产品描述
 
 Web Search MCP Server 是一个模型上下文协议(Model Context Protocol)服务器，为MCP客户端(如Claude Desktop)提供面向AI的、实时的、增强检索的搜索引擎结果，支持返回结构化数据，协助提升LLM回答的准确性和时效性。
+目前本产品仅在柔佛地域提供服务。
 
 ## 分类
 网络

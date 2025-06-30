@@ -13,7 +13,7 @@ mcp = FastMCP("Web Search MCP Server", port=int(os.getenv("PORT", "8000")))
 
 
 @mcp.tool()
-def web_search(query: str = None) -> dict[str, Any]:
+def web_search(query: str = None) -> str:
     """query a single keyword from some search engineer"""
 
     try:
