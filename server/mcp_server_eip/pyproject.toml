@@ -5,7 +5,7 @@ description = "MCP Server for EIP"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "mcp>=1.10.1",
+    "mcp>=1.9.4",
     "volcengine-python-sdk>=4.0.2",
 ]
 
