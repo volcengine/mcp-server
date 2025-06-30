@@ -1,7 +1,6 @@
 import argparse
 import logging
 import os
-import requests
 import uuid
 import string
 import random
