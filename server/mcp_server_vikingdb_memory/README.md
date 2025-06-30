@@ -97,7 +97,7 @@ To add this server to your MCP configuration, add the following to your MCP sett
         "args": [
           "--from",
           "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vikingdb_memory",
-          "mcp-server-memory"
+          "mcp-server-vikingdb-memory"
         ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "your-access-key",

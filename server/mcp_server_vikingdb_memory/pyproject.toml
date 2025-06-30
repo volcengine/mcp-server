@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-mcp-server-memory = "mcp_server_vikingdb_memory.server:main"
+mcp-server-vikingdb-memory = "mcp_server_vikingdb_memory.server:main"
 
 [build-system]
 requires = ["hatchling"]

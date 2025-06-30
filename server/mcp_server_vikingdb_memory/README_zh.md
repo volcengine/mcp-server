@@ -34,10 +34,10 @@ git clone git@github.com:volcengine/mcp-server.git
 #### UV
 ```bash
 cd mcp-server/server/mcp_server_vikingdb_memory
-uv run mcp-server-memory
+uv run mcp-server-vikingdb-memory
 
 # 使用sse模式启动(默认为stdio)
-uv run mcp-server-memory -t sse
+uv run mcp-server-vikingdb-memory -t sse
 ```
 
 使用客户端与服务器交互:
@@ -99,7 +99,7 @@ Parameters:
         "args": [
           "--from",
           "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vikingdb_memory",
-          "mcp-server-memory"
+          "mcp-server-vikingdb-memory"
         ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "your-access-key",
