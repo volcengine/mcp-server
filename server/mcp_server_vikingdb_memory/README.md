@@ -92,7 +92,7 @@ To add this server to your MCP configuration, add the following to your MCP sett
 ```json
 {
   "mcpServers": {
-    "memory": {
+    "mcp-server-vikingdb-memory": {
       "command": "uvx",
         "args": [
           "--from",
@@ -102,8 +102,8 @@ To add this server to your MCP configuration, add the following to your MCP sett
       "env": {
         "VOLCENGINE_ACCESS_KEY": "your-access-key",
         "VOLCENGINE_SECRET_KEY": "your-secret-key",
-        "MEMORY_PROJECT": "your-project-name",
-        "MEMORY_REGION": "your-region",
+        "MEMORY_PROJECT": "default",
+        "MEMORY_REGION": "cn-north-1",
         "MEMORY_COLLECTION_NAME": "your-memory-collection", 
         "MEMORY_USER_ID": "your-user-id"
       }

@@ -94,18 +94,18 @@ Parameters:
 ```json
 {
   "mcpServers": {
-    "memory": {
+    "mcp-server-memory": {
       "command": "uvx",
-        "args": [
-          "--from",
-          "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vikingdb_memory",
-          "mcp-server-vikingdb-memory"
-        ],
+      "args": [
+        "--from",
+        "git+https://github.com/chenjw/mcp-server#subdirectory=server/mcp_server_memory",
+        "mcp-server-memory"
+      ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "your-access-key",
         "VOLCENGINE_SECRET_KEY": "your-secret-key",
-        "MEMORY_PROJECT": "your-project-name",
-        "MEMORY_REGION": "your-region",
+        "MEMORY_PROJECT": "default",
+        "MEMORY_REGION": "cn-north-1",
         "MEMORY_COLLECTION_NAME": "your-memory-collection",
         "MEMORY_USER_ID": "your-user-id"
       }
