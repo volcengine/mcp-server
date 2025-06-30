@@ -13,7 +13,7 @@ class MemoryConfig:
     sk: str
     user_id: str
     project: Optional[str] = None
-    region: str = "cn-north-1",
+    region: str = "cn-north-1"
     collection_name: str = 'public_test_collection'
 
 
