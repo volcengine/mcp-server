@@ -1,12 +1,12 @@
 [project]
-name = "mcp-server-memory"
+name = "mcp-server-vikingdb-memory"
 version = "0.1.0"
 description = "MCP server for Viking Memory Service"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 dependencies = [
-    "mcp[cli]>=1.9.4",
+    "mcp[cli]==1.9.4",
     "volcengine>=1.0.171",
     "aiohttp>=3.11.14",
     "deprecated>=1.2.18",
