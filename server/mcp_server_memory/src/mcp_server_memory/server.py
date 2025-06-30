@@ -92,7 +92,7 @@ def add_memories(
 
 
     except Exception as e:
-        logger.error(f"Error in add_doc: {str(e)}")
+        logger.error(f"Error in add_memories: {str(e)}")
         return {"error": str(e)}
 
 
