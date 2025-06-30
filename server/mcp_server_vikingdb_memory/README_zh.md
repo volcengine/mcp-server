@@ -33,7 +33,7 @@ git clone git@github.com:volcengine/mcp-server.git
 
 #### UV
 ```bash
-cd mcp-server/server/mcp_server_memory
+cd mcp-server/server/mcp_server_vikingdb_memory
 uv run mcp-server-memory
 
 # 使用sse模式启动(默认为stdio)
@@ -98,7 +98,7 @@ Parameters:
       "command": "uvx",
         "args": [
           "--from",
-          "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_memory",
+          "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vikingdb_memory",
           "mcp-server-memory"
         ],
       "env": {

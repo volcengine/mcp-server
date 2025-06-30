@@ -5,9 +5,9 @@ import string
 import random
 from typing import Dict, Optional, Final, Any
 from mcp.server import FastMCP
-from mcp_server_memory.config import config
-from mcp_server_memory.common.auth import prepare_request
-from mcp_server_memory.common.memory_client import VikingDBMemoryService, VikingDBMemoryException
+from mcp_server_vikingdb_memory.config import config
+from mcp_server_vikingdb_memory.common.auth import prepare_request
+from mcp_server_vikingdb_memory.common.memory_client import VikingDBMemoryService, VikingDBMemoryException
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
