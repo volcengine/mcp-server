@@ -43,19 +43,23 @@ func HandleScreenSwipe() func(context.Context, mcp.CallToolRequest) (*mcp.CallTo
 		if err != nil {
 			return CallResultError(err)
 		}
-		fromX, err := GetInt64Param(req.Params.Arguments, "from_x")
+		args, err := CheckArgs(req.Params.Arguments)
+		if err != nil {
+			return CallResultError(err)
+		}
+		fromX, err := GetInt64Param(args, "from_x")
 		if err != nil {
 			return CallResultError(fmt.Errorf("from_x is required"))
 		}
-		fromY, err := GetInt64Param(req.Params.Arguments, "from_y")
+		fromY, err := GetInt64Param(args, "from_y")
 		if err != nil {
 			return CallResultError(fmt.Errorf("from_y is required"))
 		}
-		toX, err := GetInt64Param(req.Params.Arguments, "to_x")
+		toX, err := GetInt64Param(args, "to_x")
 		if err != nil {
 			return CallResultError(fmt.Errorf("to_x is required"))
 		}
-		toY, err := GetInt64Param(req.Params.Arguments, "to_y")
+		toY, err := GetInt64Param(args, "to_y")
 		if err != nil {
 			return CallResultError(fmt.Errorf("to_y is required"))
 		}
