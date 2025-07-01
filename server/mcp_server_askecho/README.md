@@ -139,6 +139,6 @@ uv run mcp-server-askecho -t sse
 }
 ```
 
-# License
+## License
 
 volcengine/mcp-server is licensed under the [MIT License](https://github.com/volcengine/mcp-server/blob/main/LICENSE)
