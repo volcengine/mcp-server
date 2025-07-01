@@ -371,7 +371,7 @@ def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id
             "VeFaas": {"FunctionId":function_id}}}
 
     try:
-        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateUpstream", json.dumps(body))
+        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateUpstream", json.dumps(body), region)
         # Print the full response for debugging
         print(f"Response: {json.dumps(response_body)}")
         # Check if response contains an error
@@ -407,7 +407,7 @@ def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id
                 }
     }
     try:
-        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateRoute", json.dumps(body))
+        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateRoute", json.dumps(body), region)
     except Exception as e:
         error_message = f"Error creating route: {str(e)}"
         raise ValueError(error_message)
@@ -424,7 +424,7 @@ def list_api_gateways(region: str = None):
     except ValueError as e:
         raise ValueError(f"Authorization failed: {str(e)}")
 
-    response_body = request("GET", now, {"Limit": "10"}, {}, ak, sk, token, "ListGateways", None)
+    response_body = request("GET", now, {"Limit": "10"}, {}, ak, sk, token, "ListGateways", None, region)
     return response_body
 
 
@@ -476,7 +476,7 @@ def create_api_gateway(name: str = None, region: str = "cn-beijing") -> str:
         raise ValueError(f"Authorization failed: {str(e)}")
 
     try:
-        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateGateway", json.dumps(body))
+        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateGateway", json.dumps(body), region)
         return response_body
     except Exception as e:
         return f"Failed to create VeApig gateway with name {gateway_name}: {str(e)}"
@@ -520,7 +520,7 @@ def create_gateway_service(
         raise ValueError(f"Authorization failed: {str(e)}")
 
     try:
-        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateGatewayService", json.dumps(body))
+        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateGatewayService", json.dumps(body), region)
         return json.dumps(response_body, ensure_ascii=False, indent=2)
     except Exception as e:
         return f"Failed to create VeApig gateway service with name {service_name}: {str(e)}"
@@ -542,7 +542,7 @@ def list_api_gateway_services(gateway_id: str, region: str = None):
         "Offset": 0,
     }
 
-    response_body = request("POST", now, {}, {}, ak, sk, token, "ListGatewayServices", json.dumps(body))
+    response_body = request("POST", now, {}, {}, ak, sk, token, "ListGatewayServices", json.dumps(body), region)
     return response_body
 
 @mcp.tool(description="""Lists all routes of an upstream.
@@ -559,7 +559,7 @@ def list_routes(upstream_id: str, region: str = None):
         "UpstreamId": upstream_id
     }
 
-    response_body = request("POST", now, {}, {}, ak, sk, token, "ListRoutes", json.dumps(body))
+    response_body = request("POST", now, {}, {}, ak, sk, token, "ListRoutes", json.dumps(body), region)
     return response_body
 
 def ensure_executable_permissions(folder_path: str):
@@ -714,13 +714,13 @@ def upload_code(region: str, function_id: str, local_folder_path: Optional[str] 
     else:
         raise ValueError("Either local_folder_path or file_dict must be provided.")
     response_body = upload_code_zip_for_function(api_instance=api_instance, function_id=function_id, code_zip_size=size,
-                                                 zip_bytes=data, ak=ak, sk=sk, token=token)
+                                                 zip_bytes=data, ak=ak, sk=sk, token=token, region=region)
     handle_dependency(api_instance=api_instance, function_id=function_id, local_folder_path=local_folder_path,
-                      file_dict= file_dict, ak=ak, sk=sk, token=token)
+                      file_dict= file_dict, ak=ak, sk=sk, token=token, region=region)
     return json.dumps(response_body, ensure_ascii=False, indent=2)
 
 def handle_dependency(api_instance: VEFAASApi, function_id: str, local_folder_path, file_dict,
-                      ak: str, sk: str, token: str):
+                      ak: str, sk: str, token: str, region: str = None):
     req = volcenginesdkvefaas.GetFunctionRequest(
         id=function_id
     )
@@ -768,20 +768,20 @@ def handle_dependency(api_instance: VEFAASApi, function_id: str, local_folder_pa
 
     try:
         response_body = request("POST", now, {}, {}, ak, sk, token,
-                                "CreateDependencyInstallTask", json.dumps(body))
+                                "CreateDependencyInstallTask", json.dumps(body), region)
         print(response_body)
 
         timeout_seconds = 300
         start_time = time.time()
         while True:
             status_resp = request("POST", now, {}, {}, ak, sk, token,
-                                  "GetDependencyInstallTaskStatus", json.dumps(body))
+                                  "GetDependencyInstallTaskStatus", json.dumps(body), region)
             print(status_resp)
 
             status = status_resp['Result']['Status']
             if status == 'Failed':
                 log_download_resp = request("POST", now, {}, {}, ak, sk, token,
-                                      "GetDependencyInstallTaskLogDownloadURI", json.dumps(body))
+                                      "GetDependencyInstallTaskLogDownloadURI", json.dumps(body), region)
                 url = log_download_resp['Result']['DownloadURL']
                 url = url.replace("\\u0026", "&")
                 response = requests.get(url, timeout=30)
@@ -798,7 +798,7 @@ def handle_dependency(api_instance: VEFAASApi, function_id: str, local_folder_pa
 
 
 def upload_code_zip_for_function(api_instance: VEFAASApi(object), function_id: str, code_zip_size: int, zip_bytes,
-                                 ak: str, sk: str, token: str,) -> bytes:
+                                 ak: str, sk: str, token: str, region: str,) -> bytes:
     req = volcenginesdkvefaas.GetCodeUploadAddressRequest(
         function_id=function_id,
         content_length=code_zip_size
@@ -828,7 +828,7 @@ def upload_code_zip_for_function(api_instance: VEFAASApi(object), function_id: s
     }
 
     try:
-        response_body = request("POST", now, {}, {}, ak, sk, token, "CodeUploadCallback", json.dumps(body))
+        response_body = request("POST", now, {}, {}, ak, sk, token, "CodeUploadCallback", json.dumps(body), region)
         return response_body
     except Exception as e:
         error_message = f"Error creating upstream: {str(e)}"
