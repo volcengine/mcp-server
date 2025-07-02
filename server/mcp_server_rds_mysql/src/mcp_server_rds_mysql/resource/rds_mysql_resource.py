@@ -30,7 +30,7 @@ class RDSMySQLSDK:
         configuration.region = region
         if host is not None:
             configuration.host = host
-        self.client = RDSMYSQLV2Api(volcenginesdkcore.ApiClient(configuration,header_name="X-Custom-Identifier",header_value="your-identifier"))
+        self.client = RDSMYSQLV2Api(volcenginesdkcore.ApiClient(configuration, "X-Custom-Identifier", "your-identifier"))
         self.vpcClient = VPCApi(volcenginesdkcore.ApiClient(configuration))
 
     def describe_db_instances(self, args: dict) -> DescribeDBInstancesResponse:
