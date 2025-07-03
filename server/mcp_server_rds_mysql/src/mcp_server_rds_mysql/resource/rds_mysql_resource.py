@@ -16,7 +16,7 @@ class RDSMySQLSDK:
         configuration.region = region
         if host is not None:
             configuration.host = host
-        self.client = RDSMYSQLV2Api(volcenginesdkcore.ApiClient(configuration, "X-Rdsmgr-Source", "mcp"))
+        self.client = RDSMYSQLV2Api(volcenginesdkcore.ApiClient(configuration, "X-Rdsmgr-Source", "mcp_local"))
         self.vpcClient = VPCApi(volcenginesdkcore.ApiClient(configuration))
 
     def describe_db_instances(self, args: dict) -> models.DescribeDBInstancesResponse:
