@@ -1022,12 +1022,12 @@ def describe_vpcs(
         page_number = 1
     if not page_size:
         page_size = 5
-    query_params = {
+    req = {
         "page_number": page_number,
         "page_size": page_size
     }
-
-    resp = rds_mysql_resource.describe_vpcs(query_params)
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = rds_mysql_resource.describe_vpcs(req)
     return resp.to_dict()
 
 @mcp_server.tool(
@@ -1044,14 +1044,12 @@ def describe_subnets(
             description="可用区ID，默认为cn-beijing-a，主节点或备节点所在的可用区",
         ),
 ) -> dict[str, Any]:
-    if not zone_id:
-        zone_id = "cn-beijing-a"
-    query_params = {
+    req = {
         "vpc_id": vpc_id,
         "zone_id": zone_id,
     }
-
-    resp = rds_mysql_resource.describe_subnets(query_params)
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = rds_mysql_resource.describe_subnets(req)
     return resp.to_dict()
 
 def main():
