@@ -335,18 +335,16 @@ def describe_db_instance_price_detail(
         proxy_node_custom (dict[str, Any], optional): 代理配置，可选
     """
     req = {
-        "NodeInfo": node_info,
-        "StorageType": storage_type,
-        "StorageSpace": storage_space,
-        "ChargeType": charge_type,
-        "NodeId": node_id,
-        "ZoneId": zone_id,
-        "NodeOperateType": node_operate_type,
-        "PeriodUnit": period_unit,
-        "Period": period,
-        "Number": number,
-        "ProjectName": project_name,
-        "ProxyNodeCustom": proxy_node_custom
+        "node_info": node_info,
+        "storage_type": storage_type,
+        "storage_space": storage_space,
+        "charge_type": charge_type,
+        "node_id": node_id,
+        "zone_id": zone_id,
+        "period_unit": period_unit,
+        "period": period,
+        "number": number,
+        "project_name": project_name,
     }
     req = {k: v for k, v in req.items() if v is not None}
 
