@@ -469,7 +469,7 @@ def create_rds_mysql_instance(
         primary_zone: str = Field(default="cn-beijing-a", description="主节点可用区"),
         primary_spec: str = Field(default="rds.mysql.1c2g", description="主节点规格"),
         secondary_count: int = Field(default=1, description="备节点数量"),
-        secondary_zone: Optional[str] = Field(default=None, description="备节点可用区，默认与主节点相同"),
+        secondary_zone: Optional[str] = Field(default=None, description="备节点可用区，默认与主节点相同，多可用区需要不同"),
         secondary_spec: str = Field(default="rds.mysql.1c2g", description="备节点规格"),
         read_only_count: int = Field(default=0, description="只读节点数量"),
         read_only_zone: str = Field(default="cn-beijing-a", description="只读节点可用区"),
