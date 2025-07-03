@@ -125,6 +125,23 @@ func (s *MobileUseServer) StartSSEWithServer(addr string, baseUrl string) error 
 	return nil
 }
 
+func (s *MobileUseServer) StartStreamableHTTPServer(addr string) error {
+	server := mcp_srv.NewStreamableHTTPServer(s.server,
+		mcp_srv.WithHTTPContextFunc(authFromRequest),
+	)
+
+	// Start HTTP server in a goroutine
+	go func() {
+		err := server.Start(addr)
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			// If error is not due to server shutdown, signal server is done
+			s.cancel()
+		}
+		close(s.doneCh)
+	}()
+	return nil
+}
+
 // Shutdown gracefully stops the server
 func (s *MobileUseServer) Shutdown() {
 	s.cancel()

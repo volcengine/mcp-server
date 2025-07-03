@@ -1,0 +1,20 @@
+[project]
+name = "mcp-server-vortexip-webscraper"
+version = "1.0"
+description = "VortexIP WebScraper MCP Server"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "mcp==1.9.4",
+    "requests==2.32.3",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[project.scripts]
+mcp-server-vortexip-webscraper = "mcp_server_vortexip_webscraper.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

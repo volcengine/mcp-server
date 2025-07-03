@@ -35,11 +35,15 @@ func HandleScreenTap() func(context.Context, mcp.CallToolRequest) (*mcp.CallTool
 		if err != nil {
 			return CallResultError(err)
 		}
-		x, err := GetInt64Param(req.Params.Arguments, "x")
+		args, err := CheckArgs(req.Params.Arguments)
+		if err != nil {
+			return CallResultError(err)
+		}
+		x, err := GetInt64Param(args, "x")
 		if err != nil {
 			return CallResultError(fmt.Errorf("x is required"))
 		}
-		y, err := GetInt64Param(req.Params.Arguments, "y")
+		y, err := GetInt64Param(args, "y")
 		if err != nil {
 			return CallResultError(fmt.Errorf("y is required"))
 		}

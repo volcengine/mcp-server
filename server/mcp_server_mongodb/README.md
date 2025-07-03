@@ -62,7 +62,7 @@
   ```bash
   uv sync
   ```
-- 构建cmp server:
+- 构建mcp server:
   ```bash
   uv build
   ```
@@ -88,6 +88,8 @@
     }
 }
 ```
+
+## 数据面 [MCP server](https://www.volcengine.com/mcp-marketplace/detail?name=MongoDB)
 
 ## License
 volcengine/mcp-server is licensed under the [MIT License](https://github.com/volcengine/mcp-server/blob/main/LICENSE).

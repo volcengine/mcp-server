@@ -219,7 +219,9 @@ Use this when you need to obtain a list of all Nacos Registries in a specific re
 region is the region where the gateways are located, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
 `cn-shanghai`, `cn-guangzhou` as well."""
 )
+
 def list_nacos_registries(region: str = "cn-beijing"):
+
     """
     This function is used to retrieve a list of all Nacos registries in a specific region.
 

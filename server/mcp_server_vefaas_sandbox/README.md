@@ -30,6 +30,10 @@ saas
 - 输入：
   - codeStr: 待运行的 code str
   - language: 代码运行时，支持：python、nodejs、go、bash、typescript、java、cpp、php、csharp、lua、R、 swift、scala、ruby
+  - compile_timeout: 编译超时时间，单位：秒，默认：60
+  - run_timeout: 运行超时时间，单位：秒，默认：60
+  - fetch_files: 代码执行后要获取的文件路径列表，默认为空
+  - files: 从文件路径到base64编码的文件内容的字典，默认为空
 - 输出：
   - 代码的执行输出结果
 
