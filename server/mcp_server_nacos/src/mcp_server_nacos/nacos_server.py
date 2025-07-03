@@ -240,6 +240,7 @@ def list_nacos_registries(region: str = "cn-beijing") -> str:
     try:
         response_body = handle_request(region, action, body)
         return str(response_body)
+
     except Exception as e:
         return f"Failed to get List of Nacos Registry: {str(e)}"
 

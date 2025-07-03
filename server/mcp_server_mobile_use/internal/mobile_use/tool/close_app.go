@@ -31,7 +31,11 @@ func HandleCloseAppTool() func(context.Context, mcp.CallToolRequest) (*mcp.CallT
 		if err != nil {
 			return CallResultError(err)
 		}
-		packageName, ok := req.Params.Arguments["package_name"].(string)
+		args, err := CheckArgs(req.Params.Arguments)
+		if err != nil {
+			return CallResultError(err)
+		}
+		packageName, ok := args["package_name"].(string)
 		if !ok || packageName == "" {
 			return CallResultError(fmt.Errorf("package_name is required"))
 		}

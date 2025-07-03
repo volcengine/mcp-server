@@ -19,7 +19,7 @@ click==8.1.8
     #   uvicorn
 clickhouse-connect==0.8.16
     # via mcp-bytehouse (pyproject.toml)
-h11==0.14.0
+h11>=0.16.0
     # via
     #   httpcore
     #   uvicorn

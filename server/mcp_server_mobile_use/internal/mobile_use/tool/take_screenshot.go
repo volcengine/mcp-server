@@ -2,6 +2,7 @@ package tool
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/mark3labs/mcp-go/mcp"
 )
@@ -26,10 +27,19 @@ func HandleTakeScreenshot() func(context.Context, mcp.CallToolRequest) (*mcp.Cal
 		if err != nil {
 			return CallResultError(err)
 		}
-		screenShotUrl, err := handler.ScreenShot(ctx)
+		screenShotRes, err := handler.ScreenShot(ctx)
+		if err != nil || screenShotRes == nil {
+			return CallResultError(err)
+		}
+
+		result := map[string]interface{}{
+			"result": screenShotRes,
+		}
+
+		jsonResult, err := json.Marshal(result)
 		if err != nil {
 			return CallResultError(err)
 		}
-		return CallResultSuccess(screenShotUrl)
+		return CallResultSuccess(string(jsonResult))
 	}
 }
