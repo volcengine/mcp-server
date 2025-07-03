@@ -480,7 +480,11 @@ def create_rds_mysql_instance(
         auto_renew: Optional[bool] = Field(default=None, description="预付费场景下是否自动续费"),
         period_unit: Optional[str] = Field(default=None, description="预付费场景下的购买周期(Month/Year)"),
         period: Optional[int] = Field(default=None, description="预付费场景下的购买时长"),
-        instance_type: str = Field(default="DoubleNode", description="实例类型"),
+        instance_type: str = Field(
+                    default="DoubleNode",
+                    description="实例类型，可选值：DoubleNode（双节点）、MultiNode（多节点）",
+                    choices=["DoubleNode", "MultiNode"]
+                ),
         super_account_name: Optional[str] = Field(default=None, description="高权限账号名称"),
         super_account_password: Optional[str] = Field(default=None, description="高权限账号密码"),
         lower_case_table_names: str = Field(default="1", description="表名是否区分大小写"),
