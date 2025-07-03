@@ -300,6 +300,81 @@ def describe_parameter_template(
 
 
 @mcp_server.tool(
+    name="describe_db_instance_price_detail",
+    description="查询数据库实例价格详情"
+)
+def describe_db_instance_price_detail(
+        node_info: list[dict[str, Any]] = Field(description="实例的节点配置列表，每个节点配置包含NodeType、NodeSpec等字段"),
+        storage_type: str = Field(description="实例存储类型，取值为 LocalSSD，表示本地 SSD 盘"),
+        storage_space: int = Field(description="实例存储空间，取值范围：[20, 3000]，单位：GB，步长 10GB"),
+        charge_type: str = Field(description="计费类型，取值：PostPaid（按量付费）、PrePaid（包年包月）"),
+        node_id: Optional[str] = Field(default=None, description="节点 ID，创建实例或新增节点时无需传入，变更节点配置或删除节点时必传"),
+        zone_id: Optional[str] = Field(default=None, description="节点所在可用区，创建实例和新增节点时必传，变更配置或删除节点时可不传"),
+        node_operate_type: Optional[str] = Field(default=None, description="操作类型，创建实例时无需传入，修改配置时必传，取值：Create、Modify"),
+        period_unit: Optional[str] = Field(default=None, description="预付费场景下的购买周期，取值：Month（月）、Year（年），ChargeType为PostPaid时无需传入"),
+        period: Optional[int] = Field(default=None, description="预付费模式下的时长数量"),
+        number: Optional[int] = Field(default=1, description="实例个数"),
+        project_name: Optional[str] = Field(default=None, description="所属的项目，子账号场景下需传入有权限的项目名称"),
+        proxy_node_custom: Optional[dict[str, Any]] = Field(default=None, description="实例的代理配置")
+) -> dict[str, Any]:
+    """
+    查询数据库实例价格详情
+
+    Args:
+        node_info (list[dict[str, Any]]): 实例的节点配置列表，必选
+        storage_type (str): 实例存储类型，必选
+        storage_space (int): 实例存储空间，必选
+        charge_type (str): 计费类型，必选
+        node_id (str, optional): 节点 ID，可选
+        zone_id (str, optional): 节点所在可用区，可选
+        node_operate_type (str, optional): 操作类型，可选
+        period_unit (str, optional): 预付费购买周期，可选
+        period (int, optional): 预付费时长数量，可选
+        number (int, optional): 实例个数，默认为1
+        project_name (str, optional): 所属项目名称，可选
+        proxy_node_custom (dict[str, Any], optional): 代理配置，可选
+    """
+    req = {
+        "NodeInfo": node_info,
+        "StorageType": storage_type,
+        "StorageSpace": storage_space,
+        "ChargeType": charge_type,
+        "NodeId": node_id,
+        "ZoneId": zone_id,
+        "NodeOperateType": node_operate_type,
+        "PeriodUnit": period_unit,
+        "Period": period,
+        "Number": number,
+        "ProjectName": project_name,
+        "ProxyNodeCustom": proxy_node_custom
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+
+    # 必选参数校验
+    if not node_info:
+        raise ValueError("node_info是必选参数")
+    if not all(
+        node.get("NodeType") in ["Primary", "Secondary", "ReadOnly"] and
+        node.get("NodeSpec")
+        for node in node_info
+    ):
+        raise ValueError("node_info中的每个节点必须包含有效的NodeType和NodeSpec字段")
+    if not storage_type:
+        raise ValueError("storage_type是必选参数")
+    if storage_space is None or not (20 <= storage_space <= 3000 and storage_space % 10 == 0):
+        raise ValueError("storage_space是必选参数，取值范围：[20, 3000]，步长10GB")
+    if not charge_type:
+        raise ValueError("charge_type是必选参数")
+    if charge_type == "PrePaid" and (period_unit is None or period is None):
+        raise ValueError("预付费模式下period_unit和period是必选参数")
+    if node_operate_type and node_operate_type not in ["Create", "Modify"]:
+        raise ValueError("node_operate_type必须是Create或Modify")
+
+    resp = rds_mysql_resource.describe_db_instance_price_detail(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
     name="modify_db_instance_name",
     description="修改RDS MySQL实例名称"
 )
@@ -390,7 +465,7 @@ def modify_db_account_description(
 )
 def create_rds_mysql_instance(
         vpc_id: str = Field(title="私有网络 ID", description="需要使用describe_vpcs获取"),
-        subnet_id: str = Field(title="子网 ID", description="需要使用describe_subnets获取"),
+        subnet_id: str = Field(title="子网 ID", description="需要使用describe_subnets获取，subnet_id的可用区必须是主节点或备节点所在的可用区"),
         db_engine_version: str = Field(default="MySQL_8_0", description="数据库版本"),
         instance_name: Optional[str] = Field(default=None, description="实例名称"),
         primary_zone: str = Field(default="cn-beijing-a", description="主节点可用区"),
@@ -964,7 +1039,7 @@ def describe_subnets(
         ),
         zone_id: str = Field(
             "cn-beijing-a",
-            description="可用区ID，默认为cn-beijing-a",
+            description="可用区ID，默认为cn-beijing-a，主节点或备节点所在的可用区",
         ),
 ) -> dict[str, Any]:
     if not zone_id:
