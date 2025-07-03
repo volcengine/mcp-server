@@ -463,7 +463,7 @@ def modify_db_account_description(
 )
 def create_rds_mysql_instance(
         vpc_id: str = Field(title="私有网络 ID", description="需要使用describe_vpcs获取"),
-        subnet_id: str = Field(title="子网 ID", description="需要使用describe_subnets获取，subnet_id的可用区必须是主节点或备节点所在的可用区"),
+        subnet_id: str = Field(title="子网 ID", description="需要使用describe_subnets获取，subnet_id只有一个可用区属性，subnet_id的可用区必须是主节点或备节点所在的可用区"),
         db_engine_version: str = Field(default="MySQL_8_0", description="数据库版本"),
         instance_name: Optional[str] = Field(default=None, description="实例名称"),
         primary_zone: str = Field(default="cn-beijing-a", description="主节点可用区"),
