@@ -8,12 +8,14 @@ import logging
 from .sign import request, get_authorization_credentials
 import json
 from mcp.server.fastmcp import FastMCP
-
+import os
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-mcp = FastMCP(name="Nacos")
+mcp = FastMCP("Nacos", stateless_http=True, json_response=True)
+# Enable JSON response & stateless HTTP by default
+os.environ["FASTMCP_JSON_RESPONSE"] = "true"
 
 #生成随机名称：mcp-random-string
 def generate_random_name(prefix="mcp", length=8):
@@ -106,7 +108,7 @@ def get_nacos_registry(id: str = "", region: str = "cn-beijing") -> str:
 
     try:
         response_body = handle_request(region, action, body)
-        return str(response_body)
+        return response_body
     except Exception as e:
         return f"Failed to get Nacos Registry with id {id}: {str(e)}"
 
@@ -167,7 +169,7 @@ def create_nacos_registry(name: str = "", region: str = "cn-beijing", VpcId: str
 
     try:
         response = handle_request(region, action, body)
-        return str(response)
+        return response
     except Exception as e:
         return f"Failed to create Nacos registry with name {nacos_registry_name}: {str(e)}"
 
@@ -207,7 +209,7 @@ def update_registry_info(id: str = "", name: str = "", region: str = "cn-beijing
 
     try:
         response_body = handle_request(region, action, body)
-        return str(response_body)
+        return response_body
     except Exception as e:
         return f"Failed to update Nacos Registry's info with id {id}: {str(e)}"
 
@@ -239,7 +241,7 @@ def list_nacos_registries(region: str = "cn-beijing") -> str:
 
     try:
         response_body = handle_request(region, action, body)
-        return str(response_body)
+        return response_body
     except Exception as e:
         return f"Failed to get List of Nacos Registry: {str(e)}"
 
