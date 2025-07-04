@@ -8,7 +8,7 @@ anyio==4.9.0
     #   mcp
     #   sse-starlette
     #   starlette
-certifi==2025.4.26
+certifi==2025.6.15
     # via
     #   httpcore
     #   httpx
@@ -16,7 +16,7 @@ certifi==2025.4.26
     #   volcengine-python-sdk
 charset-normalizer==3.4.2
     # via requests
-click==8.2.0
+click==8.2.1
     # via uvicorn
 h11==0.16.0
     # via
@@ -26,55 +26,61 @@ httpcore==1.0.9
     # via httpx
 httpx==0.28.1
     # via mcp
-httpx-sse==0.4.0
+httpx-sse==0.4.1
     # via mcp
 idna==3.10
     # via
     #   anyio
     #   httpx
     #   requests
-mcp @ git+https://github.com/zihengli-bytedance/python-sdk.git@3ff71057c9e60a20f81bfef6bd117f3b3d518f9c
-    # via mcp-server-vefaas-function (pyproject.toml)
-pydantic==2.11.4
+mcp==1.9.4
+    # via mcp-server-veapig (pyproject.toml)
+pycryptodomex==3.23.0
+    # via pyzipper
+pydantic==2.11.7
     # via
     #   mcp
     #   pydantic-settings
 pydantic-core==2.33.2
     # via pydantic
-pydantic-settings==2.9.1
+pydantic-settings==2.10.1
     # via mcp
 python-dateutil==2.9.0.post0
     # via volcengine-python-sdk
-python-dotenv==1.1.0
+python-dotenv==1.1.1
     # via pydantic-settings
+python-multipart==0.0.20
+    # via mcp
+pyzipper==0.3.6
+    # via mcp-server-veapig (pyproject.toml)
 requests==2.32.3
-    # via mcp-server-vefaas-function (pyproject.toml)
+    # via mcp-server-veapig (pyproject.toml)
 six==1.17.0
     # via
     #   python-dateutil
     #   volcengine-python-sdk
 sniffio==1.3.1
     # via anyio
-sse-starlette==2.3.5
+sse-starlette==2.3.6
     # via mcp
-starlette==0.46.2
+starlette==0.47.1
+    # via mcp
+typing-extensions==4.14.0
     # via
-    #   mcp
-    #   sse-starlette
-typing-extensions==4.13.2
-    # via
+    #   anyio
     #   pydantic
     #   pydantic-core
+    #   starlette
     #   typing-inspection
-typing-inspection==0.4.0
+typing-inspection==0.4.1
     # via
     #   pydantic
     #   pydantic-settings
-urllib3==2.4.0
+urllib3==2.5.0
     # via
     #   requests
     #   volcengine-python-sdk
-uvicorn==0.34.2
+uvicorn==0.35.0
     # via mcp
-volcengine-python-sdk==3.0.2
-    # via mcp-server-vefaas-function (pyproject.toml)
+volcengine-python-sdk==4.0.4
+    # via mcp-server-veapig (pyproject.toml)

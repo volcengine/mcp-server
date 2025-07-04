@@ -30,8 +30,9 @@ import shutil
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-mcp = FastMCP("VeAPIG")
-
+mcp = FastMCP("VeAPIG", stateless_http=True, json_response=True, port=8020)
+# Enable JSON response & stateless HTTP by default
+os.environ["FASTMCP_JSON_RESPONSE"] = "true"
 
 def generate_random_name(prefix="mcp", length=8):
     """Generate a random string for function name"""
@@ -102,7 +103,7 @@ region is the region where the gateways are located, default is cn-beijing. It a
 `cn-shanghai`, `cn-guangzhou` as well.
 """
 )
-def list_gateways(region: str = "cn-beijing") -> str:
+def list_gateways(region: str = "cn-beijing"):
 
     # Validate region parameter
     region = validate_and_set_region(region)
@@ -126,7 +127,7 @@ region is the region where the gateway is located, default is cn-beijing. It acc
 Note:
 1. The `id` parameter is required to identify the specific gateway you want to query."""
 )
-def get_gateway(id: str = "", region: str = "cn-beijing") -> str:
+def get_gateway(id: str = "", region: str = "cn-beijing"):
 
     # Validate region parameter
     region = validate_and_set_region(region)
@@ -150,7 +151,7 @@ region indicates the region where the gateway instance is located, defaulting to
 Note:
 1. The gateway_id parameter is mandatory and used to identify the specific gateway instance whose service list you want to query."""
 )
-def list_gateway_services(gateway_id: str = "", region: str = "cn-beijing") -> str:
+def list_gateway_services(gateway_id: str = "", region: str = "cn-beijing"):
     # Validate region parameter
     region = validate_and_set_region(region)
 
@@ -176,7 +177,7 @@ region is the region where the serverless gateway service is located, default is
 `cn-shanghai`, `cn-guangzhou` as well.
 """
 )
-def get_gateway_service(service_id: str, region: str = "cn-beijing") -> str:
+def get_gateway_service(service_id: str, region: str = "cn-beijing"):
     """
     Gets detailed information about a specific VeApig serverless gateway service.
 
@@ -207,7 +208,7 @@ region indicates the region where the gateway instance is located, defaulting to
 Note:
 1. The gateway_id parameter is mandatory and used to identify the specific gateway instance whose route list you want to query."""
 )
-def list_gateway_routes(gateway_id: str, region: str = "cn-beijing") -> str:
+def list_gateway_routes(gateway_id: str, region: str = "cn-beijing"):
     # Validate region parameter
     region = validate_and_set_region(region)
 
@@ -233,7 +234,7 @@ region is the region where the route is located, default is cn-beijing. It accep
 `cn-shanghai`, `cn-guangzhou` as well.
 """
 )
-def get_gateway_route(route_id: str, region: str = "cn-beijing") -> str:
+def get_gateway_route(route_id: str, region: str = "cn-beijing"):
     """
     Gets detailed informantion about a specific VeApig route.
 
@@ -262,7 +263,7 @@ region is the region where the serverless gateway will be created, default is cn
 `cn-shanghai`, `cn-guangzhou` as well.
 """
 )
-def create_serverless_gateway(name: str = "", region: str = "cn-beijing") -> str:
+def create_serverless_gateway(name: str = "", region: str = "cn-beijing"):
     """
     Creates a new VeApig serverless gateway.
 
@@ -303,7 +304,7 @@ region is the region where the serverless gateway service will be created, defau
 )
 def create_gateway_service(
     gateway_id: str, name: str = "", region: str = "cn-beijing"
-) -> str:
+):
     """
     Creates a new VeApig serverless gateway service.
 
