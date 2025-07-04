@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [project.scripts]
-mcp-server-veapig = "mcp_server_veapig.stdio:main"
+mcp-server-veapig = "mcp_server_veapig.main:main"
 
 [build-system]
 requires = ["hatchling"]
