@@ -30,7 +30,7 @@ import shutil
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-mcp = FastMCP("VeAPIG", stateless_http=True, json_response=True, port=8020)
+mcp = FastMCP("VeAPIG", stateless_http=True, json_response=True)
 # Enable JSON response & stateless HTTP by default
 os.environ["FASTMCP_JSON_RESPONSE"] = "true"
 
