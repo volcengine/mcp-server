@@ -13,7 +13,7 @@ log.addHandler(ch)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run the NACOS MCP Server")
+    parser = argparse.ArgumentParser(description="Run the APIG MCP Server")
     parser.add_argument(
         "--transport",
         "-t",
@@ -23,7 +23,7 @@ def main():
     )
 
     args = parser.parse_args()
-    log.info(f"Starting NACOS MCP Server with {args.transport} transport")
+    log.info(f"Starting APIG MCP Server with {args.transport} transport")
 
     mcp.run(transport=args.transport)
 
