@@ -7,27 +7,23 @@ class Error:
     message: str
     type: str
     code: str
-    log_id: Optional[str] = None
 
-    @classmethod
-    def from_dict(cls, d: dict):
-        return cls(
-            message=d.get("message", ""),
-            type=d.get("type", ""),
-            code=d.get("code", ""),
-            log_id=d.get("log_id")
-        )
+    def to_dict(self):
+        return {
+            "message": self.message,
+            "type": self.type,
+            "code": self.code
+        }
 
 
 @dataclass
 class ResponseError:
     error: Error
 
-    @classmethod
-    def from_dict(cls, d: dict):
-        return cls(
-            error=Error.from_dict(d),
-        )
+    def to_dict(self):
+        return {
+            "error": self.error.to_dict(),
+        }
 
 
 @dataclass
@@ -43,6 +39,13 @@ class CoverImage:
             width=d.get("width", 0),
             height=d.get("height", 0),
         )
+
+    def to_dict(self):
+        return {
+            "url": self.url,
+            "width": self.width,
+            "height": self.height,
+        }
 
 
 @dataclass
@@ -68,20 +71,30 @@ class Reference:
             cover_image=cover_image,
         )
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "source_type": self.source_type,
+            "site_name": self.site_name,
+            "title": self.title,
+            "publish_time": self.publish_time,
+            "url": self.url,
+            "cover_image": self.cover_image.to_dict() if self.cover_image else None,
+        }
+
 
 @dataclass
-class Response:
+class ChatCompletionToolResponse:
     log_id: str
     content: str
     references: list[Reference]
 
-    @classmethod
-    def from_dict(cls, d: dict):
-        return cls(
-            log_id=d.get("log_id", ""),
-            content=d.get("content", ""),
-            references=[Reference.from_dict(r) for r in d.get("references", [])],
-        )
+    def to_dict(self):
+        return {
+            "log_id": self.log_id,
+            "content": self.content,
+            "references": [r.to_dict() for r in self.references],
+        }
 
 
 @dataclass
@@ -102,13 +115,15 @@ class OriginChatCompletionRequest:
     bot_id: str
     stream: bool
     messages: list[Message]
+    user_id: Optional[str] = ""
 
     @classmethod
     def from_dict(cls, d: dict):
         return cls(
             bot_id=d.get("bot_id", ""),
             stream=d.get("stream", False),
-            messages=[Message.from_dict(m) for m in d.get("messages", [])]
+            messages=[Message.from_dict(m) for m in d.get("messages", [])],
+            user_id=d.get("user_id", "")
         )
 
 

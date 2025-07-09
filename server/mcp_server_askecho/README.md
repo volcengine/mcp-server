@@ -21,7 +21,69 @@ v0.1.0
 
 本 MCP Server 产品提供以下 Tools (工具/能力):
 
-### Tool 1: chat_completion
+### Tool 1: chat_completion_official
+
+#### 类型
+
+saas
+
+#### 详细描述
+
+根据用户输入问题，提供基于联网搜索的大模型总结后回复内容
+
+#### 调试所需的输入参数:
+
+输入：
+
+```json
+{
+  "inputSchema": {
+    "type": "object",
+    "required": [
+      "messages"
+    ],
+    "properties": {
+      "messages": {
+        "description": "对话消息列表",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "role",
+            "content"
+          ],
+          "properties": {
+            "role": {
+              "description": "消息角色类型",
+              "type": "string"
+            },
+            "content": {
+              "description": "消息内容",
+              "type": "string"
+            }
+          }
+        }
+      },
+      "user_id": {
+        "description": "可选，用户标识符，用于标识用户身份，以支持新闻相关工具的去重逻辑",
+        "type": "string"
+      }
+    }
+  },
+  "name": "chat_completion_official",
+  "description": "联网问答智能体会话-正式版本"
+}
+```
+
+输出：
+
+- 大模型基于联网搜索给出的总结回复
+
+#### 最容易被唤起的 Prompt示例
+
+今天的热点新闻
+
+### Tool 2: chat_completion（已废弃，推荐使用chat_completion_official）
 
 #### 类型
 
@@ -50,7 +112,7 @@ saas
     }
   },
   "name": "chat_completion",
-  "description": "联网问答智能体会话"
+  "description": "联网问答智能体会话（已废弃，推荐使用chat_completion_official）"
 }
 ```
 
@@ -68,11 +130,12 @@ Trae，Cursor，Python
 
 ## 服务开通链接 (整体产品)
 
-登录火山控制台，开通【联网agent lite版】，具体流程参考：https://www.volcengine.com/docs/85508/1512748
+登录火山控制台，开通【联网agent】，具体流程参考：https://www.volcengine.com/docs/85508/1512748
 
 ## 鉴权方式
 
-火山引擎的AKSK鉴权体系
+- API Key鉴权
+- 火山引擎的AKSK鉴权体系
 
 ## 安装部署
 
@@ -130,9 +193,11 @@ uv run mcp-server-askecho -t sse
         "mcp-server-askecho"
       ],
       "env": {
-        "VOLCENGINE_ACCESS_KEY": "your-access-key",
-        "VOLCENGINE_SECRET_KEY": "your-secret-key",
-        "ASKECHO_BOT_ID": "your-bot-id"
+        "VOLCENGINE_ACCESS_KEY": "火山引擎AK",
+        "VOLCENGINE_SECRET_KEY": "火山引擎SK",
+        "ASKECHO_API_KEY": "智能体API Key（用户需要通过控制台创建API Key以获取）",
+        "ASKECHO_BOT_ID": "智能体ID（用户需要通过联网问答智能体控制台开通智能体以获取）",
+        "ASKECHO_CHAT_COMPLETION_OFFICIAL_USER_ID": "用户ID（针对chat_completion_official生效，用于标识用户身份，以支持新闻相关工具的去重逻辑）"
       }
     }
   }
