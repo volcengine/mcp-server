@@ -137,7 +137,6 @@ The device running MCP server needs to install the following dependencies:
 
 ### Deployment and Configuration
 
-
 ```json
 {
   "mcpServers": {
@@ -145,7 +144,7 @@ The device running MCP server needs to install the following dependencies:
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_alb",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_alb/python",
         "mcp-server-alb"
       ],
       "env": {
@@ -155,7 +154,6 @@ The device running MCP server needs to install the following dependencies:
     }
   }
 }
-
 ```
 
 > Note: Please replace `Your Volcengine AK` and `Your Volcengine SK` above with the Access Key ID and Secret Access Key corresponding to your Volcengine account respectively.

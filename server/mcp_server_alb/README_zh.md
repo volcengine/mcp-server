@@ -137,7 +137,6 @@ AK&amp;SK
 
 ### 部署与配置
 
-
 ```json
 {
   "mcpServers": {
@@ -145,7 +144,7 @@ AK&amp;SK
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_alb",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_alb/python",
         "mcp-server-alb"
       ],
       "env": {
