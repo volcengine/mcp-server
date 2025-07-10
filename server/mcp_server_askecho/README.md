@@ -2,7 +2,7 @@
 
 ## 版本信息
 
-v0.1.0
+v0.2.0
 
 ## 产品描述
 
@@ -29,7 +29,7 @@ saas
 
 #### 详细描述
 
-根据用户输入问题，提供基于联网搜索的大模型总结后回复内容
+根据用户输入问题，提供基于联网搜索的大模型总结后回复内容（推荐使用）
 
 #### 调试所需的输入参数:
 
@@ -83,7 +83,7 @@ saas
 
 今天的热点新闻
 
-### Tool 2: chat_completion（已废弃，推荐使用chat_completion_official）
+### Tool 2: chat_completion
 
 #### 类型
 
@@ -91,7 +91,7 @@ saas
 
 #### 详细描述
 
-根据用户输入问题，提供基于联网搜索的大模型总结后回复内容
+根据用户输入问题，提供基于联网搜索的大模型总结后回复内容（已废弃，后续下线）
 
 #### 调试所需的输入参数:
 
@@ -112,7 +112,7 @@ saas
     }
   },
   "name": "chat_completion",
-  "description": "联网问答智能体会话（已废弃，推荐使用chat_completion_official）"
+  "description": "联网问答智能体会话（已废弃，后续下线，推荐使用chat_completion_official）"
 }
 ```
 
@@ -130,7 +130,8 @@ Trae，Cursor，Python
 
 ## 服务开通链接 (整体产品)
 
-登录火山控制台，开通【联网agent】，具体流程参考：https://www.volcengine.com/docs/85508/1512748
+登录火山控制台，开通【联网agent lite版】或【联网agent
+pro版】。具体版本功能范围、开通具体流程参考：https://www.volcengine.com/docs/85508/1512748
 
 ## 鉴权方式
 
@@ -174,8 +175,9 @@ git clone git@github.com:volcengine/mcp-server.git
 cd mcp-server/server/mcp_server_askecho
 uv run mcp-server-askecho
 
-# 使用sse模式启动(默认为stdio)
+# 使用sse/streamable-http模式启动(默认为stdio)
 uv run mcp-server-askecho -t sse
+uv run mcp-server-askecho -t streamable-http
 ```
 
 ## 部署

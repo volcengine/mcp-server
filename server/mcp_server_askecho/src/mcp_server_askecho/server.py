@@ -26,7 +26,7 @@ def chat_completion_official(
         user_id: Optional[str] = "",
 ) -> Dict[str, Any]:
     """
-    联网问答智能体会话工具标准版，基于联网搜索结果，提供端到端的AI问答能力
+    联网问答智能体会话工具标准版，根据用户输入问题，提供基于联网搜索的大模型总结后回复内容（推荐使用）
     Args:
         messages (List[Dict[str, str]]): 对话消息列表，按顺序排列，包含历史消息与当前用户输入
             - role (str): 消息角色类型
@@ -80,7 +80,7 @@ def chat_completion(
 ) -> Dict[str, Any]:
     """
     （已废弃，推荐使用chat_completion_official工具）
-    联网问答智能体会话工具，基于联网搜索结果，提供端到端的AI问答能力
+    联网问答智能体会话工具，根据用户输入问题，提供基于联网搜索的大模型总结后回复内容
     Args:
         query: 搜索问题
     Returns:
