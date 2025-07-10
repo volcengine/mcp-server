@@ -75,6 +75,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 
 - **[CDN MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_cdn)**：火山引擎 CDN 智能分析助手。  
 - **[边缘计算节点 MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_veen)**：申请、配置、查阅在边缘计算节点，包括虚拟机、镜像、裸金属，及对应的网络配置。  
+- **[ALB MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_alb)**：查阅应用型负载均衡实例的信息，包括实例关联的监听器、后端服务器组以及证书等相关信息。  
 
 
 ### **大数据**  
