@@ -110,9 +110,8 @@ def volcengine_auth_request(method, date, query, header, ak, sk, action, body):
     r = requests.request(method=method,
                          url="https://{}{}".format(request_param["host"], request_param["path"]),
                          headers=header,
-                         timeout=600,  # todo 单位确认
-                         params=request_param["query"],  # todo 干嘛的
-                         data=request_param["body"],
-                         stream=True  # todo 干嘛的
+                         timeout=600,
+                         params=request_param["query"],
+                         data=request_param["body"]
                          )
     return r

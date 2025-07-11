@@ -117,15 +117,6 @@ class OriginChatCompletionRequest:
     messages: list[Message]
     user_id: Optional[str] = ""
 
-    @classmethod
-    def from_dict(cls, d: dict):
-        return cls(
-            bot_id=d.get("bot_id", ""),
-            stream=d.get("stream", False),
-            messages=[Message.from_dict(m) for m in d.get("messages", [])],
-            user_id=d.get("user_id", "")
-        )
-
 
 @dataclass
 class Choice:

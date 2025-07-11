@@ -17,7 +17,6 @@ def chat_completion_api_key_auth_api(api_key: str, req: OriginChatCompletionRequ
                          url="https://{}{}".format(Host, "/agent_api/agent/chat/completion"),
                          headers=header,
                          timeout=600,
-                         data=json.dumps(asdict(req)),
-                         stream=True
+                         data=json.dumps(asdict(req))
                          )
     return r

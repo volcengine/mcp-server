@@ -79,7 +79,7 @@ def chat_completion(
         query: str,
 ) -> Dict[str, Any]:
     """
-    （已废弃，推荐使用chat_completion_official工具）
+    （已废弃，待下线，推荐使用chat_completion_official工具）
     联网问答智能体会话工具，根据用户输入问题，提供基于联网搜索的大模型总结后回复内容
     Args:
         query: 搜索问题
