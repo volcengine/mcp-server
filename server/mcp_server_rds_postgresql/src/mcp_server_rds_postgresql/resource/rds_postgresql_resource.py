@@ -25,7 +25,7 @@ class RDSPostgreSQLSDK:
         configuration.region = region
         if host is not None:
             configuration.host = host
-        self.client = RDSPOSTGRESQLApi(volcenginesdkcore.ApiClient(configuration))
+        self.client = RDSPOSTGRESQLApi(volcenginesdkcore.ApiClient(configuration, "X-PGMgr-Source", "local_mcp"))
 
     def describe_db_instances(self, args: dict) -> DescribeDBInstancesResponse:
         return self.client.describe_db_instances(DescribeDBInstancesRequest(**args))
