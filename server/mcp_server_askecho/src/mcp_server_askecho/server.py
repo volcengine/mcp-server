@@ -21,22 +21,20 @@ mcp = FastMCP("AskEcho MCP Server")
 
 
 @mcp.tool()
-def chat_completion_official(
-        messages: list[Message],
-        user_id: Optional[str] = "",
+def chat_completion(
+        messages: list[Message]
 ) -> Dict[str, Any]:
     """
-    联网问答智能体会话工具标准版，根据用户输入问题，提供基于联网搜索的大模型总结后回复内容（推荐使用）
+    联网问答智能体会话工具，根据用户输入问题，提供基于联网搜索的大模型总结后回复内容
     Args:
         messages (List[Dict[str, str]]): 对话消息列表，按顺序排列，包含历史消息与当前用户输入
             - role (str): 消息角色类型
-            - content (str): 该轮消息的具体内容。
-        user_id: 可选，用户标识符，用于标识用户身份，以支持新闻相关工具的去重逻辑
+            - content (str): 该轮消息的具体内容
 
     Returns:
         结构化的大模型基于联网搜索给出的总结回复
     """
-    logger.info(f"Received chat_completion_official tool request")
+    logger.info(f"Received chat_completion tool request")
 
     try:
         if config is None:
@@ -49,77 +47,19 @@ def chat_completion_official(
             bot_id=config.bot_id,
             stream=False,
             messages=messages,
-            user_id="" if user_id is None else user_id
+            user_id="" if config.user_id is None else config.user_id
         )
         if config.api_key is not None and len(config.api_key) > 0:
-            resp = chat_completion_api_key_auth_api(config.api_key, req, "chat_completion_official")
+            resp = chat_completion_api_key_auth_api(config.api_key, req, "chat_completion")
             resp.raise_for_status()
             logger.info(f"Received chat_completion_api_key_auth_api response")
             return resp.json()
         else:
             resp = chat_completion_volcengine_auth(config.volcengine_ak, config.volcengine_sk, req,
-                                                   "chat_completion_official")
+                                                   "chat_completion")
             resp.raise_for_status()
             logger.info(f"Received chat_completion_volcengine_auth response")
             return resp.json()
-    except Exception as e:
-        logger.error(f"Error in chat_completion_official tool: {e}")
-        resp_error = ResponseError(
-            error=Error(
-                message=str(e),
-                type="mcp_server_askecho_error",
-                code="mcp_server_askecho_error",
-            )
-        )
-        return resp_error.to_dict()
-
-
-@mcp.tool()
-def chat_completion(
-        query: str,
-) -> Dict[str, Any]:
-    """
-    （已废弃，待下线，推荐使用chat_completion_official工具）
-    联网问答智能体会话工具，根据用户输入问题，提供基于联网搜索的大模型总结后回复内容
-    Args:
-        query: 搜索问题
-    Returns:
-        结构化的大模型基于联网搜索给出的总结回复
-    """
-    logger.info(f"Received chat_completion tool request")
-
-    try:
-        if config is None:
-            raise ValueError("config not loaded")
-        req = OriginChatCompletionRequest(
-            bot_id=config.bot_id,
-            stream=False,
-            messages=[
-                Message(
-                    role="system",
-                    content="回答使用简短清晰的语言（300字以内）",
-                ),
-                Message(
-                    role="user",
-                    content=query,
-                )
-            ],
-        )
-        origin_api_resp = chat_completion_volcengine_auth(config.volcengine_ak, config.volcengine_sk, req,
-                                                          "chat_completion")
-        origin_api_resp.raise_for_status()
-        logger.info(f"Received chat_completion_api response")
-        api_resp = OriginChatCompletionResponse.from_dict(origin_api_resp.json())
-        if len(api_resp.id) > 0:
-            response = ChatCompletionToolResponse(
-                log_id=api_resp.id,
-                content=api_resp.choices[0].message.content if api_resp.choices else "",
-                references=api_resp.references
-            )
-            return response.to_dict()
-        else:
-            logger.error(f"Error in chat_completion_api")
-            return origin_api_resp.json()
     except Exception as e:
         logger.error(f"Error in chat_completion tool: {e}")
         resp_error = ResponseError(

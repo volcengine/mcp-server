@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 ENV_ASKECHO_BOT_ID = "ASKECHO_BOT_ID"
 ENV_ASKECHO_API_KEY = "ASKECHO_API_KEY"
+ENV_ASKECHO_USER_ID = "ASKECHO_USER_ID"
 ENV_VOLCENGINE_ACCESS_KEY = "VOLCENGINE_ACCESS_KEY"
 ENV_VOLCENGINE_SECRET_KEY = "VOLCENGINE_SECRET_KEY"
 
@@ -20,6 +21,7 @@ class AskEchoConfig:
     api_key: Optional[str] = None
     volcengine_ak: Optional[str] = None
     volcengine_sk: Optional[str] = None
+    user_id: Optional[str] = None
 
 
 def load_config() -> AskEchoConfig:
@@ -54,11 +56,13 @@ def load_config() -> AskEchoConfig:
         bot_id = os.environ.get(ENV_ASKECHO_BOT_ID)
         if not bot_id:
             raise ValueError(f"Missing required environment variable: {ENV_ASKECHO_BOT_ID}")
+        user_id = os.environ.get(ENV_ASKECHO_USER_ID)
         return AskEchoConfig(
             bot_id=bot_id,
             api_key=api_key,
             volcengine_ak=volcengine_ak,
-            volcengine_sk=volcengine_sk
+            volcengine_sk=volcengine_sk,
+            user_id=user_id,
         )
     except Exception as e:
         logger.error(f"Error loading configuration: {str(e)}")

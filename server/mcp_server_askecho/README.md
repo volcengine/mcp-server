@@ -21,7 +21,7 @@ v0.2.0
 
 本 MCP Server 产品提供以下 Tools (工具/能力):
 
-### Tool 1: chat_completion_official
+### Tool 1: chat_completion
 
 #### 类型
 
@@ -29,7 +29,7 @@ saas
 
 #### 详细描述
 
-根据用户输入问题，提供基于联网搜索的大模型总结后回复内容（推荐使用）
+根据用户输入问题，提供基于联网搜索的大模型总结后回复内容
 
 #### 调试所需的输入参数:
 
@@ -63,56 +63,11 @@ saas
             }
           }
         }
-      },
-      "user_id": {
-        "description": "可选，用户标识符，用于标识用户身份，以支持新闻相关工具的去重逻辑",
-        "type": "string"
-      }
-    }
-  },
-  "name": "chat_completion_official",
-  "description": "联网问答智能体会话-正式版本"
-}
-```
-
-输出：
-
-- 大模型基于联网搜索给出的总结回复
-
-#### 最容易被唤起的 Prompt示例
-
-今天的热点新闻
-
-### Tool 2: chat_completion
-
-#### 类型
-
-saas
-
-#### 详细描述
-
-根据用户输入问题，提供基于联网搜索的大模型总结后回复内容（已废弃，后续下线）
-
-#### 调试所需的输入参数:
-
-输入：
-
-```json
-{
-  "inputSchema": {
-    "type": "object",
-    "required": [
-      "query"
-    ],
-    "properties": {
-      "query": {
-        "description": "搜索问题",
-        "type": "string"
       }
     }
   },
   "name": "chat_completion",
-  "description": "联网问答智能体会话（已废弃，后续下线，推荐使用chat_completion_official）"
+  "description": "联网问答智能体会话"
 }
 ```
 
@@ -197,9 +152,9 @@ uv run mcp-server-askecho -t streamable-http
       "env": {
         "VOLCENGINE_ACCESS_KEY": "火山引擎AK",
         "VOLCENGINE_SECRET_KEY": "火山引擎SK",
-        "ASKECHO_API_KEY": "智能体API Key（用户需要通过控制台创建API Key以获取）",
-        "ASKECHO_BOT_ID": "智能体ID（用户需要通过联网问答智能体控制台开通智能体以获取）",
-        "ASKECHO_CHAT_COMPLETION_OFFICIAL_USER_ID": "用户ID（针对chat_completion_official生效，用于标识用户身份，以支持新闻相关工具的去重逻辑）"
+        "ASKECHO_API_KEY": "智能体API Key：用户需要通过联网问答智能体控制台创建API Key以获取",
+        "ASKECHO_BOT_ID": "智能体ID：用户需要通过联网问答智能体控制台开通智能体以获取",
+        "ASKECHO_USER_ID": "用户ID：可选，用于标识用户身份，以支持新闻相关工具的去重逻辑"
       }
     }
   }
