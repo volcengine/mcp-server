@@ -172,6 +172,7 @@ Supports [Cline](https://cline.bot/) plugin
 ## Conversation Initiation Example
 
 - List all ALB instances.
+- Get the ALB instance information and associated listener information with the private IP address 192.168.1.16.
 
 ## License
 
