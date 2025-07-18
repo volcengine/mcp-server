@@ -60,7 +60,8 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 
 - **[RDS MySQL MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_rds_mysql)**：云数据库 MySQL 版是即开即用、稳定可靠、灵活弹性、易于使用的关系型数据库服务。  
 - **[veDB MySQL MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_vedb_mysql)**：云数据库 veDB MySQL 版采用计算存储分离架构，100%兼容MySQL，最多支持 200TiB 的超大容量结构化数据存储，单个数据库集群最多可扩展至 16 个计算节点。  
-- **[MongoDB MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_mongodb)**：自然语言驱动向火山引擎文档数据库 MongoDB 版实例发送和执行自定义命令。  
+- **[Redis MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_redis)**：自然语言驱动管理火山引擎缓存数据库 Redis 实例。
+- **[MongoDB MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_mongodb)**：自然语言驱动向火山引擎文档数据库 MongoDB 版实例发送和执行自定义命令。
 - **[CloudSearch MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_cloudsearch)**：云搜索服务（Cloud Search）是火山引擎提供的全托管一站式信息检索和分析平台。  
 
 
@@ -204,6 +205,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 - **[MySQL](https://github.com/designcomputer/mysql_mcp_server)**：MySQL database integration in Python with configurable access controls and schema inspection.  
 - **[Data Exploration](https://github.com/reading-plus-ai/mcp-server-data-exploration)**：MCP server for autonomous data exploration on .csv-based datasets, providing intelligent insights with minimal effort.  
 - **[Dataset Viewer](https://github.com/privetin/dataset-viewer)**：Browse and analyze Hugging Face datasets with features like search, filtering, statistics, and data export.  
+- **[Redis](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_redis)**：MCP server for interacting with Redis, a high-performance in-memory NoSQL key-value database.
 - **[MongoDB](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_mongodb)**：A Model Context Protocol Server for MongoDB.  
 - **[MSSQL](https://github.com/RichardHan/mssql_mcp_server)**：MSSQL database integration with configurable access controls and schema inspection.  
 

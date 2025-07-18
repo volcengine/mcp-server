@@ -1,0 +1,17 @@
+[project]
+name = "mcp-server-redis"
+version = "1.0.0"
+description = "MCP server for Redis"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp[cli]",
+    "mcp>=1.9.4",
+    "volcengine-python-sdk>=1.0.130",
+]
+[project.scripts]
+mcp-server-redis = "mcp_server_redis.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
