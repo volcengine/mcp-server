@@ -133,7 +133,6 @@ Volcengine Redis service access address: https://www.volcengine.com/docs/6293/65
       ],
       "transportType": "stdio",
       "env": {
-        "VOLCENGINE_ENDPOINT": "Volcengine endpoint",
         "VOLCENGINE_REGION": "Volcengine resource region",
         "VOLCENGINE_ACCESS_KEY": "Volcengine account ACCESS_KEY",
         "VOLCENGINE_SECRET_KEY": "Volcengine account SECRET_KEY",
