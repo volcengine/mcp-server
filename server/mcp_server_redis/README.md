@@ -60,7 +60,7 @@
 
 ### 12. `describe_db_instance_params`
 - **Detailed Description**: Query the list of parameters supported by the target Redis instance.
-- **Trigger Example**: `"View parameter list for instance redis-cnlf57snu3tt8vyja"`
+- **Trigger Example**: `"View parameter list for instance redis-cnlf57snuxxxxxxxx"`
 
 ### 13. `describe_parameter_groups`
 - **Detailed Description**: Query basic information of parameter templates under current account and region.

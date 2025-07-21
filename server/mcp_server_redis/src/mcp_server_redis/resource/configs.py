@@ -1,8 +1,8 @@
-redis_supported_regions = ["cn-beijing", "cn-guangzhou", "cn-shanghai", "cn-hongkong", "ap-southeast-1", "ap-southeast-3"]
-vpc_supported_regions = ["cn-beijing", "cn-guangzhou", "cn-shanghai", "cn-hongkong", "ap-southeast-1", "ap-southeast-3"]
+redis_supported_regions = ["cn-guilin-boe"]
+vpc_supported_regions = ["cn-guilin-boe"]
 
 def get_redis_service_endpoint_by_region(region_id: str = None) -> str:
-    return f"redis.{region_id}.volcengineapi.com"
+    return "volcengineapi-boe-stable.byted.org"
 
 def get_vpc_service_endpoint_by_region(region_id: str = None) -> str:
-    return f"vpc.{region_id}.volcengineapi.com"
+    return "volcengineapi-boe-stable.byted.org"

@@ -33,7 +33,7 @@ idna==3.10
     #   httpx
 markdown-it-py==3.0.0
     # via rich
-mcp==1.9.4
+mcp>=1.9.4
     # via mcp-server-rds-postgresql (pyproject.toml)
 mdurl==0.1.2
     # via markdown-it-py
