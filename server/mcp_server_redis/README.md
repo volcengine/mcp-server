@@ -131,7 +131,7 @@ Volcengine Redis service access address: https://www.volcengine.com/docs/6293/65
         "git+https://github.com/volcengine/mcp-server.git#subdirectory=server/mcp_server_redis",
         "mcp-server-redis"
       ],
-      "transport": "stdio",
+      "--transport": "stdio",
       "env": {
         "VOLCENGINE_REGION": "Volcengine resource region",
         "VOLCENGINE_ACCESS_KEY": "Volcengine account ACCESS_KEY",
