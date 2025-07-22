@@ -5,7 +5,7 @@ import httpx
 from typing import Optional
 from volcengine.tls.tls_exception import TLSException
 from mcp_server_tls.consts import *
-from mcp_server_tls.reqeust import custom_api_call, custom_api_sse_call
+from mcp_server_tls.request import custom_api_call
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ async def create_app_instance_resource(
         if description is not None:
             body["Description"] = description
 
-        return custom_api_call(
+        return await custom_api_call(
             auth_info=auth_info,
             api=API_CREATE_APP_INSTANCE,
             body=body,
@@ -61,7 +61,7 @@ async def describe_app_instances_resource(
         if description is not None:
             params["Description"] = description
 
-        return custom_api_call(
+        return await custom_api_call(
             auth_info=auth_info,
             api=API_DESCRIBE_APP_INSTANCES,
             params=params
@@ -90,7 +90,7 @@ async def create_app_scene_meta_resource(
         if record is not None:
             body["Record"] = record
 
-        return custom_api_call(
+        return await custom_api_call(
             auth_info=auth_info,
             api=API_CREATE_APP_SCENE_META,
             body=body
@@ -133,16 +133,16 @@ async def describe_session_answer_resource(
         if intent is not None:
             body["Intent"] = intent
 
-        response_sse: httpx.Response = await custom_api_sse_call(
+        response_stream: httpx.Response = await custom_api_call(
             auth_info=auth_info,
             api=API_DESCRIBE_SESSION_ANSWER,
-            body=body
+            body=body,
+            is_stream=True,
         )
 
-        for line in response_sse.iter_lines():
+        for line in response_stream.iter_lines():
             if not line.startswith(data_prefix):
                 continue
-
             try:
                 data = json.loads(line.removeprefix(data_prefix).strip())
                 answer = data.get("Message", {}).get("Answer", "")

@@ -350,6 +350,68 @@ Retrieve information for multiple topics under a specified project ID within the
 
 Use the describe_topics_tool to find the shard count for the first 10 topics under the current project.
 
+### Tool 7: put_logs_v2_tool
+
+upload logs to the specified log topic.
+
+- Required input parameters for debugging:
+
+`Input`
+
+```json
+{
+  "inputSchema": {
+    "type": "object",
+    "required": ["logs"],
+    "properties": {
+      "logs": {
+        "type": "array",
+        "description": "logs field for the log field to be written, each item in the array is a log, each item consists of multiple key-value key-value pairs"
+      },
+      "log_time": {
+        "type": "int",
+        "description": "Log timestamp for writing to the log, default is current time",
+      },
+      "topic_id": {
+        "type": "string",
+        "description": "Optional log topic ID, default is the topic_id set in the environment variable, if not set, then must be passed."
+      },
+      "source": {
+        "type": "string",
+        "description": "The source of the logs, usually identified by the machine IP",
+      },
+      "filename": {
+        "type": "string",
+        "description": "Log file name",
+      },
+      "hash_key": {
+        "type": "string",
+        "description": "HashKey of the log group to specify the partition (Shard) to which the current log group is to be written",
+      },
+      "compression": {
+        "type": "string",
+        "description": "The compression format of the request body, default is lz4, optional zlib.",
+      },
+    }
+  },
+  "name": "put_logs_v2_tool",
+  "description": "Call the PutLogs interface to upload logs to the specified log topic. If you need to use searchLogs to query the logs, please set up the index first."
+}
+```
+
+`Output`
+    - [Reference Documentation](https://www.volcengine.com/docs/6470/112191)
+
+```json
+{
+    "request_id": "your_request_id"
+}
+```
+
+- Example of the most easily triggered prompt:
+
+Use the put_logs_v2_tool tool to help me write the following logs as [{"user": "peter", "age": 18}, {"user": "marry", "age": 16}]
+
 ## Supported Platforms
 
 Can be used with cline, cursor, Claude desktop, or other terminals supporting MCP server calls.
@@ -383,7 +445,7 @@ For server-based deployment, set `DEPLOY_MODE=remote` and only configure `REGION
 
 ### Run Locally
 
-#### Option 1
+#### 1. Launching via local code
 
 ```json
 {
@@ -401,7 +463,7 @@ For server-based deployment, set `DEPLOY_MODE=remote` and only configure `REGION
 }
 ```
 
-#### Option 2
+#### 2. Launch via remote repository
 
 ```json
 {
@@ -427,25 +489,67 @@ For server-based deployment, set `DEPLOY_MODE=remote` and only configure `REGION
 }
 ```
 
-### Run Remote
+### Remote startup
 
-Set `DEPLOY_MODE=remote`.
+#### Deploying remote services
+
+##### 1. Local direct startup
+
+Set `DEPLOY_MODE=remote`
 
 ```shell
 uv --directory /ABSOLUTE/PATH/TO/PARENT/FOLDER run mcp-server-tls -t sse
 ```
 
-When used by the caller, authentication information should be base64-encoded and included in the request header as `authorization`:
+or
+
+```shell
+uv --directory /ABSOLUTE/PATH/TO/PARENT/FOLDER run mcp-server-tls -t streamable-http
+```
+
+> We suggest that using streamable-http
+
+##### 2. Started by DOCKER
+
+We also provide DOCKERFILE to facilitate your deployment, which has not been pushed to the open source repository, so you can manually package it first.
+
+Example of docker compose startup.
+
+```
+services:
+  mcp:
+    image: your-image:your-version
+    container_name: mcp_server_tls
+    restart: always
+    ports:
+      - "80:8000"
+    environment:
+      MCP_DEPLOY_MODE: remote
+      TRANSPORT_TYPE: streamable-http
+      MCP_SERVER_HOST: 0.0.0.0
+      MCP_SERVER_PORT: 8000
+```
+
+#### call
+
+|transport-type| call link example |
+| :-: | :-: |
+| sse | http://127.0.0.1:8000/sse |
+| streamable-http | http://127.0.0.1:8000/mcp/ |
+
+The caller should put the authentication information in the authorization header after encoding it in base64 in the following format
 
 ```json
 {
     "AccessKeyId": "your ak",
     "SecretAccessKey": "your sk",
-    "SessionToken": "your token"
+    "SessionToken": "your token",
+    "Region": "your region",
+    "Endpoint": "your endpoint"
 }
 ```
 
-## Configuration on Different Platforms
+`Region` and `Endpoint` is not necessary, default region is `cn-beijing`, endpoint is `https://tls-cn-beijing.volces.com`
 
 ## License
 
