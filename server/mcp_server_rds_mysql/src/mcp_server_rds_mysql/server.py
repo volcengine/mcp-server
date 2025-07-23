@@ -721,7 +721,8 @@ async def create_rds_mysql_instance_async(
         data["maintenance_window"] = maintenance_window
 
     # 调用原有的创建方法
-    create_result = rds_mysql_resource.create_db_instance(data)
+    create_resp = rds_mysql_resource.create_db_instance(data)
+    create_result = create_resp.to_dict()
     instance_id = create_result.get("InstanceId")
     
     # 等待实例就绪
@@ -730,9 +731,10 @@ async def create_rds_mysql_instance_async(
     
     for _ in range(max_retries):
         await asyncio.sleep(retry_interval)
-        detail = rds_mysql_resource.describe_db_instance_detail({"instance_id": instance_id})
+        detail_resp = rds_mysql_resource.describe_db_instance_detail({"instance_id": instance_id})
+        detail = detail_resp.to_dict()
         if detail.get("InstanceStatus") == "Running":
-            return detail.to_dict()
+            return detail
     
     # 超时处理
     raise TimeoutError(f"实例 {instance_id} 创建超时，请手动检查实例状态")
