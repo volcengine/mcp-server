@@ -1144,7 +1144,7 @@ def create_db_account(
 
 @mcp_server.tool(
     name="describe_vpcs",
-    description="查询满足指定条件的VPC，用于创建实例"
+    description="查询VPC 信息，用于创建实例"
 )
 def describe_vpcs(
         page_number: int = Field(default=1, description="当前页页码，最小值为1"),
@@ -1164,7 +1164,7 @@ def describe_vpcs(
 
 @mcp_server.tool(
     name="describe_subnets",
-    description="查询满足指定条件的子网，用于创建实例"
+    description="查询子网信息，用于创建实例"
 )
 def describe_subnets(
         vpc_id: str = Field(
