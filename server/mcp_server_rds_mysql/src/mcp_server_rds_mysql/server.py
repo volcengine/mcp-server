@@ -607,11 +607,9 @@ async def create_rds_mysql_instance_async(
                 basic_info = detail.get('basic_info', {})
                 instance_status = basic_info.get('instance_status')
             
-            # 检查实例是否处于运行状态，考虑不同的状态名称格式
-            running_states = ["Running", "running", "RUNNING", "Available", "available", "Ready", "ready"]
-            if instance_status in running_states:
-                print(f"Instance {instance_id} is now running (status: {instance_status}) after {attempt+1} attempts")
-                return detail_dict
+            if instance_status == "Running":
+                print(f"Instance {instance_id} is now running after {attempt+1} attempts")
+                return detail
             else:
                 print(f"Instance {instance_id} current status: {instance_status}, waiting...")
         except Exception as e:
