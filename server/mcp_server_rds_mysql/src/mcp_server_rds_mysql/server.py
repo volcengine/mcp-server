@@ -458,155 +458,6 @@ def modify_db_account_description(
 
 
 @mcp_server.tool(
-    name="create_rds_mysql_instance",
-    description="创建 RDS MySQL 实例，llm之后需要调用describe_db_instance_detail（大概3-5分钟）轮询等待实例状态变为Running才能进行后续操作"
-)
-def create_rds_mysql_instance(
-        vpc_id: str = Field(title="私有网络 ID", description="需要使用describe_vpcs获取"),
-        subnet_id: str = Field(title="子网 ID", description="需要使用describe_subnets获取，subnet_id只有一个可用区属性，多可用区时找到一个与主节点或者备节点所在的可用区相同的即可"),
-        db_engine_version: str = Field(default="MySQL_8_0", description="数据库版本"),
-        instance_name: Optional[str] = Field(default=None, description="实例名称"),
-        primary_zone: str = Field(default="cn-beijing-a", description="主节点可用区"),
-        primary_spec: str = Field(default="rds.mysql.1c2g", description="主节点规格"),
-        secondary_count: int = Field(default=1, description="备节点数量"),
-        secondary_zone: Optional[str] = Field(default=None, description="备节点可用区，默认与主节点相同，多可用区需要不同"),
-        secondary_spec: str = Field(default="rds.mysql.1c2g", description="备节点规格"),
-        read_only_count: int = Field(default=0, description="只读节点数量"),
-        read_only_zone: str = Field(default="cn-beijing-a", description="只读节点可用区"),
-        read_only_spec: str = Field(default="rds.mysql.1c2g", description="只读节点规格"),
-        storage_space: int = Field(default=20, description="存储空间大小(GB)"),
-        storage_type: str = Field(default="LocalSSD", description="存储类型"),
-        charge_type: str = Field(default="PostPaid", description="付费类型"),
-        auto_renew: Optional[bool] = Field(default=None, description="预付费场景下是否自动续费"),
-        period_unit: Optional[str] = Field(default=None, description="预付费场景下的购买周期(Month/Year)"),
-        period: Optional[int] = Field(default=None, description="预付费场景下的购买时长"),
-        instance_type: str = Field(
-                    default="DoubleNode",
-                    description="实例类型，可选值：DoubleNode（双节点）、MultiNode（多节点）",
-                    choices=["DoubleNode", "MultiNode"]
-                ),
-        super_account_name: Optional[str] = Field(default=None, description="高权限账号名称"),
-        super_account_password: Optional[str] = Field(default=None, description="高权限账号密码"),
-        lower_case_table_names: str = Field(default="1", description="表名是否区分大小写"),
-        db_time_zone: Optional[str] = Field(default=None, description="时区"),
-        db_param_group_id: Optional[str] = Field(default=None, description="参数模板 ID"),
-        project_name: Optional[str] = Field(default=None, description="实例所属项目"),
-        allow_list_ids: Optional[List[str]] = Field(default=None, description="白名单 ID 列表"),
-        port: int = Field(default=3306, description="默认终端的私网端口"),
-        instance_tags: Optional[List[Dict]] = Field(default=None, description="实例标签列表"),
-        maintenance_window: Optional[Dict] = Field(default=None, description="维护窗口配置")
-) -> dict[str, Any]:
-    """创建 RDS MySQL 实例
-
-    Args:
-        vpc_id: 私有网络 ID
-        subnet_id: 子网 ID
-        db_engine_version: 数据库版本，默认 MySQL_8_0
-        instance_name: 实例名称
-        primary_zone: 主节点可用区，默认 cn-beijing-a
-        primary_spec: 主节点规格，默认 rds.mysql.1c2g
-        secondary_count: 备节点数量，默认 1
-        secondary_zone: 备节点可用区，默认与主节点相同
-        secondary_spec: 备节点规格，默认 rds.mysql.1c2g
-        read_only_count: 只读节点数量，默认 0
-        read_only_zone: 只读节点可用区，默认 cn-beijing-a
-        read_only_spec: 只读节点规格，默认 rds.mysql.1c2g
-        storage_space: 存储空间大小(GB)，默认 20
-        storage_type: 存储类型，默认 LocalSSD
-        charge_type: 付费类型，默认 PostPaid
-        auto_renew: 预付费场景下是否自动续费
-        period_unit: 预付费场景下的购买周期(Month/Year)
-        period: 预付费场景下的购买时长
-        instance_type: 实例类型，默认 DoubleNode
-        super_account_name: 高权限账号名称
-        super_account_password: 高权限账号密码
-        lower_case_table_names: 表名是否区分大小写，默认 1
-        db_time_zone: 时区
-        db_param_group_id: 参数模板 ID
-        project_name: 实例所属项目
-        allow_list_ids: 白名单 ID 列表
-        port: 默认终端的私网端口，默认 3306
-        instance_tags: 实例标签列表
-        maintenance_window: 维护窗口配置
-
-    Returns:
-        dict: 创建结果，包含实例ID和订单号等信息
-    """
-    node_info = []
-
-    node_info.append({
-        "NodeType": "Primary",
-        "ZoneId": primary_zone,
-        "NodeSpec": primary_spec
-    })
-
-    for i in range(secondary_count):
-        zone = secondary_zone or primary_zone
-        node_info.append({
-            "NodeType": "Secondary",
-            "ZoneId": zone,
-            "NodeSpec": secondary_spec
-        })
-
-
-    for i in range(read_only_count):
-        node_info.append({
-            "NodeType": "ReadOnly",
-            "ZoneId": read_only_zone,
-            "NodeSpec": read_only_spec
-        })
-
-    data = {
-        "db_engine_version": db_engine_version,
-        "node_info": node_info,
-        "storage_type": storage_type,
-        "storage_space": storage_space,
-        "vpc_id": vpc_id,
-        "subnet_id": subnet_id,
-        "instance_type": instance_type,
-        "lower_case_table_names": lower_case_table_names,
-        "port": port,
-        "charge_info": {
-            "ChargeType": charge_type,
-            "AutoRenew": auto_renew,
-            "PeriodUnit": period_unit,
-            "Period": period
-        }
-    }
-
-
-    if instance_name is not None:
-        data["instance_name"] = instance_name
-
-    if super_account_name is not None:
-        data["super_account_name"] = super_account_name
-
-    if super_account_password is not None:
-        data["super_account_password"] = super_account_password
-
-    if db_time_zone is not None:
-        data["db_time_zone"] = db_time_zone
-
-    if db_param_group_id is not None:
-        data["db_param_group_id"] = db_param_group_id
-
-    if project_name is not None:
-        data["project_name"] = project_name
-
-    if allow_list_ids is not None:
-        data["allow_list_ids"] = allow_list_ids
-
-    if instance_tags is not None:
-        data["instance_tags"] = instance_tags
-
-    if maintenance_window is not None:
-        data["maintenance_window"] = maintenance_window
-
-    resp = rds_mysql_resource.create_db_instance(data)
-    return resp.to_dict()
-
-
-@mcp_server.tool(
     name="create_rds_mysql_instance_async",
     description="创建RDS MySQL实例并自动等待实例就绪，返回已准备好的实例信息"
 )
@@ -722,21 +573,50 @@ async def create_rds_mysql_instance_async(
 
     # 调用原有的创建方法
     create_resp = rds_mysql_resource.create_db_instance(data)
-    create_result = create_resp.to_dict()
-    instance_id = create_result.get("InstanceId")
     
-    # 等待实例就绪
-    max_retries = 60  # 最多等待约10分钟
-    retry_interval = 10  # 每10秒检查一次
+    # 从响应对象直接获取实例ID属性
+    instance_id = create_resp.instance_id
     
-    for _ in range(max_retries):
+    if instance_id is None:
+        create_result = create_resp.to_dict()
+        instance_id = create_result.get("instance_id")  # 注意：to_dict()方法返回的是小写键名
+        
+        if instance_id is None:
+            raise ValueError(f"无法获取实例ID，API响应: {create_result}")
+    
+
+    max_retries = 60
+    retry_interval = 10
+    
+    for attempt in range(max_retries):
         await asyncio.sleep(retry_interval)
-        detail_resp = rds_mysql_resource.describe_db_instance_detail({"instance_id": instance_id})
-        detail = detail_resp.to_dict()
-        if detail.get("InstanceStatus") == "Running":
-            return detail
-    
-    # 超时处理
+        try:
+            req = {"instance_id": instance_id}
+            print(f"Checking instance status, attempt {attempt+1}/{max_retries}, request: {req}")
+            
+            detail_resp = rds_mysql_resource.describe_db_instance_detail(req)
+            
+            if hasattr(detail_resp, 'basic_info') and detail_resp.basic_info is not None:
+                if hasattr(detail_resp.basic_info, 'instance_status'):
+                    instance_status = detail_resp.basic_info.instance_status
+                else:
+                    basic_info_dict = detail_resp.basic_info.to_dict() if hasattr(detail_resp.basic_info, 'to_dict') else {}
+                    instance_status = basic_info_dict.get('instance_status')
+            else:
+                detail = detail_resp.to_dict()
+                basic_info = detail.get('basic_info', {})
+                instance_status = basic_info.get('instance_status')
+            
+            # 检查实例是否处于运行状态，考虑不同的状态名称格式
+            running_states = ["Running", "running", "RUNNING", "Available", "available", "Ready", "ready"]
+            if instance_status in running_states:
+                print(f"Instance {instance_id} is now running (status: {instance_status}) after {attempt+1} attempts")
+                return detail_dict
+            else:
+                print(f"Instance {instance_id} current status: {instance_status}, waiting...")
+        except Exception as e:
+            print(f"Error checking instance status: {str(e)}, retrying...")
+
     raise TimeoutError(f"实例 {instance_id} 创建超时，请手动检查实例状态")
 
 
