@@ -21,9 +21,9 @@ def main():
     parser.add_argument(
         "--transport",
         "-t",
-        choices=["sse", "stdio"],
+        choices=["sse", "stdio", "streamable-http"],
         default=os.getenv(ENV_MCP_SERVER_MODE, "stdio"),
-        help="Transport protocol to use (sse or stdio)",
+        help="Transport protocol to use (sse, stdio or streamable-http)",
     )
 
     args = parser.parse_args()

@@ -2,10 +2,14 @@ import logging
 import argparse
 import dataclasses
 from mcp.server import FastMCP
+from mcp.server.fastmcp import Context
+from mcp import types
+from typing import Dict, Any
 
 from .model import *
 from .config import *
-from .api import *
+from .api.api_key_auth import *
+from .api.volcengine_auth import *
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -18,47 +22,44 @@ mcp = FastMCP("AskEcho MCP Server")
 
 @mcp.tool()
 def chat_completion(
-        query: str,
-) -> str:
+        messages: list[Message]
+) -> Dict[str, Any]:
     """
-    联网问答智能体会话工具，基于联网搜索结果，提供端到端的AI问答能力
+    联网问答智能体会话工具，根据用户输入问题，提供基于联网搜索的大模型总结后回复内容
     Args:
-        query: 搜索问题
+        messages (List[Dict[str, str]]): 对话消息列表，按顺序排列，包含历史消息与当前用户输入
+            - role (str): 消息角色类型
+            - content (str): 该轮消息的具体内容
+
     Returns:
         结构化的大模型基于联网搜索给出的总结回复
     """
-    logger.info(f"Received chat_completion tool request with query: {query}")
+    logger.info(f"Received chat_completion tool request")
 
     try:
         if config is None:
             raise ValueError("config not loaded")
+        messages.insert(0, Message(
+            role="system",
+            content="回答使用简短清晰的语言（300字以内）",
+        ))
         req = OriginChatCompletionRequest(
             bot_id=config.bot_id,
             stream=False,
-            messages=[
-                Message(
-                    role="system",
-                    content="回答使用简短清晰的语言（300字以内）",
-                ),
-                Message(
-                    role="user",
-                    content=query,
-                )
-            ],
+            messages=messages,
+            user_id="" if config.user_id is None else config.user_id
         )
-        origin_api_resp = chat_completion_api(config.volcengine_ak, config.volcengine_sk, req)
-        logger.info(f"Received chat_completion_api response")
-        api_resp = OriginChatCompletionResponse.from_dict(origin_api_resp)
-        if len(api_resp.id) > 0:
-            response = Response(
-                log_id=api_resp.id,
-                content=api_resp.choices[0].message.content if api_resp.choices else "",
-                references=api_resp.references
-            )
-            return json.dumps(dataclasses.asdict(response), ensure_ascii=False)
+        if config.api_key is not None and len(config.api_key) > 0:
+            resp = chat_completion_api_key_auth_api(config.api_key, req, "chat_completion")
+            resp.raise_for_status()
+            logger.info(f"Received chat_completion_api_key_auth_api response")
+            return resp.json()
         else:
-            logger.error(f"Error in chat_completion_api: {origin_api_resp}")
-            return json.dumps(origin_api_resp, ensure_ascii=False)
+            resp = chat_completion_volcengine_auth(config.volcengine_ak, config.volcengine_sk, req,
+                                                   "chat_completion")
+            resp.raise_for_status()
+            logger.info(f"Received chat_completion_volcengine_auth response")
+            return resp.json()
     except Exception as e:
         logger.error(f"Error in chat_completion tool: {e}")
         resp_error = ResponseError(
@@ -68,7 +69,7 @@ def chat_completion(
                 code="mcp_server_askecho_error",
             )
         )
-        return json.dumps(dataclasses.asdict(resp_error), ensure_ascii=False)
+        return resp_error.to_dict()
 
 
 def main():
@@ -77,9 +78,9 @@ def main():
     parser.add_argument(
         "--transport",
         "-t",
-        choices=["sse", "stdio"],
+        choices=["sse", "stdio", "streamable-http"],
         default="stdio",
-        help="Transport protocol to use (sse or stdio)",
+        help="Transport protocol to use (sse, stdio or streamable-http)",
     )
 
     args = parser.parse_args()
