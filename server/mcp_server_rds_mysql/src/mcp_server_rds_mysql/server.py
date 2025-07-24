@@ -1,22 +1,19 @@
 import os
 import asyncio
-from typing import Optional
 from pydantic import Field
 import logging
 import argparse
-from typing import Any, Literal
 from mcp.server.fastmcp import FastMCP
 from mcp_server_rds_mysql.resource.rds_mysql_resource import RDSMySQLSDK
+from typing import List, Dict, Any, Optional
 
 # 初始化MCP服务
-mcp_server = FastMCP("rds_mysql_mcp_server", port=int(os.getenv("MCP_SERVER_PORT", "8000")))
+mcp_server = FastMCP("rds_mysql_mcp_server", port=int(os.getenv("MCP_SERVER_PORT", "7999")))
 logger = logging.getLogger("rds_mysql_mcp_server")
 
 rds_mysql_resource = RDSMySQLSDK(
-    region=os.getenv('VOLCENGINE_REGION'), ak=os.getenv('VOLCENGINE_ACCESS_KEY'), sk=os.getenv('VOLCENGINE_SECRET_KEY'), host=os.getenv('VOLCENGINE_ENDPOINT')
+    region=os.getenv('VOLCENGINE_REGION',"cn-beijing"), ak=os.getenv('VOLCENGINE_ACCESS_KEY'), sk=os.getenv('VOLCENGINE_SECRET_KEY'), host=os.getenv('VOLCENGINE_ENDPOINT')
 )
-
-from typing import List, Dict, Any, Optional
 
 @mcp_server.tool(
     name="describe_db_instances",
@@ -458,10 +455,10 @@ def modify_db_account_description(
 
 
 @mcp_server.tool(
-    name="create_rds_mysql_instance_async",
-    description="创建RDS MySQL实例并自动等待实例就绪，返回已准备好的实例信息"
+    name="create_rds_mysql_instance",
+    description="创建RDS MySQL实例，可选择是否等待实例就绪"
 )
-async def create_rds_mysql_instance_async(
+async def create_rds_mysql_instance(
         vpc_id: str = Field(title="私有网络 ID", description="需要使用describe_vpcs获取"),
         subnet_id: str = Field(title="子网 ID", description="需要使用describe_subnets获取，subnet_id只有一个可用区属性，多可用区时找到一个与主节点或者备节点所在的可用区相同的即可"),
         db_engine_version: str = Field(default="MySQL_8_0", description="数据库版本"),
@@ -494,12 +491,13 @@ async def create_rds_mysql_instance_async(
         allow_list_ids: Optional[List[str]] = Field(default=None, description="白名单 ID 列表"),
         port: int = Field(default=3306, description="默认终端的私网端口"),
         instance_tags: Optional[List[Dict]] = Field(default=None, description="实例标签列表"),
-        maintenance_window: Optional[Dict] = Field(default=None, description="维护窗口配置")
+        maintenance_window: Optional[Dict] = Field(default=None, description="维护窗口配置"),
+        wait_for_ready: bool = Field(default=True, description="是否等待实例就绪后再返回，默认为True。如设为False将立即返回创建结果不等待实例就绪")
 ) -> dict[str, Any]:
-    """创建RDS MySQL实例并自动等待实例就绪状态
+    """创建RDS MySQL实例，可选择是否等待实例就绪
     
-    此方法会在内部处理等待逻辑，只有当实例状态为"Running"时才会返回结果，
-    无需手动轮询检查实例状态
+    此方法默认会在内部处理等待逻辑，只有当实例状态为"Running"时才会返回结果，
+    无需手动轮询检查实例状态。如果设置wait_for_ready=False，则会立即返回创建结果。
     """
     node_info = []
 
@@ -571,10 +569,8 @@ async def create_rds_mysql_instance_async(
     if maintenance_window is not None:
         data["maintenance_window"] = maintenance_window
 
-    # 调用原有的创建方法
     create_resp = rds_mysql_resource.create_db_instance(data)
     
-    # 从响应对象直接获取实例ID属性
     instance_id = create_resp.instance_id
     
     if instance_id is None:
@@ -584,6 +580,9 @@ async def create_rds_mysql_instance_async(
         if instance_id is None:
             raise ValueError(f"无法获取实例ID，API响应: {create_result}")
     
+    # 如果不需要等待实例就绪，直接返回创建结果
+    if not wait_for_ready:
+        return create_resp.to_dict()
 
     max_retries = 60
     retry_interval = 10
@@ -595,6 +594,7 @@ async def create_rds_mysql_instance_async(
             print(f"Checking instance status, attempt {attempt+1}/{max_retries}, request: {req}")
             
             detail_resp = rds_mysql_resource.describe_db_instance_detail(req)
+            detail = detail_resp.to_dict()
             
             if hasattr(detail_resp, 'basic_info') and detail_resp.basic_info is not None:
                 if hasattr(detail_resp.basic_info, 'instance_status'):
@@ -603,7 +603,6 @@ async def create_rds_mysql_instance_async(
                     basic_info_dict = detail_resp.basic_info.to_dict() if hasattr(detail_resp.basic_info, 'to_dict') else {}
                     instance_status = basic_info_dict.get('instance_status')
             else:
-                detail = detail_resp.to_dict()
                 basic_info = detail.get('basic_info', {})
                 instance_status = basic_info.get('instance_status')
             
@@ -1070,9 +1069,9 @@ def main():
     parser.add_argument(
         "--transport",
         "-t",
-        choices=["sse", "stdio"],
+        choices=["sse", "stdio", "streamable-http"],
         default="stdio",
-        help="Transport protocol to use (sse or stdio)",
+        help="Transport protocol to use (sse, stdio or streamable-http)",
     )
 
     args = parser.parse_args()
