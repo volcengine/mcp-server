@@ -577,7 +577,7 @@ async def create_rds_mysql_instance(
     
     if instance_id is None:
         create_result = create_resp.to_dict()
-        instance_id = create_result.get("instance_id")  # 注意：to_dict()方法返回的是小写键名
+        instance_id = create_result.get("instance_id")
         
         if instance_id is None:
             raise ValueError(f"无法获取实例ID，API响应: {create_result}")
