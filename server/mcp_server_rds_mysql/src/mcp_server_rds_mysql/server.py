@@ -493,13 +493,19 @@ async def create_rds_mysql_instance(
         instance_tags: Optional[List[Dict]] = Field(default=None, description="实例标签列表"),
         maintenance_window: Optional[Dict] = Field(default=None, description="维护窗口配置"),
         wait_for_ready: bool = Field(default=True, description="是否等待实例就绪后再返回，默认为True。如设为False将立即返回创建结果不等待实例就绪"),
-        max_wait_time: int = Field(default=420, description="等待实例就绪的最长时间（秒），默认为420秒（7分钟）。仅在wait_for_ready=True时有效")
+        max_wait_time: int = Field(default=600, description="等待实例就绪的最长时间（秒），默认为600秒（10分钟）。仅在wait_for_ready=True时有效"),
+        backoff_strategy: str = Field(default="exponential", description="重试策略，可选值：exponential（指数退避）、fibonacci（斐波那契序列）", choices=["exponential", "fibonacci"])
 ) -> dict[str, Any]:
     """创建RDS MySQL实例，可选择是否等待实例就绪
     
     此方法默认会在内部处理等待逻辑，只有当实例状态为"Running"时才会返回结果，
     无需手动轮询检查实例状态。如果设置wait_for_ready=False，则会立即返回创建结果。
-    通过max_wait_time参数可控制最长等待时间，一般大多数实例3-5分钟可创建完成，复杂实例可能需要更长时间。
+    
+    支持两种重试策略：
+    - exponential: 指数退避策略，等待间隔为 initial_wait * (2^n)，如 5, 10, 20, 40秒...
+    - fibonacci: 斐波那契序列策略，等待间隔为斐波那契序列 * initial_wait，如 5, 5, 10, 15, 25秒...
+    
+    通过max_wait_time参数可控制最长等待时间，默认为10分钟，一般大多数实例3-5分钟可创建完成，复杂实例可能需要更长时间。
     """
     node_info = []
 
@@ -586,27 +592,45 @@ async def create_rds_mysql_instance(
     if not wait_for_ready:
         return create_resp.to_dict()
 
-    # Use adaptive waiting strategy - total maximum wait time is about 7 minutes (420s)
-    # First 30 seconds: Check every 10 seconds (3 checks)
-    # Then: Check every 15 seconds for up to 24 more times (360 seconds)
-    checks = 0
-    max_time = max_wait_time  # Maximum wait time in seconds
+    # 设置初始等待参数
+    initial_wait = 5  # 初始等待5秒
+    max_interval = 60  # 最大等待间隔60秒
+    
+    logger.info(f"Waiting for instance {instance_id} to be ready using {backoff_strategy} backoff strategy")
+    
+    # 对于斐波那契序列，预先计算前20个数，足够我们使用
+    fibonacci_sequence = [1, 1]
+    for i in range(2, 20):
+        fibonacci_sequence.append(fibonacci_sequence[i-1] + fibonacci_sequence[i-2])
+    
     time_spent = 0
+    retry_count = 0
     
-    # First phase: Check every 10 seconds for the first 30 seconds
-    initial_interval = 10
-    for _ in range(3):
-        if time_spent >= max_time:
-            break
-        await asyncio.sleep(initial_interval)
-        time_spent += initial_interval
-        checks += 1
+    while time_spent < max_wait_time:
+        # 根据策略计算等待间隔
+        if backoff_strategy == "exponential":
+            # 指数退避: initial_wait * 2^n, 上限为max_interval
+            wait_interval = min(initial_wait * (2 ** retry_count), max_interval)
+        else:  # fibonacci
+            # 斐波那契序列: 从第3项开始为前两项之和，但从1开始
+            index = min(retry_count, len(fibonacci_sequence) - 1)
+            wait_interval = min(initial_wait * fibonacci_sequence[index], max_interval)
+        
+        # 等待相应时间
+        await asyncio.sleep(wait_interval)
+        time_spent += wait_interval
+        retry_count += 1
+        
         try:
-            req = {"instance_id": instance_id}
-            logger.info(f"Checking instance status, attempt {checks}, elapsed time: {time_spent}s, request: {req}")
+            logger.info(f"Checking instance status, attempt {retry_count}, " +
+                       f"waited {wait_interval}s, total time: {time_spent}s")
             
+            req = {"instance_id": instance_id}
             detail_resp = rds_mysql_resource.describe_db_instance_detail(req)
             detail = detail_resp.to_dict()
+            
+            # 从响应中提取实例状态
+            instance_status = None
             
             if hasattr(detail_resp, 'basic_info') and detail_resp.basic_info is not None:
                 if hasattr(detail_resp.basic_info, 'instance_status'):
@@ -619,47 +643,17 @@ async def create_rds_mysql_instance(
                 instance_status = basic_info.get('instance_status')
             
             if instance_status == "Running":
-                logger.info(f"Instance {instance_id} is now running after {checks} attempts, {time_spent}s")
+                logger.info(f"Instance {instance_id} is now running after {retry_count} attempts, {time_spent}s")
                 return detail
+            elif instance_status in ["Error", "Failed"]:
+                logger.error(f"Instance {instance_id} creation failed with status: {instance_status}")
+                raise RuntimeError(f"Instance {instance_id} creation failed with status: {instance_status}")
             else:
-                logger.info(f"Instance {instance_id} current status: {instance_status}, waiting...")
+                logger.info(f"Instance {instance_id} current status: {instance_status}, continuing to wait...")
         except Exception as e:
             logger.error(f"Error checking instance status: {str(e)}, retrying...")
     
-    # Second phase: Check every 15 seconds
-    main_interval = 15
-    max_main_checks = 24  # Up to 24 more checks (360 seconds)
-    for _ in range(max_main_checks):
-        if time_spent >= max_time:
-            break
-        await asyncio.sleep(main_interval)
-        time_spent += main_interval
-        checks += 1
-        try:
-            req = {"instance_id": instance_id}
-            logger.info(f"Checking instance status, attempt {checks}, elapsed time: {time_spent}s, request: {req}")
-            
-            detail_resp = rds_mysql_resource.describe_db_instance_detail(req)
-            detail = detail_resp.to_dict()
-            
-            if hasattr(detail_resp, 'basic_info') and detail_resp.basic_info is not None:
-                if hasattr(detail_resp.basic_info, 'instance_status'):
-                    instance_status = detail_resp.basic_info.instance_status
-                else:
-                    basic_info_dict = detail_resp.basic_info.to_dict() if hasattr(detail_resp.basic_info, 'to_dict') else {}
-                    instance_status = basic_info_dict.get('instance_status')
-            else:
-                basic_info = detail.get('basic_info', {})
-                instance_status = basic_info.get('instance_status')
-            
-            if instance_status == "Running":
-                logger.info(f"Instance {instance_id} is now running after {checks} attempts, {time_spent}s")
-                return detail
-            else:
-                logger.info(f"Instance {instance_id} current status: {instance_status}, waiting...")
-        except Exception as e:
-            logger.error(f"Error checking instance status: {str(e)}, retrying...")
-
+    # 超时
     logger.error(f"Instance {instance_id} creation timed out after {time_spent} seconds")
     raise TimeoutError(f"Instance {instance_id} creation timed out after {time_spent} seconds. Please check the instance status manually.")
 
