@@ -492,12 +492,14 @@ async def create_rds_mysql_instance(
         port: int = Field(default=3306, description="默认终端的私网端口"),
         instance_tags: Optional[List[Dict]] = Field(default=None, description="实例标签列表"),
         maintenance_window: Optional[Dict] = Field(default=None, description="维护窗口配置"),
-        wait_for_ready: bool = Field(default=True, description="是否等待实例就绪后再返回，默认为True。如设为False将立即返回创建结果不等待实例就绪")
+        wait_for_ready: bool = Field(default=True, description="是否等待实例就绪后再返回，默认为True。如设为False将立即返回创建结果不等待实例就绪"),
+        max_wait_time: int = Field(default=420, description="等待实例就绪的最长时间（秒），默认为420秒（7分钟）。仅在wait_for_ready=True时有效")
 ) -> dict[str, Any]:
     """创建RDS MySQL实例，可选择是否等待实例就绪
     
     此方法默认会在内部处理等待逻辑，只有当实例状态为"Running"时才会返回结果，
     无需手动轮询检查实例状态。如果设置wait_for_ready=False，则会立即返回创建结果。
+    通过max_wait_time参数可控制最长等待时间，一般大多数实例3-5分钟可创建完成，复杂实例可能需要更长时间。
     """
     node_info = []
 
@@ -580,18 +582,28 @@ async def create_rds_mysql_instance(
         if instance_id is None:
             raise ValueError(f"无法获取实例ID，API响应: {create_result}")
     
-    # 如果不需要等待实例就绪，直接返回创建结果
+    # If we don't need to wait for the instance to be ready, return creation result immediately
     if not wait_for_ready:
         return create_resp.to_dict()
 
-    max_retries = 60
-    retry_interval = 10
+    # Use adaptive waiting strategy - total maximum wait time is about 7 minutes (420s)
+    # First 30 seconds: Check every 10 seconds (3 checks)
+    # Then: Check every 15 seconds for up to 24 more times (360 seconds)
+    checks = 0
+    max_time = max_wait_time  # Maximum wait time in seconds
+    time_spent = 0
     
-    for attempt in range(max_retries):
-        await asyncio.sleep(retry_interval)
+    # First phase: Check every 10 seconds for the first 30 seconds
+    initial_interval = 10
+    for _ in range(3):
+        if time_spent >= max_time:
+            break
+        await asyncio.sleep(initial_interval)
+        time_spent += initial_interval
+        checks += 1
         try:
             req = {"instance_id": instance_id}
-            print(f"Checking instance status, attempt {attempt+1}/{max_retries}, request: {req}")
+            logger.info(f"Checking instance status, attempt {checks}, elapsed time: {time_spent}s, request: {req}")
             
             detail_resp = rds_mysql_resource.describe_db_instance_detail(req)
             detail = detail_resp.to_dict()
@@ -607,14 +619,49 @@ async def create_rds_mysql_instance(
                 instance_status = basic_info.get('instance_status')
             
             if instance_status == "Running":
-                print(f"Instance {instance_id} is now running after {attempt+1} attempts")
+                logger.info(f"Instance {instance_id} is now running after {checks} attempts, {time_spent}s")
                 return detail
             else:
-                print(f"Instance {instance_id} current status: {instance_status}, waiting...")
+                logger.info(f"Instance {instance_id} current status: {instance_status}, waiting...")
         except Exception as e:
-            print(f"Error checking instance status: {str(e)}, retrying...")
+            logger.error(f"Error checking instance status: {str(e)}, retrying...")
+    
+    # Second phase: Check every 15 seconds
+    main_interval = 15
+    max_main_checks = 24  # Up to 24 more checks (360 seconds)
+    for _ in range(max_main_checks):
+        if time_spent >= max_time:
+            break
+        await asyncio.sleep(main_interval)
+        time_spent += main_interval
+        checks += 1
+        try:
+            req = {"instance_id": instance_id}
+            logger.info(f"Checking instance status, attempt {checks}, elapsed time: {time_spent}s, request: {req}")
+            
+            detail_resp = rds_mysql_resource.describe_db_instance_detail(req)
+            detail = detail_resp.to_dict()
+            
+            if hasattr(detail_resp, 'basic_info') and detail_resp.basic_info is not None:
+                if hasattr(detail_resp.basic_info, 'instance_status'):
+                    instance_status = detail_resp.basic_info.instance_status
+                else:
+                    basic_info_dict = detail_resp.basic_info.to_dict() if hasattr(detail_resp.basic_info, 'to_dict') else {}
+                    instance_status = basic_info_dict.get('instance_status')
+            else:
+                basic_info = detail.get('basic_info', {})
+                instance_status = basic_info.get('instance_status')
+            
+            if instance_status == "Running":
+                logger.info(f"Instance {instance_id} is now running after {checks} attempts, {time_spent}s")
+                return detail
+            else:
+                logger.info(f"Instance {instance_id} current status: {instance_status}, waiting...")
+        except Exception as e:
+            logger.error(f"Error checking instance status: {str(e)}, retrying...")
 
-    raise TimeoutError(f"实例 {instance_id} 创建超时，请手动检查实例状态")
+    logger.error(f"Instance {instance_id} creation timed out after {time_spent} seconds")
+    raise TimeoutError(f"Instance {instance_id} creation timed out after {time_spent} seconds. Please check the instance status manually.")
 
 
 @mcp_server.tool(
