@@ -8,7 +8,7 @@ from mcp_server_rds_mysql.resource.rds_mysql_resource import RDSMySQLSDK
 from typing import List, Dict, Any, Optional
 
 # 初始化MCP服务
-mcp_server = FastMCP("rds_mysql_mcp_server", port=int(os.getenv("MCP_SERVER_PORT", "7999")))
+mcp_server = FastMCP("rds_mysql_mcp_server", port=int(os.getenv("MCP_SERVER_PORT", "8000")))
 logger = logging.getLogger("rds_mysql_mcp_server")
 
 rds_mysql_resource = RDSMySQLSDK(
