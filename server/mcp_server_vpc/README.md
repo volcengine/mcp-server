@@ -63,7 +63,7 @@ VPC MCP Server 是一个模型上下文协议 (Model Context Protocol) 服务器
 
 ## 可适配平台
 
-可以使用 Trae 等支持 MCP server 调用的客户端。
+可以使用方舟、 Trae 、 Cursor 等支持 MCP server 调用的客户端。
 
 ## 服务开通链接
 
