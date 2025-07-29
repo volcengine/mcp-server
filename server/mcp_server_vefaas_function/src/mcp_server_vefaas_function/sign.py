@@ -38,9 +38,17 @@ Region = "cn-beijing"
 Host = "iam.volcengineapi.com"
 ContentType = "application/x-www-form-urlencoded"
 
+AK_KEY = "VOLCENGINE_ACCESS_KEY"
+SK_KEY = "VOLCENGINE_SECRET_KEY"
+
+ALT_AK_KEY = 'VOLC_ACCESSKEY'
+ALT_SK_KEY = 'VOLC_SECRETKEY'
+
 # 请求的凭证，从IAM或者STS服务中获取
-AK = os.getenv("VOLCENGINE_ACCESS_KEY")
-SK = os.getenv("VOLCENGINE_SECRET_KEY")
+AK = os.getenv(AK_KEY) or os.getenv(ALT_AK_KEY)
+SK = os.getenv(SK_KEY) or os.getenv(ALT_SK_KEY)
+
+
 # 当使用临时凭证时，需要使用到SessionToken传入Header，并计算进SignedHeader中，请自行在header参数中添加X-Security-Token头
 # SessionToken = ""
 
@@ -71,7 +79,7 @@ def hash_sha256(content: str):
 
 
 # 第二步：签名请求函数
-def request(method, date, query, header, ak, sk, token, action, body):
+def request(method, date, query, header, ak, sk, token, action, body, region = None):
     # 第三步：创建身份证明。其中的 Service 和 Region 字段是固定的。ak 和 sk 分别代表
     # AccessKeyID 和 SecretAccessKey。同时需要初始化签名结构体。一些签名计算时需要的属性也在这里处理。
     # 初始化身份证明结构体
@@ -80,13 +88,14 @@ def request(method, date, query, header, ak, sk, token, action, body):
         "access_key_id": ak,
         "secret_access_key": sk,
         "service": Service,
-        "region": Region,
+        "region": region or Region,
     }
 
     if token is not None:
         credential["session_token"] = token
 
-    if action == "CodeUploadCallback":
+    if action in ['CodeUploadCallback', 'CreateDependencyInstallTask', 'GetDependencyInstallTaskStatus',
+                  'GetDependencyInstallTaskLogDownloadURI']:
         credential["service"] = "vefaas"
 
     content_type = ContentType
@@ -176,6 +185,7 @@ def request(method, date, query, header, ak, sk, token, action, body):
                          )
     return r.json()
 
+
 def get_authorization_credentials(ctx: Context = None) -> tuple[str, str, str]:
     """
     Gets authorization credentials from either environment variables or request headers.
@@ -190,10 +200,16 @@ def get_authorization_credentials(ctx: Context = None) -> tuple[str, str, str]:
         ValueError: If authorization information is missing or invalid
     """
     # First try environment variables
-    if "VOLCENGINE_ACCESS_KEY" in os.environ and "VOLCENGINE_SECRET_KEY" in os.environ:
+    if AK_KEY in os.environ and SK_KEY in os.environ:
         return (
-            os.environ["VOLCENGINE_ACCESS_KEY"],
-            os.environ["VOLCENGINE_SECRET_KEY"],
+            os.environ[AK_KEY],
+            os.environ[SK_KEY],
+            ""  # No session token for static credentials
+        )
+    elif ALT_AK_KEY in os.environ and ALT_SK_KEY in os.environ:
+        return (
+            os.environ[ALT_AK_KEY],
+            os.environ[ALT_SK_KEY],
             ""  # No session token for static credentials
         )
 
@@ -201,15 +217,15 @@ def get_authorization_credentials(ctx: Context = None) -> tuple[str, str, str]:
     _ctx: Context[ServerSession, object] = ctx
     raw_request: Request = _ctx.request_context.request
     auth = None
-    
+
     if raw_request:
         # Try to get authorization from request headers
         auth = raw_request.headers.get("authorization", None)
-    
+
     if auth is None:
         # Try to get from environment if not in headers
         auth = os.getenv("authorization", None)
-        
+
     if auth is None:
         raise ValueError("Missing authorization info.")
 
@@ -226,7 +242,7 @@ def get_authorization_credentials(ctx: Context = None) -> tuple[str, str, str]:
 
         return (
             data.get('AccessKeyId'),
-            data.get('SecretAccessKey'), 
+            data.get('SecretAccessKey'),
             data.get('SessionToken')
         )
     except Exception as e:

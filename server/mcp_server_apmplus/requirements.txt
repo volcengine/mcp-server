@@ -33,7 +33,7 @@ idna==3.10
     #   anyio
     #   httpx
     #   requests
-mcp @ git+https://github.com/zihengli-bytedance/python-sdk.git@3ff71057c9e60a20f81bfef6bd117f3b3d518f9c
+mcp>=1.9.4
     # via mcp-server-apmplus (pyproject.toml)
 pydantic==2.11.4
     # via

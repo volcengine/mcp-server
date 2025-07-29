@@ -1,0 +1,22 @@
+[project]
+name = "mcp-server-veapig"
+version = "0.0.1"
+description = "MCP server for managing APIG"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "volcengine-python-sdk==3.0.15",
+    "requests==2.32.3",
+    "pyzipper==0.3.6",
+    "mcp==1.9.4",
+]
+
+[project.scripts]
+mcp-server-veapig = "mcp_server_veapig.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true

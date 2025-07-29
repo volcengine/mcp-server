@@ -27,8 +27,14 @@ func HandleTerminate() func(context.Context, mcp.CallToolRequest) (*mcp.CallTool
 		if err != nil || mobileUseConfig == nil {
 			return CallResultError(err)
 		}
-
-		reason := req.Params.Arguments["reason"].(string)
+		args, err := CheckArgs(req.Params.Arguments)
+		if err != nil {
+			return CallResultError(err)
+		}
+		reason, ok := args["reason"].(string)
+		if !ok || reason == "" {
+			return CallResultError(fmt.Errorf("reason is required"))
+		}
 		return CallResultSuccess(fmt.Sprintf("Task terminated: %s", reason))
 	}
 }

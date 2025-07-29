@@ -1,0 +1,18 @@
+[project]
+name = "mcp-server-vpc"
+version = "1.0.0"
+description = "VPC MCP Server"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp[cli]>=1.9.4",
+    "pydantic>=2.11.7",
+    "volcengine-python-sdk>=4.0.6",
+]
+
+[project.scripts]
+mcp-server-vpc = "mcp_server_vpc.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

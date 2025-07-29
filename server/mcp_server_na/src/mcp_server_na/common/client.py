@@ -60,7 +60,7 @@ class NAClient(BaseApi):
         self.region = region
         super(NAClient, self).__init__(region, endpoint, api_infos, "vpc", ak, sk)
 
-    def create_diagnose_instance(self, region: str, resource_type: str, resource_id: str) -> dict[str, Any]:
+    def create_diagnosis_instance(self, region: str, resource_type: str, resource_id: str) -> dict[str, Any]:
         params = {"ResourceRegion": region, "ResourceType": resource_type, "ResourceInstanceId": resource_id}
         return self.get("CreateDiagnosisInstance", params)
 

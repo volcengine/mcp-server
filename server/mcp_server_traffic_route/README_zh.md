@@ -40,38 +40,43 @@ DNS，Domain
 
 ## 可适配平台
 
-Python
+- Python
+- Node.js
+
+## 服务开通链接
+
+需要先为火山引擎账号开通 TrafficRoute DNS 套件。
+
+https://console.volcengine.com/TrafficRoute/
 
 ## 鉴权方式
 
 AK&amp;SK
 
-## 安装
+### 获取 AK&amp;SK
 
-### 使用 uv
+从[火山引擎控制台](https://console.volcengine.com/iam/identitymanage/user)获取 Access Key ID 和 Secret Access Key。
 
-When using [`uv`](https://docs.astral.sh/uv/) no specific installation is needed.
-We will use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run.
+注：此 Access Key ID 和 Secret Access Key 须具有相关 OpenAPIs 访问权限。
 
-```bash
-cd mcp-server/server/mcp_server_traffic_route
-uv run mcp-server-traffic-route
+### 环境变量配置
 
-# Start with sse mode (default is stdio)
-uv run mcp-server-traffic-route -t sse
-```
+| 变量名 | 值 |
+| ---------- | ---------- |
+| `VOLCENGINE_ACCESS_KEY` | 火山引擎账号 Access Key ID |
+| `VOLCENGINE_SECRET_KEY` | 火山引擎账号 Secret Access Key |
 
-### 使用客户端
+## Python 版 MCP server
 
-支持通过以下客户端与 MCP Server 交互，具体配置可查阅该客户端文档。
+### 依赖项
 
-- 方舟
-- Trae
-- Cursor
+运行 MCP server 的设备需要安装以下依赖项。
 
-## 部署
+- [Python](https://www.python.org/downloads/) 3.11 或更高版本。
+- [`uv`](https://docs.astral.sh/uv/) &amp; [`uvx`](https://docs.astral.sh/uv/guides/tools/)。
+- 对于 Windows 操作系统，还需要参考 [PyCryptodome 文档](https://pycryptodome.readthedocs.io/en/latest/src/installation.html#windows-from-sources) 配置该库编译环境。
 
-### UVX
+### 部署与配置
 
 ```json
 {
@@ -80,7 +85,7 @@ uv run mcp-server-traffic-route -t sse
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_traffic_route",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_traffic_route/python",
         "mcp-server-traffic-route"
       ],
       "env": {
@@ -92,6 +97,50 @@ uv run mcp-server-traffic-route -t sse
 }
 ```
 
+> 注：请将上方 `Your Volcengine AK` 和 `Your Volcengine SK` 分别替换为火山引擎账号对应的 Access Key ID 和 Secret Access Key。
+
+## Node.js 版 MCP server
+
+### 依赖项
+
+运行 MCP server 的设备需要安装以下依赖项。
+
+- [Node.js](https://nodejs.org/zh-cn/download) 22.14.1 或更高版本
+
+### 部署与配置
+
+```json
+{
+  "mcpServers": {
+    "mcp-server-traffic-route": {
+      "command": "node",
+      "args": [
+        "--from",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_traffic_route/nodejs",
+        "mcp-server-traffic-route"
+      ],
+      "env": {
+        "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
+        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK"
+      }
+    }
+  }
+}
+```
+
+> 注：请将上方 `Your Volcengine AK` 和 `Your Volcengine SK` 分别替换为火山引擎账号对应的 Access Key ID 和 Secret Access Key。
+
+## 使用客户端
+
+支持通过以下客户端与 MCP Server 交互，具体配置可查阅该客户端文档。
+
+- Cursor
+- [Trae](https://www.trae.com.cn/)
+- Claude Desktop
+- 方舟
+
+支持 [Cline](https://cline.bot/) 插件。
+
 ## 许可
 
-MIT
+[MIT](../../LICENSE)
