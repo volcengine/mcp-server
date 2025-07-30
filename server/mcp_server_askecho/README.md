@@ -150,9 +150,9 @@ uv run mcp-server-askecho -t streamable-http
         "mcp-server-askecho"
       ],
       "env": {
-        "VOLCENGINE_ACCESS_KEY": "火山引擎AK",
-        "VOLCENGINE_SECRET_KEY": "火山引擎SK",
-        "ASKECHO_API_KEY": "智能体API Key：用户需要通过联网问答智能体控制台创建API Key以获取",
+        "VOLCENGINE_ACCESS_KEY": "火山引擎AK，与API Key鉴权二选其一",
+        "VOLCENGINE_SECRET_KEY": "火山引擎SK，与API Key鉴权二选其一",
+        "ASKECHO_API_KEY": "智能体API Key：用户需要通过联网问答智能体控制台创建API Key以获取，与火山引擎的AKSK鉴权二选其一",
         "ASKECHO_BOT_ID": "智能体ID：用户需要通过联网问答智能体控制台开通智能体以获取",
         "ASKECHO_USER_ID": "用户ID：可选，用于标识用户身份，以支持新闻相关工具的去重逻辑"
       }
