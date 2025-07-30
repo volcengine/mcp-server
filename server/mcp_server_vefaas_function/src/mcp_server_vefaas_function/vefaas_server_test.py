@@ -1,13 +1,10 @@
-import base64
-import io
+import os
 import tempfile
 import unittest
-import os
-import zipfile
 
 import pyzipper
 
-from vefaas_server import does_function_exist, create_zip_base64, python_zip_implementation
+from vefaas_server import does_function_exist, python_zip_implementation
 
 
 class TestVeFaaSServerIntegration(unittest.TestCase):
@@ -17,7 +14,7 @@ class TestVeFaaSServerIntegration(unittest.TestCase):
         self.sk = os.environ.get("VOLCENGINE_SECRET_KEY")
         self.alt_ak = os.environ.get("VOLC_ACCESSKEY")
         self.alt_sk = os.environ.get("VOLC_SECRETKEY")
-        if not self.ak or not self.sk or not self.alt_ak or not self.alt_sk:
+        if (not self.ak or not self.sk) and (not self.alt_ak or not self.alt_sk):
             self.assertFalse(
                 "VOLCENGINE_ACCESS_KEY or VOLCENGINE_SECRET_KEY or VOLC_ACCESSKEY or VOLC_SECRETKEY environment variables not set"
             )
@@ -33,27 +30,6 @@ class TestVeFaaSServerIntegration(unittest.TestCase):
         # known_function_id = "your-real-function-id"
         # result = does_function_exist(known_function_id, "cn-beijing")
         # self.assertTrue(result)
-
-    def test_create_zip_base64(self):
-        test_files = {
-            "hello.txt": "Hello, world!",
-            "data.json": b'{"key": "value"}'
-        }
-
-        zip_b64 = create_zip_base64(test_files)
-
-        zip_bytes = base64.b64decode(zip_b64)
-
-        with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zip_file:
-            names = zip_file.namelist()
-            assert "hello.txt" in names
-            assert "data.json" in names
-
-            assert zip_file.read("hello.txt").decode("utf-8") == "Hello, world!"
-            assert zip_file.read("data.json") == b'{"key": "value"}'
-
-            for info in zip_file.infolist():
-                self.assertEqual((info.external_attr >> 16), 0o777)
 
     def test_python_zip_implementation(self):
         with tempfile.TemporaryDirectory() as tmpdir:

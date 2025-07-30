@@ -5,7 +5,7 @@ from volcengine.tls.tls_exception import TLSException
 from volcengine.tls.tls_requests import DescribeTopicRequest, DescribeTopicsRequest
 from volcengine.tls.tls_responses import DescribeTopicResponse, DescribeTopicsResponse
 
-from mcp_server_tls.reqeust import get_sdk_client
+from mcp_server_tls.request import call_sdk_method
 
 logger = logging.getLogger(__name__)
 
@@ -18,9 +18,13 @@ async def describe_topic_resource(
             topic_id=topic_id,
         )
 
-        result: DescribeTopicResponse = get_sdk_client(auth_info).describe_topic(request)
+        response: DescribeTopicResponse = await call_sdk_method(
+            auth_info=auth_info,
+            method_name="describe_topic",
+            describe_topic_request=request,
+        )
 
-        return vars(result.get_topic())
+        return vars(response.get_topic())
 
     except TLSException as e:
         logger.error(f"Describe topic error: {e}")
@@ -45,11 +49,15 @@ async def describe_topics_resource(
             topic_id=topic_id,
         )
 
-        result: DescribeTopicsResponse = get_sdk_client(auth_info).describe_topics(request)
+        response: DescribeTopicsResponse = await call_sdk_method(
+            auth_info=auth_info,
+            method_name="describe_topics",
+            describe_topics_request=request,
+        )
 
         return {
-            "total": result.get_total(),
-            "topics": [vars(topic_info) for topic_info in result.get_topics()]
+            "total": response.get_total(),
+            "topics": [vars(topic_info) for topic_info in response.get_topics()]
         }
 
     except TLSException as e:

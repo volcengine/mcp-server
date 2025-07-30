@@ -5,7 +5,7 @@ from volcengine.tls.tls_exception import TLSException
 from volcengine.tls.tls_requests import DescribeProjectRequest, DescribeProjectsRequest
 from volcengine.tls.tls_responses import DescribeProjectResponse, DescribeProjectsResponse
 
-from mcp_server_tls.reqeust import get_sdk_client
+from mcp_server_tls.request import call_sdk_method
 
 logger = logging.getLogger(__name__)
 
@@ -16,13 +16,17 @@ async def describe_project_resource(
     """describe_project resource
     """
     try:
-        reqeust: DescribeProjectRequest = DescribeProjectRequest(
+        request: DescribeProjectRequest = DescribeProjectRequest(
             project_id=project_id,
         )
 
-        result: DescribeProjectResponse = get_sdk_client(auth_info).describe_project(reqeust)
+        response: DescribeProjectResponse = await call_sdk_method(
+            auth_info=auth_info,
+            method_name="describe_project",
+            describe_project_request=request,
+        )
 
-        return vars(result.get_project())
+        return vars(response.get_project())
 
     except TLSException as e:
         logger.error("describe_project_resource error")
@@ -49,11 +53,15 @@ async def describe_projects_resource(
             iam_project_name=iam_project_name,
         )
 
-        result: DescribeProjectsResponse =  get_sdk_client(auth_info).describe_projects(request)
+        response: DescribeProjectsResponse = await call_sdk_method(
+            auth_info=auth_info,
+            method_name="describe_projects",
+            describe_projects_request=request,
+        )
 
         return {
-            "total": result.get_total(),
-            "projects": [vars(project_info) for project_info in result.get_projects()]
+            "total": response.get_total(),
+            "projects": [vars(project_info) for project_info in response.get_projects()]
         }
 
     except TLSException as e:

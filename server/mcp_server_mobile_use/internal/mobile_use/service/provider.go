@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"mcp_server_mobile_use/internal/mobile_use/consts"
@@ -15,7 +16,7 @@ import (
 )
 
 type MobileUseProvider interface {
-	ScreenShot(ctx context.Context) (string, error)
+	ScreenShot(ctx context.Context) (*ScreenShotResult, error)
 	ScreenTap(ctx context.Context, x, y int) error
 	ScreenSwipe(ctx context.Context, fromX, fromY, toX, toY int) error
 	InputText(ctx context.Context, text string) error
@@ -62,7 +63,7 @@ func NewMobileUseImpl(options ...Option) MobileUseProvider {
 	return impl
 }
 
-func (impl *mobileUseImpl) ScreenShot(ctx context.Context) (string, error) {
+func (impl *mobileUseImpl) ScreenShot(ctx context.Context) (*ScreenShotResult, error) {
 	tosConfig := TosConfig{
 		AccessKey:    impl.option.TosAccessKey,
 		SecretKey:    impl.option.TosSecretKey,
@@ -76,21 +77,19 @@ func (impl *mobileUseImpl) ScreenShot(ctx context.Context) (string, error) {
 	command := fmt.Sprintf(consts.ACEPCommandScreenShotFormat, tosConf)
 	output, err := impl.runSyncCommand(ctx, command, consts.ACEPCommandTypeRoot)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if output == nil {
-		return "", fmt.Errorf("ScreenShot failed, output is nil")
+		return nil, fmt.Errorf("ScreenShot failed, output is nil")
 	}
-	if strings.HasPrefix(*output, "ScreenshotURL: ") {
-		downloadUrl := strings.TrimPrefix(*output, "ScreenshotURL: ")
-		downloadUrl = strings.Trim(downloadUrl, "\n")
-		_, err := url.Parse(downloadUrl)
-		if err != nil {
-			return "", fmt.Errorf("ScreenShot failed, invalid url: %s", downloadUrl)
-		}
-		return downloadUrl, nil
+	screenshotResult, err := extractScreenshotURL(*output)
+	if err != nil {
+		return nil, fmt.Errorf("ScreenShot failed, invalid url err: %v", err)
 	}
-	return "", fmt.Errorf("ScreenShot failed, output is not a valid url: %s", *output)
+	if screenshotResult == nil {
+		return nil, fmt.Errorf("ScreenShot failed, no screenshot url found")
+	}
+	return screenshotResult, nil
 }
 
 func (impl *mobileUseImpl) ScreenTap(ctx context.Context, x, y int) error {
@@ -260,4 +259,70 @@ func (impl *mobileUseImpl) runSyncCommand(ctx context.Context, command string, u
 		}
 	}
 	return nil, fmt.Errorf("RunSyncCommand failed, Status not found")
+}
+
+func extractScreenshotURL(output string) (*ScreenShotResult, error) {
+	// handle v1
+	if strings.HasPrefix(output, "ScreenshotURL: ") {
+		downloadUrl := strings.TrimPrefix(output, "ScreenshotURL: ")
+		downloadUrl = strings.Trim(downloadUrl, "\n")
+		if _, err := url.Parse(downloadUrl); err == nil {
+			return &ScreenShotResult{
+				ScreenshotURL: downloadUrl,
+				Width:         0,
+				Height:        0,
+			}, nil
+		}
+	}
+
+	// handle v2
+	type phoneScreenshotResult struct {
+		ScreenshotURL string `json:"screenshot_url"`
+		Resolution    string `json:"resolution"`
+	}
+	var result phoneScreenshotResult
+	if err := json.Unmarshal([]byte(output), &result); err != nil {
+		return nil, fmt.Errorf("failed to parse screenshot result: %v, output: %s", err, output)
+	}
+
+	if result.ScreenshotURL == "" {
+		return nil, fmt.Errorf("screenshot URL is empty")
+	}
+	if result.Resolution == "" {
+		return nil, fmt.Errorf("screenshot resolution is empty")
+	}
+
+	if _, err := url.Parse(result.ScreenshotURL); err != nil {
+		return nil, fmt.Errorf("invalid screenshot URL: %v", err)
+	}
+
+	width, height, err := parseResolution(result.Resolution)
+	if err != nil {
+		return nil, fmt.Errorf("invalid resolution format: %s, expected format: WIDTHxHEIGHT", result.Resolution)
+	}
+
+	return &ScreenShotResult{
+		ScreenshotURL: result.ScreenshotURL,
+		Width:         width,
+		Height:        height,
+	}, nil
+}
+
+func parseResolution(resolution string) (width, height int, err error) {
+	parts := strings.Split(resolution, "x")
+	if len(parts) != 2 {
+		return 0, 0, fmt.Errorf("invalid resolution format")
+	}
+
+	width, err = strconv.Atoi(parts[0])
+	if err != nil || width <= 0 {
+		return 0, 0, fmt.Errorf("invalid width")
+	}
+
+	height, err = strconv.Atoi(parts[1])
+	if err != nil || height <= 0 {
+		return 0, 0, fmt.Errorf("invalid height")
+	}
+
+	return width, height, nil
 }

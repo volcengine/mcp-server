@@ -2,7 +2,7 @@
 
 ## 版本信息
 
-v0.1.0
+v0.2.0
 
 ## 产品描述
 
@@ -40,12 +40,29 @@ saas
   "inputSchema": {
     "type": "object",
     "required": [
-      "query"
+      "messages"
     ],
     "properties": {
-      "query": {
-        "description": "搜索问题",
-        "type": "string"
+      "messages": {
+        "description": "对话消息列表",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "role",
+            "content"
+          ],
+          "properties": {
+            "role": {
+              "description": "消息角色类型",
+              "type": "string"
+            },
+            "content": {
+              "description": "消息内容",
+              "type": "string"
+            }
+          }
+        }
       }
     }
   },
@@ -68,11 +85,13 @@ Trae，Cursor，Python
 
 ## 服务开通链接 (整体产品)
 
-登录火山控制台，开通【联网agent lite版】，具体流程参考：https://www.volcengine.com/docs/85508/1512748
+登录火山控制台，开通【联网agent lite版】或【联网agent
+pro版】。具体版本功能范围、开通具体流程参考：https://www.volcengine.com/docs/85508/1512748
 
 ## 鉴权方式
 
-火山引擎的AKSK鉴权体系
+- API Key鉴权
+- 火山引擎的AKSK鉴权体系
 
 ## 安装部署
 
@@ -111,8 +130,9 @@ git clone git@github.com:volcengine/mcp-server.git
 cd mcp-server/server/mcp_server_askecho
 uv run mcp-server-askecho
 
-# 使用sse模式启动(默认为stdio)
+# 使用sse/streamable-http模式启动(默认为stdio)
 uv run mcp-server-askecho -t sse
+uv run mcp-server-askecho -t streamable-http
 ```
 
 ## 部署
@@ -130,15 +150,17 @@ uv run mcp-server-askecho -t sse
         "mcp-server-askecho"
       ],
       "env": {
-        "VOLCENGINE_ACCESS_KEY": "your-access-key",
-        "VOLCENGINE_SECRET_KEY": "your-secret-key",
-        "ASKECHO_BOT_ID": "your-bot-id"
+        "VOLCENGINE_ACCESS_KEY": "火山引擎AK",
+        "VOLCENGINE_SECRET_KEY": "火山引擎SK",
+        "ASKECHO_API_KEY": "智能体API Key：用户需要通过联网问答智能体控制台创建API Key以获取",
+        "ASKECHO_BOT_ID": "智能体ID：用户需要通过联网问答智能体控制台开通智能体以获取",
+        "ASKECHO_USER_ID": "用户ID：可选，用于标识用户身份，以支持新闻相关工具的去重逻辑"
       }
     }
   }
 }
 ```
 
-# License
+## License
 
 volcengine/mcp-server is licensed under the [MIT License](https://github.com/volcengine/mcp-server/blob/main/LICENSE)

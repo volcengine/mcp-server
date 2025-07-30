@@ -1,0 +1,10 @@
+.build.sh
+.devcontainer/
+.env
+.git/
+.venv/
+.vscode/
+__pycache__/
+*.DS_Store
+*.pyc
+Dockerfile

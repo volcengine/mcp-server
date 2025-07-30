@@ -56,6 +56,54 @@ CDN与边缘
 
 获取边缘服务下可开通的实例规格。
 
+### Tool 8: create_cloud_server
+
+创建边缘服务。
+
+### Tool 9: set_instance_name
+
+修改边缘实例的名称。该名称主要用于展示。
+
+### Tool 10: enable_instances_i_pv6
+
+对指定边缘实例启用 IP v6。
+
+### Tool 11: list_instance_internal_ips
+
+获取指定边缘实例的私网 IP 地址的列表。
+
+### Tool 12: list_cloud_servers
+
+获取边缘服务列表。
+
+### Tool 13: list_instance_types
+
+获取边缘服务下可开通的实例规格。
+
+### Tool 14: list_available_resource_info
+
+获取边缘服务下指定实例规格支持的地域和运营商。
+
+### Tool 15: create_instance
+
+创建边缘实例。
+
+### Tool 16: list_images
+
+获取某一实例规格支持的镜像列表，包括公共镜像和自定义镜像。
+
+### Tool 17: get_image
+
+获取镜像详情。
+
+### Tool 18: get_veen_instance_usage
+
+获取指定时间范围内的算力用量。
+
+### Tool 19: list_vpc_instances
+
+获取私有网络列表。
+
 ## 可适配平台
 
 - Python

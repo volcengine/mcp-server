@@ -1,15 +1,18 @@
 from __future__ import print_function
 
 import io
-from typing import Union, Optional
+import time
+from typing import Union, Optional, List
 import datetime
 import volcenginesdkcore
 import volcenginesdkvefaas
 from volcenginesdkcore.rest import ApiException
 import random
 import string
-import base64
 import logging
+
+from volcenginesdkvefaas import VEFAASApi
+
 from .sign import request, get_authorization_credentials
 import json
 from mcp.server.fastmcp import Context, FastMCP
@@ -33,7 +36,7 @@ def supported_runtimes():
             "golang/v1",
             "node14/v1", "node20/v1",
             "nodeprime14/v1",
-            "native-node14/v1", "native-node20/v1"]
+            "native-node20/v1"]
 
 def validate_and_set_region(region: str = None) -> str:
     """
@@ -63,14 +66,20 @@ region is the region where the function will be created, default is cn-beijing. 
 Note:
 1. The runtime parameter must be one of the values returned by the supported_runtimes. Please ensure you call that tool first to get the valid options.
 2. If the function is intended to serve as a web service, you must:
-   • Write code to start an HTTP server that listens on port 8000 (e.g., using Python’s http.server, Node’s http, or Flask).
+   • Write code to start an HTTP server that listens on port 8000 (e.g., using Python's http.server, Node's http, or Flask).
    • Provide a launch script such as run.sh that starts the server (e.g., python3 server.py) and keeps it running.
-   • Set the Command parameter to point to this script (e.g., ./run.sh) in the function config.
-   • Only native runtimes support the Command field. Use supported_runtimes to ensure the chosen runtime allows it.
+   • Set the `command` parameter to point to this script (e.g., ./run.sh) in the function config.
+   • Only **native runtimes** support the `command` field. Use `supported_runtimes` to ensure compatibility.
 3. After creating the function, you can use the `upload_code` tool to upload the function code and related files.
+
+4. If `enable_vpc` is set to `true`, the following parameters are **required**:
+   • `vpc_id`: The target VPC ID  
+   • `subnet_ids`: A list of subnet IDs (at least one)  
+   • `security_group_ids`: A list of security group IDs
 """)
 def create_function(name: str = None, region: str = None, runtime: str = None, command: str = None, source: str = None,
-                    image: str = None, envs: dict = None, description: str = None) -> str:
+                    image: str = None, envs: dict = None, description: str = None, enable_vpc = False,
+                    vpc_id: str = None, subnet_ids: List[str] = None, security_group_ids: List[str] = None,) -> str:
     # Validate region
     region = validate_and_set_region(region)
 
@@ -114,6 +123,14 @@ def create_function(name: str = None, region: str = None, runtime: str = None, c
             })
         create_function_request.envs = env_list
 
+    if enable_vpc:
+        if not vpc_id or not subnet_ids or not security_group_ids:
+            raise ValueError("vpc_id or subnet_ids and security_group_ids must be provided.")
+        vpc_config = volcenginesdkvefaas.VpcConfigForUpdateFunctionInput(
+            enable_vpc=True, vpc_id=vpc_id, subnet_ids=subnet_ids, security_group_ids=security_group_ids,
+        )
+        create_function_request.vpc_config = vpc_config
+
     if description:
         create_function_request.description = description
 
@@ -128,10 +145,15 @@ def create_function(name: str = None, region: str = None, runtime: str = None, c
 Use this when asked to update a VeFaaS function's code.
 Region is the region where the function will be updated, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
 `cn-shanghai`, `cn-guangzhou` as well.
+If `enable_vpc` is set to `true`, the following parameters are **required**:
+   • `vpc_id`: The target VPC ID  
+   • `subnet_ids`: A list of subnet IDs (at least one)  
+   • `security_group_ids`: A list of security group IDs
 After updating the function, you need to release it again for the changes to take effect.
 No need to ask user for confirmation, just update the function.""")
 def update_function(function_id: str, source: str = None, region: str = None, command: str = None,
-                    envs: dict = None):
+                    envs: dict = None, enable_vpc = False, vpc_id: str = None, subnet_ids: List[str] = None,
+                    security_group_ids: List[str] = None,):
 
     region = validate_and_set_region(region)
 
@@ -173,6 +195,14 @@ def update_function(function_id: str, source: str = None, region: str = None, co
                 "value": value
             })
         update_request.envs = env_list
+
+    if enable_vpc:
+        if not vpc_id or not subnet_ids or not security_group_ids:
+            raise ValueError("vpc_id or subnet_ids and security_group_ids must be provided.")
+        vpc_config = volcenginesdkvefaas.VpcConfigForUpdateFunctionInput(
+            enable_vpc=True, vpc_id=vpc_id, subnet_ids=subnet_ids, security_group_ids=security_group_ids,
+        )
+        update_request.vpc_config = vpc_config
 
     try:
         response = api_instance.update_function(update_request)
@@ -341,7 +371,7 @@ def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id
             "VeFaas": {"FunctionId":function_id}}}
 
     try:
-        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateUpstream", json.dumps(body))
+        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateUpstream", json.dumps(body), region)
         # Print the full response for debugging
         print(f"Response: {json.dumps(response_body)}")
         # Check if response contains an error
@@ -377,7 +407,7 @@ def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id
                 }
     }
     try:
-        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateRoute", json.dumps(body))
+        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateRoute", json.dumps(body), region)
     except Exception as e:
         error_message = f"Error creating route: {str(e)}"
         raise ValueError(error_message)
@@ -394,7 +424,7 @@ def list_api_gateways(region: str = None):
     except ValueError as e:
         raise ValueError(f"Authorization failed: {str(e)}")
 
-    response_body = request("GET", now, {"Limit": "10"}, {}, ak, sk, token, "ListGateways", None)
+    response_body = request("GET", now, {"Limit": "10"}, {}, ak, sk, token, "ListGateways", None, region)
     return response_body
 
 
@@ -405,11 +435,11 @@ Creates a new VeApig API gateway in the specified region.
 - `name`: Optional custom name for the gateway. If not provided, a random name will be auto-generated.
 - `region`: Target region for gateway creation. Defaults to `cn-beijing`. Supported values include `cn-beijing`, `cn-shanghai`, `cn-guangzhou`, and `ap-southeast-1`.
 
-Note: This is an **asynchronous** operation and may take up to **5 minutes** to complete.  
-After calling this tool, you must use the `list_api_gateways` tool to check the status of the gateway.  
+Note: This is an **asynchronous** operation and may take up to **5 minutes** to complete.
+After calling this tool, you must use the `list_api_gateways` tool to check the status of the gateway.
 Only when the status is `Running` does the gateway creation complete successfully.
 
-Recommendation: A single API gateway can be reused across multiple functions and services.  
+Recommendation: A single API gateway can be reused across multiple functions and services.
 Before creating a new gateway, consider reusing an existing one using `list_api_gateways`.
 """
 )
@@ -446,7 +476,7 @@ def create_api_gateway(name: str = None, region: str = "cn-beijing") -> str:
         raise ValueError(f"Authorization failed: {str(e)}")
 
     try:
-        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateGateway", json.dumps(body))
+        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateGateway", json.dumps(body), region)
         return response_body
     except Exception as e:
         return f"Failed to create VeApig gateway with name {gateway_name}: {str(e)}"
@@ -490,8 +520,8 @@ def create_gateway_service(
         raise ValueError(f"Authorization failed: {str(e)}")
 
     try:
-        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateGatewayService", json.dumps(body))
-        return response_body
+        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateGatewayService", json.dumps(body), region)
+        return json.dumps(response_body, ensure_ascii=False, indent=2)
     except Exception as e:
         return f"Failed to create VeApig gateway service with name {service_name}: {str(e)}"
 
@@ -512,7 +542,7 @@ def list_api_gateway_services(gateway_id: str, region: str = None):
         "Offset": 0,
     }
 
-    response_body = request("POST", now, {}, {}, ak, sk, token, "ListGatewayServices", json.dumps(body))
+    response_body = request("POST", now, {}, {}, ak, sk, token, "ListGatewayServices", json.dumps(body), region)
     return response_body
 
 @mcp.tool(description="""Lists all routes of an upstream.
@@ -529,7 +559,7 @@ def list_routes(upstream_id: str, region: str = None):
         "UpstreamId": upstream_id
     }
 
-    response_body = request("POST", now, {}, {}, ak, sk, token, "ListRoutes", json.dumps(body))
+    response_body = request("POST", now, {}, {}, ak, sk, token, "ListRoutes", json.dumps(body), region)
     return response_body
 
 def ensure_executable_permissions(folder_path: str):
@@ -632,22 +662,43 @@ def python_zip_implementation(folder_path: str) -> bytes:
     print(f"Python zip finished, size: {buffer.tell() / 1024 / 1024:.2f} MB")
     return buffer.getvalue()
 
-@mcp.tool(description="""
-Uploads code to TOS for a veFaaS function deployment.
+def _get_upload_code_description() -> str:
+    """Generate a dynamic description for the `upload_code` tool based on the active transport mode."""
+    base_desc = (
+        "Uploads code to TOS for a veFaaS function deployment.\n\n"
+        "You may provide:\n"
+        "- 'local_folder_path': path to a local directory that will be zipped and uploaded (recommended for large or structured projects).\n"
+        "- 'file_dict': an in-memory mapping of filename ➜ content (handy for lightweight uploads or when local paths are not accessible).\n\n"
+    )
 
-You may provide:
-- 'local_folder_path': for uploading a local code directory (recommended for large or structured projects).
-- 'file_dict': for in-memory code files, suitable for simple or lightweight use cases.
+    # Detect run mode via FASTMCP_* environment variables.
+    is_network_transport = os.getenv("FASTMCP_STATELESS_HTTP") == "true" or os.getenv("FASTMCP_HOST") or os.getenv("FASTMCP_PORT")
 
-Note:
-If the MCP Server is deployed remotely (e.g., via SSE), local paths are not accessible. In such cases, use 'file_dict' instead of 'local_folder_path'.
+    if is_network_transport:
+        note = (
+            "Note: The MCP server is running over a network transport (SSE or streamable-http) and cannot access the local file system. "
+            "You must therefore supply code via 'file_dict'; 'local_folder_path' will be ignored.\n\n"
+        )
+    else:
+        note = (
+            "Note: The MCP server is running via STDIO locally and can access your file system. "
+            "It is recommended to use 'local_folder_path' for convenience, though 'file_dict' is still supported.\n\n"
+        )
 
-After uploading, remind the user to release the function for changes to take effect.
-""")
-def upload_code(region: str, function_id: str, local_folder_path: Optional[str] = None, file_dict: Optional[dict[str, Union[str, bytes]]] = None) -> bytes:
+    tail = "After the upload completes, call 'release_function' to publish the new code."
+
+    return base_desc + note + tail
+
+@mcp.tool(description=_get_upload_code_description())
+def upload_code(region: str, function_id: str, local_folder_path: Optional[str] = None, file_dict: Optional[dict[str, Union[str, bytes]]] = None) -> str:
     region = validate_and_set_region(region)
 
     api_instance = init_client(region, mcp.get_context())
+
+    try:
+        ak, sk, token = get_authorization_credentials(mcp.get_context())
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
 
     if local_folder_path:
         data, size, error = zip_and_encode_folder(local_folder_path)
@@ -662,11 +713,92 @@ def upload_code(region: str, function_id: str, local_folder_path: Optional[str] 
             raise ValueError("No files provided in file_dict, upload aborted.")
     else:
         raise ValueError("Either local_folder_path or file_dict must be provided.")
+    response_body = upload_code_zip_for_function(api_instance=api_instance, function_id=function_id, code_zip_size=size,
+                                                 zip_bytes=data, ak=ak, sk=sk, token=token, region=region)
+    handle_dependency(api_instance=api_instance, function_id=function_id, local_folder_path=local_folder_path,
+                      file_dict= file_dict, ak=ak, sk=sk, token=token, region=region)
+    return json.dumps(response_body, ensure_ascii=False, indent=2)
 
-    return upload_code_zip_for_function(api_instance=api_instance, function_id=function_id, code_zip_size=size, zip_bytes=data)
+def handle_dependency(api_instance: VEFAASApi, function_id: str, local_folder_path, file_dict,
+                      ak: str, sk: str, token: str, region: str = None):
+    req = volcenginesdkvefaas.GetFunctionRequest(
+        id=function_id
+    )
+
+    try:
+        response = api_instance.get_function(req)
+        runtime = response.runtime
+        print('runtime:', runtime)
+    except ApiException as e:
+        raise ValueError(f"Failed to get VeFaaS function: {str(e)}")
+
+    is_native_python = 'native-python' in runtime
+    is_native_nodejs = 'native-node' in runtime
+
+    has_requirements = (
+            (local_folder_path is not None and os.path.exists(os.path.join(local_folder_path, "requirements.txt")))
+            or (file_dict is not None and "requirements.txt" in file_dict)
+    )
+
+    has_package_json = (
+            (local_folder_path is not None and os.path.exists(os.path.join(local_folder_path, "package.json")))
+            or (file_dict is not None and "package.json" in file_dict)
+    )
+
+    has_node_modules = (
+            (local_folder_path is not None and os.path.exists(os.path.join(local_folder_path, "node_modules")))
+            or (file_dict is not None and "node_modules" in file_dict)
+    )
+
+    if is_native_python and not has_requirements:
+        print("Python runtime detected, but no requirements.txt found. Skipping dependency install.")
+        return
+    if is_native_nodejs and not has_package_json:
+        print("Node.js runtime detected, but no package.json found. Skipping dependency install.")
+        return
+    if is_native_nodejs and has_package_json and has_node_modules:
+        print("Node.js runtime detected, package.json found, but has node_modules. Skipping dependency install.")
+        return
+    if not is_native_python and not is_native_nodejs:
+        print("Runtime is not native-python or native-nodejs. Skipping dependency install.")
+        return
+
+    body = {"FunctionId": function_id}
+    now = datetime.datetime.utcnow()
+
+    try:
+        response_body = request("POST", now, {}, {}, ak, sk, token,
+                                "CreateDependencyInstallTask", json.dumps(body), region)
+        print(response_body)
+
+        timeout_seconds = 300
+        start_time = time.time()
+        while True:
+            status_resp = request("POST", now, {}, {}, ak, sk, token,
+                                  "GetDependencyInstallTaskStatus", json.dumps(body), region)
+            print(status_resp)
+
+            status = status_resp['Result']['Status']
+            if status == 'Failed':
+                log_download_resp = request("POST", now, {}, {}, ak, sk, token,
+                                      "GetDependencyInstallTaskLogDownloadURI", json.dumps(body), region)
+                url = log_download_resp['Result']['DownloadURL']
+                url = url.replace("\\u0026", "&")
+                response = requests.get(url, timeout=30)
+                install_log = response.text
+                raise ValueError("Dependency installation failed. Install log \n" + install_log)
+            elif status == 'Succeeded':
+                print("Dependency installation succeeded.")
+                break
+            if time.time() - start_time > timeout_seconds:
+                raise TimeoutError("Dependency installation timed out after {} seconds".format(timeout_seconds))
+            time.sleep(5)
+    except Exception as e:
+        raise ValueError(f"Error handling dependency: {str(e)}")
 
 
-def upload_code_zip_for_function(api_instance: object, function_id: str, code_zip_size: int, zip_bytes, ) -> bytes:
+def upload_code_zip_for_function(api_instance: VEFAASApi(object), function_id: str, code_zip_size: int, zip_bytes,
+                                 ak: str, sk: str, token: str, region: str,) -> bytes:
     req = volcenginesdkvefaas.GetCodeUploadAddressRequest(
         function_id=function_id,
         content_length=code_zip_size
@@ -686,11 +818,6 @@ def upload_code_zip_for_function(api_instance: object, function_id: str, code_zi
         error_message = f"Upload failed to {upload_url} with status code {response.status_code}: {response.text}"
         raise ValueError(error_message)
 
-    try:
-        ak, sk, token = get_authorization_credentials(mcp.get_context())
-    except ValueError as e:
-        raise ValueError(f"Authorization failed: {str(e)}")
-
     now = datetime.datetime.utcnow()
 
     # Generate a random suffix for the trigger name
@@ -701,7 +828,7 @@ def upload_code_zip_for_function(api_instance: object, function_id: str, code_zi
     }
 
     try:
-        response_body = request("POST", now, {}, {}, ak, sk, token, "CodeUploadCallback", json.dumps(body))
+        response_body = request("POST", now, {}, {}, ak, sk, token, "CodeUploadCallback", json.dumps(body), region)
         return response_body
     except Exception as e:
         error_message = f"Error creating upstream: {str(e)}"
