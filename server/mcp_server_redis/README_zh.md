@@ -132,12 +132,10 @@
         "git+https://github.com/volcengine/mcp-server.git#subdirectory=server/mcp_server_redis",
         "mcp-server-redis"
       ],
-      "--transport": "stdio",
       "env": {
         "VOLCENGINE_REGION": "火山引擎资源region",
         "VOLCENGINE_ACCESS_KEY": "火山引擎账号ACCESS_KEY",
-        "VOLCENGINE_SECRET_KEY": "火山引擎账号SECRET_KEY",
-        "MCP_SERVER_PORT": "MCP server监听端口"
+        "VOLCENGINE_SECRET_KEY": "火山引擎账号SECRET_KEY"
       }
     }
   }
