@@ -16,7 +16,7 @@ from mcp_server_tos.resources.object import ObjectResource
 logger = logging.getLogger(__name__)
 
 # Initialize FastMCP server
-mcp = FastMCP("TOS MCP Server", port=int(os.getenv("PORT", "8000")))
+mcp = FastMCP("TOS MCP Server", host=os.getenv("MCP_SERVER_HOST", "127.0.0.1"), port=int(os.getenv("PORT", "8000")))
 
 
 def get_credential_from_request():
@@ -76,7 +76,7 @@ def get_tos_config() -> TosConfig:
 
 
 @mcp.tool()
-async def list_buckets() -> list[dict]:
+async def list_buckets():
     """
     List all buckets in TOS.
     Returns:
@@ -93,7 +93,7 @@ async def list_buckets() -> list[dict]:
 
 @mcp.tool()
 async def list_objects(bucket: str, prefix: Optional[str] = None, start_after: Optional[str] = None,
-                       continuation_token: Optional[str] = None) -> str:
+                       continuation_token: Optional[str] = None):
     """
     List all objects in a bucket.
     Args:
@@ -114,7 +114,7 @@ async def list_objects(bucket: str, prefix: Optional[str] = None, start_after: O
 
 
 @mcp.tool()
-async def get_object(bucket: str, key: str) -> str:
+async def get_object(bucket: str, key: str):
     """
     Retrieves an object from VolcEngine TOS. In the GetObject request, specify the full key name for the object.
     Args:

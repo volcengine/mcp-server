@@ -18,7 +18,7 @@ def main():
         "--transport", "-t",
         choices=["sse", "stdio", "streamable-http"],
         default="stdio",
-        help="Transport protocol to use (sse or stdio)"
+        help="Transport protocol to use (sse or stdio or streamable-http)"
     )
 
     args = parser.parse_args()
