@@ -1,0 +1,28 @@
+[project]
+name = "mcp-server-veimagex"
+version = "0.1.0"
+description = "MCP server for veImageX"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp>=1.6.0",
+    "python-dotenv>=1.1.0",
+    "volcengine>=1.0.179",
+    "starlette>=0.14.2",
+    "typing-extensions>=4.0.0",
+    "pydantic>=1.8.2",
+    "retry>=0.9.2",
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.2.0",
+    "ruff>=0.11.4",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+mcp-server-veimagex = "imagex.server:main"
