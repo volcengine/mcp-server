@@ -1,6 +1,4 @@
 import inspect
-import os
-# import re
 from pydantic.networks import AnyUrl
 from mcp.server.fastmcp import FastMCP
 from mcp.server.fastmcp.resources import FunctionResource
@@ -12,7 +10,8 @@ from mcp_server_tls.resources import SUPPORT_RESOURCES
 mcp = FastMCP(
     "TLS MCP Server",
     dependencies=["env", "volcengine"],
-    port=int(os.getenv("PORT", "8000")),
+    port=int(TLS_CONFIG.mcp_port),
+    host=TLS_CONFIG.mcp_host,
 )
 
 def add_resources_to_mcp(mcp):
@@ -20,7 +19,7 @@ def add_resources_to_mcp(mcp):
     for resource_name, resource_info in SUPPORT_RESOURCES.items():
 
         fn = resource_info.get("fn")
-        uri = TLS_CONFIG.endpoint + resource_info.get("uri")
+        uri = "https://tls-{Region}.ivolces.com" + resource_info.get("uri")
         description = resource_info.get("description", None)
         mime_type = resource_info.get("mime_type", None)
 

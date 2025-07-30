@@ -31,11 +31,15 @@ func HandleLaunchAppTool() func(context.Context, mcp.CallToolRequest) (*mcp.Call
 		if err != nil {
 			return CallResultError(err)
 		}
-		packageName, ok := req.Params.Arguments["package_name"].(string)
+		args, err := CheckArgs(req.Params.Arguments)
+		if err != nil {
+			return CallResultError(err)
+		}
+		packageName, ok := args["package_name"].(string)
 		if !ok || packageName == "" {
 			return CallResultError(fmt.Errorf("package_name is required"))
 		}
-		err = handler.LaunchApp(ctx, req.Params.Arguments["package_name"].(string))
+		err = handler.LaunchApp(ctx, packageName)
 		if err != nil {
 			return CallResultError(err)
 		}
