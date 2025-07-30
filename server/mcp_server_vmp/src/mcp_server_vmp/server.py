@@ -175,7 +175,7 @@ def main():
         "-t",
         choices=["sse", "stdio", "streamable-http"],
         default=os.getenv(config.ENV_MCP_SERVER_MODE, "stdio"),
-        help="Transport protocol to use (sse or stdio)",
+        help="Transport protocol to use (sse or stdio or streamable-http, default: stdio)",
     )
 
     # Init the VMP API client using default config
