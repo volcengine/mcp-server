@@ -79,7 +79,7 @@ def hash_sha256(content: str):
 
 
 # 第二步：签名请求函数
-def request(method, date, query, header, ak, sk, token, action, body):
+def request(method, date, query, header, ak, sk, token, action, body, region = None):
     # 第三步：创建身份证明。其中的 Service 和 Region 字段是固定的。ak 和 sk 分别代表
     # AccessKeyID 和 SecretAccessKey。同时需要初始化签名结构体。一些签名计算时需要的属性也在这里处理。
     # 初始化身份证明结构体
@@ -88,13 +88,14 @@ def request(method, date, query, header, ak, sk, token, action, body):
         "access_key_id": ak,
         "secret_access_key": sk,
         "service": Service,
-        "region": Region,
+        "region": region or Region,
     }
 
     if token is not None:
         credential["session_token"] = token
 
-    if action in ['CodeUploadCallback', 'CreateDependencyInstallTask', 'GetDependencyInstallTaskStatus']:
+    if action in ['CodeUploadCallback', 'CreateDependencyInstallTask', 'GetDependencyInstallTaskStatus',
+                  'GetDependencyInstallTaskLogDownloadURI']:
         credential["service"] = "vefaas"
 
     content_type = ContentType

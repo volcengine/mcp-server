@@ -1,22 +1,19 @@
 import os
 import asyncio
-from typing import Optional
 from pydantic import Field
 import logging
 import argparse
-from typing import Any, Literal
 from mcp.server.fastmcp import FastMCP
 from mcp_server_rds_mysql.resource.rds_mysql_resource import RDSMySQLSDK
+from typing import List, Dict, Any, Optional
 
 # 初始化MCP服务
 mcp_server = FastMCP("rds_mysql_mcp_server", port=int(os.getenv("MCP_SERVER_PORT", "8000")))
 logger = logging.getLogger("rds_mysql_mcp_server")
 
 rds_mysql_resource = RDSMySQLSDK(
-    region=os.getenv('VOLCENGINE_REGION'), ak=os.getenv('VOLCENGINE_ACCESS_KEY'), sk=os.getenv('VOLCENGINE_SECRET_KEY'), host=os.getenv('VOLCENGINE_ENDPOINT')
+    region=os.getenv('VOLCENGINE_REGION',"cn-beijing"), ak=os.getenv('VOLCENGINE_ACCESS_KEY'), sk=os.getenv('VOLCENGINE_SECRET_KEY'), host=os.getenv('VOLCENGINE_ENDPOINT')
 )
-
-from typing import List, Dict, Any, Optional
 
 @mcp_server.tool(
     name="describe_db_instances",
@@ -459,9 +456,9 @@ def modify_db_account_description(
 
 @mcp_server.tool(
     name="create_rds_mysql_instance",
-    description="创建 RDS MySQL 实例"
+    description="创建RDS MySQL实例，可选择是否等待实例就绪"
 )
-def create_rds_mysql_instance(
+async def create_rds_mysql_instance(
         vpc_id: str = Field(title="私有网络 ID", description="需要使用describe_vpcs获取"),
         subnet_id: str = Field(title="子网 ID", description="需要使用describe_subnets获取，subnet_id只有一个可用区属性，多可用区时找到一个与主节点或者备节点所在的可用区相同的即可"),
         db_engine_version: str = Field(default="MySQL_8_0", description="数据库版本"),
@@ -494,43 +491,21 @@ def create_rds_mysql_instance(
         allow_list_ids: Optional[List[str]] = Field(default=None, description="白名单 ID 列表"),
         port: int = Field(default=3306, description="默认终端的私网端口"),
         instance_tags: Optional[List[Dict]] = Field(default=None, description="实例标签列表"),
-        maintenance_window: Optional[Dict] = Field(default=None, description="维护窗口配置")
+        maintenance_window: Optional[Dict] = Field(default=None, description="维护窗口配置"),
+        wait_for_ready: bool = Field(default=True, description="是否等待实例就绪后再返回，默认为True。如设为False将立即返回创建结果不等待实例就绪"),
+        max_wait_time: int = Field(default=600, description="等待实例就绪的最长时间（秒），默认为600秒（10分钟）。仅在wait_for_ready=True时有效"),
+        backoff_strategy: str = Field(default="exponential", description="重试策略，可选值：exponential（指数退避）、fibonacci（斐波那契序列）", choices=["exponential", "fibonacci"])
 ) -> dict[str, Any]:
-    """创建 RDS MySQL 实例
-
-    Args:
-        vpc_id: 私有网络 ID
-        subnet_id: 子网 ID
-        db_engine_version: 数据库版本，默认 MySQL_8_0
-        instance_name: 实例名称
-        primary_zone: 主节点可用区，默认 cn-beijing-a
-        primary_spec: 主节点规格，默认 rds.mysql.1c2g
-        secondary_count: 备节点数量，默认 1
-        secondary_zone: 备节点可用区，默认与主节点相同
-        secondary_spec: 备节点规格，默认 rds.mysql.1c2g
-        read_only_count: 只读节点数量，默认 0
-        read_only_zone: 只读节点可用区，默认 cn-beijing-a
-        read_only_spec: 只读节点规格，默认 rds.mysql.1c2g
-        storage_space: 存储空间大小(GB)，默认 20
-        storage_type: 存储类型，默认 LocalSSD
-        charge_type: 付费类型，默认 PostPaid
-        auto_renew: 预付费场景下是否自动续费
-        period_unit: 预付费场景下的购买周期(Month/Year)
-        period: 预付费场景下的购买时长
-        instance_type: 实例类型，默认 DoubleNode
-        super_account_name: 高权限账号名称
-        super_account_password: 高权限账号密码
-        lower_case_table_names: 表名是否区分大小写，默认 1
-        db_time_zone: 时区
-        db_param_group_id: 参数模板 ID
-        project_name: 实例所属项目
-        allow_list_ids: 白名单 ID 列表
-        port: 默认终端的私网端口，默认 3306
-        instance_tags: 实例标签列表
-        maintenance_window: 维护窗口配置
-
-    Returns:
-        dict: 创建结果，包含实例ID和订单号等信息
+    """创建RDS MySQL实例，可选择是否等待实例就绪
+    
+    此方法默认会在内部处理等待逻辑，只有当实例状态为"Running"时才会返回结果，
+    无需手动轮询检查实例状态。如果设置wait_for_ready=False，则会立即返回创建结果。
+    
+    支持两种重试策略：
+    - exponential: 指数退避策略，等待间隔为 initial_wait * (2^n)，如 5, 10, 20, 40秒...
+    - fibonacci: 斐波那契序列策略，等待间隔为斐波那契序列 * initial_wait，如 5, 5, 10, 15, 25秒...
+    
+    通过max_wait_time参数可控制最长等待时间，默认为10分钟，一般大多数实例3-5分钟可创建完成，复杂实例可能需要更长时间。
     """
     node_info = []
 
@@ -602,8 +577,85 @@ def create_rds_mysql_instance(
     if maintenance_window is not None:
         data["maintenance_window"] = maintenance_window
 
-    resp = rds_mysql_resource.create_db_instance(data)
-    return resp.to_dict()
+    create_resp = rds_mysql_resource.create_db_instance(data)
+    
+    instance_id = create_resp.instance_id
+    
+    if instance_id is None:
+        create_result = create_resp.to_dict()
+        instance_id = create_result.get("instance_id")
+        
+        if instance_id is None:
+            raise ValueError(f"无法获取实例ID，API响应: {create_result}")
+    
+    # If we don't need to wait for the instance to be ready, return creation result immediately
+    if not wait_for_ready:
+        return create_resp.to_dict()
+
+    # 设置初始等待参数
+    initial_wait = 5  # 初始等待5秒
+    max_interval = 60  # 最大等待间隔60秒
+    
+    logger.info(f"Waiting for instance {instance_id} to be ready using {backoff_strategy} backoff strategy")
+    
+    # 对于斐波那契序列，预先计算前20个数，足够我们使用
+    fibonacci_sequence = [1, 1]
+    for i in range(2, 20):
+        fibonacci_sequence.append(fibonacci_sequence[i-1] + fibonacci_sequence[i-2])
+    
+    time_spent = 0
+    retry_count = 0
+    
+    while time_spent < max_wait_time:
+        # 根据策略计算等待间隔
+        if backoff_strategy == "exponential":
+            # 指数退避: initial_wait * 2^n, 上限为max_interval
+            wait_interval = min(initial_wait * (2 ** retry_count), max_interval)
+        else:  # fibonacci
+            # 斐波那契序列: 从第3项开始为前两项之和，但从1开始
+            index = min(retry_count, len(fibonacci_sequence) - 1)
+            wait_interval = min(initial_wait * fibonacci_sequence[index], max_interval)
+        
+        # 等待相应时间
+        await asyncio.sleep(wait_interval)
+        time_spent += wait_interval
+        retry_count += 1
+        
+        try:
+            logger.info(f"Checking instance status, attempt {retry_count}, " +
+                       f"waited {wait_interval}s, total time: {time_spent}s")
+            
+            req = {"instance_id": instance_id}
+            detail_resp = rds_mysql_resource.describe_db_instance_detail(req)
+            detail = detail_resp.to_dict()
+            
+            # 从响应中提取实例状态
+            instance_status = None
+            
+            if hasattr(detail_resp, 'basic_info') and detail_resp.basic_info is not None:
+                if hasattr(detail_resp.basic_info, 'instance_status'):
+                    instance_status = detail_resp.basic_info.instance_status
+                else:
+                    basic_info_dict = detail_resp.basic_info.to_dict() if hasattr(detail_resp.basic_info, 'to_dict') else {}
+                    instance_status = basic_info_dict.get('instance_status')
+            else:
+                basic_info = detail.get('basic_info', {})
+                instance_status = basic_info.get('instance_status')
+            
+            if instance_status == "Running":
+                logger.info(f"Instance {instance_id} is now running after {retry_count} attempts, {time_spent}s")
+                return detail
+            elif instance_status in ["Error", "Failed"]:
+                logger.error(f"Instance {instance_id} creation failed with status: {instance_status}")
+                raise RuntimeError(f"Instance {instance_id} creation failed with status: {instance_status}")
+            else:
+                logger.info(f"Instance {instance_id} current status: {instance_status}, continuing to wait...")
+        except Exception as e:
+            logger.error(f"Error checking instance status: {str(e)}, retrying...")
+    
+    # 超时
+    logger.error(f"Instance {instance_id} creation timed out after {time_spent} seconds")
+    raise TimeoutError(f"Instance {instance_id} creation timed out after {time_spent} seconds. Please check the instance status manually.")
 
 
 @mcp_server.tool(
@@ -1012,7 +1064,7 @@ def create_db_account(
 
 @mcp_server.tool(
     name="describe_vpcs",
-    description="查询满足指定条件的VPC，用于创建实例"
+    description="查询VPC 信息，用于创建实例"
 )
 def describe_vpcs(
         page_number: int = Field(default=1, description="当前页页码，最小值为1"),
@@ -1032,7 +1084,7 @@ def describe_vpcs(
 
 @mcp_server.tool(
     name="describe_subnets",
-    description="查询满足指定条件的子网，用于创建实例"
+    description="查询子网信息，用于创建实例"
 )
 def describe_subnets(
         vpc_id: str = Field(
@@ -1058,9 +1110,9 @@ def main():
     parser.add_argument(
         "--transport",
         "-t",
-        choices=["sse", "stdio"],
+        choices=["sse", "stdio", "streamable-http"],
         default="stdio",
-        help="Transport protocol to use (sse or stdio)",
+        help="Transport protocol to use (sse, stdio or streamable-http)",
     )
 
     args = parser.parse_args()

@@ -181,7 +181,7 @@ requires-dist = [
     { name = "mcp", specifier = "==1.9.4" },
     { name = "pyzipper", specifier = "==0.3.6" },
     { name = "requests", specifier = "==2.32.3" },
-    { name = "volcengine-python-sdk", specifier = ">=3.0.8" },
+    { name = "volcengine-python-sdk", specifier = "==3.0.15" },
 ]
 
 [[package]]
@@ -430,7 +430,7 @@ wheels = [
 
 [[package]]
 name = "volcengine-python-sdk"
-version = "3.0.8"
+version = "3.0.15"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
@@ -438,4 +438,4 @@ dependencies = [
     { name = "six" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ee/be/7a240f7aae00b78c26a5bb15bc5c62a0f7212b932fdeddb209c9cc1cca7d/volcengine-python-sdk-3.0.8.tar.gz", hash = "sha256:9d1cf0a4fd3bf88ac2c466d64d50f2cedff60b4b5fcbec0e91824490aab510bb", size = 5079915, upload-time = "2025-06-03T11:03:21.414Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5f/59/3596f1251ae4857acb4dcb6d6dcf623cc5cca64fd89de88e65a320780042/volcengine-python-sdk-3.0.15.tar.gz", hash = "sha256:d77be76e24e9325cb32cc313743b91ea4ebed019733b6eff98e5a22454e17bc7", size = 5358468, upload-time = "2025-06-19T12:42:29.547Z" }
