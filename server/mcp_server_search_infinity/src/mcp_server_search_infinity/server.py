@@ -30,7 +30,6 @@ def web_search(
     Args:
         Query (str): 用户搜索 query，1~100 个字符 (过长会截断)，不支持多词搜索
         Count (int): 返回条数，最多50条，不传默认10条
-
     Returns:
         联网搜索结果返回结构
     """

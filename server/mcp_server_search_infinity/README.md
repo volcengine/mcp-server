@@ -3,6 +3,8 @@
 v0.1.0
 ## 产品描述
 依托字节强大的搜索能力，提供适配大模型数据结构的联网搜索内容，助力提升大模型知识获取、时效性及回答准确性。
+
+官方接口文档：https://www.volcengine.com/docs/85508/1650263
 ## 分类
 火山引擎云原生
 ## 标签
@@ -24,8 +26,7 @@ saas
     "inputSchema": {
         "type": "object",
         "required": [
-            "Query",
-            "SearchType"
+            "Query"
         ],
         "properties": {
             "Query": {
@@ -44,64 +45,7 @@ saas
 ```
 输出：
 ```json
-{
-    "outputSchema": {
-        "type": "object",
-        "required": [
-            "Id",
-            "SortId",
-            "Title",
-            "Snippet"
-        ],
-        "properties": {
-            "Id": {
-                "description": "结果 Id",
-                "type": "string"
-            },
-            "SortId": {
-                "description": "排序 Id",
-                "type": "number"
-            },
-            "Title": {
-                "description": "标题",
-                "type": "string"
-            },
-            "SiteName": {
-                "description": "站点名",
-                "type": "string"
-            },
-            "Url": {
-                "description": "落地页",
-                "type": "string"
-            },
-            "Snippet": {
-                "description": "普通摘要（100 字左右的相关切片）",
-                "type": "string"
-            },
-            "Summary": {
-                "description": "精准摘要（300~500 字左右经过模型处理的相关片段）",
-                "type": "string"
-            },
-            "Content": {
-                "description": "正文（引用站点正文）",
-                "type": "string"
-            },
-            "PublishTime": {
-                "description": "发布时间，ISO 时间格式。示例：2025-05-30T19:35:24+08:00",
-                "type": "string"
-            },
-            "LogoUrl": {
-                "description": "落地页 IconUrl 链接",
-                "type": "string"
-            },
-            "RankScore": {
-                "description": "得分",
-                "type": "number"
-            }
-        }
-    },
-    "description": "联网搜索结果返回结构"
-}
+联网搜索结果，结构参考 https://www.volcengine.com/docs/85508/1650263
 ```
 
 #### 最容易被唤起的 Prompt示例
@@ -153,9 +97,9 @@ uv run mcp-server-search-infinity -t streamable-http
         "mcp-server-search-infinity"
       ],
       "env": {
-        "VOLCENGINE_ACCESS_KEY": "火山引擎AK",
-        "VOLCENGINE_SECRET_KEY": "火山引擎SK",
-        "ENV_SEARCH_INFINITY_API_KEY": "融合信息搜索API Key（用户需要通过控制台创建API Key以获取）"
+        "VOLCENGINE_ACCESS_KEY": "火山引擎AK,与ENV_SEARCH_INFINITY_API_KEY接入二选一",
+        "VOLCENGINE_SECRET_KEY": "火山引擎SK,与ENV_SEARCH_INFINITY_API_KEY接入二选一",
+        "ENV_SEARCH_INFINITY_API_KEY": "融合信息搜索API Key,与AK SK接入二选一"
       }
     }
   }
