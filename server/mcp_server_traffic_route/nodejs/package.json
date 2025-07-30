@@ -34,7 +34,7 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@modelcontextprotocol/inspector": "^0.8.2",
+    "@modelcontextprotocol/inspector": ">=0.16.2",
     "@types/node": "^22.14.1",
     "typescript": "^5.8.3"
   },
