@@ -34,7 +34,7 @@ uv sync # 安装依赖
 uv run server.py --transport streamable-http --host 0.0.0.0 --port 8000
 ```
 支持的命令行参数： 
-- `--transport`：指定 MCP 服务器的传输协议，默认值为 `streamable-http`，可选项：streamable-http, sse, stdio
+- `--transport`：指定 MCP 服务器的传输协议，默认值为 `stdio`，可选项：streamable-http, sse, stdio
 - `--host`：指定 MCP 服务器的主机地址，默认值为 `0.0.0.0`。
 - `--port`：指定 MCP 服务器的端口号，默认值为 `8000`。
 
