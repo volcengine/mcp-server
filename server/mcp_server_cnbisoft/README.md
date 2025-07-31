@@ -20,3 +20,7 @@ Header请求头
     }
 }
 </code></pre>
+
+# License
+
+volcengine/mcp-server is licensed under the [MIT License](https://github.com/volcengine/mcp-server/blob/main/LICENSE).
