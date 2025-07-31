@@ -1,8 +1,9 @@
 import argparse
 import json
 import logging
+import os
 import time
-from typing import Optional
+from typing import Optional, Any
 
 from mcp.server.fastmcp import Context
 from mcp.server.fastmcp import FastMCP
@@ -279,15 +280,47 @@ def web_risk_assessor(
     return loop_query_result(client, web_risk_assessor_result.result)
 
 
+def set_mcp_config_env(mode: str, **kwargs: Any) -> None:
+    """Write environment variables according to the running mode.
+
+    Args:
+        mode: Running mode. One of ``streamable``, ``sse``, or ``stdio``.
+        **kwargs: Extra key‐value pairs that will be written into environment
+            variables named ``FASTMCP_<KEY>`` (upper-case).
+    """
+
+    # Mode-specific default settings
+    if mode == "streamable":
+        # Enable JSON response & stateless HTTP by default
+        os.environ["FASTMCP_JSON_RESPONSE"] = "true"
+        os.environ["FASTMCP_STATELESS_HTTP"] = "true"
+
+    # Write remaining key-value pairs
+    for key, value in kwargs.items():
+        env_key = f"FASTMCP_{key.upper()}"
+        os.environ[env_key] = str(value)
+
+
 def main():
     """Main entry point for the MCP server."""
     parser = argparse.ArgumentParser(description="Run the SecIntelligent MCP Server")
     parser.add_argument(
         "--transport",
         "-t",
-        choices=["sse", "stdio"],
+        choices=["sse", "stdio", "streamable-http"],
         default="stdio",
-        help="Transport protocol to use (sse or stdio)",
+        help="Transport protocol to use (streamable-http, sse, or stdio)",
+    )
+    parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Host to bind to (only relevant for network transports)",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="Port to bind to (only relevant for network transports)",
     )
 
     args = parser.parse_args()
@@ -296,9 +329,10 @@ def main():
         # # Load configuration from environment variables
         global config
 
+        set_mcp_config_env(args.transport, host=args.host, port=args.port)
         config = load_config(None)
         # Run the MCP server
-        logger.info(f"Starting SecIntelligent MCP Server with {args.transport} transport")
+        logger.info(f"Starting SecIntelligent MCP Server with {args.transport} transport, running on http://{args.host}:{args.port}")
 
         mcp.run(transport=args.transport)
     except Exception as e:

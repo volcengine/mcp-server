@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10,<4.0"
 dependencies = [
-    "mcp[cli]>=1.6.0",
+    "mcp[cli]>=1.12.0",
     "pip>=25.0.1",
     "requests>=2.32.3",
     "volcengine-python-sdk>=3.0.1",
@@ -17,6 +17,3 @@ build-backend = "hatchling.build"
 
 [project.scripts]
 mcp-server-sec-agent = "mcp_server_sec_agent.server:main"
-
-[tool.uv.sources]
-mcp = { git = "https://github.com/zihengli-bytedance/python-sdk.git", rev = "temp-for-volc" }
