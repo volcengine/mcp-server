@@ -204,7 +204,7 @@ wheels = [
 ]
 
 [[package]]
-name = "mcp-server-search-infinity"
+name = "mcp-server-askecho-search-infinity"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

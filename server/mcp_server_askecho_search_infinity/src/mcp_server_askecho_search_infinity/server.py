@@ -17,7 +17,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 config = None
-mcp = FastMCP("Search Infinity MCP Server")
+mcp = FastMCP("AskEcho Search Infinity MCP Server")
 
 
 @mcp.tool()
@@ -65,8 +65,8 @@ def web_search(
         resp_error = ResponseError(
             error=Error(
                 message=str(e),
-                type="mcp_server_search_infinity_error",
-                code="mcp_server_search_infinity_error",
+                type="mcp_server_ask_echo_search_infinity_error",
+                code="mcp_server_ask_echo_search_infinity_error",
             )
         )
         return resp_error.to_dict()
@@ -74,7 +74,7 @@ def web_search(
 
 def main():
     """Main entry point for the MCP server."""
-    parser = argparse.ArgumentParser(description="Run the Search Infinity MCP Server")
+    parser = argparse.ArgumentParser(description="Run the AskEchoSearchInfinity MCP Server")
     parser.add_argument(
         "--transport",
         "-t",
@@ -90,10 +90,10 @@ def main():
         global config
         config = load_config()
         # Run the MCP server
-        logger.info(f"Starting Search Infinity MCP Server with {args.transport} transport")
+        logger.info(f"Starting AskEchoSearchInfinity MCP Server with {args.transport} transport")
         mcp.run(transport=args.transport)
     except Exception as e:
-        logger.error(f"Error starting Search Infinity MCP Server: {str(e)}")
+        logger.error(f"Error starting AskEchoSearchInfinity MCP Server: {str(e)}")
         raise
 
 

@@ -1,5 +1,5 @@
 [project]
-name = "mcp-server-search-infinity"
+name = "mcp-server-askecho-search-infinity"
 version = "0.1.0"
 description = "Search Infinity MCP Server"
 readme = "README.md"
@@ -10,7 +10,7 @@ dependencies = [
 ]
 
 [project.scripts]
-mcp-server-search-infinity = "mcp_server_search_infinity:main"
+mcp-server-askecho-search-infinity = "mcp_server_askecho_search_infinity:main"
 
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]

@@ -76,28 +76,28 @@ git clone git@github.com:volcengine/mcp-server.git
 启动服务器:
 **UV**
 ```bash
-cd mcp-server/server/mcp_server_search_infinity
-uv run mcp-server-search-infinity
+cd mcp-server/server/mcp_server_askecho_search_infinity
+uv run mcp-server-askecho-search-infinity
 # 使用sse/streamable-http模式启动(默认为stdio)
-uv run mcp-server-search-infinity -t sse
-uv run mcp-server-search-infinity -t streamable-http
+uv run mcp-server-askecho-search-infinity -t sse
+uv run mcp-server-askecho-search-infinity -t streamable-http
 ```
 ## 部署
 ### UVX
 ```json
 {
   "mcpServers": {
-    "mcp-server-search-infinity": {
+    "mcp-server-askecho-search-infinity": {
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_search_infinity",
-        "mcp-server-search-infinity"
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_askecho_search_infinity",
+        "mcp-server-askecho-search-infinity"
       ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "火山引擎AK,与ENV_SEARCH_INFINITY_API_KEY接入二选一",
         "VOLCENGINE_SECRET_KEY": "火山引擎SK,与ENV_SEARCH_INFINITY_API_KEY接入二选一",
-        "ENV_SEARCH_INFINITY_API_KEY": "融合信息搜索API Key,与AK SK接入二选一"
+        "ENV_ASK_ECHO_SEARCH_INFINITY_API_KEY": "融合信息搜索API Key,与AK SK接入二选一"
       }
     }
   }
