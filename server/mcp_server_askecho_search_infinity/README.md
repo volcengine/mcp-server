@@ -84,6 +84,7 @@ uv run mcp-server-askecho-search-infinity -t streamable-http
 ```
 ## 部署
 ### UVX
+鉴权信息，火山引擎AK SK,与ASK_ECHO_SEARCH_INFINITY_API_KEY接入二选一即可
 ```json
 {
   "mcpServers": {
@@ -95,9 +96,9 @@ uv run mcp-server-askecho-search-infinity -t streamable-http
         "mcp-server-askecho-search-infinity"
       ],
       "env": {
-        "VOLCENGINE_ACCESS_KEY": "火山引擎AK,与ENV_SEARCH_INFINITY_API_KEY接入二选一",
-        "VOLCENGINE_SECRET_KEY": "火山引擎SK,与ENV_SEARCH_INFINITY_API_KEY接入二选一",
-        "ENV_ASK_ECHO_SEARCH_INFINITY_API_KEY": "融合信息搜索API Key,与AK SK接入二选一"
+        "VOLCENGINE_ACCESS_KEY": "",
+        "VOLCENGINE_SECRET_KEY": "",
+        "ASK_ECHO_SEARCH_INFINITY_API_KEY": ""
       }
     }
   }
