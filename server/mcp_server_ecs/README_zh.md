@@ -60,8 +60,8 @@ git clone git@github.com:volcengine/mcp-server.git
 cd mcp-server/server/mcp_server_ecs
 uv run mcp-server-ecs
 
-# 使用sse模式启动(默认为stdio)
-uv run mcp-server-ecs -t sse
+# 使用 streamable-http 模式启动(默认为stdio)
+uv run mcp-server-ecs -t streamable-http
 ```
 
 使用客户端与服务器交互:

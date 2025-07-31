@@ -16,14 +16,18 @@ def get_volc_ecs_client(region: str = None) -> ECSApi:
         if deploy_config["is_local"]:
             if _ecs_local_client is None:
                 ecs_config = volcenginesdkcore.Configuration()
-                ecs_config.ak = os.environ.get(
-                    "VOLCENGINE_ACCESS_KEY") or auth_config["ak"]
-                ecs_config.sk = os.environ.get(
-                    "VOLCENGINE_SECRET_KEY") or auth_config["sk"]
-                ecs_config.region = os.environ.get(
-                    "VOLCENGINE_REGION") or auth_config["region"]
-                ecs_config.host = os.environ.get(
-                    "VOLCENGINE_ENDPOINT") or auth_config["endpoint"]
+                ecs_config.ak = (
+                    os.environ.get("VOLCENGINE_ACCESS_KEY") or auth_config["ak"]
+                )
+                ecs_config.sk = (
+                    os.environ.get("VOLCENGINE_SECRET_KEY") or auth_config["sk"]
+                )
+                ecs_config.region = (
+                    os.environ.get("VOLCENGINE_REGION") or auth_config["region"]
+                )
+                ecs_config.host = (
+                    os.environ.get("VOLCENGINE_ENDPOINT") or auth_config["endpoint"]
+                )
                 ecs_config.client_side_validation = True
                 volcenginesdkcore.Configuration.set_default(ecs_config)
                 _ecs_local_client = ECSApi()
