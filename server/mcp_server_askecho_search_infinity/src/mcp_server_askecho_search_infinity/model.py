@@ -33,7 +33,7 @@ class WebSearchRequest:
     Count: int = 10
     Filter: Optional[dict] = None
     NeedSummary: bool = True
-    TimeRange: str = "OneDay"
+    TimeRange: str = ""
 
     def __post_init__(self):
         if self.Filter is None:
