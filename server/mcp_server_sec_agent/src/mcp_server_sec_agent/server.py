@@ -313,7 +313,7 @@ def main():
     )
     parser.add_argument(
         "--host",
-        default="127.0.0.1",
+        default="0.0.0.0",
         help="Host to bind to (only relevant for network transports)",
     )
     parser.add_argument(
@@ -330,6 +330,8 @@ def main():
         global config
 
         set_mcp_config_env(args.transport, host=args.host, port=args.port)
+        mcp = FastMCP("Security Intelligent MCP Server")
+
         config = load_config(None)
         # Run the MCP server
         logger.info(f"Starting SecIntelligent MCP Server with {args.transport} transport, running on http://{args.host}:{args.port}")
