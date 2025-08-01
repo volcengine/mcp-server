@@ -5,7 +5,7 @@ description = "MCP server for managing veFaaS (Volc Engine Function as a Service
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "mcp>=1.9.4",
+    "mcp>=1.12.3",
     "volcengine-python-sdk>=3.0.8",
     "requests==2.32.3",
     "pyzipper==0.3.6",
