@@ -4,7 +4,7 @@
 v1.0.0  
 
 ## Product Description  
-VPN  MCP  Server is a Model Context Protocol (MCP) server that allows MCP‑compatible clients (e.g., Cursor, Claude  Desktop) to interact with Volcengine’s VPN service.  
+VPN  MCP  Server is a Model Context Protocol (MCP) server that allows MCP‑compatible clients (e.g., Cursor, Claude  Desktop) to interact with Volcengine’s VPN service. 
 Using natural language, users can query and troubleshoot VPN Gateways, IPsec connections, Customer Gateways, SSL VPN servers, and related resources—streamlining cloud‑network operations.
 
 ## Category  
@@ -19,8 +19,7 @@ Networking
 
 ## Tools  
 The MCP  Server exposes the following Tools (capabilities):  
-> **inputSchema** below lists common fields only; other optional filters follow the official OpenAPI.  
-> All tools are **Instance‑type**; they can be invoked via natural‑language prompts or by sending JSON payloads.
+> **inputSchema** below lists common fields only; other optional filters follow the official OpenAPI. All tools are **Instance‑type**; they can be invoked via natural‑language prompts or by sending JSON payloads.
 
 | Tool | Description | Docs |
 |------|-------------|------|
@@ -35,7 +34,6 @@ The MCP  Server exposes the following Tools (capabilities):
 | `describe_ssl_vpn_client_certs` | List SSL client certificates | <https://www.volcengine.com/docs/6455/1119966> |
 | `describe_ssl_vpn_servers` | List SSL VPN servers | <https://www.volcengine.com/docs/6455/1119961> |
 
----
 
 ### Tool  1: describe_vpn_gateway_attributes  
 #### Description
@@ -106,7 +104,6 @@ List VPN Gateways by Region, status, IDs, etc.
 List all Available VPN Gateways in cn‑beijing.
 ```
 
----
 
 ### Tool  3: describe\_vpn\_connection\_attributes
 
@@ -142,7 +139,6 @@ JSON with connection attributes.
 Show configuration of IPsec connection vgc-xxxxxxxx.
 ```
 
----
 
 ### Tool  4: describe_vpn_connections
 
@@ -175,7 +171,6 @@ Show configuration of IPsec connection vgc-xxxxxxxx.
 List all Available IPsec connections under gateway vgw‑xxxxxxxx.
 ```
 
----
 
 ### Tool  5: describe\_vpn\_gateway\_route\_attributes
 
@@ -211,7 +206,6 @@ Get details of a VPN Gateway route entry.
 Show route vgr‑xxxxxxxx details.
 ```
 
----
 
 ### Tool  6: describe\_vpn\_gateway\_routes
 
@@ -244,8 +238,6 @@ Show route vgr‑xxxxxxxx details.
 ```
 List all routes to 10.0.0.0/16 under gateway vgw‑xxxxxxxx.
 ```
-
----
 
 ### Tool  7: describe\_customer\_gateways
 
@@ -282,8 +274,6 @@ List all routes to 10.0.0.0/16 under gateway vgw‑xxxxxxxx.
 Show all Available Customer Gateways.
 ```
 
----
-
 ### Tool  8: describe\_ssl\_vpn\_client\_cert\_attributes
 
 #### Description
@@ -318,7 +308,6 @@ Show all Available Customer Gateways.
 Show details of SSL client certificate vsc‑xxxxxxxx.
 ```
 
----
 
 ### Tool  9: describe\_ssl\_vpn\_client\_certs
 
@@ -355,7 +344,6 @@ Show details of SSL client certificate vsc‑xxxxxxxx.
 List all SSL certs under server vsc-xxxxxxxx.
 ```
 
----
 
 ### Tool  10: describe\_ssl\_vpn\_servers
 
@@ -392,7 +380,6 @@ List all SSL certs under server vsc-xxxxxxxx.
 List all SSL VPN servers under gateway vgw‑xxxxxxxx.
 ```
 
----
 
 ## Supported Platforms
 

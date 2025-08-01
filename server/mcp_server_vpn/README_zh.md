@@ -4,7 +4,7 @@
 v1.0.0  
 
 ## 产品描述  
-VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（如 Cursor、Claude Desktop 等）提供与火山引擎 VPN 服务交互的能力。  
+VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（如 Cursor、Claude Desktop 等）提供与火山引擎 VPN 服务交互的能力。
 通过自然语言即可对 VPN 网关、IPsec 连接、SSL VPN 等资源进行全链路管理，支持VPN网关、IPsec 连接、用户网关、SSL服务端等资源的查询操作，帮助用户高效管理云上网络连接。  
 
 ## 分类  
@@ -19,8 +19,7 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 
 ## Tools  
 本 MCP Server 产品提供以下 Tools (工具 / 能力)：
-> 下列 **inputSchema** 仅列出常用字段，其他可选过滤条件保持与官方 OpenAPI 一致。  
-> 所有工具均为 **实例** 类型，调用方式一致：向 MCP 客户端发出自然语言指令或直接构造 JSON 请求。
+> 下列 **inputSchema** 仅列出常用字段，其他可选过滤条件保持与官方 OpenAPI 一致。所有工具均为 **实例** 类型，调用方式一致：向 MCP 客户端发出自然语言指令或直接构造 JSON 请求。
 
 | 工具                                        | 说明                 | 文档                                                                                           |
 | ----------------------------------------- |--------------------| -------------------------------------------------------------------------------------------- |
@@ -35,16 +34,13 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 | `describe_ssl_vpn_client_certs`           | 查询 SSL 客户端证书列表     | [https://www.volcengine.com/docs/6455/1119966](https://www.volcengine.com/docs/6455/1119966) |
 | `describe_ssl_vpn_servers`                | 查询 SSL 服务端列表       | [https://www.volcengine.com/docs/6455/1119961](https://www.volcengine.com/docs/6455/1119961) |
 
----
-
 
 ### Tool 1: describe_vpn_gateway_attributes
 #### 详细描述
 查询指定 VPN 网关的详细信息（名称、公网 IP、带宽、计费类型、状态等）。
 
-#### 调试所需的输入参数
 
-##### 输入
+#### 输入
 
 ```json
 {
@@ -66,15 +62,14 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
   "description": "查询指定 VPN 网关详情"
 }
 ```
-##### 输出
+#### 输出
 * 返回 VPN 网关的详细属性.
 
-##### Prompt 示例
+#### Prompt 示例
 ```text
 查询 VPN 网关 vgw-xxxxxxxx 的详细信息。
 ```
 
----
 
 ### Tool 2: describe_vpn_gateways
 
@@ -82,7 +77,7 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 
 按条件查询 VPN 网关列表，支持 Region、状态、ID 过滤。
 
-##### 输入
+#### 输入
 
 ```json
 {
@@ -99,17 +94,16 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 }
 ```
 
-##### 输出
+#### 输出
 
 * 返回符合条件的 VPN 网关列表。
 
-##### Prompt 示例
+#### Prompt 示例
 
 ```
 列出 cn-beijing 地域状态为 Available 的全部 VPN 网关。
 ```
 
----
 
 ### Tool 3: describe_vpn_connection_attributes
 
@@ -117,7 +111,7 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 
 查询指定 IPsec 连接的详细信息（隧道配置、加密算法、状态等）。
 
-##### 输入
+#### 输入
 
 ```json
 {
@@ -137,17 +131,16 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 }
 ```
 
-##### 输出
+#### 输出
 
 * 返回 IPsec 连接的详细属性（JSON）。
 
-##### Prompt 示例
+#### Prompt 示例
 
 ```
 查看 IPsec 连接 vgc-xxxxxxxx 的详细配置。
 ```
 
----
 
 ### Tool 4: describe_vpn_connections
 
@@ -155,7 +148,7 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 
 按条件查询 IPsec 连接列表，支持网关、状态、名称过滤。
 
-##### 输入
+#### 输入
 
 ```json
 {
@@ -172,17 +165,16 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 }
 ```
 
-##### 输出
+#### 输出
 
 * 返回符合条件的 IPsec 连接列表。
 
-##### Prompt 示例
+#### Prompt 示例
 
 ```
 列出网关 vgw-xxxxxxxx 下所有 Available 状态的 IPsec 连接。
 ```
 
----
 
 ### Tool 5: describe_vpn_gateway_route_attributes
 
@@ -190,7 +182,7 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 
 查询指定 VPN 网关路由条目详情（目的网段、下一跳、优先级等）。
 
-##### 输入
+#### 输入
 
 ```json
 {
@@ -210,17 +202,16 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 }
 ```
 
-##### 输出
+#### 输出
 
 * 返回路由条目的详细信息（JSON）。
 
-##### Prompt 示例
+#### Prompt 示例
 
 ```
 查询路由条目 vgr-xxxxxxxx 的详细信息。
 ```
 
----
 
 ### Tool 6: describe_vpn_gateway_routes
 
@@ -228,7 +219,7 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 
 按条件查询 VPN 网关路由条目列表，支持目的网段、状态过滤。
 
-##### 输入
+#### 输入
 
 ```json
 {
@@ -246,17 +237,16 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 }
 ```
 
-##### 输出
+#### 输出
 
 * 返回符合条件的路由条目列表。
 
-##### Prompt 示例
+#### Prompt 示例
 
 ```
 列出网关 vgw-xxxxxxxx 中目的网段为 10.0.0.0/16 的全部路由条目。
 ```
 
----
 
 ### Tool 7: describe_customer_gateways
 
@@ -264,7 +254,7 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 
 查询用户网关（CGW）列表，支持 ID、状态过滤。
 
-##### 输入
+#### 输入
 
 ```json
 {
@@ -285,17 +275,16 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 }
 ```
 
-##### 输出
+#### 输出
 
 * 返回用户网关列表。
 
-##### Prompt 示例
+#### Prompt 示例
 
 ```
 列出所有 Available 状态的用户网关。
 ```
 
----
 
 ### Tool 8: describe_ssl_vpn_client_cert_attributes
 
@@ -303,7 +292,7 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 
 查询指定 SSL VPN 客户端证书详情（状态、过期时间、绑定服务器等）。
 
-##### 输入
+#### 输入
 
 ```json
 {
@@ -323,17 +312,16 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 }
 ```
 
-##### 输出
+#### 输出
 
 * 返回 SSL 客户端证书详细信息（JSON）。
 
-##### Prompt 示例
+#### Prompt 示例
 
 ```
 查看 SSL 客户端证书 vsc-xxxxxxxx 的详情。
 ```
 
----
 
 ### Tool 9: describe_ssl_vpn_client_certs
 
@@ -341,7 +329,7 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 
 按条件查询 SSL VPN 客户端证书列表，可按服务器、状态过滤。
 
-##### 输入
+#### 输入
 
 ```json
 {
@@ -362,17 +350,16 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 }
 ```
 
-##### 输出
+#### 输出
 
 * 返回 SSL 客户端证书列表。
 
-##### Prompt 示例
+#### Prompt 示例
 
 ```
 列出SSL服务端 vsc-xxxxxxxx 下的所有 SSL 客户端证书。
 ```
 
----
 
 ### Tool 10: describe_ssl_vpn_servers
 
@@ -380,7 +367,7 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 
 查询 SSL VPN 服务器列表，支持网关、ID 过滤。
 
-##### 输入
+#### 输入
 
 ```json
 {
@@ -401,17 +388,16 @@ VPN MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端（
 }
 ```
 
-##### 输出
+#### 输出
 
 * 返回 SSL VPN 服务器列表。
 
-##### Prompt 示例
+#### Prompt 示例
 
 ```
 列出网关 vgw-xxxxxxxx 下的全部 SSL VPN 服务器。
 ```
 
----
 
 ## 可适配平台
 
