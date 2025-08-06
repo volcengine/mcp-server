@@ -129,7 +129,8 @@ SaaS
 ## 可适配平台  
 
 sse: 方舟，Python, Cline
-stdio: Python, Cline
+stdio: Python, Cline, Trae
+streamable-http: Python, Cline, Trae
 
 ## 服务开通链接 (整体产品)  
 
@@ -160,26 +161,7 @@ OAuth 2.0
 
 请预先获取环境变量 VOLCENGINE_ACCESS_KEY 和 VOLCENGINE_SECRET_KEY。
 
-sse方式
-
-```json
-{
-  "mcpServers": {
-    "mcp-server-cloudmonitor-sse": {
-      "command": "uvx",
-      "args": [
-        "--from",
-        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_cloudmonitor",
-        "mcp-server-cloudmonitor-sse"
-      ],
-      "env": {
-        "VOLCENGINE_ACCESS_KEY": "your volcengine access key",
-        "VOLCENGINE_SECRET_KEY": "your volcengine secret key"
-      }
-    }
-  }
-}
-```
+local方式 使用stdio模式启动:
 
 stdio方式
 
@@ -192,6 +174,29 @@ stdio方式
         "--from",
         "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_cloudmonitor",
         "mcp-server-cloudmonitor-stdio"
+      ],
+      "env": {
+        "VOLCENGINE_ACCESS_KEY": "your volcengine access key",
+        "VOLCENGINE_SECRET_KEY": "your volcengine secret key"
+      }
+    }
+  }
+}
+```
+
+remote方式 使用streamable-http模式启动:
+
+streamable-http方式
+
+```json
+{
+  "mcpServers": {
+    "mcp-server-cloudmonitor-streamable": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_cloudmonitor",
+        "mcp-server-cloudmonitor-streamable"
       ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "your volcengine access key",
