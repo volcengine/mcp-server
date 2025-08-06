@@ -29,7 +29,7 @@ saas
 
 #### 详细描述
 
-根据用户输入的文本或图片查询知识库文档，返回未经LLM处理的原始搜索结果
+根据用户输入的文本或图片查询知识库文档，返回未经LLM处理的原始搜索结果。
 
 #### 调试所需的输入参数:
 
@@ -39,42 +39,86 @@ saas
 {
   "inputSchema": {
     "type": "object",
-    "required": [],
+    "required": ["application_id","dataset_id"],
     "properties": {
-      "text": {
-        "description": "搜索查询文本，与image_url二选一",
+      "application_id": {
+        "description": "要搜索的应用ID",
         "type": "string"
-      },
-      "image_url": {
-        "description": "搜索图片URL，与text二选一",
-        "type": "string"
-      },
-      "filter": {
-        "description": "搜索结果过滤条件，支持must、must_not、range操作符及and、or逻辑运算符",
-        "type": "object"
-      },
-      "page_number": {
-        "description": "结果页码，默认为1",
-        "type": "integer"
-      },
-      "page_size": {
-        "description": "每页结果数量，默认为10",
-        "type": "integer"
       },
       "dataset_id": {
         "description": "要搜索的数据集ID",
         "type": "string"
+      },
+      "text": {
+        "description": "搜索查询文本。必须提供文本或image_url之一。",
+        "type": "string"
+      },
+      "image_url": {
+        "description": "要搜索的图片URL。必须提供文本或image_url之一。",
+        "type": "string"
+      },
+      "filter": {
+        "description": "搜索结果的过滤条件。支持must、must_not、range操作符以及and、or逻辑操作符。格式：{\"op\": \"must\", \"field\": \"status\", \"conds\": [1,2]}。- op (必需)：操作符类型，支持\"must\"、\"must_not\"、\"range\"、\"and\"、\"or\"。- field (must、must_not、range必需)：应用过滤条件的字段。- conds (must、must_not必需)：过滤值列表。- conds (and、or必需)：嵌套的过滤条件。留空或设置为None表示不应用过滤。默认为None。",
+        "type": "object",
+        "properties": {
+          "op": {
+            "description": "指定过滤逻辑的算子类型，决定过滤条件如何生效。支持\"must\"、\"must_not\"、\"range\"、\"and\"、\"or\"。",
+            "type": "string",
+            "enum": ["must", "must_not", "range", "and", "or"],
+            "required": true
+          },
+          "field": {
+            "description": "指定需要应用过滤条件的目标字段（如数据的 \"状态字段 status\"\"时间字段 create_time\" 等 ）。当 op 为 must 、 must_not 、 range 时， 必须填写 field ，明确对哪个字段做过滤。当 op 为 and 、 or 时， 无需填写 field （这两类算子用于组合多组过滤条件，字段由嵌套的子条件定义 ）。",
+            "type": "string",
+            "example": "status"
+          },
+          "conds": {
+            "description": "根据 op 类型，提供过滤所需的 \"值\" 或 \"嵌套条件\"。当 op 为 must / must_not 时， conds 需填 具体值的集合 （如 [1, 2] ），表示 field 字段需匹配（或排除）这些值。当 op 为 and / or 时， conds 需填 嵌套的过滤条件集合 （如 [{\"op\": \"must\", \"field\": ...}, {\"op\": \"range\", ...}] ），表示需组合多组过滤规则， and 要求全满足， or 要求满足任意一组。",
+            "type": "array",
+            "items": {
+              "type": ["integer", "string"]
+            }
+          },
+          "gte": {
+            "description": "筛选 field 字段值 大于等于 该值的数据（如 price ≥ 100）。仅在 op=range 时生效。",
+            "type": "number",
+            "example": 100.0
+          },
+          "gt": {
+            "description": "筛选 field 字段值 严格大于 该值的数据（如 price ＞ 100）。仅在 op=range 时生效。",
+            "type": "number",
+            "example": 100.0
+          },
+          "lte": {
+            "description": "筛选 field 字段值 小于等于 该值的数据（如 price ≤ 500）。仅在 op=range 时生效。",
+            "type": "number",
+            "example": 500.0
+          },
+          "lt": {
+            "description": "筛选 field 字段值 严格小于 该值的数据（如 price ＜ 500）。仅在 op=range 时生效。",
+            "type": "number",
+            "example": 500.0
+          }
+        }
+      },
+      "page_number": {
+        "description": "要检索的结果页码。默认为1。",
+        "type": "integer"
+      },
+      "page_size": {
+        "description": "每页结果的数量。默认为10。",
+        "type": "integer"
       }
     }
   },
   "name": "search",
-  "description": "知识库原始检索"
+  "description": "根据用户输入的文本或图片查询知识库文档，返回未经LLM处理的原始搜索结果。"
 }
 ```
 
 输出：
 
-- 原始搜索结果字典
+- 包含搜索结果的字典。
 
 #### 最容易被唤起的 Prompt示例
 
@@ -88,7 +132,7 @@ saas
 
 #### 详细描述
 
-使用AI能力执行基于对话的搜索，根据领域知识回答用户问题
+使用AI能力执行基于对话的搜索，根据领域知识回答用户问题。此接口适用于对话式推荐场景。如果需要非对话式推荐，应使用搜索接口。
 
 #### 调试所需的输入参数:
 
@@ -98,45 +142,93 @@ saas
 {
   "inputSchema": {
     "type": "object",
-    "required": ["session_id"],
+    "required": ["application_id", "session_id"],
     "properties": {
+      "application_id": {
+        "description": "要搜索的应用ID",
+        "type": "string"
+      },
       "session_id": {
-        "description": "对话会话唯一标识符",
+        "description": "对话会话的唯一标识符。",
         "type": "string"
       },
       "text": {
-        "description": "搜索查询文本，与image_url二选一",
+        "description": "搜索查询文本。必须提供文本或image_url之一。",
         "type": "string"
       },
       "image_url": {
-        "description": "搜索图片URL，与text二选一",
+        "description": "要搜索的图片URL。必须提供文本或image_url之一。",
         "type": "string"
       },
       "search_limit": {
-        "description": "返回的最大搜索结果数量，默认为10",
+        "description": "返回的最大搜索结果数。默认为10。",
         "type": "integer"
       },
       "dataset_ids": {
-        "description": "要搜索的数据集ID列表",
+        "description": "要搜索的数据集ID列表。",
         "type": "array",
         "items": {
           "type": "string"
         }
       },
       "filters": {
-        "description": "搜索结果过滤条件，按数据集应用",
-        "type": "object"
+        "description": "搜索结果的过滤条件，按数据集应用。格式：{\"dataset_id\": {\"op\": \"must\", \"field\": \"status\", \"conds\": [1,2]}}。- op (必需)：操作符类型，支持\"must\"、\"must_not\"、\"range\"、\"and\"、\"or\"。- field (must、must_not、range必需)：应用过滤条件的字段。- conds (must、must_not必需)：过滤值列表。- conds (and、or必需)：嵌套的过滤条件。留空或设置为None表示不应用过滤。默认为None。",
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "op": {
+              "description": "指定过滤逻辑的算子类型，决定过滤条件如何生效。支持\"must\"、\"must_not\"、\"range\"、\"and\"、\"or\"。",
+              "type": "string",
+              "enum": ["must", "must_not", "range", "and", "or"],
+              "required": true
+            },
+            "field": {
+              "description": "指定需要应用过滤条件的目标字段（如数据的 \"状态字段 status\"\"时间字段 create_time\" 等 ）。当 op 为 must 、 must_not 、 range 时， 必须填写 field ，明确对哪个字段做过滤。当 op 为 and 、 or 时， 无需填写 field （这两类算子用于组合多组过滤条件，字段由嵌套的子条件定义 ）。
+",
+              "type": "string",
+              "example": "status"
+            },
+            "conds": {
+              "description": "根据 op 类型，提供过滤所需的 \"值\" 或 \"嵌套条件\"。当 op 为 must / must_not 时， conds 需填 具体值的集合 （如 [1, 2] ），表示 field 字段需匹配（或排除）这些值。当 op 为 and / or 时， conds 需填 嵌套的过滤条件集合 （如 [{\"op\": \"must\", \"field\": ...}, {\"op\": \"range\", ...}] ），表示需组合多组过滤规则， and 要求全满足， or 要求满足任意一组。",
+              "type": "array",
+              "items": {
+                "type": ["integer", "string"]
+              }
+            },
+            "gte": {
+              "description": "筛选 field 字段值 大于等于 该值的数据（如 price ≥ 100）。仅在 op=range 时生效。",
+              "type": "number",
+              "example": 100.0
+            },
+            "gt": {
+              "description": "筛选 field 字段值 严格大于 该值的数据（如 price ＞ 100）。仅在 op=range 时生效。",
+              "type": "number",
+              "example": 100.0
+            },
+            "lte": {
+              "description": "筛选 field 字段值 小于等于 该值的数据（如 price ≤ 500）。仅在 op=range 时生效。",
+              "type": "number",
+              "example": 500.0
+            },
+            "lt": {
+              "description": "筛选 field 字段值 严格小于 该值的数据（如 price ＜ 500）。仅在 op=range 时生效。",
+              "type": "number",
+              "example": 500.0
+            }
+          }
+        }
       }
     }
   },
   "name": "chat_search",
-  "description": "AI对话式搜索"
+  "description": "使用AI能力执行基于对话的搜索，根据领域知识回答用户问题。"
 }
 ```
 
 输出：
 
-- AI基于搜索结果生成的回答内容
+- 包含对话搜索结果的字符串。
 
 #### 最容易被唤起的 Prompt示例
 
