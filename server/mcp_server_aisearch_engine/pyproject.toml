@@ -1,0 +1,19 @@
+[project]
+name = "mcp-server-aisearch-engine"
+version = "0.0.1"
+description = "AISearch Engine MCP Server"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "mcp>=1.9.4",
+    "volcengine-python-sdk>=3.0.8",
+    "requests==2.32.3",
+    "pyzipper==0.3.6",
+]
+
+[project.scripts]
+mcp-server-aisearch-engine = "mcp_server_aisearch_engine.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
