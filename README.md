@@ -179,6 +179,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 - **[必优-ChatPPT](https://github.com/YOOTeam/chatppt-mcp)**：必优科技智能文档MCP Server目前已经覆盖了18个智能文档的接口能力，包括但不限于PPT创作，PPT美化，PPT生成，简历创作，简历分析，人岗匹配等场景下的文档处理能力。  
 - **[Figma](https://github.com/GLips/Figma-Context-MCP)**：为 Agent 提供 Figma 文件的布局和样式信息，增强它们准确生成设计的能力。  
 - **[EverArt](https://github.com/modelcontextprotocol/servers/tree/main/src/everart)**：AI image generation using various models.  
+- **[联网问答Agent](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_askecho)**：基于联网搜索结果，提供端到端的AI问答能力。
 
 
 ### **源码管理**  
