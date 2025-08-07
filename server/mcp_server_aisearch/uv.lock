@@ -204,7 +204,7 @@ wheels = [
 ]
 
 [[package]]
-name = "mcp-server-aisearch-engine"
+name = "mcp-server-aisearch"
 version = "0.0.1"
 source = { editable = "." }
 dependencies = [

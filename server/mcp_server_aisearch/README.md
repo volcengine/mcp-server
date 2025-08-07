@@ -1,4 +1,4 @@
-# AISearch Engine MCP Server
+# mcp_server_aisearch
 
 ## 版本信息
 
@@ -279,12 +279,12 @@ git clone git@github.com:volcengine/mcp-server.git
 **UV**
 
 ```bash
-cd mcp-server/server/mcp_server_aisearch_engine
-uv run mcp-server-aisearch-engine
+cd mcp-server/server/mcp_server_aisearch
+uv run mcp-server-aisearch
 
 # 使用sse/streamable-http模式启动(默认为stdio)
-uv run mcp-server-aisearch-engine -t sse
-uv run mcp-server-aisearch-engine -t streamable-http
+uv run mcp-server-aisearch -t sse
+uv run mcp-server-aisearch -t streamable-http
 ```
 
 ## 部署
@@ -294,12 +294,12 @@ uv run mcp-server-aisearch-engine -t streamable-http
 ```json
 {
   "mcpServers": {
-    "mcp-server-aisearch-engine": {
+    "mcp-server-aisearch": {
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_aisearch_engine",
-        "mcp-server-aisearch-engine"
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_aisearch",
+        "mcp-server-aisearch"
       ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "你的火山引擎AK",

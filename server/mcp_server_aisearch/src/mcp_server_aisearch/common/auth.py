@@ -5,7 +5,7 @@ import requests
 from volcengine.auth.SignerV4 import SignerV4
 from volcengine.base.Request import Request
 from volcengine.Credentials import Credentials
-from mcp_server_aisearch_engine.config import config
+from mcp_server_aisearch.config import config
 
 def prepare_request(method, path, ak, sk, params=None, data=None, doseq=0):
     if params:

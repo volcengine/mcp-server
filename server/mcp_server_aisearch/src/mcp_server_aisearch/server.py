@@ -6,8 +6,8 @@ import json
 
 from typing import Dict, Optional, Final, Any
 from mcp.server import FastMCP
-from mcp_server_aisearch_engine.config import config
-from mcp_server_aisearch_engine.common.auth import prepare_request
+from mcp_server_aisearch.config import config
+from mcp_server_aisearch.common.auth import prepare_request
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
