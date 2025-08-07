@@ -23,8 +23,7 @@ def validate_local_required_config():
     """
     required_vars = [
         "VOLCENGINE_ACCESS_KEY",
-        "VOLCENGINE_SECRET_KEY",
-        "AI_SEARCH_ENGINE_REGION"
+        "VOLCENGINE_SECRET_KEY"
     ]
     missing_vars = [var for var in required_vars if not os.environ.get(var)]
     if missing_vars:
