@@ -33,7 +33,7 @@ def web_search(
     Returns:
         联网搜索结果返回结构
     """
-    logger.info(f"Received web_search tool request with query: {Query}")
+    logger.info(f"Received web_search tool request")
 
     try:
         if config is None:
