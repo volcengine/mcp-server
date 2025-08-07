@@ -23,9 +23,10 @@ def prepare_request(method, path, ak, sk, params=None, data=None, doseq=0):
     r.set_shema("https")
     r.set_method(method)
     r.set_connection_timeout(10)
-    r.set_socket_timeout(10)
+    r.set_socket_timeout(60)
     mheaders = {
         "Content-Type": "application/json",
+        "X-MCP-Request": "true",
     }
     r.set_headers(mheaders)
     if params:

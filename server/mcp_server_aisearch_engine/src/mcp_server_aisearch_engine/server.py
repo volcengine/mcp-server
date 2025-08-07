@@ -24,13 +24,13 @@ chat_search_path = "/api/v1/application/${applicationId}/chat_search"
 mcp = FastMCP("AISearch Engine MCP Server", port=int(os.getenv("PORT", "8000")))
 
 @mcp.tool()
-def search(applicationId: str, dataset_id: str, text: str = None, image_url: str = None, filter: object = None, page_number: int = 1, page_size: int = 10) -> Dict[str, Any]:
+def search(application_id: str, dataset_id: str, text: str = None, image_url: str = None, filter: dict = None, page_number: int = 1, page_size: int = 10) -> Dict[str, Any]:
     """
     Search for documents in a knowledge base based on user input query, returning raw search results without LLM processing.
     Either text or image_url must be provided, but not both.
 
     Args:
-        applicationId (str): The application ID for the search.
+        application_id (str): The application ID for the search.
         dataset_id (str): The ID of the dataset to search in.
         text (str, optional): The search query text. Either text or image_url must be provided.
         image_url (str, optional): The URL of the image to search with. Either text or image_url must be provided.
@@ -50,12 +50,12 @@ def search(applicationId: str, dataset_id: str, text: str = None, image_url: str
     # Validate that either text or image_url is provided, but not both
     if (text is None or text == "") and (image_url is None or image_url == ""):
         raise ValueError("Either text or image_url must be provided")
-    if(applicationId is None or applicationId == ""):
-        raise ValueError("applicationId must be provided")
+    if(application_id is None or application_id == ""):
+        raise ValueError("application_id must be provided")
     if(dataset_id is None or dataset_id == ""):
         raise ValueError("dataset_id must be provided")
 
-    logger.info(f"Received search tool request: applicationId = {applicationId},text={text}, image_url={image_url}, filter={filter}, page_number={page_number}, page_size={page_size}, dataset_id={dataset_id}")
+    logger.info(f"Received search tool request: applicationId = {application_id},text={text}, image_url={image_url}, filter={filter}, page_number={page_number}, page_size={page_size}, dataset_id={dataset_id}")
     
     try:
         request_params = {
@@ -68,7 +68,7 @@ def search(applicationId: str, dataset_id: str, text: str = None, image_url: str
             "filter": filter,
             "dataset_id": dataset_id
         }
-        temp_search_path = search_path.replace("${applicationId}", applicationId)
+        temp_search_path = search_path.replace("${applicationId}", application_id)
         search_req = prepare_request(method="POST", path=temp_search_path, ak=config.ak, sk=config.sk, data=request_params)
         logger.info(f"Request: {search_req.headers}, body:{search_req.body}, url: https://{g_aisearch_engine_domain}{search_req.path}")
         rsp = requests.request(
@@ -89,14 +89,14 @@ def search(applicationId: str, dataset_id: str, text: str = None, image_url: str
         return {"error": str(e)}
 
 @mcp.tool()
-def chat_search(applicationId: str, session_id: str, text: str = None, image_url: str = None, search_limit: int = 10, dataset_ids: list = None, filters: dict = None) -> str:
+def chat_search(application_id: str, session_id: str, text: str = None, image_url: str = None, search_limit: int = 10, dataset_ids: list = None, filters: dict = None) -> Dict[str, Any]:
     """
     Perform a chat-based search using AI capabilities to answer user questions based on domain knowledge.
-    This interface is suitable for conversational recommendation scenarios. If a non-conversational recommendation is required, 
+    This interface is suitable for conversational scenarios. If a non-conversational recommendation is required, 
     the search interface should be used instead.
 
     Args:
-        applicationId (str): The application ID for the search.
+        application_id (str): The application ID for the search.
         session_id (str): The unique identifier for the chat session.
         text (str, optional): The search query text. Either text or image_url must be provided.
         image_url (str, optional): The URL of the image to search with. Either text or image_url must be provided.
@@ -110,17 +110,17 @@ def chat_search(applicationId: str, session_id: str, text: str = None, image_url
                                  - conds (required for and, or): Nested filter conditions.
                                  Leave empty or None to apply no filter. Defaults to None.
     Returns:
-        dict[str, Any]: A dictionary containing the chat search results.
+        dict[str, Any]: A dictionary containing the chat search results, including related items data.
     """
     # Validate that either text or image_url is provided, but not both
     if (text is None or text == "") and (image_url is None or image_url == ""):
         raise ValueError("Either text or image_url must be provided")
-    if(applicationId is None or applicationId == ""):
-        raise ValueError("applicationId must be provided")
+    if(application_id is None or application_id == ""):
+        raise ValueError("application_id must be provided")
     if(session_id is None or session_id == ""):
         raise ValueError("session_id must be provided")
 
-    logger.info(f"Received chat_search tool request: applicationId = {applicationId}, session_id={session_id}, text={text}, image_url={image_url}, search_limit={search_limit}, dataset_ids={dataset_ids}, filters={filters}")
+    logger.info(f"Received chat_search tool request: applicationId = {application_id}, session_id={session_id}, text={text}, image_url={image_url}, search_limit={search_limit}, dataset_ids={dataset_ids}, filters={filters}")
     try:
         # 构造 input_message 的 content 数组
         content = []
@@ -145,7 +145,7 @@ def chat_search(applicationId: str, session_id: str, text: str = None, image_url
                 "filters": filters
             }
         }
-        temp_chat_search_path = chat_search_path.replace("${applicationId}", applicationId)
+        temp_chat_search_path = chat_search_path.replace("${applicationId}", application_id)
         search_req = prepare_request(method="POST", path=temp_chat_search_path, ak=config.ak, sk=config.sk, data=request_params)
         rsp = requests.request(
             method=search_req.method,
@@ -156,8 +156,7 @@ def chat_search(applicationId: str, session_id: str, text: str = None, image_url
         rsp.raise_for_status()
         start_marker_checked = False
         full_response = ""
-
-        # 逐行解析流式响应
+        related_items = []
         for line in rsp.iter_lines(decode_unicode=True):
             if line:  # 跳过空行
                 try:
@@ -181,6 +180,10 @@ def chat_search(applicationId: str, session_id: str, text: str = None, image_url
                         full_response += content_fragment
                         logger.info(f"拼接后内容: {full_response}")
 
+                    # 提取 related_items
+                    if "payload" in result and "related_items" in result["payload"]:
+                        related_items = result["payload"]["related_items"]
+
                     # 处理结束标识（如果有）
                     if "stop_reason" in result and result["stop_reason"] == "stop":
                         logger.info("流式传输结束，完整回复已生成")
@@ -188,9 +191,12 @@ def chat_search(applicationId: str, session_id: str, text: str = None, image_url
 
                 except json.JSONDecodeError as e:
                     logger.error(f"解析单行JSON失败: {e}，内容: {line}")
-
-        # 返回完整拼接的回复
-        return full_response
+        
+        # 返回包含content和related_items的字典
+        return {
+            "content": full_response,
+            "related_items": related_items
+        }
     except Exception as e:
         logger.error(f"Error in chat_search: {str(e)}")
         return {"error": str(e)}

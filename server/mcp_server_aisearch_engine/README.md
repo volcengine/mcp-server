@@ -184,8 +184,7 @@ saas
               "required": true
             },
             "field": {
-              "description": "指定需要应用过滤条件的目标字段（如数据的 \"状态字段 status\"\"时间字段 create_time\" 等 ）。当 op 为 must 、 must_not 、 range 时， 必须填写 field ，明确对哪个字段做过滤。当 op 为 and 、 or 时， 无需填写 field （这两类算子用于组合多组过滤条件，字段由嵌套的子条件定义 ）。
-",
+              "description": "指定需要应用过滤条件的目标字段（如数据的 \"状态字段 status\"\"时间字段 create_time\" 等 ）。当 op 为 must 、 must_not 、 range 时， 必须填写 field ，明确对哪个字段做过滤。当 op 为 and 、 or 时， 无需填写 field （这两类算子用于组合多组过滤条件，字段由嵌套的子条件定义 ）。",
               "type": "string",
               "example": "status"
             },
