@@ -163,6 +163,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 - **[Glean](https://github.com/longyi1207/glean-mcp-server)**：A server that uses Glean API to search and chat.  
 - **[Pinecone](https://github.com/sirmews/mcp-pinecone)**：MCP server for searching and uploading records to Pinecone.  
 - **[Elasticsearch](https://github.com/cr7258/elasticsearch-mcp-server)**：MCP server implementation that provides Elasticsearch interaction.  
+- **[AI搜索引擎](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_aisearch_engine)**：基于大模型的多模态语义表征和理解能力，结合字节跳动信息检索领域多年最佳实践，为客户提供开箱即用的 AI 搜索搭建平台服务，帮助客户轻松搭建和集成端到端的多模态图文搜索和推荐能力。
 
 
 ### **位置服务**  
