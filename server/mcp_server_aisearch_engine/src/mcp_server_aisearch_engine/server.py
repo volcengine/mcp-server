@@ -26,8 +26,8 @@ mcp = FastMCP("AISearch Engine MCP Server", port=int(os.getenv("PORT", "8000")))
 @mcp.tool()
 def search(application_id: str, dataset_id: str, text: str = None, image_url: str = None, filter: dict = None, page_number: int = 1, page_size: int = 10) -> Dict[str, Any]:
     """
-    Search for documents in a knowledge base based on user input query, returning raw search results without LLM processing.
-    Either text or image_url must be provided, but not both.
+    This is a basic search tool without conversational capabilities. It can query the corresponding dataset based on the user's text or image query and return the raw search results. 
+    The search tool cannot be used without the datasetId input parameter. You can try using the chat_search tool based on the original query.
 
     Args:
         application_id (str): The application ID for the search.
@@ -91,9 +91,9 @@ def search(application_id: str, dataset_id: str, text: str = None, image_url: st
 @mcp.tool()
 def chat_search(application_id: str, session_id: str, text: str = None, image_url: str = None, search_limit: int = 10, dataset_ids: list = None, filters: dict = None) -> Dict[str, Any]:
     """
-    Perform a chat-based search using AI capabilities to answer user questions based on domain knowledge.
-    This interface is suitable for conversational scenarios. If a non-conversational recommendation is required, 
-    the search interface should be used instead.
+    Perform a chat-based search using AI capabilities to answer user questions based on datasets.
+    This Tool is only applicable to conversational search scenarios and cannot be used to query the dataset collections under an application. If a non-conversational search or retrieval is required, 
+    the search tool should be used instead.
 
     Args:
         application_id (str): The application ID for the search.
