@@ -14,7 +14,7 @@ from mcp_server_cloudmonitor.models.request import GetMetricsDataRequest, GetMet
 
 MCP_SERVER_NAME = "CloudMonitor"
 
-mcp = FastMCP(MCP_SERVER_NAME, log_level="DEBUG", host="0.0.0.0", port=int(os.getenv("PORT", "8000")))
+mcp = FastMCP(MCP_SERVER_NAME, log_level="DEBUG", host=os.getenv("HOST","0.0.0.0"), port=int(os.getenv("PORT", "8000")))
 
 # Configure logging
 logging.basicConfig(
