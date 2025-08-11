@@ -268,7 +268,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "httpx", specifier = ">=0.28.1" },
-    { name = "mcp", extras = ["cli"], specifier = ">=1.9.4" },
+    { name = "mcp", extras = ["cli"], specifier = ">=1.12.0" },
     { name = "volcengine", specifier = ">=1.0.175" },
 ]
 

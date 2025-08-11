@@ -108,7 +108,7 @@ uvicorn==0.34.0
     # via mcp
 volcengine==1.0.180
     # via mcp-server-las (pyproject.toml)
-mcp==1.9.4
+mcp==1.12.0
 
 python-multipart==0.0.20
     # via mcp
