@@ -1,4 +1,4 @@
-# mcp_server_aisearch
+# AI搜索引擎 MCP Server
 
 ## 版本信息
 
