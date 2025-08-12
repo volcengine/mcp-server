@@ -206,8 +206,8 @@ LAS中，数据集中关于 RAY 相关的内容有哪些
             "mcp-server-las"
           ],
             "env": {
-                "VOLC_ACCESSKEY": "your-access-key-id",
-                "VOLC_SECRETKEY": "your-access-key-secret",
+                "VOLCENGINE_ACCESS_KEY": "your-access-key-id",
+                "VOLCENGINE_SECRET_KEY": "your-access-key-secret",
                 "LAS_DATASET_ID": "your-dataset-id"
             }
         }
