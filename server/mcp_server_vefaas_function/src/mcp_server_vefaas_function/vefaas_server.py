@@ -477,7 +477,7 @@ def create_api_gateway(name: str = None, region: str = "cn-beijing") -> str:
 
     try:
         response_body = request("POST", now, {}, {}, ak, sk, token, "CreateGateway", json.dumps(body), region)
-        return response_body
+        return json.dumps(response_body, ensure_ascii=False, indent=2)
     except Exception as e:
         return f"Failed to create VeApig gateway with name {gateway_name}: {str(e)}"
 
