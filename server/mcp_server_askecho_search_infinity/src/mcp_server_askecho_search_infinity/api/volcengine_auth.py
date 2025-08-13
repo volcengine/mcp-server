@@ -3,28 +3,24 @@ import hashlib
 import hmac
 from dataclasses import asdict
 import json
-import logging
 from urllib.parse import quote
-from .model import *
+from ..model import *
 
 import requests
 
 Service = "volc_torchlight_api"
-Version = "2024-01-01"
+Version = "2025-01-01"
 Region = "cn-north-1"
 Host = "mercury.volcengineapi.com"
 ContentType = "application/json"
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
 
-
-def chat_completion_api(ak: str, sk: str, req: OriginChatCompletionRequest):
+def web_search_volcengine_auth(ak: str, sk: str, req: WebSearchRequest, tool_name: str):
     now = datetime.datetime.utcnow()
-    logger.info(f"call chat_completion with req: {req}")
-    return request("POST", now, {}, {}, ak, sk, "ChatCompletion", json.dumps(asdict(req)))
+    headers = {
+        "X-Traffic-Tag": f"ark_mcp_server_{tool_name}",
+    }
+    return volcengine_auth_request("POST", now, {}, headers, ak, sk, "WebSearch", json.dumps(asdict(req)))
 
 
 def norm_query(params):
@@ -49,7 +45,7 @@ def hash_sha256(content: str):
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 
-def request(method, date, query, header, ak, sk, action, body):
+def volcengine_auth_request(method, date, query, header, ak, sk, action, body):
     credential = {
         "access_key_id": ak,
         "secret_access_key": sk,
@@ -116,7 +112,6 @@ def request(method, date, query, header, ak, sk, action, body):
                          headers=header,
                          timeout=600,
                          params=request_param["query"],
-                         data=request_param["body"],
-                         stream=True
+                         data=request_param["body"]
                          )
-    return r.json()
+    return r

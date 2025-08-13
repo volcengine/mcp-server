@@ -38,7 +38,7 @@ def hash_sha256(content: str):
     """
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
-def get_context_from_tools(ctx: Context[ServerSession, object]) -> dict:
+def get_context_from_tools(ctx: Context[ServerSession, object, any]) -> dict:
     """get context in tool, this function should be called in tool
     """
     auth = None
@@ -65,7 +65,7 @@ def get_context_from_tools(ctx: Context[ServerSession, object]) -> dict:
     try:
         # 解码 Base64
         decoded_str = base64.b64decode(base64_data).decode('utf-8')
-        data = json.loads(decoded_str)
+        data: dict = json.loads(decoded_str)
 
         if not data.get('AccessKeyId'):
             raise ValueError("get remote ak failed, it's empty")
@@ -73,22 +73,27 @@ def get_context_from_tools(ctx: Context[ServerSession, object]) -> dict:
         if not data.get('SecretAccessKey'):
             raise ValueError("get remote sk failed, it's empty")
 
+        if bool(data.get("Region")) ^ bool(data.get("Endpoint")):
+            raise ValueError("environment variables VOLCENGINE_REGION and VOLCENGINE_ENDPOINT should be set togather")
+
         # if not data.get("SessionToken"):
         #     raise ValueError("get remote token failed, request just support sts, token should not be")
 
-        # 获取字段
+        # get auth info
         auth_info["current_time"] = data.get('CurrentTime')
         auth_info["expired_time"] = data.get('ExpiredTime')
         auth_info["ak"] = data.get('AccessKeyId')
         auth_info["sk"] = data.get('SecretAccessKey')
         auth_info["token"] = data.get('SessionToken')
+        auth_info["region"] = data.get("Region")
+        auth_info["endpoint"] = data.get("Endpoint")
 
     except Exception as e:
         raise ValueError("Decode authorization info error", e)
 
     return auth_info
 
-def get_sdk_auth_info(ctx: Context[ServerSession, object]):
+def get_sdk_auth_info(ctx: Context[ServerSession, object, any]):
     if TLS_CONFIG.deploy_mode == DEPLOY_MODE_LOCAL:
         return get_local_sdk_auth_info()
 
@@ -104,9 +109,17 @@ def get_local_sdk_auth_info() -> dict:
     }
 
 def get_remote_sdk_auth_info(remote_context_info: dict) -> dict:
+    # env has a higher priority
+    region = TLS_CONFIG.region or remote_context_info.get("region") or "cn-beijing"
+    endpoint = TLS_CONFIG.endpoint or remote_context_info.get("endpoint") or "https://tls-cn-beijing.volces.com"
+
+    # check region and endpoint
+    # if not region or not endpoint:
+    #     raise ValueError("should set Region or Endpoint in your request header or remote config")
+
     return {
-        "region": TLS_CONFIG.region,
-        "endpoint": TLS_CONFIG.endpoint,
+        "region": region,
+        "endpoint": endpoint,
         "ak": remote_context_info.get("ak"),
         "sk": remote_context_info.get("sk"),
         "token": remote_context_info.get("token"),

@@ -7,7 +7,7 @@ requires-python = ">=3.10"
 license = {text = "MIT"}
 dependencies = [
     "httpx>=0.28.1",
-    "mcp[cli] @ git+https://github.com/zihengli-bytedance/python-sdk.git@temp-for-volc",
+    "mcp>=1.10.0",
     "python-dotenv>=1.0.1",
     "volcengine==1.0.175",
     "volcengine-python-sdk>=3.0.1",

@@ -1,45 +1,45 @@
 """
 System events related tool functions
 """
-from typing import List, Optional
+
+from typing import List
 
 import volcenginesdkecs
 from mcp import types
-from pydantic import BaseModel, Field
+from pydantic import Field
 from volcenginesdkecs.models import *
 
 from mcp_server_ecs.common.client import get_volc_ecs_client
 from mcp_server_ecs.common.errors import handle_error
-from mcp_server_ecs.tools import register_tool
+from mcp_server_ecs.tools import mcp
 
 
-class DescribeSystemEventsParams(BaseModel):
-    Region: str = Field(
+@mcp.tool(
+    name="describe_system_events",
+    description="Query system events",
+)
+async def describe_system_events(
+    region: str = Field(
         default="cn-beijing",
         description="默认为cn-beijing. 可为：ap-southeast-1, cn-beijing2, cn-shanghai, cn-guangzhou 等",
-    )
-
-    CreatedAtStart: str = Field(
+    ),
+    createdAtStart: str = Field(
         default="",
         description="以CreatedAtStart为起点，筛选创建时间在其之后的事件。默认值为CreatedAtEnd前24小时（参考请求参数CreatedAtEnd），格式为RCF3339",
-    )
-
-    CreatedAtEnd: str = Field(
+    ),
+    createdAtEnd: str = Field(
         default="",
         description="以CreatedAtEnd为终点，筛选创建时间在其之前的事件。默认值为现在，格式为RCF3339",
-    )
-
-    EventIds: List[str] = Field(
+    ),
+    eventIds: List[str] = Field(
         default=[],
         description="事件ID，最多支持100个ID。您可以通过事件通知或调用本接口查询获取",
-    )
-
-    ResourceIds: List[str] = Field(
+    ),
+    resourceIds: List[str] = Field(
         default=[],
         description="资源ID，最多支持100个ID。您可以调用DescribeInstances接口，查询获取实例ID",
-    )
-
-    Status: List[str] = Field(
+    ),
+    status: List[str] = Field(
         default=[],
         description="""
                     系统事件的状态，最多支持10个。
@@ -54,9 +54,8 @@ class DescribeSystemEventsParams(BaseModel):
                     Pending：已暂停
                     Recovered：已恢复
                 """,
-    )
-
-    Types: List[str] = Field(
+    ),
+    event_types: List[str] = Field(
         default=[],
         description="""
                     系统事件的类型，最多支持100个。
@@ -74,32 +73,26 @@ class DescribeSystemEventsParams(BaseModel):
                     MemoryRiskDetected：内存运行存在风险。
                     InstanceFileSystemFailure_StopAndRepair：因文件系统异常实例停机修复。
                 """,
-    )
-
-    NeedNum: int = Field(
+    ),
+    needNum: int = Field(
         default=20,
         description="事件较多时，可以通过该字段控制查询总数，需要根据用户的意图来设置",
-    )
-
-
-@register_tool(name="describe_system_events",
-               description="Query system events",
-               model_class=DescribeSystemEventsParams)
-async def describe_system_events(args: dict) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+    ),
+) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
     try:
-        volc_client = get_volc_ecs_client(args.get("Region"))
+        volc_client = get_volc_ecs_client(region)
         total_results = []
         next_token = None
 
         while True:
             response = volc_client.describe_system_events(
                 volcenginesdkecs.DescribeSystemEventsRequest(
-                    created_at_start=args.get("CreatedAtStart"),
-                    created_at_end=args.get("CreatedAtEnd"),
-                    event_ids=args.get("EventIds"),
-                    resource_ids=args.get("ResourceIds"),
-                    status=args.get("Status"),
-                    types=args.get("Types"),
+                    created_at_start=createdAtStart,
+                    created_at_end=createdAtEnd,
+                    event_ids=eventIds,
+                    resource_ids=resourceIds,
+                    status=status,
+                    types=event_types,
                     next_token=next_token,
                 )
             )
@@ -120,16 +113,13 @@ async def describe_system_events(args: dict) -> list[types.TextContent | types.I
                 }
                 total_results.append(filtered_event)
 
-            if len(total_results) >= args.get("NeedNum") or not response.next_token:
-                total_results = total_results[: args.get("NeedNum")]
+            if len(total_results) >= needNum or not response.next_token:
+                total_results = total_results[:needNum]
                 break
 
             next_token = response.next_token
 
-        return [types.TextContent(
-            type="text",
-            text=f"Results: {total_results}"
-        )]
+        return [types.TextContent(type="text", text=f"Results: {total_results}")]
 
     except Exception as e:
         return handle_error("describe_system_events", e)

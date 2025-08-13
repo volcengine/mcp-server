@@ -1,0 +1,17 @@
+[project]
+name = "mcp-server-askecho-search-infinity"
+version = "0.1.0"
+description = "Search Infinity MCP Server"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "mcp>=1.9.4",
+    "requests>=2.32.3",
+]
+
+[project.scripts]
+mcp-server-askecho-search-infinity = "mcp_server_askecho_search_infinity:main"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"

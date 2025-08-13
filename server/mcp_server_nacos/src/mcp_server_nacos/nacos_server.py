@@ -8,12 +8,14 @@ import logging
 from .sign import request, get_authorization_credentials
 import json
 from mcp.server.fastmcp import FastMCP
-
+import os
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-mcp = FastMCP("Nacos")
+mcp = FastMCP("Nacos", stateless_http=True, json_response=True)
+# Enable JSON response & stateless HTTP by default
+os.environ["FASTMCP_JSON_RESPONSE"] = "true"
 
 #生成随机名称：mcp-random-string
 def generate_random_name(prefix="mcp", length=8):
@@ -83,7 +85,7 @@ The `id` parameter is required to identify the specific nacos registry you want 
 region is the region where the nacos registry is located, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
 `cn-shanghai`, `cn-guangzhou` as well."""
 )
-def get_nacos_registry(id: str = "", region: str = "cn-beijing") -> str:
+def get_nacos_registry(id: str = "", region: str = "cn-beijing"):
     """
     Retrieves detailed information about a specific nacos registry.
 
@@ -118,7 +120,7 @@ region is the region where the nacos registry will be created, default is cn-bei
 VpcId is the ID of the VPC where the Nacos registry will be deployed, and it cannot be empty.
 At least two non-empty SubnetIds are required to ensure high availability of the Nacos registry."""
 )
-def create_nacos_registry(name: str = "", region: str = "cn-beijing", VpcId: str = "", SubnetId1: str = "", SubnetId2: str = "", SubnetId3: str = "" ) -> str:
+def create_nacos_registry(name: str = "", region: str = "cn-beijing", VpcId: str = "", SubnetId1: str = "", SubnetId2: str = "", SubnetId3: str = "" ):
     """
     Creates a new Nacos registry.
 
@@ -178,7 +180,7 @@ region is the region where the nacos registry is located, default is cn-beijing.
 `cn-shanghai`, `cn-guangzhou` as well.
 The `id` parameter is required to identify the specific nacos registry you want to rename.
 The `name` parameter is required to identify the new name of the nacos registry.""")
-def update_registry_info(id: str = "", name: str = "", region: str = "cn-beijing") -> str:
+def update_registry_info(id: str = "", name: str = "", region: str = "cn-beijing"):
     """
     Updates the info of a specific nacos registry.
 
@@ -217,7 +219,9 @@ Use this when you need to obtain a list of all Nacos Registries in a specific re
 region is the region where the gateways are located, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
 `cn-shanghai`, `cn-guangzhou` as well."""
 )
-def list_nacos_registries(region: str = "cn-beijing") -> str:
+
+def list_nacos_registries(region: str = "cn-beijing"):
+
     """
     This function is used to retrieve a list of all Nacos registries in a specific region.
 

@@ -8,6 +8,10 @@ anyio==4.9.0
     #   mcp
     #   sse-starlette
     #   starlette
+attrs==25.3.0
+    # via
+    #   jsonschema
+    #   referencing
 certifi==2025.4.26
     # via
     #   httpcore
@@ -33,7 +37,11 @@ idna==3.10
     #   anyio
     #   httpx
     #   requests
-mcp==1.9.4
+jsonschema==4.25.0
+    # via mcp
+jsonschema-specifications==2025.4.1
+    # via jsonschema
+mcp==1.12.3
     # via mcp-server-vefaas-function (pyproject.toml)
 pycryptodomex==3.23.0
     # via pyzipper
@@ -53,8 +61,16 @@ python-multipart==0.0.20
     # via mcp
 pyzipper==0.3.6
     # via mcp-server-vefaas-function (pyproject.toml)
+referencing==0.36.2
+    # via
+    #   jsonschema
+    #   jsonschema-specifications
 requests==2.32.3
     # via mcp-server-vefaas-function (pyproject.toml)
+rpds-py==0.26.0
+    # via
+    #   jsonschema
+    #   referencing
 six==1.17.0
     # via
     #   python-dateutil

@@ -11,6 +11,7 @@ from mcp_server_apmplus.config import (
     parse_authorization,
     ENV_MCP_SERVER_PORT,
     ENV_MCP_SERVER_NAME,
+    ENV_MCP_SERVER_HOST,
 )
 from mcp_server_apmplus.model import *
 
@@ -18,6 +19,7 @@ from mcp_server_apmplus.model import *
 mcp = FastMCP(
     os.getenv(ENV_MCP_SERVER_NAME, "mcp_server_apmplus"),
     port=int(os.getenv(ENV_MCP_SERVER_PORT, "8000")),
+    host=os.getenv(ENV_MCP_SERVER_HOST, "127.0.0.1"),
 )
 
 

@@ -21,8 +21,8 @@ class LASConfig:
 def load_config() -> LASConfig:
     """Load configuration from environment variables."""
     required_vars = [
-        "VOLC_ACCESSKEY",
-        "VOLC_SECRETKEY",
+        "VOLCENGINE_ACCESS_KEY",
+        "VOLCENGINE_SECRET_KEY",
     ]
 
     # Check if all required environment variables are set
@@ -36,8 +36,8 @@ def load_config() -> LASConfig:
     return LASConfig(
         endpoint=os.getenv("VOLCENGINE_ENDPOINT", "https://las-cn-beijing.volces.com"),
         region=os.getenv("REGION", "cn-beijing"),
-        access_key_id=os.environ["VOLC_ACCESSKEY"],
-        access_key_secret=os.environ["VOLC_SECRETKEY"],
+        access_key_id=os.environ["VOLCENGINE_ACCESS_KEY"],
+        access_key_secret=os.environ["VOLCENGINE_SECRET_KEY"],
         session_token='',
         dataset_id=os.getenv("LAS_DATASET_ID", ""),
     )
