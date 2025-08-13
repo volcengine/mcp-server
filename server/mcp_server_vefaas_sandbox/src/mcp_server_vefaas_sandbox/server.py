@@ -120,7 +120,7 @@ def run_code(
 
     payload = json.dumps(payload_dict)
 
-    return send_request(payload=payload)
+    return json.dumps(send_request(payload=payload))
 
 def main():
     """Main entry point for the MCP server."""
