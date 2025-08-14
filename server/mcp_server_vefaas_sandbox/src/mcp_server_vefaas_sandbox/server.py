@@ -119,8 +119,16 @@ def run_code(
         payload_dict["files"] = files
 
     payload = json.dumps(payload_dict)
+    res = send_request(payload=payload)
 
-    return json.dumps(send_request(payload=payload), ensure_ascii=False)
+    # 这里解一次 body, 因为 body 可能包含被逃逸的 Unicode。
+    if isinstance(res.get("body"), str):
+        try:
+            res["body"] = json.loads(res["body"])
+        except json.JSONDecodeError:
+            pass
+
+    return json.dumps(res, ensure_ascii=False)
 
 def main():
     """Main entry point for the MCP server."""
