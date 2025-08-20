@@ -10,7 +10,7 @@ import volcenginesdkvefaas
 from mcp.server import FastMCP
 from volcenginesdkcore.rest import ApiException
 
-from .vefaas_server import python_zip_implementation, init_client, zip_and_encode_folder
+from vefaas_server import python_zip_implementation, init_client, zip_and_encode_folder
 
 
 class TestVeFaaSServerIntegration(unittest.TestCase):
@@ -20,10 +20,10 @@ class TestVeFaaSServerIntegration(unittest.TestCase):
         self.sk = os.environ.get("VOLCENGINE_SECRET_KEY")
         self.alt_ak = os.environ.get("VOLC_ACCESSKEY")
         self.alt_sk = os.environ.get("VOLC_SECRETKEY")
-        # if (not self.ak or not self.sk) and (not self.alt_ak or not self.alt_sk):
-        #     self.assertFalse(
-        #         "VOLCENGINE_ACCESS_KEY or VOLCENGINE_SECRET_KEY or VOLC_ACCESSKEY or VOLC_SECRETKEY environment variables not set"
-        #     )
+        if (not self.ak or not self.sk) and (not self.alt_ak or not self.alt_sk):
+            self.assertFalse(
+                "VOLCENGINE_ACCESS_KEY or VOLCENGINE_SECRET_KEY or VOLC_ACCESSKEY or VOLC_SECRETKEY environment variables not set"
+            )
 
         # 创建临时目录
         self.temp_dir = tempfile.mkdtemp()
@@ -171,6 +171,7 @@ class TestVeFaaSServerIntegration(unittest.TestCase):
             self.assertIn("file1.py", names)
             self.assertNotIn("file2.pyc", names)
             self.assertNotIn("__pycache__/cached.pyc", names)
+
 
 if __name__ == "__main__":
     unittest.main()
