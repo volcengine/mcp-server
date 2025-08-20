@@ -10,7 +10,8 @@ import volcenginesdkvefaas
 from mcp.server import FastMCP
 from volcenginesdkcore.rest import ApiException
 
-from vefaas_server import python_zip_implementation, init_client, zip_and_encode_folder
+from vefaas_server import python_zip_implementation, init_client, zip_and_encode_folder, \
+    does_function_exist
 
 
 class TestVeFaaSServerIntegration(unittest.TestCase):
@@ -72,29 +73,16 @@ class TestVeFaaSServerIntegration(unittest.TestCase):
             raise ValueError(error_message)
 
     def test_does_function_exist_with_real_credentials(self):
-        self.ak = os.environ.get("VOLCENGINE_ACCESS_KEY")
-        self.sk = os.environ.get("VOLCENGINE_SECRET_KEY")
-        self.alt_ak = os.environ.get("VOLC_ACCESSKEY")
-        self.alt_sk = os.environ.get("VOLC_SECRETKEY")
-        mcp = FastMCP("VeFaaS")
-        api_instance = init_client('cn-beijing', mcp.get_context())
-        create_function_request = volcenginesdkvefaas.CreateFunctionRequest(
-            name='test-dkt',
-            runtime='native-python3.12/v1',
-        )
-        env_list = []
+        # Test with a known non-existent function ID
+        non_existent_id = "non-existent-function-123"
+        result = does_function_exist(non_existent_id, "cn-beijing")
+        self.assertFalse(result)
 
-        env_list.append({
-            "key": 'key1',
-            "value": 'value1'
-        })
-        create_function_request.envs = env_list
-        try:
-            response = api_instance.create_function(create_function_request)
-            print(response)
-        except ApiException as e:
-            error_message = f"Failed to create VeFaaS function: {str(e)}"
-            raise ValueError(error_message)
+        # Note: To test a positive case, you would need a real function ID
+        # that exists in your account. You could add something like:
+        # known_function_id = "your-real-function-id"
+        # result = does_function_exist(known_function_id, "cn-beijing")
+        # self.assertTrue(result)
 
     def test_python_zip_implementation(self):
         with tempfile.TemporaryDirectory() as tmpdir:
