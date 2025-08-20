@@ -22,8 +22,10 @@ config = None
 global_dataset_id = None
 
 # Create MCP server
-mcp = FastMCP("LAS Dataset Search Server", port=int(os.getenv("PORT", "8000")))
-
+# Create MCP server
+mcp = FastMCP("LAS Dataset Search Server", host=os.getenv("MCP_SERVER_HOST","0.0.0.0"),
+              port=int(os.getenv("MCP_SERVER_PORT", "8000")),
+              streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"))
 
 
 @mcp.tool()
