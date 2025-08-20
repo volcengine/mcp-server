@@ -8,30 +8,33 @@ from mcp_server_cen.base.cen import CENSDK
 logger = logging.getLogger(__name__)
 
 # Initialize FastMCP server
-mcp = FastMCP("CEN MCP Server", port=int(os.getenv("PORT", "8000")))
+mcp = FastMCP("CEN MCP Server", port=int(os.getenv("PORT", "8008")))
 
 cen_resource = CENSDK()
 
 
 @mcp.tool(
     name="describe_cens",
-    description="查询满足指定条件的CEN实例"
+    description="根据CEN实例的ID、名称或项目名称查询满足条件的CEN实例的详细信息"
 )
 def describe_cens(
         cen_ids: Optional[List[str]] = None,
-        cen_names: Optional[List[str]] = None
+        cen_names: Optional[List[str]] = None,
+        project_name: Optional[List[str]] = None
 ) -> dict[str, Any]:
     """
     调用 DescribeCens 接口，查询满足指定条件的CEN实例。
     Args:
         cen_ids Optional(List[str]): CEN实例的ID列表。
         cen_names Optional(List[str]): CEN实例的名称列表。
+        project_name Optional(List[str]): CEN实例所属项目的名称列表。
     Returns:
         dict[str, Any]: CEN实例的详细信息。
     """
     req = {
         "cen_ids": cen_ids,
-        "cen_name": cen_names
+        "cen_name": cen_names,
+        "project_name": project_name
     }
 
     resp = cen_resource.describe_cens(req)
@@ -40,7 +43,7 @@ def describe_cens(
 
 @mcp.tool(
     name="describe_cen_attributes",
-    description="查询CEN实例的详细信息"
+    description="根据CEN实例的ID查询CEN实例的详细信息，也可以使用describe_cens进行查询"
 )
 def describe_cen_attributes(
         cen_id: str = None) -> dict[str, Any]:
@@ -63,7 +66,7 @@ def describe_cen_attributes(
 
 @mcp.tool(
     name="describe_instance_granted_rules",
-    description="查看满足指定条件的网络实例的跨账号授权信息"
+    description="查看满足指定条件的网络实例的跨账号授权信息,即本账号的网络实例授权给其他账号CEN实例的详细信息"
 )
 def describe_instance_granted_rules(
         instance_id: Optional[str] = None,
@@ -93,7 +96,7 @@ def describe_instance_granted_rules(
 
 @mcp.tool(
     name="describe_grant_rules_to_cen",
-    description="查询CEN实例关联的实例"
+    description="查询本账号指定云企业网实例接受其他账号网络实例授权的信息"
 )
 def describe_grant_rules_to_cen(
         cen_id: str = None) -> dict[str, Any]:
@@ -116,7 +119,7 @@ def describe_grant_rules_to_cen(
 
 @mcp.tool(
     name="describe_cen_attached_instance_attributes",
-    description="查询网络实例的详细信息"
+    description="查看指定网络实例的详情"
 )
 def describe_cen_attached_instance_attributes(
         cen_id: str = None,
@@ -148,10 +151,10 @@ def describe_cen_attached_instance_attributes(
 
 @mcp.tool(
     name="describe_cen_attached_instances",
-    description="查询网络实例列表"
+    description="查询满足指定条件的网络实例列表,支持根据CEN实例ID、实例ID、实例区域ID、实例类型查询"
 )
 def describe_cen_attached_instances(
-        cen_id: str = None,
+        cen_id: Optional[str] = None,
         instance_id: Optional[str] = None,
         instance_region_id: Optional[str] = None,
         instance_type: Optional[str] = None) -> dict[str, Any]:
@@ -180,7 +183,7 @@ def describe_cen_attached_instances(
 
 @mcp.tool(
     name="describe_cen_bandwidth_packages",
-    description="查询满足指定条件的带宽包信息"
+    description="查询满足指定条件的带宽包信息,支持根据CEN实例ID、带宽包ID、带宽包名称、本地区域ID、对端区域ID、项目名称、标签筛选查询"
 )
 def describe_cen_bandwidth_packages(
         cen_bandwidth_package_ids: Optional[str] = None,
@@ -219,7 +222,7 @@ def describe_cen_bandwidth_packages(
 
 @mcp.tool(
     name="describe_cen_bandwidth_package_attributes",
-    description="查询指定带宽包实例的详细信息"
+    description="查询指定带宽包实例的详细信息,支持根据带宽包ID查询"
 )
 def describe_cen_bandwidth_package_attributes(
         cen_bandwidth_package_id: str = None) -> dict[str, Any]:
@@ -262,7 +265,7 @@ def describe_cen_bandwidth_packages_billing(
 
 @mcp.tool(
     name="describe_cen_inter_region_bandwidth_attributes",
-    description="查询指定云企业网实例域间带宽的详细信息"
+    description="查询指定云企业网实例域间带宽的详细信息,支持根据CEN域间带宽的ID查询"
 )
 def describe_cen_inter_region_bandwidth_attributes(
         inter_region_bandwidth_id: str = None) -> dict[str, Any]:
@@ -285,7 +288,7 @@ def describe_cen_inter_region_bandwidth_attributes(
     description="查询满足指定条件的云企业网实例域间带宽的列表"
 )
 def describe_cen_inter_region_bandwidths(
-        cen_id: str = None,
+        cen_id: Optional[str] = None,
         inter_region_bandwidth_ids: Optional[list[str]] = None) -> dict[str, Any]:
     """
     调用 DescribeCenInterRegionBandwidths 接口，查询满足指定条件的云企业网实例域间带宽的列表。
@@ -305,7 +308,7 @@ def describe_cen_inter_region_bandwidths(
 
 @mcp.tool(
     name="describe_cen_service_route_entries",
-    description="查询满足指定条件的云服务访问路由的详细信息"
+    description="查询满足指定条件的云服务访问路由的详细信息,支持根据CEN实例ID、云服务的地址段、云服务所属的地域、访问云服务时使用的私有网络实例(vpc)ID、路由条目的ID"
 )
 def describe_cen_service_route_entries(
         cen_id: Optional[str] = None,
@@ -334,7 +337,7 @@ def describe_cen_service_route_entries(
 
 @mcp.tool(
     name="describe_cen_route_entries",
-    description="查询指定云企业网实例的路由条目"
+    description="查询指定云企业网实例的路由条目,支持根据CEN实例ID、路由条目的目标CIDR块、路由条目的实例ID、路由条目的实例区域ID、路由条目的实例类型查询"
 )
 def describe_cen_route_entries(
         cen_id: Optional[str] = None,
@@ -367,7 +370,7 @@ def describe_cen_route_entries(
 
 @mcp.tool(
     name="describe_cen_summary_route_entries",
-    description="查询满足指定条件的CEN汇总路由"
+    description="查询满足指定条件的CEN汇总路由,支持根据CEN实例ID、路由条目的目标CIDR块查询"
 )
 def describe_cen_summary_route_entries(
         cen_id: str = None,
