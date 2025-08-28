@@ -1,0 +1,25 @@
+{
+  "name": "@cloudsway-ai/smartsearch",
+  "version": "0.1.1",
+  "description": "MCP server for a smart search API",
+  "license": "MIT",
+  "bin": {
+    "smartsearch": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc && shx chmod +x dist/index.js",
+    "prepare": "npm run build",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "shx": "^0.3.4",
+    "typescript": "^5.6.2"
+  }
+}
