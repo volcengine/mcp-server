@@ -20,6 +20,17 @@ CEN MCP Server 是一个模型上下文协议(Model Context Protocol)服务器�
 业务数据查询
 - `describe_cens`: [查询满足指定条件的云企业网实例的详细信息](https://www.volcengine.com/docs/6405/78275)
 - `describe_cen_attributes`: [查询指定云企业网实例的详细信息](https://www.volcengine.com/docs/6405/78273)
+- `describe_instance_granted_rules`: [查看满足指定条件的网络实例的跨账号授权信息](https://www.volcengine.com/docs/6405/108810)
+- `describe_grant_rules_to_cen`: [查看满足指定条件的云企业网实例的跨账号授权信息](https://www.volcengine.com/docs/6405/108811)
+- `describe_cen_attached_instance_attributes`: [查看指定网络实例的详情](https://www.volcengine.com/docs/6405/78279)
+- `describe_cen_attached_instances`: [查询满足指定条件的网络实例](https://www.volcengine.com/docs/6405/78280)
+- `describe_cen_bandwidth_packages`: [查询满足指定条件的带宽包的详细信息](https://www.volcengine.com/docs/6405/101141)
+- `describe_cen_bandwidth_package_attributes`: [查询指定带宽包的详细信息](https://www.volcengine.com/docs/6405/101142)
+- `describe_cen_inter_region_bandwidth_attributes`: [查询指定云企业网实例域间带宽的详细信息](https://www.volcengine.com/docs/6405/81008)
+- `describe_cen_inter_region_bandwidths`: [查询满足指定条件的云企业网实例域间带宽的详细信息](https://www.volcengine.com/docs/6405/81009)
+- `describe_cen_service_route_entries`: [查询满足指定条件的云服务访问路由的详细信息](https://www.volcengine.com/docs/6405/119648)
+- `describe_cen_route_entries`: [查询指定云企业网实例的路由条目](https://www.volcengine.com/docs/6405/78283)
+- `describe_cen_summary_route_entries`: [查询满足指定条件的CEN汇总路由](https://www.volcengine.com/docs/6405/68979)
 
 ## 可适配平台
 
