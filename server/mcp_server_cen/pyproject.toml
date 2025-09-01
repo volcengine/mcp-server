@@ -1,0 +1,17 @@
+[project]
+name = "mcp-server-cen"
+version = "0.1.0"
+description = "MCP Server for CEN"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp>=1.9.4",
+    "volcengine-python-sdk>=4.0.2",
+]
+
+[project.scripts]
+mcp-server-cen = "mcp_server_cen.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
