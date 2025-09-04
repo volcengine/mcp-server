@@ -42,7 +42,7 @@ def main():
     )
     parser.add_argument(
         "--host",
-        default="0.0.0.0",
+        default="127.0.0.0",
         help="Host to bind to (only relevant for network transports)",
     )
     parser.add_argument(

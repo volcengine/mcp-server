@@ -255,7 +255,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "mcp", specifier = ">=1.9.4" },
+    { name = "mcp", specifier = ">=1.12.0" },
     { name = "pip", specifier = ">=25.0.1" },
     { name = "requests", specifier = ">=2.32.3" },
     { name = "volcengine-python-sdk", specifier = ">=3.0.1" },
