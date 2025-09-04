@@ -1,9 +1,7 @@
-import argparse
 import json
 import logging
-import os
 import time
-from typing import Optional, Any
+from typing import Optional
 
 from mcp.server.fastmcp import Context
 from mcp.server.fastmcp import FastMCP
@@ -12,15 +10,13 @@ from starlette.requests import Request
 
 from mcp_server_sec_agent.client.model import *
 from mcp_server_sec_agent.client.sec_intelligent_client import SecIntelligentClient
-from mcp_server_sec_agent.config import SecIntelligentConfig
 from mcp_server_sec_agent.config import load_config
 from mcp_server_sec_agent.const import *
+from mcp_server_sec_agent.main import config
 
 logger = logging.getLogger(__name__)
 
 mcp = FastMCP("Security Intelligent MCP Server")
-
-config = SecIntelligentConfig(access_key="", secret_key="", region="", endpoint="", security_token="", debug=False)
 
 
 def loop_query_result(client: SecIntelligentClient, result: dict | SecIntelligentMCPCallResult) -> str:
@@ -278,69 +274,3 @@ def web_risk_assessor(
             "ResultID not found in result, result: {}".format(web_risk_assessor_result.result))
 
     return loop_query_result(client, web_risk_assessor_result.result)
-
-
-def set_mcp_config_env(mode: str, **kwargs: Any) -> None:
-    """Write environment variables according to the running mode.
-
-    Args:
-        mode: Running mode. One of ``streamable``, ``sse``, or ``stdio``.
-        **kwargs: Extra key‐value pairs that will be written into environment
-            variables named ``FASTMCP_<KEY>`` (upper-case).
-    """
-
-    # Mode-specific default settings
-    if mode == "streamable":
-        # Enable JSON response & stateless HTTP by default
-        os.environ["FASTMCP_JSON_RESPONSE"] = "true"
-        os.environ["FASTMCP_STATELESS_HTTP"] = "true"
-
-    # Write remaining key-value pairs
-    for key, value in kwargs.items():
-        env_key = f"FASTMCP_{key.upper()}"
-        os.environ[env_key] = str(value)
-
-
-def main():
-    """Main entry point for the MCP server."""
-    parser = argparse.ArgumentParser(description="Run the SecIntelligent MCP Server")
-    parser.add_argument(
-        "--transport",
-        "-t",
-        choices=["sse", "stdio", "streamable-http"],
-        default="stdio",
-        help="Transport protocol to use (streamable-http, sse, or stdio)",
-    )
-    parser.add_argument(
-        "--host",
-        default="0.0.0.0",
-        help="Host to bind to (only relevant for network transports)",
-    )
-    parser.add_argument(
-        "--port",
-        type=int,
-        default=8000,
-        help="Port to bind to (only relevant for network transports)",
-    )
-
-    args = parser.parse_args()
-
-    try:
-        # # Load configuration from environment variables
-        global config
-
-        set_mcp_config_env(args.transport, host=args.host, port=args.port)
-        mcp = FastMCP("Security Intelligent MCP Server")
-
-        config = load_config(None)
-        # Run the MCP server
-        logger.info(f"Starting SecIntelligent MCP Server with {args.transport} transport, running on http://{args.host}:{args.port}")
-
-        mcp.run(transport=args.transport)
-    except Exception as e:
-        logger.error(f"Error starting SecIntelligent MCP Server: {str(e)}")
-        raise
-
-
-if __name__ == "__main__":
-    main()
