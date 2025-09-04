@@ -7,7 +7,9 @@ from mcp_server_dbw.resource.dbw_resource import DBWSDK
 from typing import List, Dict, Any, Optional
 
 # 初始化MCP服务
-mcp_server = FastMCP("dbw_mcp_server", port=int(os.getenv("MCP_SERVER_PORT", "8000")))
+mcp_server = FastMCP("dbw_mcp_server",
+                     host=os.getenv("MCP_SERVER_HOST", "127.0.0.1"),
+                     port=int(os.getenv("MCP_SERVER_PORT", "8000")))
 logger = logging.getLogger("dbw_mcp_server")
 
 dbw_resource = DBWSDK(
