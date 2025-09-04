@@ -3,7 +3,7 @@ import volcenginesdkdbw
 from volcenginesdkdbw.models import GenerateSQLFromNLRequest, GenerateSQLFromNLResponse
 
 
-class DBWSDK:
+class DBWClient:
     """初始化 volc DBW client"""
 
     def __init__(self, region: str = None, ak: str = None, sk: str = None, host: str = None,
