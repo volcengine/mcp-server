@@ -156,9 +156,12 @@ SaaS
 
 ## 可适配平台
 
-方舟，python，cursor
+* 火山方舟
+* Python
+* Cursor
+* Cline
 
-## 服务开通链接 (整体产品)
+## TOS 控制台
 
 <https://console.volcengine.com/tos>
 
@@ -202,10 +205,9 @@ SaaS
   uv build
   ```
 
-### Using uv (recommended)
+### （推荐）使用 uv 安装
 
-When using [`uv`](https://docs.astral.sh/uv/) no specific installation is needed. We will
-use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run *mcp-server-tos*.
+当使用 [`uv`](https://docs.astral.sh/uv/) 时，`uv` 将自动完成依赖安装。可以通过  [`uvx`](https://docs.astral.sh/uv/guides/tools/) 直接运行 *mcp-server-tos*.
 
 #### 本地配置
 
@@ -229,11 +231,8 @@ use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run *mcp-server
 
 ## 在不同平台的配置
 
-### 方舟
+### 方舟：体验中心
 
-#### 体验中心
-
-[示例如下]
 
 1. 查看MCP Server 详情
    在大模型生态广场，选择合适的MCP Server，并查看详情
@@ -246,15 +245,60 @@ use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run *mcp-server
 5. 去对应的Client的平台进行使用
    点击快捷跳转按钮，前往方舟平台的体验中心进行对应MCP Server的体验
 
-## 产品截图/视频 - optional
+### VSCode：Cline 插件
 
-### Cursor
+1. 配置 Manage MCP Servers
+  VSCode 中 Cline 插件下方选择 [Manage MCP Servers]
+2. 选择 Configure MCP Servers
+  Cline 的 `cline_mcp_settings.json` 配置文件中填入下方 uvx 配置
+3. 替换 json 变量
+  根据实际的 AKSK、Region、Endpoint、Bucket 填入对应的具体配置
+  如不使用 STS 模式，则不需要 Security-Token 变量
+4. 保存，并开启 MCP Server
+  如果 Cline 提示绿色，则表示 TOS MCP 服务运行成功
 
 ## 部署
 
-[示例如下]
-
 ### UVX
+
+* VOLCENGINE_ACCESS_KEY：火山引擎账号的 AK
+* VOLCENGINE_SECRET_KEY：火山引擎账号的 SK
+* VOLCENGINE_REGION：TOS Bucket 所在的 region 信息
+  * 如 `cn-beijing`
+* TOS_ENDPOINT：TOS Bucket 的接入点地址，通常每个region唯一。可以在 TOS [控制台]-[桶列表]-[Bucket]-[概览]-[访问域名]中查询。
+  * 如 `https://tos-cn-beijing.volces.com`
+* TOS_BUCKET：TOS Bucket 名称
+  * Bucket name 参数 **可选**，如不填写，则需要在 prompt 中指定 “帮我查询 xxx bucket 下的文件”
+
+
+```json
+{
+  "mcpServers": {
+    "tos-mcp": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_tos",
+        "mcp-server-tos"
+      ],
+      "env": {
+        "VOLCENGINE_ACCESS_KEY": "your access-key-id",
+        "VOLCENGINE_SECRET_KEY": "your access-key-secret",
+        "VOLCENGINE_REGION": "tos region",
+        "TOS_ENDPOINT": "tos endpoint",
+        "TOS_BUCKET": "your specific bucket"
+      }
+    }
+  }
+}
+```
+
+
+### UVX（STS模式）
+
+* 如使用 STS 模式访问 TOS，则可以手动传入 STS-Token
+* SECURITY_TOKEN：**可选**，使用 STS 登陆时，填入 STS-Token
+
 
 ```json
 {
@@ -282,5 +326,4 @@ use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run *mcp-server
 ## License
 
 volcengine/mcp-server is licensed under the [MIT License](https://github.com/volcengine/mcp-server/blob/main/LICENSE).
-
 
