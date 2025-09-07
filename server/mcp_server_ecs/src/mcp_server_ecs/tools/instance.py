@@ -81,6 +81,7 @@ async def describe_instances(
                     project_name=projectName,
                     status=status,
                     zone_id=zoneId,
+                    max_results=20,
                     next_token=next_token,
                 )
             )
@@ -172,6 +173,7 @@ async def describe_images(
                     project_name=projectName,
                     status=status,
                     visibility=visibility,
+                    max_results=20,
                     next_token=next_token,
                 )
             )
@@ -241,6 +243,7 @@ async def describe_instance_types(
                 volcenginesdkecs.DescribeInstanceTypesRequest(
                     image_id=imageId,
                     instance_type_ids=instanceTypeIds,
+                    max_results=20,
                     next_token=next_token,
                 )
             )
