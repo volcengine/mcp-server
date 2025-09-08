@@ -16,4 +16,4 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project.scripts]
-mcp-server-sec-agent = "mcp_server_sec_agent.server:main"
+mcp-server-sec-agent = "mcp_server_sec_agent.main:main"
