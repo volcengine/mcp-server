@@ -210,7 +210,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "mcp", extras = ["cli"], specifier = ">=1.10.0" },
+    { name = "mcp", extras = ["cli"], specifier = ">=1.12.0" },
     { name = "volcengine-python-sdk", specifier = ">=4.0.15" },
 ]
 
