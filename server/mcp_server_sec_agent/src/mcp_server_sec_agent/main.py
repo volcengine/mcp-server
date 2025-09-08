@@ -61,7 +61,7 @@ def main():
         config = load_config(None)
         set_mcp_config_env(args.transport, host=args.host, port=args.port)
 
-        from server import mcp
+        from mcp_server_sec_agent.server import mcp
 
         # Run the MCP server
         logger.info(
