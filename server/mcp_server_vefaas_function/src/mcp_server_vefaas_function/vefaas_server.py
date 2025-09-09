@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import fnmatch
 import io
 import time
 from typing import Union, Optional, List
@@ -477,7 +478,7 @@ def create_api_gateway(name: str = None, region: str = "cn-beijing") -> str:
 
     try:
         response_body = request("POST", now, {}, {}, ak, sk, token, "CreateGateway", json.dumps(body), region)
-        return response_body
+        return json.dumps(response_body, ensure_ascii=False, indent=2)
     except Exception as e:
         return f"Failed to create VeApig gateway with name {gateway_name}: {str(e)}"
 
@@ -569,7 +570,7 @@ def ensure_executable_permissions(folder_path: str):
             if fname.endswith('.sh') or fname in ('run.sh',):
                 os.chmod(full_path, 0o755)
 
-def zip_and_encode_folder(folder_path: str) -> Tuple[bytes, int, Exception]:
+def zip_and_encode_folder(folder_path: str, local_folder_exclude: List[str]) -> Tuple[bytes, int, Exception]:
     """
     Zips a folder with system zip command (if available) or falls back to Python implementation.
     Returns (zip_data, size_in_bytes, error) tuple.
@@ -578,7 +579,7 @@ def zip_and_encode_folder(folder_path: str) -> Tuple[bytes, int, Exception]:
     if not shutil.which('zip'):
         print("System zip command not found, using Python implementation")
         try:
-            data = python_zip_implementation(folder_path)
+            data = python_zip_implementation(folder_path, local_folder_exclude)
             return data, len(data), None
         except Exception as e:
             return None, 0, e
@@ -586,9 +587,18 @@ def zip_and_encode_folder(folder_path: str) -> Tuple[bytes, int, Exception]:
     print(f"Zipping folder: {folder_path}")
     try:
         ensure_executable_permissions(folder_path)
+        # 基础命令
+        cmd = ['zip', '-r', '-q', '-', '.', '-x', '*.git*', '-x', '*.venv*', '-x', '*__pycache__*', '-x', '*.pyc']
+
+        # 动态拼 exclude 参数
+        if local_folder_exclude:
+            for pattern in local_folder_exclude:
+                cmd.extend(['-x', pattern])
+        print(f"cmd is {cmd}")
+
         # Create zip process with explicit arguments
         proc = subprocess.Popen(
-            ['zip', '-r', '-q', '-', '.', '-x', '*.git*', '-x', '*.venv*', '-x', '*__pycache__*', '-x', '*.pyc'],
+            cmd,
             cwd=folder_path,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -600,7 +610,7 @@ def zip_and_encode_folder(folder_path: str) -> Tuple[bytes, int, Exception]:
             stdout, stderr = proc.communicate(timeout=30)
             if proc.returncode != 0:
                 print(f"Zip error: {stderr.decode()}")
-                data = python_zip_implementation(folder_path)
+                data = python_zip_implementation(folder_path, local_folder_exclude)
                 return data, len(data), None
 
             if stdout:
@@ -609,7 +619,7 @@ def zip_and_encode_folder(folder_path: str) -> Tuple[bytes, int, Exception]:
                 return stdout, size, None
             else:
                 print("No data from zip command, falling back to Python implementation")
-                data = python_zip_implementation(folder_path)
+                data = python_zip_implementation(folder_path, local_folder_exclude)
                 return data, len(data), None
 
         except subprocess.TimeoutExpired:
@@ -617,7 +627,7 @@ def zip_and_encode_folder(folder_path: str) -> Tuple[bytes, int, Exception]:
             proc.wait(timeout=5)  # Give it 5 seconds to cleanup
             print("Zip process timed out, falling back to Python implementation")
             try:
-                data = python_zip_implementation(folder_path)
+                data = python_zip_implementation(folder_path, local_folder_exclude)
                 return data, len(data), None
             except Exception as e:
                 return None, 0, e
@@ -625,12 +635,12 @@ def zip_and_encode_folder(folder_path: str) -> Tuple[bytes, int, Exception]:
     except Exception as e:
         print(f"System zip error: {str(e)}")
         try:
-            data = python_zip_implementation(folder_path)
+            data = python_zip_implementation(folder_path, local_folder_exclude)
             return data, len(data), None
         except Exception as e2:
             return None, 0, e2
 
-def python_zip_implementation(folder_path: str) -> bytes:
+def python_zip_implementation(folder_path: str, local_folder_exclude: List[str] = None) -> bytes:
     """Pure Python zip implementation with permissions support"""
     buffer = BytesIO()
 
@@ -642,6 +652,8 @@ def python_zip_implementation(folder_path: str) -> bytes:
 
                 # Skip excluded paths and binary/cache files
                 if any(excl in arcname for excl in ['.git', '.venv', '__pycache__', '.pyc']):
+                    continue
+                if local_folder_exclude and any(fnmatch.fnmatch(arcname, pattern) for pattern in local_folder_exclude):
                     continue
 
                 try:
@@ -668,6 +680,7 @@ def _get_upload_code_description() -> str:
         "Uploads code to TOS for a veFaaS function deployment.\n\n"
         "You may provide:\n"
         "- 'local_folder_path': path to a local directory that will be zipped and uploaded (recommended for large or structured projects).\n"
+        "- 'local_folder_exclude': list of glob patterns for files/folders to exclude when zipping 'local_folder_path' (e.g., ['*.pyc', '__pycache__/*']).\n"
         "- 'file_dict': an in-memory mapping of filename ➜ content (handy for lightweight uploads or when local paths are not accessible).\n\n"
     )
 
@@ -690,7 +703,9 @@ def _get_upload_code_description() -> str:
     return base_desc + note + tail
 
 @mcp.tool(description=_get_upload_code_description())
-def upload_code(region: str, function_id: str, local_folder_path: Optional[str] = None, file_dict: Optional[dict[str, Union[str, bytes]]] = None) -> str:
+def upload_code(region: str, function_id: str, local_folder_path: Optional[str] = None,
+                local_folder_exclude: Optional[List[str]] = None,
+                file_dict: Optional[dict[str, Union[str, bytes]]] = None) -> str:
     region = validate_and_set_region(region)
 
     api_instance = init_client(region, mcp.get_context())
@@ -701,7 +716,7 @@ def upload_code(region: str, function_id: str, local_folder_path: Optional[str] 
         raise ValueError(f"Authorization failed: {str(e)}")
 
     if local_folder_path:
-        data, size, error = zip_and_encode_folder(local_folder_path)
+        data, size, error = zip_and_encode_folder(local_folder_path, local_folder_exclude)
         if error:
             raise ValueError(f"Error zipping folder: {error}")
         if not data or size == 0:

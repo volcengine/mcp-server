@@ -93,6 +93,7 @@ async def describe_system_events(
                     resource_ids=resourceIds,
                     status=status,
                     types=event_types,
+                    max_results=20,
                     next_token=next_token,
                 )
             )
