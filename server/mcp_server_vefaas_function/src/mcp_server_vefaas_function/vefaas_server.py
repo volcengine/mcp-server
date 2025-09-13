@@ -33,11 +33,7 @@ mcp = FastMCP("VeFaaS")
 @mcp.tool(description="""Lists all supported runtimes for veFaaS functions.
 Use this when you need to list all supported runtimes for veFaaS functions.""")
 def supported_runtimes():
-    return ["python3.8/v1", "python3.9/v1", "python3.10/v1", "python3.12/v1", "native-python3.12/v1",
-            "golang/v1",
-            "node14/v1", "node20/v1",
-            "nodeprime14/v1",
-            "native-node20/v1"]
+    return ["native-python3.12/v1", "native-node20/v1", "native/v1"]
 
 def validate_and_set_region(region: str = None) -> str:
     """
@@ -60,19 +56,20 @@ def validate_and_set_region(region: str = None) -> str:
         region = "cn-beijing"
     return region
 
-@mcp.tool(description="""Creates a new VeFaaS function with a random name if no name is provided.
-region is the region where the function will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
+@mcp.tool(description="""Creates a new VeFaaS function.
+1. Before create_function be called, maybe need to generate code first. These rules must be respected:
+    • If the code try to start a http server, can only listen ip:0.0.0.0, port:8000.
+    • Must use a script to start function, the script name is run.sh by default, in the project root directory, also can use other named script,
+      but need to specify in the create_function parameters. Need make sure the start script has execution permission.
+    • The code dependencies must be list in specify files (e.g. python in requirements.txt, node in package.json) 
+2. When creating functon, need verify some important parameter:
+    - parameter `name`  can be a random name if no name is provided, but you should make sure the name is not exist in function list.
+    - parameter `region` is the region where the function will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
           `cn-shanghai`, `cn-guangzhou` as well.
-
-Note:
-1. The runtime parameter must be one of the values returned by the supported_runtimes. Please ensure you call that tool first to get the valid options.
-2. If the function is intended to serve as a web service, you must:
-   • Write code to start an HTTP server that listens on port 8000 (e.g., using Python's http.server, Node's http, or Flask).
-   • Provide a launch script such as run.sh that starts the server (e.g., python3 server.py) and keeps it running.
-   • Set the `command` parameter to point to this script (e.g., ./run.sh) in the function config.
-   • Only **native runtimes** support the `command` field. Use `supported_runtimes` to ensure compatibility.
-3. After creating the function, you can use the `upload_code` tool to upload the function code and related files.
-
+    - parameter `runtime` must be one of the native runtime returned by the supported_runtimes. Please ensure you call that tool first to get the valid options.
+        Choose runtime by code language (e.g. python language choose native-python3.12/v1)
+    - parameter `command` can be set. If it is set, use the value as the start script.
+3. After creating the function succeed, you can use the `upload_code` tool to upload the function code and related files, note that some parameters must be filled in when call upload_code tool.
 4. If `enable_vpc` is set to `true`, the following parameters are **required**:
    • `vpc_id`: The target VPC ID  
    • `subnet_ids`: A list of subnet IDs (at least one)  
@@ -218,7 +215,8 @@ Region is the region where the function will be released, default is cn-beijing.
 `cn-shanghai`, `cn-guangzhou` as well.
 After releasing, you should call get_function_release_status to check the release status.
 No need to ask user for confirmation, just release the function.
-If you want the function to be accessible from the public internet, you also need to call create_api_gateway_trigger after releasing to create an API Gateway trigger.""")
+After get_function_release_status returns the release status is success and if you want the function to be accessible from the public internet, 
+you also need to call create_api_gateway_trigger after releasing finished to create an API Gateway trigger.""")
 def release_function(function_id: str, region: str = None):
     region = validate_and_set_region(region)
 
@@ -698,9 +696,14 @@ def _get_upload_code_description() -> str:
             "It is recommended to use 'local_folder_path' for convenience, though 'file_dict' is still supported.\n\n"
         )
 
+    pre_check = (
+        "Before upload code, need to check the code, if the code try to start a http server, it only can listen ip:0.0.0.0, port:8000,"
+        "if not satisfied, need fix the code first\n\n"
+    )
+
     tail = "After the upload completes, call 'release_function' to publish the new code."
 
-    return base_desc + note + tail
+    return base_desc + note + pre_check + tail
 
 @mcp.tool(description=_get_upload_code_description())
 def upload_code(region: str, function_id: str, local_folder_path: Optional[str] = None,
