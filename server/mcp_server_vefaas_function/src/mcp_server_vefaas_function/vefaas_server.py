@@ -58,10 +58,8 @@ def validate_and_set_region(region: str = None) -> str:
 
 @mcp.tool(description="""Creates a new VeFaaS function.
 1. Before create_function be called, maybe need to generate code first. These rules must be respected:
-    • If the code try to start a http server, can only listen ip:0.0.0.0, port:8000.
     • Must use a script to start function, the script name is run.sh by default, in the project root directory, also can use other named script,
       but need to specify in the create_function parameters. Need make sure the start script has execution permission.
-    • The code dependencies must be list in specify files (e.g. python in requirements.txt, node in package.json) 
 2. When creating functon, need verify some important parameter:
     - parameter `name`  can be a random name if no name is provided, but you should make sure the name is not exist in function list.
     - parameter `region` is the region where the function will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
@@ -71,9 +69,13 @@ def validate_and_set_region(region: str = None) -> str:
     - parameter `command` can be set. If it is set, use the value as the start script.
 3. After creating the function succeed, you can use the `upload_code` tool to upload the function code and related files, note that some parameters must be filled in when call upload_code tool.
 4. If `enable_vpc` is set to `true`, the following parameters are **required**:
-   • `vpc_id`: The target VPC ID  
-   • `subnet_ids`: A list of subnet IDs (at least one)  
+   • `vpc_id`: The target VPC ID
+   • `subnet_ids`: A list of subnet IDs (at least one)
    • `security_group_ids`: A list of security group IDs
+
+Tips:
+• If the code starts an HTTP server, it must listen on 0.0.0.0:8000.
+• Python/Node dependencies: declare them in `requirements.txt` / `package.json`; VeFaaS installs them as needed.
 """)
 def create_function(name: str = None, region: str = None, runtime: str = None, command: str = None, source: str = None,
                     image: str = None, envs: dict = None, description: str = None, enable_vpc = False,
@@ -144,8 +146,8 @@ Use this when asked to update a VeFaaS function's code.
 Region is the region where the function will be updated, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
 `cn-shanghai`, `cn-guangzhou` as well.
 If `enable_vpc` is set to `true`, the following parameters are **required**:
-   • `vpc_id`: The target VPC ID  
-   • `subnet_ids`: A list of subnet IDs (at least one)  
+   • `vpc_id`: The target VPC ID
+   • `subnet_ids`: A list of subnet IDs (at least one)
    • `security_group_ids`: A list of security group IDs
 After updating the function, you need to release it again for the changes to take effect.
 No need to ask user for confirmation, just update the function.""")
@@ -209,14 +211,17 @@ def update_function(function_id: str, source: str = None, region: str = None, co
         error_message = f"Failed to update VeFaaS function: {str(e)}"
         raise ValueError(error_message)
 
-@mcp.tool(description="""Releases a VeFaaS function to make it available for production use.
-Use this when asked to release, publish, or deploy a VeFaaS function.
-Region is the region where the function will be released, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
-`cn-shanghai`, `cn-guangzhou` as well.
-After releasing, you should call get_function_release_status to check the release status.
-No need to ask user for confirmation, just release the function.
-After get_function_release_status returns the release status is success and if you want the function to be accessible from the public internet, 
-you also need to call create_api_gateway_trigger after releasing finished to create an API Gateway trigger.""")
+@mcp.tool(description="""Release a function to production (deploy).
+
+When to use:
+- After 'upload_code' (and dependency install, if any, has Succeeded).
+
+Guide:
+- If 'upload_code' created a dependency install task, wait for 'Succeeded' via 'get_dependency_install_task_status'.
+- Loop 'get_function_release_status' until release completes. On Succeeded: proceed to create API Gateway trigger. On Failed: inspect status/errors, fix code/config as needed, re-run 'upload_code' (if code changed), then retry release. Do not create API Gateway Trigger on failure.
+
+Region: default 'cn-beijing' (supported: 'ap-southeast-1', 'cn-beijing', 'cn-shanghai', 'cn-guangzhou').
+No confirmation needed.""")
 def release_function(function_id: str, region: str = None):
     region = validate_and_set_region(region)
 
@@ -585,10 +590,10 @@ def zip_and_encode_folder(folder_path: str, local_folder_exclude: List[str]) -> 
     print(f"Zipping folder: {folder_path}")
     try:
         ensure_executable_permissions(folder_path)
-        # 基础命令
+        # Base zip command
         cmd = ['zip', '-r', '-q', '-', '.', '-x', '*.git*', '-x', '*.venv*', '-x', '*__pycache__*', '-x', '*.pyc']
 
-        # 动态拼 exclude 参数
+        # Append user-specified exclude patterns
         if local_folder_exclude:
             for pattern in local_folder_exclude:
                 cmd.extend(['-x', pattern])
@@ -673,13 +678,18 @@ def python_zip_implementation(folder_path: str, local_folder_exclude: List[str] 
     return buffer.getvalue()
 
 def _get_upload_code_description() -> str:
-    """Generate a dynamic description for the `upload_code` tool based on the active transport mode."""
+    """Generate a concise, dynamic description for the `upload_code` tool."""
     base_desc = (
-        "Uploads code to TOS for a veFaaS function deployment.\n\n"
-        "You may provide:\n"
-        "- 'local_folder_path': path to a local directory that will be zipped and uploaded (recommended for large or structured projects).\n"
-        "- 'local_folder_exclude': list of glob patterns for files/folders to exclude when zipping 'local_folder_path' (e.g., ['*.pyc', '__pycache__/*']).\n"
-        "- 'file_dict': an in-memory mapping of filename ➜ content (handy for lightweight uploads or when local paths are not accessible).\n\n"
+        "Upload function code to TOS.\n\n"
+        "Inputs (choose one):\n"
+        "- 'local_folder_path' (+ optional 'local_folder_exclude')\n"
+        "- 'file_dict': {filename -> content}\n\n"
+        "Returns:\n"
+        "- 'code_upload_callback'\n"
+        "- 'dependency': {dependency_task_created, should_check_dependency_status, skip_reason?}\n\n"
+        "Tips:\n"
+        "- Python/Node deps: put them in 'requirements.txt'/'package.json'; VeFaaS installs them as needed.\n"
+        "- When uploading code, exclude local deps and noise (e.g., `.venv`, `node_modules`, `.git`, build artifacts) via `local_folder_exclude`.\n\n"
     )
 
     # Detect run mode via FASTMCP_* environment variables.
@@ -687,26 +697,22 @@ def _get_upload_code_description() -> str:
 
     if is_network_transport:
         note = (
-            "Note: The MCP server is running over a network transport (SSE or streamable-http) and cannot access the local file system. "
-            "You must therefore supply code via 'file_dict'; 'local_folder_path' will be ignored.\n\n"
+            "Note: Running over network transport; local file system is not accessible.\n"
+            "Use 'file_dict'; 'local_folder_path' is ignored.\n\n"
         )
     else:
         note = (
-            "Note: The MCP server is running via STDIO locally and can access your file system. "
-            "It is recommended to use 'local_folder_path' for convenience, though 'file_dict' is still supported.\n\n"
+            "Note: Running locally via STDIO; 'local_folder_path' is recommended.\n\n"
         )
 
-    pre_check = (
-        "Before upload code, need to check the code, if the code try to start a http server, it only can listen ip:0.0.0.0, port:8000,"
-        "if not satisfied, need fix the code first\n\n"
+    tail = (
+        "After upload: dependency install (if any) runs asynchronously; use 'get_dependency_install_task_status' to poll until Succeeded/Failed."
     )
 
-    tail = "After the upload completes, call 'release_function' to publish the new code."
-
-    return base_desc + note + pre_check + tail
+    return base_desc + note + tail
 
 @mcp.tool(description=_get_upload_code_description())
-def upload_code(region: str, function_id: str, local_folder_path: Optional[str] = None,
+def upload_code(function_id: str, region: Optional[str] = None, local_folder_path: Optional[str] = None,
                 local_folder_exclude: Optional[List[str]] = None,
                 file_dict: Optional[dict[str, Union[str, bytes]]] = None) -> str:
     region = validate_and_set_region(region)
@@ -731,14 +737,44 @@ def upload_code(region: str, function_id: str, local_folder_path: Optional[str] 
             raise ValueError("No files provided in file_dict, upload aborted.")
     else:
         raise ValueError("Either local_folder_path or file_dict must be provided.")
-    response_body = upload_code_zip_for_function(api_instance=api_instance, function_id=function_id, code_zip_size=size,
-                                                 zip_bytes=data, ak=ak, sk=sk, token=token, region=region)
-    handle_dependency(api_instance=api_instance, function_id=function_id, local_folder_path=local_folder_path,
-                      file_dict= file_dict, ak=ak, sk=sk, token=token, region=region)
-    return json.dumps(response_body, ensure_ascii=False, indent=2)
+    response_body = upload_code_zip_for_function(
+        api_instance=api_instance,
+        function_id=function_id,
+        code_zip_size=size,
+        zip_bytes=data,
+        ak=ak,
+        sk=sk,
+        token=token,
+        region=region,
+    )
 
-def handle_dependency(api_instance: VEFAASApi, function_id: str, local_folder_path, file_dict,
-                      ak: str, sk: str, token: str, region: str = None):
+    dep_info = handle_dependency(
+        api_instance=api_instance,
+        function_id=function_id,
+        local_folder_path=local_folder_path,
+        file_dict=file_dict,
+        ak=ak,
+        sk=sk,
+        token=token,
+        region=region,
+    )
+
+    result = {
+        "code_upload_callback": response_body,
+        "dependency": dep_info,
+    }
+    return json.dumps(result, ensure_ascii=False, indent=2)
+
+def handle_dependency(
+    api_instance: VEFAASApi,
+    function_id: str,
+    local_folder_path,
+    file_dict,
+    ak: str,
+    sk: str,
+    token: str,
+    region: str = None,
+):
     req = volcenginesdkvefaas.GetFunctionRequest(
         id=function_id
     )
@@ -750,8 +786,9 @@ def handle_dependency(api_instance: VEFAASApi, function_id: str, local_folder_pa
     except ApiException as e:
         raise ValueError(f"Failed to get VeFaaS function: {str(e)}")
 
-    is_native_python = 'native-python' in runtime
-    is_native_nodejs = 'native-node' in runtime
+    # Treat any Python/Node runtime as eligible
+    is_python = 'python' in runtime
+    is_nodejs = 'node' in runtime
 
     has_requirements = (
             (local_folder_path is not None and os.path.exists(os.path.join(local_folder_path, "requirements.txt")))
@@ -768,52 +805,108 @@ def handle_dependency(api_instance: VEFAASApi, function_id: str, local_folder_pa
             or (file_dict is not None and "node_modules" in file_dict)
     )
 
-    if is_native_python and not has_requirements:
+    # Minimal decision surface for the agent
+    if is_python and not has_requirements:
         print("Python runtime detected, but no requirements.txt found. Skipping dependency install.")
-        return
-    if is_native_nodejs and not has_package_json:
+        return {"dependency_task_created": False, "should_check_dependency_status": False, "skip_reason": "No requirements.txt"}
+    if is_nodejs and not has_package_json:
         print("Node.js runtime detected, but no package.json found. Skipping dependency install.")
-        return
-    if is_native_nodejs and has_package_json and has_node_modules:
+        return {"dependency_task_created": False, "should_check_dependency_status": False, "skip_reason": "No package.json"}
+    if is_nodejs and has_package_json and has_node_modules:
         print("Node.js runtime detected, package.json found, but has node_modules. Skipping dependency install.")
-        return
-    if not is_native_python and not is_native_nodejs:
-        print("Runtime is not native-python or native-nodejs. Skipping dependency install.")
-        return
+        return {"dependency_task_created": False, "should_check_dependency_status": False, "skip_reason": "node_modules present"}
+    if not is_python and not is_nodejs:
+        print("Runtime is not Python or Node.js. Skipping dependency install.")
+        return {"dependency_task_created": False, "should_check_dependency_status": False, "skip_reason": "Unsupported runtime"}
 
     body = {"FunctionId": function_id}
     now = datetime.datetime.utcnow()
 
     try:
-        response_body = request("POST", now, {}, {}, ak, sk, token,
-                                "CreateDependencyInstallTask", json.dumps(body), region)
-        print(response_body)
-
-        timeout_seconds = 300
-        start_time = time.time()
-        while True:
-            status_resp = request("POST", now, {}, {}, ak, sk, token,
-                                  "GetDependencyInstallTaskStatus", json.dumps(body), region)
-            print(status_resp)
-
-            status = status_resp['Result']['Status']
-            if status == 'Failed':
-                log_download_resp = request("POST", now, {}, {}, ak, sk, token,
-                                      "GetDependencyInstallTaskLogDownloadURI", json.dumps(body), region)
-                url = log_download_resp['Result']['DownloadURL']
-                url = url.replace("\\u0026", "&")
-                response = requests.get(url, timeout=30)
-                install_log = response.text
-                raise ValueError("Dependency installation failed. Install log \n" + install_log)
-            elif status == 'Succeeded':
-                print("Dependency installation succeeded.")
-                break
-            if time.time() - start_time > timeout_seconds:
-                raise TimeoutError("Dependency installation timed out after {} seconds".format(timeout_seconds))
-            time.sleep(5)
+        create_resp = request(
+            "POST", now, {}, {}, ak, sk, token, "CreateDependencyInstallTask", json.dumps(body), region
+        )
+        print(create_resp)
+        return {
+            "dependency_task_created": True,
+            "should_check_dependency_status": True,
+        }
     except Exception as e:
-        raise ValueError(f"Error handling dependency: {str(e)}")
+        # Keep behavior consistent with previous implementation: surface as an error
+        raise ValueError(f"Error creating dependency install task: {str(e)}")
 
+@mcp.tool(description="""
+Check dependency install task status (paired with 'upload_code').
+
+Use when 'upload_code' reported a task or your code has 'requirements.txt' (Python) / 'package.json' (Node.js).
+
+Returns:
+- 'status' (raw API response)
+- If Failed: 'log_download_url' and, when 'fetch_log_content' is True, 'log_content'.
+
+Agent guidance:
+- Poll every 3s with a ~5min timeout; stop on Succeeded/Failed.
+- On Failed: inspect logs. If dependency spec issue, fix and 'upload_code' again; if transient, retry.
+
+Params: function_id; optional region (default cn-beijing); fetch_log_content (bool).
+""")
+def get_dependency_install_task_status(
+    function_id: str,
+    region: Optional[str] = None,
+    fetch_log_content: bool = False,
+):
+    region = validate_and_set_region(region)
+
+    try:
+        ak, sk, token = get_authorization_credentials(mcp.get_context())
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
+
+    body = {"FunctionId": function_id}
+    now = datetime.datetime.utcnow()
+
+    try:
+        status_resp = request(
+            "POST", now, {}, {}, ak, sk, token, "GetDependencyInstallTaskStatus", json.dumps(body), region
+        )
+        result = {"status": status_resp}
+
+        try:
+            status = status_resp.get("Result", {}).get("Status")
+        except Exception:
+            status = None
+
+        if status == "Failed":
+            try:
+                log_resp = request(
+                    "POST",
+                    now,
+                    {},
+                    {},
+                    ak,
+                    sk,
+                    token,
+                    "GetDependencyInstallTaskLogDownloadURI",
+                    json.dumps(body),
+                    region,
+                )
+                url = log_resp.get("Result", {}).get("DownloadURL")
+                if isinstance(url, str):
+                    url = url.replace("\\u0026", "&")
+                result["log_download_url"] = url
+
+                if fetch_log_content and url:
+                    try:
+                        resp = requests.get(url, timeout=30)
+                        result["log_content"] = resp.text
+                    except Exception as ex:
+                        result["log_content_error"] = str(ex)
+            except Exception as ex:
+                result["log_download_error"] = str(ex)
+
+        return result
+    except Exception as e:
+        raise ValueError(f"Failed to get dependency install task status: {str(e)}")
 
 def upload_code_zip_for_function(api_instance: VEFAASApi(object), function_id: str, code_zip_size: int, zip_bytes,
                                  ak: str, sk: str, token: str, region: str,) -> bytes:
