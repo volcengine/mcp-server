@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [project.scripts]
-mcp-server-vefaas-function = "mcp_server_vefaas_function.stdio:main"
+mcp-server-vefaas-function = "mcp_server_vefaas_function.main:main"
 
 [build-system]
 requires = ["hatchling"]

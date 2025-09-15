@@ -28,7 +28,11 @@ import shutil
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-mcp = FastMCP("VeFaaS")
+mcp = FastMCP("VeFaaS MCP Server",
+              host=os.getenv("MCP_SERVER_HOST", "0.0.0.0"),
+              port=int(os.getenv("MCP_SERVER_PORT", "8000")),
+              stateless_http=os.getenv("STATLESS_HTTP", "true").lower() == "true",
+              streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"))
 
 @mcp.tool(description="""Lists all supported runtimes for veFaaS functions.
 Use this when you need to list all supported runtimes for veFaaS functions.""")
