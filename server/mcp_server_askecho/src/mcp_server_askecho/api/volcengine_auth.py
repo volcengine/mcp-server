@@ -6,7 +6,7 @@ import json
 from urllib.parse import quote
 from ..model import *
 
-import requests
+import aiohttp
 
 Service = "volc_torchlight_api"
 Version = "2024-01-01"
@@ -15,12 +15,12 @@ Host = "mercury.volcengineapi.com"
 ContentType = "application/json"
 
 
-def chat_completion_volcengine_auth(ak: str, sk: str, req: OriginChatCompletionRequest, tool_name: str):
+async def chat_completion_volcengine_auth(ak: str, sk: str, req: OriginChatCompletionRequest, tool_name: str):
     now = datetime.datetime.utcnow()
     headers = {
         "X-Traffic-Tag": f"ark_mcp_server_{tool_name}",
     }
-    return volcengine_auth_request("POST", now, {}, headers, ak, sk, "ChatCompletion", json.dumps(asdict(req)))
+    return await volcengine_auth_request("POST", now, {}, headers, ak, sk, "ChatCompletion", json.dumps(asdict(req)))
 
 
 def norm_query(params):
@@ -45,7 +45,7 @@ def hash_sha256(content: str):
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 
-def volcengine_auth_request(method, date, query, header, ak, sk, action, body):
+async def volcengine_auth_request(method, date, query, header, ak, sk, action, body):
     credential = {
         "access_key_id": ak,
         "secret_access_key": sk,
@@ -107,11 +107,18 @@ def volcengine_auth_request(method, date, query, header, ak, sk, action, body):
         signature,
     )
     header = {**header, **sign_result}
-    r = requests.request(method=method,
-                         url="https://{}{}".format(request_param["host"], request_param["path"]),
-                         headers=header,
-                         timeout=600,
-                         params=request_param["query"],
-                         data=request_param["body"]
-                         )
-    return r
+
+    async with aiohttp.ClientSession() as session:
+        async with session.request(
+            method=method,
+            url=f"https://{request_param['host']}{request_param['path']}",
+            headers=header,
+            timeout=aiohttp.ClientTimeout(total=600),
+            params=request_param["query"],
+            data=request_param["body"]
+        ) as response:
+            response.raise_for_status()
+            data = await response.json()
+            return data
+        return None
+    return None
