@@ -1,6 +1,7 @@
 import logging
 import argparse
 import dataclasses
+import asyncio
 from mcp.server import FastMCP
 from mcp.server.fastmcp import Context
 from mcp import types
@@ -21,7 +22,7 @@ mcp = FastMCP("AskEcho Search Infinity MCP Server")
 
 
 @mcp.tool()
-def web_search(
+async def web_search(
     Query: str,
     Count: int = 10
 ) -> Dict[str, Any]:
@@ -38,28 +39,28 @@ def web_search(
     try:
         if config is None:
             raise ValueError("config not loaded")
-        
+
         # Validate Count parameter
         if Count > 50:
             Count = 50
         elif Count < 1:
             Count = 10
-            
+
         req = WebSearchRequest(
             Query=Query,
             Count=Count
         )
-        
+
         if config.api_key is not None and len(config.api_key) > 0:
-            resp = web_search_api_key_auth(config.api_key, req, "web_search")
+            resp = await web_search_api_key_auth(config.api_key, req, "web_search")
             resp.raise_for_status()
             logger.info(f"Received web_search_api_key_auth response")
-            return resp.json()
+            return await resp.json()
         else:
-            resp = web_search_volcengine_auth(config.volcengine_ak, config.volcengine_sk, req, "web_search")
+            resp = await web_search_volcengine_auth(config.volcengine_ak, config.volcengine_sk, req, "web_search")
             resp.raise_for_status()
             logger.info(f"Received web_search_volcengine_auth response")
-            return resp.json()
+            return await resp.json()
     except Exception as e:
         logger.error(f"Error in web_search tool: {e}")
         resp_error = ResponseError(
