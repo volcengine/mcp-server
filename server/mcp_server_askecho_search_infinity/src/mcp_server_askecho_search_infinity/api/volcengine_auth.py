@@ -117,4 +117,28 @@ async def volcengine_auth_request(method, date, query, header, ak, sk, action, b
             params=request_param["query"],
             data=request_param["body"]
         ) as response:
-            return response
+            # 在上下文内读取所有数据，避免连接关闭问题
+            content = await response.read()
+
+            # 创建一个兼容requests响应的对象
+            class AsyncResponse:
+                def __init__(self, status_code, content_data):
+                    self.status_code = status_code
+                    self._content = content_data
+
+                def raise_for_status(self):
+                    if self.status_code >= 400:
+                        raise aiohttp.ClientResponseError(
+                            request_info=None,
+                            history=None,
+                            status=self.status_code,
+                            message=f"HTTP {self.status_code}"
+                        )
+
+                def json(self):
+                    return json.loads(self._content.decode('utf-8'))
+
+                async def json(self):
+                    return json.loads(self._content.decode('utf-8'))
+
+            return AsyncResponse(response.status, content)
