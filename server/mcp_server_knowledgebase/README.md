@@ -128,7 +128,8 @@ Search for knowledge in the configured collection based on a query.
 search_knowledge(
     query="How to reset my password?",
     limit=3,
-    collection_name=None
+    collection_name=None,
+    doc_filter=None,
 )
 ```
 
@@ -136,7 +137,10 @@ Parameters:
 - `query` (required): The search query string
 - `limit` (optional): Maximum number of results to return (default: 3)
 - `collection_name` (optional): Knowledge base collection name to search. If not provided, llm will choose some collections to search based on the description of collection
-
+- `doc_filter` (optional): the filter is used to filter search results(default: None), which is structured as a JSON object with the following key components:
+  - `op` (string, required): specifies the query operator that defines the filtering logic. Valid values are 'must' and 'must_not', 'must' means results must satisfy the condition (inclusion filter),'must_not' means results must not satisfy the condition (exclusion filter).
+  - `field` (string, required): indicates the specific document field to apply the filter on (e.g., "doc_id").
+  - `conds` (array, required):  contains the concrete values used for filtering. The data type of elements in the array depends on the field.
 ## MCP Integration
 
 To add this server to your MCP configuration, add the following to your MCP settings file:

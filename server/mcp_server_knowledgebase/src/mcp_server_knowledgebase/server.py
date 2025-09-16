@@ -24,7 +24,8 @@ doc_add_path = "/api/knowledge/doc/add"
 doc_info_path = "/api/knowledge/doc/info"
 
 # Create MCP server
-mcp = FastMCP("Knowledgebase MCP Server", port=int(os.getenv("PORT", "8000")))
+mcp = FastMCP("Knowledgebase MCP Server", port=int(os.getenv("PORT", "8000")),
+              streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"))
 
 @mcp.tool()
 def add_doc(
@@ -274,6 +275,7 @@ def search_knowledge(
         query: str,
         collection_name: str,
         limit: int = 3,
+        doc_filter: dict = None,
 ) -> Dict:
     """Search knowledge from the Viking Knowledgebase service And return Top limit related chunks of your query.
     This tool allows you to search knowledge in provided collection based on the given query.
@@ -282,6 +284,14 @@ def search_knowledge(
         query: the search query string.
         limit: the maximum number of results to return (default: 3).
         collection_name: the name of the knowledge base collection to search for.
+        doc_filter: the filter is used to filter search results(default: None), which is structured as a JSON object with
+        the following key components:
+        - 'op': (string, required) specifies the query operator that defines the filtering logic. Valid values are
+            'must' and 'must_not', 'must' means results must satisfy the condition (inclusion filter),'must_not' means
+            results must not satisfy the condition (exclusion filter).
+        - 'field':  (string, required) indicates the specific document field to apply the filter on (e.g., "doc_id").
+        - 'conds': (array, required) contains the concrete values used for filtering. The data type
+            of elements in the array depends on the field.
 
     Returns:
         A list of search results.
@@ -300,7 +310,13 @@ def search_knowledge(
             "project": config.project,
         }
 
+        if doc_filter:
+            request_params['query_param'] = {
+                "doc_filter": doc_filter,
+            }
+
         search_req = prepare_request(method="POST", path=search_knowledge_path, ak=config.ak, sk=config.sk, data=request_params)
+        logger.debug("search param: {}".format(search_req.body))
         rsp = requests.request(
             method=search_req.method,
             url="https://{}{}".format(g_knowledge_base_domain, search_req.path),
