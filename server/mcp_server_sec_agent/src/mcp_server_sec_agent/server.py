@@ -1,4 +1,3 @@
-import argparse
 import json
 import logging
 import time
@@ -11,15 +10,13 @@ from starlette.requests import Request
 
 from mcp_server_sec_agent.client.model import *
 from mcp_server_sec_agent.client.sec_intelligent_client import SecIntelligentClient
-from mcp_server_sec_agent.config import SecIntelligentConfig
 from mcp_server_sec_agent.config import load_config
 from mcp_server_sec_agent.const import *
+from mcp_server_sec_agent.main import config
 
 logger = logging.getLogger(__name__)
 
 mcp = FastMCP("Security Intelligent MCP Server")
-
-config = SecIntelligentConfig(access_key="", secret_key="", region="", endpoint="", security_token="", debug=False)
 
 
 def loop_query_result(client: SecIntelligentClient, result: dict | SecIntelligentMCPCallResult) -> str:
@@ -277,34 +274,3 @@ def web_risk_assessor(
             "ResultID not found in result, result: {}".format(web_risk_assessor_result.result))
 
     return loop_query_result(client, web_risk_assessor_result.result)
-
-
-def main():
-    """Main entry point for the MCP server."""
-    parser = argparse.ArgumentParser(description="Run the SecIntelligent MCP Server")
-    parser.add_argument(
-        "--transport",
-        "-t",
-        choices=["sse", "stdio"],
-        default="stdio",
-        help="Transport protocol to use (sse or stdio)",
-    )
-
-    args = parser.parse_args()
-
-    try:
-        # # Load configuration from environment variables
-        global config
-
-        config = load_config(None)
-        # Run the MCP server
-        logger.info(f"Starting SecIntelligent MCP Server with {args.transport} transport")
-
-        mcp.run(transport=args.transport)
-    except Exception as e:
-        logger.error(f"Error starting SecIntelligent MCP Server: {str(e)}")
-        raise
-
-
-if __name__ == "__main__":
-    main()

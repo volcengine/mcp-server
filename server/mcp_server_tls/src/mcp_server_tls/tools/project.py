@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from mcp_server_tls.config import TLS_CONFIG
 from mcp_server_tls.resources.project import describe_project_resource, describe_projects_resource
@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 async def describe_project_tool(
         project_id: Optional[str] = None
-) -> Dict[str, str]:
+) -> dict:
     """Retrieve VolcEngine TLS project information using a project ID.
     """
     try:
@@ -38,7 +38,7 @@ async def describe_projects_tool(
         project_name: Optional[str] = None,
         is_full_name: Optional[bool] = False,
         iam_project_name: Optional[str] = None,
-) -> Dict[str, Any]:
+) -> dict:
     """Retrieve VolcEngine TLS project information using a project ID or other parameters.
        By default, each query returns up to 10 results.
     """

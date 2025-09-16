@@ -56,6 +56,54 @@ List all internal IP addresses of the specific edge computing node.
 
 List all the available spec types of the specific edge computing node.
 
+### Tool 8: create_cloud_server
+
+Create edge computing node.
+
+### Tool 9: set_instance_name
+
+Set the display name of the specific edge computing node instance.
+
+### Tool 10: enable_instances_i_pv6
+
+Enable IP v6 for the specific edge computing node instance.
+
+### Tool 11: list_instance_internal_ips
+
+List all internal IP addresses of the specific edge computing node instance.
+
+### Tool 12: list_cloud_servers
+
+List all edge computing node.
+
+### Tool 13: list_instance_types
+
+List all instance types of the specific edge computing node.
+
+### Tool 14: list_available_resource_info
+
+List all available resource info of the specific instance type.
+
+### Tool 15: create_instance
+
+Create edge computing node instance.
+
+### Tool 16: list_images
+
+List all images of the specific instance type.
+
+### Tool 17: get_image
+
+Get image details.
+
+### Tool 18: get_veen_instance_usage
+
+Get the usage of the specific instance type.
+
+### Tool 19: list_vpc_instances
+
+List all virtual private cloud instances.
+
 ## Compatible Platforms
 
 - Python

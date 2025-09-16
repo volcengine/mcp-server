@@ -61,8 +61,8 @@ Start the server:
 cd mcp-server/server/mcp_server_ecs
 uv run mcp-server-ecs
 
-# Start with sse mode (default is stdio)
-uv run mcp-server-ecs -t sse
+# Start with streamable-http mode (default is stdio)
+uv run mcp-server-ecs -t streamable-http
 ```
 
 Use a client to interact with the server:

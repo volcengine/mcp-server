@@ -22,11 +22,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Initialize FastMCP server
-mcp = FastMCP(os.getenv(config.ENV_MCP_SERVER_NAME, "mcp_server_vmp"), port=int(os.getenv(config.ENV_MCP_SERVER_PORT, "8000")))
+mcp = FastMCP(os.getenv(config.ENV_MCP_SERVER_NAME, "mcp_server_vmp"), host=os.getenv(config.ENV_MCP_SERVER_HOST, "0.0.0.0"), port=int(os.getenv(config.ENV_MCP_SERVER_PORT, "8000")))
 vmpApiClient : vmpapi.VMPApi = None
 
 @mcp.tool()
-async def list_workspaces(region: str = "cn-beijing") -> any:
+async def list_workspaces(region: str = "cn-beijing"):
     """list volcengine managed prometheus(VMP) workspaces in specific region.
 
     Args:
@@ -39,7 +39,7 @@ async def list_workspaces(region: str = "cn-beijing") -> any:
     return await vmpApiClient.list_workspaces(conf)
 
 @mcp.tool()
-async def query_metrics(workspaceId: str, query: str, time: Optional[str] = None, region: str = "cn-beijing") -> any:
+async def query_metrics(workspaceId: str, query: str, time: Optional[str] = None, region: str = "cn-beijing"):
     """Execute an instant query against specific volcengine managed prometheus(VMP) workspace.
     
     Args:
@@ -55,7 +55,7 @@ async def query_metrics(workspaceId: str, query: str, time: Optional[str] = None
     return await vmpApiClient.query_instant_metrics(workspaceId, query, time, conf)
 
 @mcp.tool()
-async def query_range_metrics(workspaceId: str, query: str, start: str, end: str, step: Optional[str] = None, region: str = "cn-beijing") -> any:
+async def query_range_metrics(workspaceId: str, query: str, start: str, end: str, step: Optional[str] = None, region: str = "cn-beijing"):
     """Execute a range query against specific volcengine managed prometheus(VMP) workspace.
     
     Args:
@@ -73,7 +73,7 @@ async def query_range_metrics(workspaceId: str, query: str, start: str, end: str
     return await vmpApiClient.query_range_metrics(workspaceId, query, start, end, step, conf)
 
 @mcp.tool()
-async def query_metric_names(workspaceId: str, match: Optional[str] = None, region: str = "cn-beijing") -> any:
+async def query_metric_names(workspaceId: str, match: Optional[str] = None, region: str = "cn-beijing"):
     """List all metric names in specific volcengine managed prometheus(VMP) workspace.
 
     Args:
@@ -88,7 +88,7 @@ async def query_metric_names(workspaceId: str, match: Optional[str] = None, regi
     return await vmpApiClient.query_label_values(workspaceId, "__name__", match=[match], dynamicConf=conf)
 
 @mcp.tool()
-async def query_metric_labels(workspaceId: str, metricName: str, region: str = "cn-beijing") -> any:
+async def query_metric_labels(workspaceId: str, metricName: str, region: str = "cn-beijing"):
     """List all labels of specific metric in volcengine managed prometheus(VMP) workspace.
     Args:
         workspaceId: target prometheus workspace id
@@ -173,9 +173,9 @@ def main():
     parser.add_argument(
         "--transport",
         "-t",
-        choices=["sse", "stdio"],
+        choices=["sse", "stdio", "streamable-http"],
         default=os.getenv(config.ENV_MCP_SERVER_MODE, "stdio"),
-        help="Transport protocol to use (sse or stdio)",
+        help="Transport protocol to use (sse or stdio or streamable-http, default: stdio)",
     )
 
     # Init the VMP API client using default config

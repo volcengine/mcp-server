@@ -49,7 +49,6 @@
   "name": "search_logs_v2",
   "description": "根据日志查询语句，在指定日志主题和时间范围内查询日志"
 }
-
 ```
 
 `输出`
@@ -126,7 +125,6 @@
   "name": "text2sql",
   "description": "将用户输入的查询语言转为TLS定义的SQL查询语句"
 }
-
 ```
 
 `输出`
@@ -352,6 +350,68 @@
 
 使用describe_topics_tool工具帮我查下当前项目下前10个项目的分区数量.
 
+### Tool 7: put_logs_v2_tool
+
+上传日志到指定的日志主题中。
+
+- 调试所需的输入参数:
+
+`输入`
+
+```json
+{
+  "inputSchema": {
+    "type": "object",
+    "required": ["logs"],
+    "properties": {
+      "logs": {
+        "type": "array",
+        "description": "logs字段为要写入的日志字段，数组中每个item即为一条日志，每个item由多个key-value键值对组成"
+      },
+      "log_time": {
+        "type": "int",
+        "description": "写入日志的日志时间戳，默认为当前时间",
+      },
+      "topic_id": {
+        "type": "string",
+        "description": "可选的日志主题ID, 默认为环境变量中设置的topic_id,如果没有设置,则必传"
+      },
+      "source": {
+        "type": "string",
+        "description": "日志来源，通常使用机器 IP 作为标识",
+      },
+      "filename": {
+        "type": "string",
+        "description": "日志文件名",
+      },
+      "hash_key": {
+        "type": "string",
+        "description": "日志组的 HashKey，用于指定当前日志组要写入的分区（Shard）",
+      },
+      "compression": {
+        "type": "string",
+        "description": "请求体的压缩格式，默认为lz4，可选zlib",
+      },
+    }
+  },
+  "name": "put_logs_v2_tool",
+  "description": "调用 PutLogs 接口上传日志到指定的日志主题中，如需使用searchLogs查询日志，请先设置好索引"
+}
+```
+
+`输出`
+    - [参考文档](https://www.volcengine.com/docs/6470/112191)
+
+```json
+{
+    "request_id": "your_request_id"
+}
+```
+
+- 最容易被唤起的 Prompt示例
+
+使用put_logs_v2_tool工具帮我写入以下日志如[{"user": "peter", "age": 18}, {"user": "marry", "age": 16}]
+
 ## 可适配平台
 
 可以使用cline、cursor、claude desktop或支持MCP server调用的其它终端
@@ -383,9 +443,9 @@ mv .env_example .env
 
 ## 安装
 
-### Run Locally
+### 本地启动
 
-#### Option1
+#### 1. 通过本地代码启动
 
 ```json
 {
@@ -403,7 +463,7 @@ mv .env_example .env
 }
 ```
 
-#### Option2
+#### 2. 通过远端仓库启动
 
 ```json
 {
@@ -429,27 +489,69 @@ mv .env_example .env
 }
 ```
 
-### Run Remote
+### 远端启动
 
-设置DEPLOY_MODE=remote
+#### 部署远端服务
+
+##### 1. 本地直接启动
+
+设置 `DEPLOY_MODE=remote`
 
 ```shell
 uv --directory /ABSOLUTE/PATH/TO/PARENT/FOLDER run mcp-server-tls -t sse
 ```
 
+or
+
+```shell
+uv --directory /ABSOLUTE/PATH/TO/PARENT/FOLDER run mcp-server-tls -t streamable-http
+```
+
+> 我们建议使用streamable-http
+
+##### 2. 通过DOCKER启动
+
+我们也提供了DOCKERFILE方便大家部署，暂时未推送到开源库，可以先手动打包
+
+docker compose 启动示例:
+
+```
+services:
+  mcp:
+    image: your-image:your-version
+    container_name: mcp_server_tls
+    restart: always
+    ports:
+      - "80:8000"
+    environment:
+      MCP_DEPLOY_MODE: remote
+      TRANSPORT_TYPE: streamable-http
+      MCP_SERVER_HOST: 0.0.0.0
+      MCP_SERVER_PORT: 8000
+```
+
+#### 调用
+
+|transport-type|调用链接示例|
+| :-: | :-: |
+| sse | http://127.0.0.1:8000/sse |
+| streamable-http | http://127.0.0.1:8000/mcp/ |
+
 调用方使用时请将认证信息按照以下格式通过base64编码后放在请求头的authorization中
+
 ```json
 {
     "AccessKeyId": "your ak",
     "SecretAccessKey": "your sk",
-    "SessionToken": "your token"
+    "SessionToken": "your token",
+    "Region": "your region",
+    "Endpoint": "your endpoint"
 }
 ```
 
-##在不同平台的配置
+`Region`和`Endpoint`不是必传的, 默认的region是`cn-beijing`, endpoint是`https://tls-cn-beijing.volces.com`
 
 ## License
 
 volcengine/mcp-server is licensed under the [MIT License](https://github.com/volcengine/mcp-server/blob/main/LICENSE).
-
 

@@ -8,6 +8,8 @@ from mcp_server_vortexip_webscraper.base.config import WEB_SCRAPER_CONFIG
 
 logger = logging.getLogger(__name__)
 
+WEB_SCRAPER_PORT = 8080
+
 # Initialize FastMCP server
 mcp = FastMCP("Web Scraper MCP Server", port=int(os.getenv("PORT", "8000")))
 
@@ -17,7 +19,7 @@ def webscraper_serp(query: str = None) -> str:
     """query keyword from some search engine"""
 
     try:
-        url = f"https://{WEB_SCRAPER_CONFIG.endpoint}/v1/queries"
+        url = f"https://{WEB_SCRAPER_CONFIG.endpoint}:{WEB_SCRAPER_PORT}/v1/queries"
 
         headers = {
             "Content-Type": "application/json",

@@ -4,7 +4,7 @@ from mcp_server_tls.resources.project import describe_project_resource, describe
 
 from mcp_server_tls.resources.topic import describe_topic_resource, describe_topics_resource
 
-from mcp_server_tls.resources.log import search_logs_v2_resource
+from mcp_server_tls.resources.log import search_logs_v2_resource, put_logs_v2_resource
 
 from mcp_server_tls.resources.text_analysis import (
     create_app_instance_resource,
@@ -36,6 +36,10 @@ SUPPORT_RESOURCES = {
     "search_logs_v2_resource": {
         "fn": search_logs_v2_resource,
         "uri": "/SearchLogs?topic_id={topic_id}&query={query}&start_time={start_time}&end_time={end_time}&limit={limit}",
+    },
+    "put_logs_v2_resource": {
+        "fn": put_logs_v2_resource,
+        "uri": "/putLogs?logs={logs}&log_time={log_time}"
     },
     # text_analysis
     "create_app_instance_resource": {

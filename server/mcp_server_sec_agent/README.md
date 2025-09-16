@@ -9,6 +9,39 @@
 | 分类 | 安全                       |
 | 标签 | 安全，安全智能体，安全值守 |
 
+## 系统依赖
+1. 安装 Python 3.11 或者更高版本
+2. 安装 uv
+### 安装 uv 方法
+**Linux/macOS:**
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+**Windows:**
+```bash
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+Python >=3.10,<3.12
+
+```bash
+pip install -r requirement.txt
+```
+
+## 运行方法
+```bash
+uv sync # 安装依赖
+uv run server.py --transport streamable-http --host 0.0.0.0 --port 8000
+```
+支持的命令行参数： 
+- `--transport`：指定 MCP 服务器的传输协议，默认值为 `stdio`，可选项：streamable-http, sse, stdio
+- `--host`：指定 MCP 服务器的主机地址，默认值为 `0.0.0.0`。
+- `--port`：指定 MCP 服务器的端口号，默认值为 `8000`。
+
+不同的传输协议的URL：
+- `streamable-http`：http://<host>:<port>/mcp
+- `sse`：http://<host>:<port>/sse
+
 ## Tools
 
 本 MCP Server 产品提供以下 Tools (工具/能力):
