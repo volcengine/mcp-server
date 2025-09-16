@@ -52,15 +52,9 @@ async def web_search(
         )
 
         if config.api_key is not None and len(config.api_key) > 0:
-            resp = await web_search_api_key_auth(config.api_key, req, "web_search")
-            resp.raise_for_status()
-            logger.info(f"Received web_search_api_key_auth response")
-            return await resp.json()
+            return await web_search_api_key_auth(config.api_key, req, "web_search")
         else:
-            resp = await web_search_volcengine_auth(config.volcengine_ak, config.volcengine_sk, req, "web_search")
-            resp.raise_for_status()
-            logger.info(f"Received web_search_volcengine_auth response")
-            return await resp.json()
+            return await web_search_volcengine_auth(config.volcengine_ak, config.volcengine_sk, req, "web_search")
     except Exception as e:
         logger.error(f"Error in web_search tool: {e}")
         resp_error = ResponseError(
