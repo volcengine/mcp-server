@@ -64,8 +64,9 @@ def validate_and_set_region(region: str = None) -> str:
 1. Before create_function be called, maybe need to generate code first. These rules must be respected:
     • Must use a script to start function, the script name is run.sh by default, in the project root directory, also can use other named script,
       but need to specify in the create_function parameters. Need make sure the start script has execution permission.
-2. When creating functon, need verify some important parameter:
-    - parameter `name`  can be a random name if no name is provided, but you should make sure the name is not exist in function list.
+2. When creating functon, need verify some important parameter before invoking create_function method:
+    - parameter `name`: First generete a meaningful name with a random suffix if no name is provided. Before calling create_function, 
+        you **MUST** call `list_functions` to check if the function name already exists, if it does, you need regenerate a new name and recheck
     - parameter `region` is the region where the function will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
           `cn-shanghai`, `cn-guangzhou` as well.
     - parameter `runtime` must be one of the native runtime returned by the supported_runtimes. Please ensure you call that tool first to get the valid options.
@@ -423,7 +424,7 @@ def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id
 
 @mcp.tool(description="""Lists all API gateways.
 Use this when you need to list all API gateways.
-No need to ask user for confirmation, just list the gateways.""")
+No need to ask user for confirmation, just list the gateways, if the request timed out, you should retry at least 5 times""")
 def list_api_gateways(region: str = None):
     now = datetime.datetime.utcnow()
 
@@ -436,19 +437,16 @@ def list_api_gateways(region: str = None):
     return response_body
 
 
-@mcp.tool(
-    description="""
-Creates a new VeApig API gateway in the specified region.
+@mcp.tool(description="""Checks for an existing VeApig API gateway with the specified region. If a running gateway with that region is found, it's reused. Otherwise, a new gateway is created.
 
-- `name`: Optional custom name for the gateway. If not provided, a random name will be auto-generated.
-- `region`: Target region for gateway creation. Defaults to `cn-beijing`. Supported values include `cn-beijing`, `cn-shanghai`, `cn-guangzhou`, and `ap-southeast-1`.
+- `name`: The name for the gateway. If provided, the tool will first search for a gateway with this name. If not provided, a new gateway with a random name will be created.
+- `region`: Target region for the gateway. Defaults to `cn-beijing`. Supported values: `cn-beijing`, `cn-shanghai`, `cn-guangzhou`, `ap-southeast-1`.
+
+If can not find an existing running gateway, start to create a new one.
 
 Note: This is an **asynchronous** operation and may take up to **5 minutes** to complete.
-After calling this tool, you must use the `list_api_gateways` tool to check the status of the gateway.
+After calling this tool, you must use the `list_api_gateways` tool to check the status of the gateway with the specified name and region.
 Only when the status is `Running` does the gateway creation complete successfully.
-
-Recommendation: A single API gateway can be reused across multiple functions and services.
-Before creating a new gateway, consider reusing an existing one using `list_api_gateways`.
 """
 )
 def create_api_gateway(name: str = None, region: str = "cn-beijing") -> str:
