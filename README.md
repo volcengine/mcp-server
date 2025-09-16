@@ -60,7 +60,8 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 
 - **[RDS MySQL MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_rds_mysql)**：云数据库 MySQL 版是即开即用、稳定可靠、灵活弹性、易于使用的关系型数据库服务。  
 - **[veDB MySQL MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_vedb_mysql)**：云数据库 veDB MySQL 版采用计算存储分离架构，100%兼容MySQL，最多支持 200TiB 的超大容量结构化数据存储，单个数据库集群最多可扩展至 16 个计算节点。  
-- **[MongoDB MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_mongodb)**：自然语言驱动向火山引擎文档数据库 MongoDB 版实例发送和执行自定义命令。  
+- **[Redis MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_redis)**：自然语言驱动管理火山引擎缓存数据库 Redis 实例。
+- **[MongoDB MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_mongodb)**：自然语言驱动向火山引擎文档数据库 MongoDB 版实例发送和执行自定义命令。
 - **[CloudSearch MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_cloudsearch)**：云搜索服务（Cloud Search）是火山引擎提供的全托管一站式信息检索和分析平台。  
 
 
@@ -75,7 +76,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 
 - **[CDN MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_cdn)**：火山引擎 CDN 智能分析助手。  
 - **[边缘计算节点 MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_veen)**：申请、配置、查阅在边缘计算节点，包括虚拟机、镜像、裸金属，及对应的网络配置。  
-- **[Traffic Route MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_traffic_route)**：各种类型的 DNS 节点链路配置。  
+- **[ALB MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_alb)**：查阅应用型负载均衡实例的信息，包括实例关联的监听器、后端服务器组以及证书等相关信息。  
 
 
 ### **大数据**  
@@ -101,6 +102,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 
 - **[证书中心 MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_certificate_center)**：通过自然语言驱动管理证书服务。  
 - **[域名服务 MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_domain_service)**：通过自然语言高效查询并注册域名。  
+- **[TrafficRoute MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_traffic_route)**：各种类型的 DNS 节点链路配置。
 
 
 ### **管理与治理**  
@@ -161,6 +163,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 - **[Glean](https://github.com/longyi1207/glean-mcp-server)**：A server that uses Glean API to search and chat.  
 - **[Pinecone](https://github.com/sirmews/mcp-pinecone)**：MCP server for searching and uploading records to Pinecone.  
 - **[Elasticsearch](https://github.com/cr7258/elasticsearch-mcp-server)**：MCP server implementation that provides Elasticsearch interaction.  
+- **[AI搜索引擎](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_aisearch_engine)**：基于大模型的多模态语义表征和理解能力，结合字节跳动信息检索领域多年最佳实践，为客户提供开箱即用的 AI 搜索搭建平台服务，帮助客户轻松搭建和集成端到端的多模态图文搜索和推荐能力。
 
 
 ### **位置服务**  
@@ -177,6 +180,8 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 - **[必优-ChatPPT](https://github.com/YOOTeam/chatppt-mcp)**：必优科技智能文档MCP Server目前已经覆盖了18个智能文档的接口能力，包括但不限于PPT创作，PPT美化，PPT生成，简历创作，简历分析，人岗匹配等场景下的文档处理能力。  
 - **[Figma](https://github.com/GLips/Figma-Context-MCP)**：为 Agent 提供 Figma 文件的布局和样式信息，增强它们准确生成设计的能力。  
 - **[EverArt](https://github.com/modelcontextprotocol/servers/tree/main/src/everart)**：AI image generation using various models.  
+- **[联网问答Agent](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_askecho)**：基于联网搜索结果，提供端到端的AI问答能力。
+- **[SearchInfinity](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_askecho_search_infinity)**：提供联网搜索能力，助力AI大模型获取知识、提升回复准确性。
 
 
 ### **源码管理**  
@@ -203,6 +208,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 - **[MySQL](https://github.com/designcomputer/mysql_mcp_server)**：MySQL database integration in Python with configurable access controls and schema inspection.  
 - **[Data Exploration](https://github.com/reading-plus-ai/mcp-server-data-exploration)**：MCP server for autonomous data exploration on .csv-based datasets, providing intelligent insights with minimal effort.  
 - **[Dataset Viewer](https://github.com/privetin/dataset-viewer)**：Browse and analyze Hugging Face datasets with features like search, filtering, statistics, and data export.  
+- **[Redis](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_redis)**：MCP server for interacting with Redis, a high-performance in-memory NoSQL key-value database.
 - **[MongoDB](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_mongodb)**：A Model Context Protocol Server for MongoDB.  
 - **[MSSQL](https://github.com/RichardHan/mssql_mcp_server)**：MSSQL database integration with configurable access controls and schema inspection.  
 

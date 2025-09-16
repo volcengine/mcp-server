@@ -8,7 +8,7 @@
 - **Version**: v0.0.1
 - **Category**: Video Cloud, Cloud Phone
 - **Tags**: OS-Agent, Cloud Phone, Mobile
-- **Description**: This toolkit is implemented based on MCP (Multi-Cloud Platform) protocol, featuring excellent scalability and compatibility with Volcano Engine's Cloud Phone products. All tools are exposed through standard interfaces for easy integration into various automation platforms and business systems.
+- **Description**: This toolkit is implemented based on MCP (Model Context Protocol) protocol, featuring excellent scalability and compatibility with Volcano Engine's Cloud Phone products. All tools are exposed through standard interfaces for easy integration into various automation platforms and business systems.
 
 ## MCP Tools
 ### Tools List
@@ -28,7 +28,7 @@
 
 ### Detailed Tool Specifications
 ### 1. take_screenshot
-**Description**: Capture cloud phone screen and return screenshot URL  
+**Description**: Capture cloud phone screen and return screenshot URL with screen dimensions  
 
 **Input Parameters**:
 ```json
@@ -40,7 +40,11 @@
 **Output Example**: 
 ```json
 {
-  "result": "Screenshot download URL"
+  "result": {
+    "screenshot_url": "Screenshot download URL",
+    "width": 1080,
+    "height": 1920
+  }
 }
 ```
 
@@ -326,26 +330,25 @@ Built binaries will be in `output/` ：
 - `output/cap_tos` etc.：Auxiliary tools
 
 ### 2. Local Deployment
-Supports two modes: `stdio` and `sse`。
-#### 2.1 stdio 
-Suitable for scenarios where communication with the MCP Server is via standard input and output. Set the following environment variables before startup:
+MCP Server supports three startup modes: `stdio`, `streamable-http` and `sse`.
+#### 2.1 stdio Mode
+Suitable for scenarios where communication with the MCP Server is via standard input and output. Set the following **environment variables** before startup:
 
-| Field           | Description                  |
-|------------------|-----------------------|
-| ACEP_ACCESS_KEY  | Cloud Phone AK        |
-| ACEP_SECRET_KEY  | Cloud Phone SK |
-| ACEP_PRODUCT_ID  | Cloud Phone Product ID         |
+| Variable Name      | Description                  |
+|-------------------|-----------------------|
+| ACEP_ACCESS_KEY  | Cloud Phone Access Key        |
+| ACEP_SECRET_KEY  | Cloud Phone Access Key Secret |
+| ACEP_PRODUCT_ID  | Cloud Phone Business ID         |
 | ACEP_DEVICE_ID   | Cloud Phone Device ID         |
-| TOS_ACCESS_KEY   | TOS AK          |
-| TOS_SECRET_KEY   | TOS SK   |
+| TOS_ACCESS_KEY   | TOS Access Key          |
+| TOS_SECRET_KEY   | TOS Access Key Secret   |
 | ACEP_TOS_BUCKET  | TOS Bucket Name        |
 | ACEP_TOS_REGION  | TOS Region              |
 | ACEP_TOS_ENDPOINT| TOS Endpoint          |
 
-**Go Example(stdio)**
-
+**Go Code Example: Connect to MCP Server via stdio and call take_screenshot tool**
 ```go
-// stdio example
+// stdio method call example
 func main() {
     ctx := context.Background()
     // Path to the MCP Server executable file
@@ -380,71 +383,70 @@ func main() {
 ```
 > Note: Replace `<your-access-key>`, `<your-secret-key>`, `<your-product-id>`, `<your-device-id>`, `<your-auth-token>`, `<tos-access-key>`, `<tos-secret-key>`, `<tos-bucket>`, `<tos-region>`, and `<tos-endpoint>` with actual values. For calling other tools, simply modify the req.Params.Name and Arguments fields.
 
-#### 2.2 sse
-It is suitable for scenarios where communication with the MCP Server is conducted via the HTTP SSE (Server-Sent Events) protocol.
+#### 2.2 HTTP Mode
+Suitable for scenarios where communication with the MCP Server is conducted via HTTP protocol.
 
 **Startup command:**
-
 ```bash
-./output/mobile_use_mcp --transport sse --port 8080
+./output/mobile_use_mcp --transport (sse/streamable-http) --port 8080
 ```
-- `--transport`/`-t`：Specify the startup mode. Supports `stdio` and `sse`，default `stdio`
-- `--port`/`-p`：Specify the listening port for the SSE service. It only takes effect in `sse` mode，default `8080`
+- `--transport`/`-t`: Specify startup mode, supports `stdio`, `sse`, and `streamable-http`, default `stdio`
+- `--port`/`-p`: Specify HTTP service listening port, effective in `sse` and `streamable-http` modes, default `8080`
 
-**SSE header:**
+**SSE method header field descriptions:**
 
-| Header               | Description           |
-|----------------------|-----------------------|
-| Authorization        | Auth token           |
-| X-ACEP-ProductId     | Cloud Phone Product ID          |
-| X-ACEP-DeviceId      | Cloud Phone Device ID            |
-| X-ACEP-TosBucket     | TOS Bucket Name      |
-| X-ACEP-TosRegion     | TOS Region           |
-| X-ACEP-TosEndpoint   | TOS Endpoint         |
-| X-ACEP-TosSession    | TOS Session Token    |
+| Header Name         | Description                |
+|---------------------|---------------------|
+| Authorization       | Authentication token          |
+| X-ACEP-ProductId    | Cloud Phone Business ID       |
+| X-ACEP-DeviceId     | Cloud Phone Instance ID       |
+| X-ACEP-TosBucket    | TOS Bucket Name      |
+| X-ACEP-TosRegion    | TOS Region            |
+| X-ACEP-TosEndpoint  | TOS Endpoint        |
+| X-ACEP-TosSession   | TOS Session Token   |
 
-**SSE AuthInfo Fields:**
+**SSE method AuthInfo field descriptions:**
 
-| Field             | Type     | Description                              |
-|-------------------|----------|------------------------------------------|
-| AccessKeyId       | string   | Volcano Access Key ID (required)        |
-| SecretAccessKey   | string   | Volcano Access Key Secret (required)     |
-| CurrentTime       | string   | Current time (RFC3339, required)         |
-| ExpiredTime       | string   | Expiration time (RFC3339, required)      |
-| SessionToken      | string   | Volcano temporary Token (optional)       |
+| Field Name         | Type   | Description                              |
+|-------------------|--------|-----------------------------------|
+| AccessKeyId      | string | Volcano Access Key ID (required)           |
+| SecretAccessKey  | string | Volcano Access Key Secret (required)       |
+| CurrentTime      | string | Current time (RFC3339, required)         |
+| ExpiredTime      | string | Expiration time (RFC3339, required)         |
+| SessionToken     | string | Volcano temporary Token (optional)            |
 
 ```go
 // Token generation
-// Assuming the AuthInfo struct is defined as follows
+// Assuming AuthInfo struct is defined as follows
 type AuthInfo struct {
-        AccessKeyId     string `json:"AccessKeyId"`     // Access key ID
-        SecretAccessKey string `json:"SecretAccessKey"` // Secret access key
-        CurrentTime     string `json:"CurrentTime"`     // Current time (RFC3339 format)
-        ExpiredTime     string `json:"ExpiredTime"`     // Expiration time (RFC3339 format)
-        SessionToken    string `json:"SessionToken"`    // Session token (optional)
+	AccessKeyId     string `json:"AccessKeyId"`
+	SecretAccessKey string `json:"SecretAccessKey"`
+	CurrentTime     string `json:"CurrentTime"`
+	ExpiredTime     string `json:"ExpiredTime"`
+	SessionToken    string `json:"SessionToken"`
 }
 
-// Generates an authentication token using provided credentials
 func GenerateAuthToken(accessKey, secretKey, sessionToken string) (string, error) {
-        now := time.Now().Format(time.RFC3339)
-        expired := time.Now().Add(24 * time.Hour).Format(time.RFC3339)
-        auth := &AuthInfo{
-                AccessKeyId:     accessKey,
-                SecretAccessKey: secretKey,
-                CurrentTime:     now,
-                ExpiredTime:     expired,
-                SessionToken:    sessionToken,
-        }
-        authBytes, err := json.Marshal(auth)
-        if err != nil {
-                return "", err
-        }
-        authToken := base64.StdEncoding.EncodeToString(authBytes)
-        return authToken, nil
+	now := time.Now().Format(time.RFC3339)
+	expired := time.Now().Add(24 * time.Hour).Format(time.RFC3339)
+	auth := &AuthInfo{
+		AccessKeyId:     accessKey,
+		SecretAccessKey: secretKey,
+		CurrentTime:     now,
+		ExpiredTime:     expired,
+		SessionToken:    sessionToken,
+	}
+	authBytes, err := json.Marshal(auth)
+	if err != nil {
+		return "", err
+	}
+	authToken := base64.StdEncoding.EncodeToString(authBytes)
+	return authToken, nil
 }
 ```
 
-**Go Code Example: Connecting to MCP Server via SSE and Calling take_screenshot Tool**
+**Go Code Example: Connect to MCP Server via SSE and call take_screenshot tool**
+
 ```go
 // SSE method call example
 func main() {
@@ -473,7 +475,38 @@ func main() {
     log.Println("Screenshot result:", result)
 }
 ```
-> Note: Replace `<your-access-key>`, `<your-secret-key>`, `<your-product-id>`, and `<your-device-id> with actual values. For other tool calls, simply modify the req.Params.Name and Arguments fields.
+
+**Go Code Example: Connect to MCP Server via streamable-http and call take_screenshot tool**
+
+```go
+func main() {
+    ctx := context.Background()
+    baseUrl := "http://0.0.0.0:8080/mcp"
+    cli, err := mobile_use_client.NewMobileUseStreamableHTTPClient(ctx, baseUrl, map[string]string{
+        "Authorization":      authToken,           // Authentication token
+        "X-ACEP-ProductId":   "<your-product-id>", // Cloud Phone Business ID
+        "X-ACEP-DeviceId":    "<your-device-id>",  // Cloud Phone Instance ID
+        "X-ACEP-TosBucket":   "<your-tos-bucket>", // TOS Bucket Name
+        "X-ACEP-TosRegion":   "<your-tos-region>", // TOS Region
+        "X-ACEP-TosEndpoint": "<your-tos-endpoint>", // TOS Endpoint
+        "X-ACEP-TosSession":  "",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer cli.Close()
+    req := mcp.CallToolRequest{}
+    req.Params.Name = "take_screenshot"
+    req.Params.Arguments = map[string]interface{}{}
+    result, err := cli.CallTool(ctx, req)
+    if err != nil {
+        log.Fatal(err)
+    }
+    log.Println("Screenshot result:", result)
+}
+```
+
+> Note: Replace `<your-access-key>`, `<your-secret-key>`, `<your-product-id>`, `<your-device-id>` etc. with actual values. For calling other tools, simply modify the req.Params.Name and Arguments fields.
 
 ### 3. Other Notes
 - After startup, you can interact with the Server via an MCP protocol client. For specific interfaces and parameters, refer to the tool documentation.

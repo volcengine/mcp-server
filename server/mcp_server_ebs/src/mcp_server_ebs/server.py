@@ -165,7 +165,9 @@ def init_ebs_service(config: object, region_id: str = None) -> volcenginesdkstor
 storage_ebs_service = None
 
 # Create MCP server
-mcp = FastMCP("Storage EBS MCP Server", port=int(os.getenv("PORT", "8000")))
+mcp = FastMCP("Storage EBS MCP Server", 
+    port=int(os.getenv("PORT", "8000")),
+    host=os.getenv("MCP_SERVER_HOST", "0.0.0.0"))
 
 @mcp.tool()
 def describe_volume(
@@ -471,7 +473,7 @@ def extend_volume(
 def main():
     """Main entry point for the Storage EBS MCP Server."""
     parser = argparse.ArgumentParser(description="Run the Storage EBS MCP Server")
-    parser.add_argument("--transport", "-t", choices=["sse", "stdio"], default="stdio")
+    parser.add_argument("--transport", "-t", choices=["sse", "stdio", "streamable-http"], default="stdio")
     parser.add_argument("--config", "-c", help="Path to config file")
     
     args = parser.parse_args()

@@ -17,8 +17,7 @@ def create_mcp_server():
 
     """Create and configure VOD MCP server instance"""
     mcp = FastMCP(
-        "VOD MCP", 
-        description="VOD provides audio/video solutions including media upload, media management, and video editing.",
+        "VOD MCP"
     )
     
     @mcp.tool()

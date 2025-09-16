@@ -1,7 +1,9 @@
 import logging
 import os
-from concurrent_log_handler import ConcurrentRotatingFileHandler
 from typing import TypeVar
+
+from concurrent_log_handler import ConcurrentRotatingFileHandler
+
 from mcp_server_ecs.common.config import log_config
 
 _WRITE_MODE = "a"

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from mcp_server_tls.config import TLS_CONFIG
 from mcp_server_tls.resources.topic import describe_topic_resource, describe_topics_resource
@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 async def describe_topic_tool(
         topic_id: Optional[str] = None
-) -> Dict[str, str]:
+) -> dict:
     """Retrieve VolcEngine TLS topic information using a topic ID.
     """
     try:
@@ -38,7 +38,7 @@ async def describe_topics_tool(
         project_name: Optional[str] = None,
         topic_id: Optional[str] = None,
         topic_name: Optional[str] = None,
-) -> Dict[str, Any]:
+) -> dict:
     """Retrieve VolcEngine TLS topic information using a project ID or other parameters.
        By default, each query returns up to 10 results.
     """

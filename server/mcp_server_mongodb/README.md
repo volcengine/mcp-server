@@ -1,124 +1,41 @@
 # Volc Mongo SDK MCP Server 
+> 火山引擎 MongoDB 版是由火山引擎提供的完全兼容开源 MongoDB 数据库服务，支持实例管理、账号管理、数据库管理、备份恢复、白名单、透明数据加密、数据迁移、数据同步、读写分离、安全审计、高可用、版本升级、备份恢复等关键特性。
 [https://www.volcengine.com/product/mongodb]
 
-## 版本信息
-v1
 
-## 产品描述
-### 短描述
-mongo管控面sdk mcp server
+---
 
-### 长描述
-火山 mongo 管控面 sdk 的 mcp server，使客户可以自然语言的方式调用SDK
+| 项目 | 详情                               |
+| ---- |----------------------------------|
+| 版本 | v1.0.0                           |
+| 描述 | 火山引擎 MongoDB 版即开即用、稳定可靠的关系型数据库服务 |
+| 分类 | 数据库                              |
+| 标签 | MongoDB 关系型数据库, 数据库              |
 
-## 分类
-数据库
+---
 
-## 标签
-#存储#数据库#文档型#MongoDB
+
 ## Tools
 本 MCP Server 产品提供以下 Tools (工具/能力):
-### describe_db_instances
-#### 详细描述:
-获取MongoDB实例列表和数量
-#### 调试缩需要输入参数:
-输入：
-```json
-{
-  inputSchema={
-    "type": "object",
-    "properties": {
-        "instance_id": {"type": "string", "description": "MongoDB 实例ID"},
-        "instance_name": {"type": "string", "description": "MongoDB 实例名称"},
-        "page_size": {"type": "integer", "description": "实例列表每页大小"},
-    },
-    "required": ["page_number", "page_size"],
-  }
-}
-```
-### describe_db_instance_detail
-#### 详细描述:
-返回MongoDB实例的详情信息
-#### 调试缩需要输入参数:
-输入：
-```json
-{
-  inputSchema={
-    "type": "object",
-    "properties": {
-        "instance_id": {"type": "string", "description": "MongoDB实例ID"}
-    },
-    "required": ["instance_id"]
-  }
-}
-```
-### describe_backups_request
-#### 详细描述:
-获取MongoDB实例备份信息列表
-#### 调试缩需要输入参数:
-输入：
-```json
-{
-  inputSchema={
-    "type": "object",
-    "properties": {
-        "instance_id": {"type": "string", "description": "MongoDB实例ID"},
-        "backup_object": {
-            "type": "string", "enum": ["Data", "Log"], "description": "备份对象，全量数据备份或者是日志备份"
-        },
-        "backup_status": {
-            "type": "string", "enum": ["Success", "Failed", "Running"],
-            "description": "备份状态"
-        },
-        "backup_type": {
-            "type": "string", "enum": ["Logical", "Physical"], "description": "备份方式, 物理备份或者是逻辑备份"
-        },
-        "page_number": {"type": "integer", "description": "备份列表页数"}
-    }
-}
-```
-### describe_db_instance_parameters
-#### 详细描述:
-获取MongoDB实例参数列表
-#### 调试缩需要输入参数:
-输入：
-```json
-{
-  inputSchema={
-      "type": "object",
-      "properties": {
-          "instance_id": {"type": "string", "description": "MongoDB实例ID"},
-          "parameter_role": {
-              "type": "string",
-              "enum": ["Node", "Shard", "ConfigServer", "Mongos"],
-              "description": "MongoDB实例组件角色, 副本集对应Node, 分片集群的各个组件对应Shard, ConfigServer, Mongos",
-          },
-      },
-      "required": ["instance_id"],
-  }
-}
-```
-### describe_slow_log
-#### 详细描述:
-获取MongoDB慢日志列表
-#### 调试缩需要输入参数:
-输入：
-```json
-{
-  inputSchema={
-      "type": "object",
-      "properties": {
-          "instance_id": {"type": "string", "description": "MongoDB实例ID"},
-          "context": {"type": "context", "description": "上一页慢日志最后一条的位置标识"},
-          "pod_name": {"type": "string", "description": "MongoDB实例pod name，也是实例的 node_id, "
-                "db_instance_detail 方法中可以获取到, 格式: instance_id-${index}"},
-          "start_time": {"type": "integer", "description": "查询慢日志的开始时间戳"},
-          "end_time": {"type": "integer", "description": "查询慢日志的结束时间戳"},
-      },
-      "required": ["instance_id", "limit", "start_time", "end_time", "sort", "pod_name"],
-  }
-}
-```
+### 1.describe_db_instances
+- **详细描述**： 获取MongoDB实例列表和数量
+### 2.describe_db_instance_detail
+- **详细描述**： 返回MongoDB实例的详情信息
+### 3.describe_backups_request
+- **详细描述**： 获取MongoDB实例备份信息列表
+### 4.describe_db_instance_parameters
+- **详细描述**： 获取MongoDB实例参数列表
+### 5.describe_slow_log
+- **详细描述**： 获取MongoDB慢日志列表
+### 6.describe_azs
+- **详细描述**： 获取实例创建可用区
+### 7.describe_allow_lists
+- **详细描述**： 获取MongoDB实例白名单
+### 8.describe_node_specs
+- **详细描述**： 获取实例部署规格
+### 9.create_db_instance
+- **详细描述**： 创建mongoDB实例
+
 
 
 ## 可适配平台  
@@ -145,42 +62,10 @@ mongo管控面sdk mcp server
   ```bash
   uv sync
   ```
-- 构建cmp server:
+- 构建mcp server:
   ```bash
   uv build
   ```
-### 使用 Claude Desktop
-
-On MacOS: `~/Library/Application\ Support/Claude/claude_desktop_config.json`
-On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
-
-<details>
-  <summary> Servers Configuration </summary>
-
-```json
-{
-  "mcpServers": {
-    "mongo_mcp_server": {
-      "disabled": false,
-      "command": "uvx",
-      "args": [
-        "--directory",
-        "/<path to mcp-servers>/mcp-servers/src/git/mongodb-mgr-sdk-mcp-server/src/mcp_server_mongodb/",
-        "run",
-        "server.py"
-      ],
-      "env": {
-        "VOLC_ACCESSKEY": "your-access-key-id",
-        "VOLC_SECRETKEY": "your-access-key-secret",
-        "VOLC_REGION": "VOLC_REGION"
-      },
-      "transportType": "stdio"
-    }
-  }
-}
-```
-
-</details>
 
 ### 使用 UVX
 
@@ -195,14 +80,16 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
             "mcp-server-mongodb"
           ],
             "env": {
-                "VOLC_ACCESSKEY": "your-access-key-id",
-                "VOLC_SECRETKEY": "your-access-key-secret",
-                "VOLC_REGION": "VOLC_REGION"
+                "VOLCENGINE_ACCESS_KEY": "your-access-key-id",
+                "VOLCENGINE_SECRET_KEY": "your-access-key-secret",
+                "VOLCENGINE_REGION": "VOLC_REGION"
             }
         }
     }
 }
 ```
+
+## 数据面 [MCP server](https://www.volcengine.com/mcp-marketplace/detail?name=MongoDB)
 
 ## License
 volcengine/mcp-server is licensed under the [MIT License](https://github.com/volcengine/mcp-server/blob/main/LICENSE).

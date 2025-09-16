@@ -5,7 +5,7 @@ description = "MCP Server for ECS"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "mcp @ git+https://github.com/zihengli-bytedance/python-sdk.git@temp-for-volc",
+    "mcp>=1.9.4",
     "pydantic==2.10.6",
     "volcengine-python-sdk>=3.0.1",
     "concurrent-log-handler==0.9.25",

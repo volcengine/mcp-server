@@ -1,14 +1,16 @@
 [project]
 name = "mcp-server-tls"
-version = "0.1.0"
+version = "0.1.2"
 description = "TLS MCP server project"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "httpx>=0.28.1",
-    "mcp[cli] @ git+https://github.com/zihengli-bytedance/python-sdk.git@temp-for-volc",
+    "lz4>=4.4.4",
+    "mcp[cli]>=1.12.0",
     "python-dotenv>=1.0.1",
     "volcengine>=1.0.175",
+    "httpcore==1.0.9",
 ]
 
 [project.scripts]

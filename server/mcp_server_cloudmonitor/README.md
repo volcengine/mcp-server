@@ -135,7 +135,8 @@ Query the CpuTotal metric data of the Instance i-cnlfk3hz2nf95hjlz under the Ins
 ## Adaptable platform  
 
 sse: Ark，Python, Cline
-stdio: Python, Cline
+stdio: Python, Cline, Trae
+streamable-http: Python, Cline, Trae
 
 ## Service activation link (overall product) 
 
@@ -166,27 +167,9 @@ Click the quick jump button to go to the experience center of the Ark platform f
 
 Please obtain the environment variables in advance VOLCENGINE_ACCESS_KEY 和 VOLCENGINE_SECRET_KEY。
 
-sse mode
-```json
-{
-  "mcpServers": {
-    "mcp-server-cloudmonitor-sse": {
-      "command": "uvx",
-      "args": [
-        "--from",
-        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_cloudmonitor",
-        "mcp-server-cloudmonitor-sse"
-      ],
-      "env": {
-        "VOLCENGINE_ACCESS_KEY": "your volcengine access key",
-        "VOLCENGINE_SECRET_KEY": "your volcengine secret key"
-      }
-    }
-  }
-}
-```
+Start using the stdio mode in the local mode,
 
-stdio mode
+stdio mode:
 
 ```json
 {
@@ -197,6 +180,28 @@ stdio mode
         "--from",
         "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_cloudmonitor",
         "mcp-server-cloudmonitor-stdio"
+      ],
+      "env": {
+        "VOLCENGINE_ACCESS_KEY": "your volcengine access key",
+        "VOLCENGINE_SECRET_KEY": "your volcengine secret key"
+      }
+    }
+  }
+}
+```
+
+The remote mode is started using the streamable-http mode,
+
+streamable-http mode:
+```json
+{
+  "mcpServers": {
+    "mcp-server-cloudmonitor-streamable": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_cloudmonitor",
+        "mcp-server-cloudmonitor-streamable"
       ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "your volcengine access key",

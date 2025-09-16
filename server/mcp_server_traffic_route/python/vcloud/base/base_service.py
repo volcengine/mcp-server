@@ -1,5 +1,5 @@
 # coding:utf-8
-from src.base.base_trait import BaseTrait  # Modify it if necessary
+from vcloud.base.base_trait import BaseTrait  # Modify it if necessary
 
 
 class BaseService(BaseTrait):

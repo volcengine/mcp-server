@@ -108,3 +108,14 @@ func GetInt64Param(args map[string]interface{}, key string) (int64, error) {
 		return 0, fmt.Errorf("%s must be an integer, got %T", key, val)
 	}
 }
+
+func CheckArgs(args any) (map[string]interface{}, error) {
+	if args == nil {
+		return nil, fmt.Errorf("args is nil")
+	}
+	res, ok := args.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("args is invalid")
+	}
+	return res, nil
+}

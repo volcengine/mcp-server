@@ -35,7 +35,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_accelerator(params: dict, body: dict) -> str:
         """
-        查询标准型加速器详情
+        查询单个标准型加速器的详情。
         Call steps:
         1. Pass "describe_accelerator" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_accelerator
@@ -47,7 +47,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_basic_accelerator(params: dict, body: dict) -> str:
         """
-        查询基础型加速器详情
+        查询单个基础型加速器的详情。
         Call steps:
         1. Pass "describe_basic_accelerator" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_basic_accelerator
@@ -59,7 +59,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_basic_endpoint_group(params: dict, body: dict) -> str:
         """
-        查询终端节点组详情
+        查询单个终端节点组的详情。
         Call steps:
         1. Pass "describe_basic_endpoint_group" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_basic_endpoint_group
@@ -73,7 +73,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_basic_ip_set(params: dict, body: dict) -> str:
         """
-        查询基础型加速器加速区域详情
+        查询基础型加速器的单个加速区域详情。
         Call steps:
         1. Pass "describe_basic_ip_set" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_basic_ip_set
@@ -85,7 +85,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_endpoint_group(params: dict, body: dict) -> str:
         """
-        查询终端节点组
+        查询单个终端节点组的详情。
         Call steps:
         1. Pass "describe_endpoint_group" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_endpoint_group
@@ -97,7 +97,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_ip_set(params: dict, body: dict) -> str:
         """
-        查询加速区域
+        查询单个加速区域的详情。
         Call steps:
         1. Pass "describe_ip_set" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_ip_set
@@ -119,14 +119,38 @@ def create_mcp_server():
         return reqs
 
     @mcp.tool()
+    def describe_listener_logs(params: dict, body: dict) -> str:
+        """
+        查询监听日志
+        Call steps:
+        1. Pass "describe_listener_logs" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+        2. After obtaining the parameter description, invoke  describe_listener_logs
+        """
+        reqs = service.mcp_post("McpDescribeListenerLogs", params, json.dumps(body))
+
+        return reqs
+
+    @mcp.tool()
     def describe_statistics(params: dict, body: dict) -> str:
         """
-        查询全球加速监控数据
+        查询全球加速监控数据。
         Call steps:
         1. Pass "describe_statistics" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_statistics
         """
         reqs = service.mcp_post("McpDescribeStatistics", params, json.dumps(body))
+
+        return reqs
+
+    @mcp.tool()
+    def describe_top_statistics(params: dict, body: dict) -> str:
+        """
+        查询排名明细
+        Call steps:
+        1. Pass "describe_top_statistics" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+        2. After obtaining the parameter description, invoke  describe_top_statistics
+        """
+        reqs = service.mcp_post("McpDescribeTopStatistics", params, json.dumps(body))
 
         return reqs
 
@@ -155,9 +179,49 @@ def create_mcp_server():
         return reqs
 
     @mcp.tool()
+    def get_basic_endpoint_related_acc_instance_infos(params: dict, body: dict) -> str:
+        """
+        查询终端节点关联基础加速器
+        Call steps:
+        1. Pass "get_basic_endpoint_related_acc_instance_infos" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+        2. After obtaining the parameter description, invoke  get_basic_endpoint_related_acc_instance_infos
+        """
+        reqs = service.mcp_post(
+            "McpGetBasicEndpointRelatedAccInstanceInfos", params, json.dumps(body)
+        )
+
+        return reqs
+
+    @mcp.tool()
+    def get_endpoint_related_acc_instance_infos(params: dict, body: dict) -> str:
+        """
+        查询终端节点关联标准加速器
+        Call steps:
+        1. Pass "get_endpoint_related_acc_instance_infos" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+        2. After obtaining the parameter description, invoke  get_endpoint_related_acc_instance_infos
+        """
+        reqs = service.mcp_post(
+            "McpGetEndpointRelatedAccInstanceInfos", params, json.dumps(body)
+        )
+
+        return reqs
+
+    @mcp.tool()
+    def list_accelerate_areas(params: dict) -> str:
+        """
+        获取账号可用加速区域列表
+        Call steps:
+        1. Pass "list_accelerate_areas" as an input parameter to invoke the `get_note` method to obtain the parameter description.
+        2. After obtaining the parameter description, invoke  list_accelerate_areas
+        """
+        reqs = service.mcp_get("McpListAccelerateAreas", params, json.dumps({}))
+
+        return reqs
+
+    @mcp.tool()
     def list_accelerators(params: dict, body: dict) -> str:
         """
-        列举加速实例
+        查询标准型加速器列表。
         Call steps:
         1. Pass "list_accelerators" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  list_accelerators
@@ -181,7 +245,7 @@ def create_mcp_server():
     @mcp.tool()
     def list_basic_accelerate_i_ps(params: dict, body: dict) -> str:
         """
-        拉取基础型加速器加速IP列表
+        查询基础型加速器上指定加速区域的加速IP列表。
         Call steps:
         1. Pass "list_basic_accelerate_i_ps" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  list_basic_accelerate_i_ps
@@ -193,7 +257,7 @@ def create_mcp_server():
     @mcp.tool()
     def list_basic_accelerators(params: dict, body: dict) -> str:
         """
-        查询基础型加速器列表
+        查询基础型加速器列表。
         Call steps:
         1. Pass "list_basic_accelerators" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  list_basic_accelerators
@@ -205,7 +269,7 @@ def create_mcp_server():
     @mcp.tool()
     def list_basic_endpoint_groups(params: dict, body: dict) -> str:
         """
-        获取基础型加速器终端节点组列表
+        查询基础型加速器终端节点组列表。
         Call steps:
         1. Pass "list_basic_endpoint_groups" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  list_basic_endpoint_groups
@@ -217,7 +281,7 @@ def create_mcp_server():
     @mcp.tool()
     def list_basic_endpoints(params: dict, body: dict) -> str:
         """
-        拉取基础型加速器终端节点
+        基于基础型加速器上的指定终端节点组，查询终端节点列表。
         Call steps:
         1. Pass "list_basic_endpoints" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  list_basic_endpoints
@@ -229,7 +293,7 @@ def create_mcp_server():
     @mcp.tool()
     def list_basic_ip_sets(params: dict, body: dict) -> str:
         """
-        获取基础型加速区域列表
+        查询指定基础型加速器上的加速区域列表。
         Call steps:
         1. Pass "list_basic_ip_sets" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  list_basic_ip_sets
@@ -241,7 +305,7 @@ def create_mcp_server():
     @mcp.tool()
     def list_endpoint_groups(params: dict, body: dict) -> str:
         """
-        列举终端节点组
+        查询标准型加速器的终端节点组列表。
         Call steps:
         1. Pass "list_endpoint_groups" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  list_endpoint_groups

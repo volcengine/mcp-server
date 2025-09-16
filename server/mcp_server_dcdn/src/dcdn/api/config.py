@@ -68,15 +68,15 @@ api_info = {
     "McpListCertBind": ApiInfo(
         "POST", "/", {"Action": "ListCertBind", "Version": "2021-04-01"}, {}, {}
     ),
-    "McpDescribeStatistics": ApiInfo(
-        "POST", "/", {"Action": "DescribeStatistics", "Version": "2022-03-01"}, {}, {}
-    ),
     "McpDescribeDomainRegionData": ApiInfo(
         "POST",
         "/",
         {"Action": "DescribeDomainRegionData", "Version": "2021-04-01"},
         {},
         {},
+    ),
+    "McpDescribeStatistics": ApiInfo(
+        "POST", "/", {"Action": "DescribeStatistics", "Version": "2021-04-01"}, {}, {}
     ),
 }
 service_info_map = {

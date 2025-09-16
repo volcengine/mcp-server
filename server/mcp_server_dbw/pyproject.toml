@@ -1,0 +1,17 @@
+[project]
+name = "mcp-server-dbw"
+version = "0.1.0"
+description = "MCP Server for DBW"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp[cli]>=1.12.0",
+    "volcengine-python-sdk>=4.0.15",
+]
+
+[project.scripts]
+mcp-server-dbw = "mcp_server_dbw.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
