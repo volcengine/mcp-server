@@ -1,8 +1,5 @@
-from __future__ import print_function
-
 import fnmatch
 import io
-import time
 from typing import Union, Optional, List
 import datetime
 import volcenginesdkcore
@@ -28,16 +25,17 @@ import shutil
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-mcp = FastMCP("VeFaaS MCP Server",
+mcp = FastMCP("veFaaS MCP Server",
               host=os.getenv("MCP_SERVER_HOST", "0.0.0.0"),
               port=int(os.getenv("MCP_SERVER_PORT", "8000")),
               stateless_http=os.getenv("STATLESS_HTTP", "true").lower() == "true",
               streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"))
 
-@mcp.tool(description="""Lists all supported runtimes for veFaaS functions.
-Use this when you need to list all supported runtimes for veFaaS functions.""")
-def supported_runtimes():
-    return ["native-python3.12/v1", "native-node20/v1", "native/v1"]
+SUPPORTED_RUNTIMES = [
+    "native-python3.12/v1",
+    "native-node20/v1",
+    "native/v1",
+]
 
 def validate_and_set_region(region: str = None) -> str:
     """
@@ -60,27 +58,22 @@ def validate_and_set_region(region: str = None) -> str:
         region = "cn-beijing"
     return region
 
-@mcp.tool(description="""Creates a new VeFaaS function.
-1. Before create_function be called, maybe need to generate code first. These rules must be respected:
-    • Must use a script to start function, the script name is run.sh by default, in the project root directory, also can use other named script,
-      but need to specify in the create_function parameters. Need make sure the start script has execution permission.
-2. When creating functon, need verify some important parameter before invoking create_function method:
-    - parameter `name`: First generete a meaningful name with a random suffix if no name is provided. Before calling create_function, 
-        you **MUST** call `list_functions` to check if the function name already exists, if it does, you need regenerate a new name and recheck
-    - parameter `region` is the region where the function will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
-          `cn-shanghai`, `cn-guangzhou` as well.
-    - parameter `runtime` must be one of the native runtime returned by the supported_runtimes. Please ensure you call that tool first to get the valid options.
-        Choose runtime by code language (e.g. python language choose native-python3.12/v1)
-    - parameter `command` can be set. If it is set, use the value as the start script.
-3. After creating the function succeed, you can use the `upload_code` tool to upload the function code and related files, note that some parameters must be filled in when call upload_code tool.
-4. If `enable_vpc` is set to `true`, the following parameters are **required**:
-   • `vpc_id`: The target VPC ID
-   • `subnet_ids`: A list of subnet IDs (at least one)
-   • `security_group_ids`: A list of security group IDs
+@mcp.tool(description="""Create a veFaaS function.
 
-Tips:
-• If the code starts an HTTP server, it must listen on 0.0.0.0:8000.
-• Python/Node dependencies: declare them in `requirements.txt` / `package.json`; VeFaaS installs them as needed.
+Workflow tips:
+- Ship runnable code plus a startup script (`run.sh` by default). If you use another script, pass it via `command` and make it executable.
+- Choose the runtime that matches your stack: `native-python3.12/v1`, `native-node20/v1`, or `native/v1`; these images only provide interpreters.
+- Provide `name` or let us generate one; if the platform reports a conflict we auto-append a suffix and retry.
+- Region defaults to `cn-beijing`; acceptable overrides: `ap-southeast-1`, `cn-beijing`, `cn-shanghai`, `cn-guangzhou`.
+- Supplying `enable_vpc=true` requires `vpc_id`, `subnet_ids`, and `security_group_ids`.
+- After creation call `upload_code` to push code/resources.
+
+Execution rules:
+- HTTP services must listen on 0.0.0.0:8000.
+- Declare every framework/server dependency in `requirements.txt` / `package.json`; do not bundle virtualenvs.
+- Module CLIs are not on PATH. Invoke them with `python -m module_name ...` or start the server in code—running `gunicorn ...` or `uvicorn ...` directly will fail.
+- Keep startup scripts focused on launching the app; skip extra installs once `upload_code` has run.
+- Store templates/static assets as files and sanity-check imports before uploading.
 """)
 def create_function(name: str = None, region: str = None, runtime: str = None, command: str = None, source: str = None,
                     image: str = None, envs: dict = None, description: str = None, enable_vpc = False,
@@ -89,73 +82,119 @@ def create_function(name: str = None, region: str = None, runtime: str = None, c
     region = validate_and_set_region(region)
 
     api_instance = init_client(region, mcp.get_context())
-    function_name = name if name else generate_random_name()
-    create_function_request = volcenginesdkvefaas.CreateFunctionRequest(
-        name=function_name,
-        runtime=runtime if runtime else "python3.8/v1",
-    )
+    if enable_vpc and (not vpc_id or not subnet_ids or not security_group_ids):
+        raise ValueError("vpc_id or subnet_ids and security_group_ids must be provided.")
 
-    if image:
-        create_function_request.source = image
-        create_function_request.source_type = "image"
-
-    if command:
-        create_function_request.command = command
-
-    source_type = None
-
-    if source:
-        # Determine source type based on the format
-        if ":" not in source:
-            # If no colon, assume it's a base64 encoded zip
-            source_type = "zip"
-        elif source.count(":") == 1 and "/" not in source:
-            # Format: bucket_name:object_key
-            source_type = "tos"
-        elif "/" in source and ":" in source:
-            # Format: host/namespace/repo:tag
-            source_type = "image"
-
-        create_function_request.source = source
-        create_function_request.source_type = source_type
-
-    if envs:
-        env_list = []
-        for key, value in envs.items():
-            env_list.append({
-                "key": key,
-                "value": value
-            })
-        create_function_request.envs = env_list
-
-    if enable_vpc:
-        if not vpc_id or not subnet_ids or not security_group_ids:
-            raise ValueError("vpc_id or subnet_ids and security_group_ids must be provided.")
-        vpc_config = volcenginesdkvefaas.VpcConfigForUpdateFunctionInput(
-            enable_vpc=True, vpc_id=vpc_id, subnet_ids=subnet_ids, security_group_ids=security_group_ids,
+    def build_create_request(current_name: str) -> volcenginesdkvefaas.CreateFunctionRequest:
+        request_obj = volcenginesdkvefaas.CreateFunctionRequest(
+            name=current_name,
+            runtime=runtime if runtime else "python3.8/v1",
         )
-        create_function_request.vpc_config = vpc_config
 
-    if description:
-        create_function_request.description = description
+        if image:
+            request_obj.source = image
+            request_obj.source_type = "image"
 
-    try:
-        response = api_instance.create_function(create_function_request)
-        return f"Successfully created VeFaaS function with name {function_name} and id {response.id}"
-    except ApiException as e:
-        error_message = f"Failed to create VeFaaS function: {str(e)}"
-        raise ValueError(error_message)
+        if command:
+            request_obj.command = command
 
-@mcp.tool(description="""Updates a VeFaaS function's code.
-Use this when asked to update a VeFaaS function's code.
-Region is the region where the function will be updated, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
-`cn-shanghai`, `cn-guangzhou` as well.
-If `enable_vpc` is set to `true`, the following parameters are **required**:
-   • `vpc_id`: The target VPC ID
-   • `subnet_ids`: A list of subnet IDs (at least one)
-   • `security_group_ids`: A list of security group IDs
-After updating the function, you need to release it again for the changes to take effect.
-No need to ask user for confirmation, just update the function.""")
+        if source:
+            if ":" not in source:
+                source_type = "zip"
+            elif source.count(":") == 1 and "/" not in source:
+                source_type = "tos"
+            elif "/" in source and ":" in source:
+                source_type = "image"
+            else:
+                source_type = None
+
+            request_obj.source = source
+            if source_type:
+                request_obj.source_type = source_type
+
+        if envs:
+            env_list = [{"key": key, "value": value} for key, value in envs.items()]
+            request_obj.envs = env_list
+
+        if enable_vpc:
+            vpc_config = volcenginesdkvefaas.VpcConfigForUpdateFunctionInput(
+                enable_vpc=True, vpc_id=vpc_id, subnet_ids=subnet_ids, security_group_ids=security_group_ids,
+            )
+            request_obj.vpc_config = vpc_config
+
+        if description:
+            request_obj.description = description
+
+        return request_obj
+
+    base_name = name if name else generate_random_name()
+    current_name = base_name
+    used_names = {current_name}
+    max_attempts = 5
+    attempt = 0
+
+    while attempt < max_attempts:
+        request_obj = build_create_request(current_name)
+        try:
+            response = api_instance.create_function(request_obj)
+            return f"Successfully created veFaaS function with name {current_name} and id {response.id}"
+        except ApiException as e:
+            if is_name_conflict_error(e):
+                attempt += 1
+                next_name = append_random_suffix(base_name)
+                while next_name in used_names:
+                    next_name = append_random_suffix(base_name)
+                used_names.add(next_name)
+                logger.info(
+                    "Function name '%s' already exists. Retrying with '%s' (attempt %s/%s)",
+                    current_name,
+                    next_name,
+                    attempt,
+                    max_attempts,
+                )
+                current_name = next_name
+                continue
+
+            error_message = f"Failed to create veFaaS function: {str(e)}"
+            raise ValueError(error_message)
+
+    raise ValueError("Failed to create veFaaS function: exhausted name retries due to conflicts.")
+
+
+def append_random_suffix(name: str, length: int = 6) -> str:
+    suffix = "".join(random.choices(string.ascii_lowercase + string.digits, k=length))
+    return f"{name}-{suffix}"
+
+
+def is_name_conflict_error(exception: ApiException) -> bool:
+    message = str(exception).lower()
+    if "already exists" in message:
+        return True
+
+    body = getattr(exception, "body", None)
+    if body:
+        if isinstance(body, (bytes, bytearray)):
+            body_text = body.decode("utf-8", errors="ignore").lower()
+        else:
+            body_text = str(body).lower()
+        if "already exists" in body_text:
+            return True
+
+    return False
+
+@mcp.tool(description="""Update a veFaaS function's referenced artifact or runtime settings.
+
+When to use:
+- Swap the function to an existing artifact (base64 zip, TOS object, container image) or adjust command/env/VPC fields.
+- Do **not** use this for fresh local code edits—run 'upload_code' so the platform rebuilds the package correctly.
+
+Guide:
+- If `source` is provided, ensure the artifact already exists and matches the inferred source_type (zip/tos/image).
+- For VPC changes set `enable_vpc=true` and include `vpc_id`, `subnet_ids`, `security_group_ids`.
+- Always call 'release_function' afterwards so the changes go live.
+
+Region defaults to 'cn-beijing' (also supports 'ap-southeast-1', 'cn-beijing', 'cn-shanghai', 'cn-guangzhou').
+No confirmation needed.""")
 def update_function(function_id: str, source: str = None, region: str = None, command: str = None,
                     envs: dict = None, enable_vpc = False, vpc_id: str = None, subnet_ids: List[str] = None,
                     security_group_ids: List[str] = None,):
@@ -213,17 +252,18 @@ def update_function(function_id: str, source: str = None, region: str = None, co
         response = api_instance.update_function(update_request)
         return f"Successfully updated function {function_id} with source type {source_type}"
     except ApiException as e:
-        error_message = f"Failed to update VeFaaS function: {str(e)}"
+        error_message = f"Failed to update veFaaS function: {str(e)}"
         raise ValueError(error_message)
 
 @mcp.tool(description="""Release a function to production (deploy).
 
 When to use:
-- After 'upload_code' (and dependency install, if any, has Succeeded).
+- Only immediately after a successful 'upload_code' (or 'update_function' for image-based updates) once dependency install has reported Succeeded; releasing without that step reuses the previous artifact and skips your fresh code.
 
 Guide:
-- If 'upload_code' created a dependency install task, wait for 'Succeeded' via 'get_dependency_install_task_status'.
-- Loop 'get_function_release_status' until release completes. On Succeeded: proceed to create API Gateway trigger. On Failed: inspect status/errors, fix code/config as needed, re-run 'upload_code' (if code changed), then retry release. Do not create API Gateway Trigger on failure.
+- If 'upload_code' created a dependency install task, wait for 'Succeeded' via 'get_dependency_install_task_status'. If you're unsure whether upload ran in this session, call it again before releasing.
+- This call only submits the release job; it does **not** mean the function is live. Immediately poll 'get_function_release_status' until it reports Succeeded/Failed before taking any follow-up actions (e.g. creating an API Gateway trigger).
+- On Succeeded: proceed to create API Gateway trigger. On Failed: inspect status/errors, fix code/config as needed, re-run 'upload_code' (if code changed), then retry release. Do not create API Gateway Trigger on failure.
 
 Region: default 'cn-beijing' (supported: 'ap-southeast-1', 'cn-beijing', 'cn-shanghai', 'cn-guangzhou').
 No confirmation needed.""")
@@ -233,17 +273,21 @@ def release_function(function_id: str, region: str = None):
     api_instance = init_client(region, mcp.get_context())
 
     try:
+        logger.info("Release uses the last artifact uploaded via upload_code/update_function; ensure that step has completed successfully before calling release.")
         req = volcenginesdkvefaas.ReleaseRequest(
             function_id=function_id, revision_number=0
         )
         response = api_instance.release(req)
-        return f"Successfully released function {function_id} for production use"
+        return (
+            "Release request submitted for function "
+            f"{function_id}. Poll 'get_function_release_status' until it reports Succeeded/Failed."
+        )
     except ApiException as e:
-        error_message = f"Failed to release VeFaaS function: {str(e)}"
+        error_message = f"Failed to release veFaaS function: {str(e)}"
         raise ValueError(error_message)
 
-@mcp.tool(description="""Deletes a VeFaaS function.
-Use this when asked to delete, remove, or uninstall a VeFaaS function.
+@mcp.tool(description="""Deletes a veFaaS function.
+Use this when asked to delete, remove, or uninstall a veFaaS function.
 Region is the region where the function will be deleted, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
 `cn-shanghai`, `cn-guangzhou` as well.
 No need to ask user for confirmation, just delete the function.""")
@@ -259,13 +303,20 @@ def delete_function(function_id: str, region: str = None):
         response = api_instance.delete_function(req)
         return f"Successfully deleted function {function_id}"
     except ApiException as e:
-        error_message = f"Failed to delete VeFaaS function: {str(e)}"
+        error_message = f"Failed to delete veFaaS function: {str(e)}"
         raise ValueError(error_message)
 
-@mcp.tool(description="""Checks the release status of a VeFaaS function.
-Use this when you need to check the release status of a VeFaaS function.
-Region is the region where the function exists, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
-`cn-shanghai`, `cn-guangzhou` as well.
+@mcp.tool(description="""Check release status (paired with 'release_function').
+
+Use immediately after 'release_function' because that call only enqueues the release; keep polling until Succeeded/Failed and do nothing else (no triggers, no traffic changes) until status is final.
+
+Returns: raw API response.
+
+Agent guidance:
+- Poll every ~3s with a ~5min timeout; stop on Succeeded/Failed.
+- On Failed: inspect status/errors, resolve, then rerun 'upload_code' -> 'release_function' procedure once fixes are in place. A frequent issue is `bash: <tool>: command not found`; ensure startup scripts call Python modules via `python -m ...` or launch the server in code (see `create_function` guidance) before retrying.
+
+Region is the region where the function exists, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`, `cn-shanghai`, `cn-guangzhou` as well.
 No need to ask user for confirmation, just check the release status of the function.""")
 def get_function_release_status(function_id: str, region: str = None):
     region = validate_and_set_region(region)
@@ -277,24 +328,8 @@ def get_function_release_status(function_id: str, region: str = None):
     response = api_instance.get_release_status(req)
     return response
 
-@mcp.tool(description="""Checks if a VeFaaS function exists.
-Use this when you need to check if a VeFaaS function exists.
-No need to ask user for confirmation, just check if the function exists.""")
-def does_function_exist(function_id: str, region: str = None):
-    region = validate_and_set_region(region)
-
-    api_instance = init_client(region, mcp.get_context())
-    req = volcenginesdkvefaas.GetFunctionRequest(
-        id=function_id
-    )
-    try:
-        response = api_instance.get_function(req)
-        return True
-    except ApiException as e:
-        return False
-
-@mcp.tool(description="""Lists all VeFaaS functions.
-Use this when you need to list all VeFaaS functions.
+@mcp.tool(description="""Lists all veFaaS functions.
+Use this when you need to list all veFaaS functions.
 No need to ask user for confirmation, just list the functions.""")
 def get_latest_functions(region: str = None):
     region = validate_and_set_region(region)
@@ -317,14 +352,14 @@ def generate_random_name(prefix="mcp", length=8):
 
 def init_client(region: str = None, ctx: Context = None):
     """
-    Initializes the VeFaaS API client with credentials and region.
+    Initializes the veFaaS API client with credentials and region.
 
     Args:
         region: The region to use for the client
         ctx: The server context object
 
     Returns:
-        VEFAASApi: Initialized VeFaaS API client
+        VEFAASApi: Initialized veFaaS API client
 
     Raises:
         ValueError: If authorization fails
@@ -342,7 +377,7 @@ def init_client(region: str = None, ctx: Context = None):
 
     # Set region with default if needed
     region = region if region is not None else "cn-beijing"
-    print(f"Using region: {region}")
+    logger.info("Using region: %s", region)
     configuration.region = region
 
     # set default configuration
@@ -350,14 +385,14 @@ def init_client(region: str = None, ctx: Context = None):
     return volcenginesdkvefaas.VEFAASApi()
 
 
-@mcp.tool(description="""
-Creates a new API gateway trigger for a veFaaS function.
+@mcp.tool(description="""Create an API Gateway trigger for a veFaaS function.
 
-- Each function must use a dedicated gateway service (do not reuse services between functions).
-- API gateways should be reused across different services whenever possible.
+Prereqs:
+- Release the function first (`release_function` + poll `get_function_release_status` until Succeeded).
+- Ensure a running API gateway is available (inspect via `list_api_gateways`; reuse an existing gateway whenever possible and only call `create_api_gateway` if none are suitable).
+- Provision a dedicated gateway service for this function via `create_api_gateway_service` (each public domain -> its own service).
 
-This tool only creates the trigger using the provided gateway ID and service ID.
-After creation, you can use the `list_api_gateway_services` tool to retrieve the access address.
+This tool links the function to that service (creates upstream + route). After success, reuse the service details returned by `create_api_gateway_service` to present the public domain to the user.
 """)
 def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id: str, region: str = None):
     region = validate_and_set_region(region)
@@ -381,8 +416,7 @@ def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id
 
     try:
         response_body = request("POST", now, {}, {}, ak, sk, token, "CreateUpstream", json.dumps(body), region)
-        # Print the full response for debugging
-        print(f"Response: {json.dumps(response_body)}")
+        logger.debug("CreateUpstream response: %s", json.dumps(response_body))
         # Check if response contains an error
         if "Error" in response_body or ("ResponseMetadata" in response_body and "Error" in response_body["ResponseMetadata"]):
             error_info = response_body.get("Error") or response_body["ResponseMetadata"].get("Error")
@@ -399,7 +433,7 @@ def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id
         raise ValueError(error_message)
 
     body = {
-        "Name":"router1",
+        "Name":"default",
         "UpstreamList":[{
                 "Type":"VeFaas",
                 "UpstreamId":upstream_id,
@@ -422,9 +456,11 @@ def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id
         raise ValueError(error_message)
     return response_body
 
-@mcp.tool(description="""Lists all API gateways.
-Use this when you need to list all API gateways.
-No need to ask user for confirmation, just list the gateways, if the request timed out, you should retry at least 5 times""")
+@mcp.tool(description="""List API gateways.
+
+Use this to (1) confirm a gateway exists before creating one and (2) poll gateway status after invoking `create_api_gateway` (wait for `Running`).
+Polling guidance: retry the call every ~5s for up to ~5 minutes. If a single request times out, retry at least 5 times before surfacing an error.
+""")
 def list_api_gateways(region: str = None):
     now = datetime.datetime.utcnow()
 
@@ -437,18 +473,16 @@ def list_api_gateways(region: str = None):
     return response_body
 
 
-@mcp.tool(description="""Checks for an existing VeApig API gateway with the specified region. If a running gateway with that region is found, it's reused. Otherwise, a new gateway is created.
+@mcp.tool(description="""Create an API gateway when no reusable gateway exists.
 
-- `name`: The name for the gateway. If provided, the tool will first search for a gateway with this name. If not provided, a new gateway with a random name will be created.
-- `region`: Target region for the gateway. Defaults to `cn-beijing`. Supported values: `cn-beijing`, `cn-shanghai`, `cn-guangzhou`, `ap-southeast-1`.
-
-If can not find an existing running gateway, start to create a new one.
-
-Note: This is an **asynchronous** operation and may take up to **5 minutes** to complete.
-After calling this tool, you must use the `list_api_gateways` tool to check the status of the gateway with the specified name and region.
-Only when the status is `Running` does the gateway creation complete successfully.
-"""
-)
+- Prefer reusing an existing Running gateway discovered via `list_api_gateways`; call this tool only when none are suitable.
+- `region` defaults to `cn-beijing`; supported: `cn-beijing`, `cn-shanghai`, `cn-guangzhou`, `ap-southeast-1`.
+- `name` sets the desired gateway name. Provide it only after confirming with `list_api_gateways` that the name is free; otherwise let the tool generate one.
+- Operation is asynchronous (≤~5 minutes). After invoking, poll `list_api_gateways` until the gateway with this name/region reports `Running` before creating services or triggers.
+- Gateway creation does not yield a public domain; domains come from services. Use the service details returned by `create_api_gateway_service` (after routing is in place) to surface the URL.
+- Once Running, call `create_api_gateway_service` to get a dedicated service/domain per veFaaS function; the tool now returns both the create response and the fetched service details (including domain).
+- If the API responds that the account balance is below the required threshold (for example, balance < 100) or quota has been exceeded, surface the message and instruct the user to resolve it via the console or contact API gateway OnCall; retries are not useful.
+""")
 def create_api_gateway(name: str = None, region: str = "cn-beijing") -> str:
     """
     Creates a new VeApig gateway.
@@ -487,15 +521,13 @@ def create_api_gateway(name: str = None, region: str = "cn-beijing") -> str:
     except Exception as e:
         return f"Failed to create VeApig gateway with name {gateway_name}: {str(e)}"
 
+@mcp.tool(description="""Create a VeApig gateway service (one per public domain).
 
-@mcp.tool(
-    description="""Creates a new VeApig gateway service with a random name if no name is provided.
-gateway_id is the id of the gateway where the service will be created. The gateway_id is required.
-region is the region where the gateway service will be created, default is cn-beijing. It accepts `ap-southeast-1`, `cn-beijing`,
-`cn-shanghai`, `cn-guangzhou` as well.
-"""
-)
-def create_gateway_service(
+- Requires an existing Running gateway (`gateway_id`). Gateway region defaults to `cn-beijing`; also supports `ap-southeast-1`, `cn-shanghai`, `cn-guangzhou`.
+- Provide `name` to control the service name; otherwise a random value is used. Always reuse an existing Running gateway and add services per function/domain.
+- Returns the raw creation response plus a follow-up `GetGatewayService` result so you can capture the service ID and domain. After binding routes (`create_api_gateway_trigger`), reuse those details when presenting the public URL.
+""")
+def create_api_gateway_service(
     gateway_id: str, name: str = None, region: str = "cn-beijing"
 ) -> str:
     """
@@ -526,47 +558,31 @@ def create_gateway_service(
         raise ValueError(f"Authorization failed: {str(e)}")
 
     try:
-        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateGatewayService", json.dumps(body), region)
-        return json.dumps(response_body, ensure_ascii=False, indent=2)
+        creation_response = request("POST", now, {}, {}, ak, sk, token, "CreateGatewayService", json.dumps(body), region)
     except Exception as e:
         return f"Failed to create VeApig gateway service with name {service_name}: {str(e)}"
 
-
-@mcp.tool(description="""Lists all services of an API gateway.
-Use this when you need to list all services of an API gateway.
-No need to ask user for confirmation, just list the services.""")
-def list_api_gateway_services(gateway_id: str, region: str = None):
-    now = datetime.datetime.utcnow()
     try:
-        ak, sk, token = get_authorization_credentials(mcp.get_context())
-    except ValueError as e:
-        raise ValueError(f"Authorization failed: {str(e)}")
+        result = creation_response.get("Result", {}) if isinstance(creation_response, dict) else {}
+    except Exception:
+        result = {}
 
-    body = {
-        "GatewayId": gateway_id,
-        "Limit": 10,
-        "Offset": 0,
+    service_id = result.get("Id") or result.get("ServiceId")
+    if not service_id:
+        raise ValueError(f"CreateGatewayService response missing service ID: {creation_response}")
+
+    detail_body = {"Id": service_id}
+    detail_now = datetime.datetime.utcnow()
+    service_details = request(
+        "POST", detail_now, {}, {}, ak, sk, token, "GetGatewayService", json.dumps(detail_body), region
+    )
+
+    combined = {
+        "service_id": service_id,
+        "create_response": creation_response,
+        "service_details": service_details,
     }
-
-    response_body = request("POST", now, {}, {}, ak, sk, token, "ListGatewayServices", json.dumps(body), region)
-    return response_body
-
-@mcp.tool(description="""Lists all routes of an upstream.
-Use this when you need to list all routes of an upstream.
-No need to ask user for confirmation, just list the routes.""")
-def list_routes(upstream_id: str, region: str = None):
-    now = datetime.datetime.utcnow()
-    try:
-        ak, sk, token = get_authorization_credentials(mcp.get_context())
-    except ValueError as e:
-        raise ValueError(f"Authorization failed: {str(e)}")
-
-    body = {
-        "UpstreamId": upstream_id
-    }
-
-    response_body = request("POST", now, {}, {}, ak, sk, token, "ListRoutes", json.dumps(body), region)
-    return response_body
+    return json.dumps(combined, ensure_ascii=False, indent=2)
 
 def ensure_executable_permissions(folder_path: str):
     for root, _, files in os.walk(folder_path):
@@ -582,14 +598,14 @@ def zip_and_encode_folder(folder_path: str, local_folder_exclude: List[str]) -> 
     """
     # Check for system zip first
     if not shutil.which('zip'):
-        print("System zip command not found, using Python implementation")
+        logger.info("System zip command not found, using Python implementation")
         try:
             data = python_zip_implementation(folder_path, local_folder_exclude)
             return data, len(data), None
         except Exception as e:
             return None, 0, e
 
-    print(f"Zipping folder: {folder_path}")
+    logger.info("Zipping folder: %s", folder_path)
     try:
         ensure_executable_permissions(folder_path)
         # Base zip command
@@ -599,7 +615,7 @@ def zip_and_encode_folder(folder_path: str, local_folder_exclude: List[str]) -> 
         if local_folder_exclude:
             for pattern in local_folder_exclude:
                 cmd.extend(['-x', pattern])
-        print(f"cmd is {cmd}")
+        logger.debug("Zip command: %s", cmd)
 
         # Create zip process with explicit arguments
         proc = subprocess.Popen(
@@ -614,23 +630,23 @@ def zip_and_encode_folder(folder_path: str, local_folder_exclude: List[str]) -> 
         try:
             stdout, stderr = proc.communicate(timeout=30)
             if proc.returncode != 0:
-                print(f"Zip error: {stderr.decode()}")
+                logger.error("Zip error: %s", stderr.decode())
                 data = python_zip_implementation(folder_path, local_folder_exclude)
                 return data, len(data), None
 
             if stdout:
                 size = len(stdout)
-                print(f"Zip finished, size: {size / 1024 / 1024:.2f} MB")
+                logger.info("Zip finished, size: %.2f MB", size / 1024 / 1024)
                 return stdout, size, None
             else:
-                print("No data from zip command, falling back to Python implementation")
+                logger.warning("zip produced no data; falling back to Python implementation")
                 data = python_zip_implementation(folder_path, local_folder_exclude)
                 return data, len(data), None
 
         except subprocess.TimeoutExpired:
             proc.kill()
             proc.wait(timeout=5)  # Give it 5 seconds to cleanup
-            print("Zip process timed out, falling back to Python implementation")
+            logger.warning("zip process timed out; falling back to Python implementation")
             try:
                 data = python_zip_implementation(folder_path, local_folder_exclude)
                 return data, len(data), None
@@ -638,7 +654,7 @@ def zip_and_encode_folder(folder_path: str, local_folder_exclude: List[str]) -> 
                 return None, 0, e
 
     except Exception as e:
-        print(f"System zip error: {str(e)}")
+        logger.error("System zip error: %s", str(e))
         try:
             data = python_zip_implementation(folder_path, local_folder_exclude)
             return data, len(data), None
@@ -674,9 +690,9 @@ def python_zip_implementation(folder_path: str, local_folder_exclude: List[str] 
                     with open(file_path, 'rb') as f:
                         zipf.writestr(info, f.read())
                 except Exception as e:
-                    print(f"Warning: Skipping file {arcname} due to error: {str(e)}")
+                    logger.warning("Skipping file %s due to error: %s", arcname, str(e))
 
-    print(f"Python zip finished, size: {buffer.tell() / 1024 / 1024:.2f} MB")
+    logger.info("Python zip finished, size: %.2f MB", buffer.tell() / 1024 / 1024)
     return buffer.getvalue()
 
 def _get_upload_code_description() -> str:
@@ -690,8 +706,8 @@ def _get_upload_code_description() -> str:
         "- 'code_upload_callback'\n"
         "- 'dependency': {dependency_task_created, should_check_dependency_status, skip_reason?}\n\n"
         "Tips:\n"
-        "- Python/Node deps: put them in 'requirements.txt'/'package.json'; VeFaaS installs them as needed.\n"
-        "- When uploading code, exclude local deps and noise (e.g., `.venv`, `node_modules`, `.git`, build artifacts) via `local_folder_exclude`.\n\n"
+        "- Python/Node deps: put them in 'requirements.txt'/'package.json'; veFaaS installs them as needed.\n"
+        "- When uploading code, exclude local deps and noise (e.g., `.venv`, `site-packages`, `node_modules`, `.git`, build artifacts) via `local_folder_exclude`.\n\n"
     )
 
     # Detect run mode via FASTMCP_* environment variables.
@@ -708,7 +724,7 @@ def _get_upload_code_description() -> str:
         )
 
     tail = (
-        "After upload: dependency install (if any) runs asynchronously; use 'get_dependency_install_task_status' to poll until Succeeded/Failed."
+        "After upload: dependency install (if any) runs asynchronously; if triggered, you MUST call 'get_dependency_install_task_status' to poll until Succeeded/Failed."
     )
 
     return base_desc + note + tail
@@ -784,9 +800,9 @@ def handle_dependency(
     try:
         response = api_instance.get_function(req)
         runtime = response.runtime
-        print('runtime:', runtime)
+        logger.debug("Runtime detected: %s", runtime)
     except ApiException as e:
-        raise ValueError(f"Failed to get VeFaaS function: {str(e)}")
+        raise ValueError(f"Failed to get veFaaS function: {str(e)}")
 
     # Treat any Python/Node runtime as eligible
     is_python = 'python' in runtime
@@ -809,16 +825,16 @@ def handle_dependency(
 
     # Minimal decision surface for the agent
     if is_python and not has_requirements:
-        print("Python runtime detected, but no requirements.txt found. Skipping dependency install.")
+        logger.info("Python runtime detected, but no requirements.txt found. Skipping dependency install.")
         return {"dependency_task_created": False, "should_check_dependency_status": False, "skip_reason": "No requirements.txt"}
     if is_nodejs and not has_package_json:
-        print("Node.js runtime detected, but no package.json found. Skipping dependency install.")
+        logger.info("Node.js runtime detected, but no package.json found. Skipping dependency install.")
         return {"dependency_task_created": False, "should_check_dependency_status": False, "skip_reason": "No package.json"}
     if is_nodejs and has_package_json and has_node_modules:
-        print("Node.js runtime detected, package.json found, but has node_modules. Skipping dependency install.")
+        logger.info("Node.js runtime detected, package.json found, but has node_modules. Skipping dependency install.")
         return {"dependency_task_created": False, "should_check_dependency_status": False, "skip_reason": "node_modules present"}
     if not is_python and not is_nodejs:
-        print("Runtime is not Python or Node.js. Skipping dependency install.")
+        logger.info("Runtime is not Python or Node.js. Skipping dependency install.")
         return {"dependency_task_created": False, "should_check_dependency_status": False, "skip_reason": "Unsupported runtime"}
 
     body = {"FunctionId": function_id}
@@ -828,7 +844,7 @@ def handle_dependency(
         create_resp = request(
             "POST", now, {}, {}, ak, sk, token, "CreateDependencyInstallTask", json.dumps(body), region
         )
-        print(create_resp)
+        logger.debug("Dependency install response: %s", create_resp)
         return {
             "dependency_task_created": True,
             "should_check_dependency_status": True,
@@ -847,7 +863,8 @@ Returns:
 - If Failed: 'log_download_url' and, when 'fetch_log_content' is True, 'log_content'.
 
 Agent guidance:
-- Poll every 3s with a ~5min timeout; stop on Succeeded/Failed.
+- Poll every 3s with a ~5min timeout; if you polled less than ~3s ago and status is still InProgress, reuse the last response instead of calling again (prevents loop detectors from firing).
+- Stop on Succeeded/Failed; if it stays InProgress beyond ~5min, escalate instead of hammering the API.
 - On Failed: inspect logs. If dependency spec issue, fix and 'upload_code' again; if transient, retry.
 
 Params: function_id; optional region (default cn-beijing); fetch_log_content (bool).
@@ -926,7 +943,7 @@ def upload_code_zip_for_function(api_instance: VEFAASApi(object), function_id: s
 
     response = requests.put(url=upload_url, data=zip_bytes, headers=headers)
     if 200 <= response.status_code < 300:
-        print(f"Upload successful! Size: {code_zip_size / 1024 / 1024:.2f} MB")
+        logger.info("Upload successful. Size: %.2f MB", code_zip_size / 1024 / 1024)
     else:
         error_message = f"Upload failed to {upload_url} with status code {response.status_code}: {response.text}"
         raise ValueError(error_message)
