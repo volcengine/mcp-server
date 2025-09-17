@@ -180,7 +180,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "mcp", specifier = ">=1.9.4" },
-    { name = "volcengine-python-sdk", specifier = ">=4.0.2" },
+    { name = "volcengine-python-sdk", specifier = "==4.0.20" },
 ]
 
 [[package]]
@@ -536,7 +536,7 @@ wheels = [
 
 [[package]]
 name = "volcengine-python-sdk"
-version = "4.0.11"
+version = "4.0.20"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
@@ -544,4 +544,7 @@ dependencies = [
     { name = "six" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9b/d6/244bb01e0683e37128ed071ce51061feaa4ea8dbe9eeaf33e865fa6252fc/volcengine-python-sdk-4.0.11.tar.gz", hash = "sha256:92c46411edb80b40bac87f07fc871dd9c6e4a987fbb793648f74028d9022c5dc", size = 6414720, upload-time = "2025-08-14T12:50:27.543Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5e/8c/7f290fa6446bbd6c1cd9321c2e60f3d4c5a11648a33ee2ab91760c6dee03/volcengine-python-sdk-4.0.20.tar.gz", hash = "sha256:ac48a7b7110f175fa9387f1ec1d256ba302f224d671a54ced3a6f761545e97e8", size = 5885411, upload-time = "2025-09-12T03:51:20.944Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/95/b0/e22da66c0e44224384262c44cd62964daa1a2b583f2b82d8335936305e7f/volcengine_python_sdk-4.0.20-py2.py3-none-any.whl", hash = "sha256:84d93df423cd7c318f762d3ddf046eafcc031c796a3d037401ffe33f4f24c643", size = 22675532, upload-time = "2025-09-12T03:51:16.797Z" },
+]

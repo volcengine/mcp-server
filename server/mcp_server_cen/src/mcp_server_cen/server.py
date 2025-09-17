@@ -240,8 +240,6 @@ def describe_cen_bandwidth_package_attributes(
     resp = cen_resource.describe_cen_bandwidth_package_attributes(req)
     return resp.to_dict()
 
-# TODO: cannot find describe_cen_bandwidth_packages_billing in volcenginesdkcen/models
-'''
 @mcp.tool(
     name="describe_cen_bandwidth_packages_billing",
     description="查询满足指定条件的带宽包实例计费相关信息"
@@ -261,7 +259,6 @@ def describe_cen_bandwidth_packages_billing(
 
     resp = cen_resource.describe_cen_bandwidth_packages_billing(req)
     return resp.to_dict()
-'''
 
 @mcp.tool(
     name="describe_cen_inter_region_bandwidth_attributes",
