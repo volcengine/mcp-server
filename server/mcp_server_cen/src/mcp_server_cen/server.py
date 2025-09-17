@@ -286,16 +286,16 @@ def describe_cen_bandwidth_package_attributes(
     description="查询满足指定条件的带宽包实例计费相关信息"
 )
 def describe_cen_bandwidth_packages_billing(
-        bandwidth_package_id: str = None) -> dict[str, Any]:
+        cen_bandwidth_package_ids: str = None) -> dict[str, Any]:
     """
     调用 DescribeCenBandwidthPackagesBilling 接口，查询满足指定条件的带宽包实例计费相关信息。
     Args:
-        bandwidth_package_id (str): 要查看的带宽包的ID。
+        cen_bandwidth_package_ids (str): 要查看的带宽包的ID。
     Returns:
         dict[str, Any]: 带宽包的计费信息。
     """
     req = {
-        "bandwidth_package_id": bandwidth_package_id
+        'cen_bandwidth_package_ids': cen_bandwidth_package_ids
     }
 
     resp = cen_resource.describe_cen_bandwidth_packages_billing(req)

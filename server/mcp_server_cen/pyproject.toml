@@ -5,7 +5,7 @@ description = "MCP Server for CEN"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "mcp>=1.9.4",
+    "mcp==1.10.0",
     "volcengine-python-sdk==4.0.20",
 ]
 
