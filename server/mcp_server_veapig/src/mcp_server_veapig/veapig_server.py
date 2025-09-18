@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 mcp = FastMCP(
     "VeAPIG",
     host=os.getenv("MCP_SERVER_HOST", "0.0.0.0"),
-    post=os.getenv("MCP_SERVER_PORT", "8000"),
+    port=int(os.getenv("MCP_SERVER_PORT", "8000")),
     streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"),
     stateless_http=True,
     json_response=True,
