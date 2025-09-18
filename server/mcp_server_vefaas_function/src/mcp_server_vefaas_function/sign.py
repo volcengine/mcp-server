@@ -27,9 +27,12 @@ import datetime
 import os
 import base64
 import json
+import logging
 from mcp.server.session import ServerSession
 from mcp.server.fastmcp import Context
 from starlette.requests import Request
+
+logger = logging.getLogger(__name__)
 
 # 以下参数视服务不同而不同，一个服务内通常是一致的
 Service = "apig"
@@ -153,16 +156,16 @@ def request(method, date, query, header, ak, sk, token, action, body, region = N
     )
 
     # 打印正规化的请求用于调试比对
-    print(canonical_request_str)
+    logger.debug("canonical_request=%s", canonical_request_str)
     hashed_canonical_request = hash_sha256(canonical_request_str)
 
     # 打印hash值用于调试比对
-    print(hashed_canonical_request)
+    logger.debug("hashed_canonical_request=%s", hashed_canonical_request)
     credential_scope = "/".join([short_x_date, credential["region"], credential["service"], "request"])
     string_to_sign = "\n".join(["HMAC-SHA256", x_date, credential_scope, hashed_canonical_request])
 
     # 打印最终计算的签名字符串用于调试比对
-    print(string_to_sign)
+    logger.debug("string_to_sign=%s", string_to_sign)
     k_date = hmac_sha256(credential["secret_access_key"].encode("utf-8"), short_x_date)
     k_region = hmac_sha256(k_date, credential["region"])
     k_service = hmac_sha256(k_region, credential["service"])
