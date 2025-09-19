@@ -24,7 +24,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Create MCP server
-mcp = FastMCP("LAS Dataset Search Server", port=int(os.getenv("PORT", "8888")))
+mcp = FastMCP("LAS Dataset Search Server", port=int(os.getenv("PORT", "8888")),host=os.getenv("ENV_MCP_SERVER_HOST", "127.0.0.1"))
 
 @mcp.tool()
 def las_get_dataset_info(

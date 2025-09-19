@@ -10,7 +10,7 @@
 - **版本**：v0.0.1
 - **分类**：视频云，云手机
 - **标签**：OS-Agent，云手机，移动端
-- **描述**：本工具集基于 MCP（Multi-Cloud Platform）协议实现，具备良好的扩展性和兼容性，适配火山引擎云手机产品。所有工具均以标准接口形式对外开放，便于集成到各类自动化平台和业务系统中
+- **描述**：本工具集基于 MCP（Model Context Protocol）协议实现，具备良好的扩展性和兼容性，适配火山引擎云手机产品。所有工具均以标准接口形式对外开放，便于集成到各类自动化平台和业务系统中
 
 ## MCP Tools
 ### Tools 列表
@@ -30,7 +30,7 @@
 
 ### Tools 详细说明
 ### 1. take_screenshot
-**描述**：对云手机屏幕进行截图，返回截图下载链接  
+**描述**：对云手机屏幕进行截图，返回截图下载链接和屏幕宽高信息  
 
 **输入参数**：
 ```json
@@ -42,7 +42,11 @@
 **输出示例**：
 ```json
 {
-  "result": "截图下载URL"
+  "result": {
+    "screenshot_url": "截图下载URL",
+    "width": 1080,
+    "height": 1920
+  }
 }
 ```
 
@@ -324,7 +328,7 @@
 - `output/cap_tos` 等：其他辅助工具
 
 ### 2. 本地启动
-MCP Server 支持两种启动模式：`stdio` 和 `sse`。
+MCP Server 支持三种启动模式：`stdio` 、 `sse` 和 `streamable-http`。
 #### 2.1 stdio 模式
 适用于通过标准输入输出与 MCP Server 通信的场景。在启动前需设置以下**环境变量**：
 
@@ -377,16 +381,16 @@ func main() {
 ```
 > 说明：请将 `<your-access-key>`、`<your-secret-key>`、`<your-product-id>`、`<your-device-id>`、`<your-auth-token>`、`<tos-access-key>`、`<tos-secret-key>`、`<tos-bucket>`、`<tos-region>`、`<tos-endpoint>` 替换为实际值。其他工具调用只需修改 `req.Params.Name` 及 `Arguments` 字段。
 
-#### 2.2 sse模式
-适用于通过 HTTP SSE（Server-Sent Events）协议与 MCP Server 通信的场景。
+#### 2.2 HTTP模式
+适用于通过 HTTP 协议与 MCP Server 通信的场景。
 **启动命令:**
 ```bash
-./output/mobile_use_mcp --transport sse --port 8080
+./output/mobile_use_mcp --transport (sse/streamable-http) --port 8080
 ```
-- `--transport`/`-t`：指定启动模式，支持 `stdio` 和 `sse`，默认 `stdio`
-- `--port`/`-p`：指定 SSE 服务监听端口，仅在 `sse` 模式下生效，默认 `8080`
+- `--transport`/`-t`：指定启动模式，支持 `stdio` 、 `sse` 和 `streamable-http`，默认 `stdio`
+- `--port`/`-p`：指定 HTTP 服务监听端口，在 `sse` 和 `streamable-http` 模式下生效，默认 `8080`
 
-**SSE 方式 header 字段说明:**
+**HTTP 方式 header 字段说明:**
 
 | Header 名称         | 说明                |
 |---------------------|---------------------|
@@ -407,6 +411,8 @@ func main() {
 | CurrentTime      | string | 当前时间（RFC3339，必填）         |
 | ExpiredTime      | string | 过期时间（RFC3339，必填）         |
 | SessionToken     | string | 火山临时 Token（可选）            |
+
+**Go 代码示例：通过 SSE 方式连接 MCP Server 并调用 take_screenshot 工具**
 
 ```go
 // token 生成
@@ -468,6 +474,36 @@ func main() {
     log.Println("截图结果:", result)
 }
 ```
+**Go 代码示例：通过 streamable-http 方式连接 MCP Server 并调用 take_screenshot 工具**
+
+```go
+func main() {
+    ctx := context.Background()
+    baseUrl := "http://0.0.0.0:8080/mcp"
+    cli, err := mobile_use_client.NewMobileUseStreamableHTTPClient(ctx, baseUrl, map[string]string{
+        "Authorization":      authToken,           // 鉴权token
+        "X-ACEP-ProductId":   "<your-product-id>", // 云手机业务ID
+        "X-ACEP-DeviceId":    "<your-device-id>",  // 云手机实例ID
+        "X-ACEP-TosBucket":   "<your-tos-bucket>", // TOS 存储桶名称
+        "X-ACEP-TosRegion":   "<your-tos-region>", // TOS 区域
+        "X-ACEP-TosEndpoint": "<your-tos-endpoint>", // TOS Endpoint
+        "X-ACEP-TosSession":  "",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer cli.Close()
+    req := mcp.CallToolRequest{}
+    req.Params.Name = "take_screenshot"
+    req.Params.Arguments = map[string]interface{}{}
+    result, err := cli.CallTool(ctx, req)
+    if err != nil {
+        log.Fatal(err)
+    }
+    log.Println("截图结果:", result)
+}
+```
+
 > 说明：请将 `<your-access-key>`、`<your-secret-key>`、`<your-product-id>`、`<your-device-id>` 等替换为实际值。其他工具调用只需修改 `req.Params.Name` 及 `Arguments` 字段。
 
 ### 3. 其他说明

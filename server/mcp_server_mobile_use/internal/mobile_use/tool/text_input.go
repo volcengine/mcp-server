@@ -35,7 +35,11 @@ func HandleTextInput() func(context.Context, mcp.CallToolRequest) (*mcp.CallTool
 		if err != nil {
 			return CallResultError(err)
 		}
-		text, ok := req.Params.Arguments["text"].(string)
+		args, err := CheckArgs(req.Params.Arguments)
+		if err != nil {
+			return CallResultError(err)
+		}
+		text, ok := args["text"].(string)
 		if !ok {
 			return CallResultError(fmt.Errorf("text is required"))
 		}

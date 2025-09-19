@@ -42,7 +42,7 @@ configure_logging("INFO")
 server = Server("mcp-server")
 
 # 获取全局配置
-server_config = load_config('config.yaml')
+server_config = load_config('cfg.yaml')
 
 
 class SSEMiddleware:

@@ -1,0 +1,17 @@
+[project]
+name = "mcp-server-eip"
+version = "0.1.0"
+description = "MCP Server for EIP"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp>=1.9.4",
+    "volcengine-python-sdk>=4.0.2",
+]
+
+[project.scripts]
+mcp-server-eip = "mcp_server_eip.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

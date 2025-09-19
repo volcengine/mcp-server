@@ -128,4 +128,3 @@ if __name__ == '__main__':
             content_type="text/plain",
         )
     )
-    print(resp)

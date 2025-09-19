@@ -16,16 +16,16 @@ def main():
     parser = argparse.ArgumentParser(description="Run the TOS MCP Server")
     parser.add_argument(
         "--transport", "-t",
-        choices=["sse", "stdio"],
+        choices=["sse", "stdio", "streamable-http"],
         default="stdio",
-        help="Transport protocol to use (sse or stdio)"
+        help="Transport protocol to use (sse or stdio or streamable-http)"
     )
 
     args = parser.parse_args()
 
     try:
         # Run the MCP server
-        logger.info(f"Starting TOS MCP Server with {args.transport} transport, region is {TOS_CONFIG.region}")
+        logger.info(f"Starting TOS MCP Server")
 
         mcp.run(transport=args.transport)
     except Exception as e:

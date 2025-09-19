@@ -13,8 +13,13 @@ from pydantic import Field
 from mcp_server_cloudmonitor.models.request import GetMetricsDataRequest, GetMetricsDataFilter
 
 MCP_SERVER_NAME = "CloudMonitor"
+ENV_MCP_SERVER_PORT = "MCP_SERVER_PORT"
+ENV_MCP_SERVER_HOST = "MCP_SERVER_HOST"
 
-mcp = FastMCP(MCP_SERVER_NAME, debug=True, log_level="DEBUG", port=int(os.getenv("PORT", "8000")))
+mcp = FastMCP(MCP_SERVER_NAME, log_level="DEBUG",
+              host=os.getenv(ENV_MCP_SERVER_HOST,"0.0.0.0"),
+              port=int(os.getenv(ENV_MCP_SERVER_PORT, "8000")),
+              streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"))
 
 # Configure logging
 logging.basicConfig(
@@ -37,15 +42,8 @@ def get_metric_data(
         ),
         request: GetMetricsDataRequest = Field(description="查询请求参数"),
 ) -> str:
-    logger.info(
-        f"get_metric_data raw request: {json.dumps(request.model_dump(exclude_none=True), ensure_ascii=False)}"
-    )
     _set_default_for_get_metric_data(request)
-    logger.info(
-        f"get_metric_data final request: {json.dumps(request.model_dump(exclude_none=True), ensure_ascii=False)}"
-    )
-
-    print("enter server process")
+    logger.info("enter server process")
 
     try:
         api_instance = client.init_client(region=region, ctx=mcp.get_context())

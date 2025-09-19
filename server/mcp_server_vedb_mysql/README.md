@@ -1,125 +1,90 @@
 # veDB MySQL MCP Server
+> The veDB MySQL cloud database adopts a compute-storage–separated architecture, is 100 % MySQL-compatible, and supports up to 200 TiB of large-scale structured data storage. A single cluster can scale out to as many as 16 compute nodes. Key features include instance management, account management, database management, backup and restore, allowlist, data migration, data synchronization, read/write splitting, security auditing, high availability, version upgrades, and backup & recovery.
 
-This MCP server provides a tool to interact with the VolcEngine veDB MySQL Service, allowing you to search and retrieve knowledge from your collections.
+[中文介绍](README_zh.md)
 
-## Features
+---
+| Item | Details |
+| ---- | ---- |
+| Description | Volcano Engine veDB MySQL is an out-of-the-box, stable and reliable relational database service |
+| Category | Database |
+| Tags | MySQL, RDS, Relational Database, Database |
 
-- list_vedb_mysql_instances
-> Retrieve a list of all veDB MySQL instances for the user, including a batch of instance IDs and basic information
-- describe_vedb_mysql_detail
-> Retrieve detailed information about a specific veDB MySQL instance
-- list_vedb_mysql_instance_databases
-> Retrieve a list of databases created in a specific veDB MySQL instance, including privileges info
-- list_vedb_mysql_instance_accounts
-> Obtain a list of accounts in a single veDB MySQL instance, with their privilege details
-- modify_vedb_mysql_instance_alias
-> Modify a specific veDB MySQL instance's alias
+---
 
-## Setup
+## Tools
 
-### Prerequisites
+### 1. `create_vedb_mysql_instance`
+- **Description**: Creates a new instance.
+- **Trigger example**: `"Create a new vedbm instance using the parameters of my other instance as reference, and tell me the MySQL connection string."`
 
-- Python 3.10 or higher
-- API credentials (AK/SK)
+### 2. `list_vedb_mysql_instances`
+- **Description**: Retrieves the list of a user’s veDB MySQL instances, including each instance ID and basic information.
+- **Trigger example**: `"List my vedbm instances."`
 
-### Installation
+### 3. `describe_vedb_mysql_detail`
+- **Description**: Gets detailed information about a specified instance.
+- **Trigger example**: `"Show the details of instance ID vedbm-hylviolixpvu."`
 
-1. Install the package:
+### 4. `list_vedb_mysql_instance_databases`
+- **Description**: Retrieves the list of databases within a specified instance, including permission information.
+- **Trigger example**: `"Show the database list in instance vedbm-hylviolixpvu."`
 
-```bash
-pip install -e .
+### 5. `list_vedb_mysql_instance_accounts`
+- **Description**: Retrieves account information within a specified instance, including permission details.
+- **Trigger example**: `"Show the account list in instance vedbm-hylviolixpvu."`
+
+### 6. `modify_vedb_mysql_instance_alias`
+- **Description**: Updates the alias of a specified instance.
+- **Trigger example**: `"Change the alias of instance vedbm-hylviolixpvu to Production Database."`
+
+### 7. `create_vedb_mysql_allowlist`
+- **Description**: Creates a veDB MySQL network allowlist (whitelist).
+- **Trigger example**: `"Create a veDB MySQL network allowlist only for my ECS instances."`
+
+### 8. `bind_allowlist_to_vedb_mysql_instances`
+- **Description**: Binds a veDB MySQL network allowlist to one or more instances.
+- **Trigger example**: `"Bind the allowlist created in the previous step to my veDB MySQL instance."`
+
+---
+
+## Service Activation Link
+[Click here to open the Volcano Engine veDB MySQL service page](https://console.volcengine.com/db/vedb-mysql)
+
+---
+
+## Authentication
+Obtain your Access Key ID, Secret Access Key, and Region from the Volcano Engine console, and use API Key authentication.  
+Set the following variables in your configuration file:
+
+```
+VOLCENGINE_ACCESS_KEY  = <Your Access Key ID>
+VOLCENGINE_SECRET_KEY  = <Your Secret Access Key>
 ```
 
-Or with uv (recommended):
-
-```bash
-uv pip install -e .
-```
-
-### Configuration
-
-The server requires the following environment variables:
-
-- `VOLC_ACCESSKEY`: Your VolcEngine access key
-- `VOLC_SECRETKEY`: Your VolcEngine secret key
-- `REGION`: Your VolcEngine region (e.g., "cn-beijing")
-
-Optional environment variables:
-
-- `PORT`: Port for the FastMCP server (default: 8000)
-
-## Usage
-
-### Running the Server
-
-The server can be run with either stdio transport (for MCP integration) or SSE transport:
-
-```bash
-python -m mcp_server_vedb_mysql.server --transport stdio
-```
-
-Or:
-
-```bash
-python -m mcp_server_vedb_mysql.server --transport sse
-```
-
-## MCP Integration
-
-To add this server to your MCP configuration, add the following to your MCP settings file:
-
+## Deploy
+Volcano Engine veDB MySQL service access address: <https://www.volcengine.com/docs/6357/66583>
 ```json
 {
-   "mcpServers": {
-      "veDB_mysql": {
-         "command": "uvx",
-         "args": [
-            "--from",
-            "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vedb_mysql",
-            "mcp-server-vedb-mysql"
-         ],
-         "env": {
-            "VOLC_ACCESSKEY": "your-access-key",
-            "VOLC_SECRETKEY": "your-secret-key",
-            "REGION": "cn-beijing",
-            "PORT": "8000",
-            "ENDPOINT": "vedbm.cn-beijing.volcengineapi.com"
-         }
+  "mcpServers": {
+    "vedb_mysql": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vedb_mysql",
+        "mcp-server-vedbm"
+      ],
+      "env": {
+        "VOLCENGINE_ACCESS_KEY": "your-access-key",
+        "VOLCENGINE_SECRET_KEY": "your-secret-key",
+        "VOLCENGINE_REGION": "<VOLCENGINE_REGION>",
+        "MCP_SERVER_PORT": "<PORT>",
+        "VOLCENGINE_ENDPOINT": "<ENDPOINT>"
       }
-   }
+    }
+  }
 }
 ```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Authentication Errors**
-   - Verify your AK/SK credentials are correct
-   - Check that you have the necessary permissions for the collection
-
-2. **Connection Timeouts**
-   - Check your network connection to the VolcEngine API
-   - Verify the host configuration is correct
-
-3. **Empty Results**
-   - Verify the collection name is correct
-   - Try broadening your search query
-
-### Logging
-
-The server uses Python's logging module with INFO level by default. You can see detailed logs in `/tmp/mcp.vedbmysql.log` when running the server.
-
-## Contributing
-
-Contributions to improve the Viking Knowledge Base MCP Server are welcome. Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-Please ensure your code follows the project's coding standards and includes appropriate tests.
 
 ## License
 

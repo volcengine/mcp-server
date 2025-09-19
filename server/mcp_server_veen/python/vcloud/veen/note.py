@@ -272,17 +272,17 @@ note = {
     "reboot_instances": r""" 
    Args: 
        body: A JSON structure
-            instance_identities ( Array of String ): 是  边缘实例 ID 列表。您可以通过 ListInstances 接口查询边缘实例 ID。 
+            instance_identities ( Array of String ): 是  边缘实例 ID 列表。您可以通过 list_instances 工具查询边缘实例 ID。 
     """,
     "start_instances": r""" 
    Args: 
        body: A JSON structure
-            instance_identities ( Array of String ): 是  边缘实例 ID 列表。您可以通过 ListInstances 接口查询边缘实例 ID。 
+            instance_identities ( Array of String ): 是  边缘实例 ID 列表。您可以通过 list_instances 工具查询边缘实例 ID。 
     """,
     "stop_instances": r""" 
    Args: 
        body: A JSON structure
-            instance_identities ( Array of String ): 是  边缘实例 ID 列表。您可以通过 ListInstances 接口查询边缘实例 ID。 
+            instance_identities ( Array of String ): 是  边缘实例 ID 列表。您可以通过 list_instances 工具查询边缘实例 ID。 
     """,
     "list_instances": r""" 
    Args: 
@@ -324,17 +324,17 @@ note = {
     "get_instance": r""" 
    Args: 
        params: A JSON structure
-            instance_identity ( String ): 是  边缘实例 ID。您可以通过 ListInstances 接口获取边缘实例 ID。 
+            instance_identity ( String ): 是  边缘实例 ID。您可以通过 list_instances 工具获取边缘实例 ID。 
     """,
     "reset_login_credential": r""" 
    Args: 
        body: A JSON structure
-            instance_identity ( String ): 是  边缘实例 ID。您可以通过 ListInstances 接口查询边缘实例 ID。 
+            instance_identity ( String ): 是  边缘实例 ID。您可以通过 list_instances 工具查询边缘实例 ID。 
     """,
     "set_instance_name": r""" 
    Args: 
        body: A JSON structure
-            instance_identity ( String ): 是  边缘实例 ID。您可以通过 ListInstances 接口查询边缘实例 ID。 
+            instance_identity ( String ): 是  边缘实例 ID。您可以通过 list_instances 工具查询边缘实例 ID。 
             instance_name ( String ): 是  实例名称。命名规则如下： 
                   - 允许5~80个字符。 
                   - 支持中文、大写字母、小写字母、数字。 
@@ -344,7 +344,7 @@ note = {
     "batch_reset_system": r""" 
    Args: 
        body: A JSON structure
-            instance_identities ( Array of String ): 是  边缘实例 ID 列表。您可以通过 ListInstances 接口查询边缘实例 ID。 
+            instance_identities ( Array of String ): 是  边缘实例 ID 列表。您可以通过 list_instances 工具查询边缘实例 ID。 
             image_identity ( String ): 否  新镜像的 ID。您可以通过 ListImages 接口查询镜像 ID。 
                   该参数用于为边缘实例更换镜像。如果您不指定该参数的值，代表不更换边缘实例的镜像。 
     """,
@@ -362,7 +362,7 @@ note = {
     "enable_instances_i_pv6": r""" 
    Args: 
        body: A JSON structure
-            instance_identities ( Array of String ): 是  边缘实例 ID 列表。您可以通过 ListInstances 接口查询边缘实例 ID。 
+            instance_identities ( Array of String ): 是  边缘实例 ID 列表。您可以通过 list_instances 工具查询边缘实例 ID。 
             with_reboot ( Boolean ): 是  是否重启实例。取值范围： 
                   - true：重启实例。 
                   - false：不重启实例。 
@@ -377,36 +377,36 @@ note = {
     "update_instances_spec": r""" 
    Args: 
        body: A JSON structure
-            instance_identities ( Array of String ): 是  边缘实例 ID 列表。您可以通过 ListInstances 接口查询边缘实例 ID。 
+            instance_identities ( Array of String ): 是  边缘实例 ID 列表。您可以通过 list_instances 工具查询边缘实例 ID。 
             new_spec_name ( String ): 是  新的实例规格的名称。您可以通过 ListInstanceTypes 接口查询可开通的实例规格。 
     """,
     "list_instance_internal_ips": r""" 
    Args: 
        params: A JSON structure
-            instance_identity ( String ): 是  边缘实例 ID。您可以通过 ListInstances 接口查询边缘实例 ID。 
+            instance_identity ( String ): 是  边缘实例 ID。您可以通过 list_instances 工具查询边缘实例 ID。 
     """,
     "set_bound_eip_share_bandwidth_peak": r""" 
    Args: 
        body: A JSON structure
-            instance_identity ( String ): 是  边缘实例 ID。您可以通过 ListInstances 接口查询边缘实例 ID。 
+            instance_identity ( String ): 是  边缘实例 ID。您可以通过 list_instances 工具查询边缘实例 ID。 
             bound_eip_share_bandwidth_peak ( String ): 是  弹性公网 IP 的共享带宽峰值。取值范围与弹性公网 IP 绑定的边缘实例的公网带宽峰值的范围一致。取值须是 5 的倍数。单位：Mbps。 
     """,
     "batch_bind_eip_to_internal_ips_randomly": r""" 
    Args: 
        body: A JSON structure
-            instance_identity ( String ): 是  边缘实例 ID。您可以通过 ListInstances 接口查询边缘实例 ID。 
+            instance_identity ( String ): 是  边缘实例 ID。您可以通过 list_instances 工具查询边缘实例 ID。 
             internal_ips ( Array of String ): 是  需要绑定的私网 IP 地址的列表。您可以通过 ListInstanceInternalIps 接口查询边缘实例的私网 IP 地址。 
     """,
     "batch_delete_internal_ips": r""" 
    Args: 
        body: A JSON structure
-            instance_identity ( String ): 是  边缘实例 ID。您可以通过 ListInstances 接口查询边缘实例 ID。 
+            instance_identity ( String ): 是  边缘实例 ID。您可以通过 list_instances 工具查询边缘实例 ID。 
             internal_ips ( Array of String ): 是  私网 IP 地址列表。您可以通过 ListInstanceInternalIps 接口查询边缘实例的私网 IP 地址。 
     """,
     "get_instance_cloud_disk_info": r""" 
    Args: 
        params: A JSON structure
-            instance_identity ( String ): 是  边缘实例 ID。您可以通过 ListInstances 接口查询边缘实例 ID。 
+            instance_identity ( String ): 是  边缘实例 ID。您可以通过 list_instances 工具查询边缘实例 ID。 
     """,
     "set_cloud_server_delete_protection": r""" 
    Args: 
@@ -419,7 +419,7 @@ note = {
     "set_instance_delete_protection": r""" 
    Args: 
        body: A JSON structure
-            instance_ids ( Array of String ): 是  边缘实例 ID 列表。您可以通过 ListInstances 接口查询边缘实例 ID。 
+            instance_ids ( Array of String ): 是  边缘实例 ID 列表。您可以通过 list_instances 工具查询边缘实例 ID。 
             instance_delete_protection ( Boolean ): 否  是否为边缘实例开启删除保护。取值范围： 
                   - true：开启删除保护。 
                   - false：关闭删除保护。 
@@ -486,20 +486,20 @@ note = {
     "create_secondary_internal_ip_and_reboot": r""" 
    Args: 
        body: A JSON structure
-            instance_identity ( String ): 是  边缘实例 ID。您可以通过 ListInstances 接口查询边缘实例 ID。 
+            instance_identity ( String ): 是  边缘实例 ID。您可以通过 list_instances 工具查询边缘实例 ID。 
             num ( Integer ): 是  新增的辅助私网 IP 地址的数量。您可以通过 ListInstanceInternalIps 接口获取私网 IP 地址列表。 
     """,
     "bind_eip_to_internal_ip": r""" 
    Args: 
        body: A JSON structure
-            instance_identity ( String ): 是  边缘实例 ID。您可以通过 ListInstances 接口查询边缘实例 ID。 
+            instance_identity ( String ): 是  边缘实例 ID。您可以通过 list_instances 工具查询边缘实例 ID。 
             eip_identity ( String ): 是  弹性公网 IP 的 ID。 
             internal_ip ( String ): 是  私网 IP 地址列表。您可以通过 ListInstanceInternalIps 接口查询边缘实例的私网 IP 地址。 
     """,
     "list_images": r""" 
    Args: 
        params: A JSON structure
-            instance_type ( String ): 是  实例规格。您可以通过 ListInstanceTypes 接口获取可开通的实例规格。 
+            instance_type ( String ): 是  实例规格。您可以通过 list_instance_types 接口获取可开通的实例规格。 
             system_arch ( String ): 否  操作系统的架构。取值范围： 
                   - Linux：Linux 操作系统。 
                   - Windows：Windows 操作系统。 
@@ -553,12 +553,12 @@ note = {
     "get_image": r""" 
    Args: 
        params: A JSON structure
-            image_id ( String ): 是  镜像 ID。您可以通过 ListImages 接口查询镜像 ID。 
+            image_id ( String ): 是  镜像 ID。您可以通过 list_images 接口查询镜像 ID。 
     """,
     "build_image_by_vm": r""" 
    Args: 
        body: A JSON structure
-            veen_vm_id ( String ): 是  用于创建镜像的边缘实例的 ID。您可以通过 ListInstances 接口查询边缘实例 ID。 
+            veen_vm_id ( String ): 是  用于创建镜像的边缘实例的 ID。您可以通过 list_instances 工具查询边缘实例 ID。 
             image_name ( String ): 是  镜像名称。命名规则如下： 
                   - 允许 5~80 个字符。 
                   - 支持中文、大写字母、小写字母、数字。 

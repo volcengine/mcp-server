@@ -1,7 +1,7 @@
 import logging
 import os
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List
 
 from dotenv import load_dotenv
 
@@ -82,7 +82,7 @@ def load_config() -> TosConfig:
         buckets=os.getenv("TOS_BUCKETS", "").split(","),
         max_object_size=int(os.getenv("MAX_OBJECT_SIZE", "262144")),
     )
-    logger.info(f"Loaded configuration, endpoint: {config.endpoint}, region: {config.region} buckets: {config.buckets}")
+    logger.info(f"Loaded configuration successfully")
 
     return config
 

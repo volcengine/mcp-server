@@ -17,8 +17,8 @@ var (
 )
 
 func init() {
-	flag.StringVar(&transport, "transport", "stdio", "transport type (stdio or sse)")
-	flag.StringVar(&transport, "t", "stdio", "transport type (stdio or sse)")
+	flag.StringVar(&transport, "transport", "stdio", "transport type (stdio,sse,streamable-http)")
+	flag.StringVar(&transport, "t", "stdio", "transport type (stdio,sse,streamable-http)")
 	flag.StringVar(&port, "port", "8080", "mcp server port while serve transport is sse mode")
 	flag.StringVar(&port, "p", "8080", "mcp server port while serve transport is sse mode")
 }
@@ -46,6 +46,11 @@ func main() {
 		baseUrl := fmt.Sprintf(":%s", port)
 		if err := s.StartSSEWithServer(fmt.Sprintf(":%s", port), baseUrl); err != nil {
 			slog.Error("Failed to start SSE server", "error", err)
+			os.Exit(1)
+		}
+	case "streamable-http":
+		if err := s.StartStreamableHTTPServer(fmt.Sprintf(":%s", port)); err != nil {
+			slog.Error("Failed to start streamable-http server", "error", err)
 			os.Exit(1)
 		}
 	default:

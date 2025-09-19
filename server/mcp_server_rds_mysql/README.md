@@ -15,45 +15,73 @@
 
 ## Tools
 
-### 1. `list_rds_mysql_instances`
+### 1. `describe_db_instances`
 - **详细描述**：查看用户的 RDS MySQL 实例列表，支持分页查询。
 - **触发示例**：`"列出我的 RDS MySQL 实例"`
 
-### 2. `describe_rds_mysql_detail`
+### 2. `describe_db_instance_detail`
 - **详细描述**：根据指定 RDS MySQL 实例 ID 查看实例详情。
 - **触发示例**：`"查看实例 ID 为 mysql - 123456 的详细信息"`
 
-### 3. `list_rds_mysql_instance_engine_minor_versions`
+### 3. `describe_db_instance_engine_minor_versions`
 - **详细描述**：查询指定 RDS MySQL 实例可升级的内核小版本。
 - **触发示例**：`"查看实例 mysql - 123456 可升级的内核版本"`
 
-### 4. `list_rds_mysql_instance_accounts`
+### 4. `describe_db_accounts`
 - **详细描述**：查看指定 RDS MySQL 实例的数据库账号列表，支持分页查询。
 - **触发示例**：`"列出实例 mysql - 123456 的所有数据库账号"`
 
-### 5. `list_rds_mysql_instance_databases`
+### 5. `describe_databases`
 - **详细描述**：查看指定 RDS MySQL 实例的数据库列表，支持分页查询。
 - **触发示例**：`"列出实例 mysql - 123456 的所有数据库"`
 
-### 6. `list_rds_mysql_instance_parameters`
+### 6. `describe_db_instance_parameters`
 - **详细描述**：查询指定 RDS MySQL 实例的参数配置。
 - **触发示例**：`"查看实例 mysql - 123456 的参数配置"`
 
-### 7. `list_rds_mysql_parameter_templates`
+### 7. `list_parameter_templates`
 - **详细描述**：查询 MySQL 实例的参数模板列表，支持分页查询。
 - **触发示例**：`"列出可用的 MySQL 参数模板"`
 
-### 8. `describe_rds_mysql_parameter_template`
+### 8. `describe_parameter_template`
 - **详细描述**：根据参数模版 ID 查询指定的参数模板详情。
 - **触发示例**：`"查看参数模板 mysql - template - 123 的详细信息"`
 
-### 9. `modify_rds_mysql_instance_alias`
+### 9. `modify_db_instance_name`
 - **详细描述**：修改 RDS MySQL 实例名称。
 - **触发示例**：`"将实例 mysql - 123456 的名称改为生产数据库"`
 
-### 10. `modify_rds_mysql_account_description`
+### 10. `modify_db_account_description`
 - **详细描述**：修改 RDS MySQL 实例的数据库账号的描述信息。
 - **触发示例**：`"将账号 admin 的描述改为管理员账号"`
+
+### 11. `create_db_instance`
+- **详细描述**：创建 RDS MySQL 实例。
+- **触发示例**：`"创建一个RDS MySQL实例"`
+
+### 12. `create_allow_list`
+- **详细描述**：创建RDS MySQL实例白名单。
+- **触发示例**：`"创建一个RDS MySQL实例白名单"`
+
+### 13. `associate_allow_list`
+- **详细描述**：绑定RDS MySQL实例与白名单。
+- **触发示例**：`"绑定RDS MySQL实例与白名单"`
+
+### 14. `create_db_account`
+- **详细描述**：创建RDS MySQL实例数据库账号。
+- **触发示例**：`"创建RDS MySQL实例数据库账号"`
+
+### 15. `create_database`
+- **详细描述**：创建RDS MySQL实例数据库。
+- **触发示例**：`"创建RDS MySQL实例数据库"`
+
+### 16. `describe_vpcs`
+- **详细描述**：查询满足指定条件的VPC，用于创建实例。
+- **触发示例**：`"有哪些VPC"`
+
+### 17. `describe_subnets`
+- **详细描述**：查询满足指定条件的子网，用于创建实例。
+- **触发示例**：`"某个VPC下有哪些子网"`
 
 ---
 
@@ -63,7 +91,7 @@
 ---
 
 ## 鉴权方式
-在火山引擎管理控制台获取访问密钥 ID、秘密访问密钥和区域，采用 API Key 鉴权。需要在配置文件中设置 `VOLC_ACCESSKEY` 和 `VOLC_SECRETKEY`。
+在火山引擎管理控制台获取访问密钥 ID、秘密访问密钥和区域，采用 API Key 鉴权。需要在配置文件中设置 `VOLCENGINE_ACCESS_KEY` 和 `VOLCENGINE_SECRET_KEY`。
 
 ---
 

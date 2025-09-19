@@ -8,6 +8,10 @@ anyio==4.9.0
     #   mcp
     #   sse-starlette
     #   starlette
+attrs==25.3.0
+    # via
+    #   jsonschema
+    #   referencing
 certifi==2025.4.26
     # via
     #   httpcore
@@ -33,8 +37,14 @@ idna==3.10
     #   anyio
     #   httpx
     #   requests
-mcp @ git+https://github.com/zihengli-bytedance/python-sdk.git@3ff71057c9e60a20f81bfef6bd117f3b3d518f9c
+jsonschema==4.25.0
+    # via mcp
+jsonschema-specifications==2025.4.1
+    # via jsonschema
+mcp==1.12.3
     # via mcp-server-vefaas-function (pyproject.toml)
+pycryptodomex==3.23.0
+    # via pyzipper
 pydantic==2.11.4
     # via
     #   mcp
@@ -47,8 +57,20 @@ python-dateutil==2.9.0.post0
     # via volcengine-python-sdk
 python-dotenv==1.1.0
     # via pydantic-settings
+python-multipart==0.0.20
+    # via mcp
+pyzipper==0.3.6
+    # via mcp-server-vefaas-function (pyproject.toml)
+referencing==0.36.2
+    # via
+    #   jsonschema
+    #   jsonschema-specifications
 requests==2.32.3
     # via mcp-server-vefaas-function (pyproject.toml)
+rpds-py==0.26.0
+    # via
+    #   jsonschema
+    #   referencing
 six==1.17.0
     # via
     #   python-dateutil
@@ -76,5 +98,5 @@ urllib3==2.4.0
     #   volcengine-python-sdk
 uvicorn==0.34.2
     # via mcp
-volcengine-python-sdk==3.0.2
+volcengine-python-sdk==3.0.14
     # via mcp-server-vefaas-function (pyproject.toml)

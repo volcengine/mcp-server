@@ -24,6 +24,7 @@ dependencies = [
     "requests>=2.32.3",
     "tzdata>=2024.2",
     "volcengine-python-sdk>=3.0.1",
+    "h11>=0.16.0",
 ]
 
 [project.scripts]
