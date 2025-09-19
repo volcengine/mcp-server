@@ -82,7 +82,7 @@ def hash_sha256(content: str):
 
 
 # 第二步：签名请求函数
-def request(method, date, query, header, ak, sk, token, action, body, region = None):
+def request(method, date, query, header, ak, sk, token, action, body, region = None, timeout=None):
     # 第三步：创建身份证明。其中的 Service 和 Region 字段是固定的。ak 和 sk 分别代表
     # AccessKeyID 和 SecretAccessKey。同时需要初始化签名结构体。一些签名计算时需要的属性也在这里处理。
     # 初始化身份证明结构体
@@ -98,7 +98,7 @@ def request(method, date, query, header, ak, sk, token, action, body, region = N
         credential["session_token"] = token
 
     if action in ['CodeUploadCallback', 'CreateDependencyInstallTask', 'GetDependencyInstallTaskStatus',
-                  'GetDependencyInstallTaskLogDownloadURI']:
+                  'GetDependencyInstallTaskLogDownloadURI', "ListTemplates", "GetTemplateDetail", "GetRevision"]:
         credential["service"] = "vefaas"
 
     content_type = ContentType
@@ -118,6 +118,7 @@ def request(method, date, query, header, ak, sk, token, action, body, region = N
         "content_type": content_type,
         "date": date,
         "query": {"Action": action, "Version": version, **query},
+        "timeout": timeout,
     }
     if body is None:
         request_param["body"] = ""
@@ -185,6 +186,7 @@ def request(method, date, query, header, ak, sk, token, action, body, region = N
                          headers=header,
                          params=request_param["query"],
                          data=request_param["body"],
+                         timeout=request_param["timeout"],
                          )
     return r.json()
 
