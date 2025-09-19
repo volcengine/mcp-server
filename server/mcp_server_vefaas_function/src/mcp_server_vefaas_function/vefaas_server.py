@@ -31,6 +31,10 @@ mcp = FastMCP("veFaaS MCP Server",
               stateless_http=os.getenv("STATLESS_HTTP", "true").lower() == "true",
               streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"))
 
+# Supported runtimes for veFaaS functions:
+# - `native-python3.12/v1`: For Python services, python version is 3.12. Check dependency compatibility.
+# - `native-node20/v1`: For Node.js services, node version is 20. Check dependency compatibility.
+# - `native/v1`: For services running as executable binaries (e.g., from Go, C++).
 SUPPORTED_RUNTIMES = [
     "native-python3.12/v1",
     "native-node20/v1",
@@ -706,6 +710,8 @@ def _get_upload_code_description() -> str:
         "- 'code_upload_callback'\n"
         "- 'dependency': {dependency_task_created, should_check_dependency_status, skip_reason?}\n\n"
         "Tips:\n"
+        "- For compiled languages like Golang or C++, you **must** build the executable binary on your local machine *before* uploading. The upload should contain the compiled binary.\n"
+        "- Startup scripts for compiled languages (e.g., Golang) must **not** contain build commands (e.g., `go build`). They should directly execute the pre-built executable.\n"
         "- Python/Node deps: put them in 'requirements.txt'/'package.json'; veFaaS installs them as needed.\n"
         "- When uploading code, exclude local deps and noise (e.g., `.venv`, `site-packages`, `node_modules`, `.git`, build artifacts) via `local_folder_exclude`.\n\n"
     )
@@ -886,7 +892,7 @@ def get_dependency_install_task_status(
 
     try:
         status_resp = request(
-            "POST", now, {}, {}, ak, sk, token, "GetDependencyInstallTaskStatus", json.dumps(body), region
+            "POST", now, {}, {}, ak, sk, token, "GetDependencyInstallTaskStatus", json.dumps(body), region, 5,
         )
         result = {"status": status_resp}
 
@@ -908,6 +914,7 @@ def get_dependency_install_task_status(
                     "GetDependencyInstallTaskLogDownloadURI",
                     json.dumps(body),
                     region,
+                    5,
                 )
                 url = log_resp.get("Result", {}).get("DownloadURL")
                 if isinstance(url, str):
@@ -974,3 +981,58 @@ def build_zip_bytes_for_file_dict(file_dict):
             zip_file.writestr(info, content)
     zip_bytes = zip_buffer.getvalue()
     return zip_bytes
+
+@mcp.tool(description="""Lists available vefaas function templates. Use this to find template names for a specific 'runtime'.
+The returned names are required to fetch template source code using the 'get_template' tool.
+    This is a good first step for generating or debugging vefaas functions.
+Params: runtime, can be none or one of the value of [native-python3.12/v1, native-node20/v1, native/v1]. Passing `none` will return templates for all runtimes.
+In the returned results, only pay attention to the templates for runtimes [native-python3.12/v1, native-node20/v1, native/v1]. 
+If the expected runtime for the generated code is not in [native-python3.12/v1, native-node20/v1, native/v1], you don't need to refer to the templates.
+""")
+def list_templates(runtime: Optional[str] = None):
+    try:
+        ak, sk, token = get_authorization_credentials(mcp.get_context())
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
+
+    now = datetime.datetime.utcnow()
+    body = {"runtime": runtime}
+
+    try:
+        resp = request(
+            "POST", now, {}, {}, ak, sk, token, "ListFunctionTemplates", json.dumps(body), None, 5,
+        )
+        #print(f"list_templates resp: {resp}")
+    except Exception as e:
+        raise ValueError(f"Failed to list function templates: {str(e)}")
+    
+    return resp
+
+@mcp.tool(description="""Fetches the source code of a specific vefaas function template as a zip archive.
+You must provide a valid 'template_name' from 'list_templates'.
+
+When to use:
+- To generate new vefaas function code: Analyze the template to understand the required file structure, dependencies, and code style.
+- To debug a failing deployment: Compare your code with a working template to identify errors in configuration, dependencies, or implementation.
+
+Note: The tool returns the template content directly. Do not save it to a local file unless the user explicitly asks.
+""")
+def get_template(template_name: str):
+    try:
+        ak, sk, token = get_authorization_credentials(mcp.get_context())
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
+
+    now = datetime.datetime.utcnow()
+    body = {"Name": template_name}
+
+    try:
+        resp = request(
+            "POST", now, {}, {}, ak, sk, token, "GetFunctionTemplate", json.dumps(body), None, 20,
+        )
+        #print(f"get_template resp: {resp}")
+    except Exception as e:
+        raise ValueError(f"Failed to get function template: {str(e)}")
+
+
+    return resp
