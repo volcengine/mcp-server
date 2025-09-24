@@ -31,7 +31,7 @@ def create_mcp_server():
 
     @mcp.tool()
     def guide():
-        """VeImageX MCP is the Volcengine(火山引擎) ImageX(图片服务) MCP Server, an image processing assistant that helps users upload images, process images, distribute images, and obtain image URLs.
+        """VeImageX MCP is the Volcengine(火山引擎) ImageX(图片服务) MCP Server, an image processing assistant that helps users upload images、process images、 distribute images, and obtain image URLs.
 
         Before using VeImageX MCP, you need to know a few things:
         1. For tools that need to pass in service_id and domain in the parameters, prioritize obtaining from environment variable as the default value. If no value is specified in the environment variable, prompt the user.
