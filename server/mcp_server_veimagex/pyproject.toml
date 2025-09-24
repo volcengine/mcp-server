@@ -5,7 +5,7 @@ description = "MCP server for veImageX"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "mcp>=1.6.0",
+    "mcp==1.12.0",
     "python-dotenv>=1.1.0",
     "volcengine>=1.0.179",
     "starlette>=0.14.2",
