@@ -76,7 +76,7 @@ Note:
     - gateway_name: the name of the function's api gateway (gateway_name from create_api_gateway)
     - gateway_service_name:the name of the function's api gateway service (service_name from create_api_gateway_service)
     - upstream_name: the name of the function's api trigger (upstream_name from create_api_gateway_trigger)
-
+- **CRITICAL REQUIREMENT - MUST EDIT vefaas.yml**: Add application_id `vefaas.yml` immediately after application created.
 Error Handle Tips:
 - If there is **any authentication** error about vefaas application(create/release/get), let user apply auth by https://console.volcengine.com/iam/service/attach_custom_role?ServiceName=vefaas&policy1_1=APIGFullAccess&policy1_2=VeFaaSFullAccess&role1=ServerlessApplicationRole, then retry.
 """)
@@ -214,11 +214,13 @@ def get_vefaas_application(application_id: Required[str], region: Optional[str] 
 
 @mcp.tool(description="""Create a veFaaS function.
 Workflow tips:
+- **CRITICAL REQUIREMENT** Before create function, check whether there is vefaas.yml exist, if it does, use the validate function_id in it and **SKIP** create_function.
 - Ship runnable code plus a startup script (`run.sh` by default). If you use another script, pass it via `command` and make it executable.
 - Provide `name` or let us generate one; if the platform reports a conflict we auto-append a suffix and retry.
 - Region defaults to `cn-beijing`; acceptable overrides: `ap-southeast-1`, `cn-beijing`, `cn-shanghai`, `cn-guangzhou`.
 - Supplying `enable_vpc=true` requires `vpc_id`, `subnet_ids`, and `security_group_ids`.
-- After creation call `upload_code` to push code/resources.
+- **CRITICAL REQUIREMENT - Must Create/Edit vefaas.yml**: add `function_id`, `name`, `region`, `runtime` to file immediately once function created.
+- After creation and vefaas.yml generated, call `upload_code` to push code/resources.
 
 - Scenario analysis: When create/deploy veFaaS function, analysis scenario and follow the steps in the following scenario:
     ### Scenario 1: No code in local, generate code from scratch and deploy to a new veFaaS function.
@@ -596,6 +598,13 @@ Prereqs:
 - Release the function first (`release_function` + poll `get_function_release_status` until Succeeded).
 - Ensure a running API gateway is available (inspect via `list_api_gateways`; reuse an existing gateway whenever possible and only call `create_api_gateway` if none are suitable).
 - Provision a dedicated gateway service for this function via `create_api_gateway_service` (each public domain -> its own service).
+
+Note:
+- **CRITICAL REQUIREMENT - MUST EDIT vefaas.yml**: Add trigger info immediately to `vefaas.yml` immediately after trigger created. Strictly follow the fomat:
+    triggers:
+      - id: `trigger_id` (from create_api_gateway_trigger response)
+        type: apig
+        name: `trigger_name` (from create_api_gateway_trigger response)
 
 This tool links the function to that service (creates upstream + route). After success, reuse the service details returned by `create_api_gateway_service` to present the public domain to the user.
 """)
@@ -1304,7 +1313,26 @@ def pull_function_code(function_id: str, dest_dir: str, region: Optional[str] = 
         # Unzip the file
         with zipfile.ZipFile(io.BytesIO(response.content)) as zip_ref:
             zip_ref.extractall(dest_dir)
-        
+
+        # generate vefaas.yml
+        vefaas_yml_path = os.path.join(dest_dir, "vefaas.yml")
+        try:
+            function_detail = get_function_detail(function_id, region)
+            triggers = list_function_triggers(function_id, region).get("Result", {}).get("Items", [])
+            with open(vefaas_yml_path, "w") as f:
+                f.write(f"function_id: {function_id}\n")
+                f.write(f"name: {function_detail.name}\n")
+                f.write(f"region: {region}\n")
+                f.write(f"runtime: {function_detail.runtime}\n")
+                f.write(f"triggers:\n")
+                for trigger in triggers:
+                    f.write(f"  - id: {trigger.get('Id', '')}\n")
+                    f.write(f"    type: {trigger.get('Type', '')}\n")
+                    f.write(f"    name: {trigger.get('Name', '')}\n")
+        except Exception as e:
+            logger.error(f"Failed to write vefaas.yml for function {function_id}: {str(e)}")
+            return e
+
         return f"Function {function_id} code (revision {target_revision}) downloaded and extracted to {dest_dir}"
 
     except Exception as e:
