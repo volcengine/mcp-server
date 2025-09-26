@@ -1,6 +1,6 @@
 # Conversational AI MCP
 
-The same audio and video service as Doubao's real-time calling, integrating LLM, VLM, ASR, TTS, and audio/video processing/transmission capabilities. Quickly implement smooth, natural, and human-like real-time conversation functionality between users and large models, making human-AI interaction no longer limited to text. It can be applied to scenarios such as AI intelligent assistants, AI customer service, AI companionship, AI oral language teaching, AI game coaching, smart hardware, smart toys, smart homes, smart educational hardware, embodied intelligence, and more.
+The same calling service as Doubao, integrating large language models (LLM), visual understanding models (VLM), automatic speech recognition (ASR), text-to-speech (TTS), and audio/video processing/transmission capabilities. Quickly implement smooth, natural, and human-like real-time conversation functions between users and large models, making human-AI interaction no longer limited to text. It can be applied to AI intelligent assistants, AI customer service, AI companionship, AI oral language teaching, AI game coaching, smart hardware, smart toys, smart homes, smart educational hardware, embodied intelligence, and other application scenarios.
 
 ## Tools
 
@@ -9,20 +9,19 @@ This MCP Server product provides the following Tools (tools/capabilities):
 ### Tool1: start_voice_chat
 
 - Detailed Description:
-  In real-time audio and video scenarios, you can call this interface to introduce an intelligent agent into the room for AI real-time interaction.
-  RTC provides one-stop access to ASR, TTS, and LLM, while also supporting channel services, allowing flexible access to third-party large models/Agents through this interface.
+  Call the StartVoiceChat interface to launch an AI agent with listening and speaking capabilities in your application, enabling it to have natural, smooth, and human-like real-time conversations with real users.
+  This interface integrates automatic speech recognition (ASR), large language model (LLM), and text-to-speech (TTS) capabilities in one stop, and ensures an ultimate conversation experience through Volcano Engine's low-latency real-time communication technology. You can access Volcano Engine's complete AI service suite out of the box, and also support flexible integration of self-developed or third-party ASR, LLM, and TTS services.
 - Trigger Example: Start a conversational AI agent
 
 ### Tool2: update_voice_chat
 
-- Detailed Description:
-  In real-time audio and video call scenarios, if you need to operate the intelligent agent, such as interrupting the agent during voice output, you can achieve this by calling this interface.
+- Detailed Description: After successfully starting an agent task through StartVoiceChat, you can call this interface at any moment during the conversation to send commands to the task, achieving rich real-time interactive effects. Using this interface can implement functions including but not limited to: interrupt the agent's current voice broadcast; return Function Calling tool invocation results to LLM; end the current user's voice input and trigger a new round of conversation; let the agent actively broadcast a specified text; dynamically input context to LLM; input images to LLM with visual capabilities, etc.
 - Trigger Example: Interrupt this agent
 
 ### Tool3: stop_voice_chat
 
 - Detailed Description:
-  In real-time audio and video call scenarios, if you need to end the agent's voice chat service, you can achieve this by calling this interface.
+  If you need to end the agent's voice chat service, you can achieve this by calling this interface.
 - Trigger Example: Stop/close this agent
 
 ## Compatible Platforms
@@ -31,7 +30,7 @@ You can use Ark, Trae, Cline, Cursor, or other platforms that support MCP servic
 
 ## Service Activation Link (Overall Product)
 
-You can visit the [Console Getting Started Guide](https://console.volcengine.com/rtc/aigc/run?from=mcp) to quickly experience a no-code real-time conversational AI Demo, learn how to activate necessary services and quickly integrate client and server to experience AI real-time interaction capabilities.
+You can visit [Quick Start](https://console.volcengine.com/rtc/aigc/run?from=mcp) to experience a no-code real-time conversational AI Demo, learn how to activate necessary services and quickly integrate client and server to experience AI real-time interaction capabilities.
 
 ## Authentication Method
 

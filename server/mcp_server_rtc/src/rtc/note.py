@@ -327,26 +327,28 @@ note = {
             AppId ( String ): 是  你的音视频应用的唯一标志，参看创建 RTC 应用获取或创建 AppId。 
             RoomId ( String ): 是  真人与 AI 会话的 RTC 房间 ID。 
             TaskId ( String ): 是  已发起的智能体任务 ID。需与 StartVoiceChat 配置的一致。 
-            Command ( String ): 是  更新指令： 
-                  - interrupt：打断智能体。 
-                  - function：传回工具调用信息指令。 
-                  - ExternalTextToSpeech ： 传入文本信息供 TTS 音频播放。使用方法参看自定义语音播放。 
-                  - ExternalPromptsForLLM：传入自定义文本与用户问题拼接后送入 LLM。 
-                  - ExternalTextToLLM：传入外部问题送入 LLM。根据你设定的优先级决定替代用户问题或增加新一轮对话。当与 ImageConfig 参数一同使用时，可实现外部图片和文本的同步输入。 
+            Command ( String ): 是  要执行的指令。不同的指令对应不同的功能，并决定了其他参数（如 Message）是否需要填写。 
+                  - interrupt：打断智能体。使用方法参见手动打断。 
+                  - function：向 LLM 回传 Function Calling 的工具调用结果。使用方法参见Function Calling。 
+                  - ExternalTextToSpeech ： 传入文本信息让智能体主动播报。使用方法参看自定义语音播放。 
+                  - ExternalPromptsForLLM：传入自定义文本作为背景信息，与用户的下一轮语音输入拼接后一同送入 LLM。使用方法参见提供背景信息（不立即回复）。 
+                  - ExternalTextToLLM：传入外部文本作为当前轮次的用户输入，直接送入 LLM 进行提问。当与 ImageConfig 参数一同使用时，可实现外部图片和文本的同步输入。使用方法参看通过文本直接提问和外部图片理解。 
                   - FinishSpeechRecognition：触发新一轮对话。 
-            Message ( String ): 否  工具调用信息指令。 
-                  1. Command 取值为 function、ExternalTextToSpeech、ExternalPromptsForLLM和ExternalTextToLLM时，Message必填。 
-                  2. 当 Command 取值为 function时，Message 格式需为 Json 转译字符串，例如： 
-                  "{"ToolCallID":"call_cx","Content":"上海天气是台风"}" 
-                  其他取值时格式为普通字符串，例如你刚才的故事讲的真棒。" 
-                  3. 当 Command 取值为 ExternalTextToSpeech时，message 传入内容建议不超过 200 个字符。 
+            Message ( String ): 否  指令关联的消息内容。 
+                  该字段是否必填以及其内容格式，取决于 Command 字段的值： 
+                  - 仅当 Command 为以下值时，Message 为必填：function、ExternalTextToSpeech、ExternalPromptsForLLM 或 ExternalTextToLLM。对于其他 Command 值，此字段应忽略。 
+                  - 内容格式要求： 
+                  	- 当 Command 值为 function 时，Message 格式需为 JSON 转译字符串，例如： 
+                  "{"ToolCallID":"call_cx","Content":"上海天气是台风"}"。 
+                    - Command 为其他值时：格式为普通字符串，例如"你刚才的故事讲的真棒。" 
+                  - 内容长度要求：当 Command 值为 ExternalTextToSpeech 时，Message 传入内容建议不超过 200 个字符。 
             InterruptMode ( Integer ): 否  传入文本信息或外部问题时，处理的优先级。 
                   - 1：高优先级。传入信息直接打断交互，进行处理。 
                   - 2：中优先级。等待当前交互结束后，进行处理。 
                   - 3：低优先级。如当前正在发生交互，直接丢弃 Message 传入的信息。 
-                  当 command 为 ExternalTextToSpeech 或 ExternalTextToLLM 时为该参数必填。 
-            ImageConfig ( Object of ImageConfig ): 否  配置要传入的外部图片。 
-                  当 Command 为 ExternalTextToLLM 且需要传入图片时，此参数为必填。 
+                  仅当 command 为 ExternalTextToSpeech 或 ExternalTextToLLM 时为该参数为必填。 
+            ImageConfig ( Object of ImageConfig ): 否  用于向具备视觉能力的 LLM 传入图片进行理解。 
+                  此参数仅在 Command 为 ExternalTextToLLM 时生效。 
            #{.custom-md-table-4}#
            "字段"： ImageConfig
             参数 ( 类型 ): 是否必选  描述 
