@@ -219,7 +219,7 @@ Workflow tips:
 - Provide `name` or let us generate one; if the platform reports a conflict we auto-append a suffix and retry.
 - Region defaults to `cn-beijing`; acceptable overrides: `ap-southeast-1`, `cn-beijing`, `cn-shanghai`, `cn-guangzhou`.
 - Supplying `enable_vpc=true` requires `vpc_id`, `subnet_ids`, and `security_group_ids`.
-- **CRITICAL REQUIREMENT - Must Create/Edit vefaas.yml**: add `function_id`, `name`, `region`, `runtime` to file immediately once function created.
+- **CRITICAL REQUIREMENT - Must Create/Edit vefaas.yml**: add `function_id`, `name`, `region`, `runtime`, `command` to file immediately once function created.
 - After creation and vefaas.yml generated, call `upload_code` to push code/resources.
 
 - Scenario analysis: When create/deploy veFaaS function, analysis scenario and follow the steps in the following scenario:
@@ -241,17 +241,17 @@ Workflow tips:
         12. Create veFaaS application: Call `create_application` to create a new veFaaS application.
         13. Release veFaaS application: Call `release_application` to release the veFaaS application.
         14. Check application status: Call `get_application` to check the status of the veFaaS application, must wait application release finished.
-        15. Done: Provide the application link, vefaas function link, vefaas function public access URL for the API trigger and some function information.
+        15. Done: Provide the application link, vefaas function link and some function information.
             - application link: https://console.volcengine.com/vefaas/region:vefaas+`region`/application/detail/`application_id`?tab=detail
             - vefaas function link: https://console.volcengine.com/vefaas/region:vefaas+`region`/function/detail/`function_id`?tab=config
-            - vefaas function public access link: https://`api_gateway_service_id`.apigateway-`region`.volceapi.com
 
     ### Scenario 2: Deploy existing code to a existing veFaaS function. (user must provide the function_id)
         1. Upload & Install
         2. Check Dependencies
         3. Release Function:
         4. Check Release Status
-        5. Done: Provide the vefaas function link, vefaas function public access URL for the API trigger and some function information.
+        5. **DO NOT** create or release api-gateway/application for function in this scenario.
+        6. Done: Provide the vefaas function link and some function information.
 
     ### Scenario 3: Deploy existing code to new veFaaS function.
         1. Select Runtime
@@ -265,7 +265,7 @@ Workflow tips:
         9. Create veFaaS application
         10. Release veFaaS application
         11. Check application status
-        12. Done: Provide the application link, vefaas function public access URL for the API trigger and some function information.
+        12. Done: Provide the application link and some function information.
         
     ### Scenario others: 
         - model should generate the workflow, but respect veFaaS develop rules.
@@ -470,7 +470,8 @@ When to use:
 Guide:
 - If 'upload_code' created a dependency install task, wait for 'Succeeded' via 'get_dependency_install_task_status'. If you're unsure whether upload ran in this session, call it again before releasing.
 - This call only submits the release job; it does **not** mean the function is live. Immediately poll 'get_function_release_status' until it reports Succeeded/Failed before taking any follow-up actions (e.g. creating an API Gateway trigger).
-- On Succeeded: proceed to create API Gateway trigger. On Failed: inspect status/errors, fix code/config as needed, re-run 'upload_code' (if code changed), then retry release. Do not create API Gateway Trigger on failure.
+- If function is the **first time create and release**, On Succeeded: proceed to create API Gateway trigger. On Failed: inspect status/errors, fix code/config as needed, re-run 'upload_code' (if code changed), then retry release. Do not create API Gateway Trigger on failure.
+- **DO NOT** create API Gateway if function is already exist before;
 
 Region: default 'cn-beijing' (supported: 'ap-southeast-1', 'cn-beijing', 'cn-shanghai', 'cn-guangzhou').
 No confirmation needed.""")
@@ -1339,10 +1340,6 @@ def pull_function_code(function_id: str, dest_dir: str, region: Optional[str] = 
         raise ValueError(f"Failed to download and extract function code: {str(e)}")
 
 @mcp.tool(description="""List veFaaS function triggers.
-
-Note:
-- Trigger type:
-    - `apig`: the http trigger, can get GatewayServiceId from result, can use GatewayServiceId to generate public access link.
 """)
 def list_function_triggers(function_id: str, region: Optional[str] = None):
     region = validate_and_set_region(region)
