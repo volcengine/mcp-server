@@ -14,7 +14,8 @@ from volcenginesdkcen.models import DescribeCensRequest, DescribeCensResponse, \
         DescribeCenInterRegionBandwidthsRequest, DescribeCenInterRegionBandwidthsResponse, \
         DescribeCenServiceRouteEntriesRequest, DescribeCenServiceRouteEntriesResponse, \
         DescribeCenRouteEntriesRequest, DescribeCenRouteEntriesResponse, \
-        DescribeCenSummaryRouteEntriesRequest, DescribeCenSummaryRouteEntriesResponse
+        DescribeCenSummaryRouteEntriesRequest, DescribeCenSummaryRouteEntriesResponse, \
+        DescribeCenBandwidthPackagesBillingRequest, DescribeCenBandwidthPackagesBillingResponse
 
 
 class CENSDK:
@@ -53,8 +54,8 @@ class CENSDK:
     def describe_cen_bandwidth_package_attributes(self, args: dict) -> DescribeCenBandwidthPackageAttributesResponse:
         return self.client.describe_cen_bandwidth_package_attributes(DescribeCenBandwidthPackageAttributesRequest(**args))
     
-    # def describe_cen_bandwidth_packages_billing(self, args: dict) -> DescribeCenBandwidthPackagesBillingResponse:
-    #     return self.client.describe_cen_bandwidth_packages_billing(DescribeCenBandwidthPackagesBillingRequest(**args))
+    def describe_cen_bandwidth_packages_billing(self, args: dict) -> DescribeCenBandwidthPackagesBillingResponse:
+        return self.client.describe_cen_bandwidth_packages_billing(DescribeCenBandwidthPackagesBillingRequest(**args))
     
     def describe_cen_inter_region_bandwidth_attributes(self, args: dict) -> DescribeCenInterRegionBandwidthAttributesResponse:
         return self.client.describe_cen_inter_region_bandwidth_attributes(DescribeCenInterRegionBandwidthAttributesRequest(**args))
