@@ -1,6 +1,7 @@
 import fnmatch
 import io
 from pdb import run
+from socket import timeout
 from typing import Required, Union, Optional, List
 import datetime
 import volcenginesdkcore
@@ -70,10 +71,9 @@ def validate_and_set_region(region: str = None) -> str:
 @mcp.tool(description="""Create a veFaaS Application.
 
 Args:
+ - function_id: vefaas function id.
  - function_name: vefaas function name.
- - gateway_name: vefaas function api gateway name (gateway_name from create_api_gateway or list_api_gateways).
- - gateway_service_name: vefaas function api gateway service name (service_name from create_api_gateway_service).
- - upstream_name: vefaas function api gateway trigger name (upstream_name from create_api_gateway_trigger).
+ - gateway_name: api gateway name (gateway_name from tool `fetch_running_api_gateway`).
 
 Note:
  - veFaaS Application is the top-level collection that contains veFaaS function, api-gateway and other production.
@@ -88,18 +88,25 @@ Error Handle Tips:
 - If user want to create a veFaaS Application, **MUST** follow the steps:
  1. Use `list_vefaas_application_templates` to get all available templates.
  2. Find most suitable template from all the templates and use `get_application_template_detail` to get template code.
- 3. Create/Release vefaas function and create api-gateway trigger.
+ 3. Create/Release vefaas function.
  4. Create/Release vefaas application.
 - MUST EDIT vefaas.yml: Add application_id to `vefaas.yml` immediately after application created successfully.
 
 """)
-def create_vefaas_application(function_name: Required[str], gateway_name: Required[str], gateway_service_name: Optional[str] = None, 
-        upstream_name: Optional[str] = None, region: Optional[str] = None):
+def create_vefaas_application(function_id: Required[str], function_name: Required[str], gateway_name: Required[str], region: Optional[str] = None):
     now = datetime.datetime.utcnow()
     try:
         ak, sk, token = get_authorization_credentials(mcp.get_context())
     except ValueError as e:
         raise ValueError(f"Authorization failed: {str(e)}")
+
+    # check apig trigger whether exist
+    try:
+        triggers = list_function_triggers(function_id, region).get("Result", {}).get("Items", [])
+        if any(trigger.get("Type") == "apig" for trigger in triggers):
+            return f"APIGateway trigger already exists for function {function_name}, skip create application"
+    except Exception as e:
+        raise ValueError(f"Failed to list function triggers: {str(e)}")
 
     region = validate_and_set_region(region)
 
@@ -110,8 +117,6 @@ def create_vefaas_application(function_name: Required[str], gateway_name: Requir
         "Config": {
             "FunctionName": function_name,
             "GatewayName": gateway_name,
-            "ServiceName": gateway_service_name,
-            "UpstreamName": upstream_name,
         },
         "TemplateId": TemplateIdForRegion.get(region, "68d24592162cb40008217d6f"),
     }
@@ -129,12 +134,10 @@ Args:
  - application_id: vefaas application_id.
 
 Note:
- - After release succeed, start poll `get_vefaas_application` tool to check application deployment status.
- - If release failed, let user check the error log from `get_vefaas_application`.
+ - After release succeed, start poll `poll_vefaas_application_status` tool to check application deployment status, If release failed, let user check the error logs.
 
 **CRITICAL REQUIREMENT**
-  - Stop poll `get_vefaas_application` tool when deploy_success or deploy_fail
-  - Poll every 3 seconds to avoid loop detection, up to 3 minutes.
+  - Stop poll `poll_vefaas_application_status` tool when deploy_success or deploy_fail, at most poll 3 times.
 """)
 def release_vefaas_application(application_id: Required[str], region: Optional[str] = None):
     region = validate_and_set_region(region)
@@ -155,16 +158,6 @@ def release_vefaas_application(application_id: Required[str], region: Optional[s
     except Exception as e:
         raise ValueError(f"Failed to release application: {str(e)}")
 
-@mcp.tool(description="""Get veFaaS Application information.
-
-Args:
- - application_id: vefaas application_id.
-
-Note:
- - veFaaS Application status **NOT** related to veFaaS function release status.
- - Usually use this tool to check application deployment status after release.
-
-""")
 def get_vefaas_application(application_id: Required[str], region: Optional[str] = None):
     region = validate_and_set_region(region)
 
@@ -233,6 +226,86 @@ def get_vefaas_application(application_id: Required[str], region: Optional[str] 
     except Exception as e:
         raise ValueError(f"Failed to parse application response: {str(e)}")
 
+@mcp.tool(description="""Get veFaaS Application deployment status.
+
+Args:
+ - application_id: vefaas application_id.
+
+Note:
+ - veFaaS Application status **NOT** related to veFaaS function release status.
+ - Usually use this tool to check application deployment status after application release.
+
+""")
+def poll_vefaas_application_status(application_id: Required[str], region: Optional[str] = None):
+    region = validate_and_set_region(region)
+    now = datetime.datetime.utcnow()
+    try:
+        ak, sk, token = get_authorization_credentials(mcp.get_context())
+    except ValueError as e:
+        raise ValueError(f"Authorization failed: {str(e)}")
+    
+    body = {
+        "Id": application_id,
+    }
+    timeout = 120
+    polling_interval = 5
+    start_time = time.time()
+
+    while time.time() - start_time < timeout:
+        try:
+            response = request("POST", now, {}, {}, ak, sk, token, "GetApplication", json.dumps(body), region)
+            if response["Result"] is not None:
+                result = response["Result"]
+                status = result.get("Status")
+        except Exception as e:
+            status = None
+        
+        if status == "deploying" or status == None:
+            time.sleep(polling_interval)
+            continue
+        else:
+            break
+    
+    errLogs: list[str] = []
+    hasAuthError = False
+    if status == "deploy_fail":
+        try:
+            revision_number = result.get("NewRevisionNumber")
+            if revision_number: 
+                logQueryBody = {
+                    "Id": application_id,
+                    "Limit": 99999,
+                    "RevisionNumber": revision_number,
+                }
+                logResponse = request("POST", now, {}, {}, ak, sk, token, "GetApplicationRevisionLog", json.dumps(logQueryBody), region)
+                log_result = logResponse.get("Result")
+                if log_result:
+                    logLines = log_result.get("LogLines", [])
+                    for logLine in logLines:
+                        if "warn" in logLine.lower() or "error" in logLine.lower() or "fail" in logLine.lower():
+                            errLogs.append(logLine)
+                        if "not authorized" in logLine.lower() or "cannot get sts token" in logLine.lower():
+                            errLogs.append(logLine)
+                            hasAuthError = True
+            if hasAuthError:
+                errLogs.append("Failed to release application due to an authentication error. Please visit https://console.volcengine.com/iam/service/attach_custom_role?ServiceName=vefaas&policy1_1=APIGFullAccess&policy1_2=VeFaaSFullAccess&role1=ServerlessApplicationRole to grant the required permissions and then try again.")    
+        except Exception as e:
+            logger.error(f"Failed to get application log: {str(e)}")              
+        
+    responseInfo = {
+        "Id": result["Id"],
+        "Name": result["Name"],
+        "Status": result["Status"],
+        "Config": result["Config"],
+        "Region": result["Region"],
+        "NewRevisionNumber": result.get("NewRevisionNumber"),
+    }
+    if len(errLogs) > 0:
+        responseInfo["DeployFailedLogs"] = errLogs
+
+    return responseInfo
+
+
 @mcp.tool(description="""Create a veFaaS function.
 
 Args:
@@ -263,8 +336,8 @@ Error Handle Tips:
     - **Do follow steps sequentially**:
      - 1. Upload code to veFaaS function. (Do If source is TOS object)
      - 2. Release function, if user need release/deploy function and upload_code done.
-     - 3. Create a api gateway trigger after function create and release success.
-     - 4. Create and release an vefaas Application after function created/released succeed and api_gateway_trigger created succeed.
+     - 3. Fetch a running api gateway.
+     - 4. Create and release an vefaas Application after function created/released succeed and running api-gateway been found.
 
 """)
 def create_function(name: str = None, region: str = None, runtime: str = None, command: str = None, source: str = None,
@@ -469,7 +542,7 @@ Note:
 - Call this tool when function code or config has been updated and need to release.
     - If code changed, **must** wait code uploaded and dependency install task completed.
     - If only config changed, no need to wait.
-- After this tool called success, start poll `get_function_release_status` to check release status, stop poll if release succeed or failed. Poll every 3 seconds to avoid loop detection, up to 5 minutes.
+- After this tool called success, start poll `poll_function_release_status` to check release status, stop poll if release succeed or failed, at most call this tool 3 times.
 
 """)
 def release_function(function_id: str, region: str = None):
@@ -485,7 +558,7 @@ def release_function(function_id: str, region: str = None):
         response = api_instance.release(req)
         return (
             "Release request submitted for function "
-            f"{function_id}. Poll 'get_function_release_status' until it reports Succeeded/Failed."
+            f"{function_id}. Poll 'poll_function_release_status' until it reports Succeeded/Failed."
         )
     except ApiException as e:
         error_message = f"Failed to release veFaaS function: {str(e)}"
@@ -516,19 +589,6 @@ def delete_function(function_id: str, region: str = None):
         error_message = f"Failed to delete veFaaS function: {str(e)}"
         raise ValueError(error_message)
 
-@mcp.tool(description="""Check release status.
-
-Args:
-- function_id: ID of the function to check release status.
-- region: The region of the veFaaS function.
-
-Note:
- - If failed: inspect status/errors, resolve, then rerun 'upload_code' -> 'release_function' procedure once fixes are in place. 
-    - A frequent issue is `bash: <tool>: command not found`; ensure startup scripts call Python modules via `python -m ...` or launch the server in code (see `create_function` guidance) before retrying.
-
-**CRITICAL REQUIREMENT**:
- - Can **only** use this tool to check vefaas function release status, release may take a while, should wait and check many times until status become Succeeded or Failed. **NEVER** try to get release status by other ways.
-""")
 def get_function_release_status(function_id: str, region: str = None):
     region = validate_and_set_region(region)
 
@@ -539,6 +599,38 @@ def get_function_release_status(function_id: str, region: str = None):
     response = api_instance.get_release_status(req)
     if response.status == "inprogress":
         time.sleep(10)
+    return response
+
+
+@mcp.tool(description="""Check veFaaS function release status.
+
+Args:
+- function_id: ID of the function to check release status.
+- region: The region of the veFaaS function.
+
+Note:
+ - If failed: inspect status/errors, resolve, then rerun 'upload_code' -> 'release_function' procedure once fixes are in place. 
+    - A frequent issue is `bash: <tool>: command not found`; ensure startup scripts call Python modules via `python -m ...` or launch the server in code (see `create_function` guidance) before retrying.
+
+**CRITICAL REQUIREMENT**:
+ - Can **only** use this tool to check vefaas function release status, **NEVER** try to get release status by other ways.
+""")
+def poll_function_release_status(function_id: str, region: str = None):
+    region = validate_and_set_region(region)
+
+    api_instance = init_client(region, mcp.get_context())
+    req = volcenginesdkvefaas.GetReleaseStatusRequest(
+        function_id=function_id
+    )
+    start_time = time.time()
+    timeout: int = 120
+    interval: int = 5
+    while time.time() - start_time < timeout:
+        response = api_instance.get_release_status(req)
+        if response.status == "inprogress":
+            time.sleep(interval)
+        else:
+            return response
     return response
 
 def generate_random_name(prefix="mcp", length=8):
@@ -583,109 +675,7 @@ def init_client(region: str = None, ctx: Context = None):
     volcenginesdkcore.Configuration.set_default(configuration)
     return volcenginesdkvefaas.VEFAASApi()
 
-
-@mcp.tool(description="""Create an API Gateway Trigger for a veFaaS function.
-
-Args:
-- function_id: ID of the function to create trigger for.
-- api_gateway_id: ID of the API Gateway to use.
-- service_id: ID of the API Gateway Service to use.
-- region: The region of the veFaaS function.
-
-Note:
-- Use `list_api_gateways` to find an existing gateway to use, if not exist, create one via `create_api_gateway`.
-- **MUST** use `create_api_gateway_service` to create a new gateway service for function.
-- This tool links the function to that service (creates upstream + route). After success, reuse the service details returned by `create_api_gateway_service` to present the public domain to the user.
-
-**CRITICAL REQUIREMENT**:
-- This tool **CAN ONLY** be called if `create_function` tool be called in previous step.
- - After trigger created:
-    - Add `public_access_domain` to `vefaas.yml`.
-    - Add trigger info to `vefaas.yml` immediately. Follow the fomat:
-        triggers:
-        - id: `trigger_id` (from create_api_gateway_trigger response)
-            type: apig
-            name: `trigger_name` (from create_api_gateway_trigger response)
-
-""")
-def create_api_gateway_trigger(function_id: str, api_gateway_id: str, service_id: str, region: str = None):
-    region = validate_and_set_region(region)
-
-    try:
-        ak, sk, token = get_authorization_credentials(mcp.get_context())
-    except ValueError as e:
-        raise ValueError(f"Authorization failed: {str(e)}")
-
-    now = datetime.datetime.utcnow()
-
-    # Generate a random suffix for the trigger name
-    suffix = generate_random_name(prefix="", length=6)
-    upstream_name = f"{function_id}-trigger-{suffix}"
-    body = {
-        "Name":upstream_name,
-        "GatewayId":api_gateway_id,
-        "SourceType":"VeFaas",
-        "UpstreamSpec": {
-            "VeFaas": {"FunctionId":function_id}}}
-
-    try:
-        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateUpstream", json.dumps(body), region)
-        logger.debug("CreateUpstream response: %s", json.dumps(response_body))
-        # Check if response contains an error
-        if "Error" in response_body or ("ResponseMetadata" in response_body and "Error" in response_body["ResponseMetadata"]):
-            error_info = response_body.get("Error") or response_body["ResponseMetadata"].get("Error")
-            error_message = f"API Error: {error_info.get('Message', 'Unknown error')}"
-            raise ValueError(error_message)
-
-        # Check if Result exists in the response
-        if "Result" not in response_body:
-            raise ValueError(f"API call did not return a Result field: {response_body}")
-
-        upstream_id = response_body["Result"]["Id"]
-    except Exception as e:
-        error_message = f"Error creating upstream: {str(e)}"
-        raise ValueError(error_message)
-
-    body = {
-        "Name":"default",
-        "UpstreamList":[{
-                "Type":"VeFaas",
-                "UpstreamId":upstream_id,
-                "Weight":100
-                }
-                ],
-                "ServiceId":service_id,
-                "MatchRule":{"Method":["POST","GET","PUT","DELETE","HEAD","OPTIONS"],
-                             "Path":{"MatchType":"Prefix","MatchContent":"/"}},
-                "AdvancedSetting":{"TimeoutSetting":{
-                    "Enable":False,
-                    "Timeout":30},
-                "CorsPolicySetting":{"Enable":False}
-                }
-    }
-    try:
-        response_body = request("POST", now, {}, {}, ak, sk, token, "CreateRoute", json.dumps(body), region)
-    except Exception as e:
-        error_message = f"Error creating route: {str(e)}"
-        raise ValueError(error_message)
-    
-    respInfo = {
-        "UpstreamId": upstream_id,
-        "UpstreamName": upstream_name,
-        "CreateRouteResponse": response_body
-    }
-    return respInfo
-
-@mcp.tool(description="""List API Gateways.
-
-Args:
- - region: The region to find API Gateways.
-
-Note:
- - Use this tool to confirm a gateway exists before creating one.
-
-""")
-def list_api_gateways(region: str = None):
+def list_existing_api_gateways(region: str = None):
     now = datetime.datetime.utcnow()
 
     try:
@@ -693,22 +683,24 @@ def list_api_gateways(region: str = None):
     except ValueError as e:
         raise ValueError(f"Authorization failed: {str(e)}")
 
-    response_body = request("GET", now, {"Limit": "10"}, {}, ak, sk, token, "ListGateways", None, region)
-    return response_body
+    response_body = request("GET", now, {"Limit": "20"}, {}, ak, sk, token, "ListGateways", None, region)
+    try:
+        exist_gateways = response_body.get("Result", {}).get("Items", [])
+        result = []
+        for gateway in exist_gateways:
+            if gateway.get("Region") == region and gateway.get("Status") in ["Running", "Creating"]:
+                result.append({
+                    "Name": gateway.get("Name", ""),
+                    "ID": gateway.get("ID", ""),
+                    "Region": gateway.get("Region", ""),
+                    "Type": gateway.get("Type", ""),
+                    "Status": gateway.get("Status", ""),
+                })
+        return result
+    except Exception as e:
+        return f"Failed to list API Gateways: {str(e)}"
 
-
-@mcp.tool(description="""Create an API Gateway when no reusable gateway exists.
-
-Args:
- - name: The name of the API Gateway.
- - region: The region to create the API Gateway. (supported: `cn-beijing`, `cn-shanghai`, `cn-guangzhou`, `ap-southeast-1`)
-
-Note:
- - Operation is asynchronous (≤~5 minutes). After invoking, poll `list_api_gateways` until the gateway with this name/region reports `Running`. **Poll every ~5s for up to ~5 minutes**.
- - If the API responds that the account balance is below the required threshold (for example, balance < 100) or quota has been exceeded, surface the message and instruct the user to resolve it via the console or contact API gateway OnCall; retries are not useful.
-
-""")
-def create_api_gateway(name: str = None, region: str = "cn-beijing") -> str:
+def create_api_gateway(name: str = None, region: str = "cn-beijing"):
     """
     Creates a new VeApig gateway.
 
@@ -746,66 +738,55 @@ def create_api_gateway(name: str = None, region: str = "cn-beijing") -> str:
     except Exception as e:
         return f"Failed to create VeApig gateway with name {gateway_name}: {str(e)}"
 
-@mcp.tool(description="""Create a VeApig gateway service (one per public domain).
+@mcp.tool(description="""Fetch an Running API Gateway ID.
 
 Args:
- - gateway_id: The ID of the API Gateway where the service will be created.
- - name: The name of the gateway service. If not provided, a random value is used.
- - region: The region of the API Gateway Service will be created. Default is cn-beijing.
+ - region: The region to fetch the gateway for.
 
 Note:
- - Requires an existing Running gateway (`gateway_id`). Can use `list_api_gateways` and `create_api_gateway` to get one.
- - Always reuse an existing Running gateway and add services per function/domain.
- - Returns the raw creation response plus a follow-up `GetGatewayService` result so you can capture the service ID and domain. After binding routes (`create_api_gateway_trigger`), reuse those details when presenting the public URL.
-
+ - Use this tool to select one running api gateway for create veFaaS Application.
+ - If no running gateway exists, will create a new one and wait for it to be running.
+ - If can this tool can not fetch a running gateway after timeout, please retry and at most try 3 times.
 """)
-def create_api_gateway_service(
-    gateway_id: str, name: str = None, region: str = "cn-beijing"
-) -> str:
-    if name:
-        service_name = append_random_suffix(name)
-    else:
-        service_name = generate_random_name()
+
+def fetch_running_api_gateway(region: str = None):
     region = validate_and_set_region(region)
-    body = {
-        "ServiceName": service_name,
-        "GatewayId": gateway_id,
-        "Protocol": ["HTTP", "HTTPS"],
-        "AuthSpec": {"Enable": False},
-    }
-
-    now = datetime.datetime.utcnow()
+    
     try:
-        ak, sk, token = get_authorization_credentials(mcp.get_context())
-    except ValueError as e:
-        raise ValueError(f"Authorization failed: {str(e)}")
+        existing_gateways = list_existing_api_gateways(region)
+        running_gateways = [gw for gw in existing_gateways if gw["Status"] == "Running"]
+        if len(running_gateways) > 0:
+            return random.choice(running_gateways)
 
-    try:
-        creation_response = request("POST", now, {}, {}, ak, sk, token, "CreateGatewayService", json.dumps(body), region)
+        timeout = 180
+        interval = 5
+        start_time = datetime.datetime.utcnow()
+        create_api_gateway_failed_times = 0
+        while (datetime.datetime.utcnow() - start_time).total_seconds() < timeout:
+            existing_gateways = list_existing_api_gateways(region)
+            running_gateways = [gw for gw in existing_gateways if gw["Status"] == "Running"]
+            if len(running_gateways) > 0:
+                return random.choice(running_gateways)
+
+            pending_gateways = [gw for gw in existing_gateways if gw["Status"] == "Creating"]
+            if len(pending_gateways) > 0:
+                logger.info(f"Waiting for gateway to be running: {pending_gateways}")
+                time.sleep(interval)
+                continue
+            
+            try:
+                create_api_gateway(region=region)
+                time.sleep(interval)
+            except Exception as e:
+                logger.error(f"Failed to create API Gateway: {str(e)}")
+                create_api_gateway_failed_times += 1
+                if create_api_gateway_failed_times >= 3:
+                    raise Exception(f"Failed to create API Gateway after {create_api_gateway_failed_times} times")
+                time.sleep(interval)
     except Exception as e:
-        return f"Failed to create VeApig gateway service with name {service_name}: {str(e)}"
-
-    try:
-        result = creation_response.get("Result", {}) if isinstance(creation_response, dict) else {}
-    except Exception:
-        result = {}
-
-    service_id = result.get("Id") or result.get("ServiceId")
-    if not service_id:
-        raise ValueError(f"CreateGatewayService response missing service ID: {creation_response}")
-
-    detail_body = {"Id": service_id}
-    detail_now = datetime.datetime.utcnow()
-    service_details = request(
-        "POST", detail_now, {}, {}, ak, sk, token, "GetGatewayService", json.dumps(detail_body), region
-    )
-
-    combined = {
-        "service_id": service_id,
-        "create_response": creation_response,
-        "service_details": service_details,
-    }
-    return json.dumps(combined, ensure_ascii=False, indent=2)
+        return f"Failed to fetch an running API Gateway: {str(e)}"
+     
+    return f"Failed to fetch an running API Gateway after {timeout} seconds"
 
 def ensure_executable_permissions(folder_path: str):
     for root, _, files in os.walk(folder_path):
@@ -958,7 +939,7 @@ def _get_upload_code_description() -> str:
         )
 
     tail = (
-        "After upload: dependency install (if any) runs asynchronously; if triggered, you MUST call 'get_dependency_install_task_status' to poll until Succeeded/Failed."
+        "After upload: dependency install (if any) runs asynchronously; if triggered, you MUST call 'poll_dependency_install_task_status' to poll until Succeeded/Failed."
     )
 
     return base_desc + note + tail
@@ -1095,77 +1076,57 @@ Args:
 
 Note:
  - Use when 'upload_code' reported a task or your code has 'requirements.txt' (Python) / 'package.json' (Node.js).
- - Stop on Succeeded/Failed; if it stays InProgress beyond ~5min, escalate instead of hammering the API.
  - On Failed: inspect logs. If dependency spec issue, fix and 'upload_code' again; if transient, retry.
 
-**CRITICAL REQUIREMENT**:
- - Poll every 3s to avoid loop detection, up to 5min timeout.
-
-Returns:
-- 'status' (raw API response)
-- If Failed: 'log_download_url', when 'fetch_log_content' is True: 'log_content'.
-
 """)
-def get_dependency_install_task_status(
+def poll_dependency_install_task_status(
     function_id: str,
     region: Optional[str] = None,
-    fetch_log_content: bool = False,
-):
+    ):
     region = validate_and_set_region(region)
-
     try:
         ak, sk, token = get_authorization_credentials(mcp.get_context())
     except ValueError as e:
         raise ValueError(f"Authorization failed: {str(e)}")
-
+    
     body = {"FunctionId": function_id}
     now = datetime.datetime.utcnow()
 
-    try:
-        status_resp = request(
-            "POST", now, {}, {}, ak, sk, token, "GetDependencyInstallTaskStatus", json.dumps(body), region, 5,
-        )
-        result = {"status": status_resp}
-
+    timeout_seconds = 120
+    poll_interval_seconds = 5
+    start_time = time.time()
+    while time.time() - start_time < timeout_seconds:
         try:
+            status_resp = request(
+                "POST", now, {}, {}, ak, sk, token, "GetDependencyInstallTaskStatus", json.dumps(body), region, 5,
+            )
+            result = {"status": status_resp}
             status = status_resp.get("Result", {}).get("Status")
-        except Exception:
+        except Exception as ex:
+            result = {"fetch_status_error": str(ex)}
             status = None
 
-        if status == "Failed":
+        if status == "InProgress" or status == None:
+            time.sleep(poll_interval_seconds)
+            continue
+        else:
+            break
+    if status == "Failed":
+        try:
+            log_resp = request("POST", now, {}, {}, ak, sk, token, "GetDependencyInstallTaskLogDownloadURI", json.dumps(body), region, 5)
+            url = log_resp.get("Result", {}).get("DownloadURL")
+            if isinstance(url, str):
+                url = url.replace("\\u0026", "&")
+            result["log_download_url"] = url
+
             try:
-                log_resp = request(
-                    "POST",
-                    now,
-                    {},
-                    {},
-                    ak,
-                    sk,
-                    token,
-                    "GetDependencyInstallTaskLogDownloadURI",
-                    json.dumps(body),
-                    region,
-                    5,
-                )
-                url = log_resp.get("Result", {}).get("DownloadURL")
-                if isinstance(url, str):
-                    url = url.replace("\\u0026", "&")
-                result["log_download_url"] = url
-
-                if fetch_log_content and url:
-                    try:
-                        resp = requests.get(url, timeout=30)
-                        result["log_content"] = resp.text
-                    except Exception as ex:
-                        result["log_content_error"] = str(ex)
+                resp = requests.get(url, timeout=30)
+                result["log_content"] = resp.text
             except Exception as ex:
-                result["log_download_error"] = str(ex)
-
-        if status == "InProgress":
-            time.sleep(10)
-        return result
-    except Exception as e:
-        raise ValueError(f"Failed to get dependency install task status: {str(e)}")
+                result["log_content_error"] = str(ex)
+        except Exception as ex:
+            result["log_download_error"] = str(ex)
+    return result
 
 def upload_code_zip_for_function(api_instance: VEFAASApi(object), function_id: str, code_zip_size: int, zip_bytes,
                                  ak: str, sk: str, token: str, region: str,) -> bytes:
