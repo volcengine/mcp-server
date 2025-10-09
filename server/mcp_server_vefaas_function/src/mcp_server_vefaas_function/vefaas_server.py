@@ -211,7 +211,7 @@ def get_vefaas_application(application_id: Required[str], region: Optional[str] 
                     logger.error(f"Failed to get application log: {str(e)}")
 
             if result.get("Status") == "deploying":
-                time.sleep(3)
+                time.sleep(10)
             
             if hasAuthError:
                 raise ValueError("Failed to release application due to an authentication error. Please visit https://console.volcengine.com/iam/service/attach_custom_role?ServiceName=vefaas&policy1_1=APIGFullAccess&policy1_2=VeFaaSFullAccess&role1=ServerlessApplicationRole to grant the required permissions and then try again.")    
@@ -538,7 +538,7 @@ def get_function_release_status(function_id: str, region: str = None):
     )
     response = api_instance.get_release_status(req)
     if response.status == "inprogress":
-        time.sleep(5)
+        time.sleep(10)
     return response
 
 def generate_random_name(prefix="mcp", length=8):
@@ -1162,7 +1162,7 @@ def get_dependency_install_task_status(
                 result["log_download_error"] = str(ex)
 
         if status == "InProgress":
-            time.sleep(3)
+            time.sleep(10)
         return result
     except Exception as e:
         raise ValueError(f"Failed to get dependency install task status: {str(e)}")
