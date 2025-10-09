@@ -71,9 +71,9 @@ def validate_and_set_region(region: str = None) -> str:
 
 Args:
  - function_name: vefaas function name.
- - gateway_name: vefaas function api gateway name.
- - gateway_service_name: vefaas function api gateway service name.
- - upstream_name: vefaas function api gateway trigger name.
+ - gateway_name: vefaas function api gateway name (gateway_name from create_api_gateway or list_api_gateways).
+ - gateway_service_name: vefaas function api gateway service name (service_name from create_api_gateway_service).
+ - upstream_name: vefaas function api gateway trigger name (upstream_name from create_api_gateway_trigger).
 
 Note:
  - veFaaS Application is the top-level collection that contains veFaaS function, api-gateway and other production.
