@@ -90,7 +90,7 @@ Error Handle Tips:
  2. Find most suitable template from all the templates and use `get_application_template_detail` to get template code.
  3. Create/Release vefaas function.
  4. Create/Release vefaas application.
-- MUST EDIT vefaas.yml: Add application_id to `vefaas.yml` immediately after application created successfully.
+- MUST EDIT vefaas.yml after application created successfully: Add application_id to `vefaas.yml` immediately after application created successfully.
 
 """)
 def create_vefaas_application(function_id: Required[str], function_name: Required[str], gateway_name: Required[str], region: Optional[str] = None):
