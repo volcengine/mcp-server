@@ -34,12 +34,6 @@ mcp = FastMCP("veFaaS MCP Server",
               stateless_http=os.getenv("STATLESS_HTTP", "true").lower() == "true",
               streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"))
 
-SUPPORTED_RUNTIMES = [
-    "native-python3.12/v1",
-    "native-node20/v1",
-    "native/v1",
-]
-
 TemplateIdForRegion = {
     "ap-southeast-1": "68d24592162cb40008217d6f",
     "cn-beijing": "68d24592162cb40008217d6f",
@@ -73,22 +67,24 @@ def validate_and_set_region(region: str = None) -> str:
 Args:
  - function_id: vefaas function id.
  - function_name: vefaas function name.
- - gateway_name: api gateway name (gateway_name from tool `fetch_running_api_gateway`).
+ - gateway_name: api gateway name (Name from tool `fetch_running_api_gateway`).
 
 Note:
- - veFaaS Application is the top-level collection that contains veFaaS function, api-gateway and other production.
+ - Applications bind the function to an API gateway as the top-level delivery unit.
+ - Creation automatically submits an application release; capture the returned `application_id`.
+ - On success, append `application_id` to `vefaas.yaml` immediately.
+
+**CRITICAL REQUIREMENT**:
+ - Invoke only after the current workflow has just run `create_function`; otherwise reuse the existing application.
+ - Before calling, confirm (and if not already done in this workflow, perform):
+   - Step 1: List templates via `list_vefaas_application_templates`.
+   - Step 2: Pull details/code with `get_vefaas_application_template` if a template fits.
+   - Step 3: Create the veFaaS function and confirm its release succeeded.
+   - Step 4: Ensure a running API gateway is ready.
+ - Immediately after this tool returns, call `poll_vefaas_application_status` until deployment finishes (success or fail, max three polls) — skip polling if creation or release fails.
 
 Error Handle Tips:
  - If there is **any authentication** error about vefaas application(create/release/get), let user apply auth by link: https://console.volcengine.com/iam/service/attach_custom_role?ServiceName=vefaas&policy1_1=APIGFullAccess&policy1_2=VeFaaSFullAccess&role1=ServerlessApplicationRole, then retry.
-
-**CRITICAL REQUIREMENT**
-- This tool **CAN ONLY** be called if `create_function` tool be called in previous step.
-- If user want to create a veFaaS Application, **MUST** follow the steps:
- 1. Use `list_vefaas_application_templates` to get all available templates.
- 2. Find most suitable template from all the templates and use `get_application_template_detail` to get template code. If no related template found, no need to use template.
- 3. Create/Release vefaas function.
- 4. Create/Release vefaas application.
-- MUST EDIT vefaas.yml: Add application_id to `vefaas.yml` immediately after application created successfully.
 
 """)
 def create_vefaas_application(function_id: Required[str], function_name: Required[str], gateway_name: Required[str], region: Optional[str] = None):
@@ -124,105 +120,25 @@ def create_vefaas_application(function_id: Required[str], function_name: Require
     except Exception as e:
         raise ValueError(f"Failed to create application: {str(e)}")
 
-    return response_body
+    result = {}
+    if isinstance(response_body, dict):
+        result = response_body.get("Result") or {}
+    application_id = result.get("Id")
+    if not application_id:
+        raise ValueError("Failed to determine application ID from create response.")
 
-@mcp.tool(description="""Release a veFaaS Application.
-
-Args:
- - application_id: vefaas application_id.
-
-Note:
- - After release succeed, start poll `poll_vefaas_application_status` tool to check application deployment status, If release failed, let user check the error logs.
-
-**CRITICAL REQUIREMENT**
-  - Stop poll `poll_vefaas_application_status` tool when deploy_success or deploy_fail, at most poll 3 times.
-""")
-def release_vefaas_application(application_id: Required[str], region: Optional[str] = None):
-    region = validate_and_set_region(region)
-
-    now = datetime.datetime.utcnow()
+    release_body = {"Id": application_id}
     try:
-        ak, sk, token = get_authorization_credentials(mcp.get_context())
-    except ValueError as e:
-        raise ValueError(f"Authorization failed: {str(e)}")
-    
-    body = {
-        "Id": application_id,
-    }
-    
-    try:
-        response = request("POST", now, {}, {}, ak, sk, token, "ReleaseApplication", json.dumps(body), region)
-        return response
+        release_response = request("POST", datetime.datetime.utcnow(), {}, {}, ak, sk, token, "ReleaseApplication", json.dumps(release_body), region)
     except Exception as e:
         raise ValueError(f"Failed to release application: {str(e)}")
 
-def get_vefaas_application(application_id: Required[str], region: Optional[str] = None):
-    region = validate_and_set_region(region)
-
-    now = datetime.datetime.utcnow()
-    try:
-        ak, sk, token = get_authorization_credentials(mcp.get_context())
-    except ValueError as e:
-        raise ValueError(f"Authorization failed: {str(e)}")
-    
-    body = {
-        "Id": application_id,
+    payload = {
+        "application_id": application_id,
+        "create_application": response_body,
+        "release_application": release_response,
     }
-    
-    try:
-        response = request("POST", now, {}, {}, ak, sk, token, "GetApplication", json.dumps(body), region)
-    except Exception as e:
-        raise ValueError(f"Failed to get application: {str(e)}")
-    
-    try:
-        if response["Result"] is not None:
-            result = response["Result"]
-            errLogs: list[str] = []
-            hasAuthError = False
-            if result.get("Status") == "deploy_fail":
-                try:
-                    revision_number = result.get("NewRevisionNumber")
-                    if revision_number: 
-                        logQueryBody = {
-                            "Id": application_id,
-                            "Limit": 99999,
-                            "RevisionNumber": revision_number,
-                        }
-                        logResponse = request("POST", now, {}, {}, ak, sk, token, "GetApplicationRevisionLog", json.dumps(logQueryBody), region)
-                        log_result = logResponse.get("Result")
-                        if log_result:
-                            logLines = log_result.get("LogLines", [])
-                            for logLine in logLines:
-                                if "warn" in logLine.lower() or "error" in logLine.lower() or "fail" in logLine.lower():
-                                    errLogs.append(logLine)
-                                if "not authorized" in logLine.lower() or "cannot get sts token" in logLine.lower():
-                                    errLogs.append(logLine)
-                                    hasAuthError = True
-                except Exception as e:
-                    logger.error(f"Failed to get application log: {str(e)}")
-
-            if result.get("Status") == "deploying":
-                time.sleep(10)
-            
-            if hasAuthError:
-                raise ValueError("Failed to release application due to an authentication error. Please visit https://console.volcengine.com/iam/service/attach_custom_role?ServiceName=vefaas&policy1_1=APIGFullAccess&policy1_2=VeFaaSFullAccess&role1=ServerlessApplicationRole to grant the required permissions and then try again.")    
-
-            responseInfo = {
-                "Id": result["Id"],
-                "Name": result["Name"],
-                "Status": result["Status"],
-                "Config": result["Config"],
-                "Region": result["Region"],
-                "NewRevisionNumber": result.get("NewRevisionNumber"),
-            }
-            if len(errLogs) > 0:
-                responseInfo["DeployFailedLogs"] = errLogs
-
-            return responseInfo
-        else:
-            raise ValueError(f"Get Application {application_id} failed, result is empty")
-    except Exception as e:
-        raise ValueError(f"Failed to parse application response: {str(e)}")
+    return json.dumps(payload, ensure_ascii=False, indent=2)
 
 @mcp.tool(description="""Get veFaaS Application deployment status.
 
@@ -230,9 +146,13 @@ Args:
  - application_id: vefaas application_id.
 
 Note:
- - veFaaS Application status **NOT** related to veFaaS function release status.
- - Usually use this tool to check application deployment status after application release.
- - **MUST** provide some important info for user after application deployment finished: application_id, region, deployment status, access_url and app_platform_url. (can get these info from tool return value)
+ - Application deployment status is independent of function releases.
+ - Call after `create_vefaas_application` (which auto-submits release) to monitor progress.
+ - When it finishes, report application_id, region, status, access_url, and app_platform_url derived from the response.
+
+**CRITICAL REQUIREMENT**:
+ - Do not use alternative methods to check application deployment status—only this tool.
+ - Poll immediately after `create_vefaas_application` returns (release is auto-submitted) and stop once you see `deploy_success` or `deploy_fail`, with at most three attempts.
 
 """)
 def poll_vefaas_application_status(application_id: Required[str], region: Optional[str] = None):
@@ -242,7 +162,7 @@ def poll_vefaas_application_status(application_id: Required[str], region: Option
         ak, sk, token = get_authorization_credentials(mcp.get_context())
     except ValueError as e:
         raise ValueError(f"Authorization failed: {str(e)}")
-    
+
     body = {
         "Id": application_id,
     }
@@ -258,19 +178,19 @@ def poll_vefaas_application_status(application_id: Required[str], region: Option
                 status = result.get("Status")
         except Exception as e:
             status = None
-        
+
         if status == "deploying" or status == None:
             time.sleep(polling_interval)
             continue
         else:
             break
-    
+
     errLogs: list[str] = []
     hasAuthError = False
     if status == "deploy_fail":
         try:
             revision_number = result.get("NewRevisionNumber")
-            if revision_number: 
+            if revision_number:
                 logQueryBody = {
                     "Id": application_id,
                     "Limit": 99999,
@@ -287,10 +207,10 @@ def poll_vefaas_application_status(application_id: Required[str], region: Option
                             errLogs.append(logLine)
                             hasAuthError = True
             if hasAuthError:
-                errLogs.append("Failed to release application due to an authentication error. Please visit https://console.volcengine.com/iam/service/attach_custom_role?ServiceName=vefaas&policy1_1=APIGFullAccess&policy1_2=VeFaaSFullAccess&role1=ServerlessApplicationRole to grant the required permissions and then try again.")    
+                errLogs.append("Failed to release application due to an authentication error. Please visit https://console.volcengine.com/iam/service/attach_custom_role?ServiceName=vefaas&policy1_1=APIGFullAccess&policy1_2=VeFaaSFullAccess&role1=ServerlessApplicationRole to grant the required permissions and then try again.")
         except Exception as e:
-            logger.error(f"Failed to get application log: {str(e)}")              
-    
+            logger.error(f"Failed to get application log: {str(e)}")
+
     # get system_url
     system_url = ""
     try:
@@ -324,25 +244,28 @@ Args:
  - region: function region. (`cn-beijing` by default)
 
 Note:
- - runtime **MUST** be `native-python3.12/v1`, `native-node20/v1`, or `native/v1`.
- - command **MUST** be a runnable script, e.g., `./run.sh`.
- - region **MUST** be `cn-beijing`, `cn-shanghai`, `cn-guangzhou`, or `ap-southeast-1`.
- - Supplying `enable_vpc=true` requires `vpc_id`, `subnet_ids`, and `security_group_ids`.
- - After all steps done, provide veFaaS function infos like function_id, name, region, runtime and platfrom link if these infos can get from context directly.
+ - runtime must be `native-python3.12/v1`, `native-node20/v1`, or `native/v1` (defaults to `native-python3.12/v1` if omitted).
+ - command must be a runnable script (default `./run.sh`).
+ - region defaults to `cn-beijing` and must be one of `cn-beijing`, `cn-shanghai`, `cn-guangzhou`, `ap-southeast-1`.
+ - `enable_vpc=true` requires `vpc_id`, `subnet_ids`, and `security_group_ids`.
+ - Startup scripts must invoke tooling via `python -m <module>` (e.g., `python -m uvicorn ...`); direct CLI binaries such as `uvicorn` or `gunicorn` are not on PATH—apply the same rule for any missing CLI: use `python -m <module>` or launch it from code.
+ - When bootstrapping a new workload (e.g., React service), review official templates via `list_vefaas_application_templates` and `get_vefaas_application_template` first so code and configs inherit veFaaS conventions.
+ - Review the `upload_code` checklist before preparing artifacts or startup scripts.
+ - After work completes, surface function_id, name, region, runtime, and platform link if available from context.
     - veFaaS platform link template: https://console.volcengine.com/vefaas/region:vefaas+`region`/function/detail/`function_id`?tab=config
 
 Error Handle Tips:
  - If there is **any authentication** error about vefaas function(like create/release/get), let user to apply auth by this link https://console.volcengine.com/iam/service/attach_role/?ServiceName=vefaas, then retry.
 
 **CRITICAL REQUIREMENT**:
- - Before create function, check whether there is vefaas.yml exist, if it does, use the validate function_id in it and SKIP create_function.
- - After function created success:
-    - Create and Edit vefaas.yml: add `function_id`, `name`, `region`, `runtime`, `command` to file immediately once function created.
-    - **Do follow steps sequentially**:
-     - 1. Upload code to veFaaS function. (Do If source is TOS object)
-     - 2. Release function, if user need release/deploy function and upload_code done.
-     - 3. Fetch a running api gateway.
-     - 4. Create and release an vefaas Application after function created/released succeed and running api-gateway been found.
+ - If `vefaas.yaml` already holds a valid `function_id`, reuse it and skip this tool.
+ - On success, write `function_id`, `name`, `region`, `runtime`, `command` to `vefaas.yaml`.
+ - Then execute in order:
+   - Step 0 (for new services without an existing template choice): call `list_vefaas_application_templates`, pick a template, and pull its source via `get_vefaas_application_template` to guide code changes before uploading.
+   - Step 1: Run `upload_code` (per its checklist; required for TOS sources).
+   - Step 2: Call `release_function` once upload completes when release is needed.
+   - Step 3: Fetch a running API gateway.
+   - Step 4: Create the veFaaS application (this tool auto-releases) and immediately poll deployment status via `poll_vefaas_application_status`.
 
 """)
 def create_function(name: str = None, region: str = None, runtime: str = None, command: str = None, source: str = None,
@@ -358,7 +281,7 @@ def create_function(name: str = None, region: str = None, runtime: str = None, c
     def build_create_request(current_name: str) -> volcenginesdkvefaas.CreateFunctionRequest:
         request_obj = volcenginesdkvefaas.CreateFunctionRequest(
             name=current_name,
-            runtime=runtime if runtime else "python3.8/v1",
+            runtime=runtime if runtime else "native-python3.12/v1",
         )
 
         if image:
@@ -468,10 +391,9 @@ Args:
 - security_group_ids: Optional list of security group IDs if VPC is enabled.
 
 Note:
-- Swap the function to an existing artifact (base64 zip, TOS object, container image) or adjust command/env/VPC fields.
-- If `source` is provided, ensure the artifact already exists and matches the inferred source_type (zip/tos/image).
-- Do **NOT** use this for fresh local code edits—run 'upload_code' so the platform rebuilds the package correctly.
-- For VPC changes set `enable_vpc=true` and include `vpc_id`, `subnet_ids`, `security_group_ids`.
+- Use to swap in an existing artifact (base64 zip/TOS/image) or update command/env/VPC fields; for fresh local edits prefer `upload_code`.
+- When passing `source`, ensure the artifact already exists and matches the inferred source_type (zip/tos/image).
+- For VPC updates set `enable_vpc=true` and include `vpc_id`, `subnet_ids`, and `security_group_ids`.
 
 """)
 def update_function(function_id: str, source: str = None, region: str = None, command: str = None,
@@ -541,13 +463,11 @@ Args:
 - region: The region of the veFaaS function.
 
 Note:
- - This tool only submits the release job; it does **NOT** mean the function is live or releaseing finished
+ - Submits the release job; the function is not live until polling reports success.
 
 **CRITICAL REQUIREMENT**:
-- Call this tool when function code or config has been updated and need to release.
-    - If code changed, **must** wait code uploaded and dependency install task completed.
-    - If only config changed, no need to wait.
-- After this tool called success, start poll `poll_function_release_status` to check release status, stop poll if release succeed or failed, at most call this tool 3 times.
+- Use only when new code or config is ready to publish. If code changed, wait for `upload_code` (including dependency install tasks) to finish; config-only changes can proceed immediately.
+- After submission, call `poll_function_release_status` until it returns Succeeded/Failed, and invoke that poll tool no more than three times.
 
 """)
 def release_function(function_id: str, region: str = None):
@@ -614,8 +534,8 @@ Args:
 - region: The region of the veFaaS function.
 
 Note:
- - If failed: inspect status/errors, resolve, then rerun 'upload_code' -> 'release_function' procedure once fixes are in place. 
-    - A frequent issue is `bash: <tool>: command not found`; ensure startup scripts call Python modules via `python -m ...` or launch the server in code (see `create_function` guidance) before retrying.
+- If failed: inspect status/errors, resolve, then rerun 'upload_code' -> 'release_function' procedure once fixes are in place.
+   - A frequent error is `bash: uvicorn: command not found`; switch startup scripts to `python -m uvicorn main:app --host 0.0.0.0 --port 8000` (or launch the server in code) per the `upload_code` guidance—apply the same rule for any missing CLI.
 
 **CRITICAL REQUIREMENT**:
  - Can **only** use this tool to check vefaas function release status, **NEVER** try to get release status by other ways.
@@ -638,7 +558,7 @@ def poll_function_release_status(function_id: str, region: str = None):
             time.sleep(interval)
         else:
             return response
-    
+
     return response
 
 def generate_random_name(prefix="mcp", length=8):
@@ -699,7 +619,6 @@ def list_existing_api_gateways(region: str = None):
             if gateway.get("Region") == region and gateway.get("Status") in ["Running", "Creating"]:
                 result.append({
                     "Name": gateway.get("Name", ""),
-                    "ID": gateway.get("Id", ""),
                     "Region": gateway.get("Region", ""),
                     "Type": gateway.get("Type", ""),
                     "Status": gateway.get("Status", ""),
@@ -746,20 +665,20 @@ def create_api_gateway(name: str = None, region: str = "cn-beijing"):
     except Exception as e:
         return f"Failed to create VeApig gateway with name {gateway_name}: {str(e)}"
 
-@mcp.tool(description="""Fetch an Running API Gateway ID.
+@mcp.tool(description="""Fetch a running API Gateway ID.
 
 Args:
  - region: The region to fetch the gateway for.
 
 Note:
- - Use this tool to select one running api gateway for create veFaaS Application.
- - If no running gateway exists, will create a new one and wait for it to be running.
- - If can this tool returned error, should retry and at most retry 3 times.
+ - Returns a running API gateway to feed into `create_vefaas_application`; creates one and waits if none are ready.
+ - On failure, retry up to three times before surfacing the error.
+ - Use the returned gateway's `Name` directly when calling `create_vefaas_application`, and expect new gateways to take a few minutes to reach `Running`.
 """)
 
 def fetch_running_api_gateway(region: str = None):
     region = validate_and_set_region(region)
-    
+
     try:
         existing_gateways = list_existing_api_gateways(region)
         running_gateways = [gw for gw in existing_gateways if gw["Status"] == "Running"]
@@ -781,7 +700,7 @@ def fetch_running_api_gateway(region: str = None):
                 logger.info(f"Waiting for gateway to be running: {pending_gateways}")
                 time.sleep(interval)
                 continue
-            
+
             try:
                 create_api_gateway(region=region)
                 time.sleep(interval)
@@ -793,7 +712,7 @@ def fetch_running_api_gateway(region: str = None):
                 time.sleep(interval)
     except Exception as e:
         raise Exception(f"Failed to fetch an running API Gateway: {str(e)}")
-     
+
     raise Exception(f"Failed to fetch an running API Gateway after {timeout} seconds")
 
 def ensure_executable_permissions(folder_path: str):
@@ -915,26 +834,20 @@ def _get_upload_code_description() -> str:
         " - function_id: The ID of the function to upload code for.\n"
         " - region: The region of the function.\n"
         " - local_folder_path: The path to the local folder containing the code to upload.\n"
-        " - local_folder_exclude: Optional list of patterns to exclude from the upload.\n"
+        " - local_folder_exclude: Optional list of patterns to exclude from the upload (e.g., ['.venv', 'node_modules', '.git', '*.pyc']).\n"
         " - file_dict: {filename -> content}\n\n"
 
         "Returns:\n"
         "- 'code_upload_callback'\n"
         "- 'dependency': {dependency_task_created, should_check_dependency_status, skip_reason?}\n\n"
-    
-        "**CRITICAL REQUIREMENT:**\n"
-        " - **MUST** respect veFaaS Develop Rules.(**edit code to satisfied the rules before uploading**)\n"
-        "  - Rule 1: Process must be startup by an executeble script.\n"
-        "  - Rule 2: For Golang/C++/other compiled languages: veFaaS **CANNOT** compile code. Must compile a Linux-compatible binary locally and upload it with all the source code, the startup script must execute this pre-compiled binary directly.\n"
-        "  - Rule 3: Startup script must not contain any compile command or dependency install command. (like: go build or pip install)\n"
-        "  - Rule 4: Python/Node deps: put them in 'requirements.txt'/'package.json'; veFaaS installs them as needed.\n"
-        "  - Rule 5: HTTP server **MUST** listen on IP: 0.0.0.0, PORT: 8000.\n"
-        "  - Rule 6: Store templates/static assets as files and sanity-check imports before uploading.\n"
-        "  - Rule 7: Declare every framework/server dependency in `requirements.txt` / `package.json`; do not bundle virtualenvs.\n"
-        "  - Rule 8: Module CLIs are not on PATH. Invoke them with `python -m module_name ...` or start the server in code—running `gunicorn ...` or `uvicorn ...` directly will fail.\n"
-        "  - Rule 9: Keep startup scripts focused on launching the app; skip extra installs/build once `upload_code` has run.\n"
-        "  - Rule 10: Store templates/static assets as files and sanity-check imports before uploading.\n"
-        "  - Rule 11: When uploading code, exclude local deps and noise (e.g., `.venv`, `site-packages`, `node_modules`, `.git`, build artifacts) via `local_folder_exclude`.\n\n"
+
+        "**Code & Runtime Checklist (follow before uploading):**\n"
+        " - Provide an executable startup script that launches the service; skip compile or dependency install commands.\n"
+        " - Pre-build Linux-compatible binaries for compiled languages and invoke them directly from the startup script.\n"
+        " - Python/Node dependencies belong in 'requirements.txt' or 'package.json'; never ship virtualenvs or 'node_modules'.\n"
+        " - HTTP servers must bind to 0.0.0.0:8000 and include required templates/static assets in the package.\n"
+        " - CLI tooling is not on PATH—call Python modules with 'python -m <module>' (e.g., 'python -m uvicorn main:app --host 0.0.0.0 --port 8000') or start the server directly in code; apply the same rule for any missing CLI.\n"
+        " - Exclude local build artifacts and dependency folders (e.g., '.venv', 'site-packages', 'node_modules', '.git') via 'local_folder_exclude'.\n\n"
     )
 
     # Detect run mode via FASTMCP_* environment variables.
@@ -1083,13 +996,12 @@ def handle_dependency(
 @mcp.tool(description="""Check dependency install task status (paired with 'upload_code').
 
 Args:
-- function_id: The ID of the veFaaS function.
-- fetch_log_content: Whether to fetch log content when the task is Failed. Default is False.
+- function_id: ID of the veFaaS function whose dependency task you are checking.
+- region: Region of the function (defaults to `cn-beijing` when omitted).
 
 Note:
- - Use when 'upload_code' reported a task or your code has 'requirements.txt' (Python) / 'package.json' (Node.js).
- - On Failed: inspect logs. If dependency spec issue, fix and 'upload_code' again; if transient, retry.
-
+ - Call only after `upload_code` reports that a dependency install task was created.
+ - If status is `Failed`, download the provided log URL, fix issues (dependency specs, etc.), then rerun `upload_code`.
 """)
 def poll_dependency_install_task_status(
     function_id: str,
@@ -1100,7 +1012,7 @@ def poll_dependency_install_task_status(
         ak, sk, token = get_authorization_credentials(mcp.get_context())
     except ValueError as e:
         raise ValueError(f"Authorization failed: {str(e)}")
-    
+
     body = {"FunctionId": function_id}
     now = datetime.datetime.utcnow()
 
@@ -1220,11 +1132,11 @@ def get_function_revision(function_id: str, region: Optional[str] = None, revisi
 def get_function_detail(function_id: str, region: Optional[str] = None):
     """Get function information to check if it exists."""
     region = validate_and_set_region(region)
-    
+
     api_instance = init_client(region, mcp.get_context())
-    
+
     req = volcenginesdkvefaas.GetFunctionRequest(id=function_id)
-    
+
     try:
         response = api_instance.get_function(req)
         return response
@@ -1237,23 +1149,25 @@ def get_function_detail(function_id: str, region: Optional[str] = None):
 @mcp.tool(description="""Download function code for veFaaS function.
 
 Args:
- - function_id (required): the ID of the function
- - revision_number (optional): specific code revision number to query. If not provided, defaults to version 0.
- - use_stable_revision (optional): default False. Only when user ask the online/released/stable revision code set use_stable_revision to True.
- - dest_dir: the path where the code to download and unzip. default is local opened path.
+ - function_id: ID of the function.
+ - region: Region of the function (defaults to `cn-beijing`).
+ - dest_dir: Directory to extract the downloaded code into (must be provided).
+ - revision_number: Specific revision to fetch (defaults to 0 when omitted).
+ - use_stable_revision: Set to True only when online/released/stable code is required; overrides `revision_number`.
 
-
+Note:
+ - Always supply `dest_dir`; the tool will create the directory if it does not exist.
 """)
 def pull_function_code(function_id: str, region: Optional[str] = "", dest_dir: str = None, revision_number: Optional[int] = None, use_stable_revision: Optional[bool] = False):
     region = validate_and_set_region(region)
-    
+
     # First check if function exists
     try:
         function_detail = get_function_detail(function_id, region)
         logger.info(f"Function {function_id} found in region {region}")
     except Exception as e:
         raise ValueError(f"Function {function_id} not found in region {region}: {str(e)}")
-    
+
     # Determine which revision number to use
     target_revision = None
     if revision_number is not None:
@@ -1267,7 +1181,7 @@ def pull_function_code(function_id: str, region: Optional[str] = "", dest_dir: s
                 logger.info(f"Using stable revision number: {target_revision}")
         except Exception as e:
             raise ValueError(f"Failed to get stable revision number: {str(e)}")
-    
+
     if target_revision is None:
         target_revision = 0
 
@@ -1277,7 +1191,7 @@ def pull_function_code(function_id: str, region: Optional[str] = "", dest_dir: s
         logger.info(f"Revision {target_revision} information retrieved")
     except Exception as e:
         raise ValueError(f"Failed to get revision {target_revision} information: {str(e)}")
-    
+
     # Extract source_location from revision info
     source_location = None
     try:
@@ -1298,8 +1212,8 @@ def pull_function_code(function_id: str, region: Optional[str] = "", dest_dir: s
         with zipfile.ZipFile(io.BytesIO(response.content)) as zip_ref:
             zip_ref.extractall(dest_dir)
 
-        # generate vefaas.yml
-        vefaas_yml_path = os.path.join(dest_dir, "vefaas.yml")
+        # generate vefaas.yaml
+        vefaas_yml_path = os.path.join(dest_dir, "vefaas.yaml")
         try:
             function_detail = get_function_detail(function_id, region)
             triggers = list_function_triggers(function_id, region).get("Result", {}).get("Items", [])
@@ -1315,7 +1229,7 @@ def pull_function_code(function_id: str, region: Optional[str] = "", dest_dir: s
                     f.write(f"    type: {trigger.get('Type', '')}\n")
                     f.write(f"    name: {trigger.get('Name', '')}\n")
         except Exception as e:
-            logger.error(f"Failed to write vefaas.yml for function {function_id}: {str(e)}")
+            logger.error(f"Failed to write vefaas.yaml for function {function_id}: {str(e)}")
             return e
 
         return {
@@ -1348,21 +1262,17 @@ def list_function_triggers(function_id: str, region: Optional[str] = None):
     except Exception as e:
         raise ValueError(f"Failed to list function triggers: {str(e)}")
 
-@mcp.tool(description="""List veFaaS Application templates for creating new applications.
+@mcp.tool(description="""List veFaaS application templates.
 
-This tool helps you find appropriate veFaaS application templates based on your specific requirements when creating new veFaaS applications. Each template in the response includes a 'description' field that explains the template's functionality and use case.
+Args:
+ - page_number: Page index (default 1).
+ - page_size: Page size (default 100).
 
-NOTE:
- - Use this tool to:
-  - 1. Discover available templates for different application types and use cases
-  - 2. Review template descriptions to find the most suitable one for your needs
-  - 3. Get template details and source code for further development using the template ID
-
- - Each template returned contains:
-  - ID: Template ID for get detail.
-  - Description: A brief explanation of the template's functionality and use case.
-
-After finding a suitable template, use tool get_vefaas_application_template with the template ID to get the template's source code and detailed information for development.""")
+Note:
+ - Run before creating an application to discover available templates and read their descriptions.
+ - Returns only templates that are enabled.
+ - Capture the chosen template's `id` and call `get_vefaas_application_template` to download its source.
+""")
 def list_vefaas_application_templates(page_number: int = 1, page_size: int = 100):
     try:
         ak, sk, token = get_authorization_credentials(mcp.get_context())
@@ -1381,7 +1291,7 @@ def list_vefaas_application_templates(page_number: int = 1, page_size: int = 100
         #print(f"list_templates resp: {resp}")
     except Exception as e:
         raise ValueError(f"Failed to list application templates: {str(e)}")
-    
+
     result = []
     for item in resp.get("Result", {}).get("Items", []):
         if item.get("EnableTemplate", False):
@@ -1392,15 +1302,15 @@ def list_vefaas_application_templates(page_number: int = 1, page_size: int = 100
         })
     return result
 
-@mcp.tool(description="""Get veFaaS Application template source code.
+@mcp.tool(description="""Download a veFaaS application template.
 
 Args:
- - template_id (required): the ID of the template to fetch, the ID can get from tool 'list_vefaas_application_templates'.
- - destination_dir (required): user specified the directory where the template zip file should be saved. If not provided, the destination_dir should be saved in the current folder path.
- 
-Note: 
-- Never save the template.zip file. If need to save the code, extract the files from the zip archive.
+ - template_id: Template ID from `list_vefaas_application_templates`.
+ - destination_dir: Directory to extract the template contents into.
 
+Note:
+ - Download the archive and extract files; do not persist the zip itself.
+ - Reuse or clean `destination_dir` before repeated downloads to avoid partial overwrite issues.
 """)
 def get_vefaas_application_template(template_id: str, destination_dir: str):
     try:
@@ -1428,14 +1338,14 @@ def get_vefaas_application_template(template_id: str, destination_dir: str):
         response.raise_for_status()  # Raise an exception for bad status codes
 
         # Determine the destination directory
-        
+
         # Create destination directory if it doesn't exist
         os.makedirs(destination_dir, exist_ok=True)
 
         # Unzip the file
         with zipfile.ZipFile(io.BytesIO(response.content)) as zip_ref:
             zip_ref.extractall(destination_dir)
-        
+
         return f"Template {template_id} downloaded and extracted to {destination_dir}"
 
     except Exception as e:

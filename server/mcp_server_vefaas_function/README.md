@@ -1,6 +1,6 @@
 # veFaaS MCP Server
 
-veFaaS MCP Server 提供创建、更新、发布 veFaaS 函数以及管理应用的自动化能力，帮助在 MCP 体系内快速对接 veFaaS 服务。
+veFaaS MCP Server 提供创建、更新、发布 veFaaS 函数以及管理应用的自动化能力，用于快速对接 veFaaS 服务。
 
 ## 安装与快速开始
 
