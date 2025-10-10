@@ -77,8 +77,6 @@ Args:
 
 Note:
  - veFaaS Application is the top-level collection that contains veFaaS function, api-gateway and other production.
- - After all steps done, provide veFaaS Application infos like application_id, name, region and platform link if these info can get from context directly.
-    - veFaaS platform link template: https://console.volcengine.com/vefaas/region:vefaas+`region`/application/detail/`application_id`?tab=detail
 
 Error Handle Tips:
  - If there is **any authentication** error about vefaas application(create/release/get), let user apply auth by link: https://console.volcengine.com/iam/service/attach_custom_role?ServiceName=vefaas&policy1_1=APIGFullAccess&policy1_2=VeFaaSFullAccess&role1=ServerlessApplicationRole, then retry.
@@ -87,7 +85,7 @@ Error Handle Tips:
 - This tool **CAN ONLY** be called if `create_function` tool be called in previous step.
 - If user want to create a veFaaS Application, **MUST** follow the steps:
  1. Use `list_vefaas_application_templates` to get all available templates.
- 2. Find most suitable template from all the templates and use `get_application_template_detail` to get template code.
+ 2. Find most suitable template from all the templates and use `get_application_template_detail` to get template code. If no related template found, no need to use template.
  3. Create/Release vefaas function.
  4. Create/Release vefaas application.
 - MUST EDIT vefaas.yml: Add application_id to `vefaas.yml` immediately after application created successfully.
@@ -234,6 +232,7 @@ Args:
 Note:
  - veFaaS Application status **NOT** related to veFaaS function release status.
  - Usually use this tool to check application deployment status after application release.
+ - **MUST** provide some important info for user after application deployment finished: application_id, region, deployment status, access_url and app_platform_url. (can get these info from tool return value)
 
 """)
 def poll_vefaas_application_status(application_id: Required[str], region: Optional[str] = None):
@@ -291,13 +290,23 @@ def poll_vefaas_application_status(application_id: Required[str], region: Option
                 errLogs.append("Failed to release application due to an authentication error. Please visit https://console.volcengine.com/iam/service/attach_custom_role?ServiceName=vefaas&policy1_1=APIGFullAccess&policy1_2=VeFaaSFullAccess&role1=ServerlessApplicationRole to grant the required permissions and then try again.")    
         except Exception as e:
             logger.error(f"Failed to get application log: {str(e)}")              
-        
+    
+    # get system_url
+    system_url = ""
+    try:
+        cloud_resource = json.loads(result["CloudResource"])
+        system_url = cloud_resource['framework']['url']['system_url']
+    except Exception as e:
+        logger.error(f"Failed to get system_url: {str(e)}")
+
     responseInfo = {
         "Id": result["Id"],
         "Name": result["Name"],
         "Status": result["Status"],
         "Config": result["Config"],
         "Region": result["Region"],
+        "AccessUrl": system_url,
+        "AppPlatformUrl": f"https://console.volcengine.com/vefaas/region:vefaas+{region}/application/detail/{application_id}?tab=detail",
         "NewRevisionNumber": result.get("NewRevisionNumber"),
     }
     if len(errLogs) > 0:
@@ -319,10 +328,6 @@ Note:
  - command **MUST** be a runnable script, e.g., `./run.sh`.
  - region **MUST** be `cn-beijing`, `cn-shanghai`, `cn-guangzhou`, or `ap-southeast-1`.
  - Supplying `enable_vpc=true` requires `vpc_id`, `subnet_ids`, and `security_group_ids`.
- - Declare every framework/server dependency in `requirements.txt` / `package.json`; do not bundle virtualenvs.
- - Module CLIs are not on PATH. Invoke them with `python -m module_name ...` or start the server in code—running `gunicorn ...` or `uvicorn ...` directly will fail.
- - Keep startup scripts focused on launching the app; skip extra installs/build once `upload_code` has run.
- - Store templates/static assets as files and sanity-check imports before uploading.
  - After all steps done, provide veFaaS function infos like function_id, name, region, runtime and platfrom link if these infos can get from context directly.
     - veFaaS platform link template: https://console.volcengine.com/vefaas/region:vefaas+`region`/function/detail/`function_id`?tab=config
 
@@ -614,6 +619,8 @@ Note:
 
 **CRITICAL REQUIREMENT**:
  - Can **only** use this tool to check vefaas function release status, **NEVER** try to get release status by other ways.
+ - After function release finished, provide some important info for user: function_id, region, release status, and vefaas function platform url.
+  - `vefaas function platform url` is `https://console.volcengine.com/vefaas/function/detail?functionId={function_id}&region={region}`
 """)
 def poll_function_release_status(function_id: str, region: str = None):
     region = validate_and_set_region(region)
@@ -631,6 +638,7 @@ def poll_function_release_status(function_id: str, region: str = None):
             time.sleep(interval)
         else:
             return response
+    
     return response
 
 def generate_random_name(prefix="mcp", length=8):
@@ -691,7 +699,7 @@ def list_existing_api_gateways(region: str = None):
             if gateway.get("Region") == region and gateway.get("Status") in ["Running", "Creating"]:
                 result.append({
                     "Name": gateway.get("Name", ""),
-                    "ID": gateway.get("ID", ""),
+                    "ID": gateway.get("Id", ""),
                     "Region": gateway.get("Region", ""),
                     "Type": gateway.get("Type", ""),
                     "Status": gateway.get("Status", ""),
@@ -746,7 +754,7 @@ Args:
 Note:
  - Use this tool to select one running api gateway for create veFaaS Application.
  - If no running gateway exists, will create a new one and wait for it to be running.
- - If can this tool can not fetch a running gateway after timeout, please retry and at most try 3 times.
+ - If can this tool returned error, should retry and at most retry 3 times.
 """)
 
 def fetch_running_api_gateway(region: str = None):
@@ -784,9 +792,9 @@ def fetch_running_api_gateway(region: str = None):
                     raise Exception(f"Failed to create API Gateway after {create_api_gateway_failed_times} times")
                 time.sleep(interval)
     except Exception as e:
-        return f"Failed to fetch an running API Gateway: {str(e)}"
+        raise Exception(f"Failed to fetch an running API Gateway: {str(e)}")
      
-    return f"Failed to fetch an running API Gateway after {timeout} seconds"
+    raise Exception(f"Failed to fetch an running API Gateway after {timeout} seconds")
 
 def ensure_executable_permissions(folder_path: str):
     for root, _, files in os.walk(folder_path):
@@ -922,7 +930,11 @@ def _get_upload_code_description() -> str:
         "  - Rule 4: Python/Node deps: put them in 'requirements.txt'/'package.json'; veFaaS installs them as needed.\n"
         "  - Rule 5: HTTP server **MUST** listen on IP: 0.0.0.0, PORT: 8000.\n"
         "  - Rule 6: Store templates/static assets as files and sanity-check imports before uploading.\n"
-        "  - Rule 7: When uploading code, exclude local deps and noise (e.g., `.venv`, `site-packages`, `node_modules`, `.git`, build artifacts) via `local_folder_exclude`.\n\n"
+        "  - Rule 7: Declare every framework/server dependency in `requirements.txt` / `package.json`; do not bundle virtualenvs.\n"
+        "  - Rule 8: Module CLIs are not on PATH. Invoke them with `python -m module_name ...` or start the server in code—running `gunicorn ...` or `uvicorn ...` directly will fail.\n"
+        "  - Rule 9: Keep startup scripts focused on launching the app; skip extra installs/build once `upload_code` has run.\n"
+        "  - Rule 10: Store templates/static assets as files and sanity-check imports before uploading.\n"
+        "  - Rule 11: When uploading code, exclude local deps and noise (e.g., `.venv`, `site-packages`, `node_modules`, `.git`, build artifacts) via `local_folder_exclude`.\n\n"
     )
 
     # Detect run mode via FASTMCP_* environment variables.
