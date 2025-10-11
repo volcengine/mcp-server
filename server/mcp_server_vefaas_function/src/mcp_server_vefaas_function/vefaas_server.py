@@ -81,7 +81,7 @@ Note:
    - Step 2: Pull details/code with `get_vefaas_application_template` if a template fits.
    - Step 3: Create the veFaaS function and confirm its release succeeded.
    - Step 4: Ensure a running API gateway is ready.
- - Immediately after this tool returns, call `poll_vefaas_application_status` until deployment finishes (success or fail, max three polls) — skip polling if creation or release fails.
+ - On success, immediately call `poll_vefaas_application_status` until deployment finishes (success or fail, max three polls). If creation fails or raises, stop and surface the error instead of polling.
 
 Error Handle Tips:
  - If there is **any authentication** error about vefaas application(create/release/get), let user apply auth by link: https://console.volcengine.com/iam/service/attach_custom_role?ServiceName=vefaas&policy1_1=APIGFullAccess&policy1_2=VeFaaSFullAccess&role1=ServerlessApplicationRole, then retry.
@@ -265,7 +265,7 @@ Error Handle Tips:
    - Step 1: Run `upload_code` (per its checklist; required for TOS sources).
    - Step 2: Call `release_function` once upload completes when release is needed.
    - Step 3: Fetch a running API gateway.
-   - Step 4: Create the veFaaS application (this tool auto-releases) and immediately poll deployment status via `poll_vefaas_application_status`.
+ - Step 4: Create the veFaaS application (this tool auto-releases). Only if creation succeeds, poll deployment status via `poll_vefaas_application_status`; otherwise surface the failure.
 
 """)
 def create_function(name: str = None, region: str = None, runtime: str = None, command: str = None, source: str = None,
@@ -1151,12 +1151,13 @@ def get_function_detail(function_id: str, region: Optional[str] = None):
 Args:
  - function_id: ID of the function.
  - region: Region of the function (defaults to `cn-beijing`).
- - dest_dir: Directory to extract the downloaded code into (must be provided).
+ - dest_dir: absolute path to the folder where the code should be downloaded and unzipped (required).
  - revision_number: Specific revision to fetch (defaults to 0 when omitted).
  - use_stable_revision: Set to True only when online/released/stable code is required; overrides `revision_number`.
 
 Note:
- - Always supply `dest_dir`; the tool will create the directory if it does not exist.
+ - If your current working directory is empty, pass its absolute path so the files land directly there—avoid nesting unless necessary.
+ - Only create a dedicated subfolder (e.g., `/path/to/project/vefaas_{function_id}/`) when the working directory already contains files; the server will create it if missing.
 """)
 def pull_function_code(function_id: str, region: Optional[str] = "", dest_dir: str = None, revision_number: Optional[int] = None, use_stable_revision: Optional[bool] = False):
     region = validate_and_set_region(region)
@@ -1204,6 +1205,9 @@ def pull_function_code(function_id: str, region: Optional[str] = "", dest_dir: s
         # Download the code zip file
         response = requests.get(source_location)
         response.raise_for_status()
+
+        if not dest_dir:
+            raise ValueError("dest_dir must be provided so the server knows where to extract the function code.")
 
         # Create destination directory if it doesn't exist
         os.makedirs(dest_dir, exist_ok=True)
@@ -1350,3 +1354,42 @@ def get_vefaas_application_template(template_id: str, destination_dir: str):
 
     except Exception as e:
         raise ValueError(f"Failed to download and extract application template: {str(e)}")
+
+@mcp.prompt(name="deploy_vefaas", title="""deploy veFaaS function""")
+def deploy_vefaas(
+    function_id: str,
+    region: str = "cn-beijing",
+    local_folder_path: Optional[str] = None,
+    local_folder_exclude: Optional[List[str]] = None,
+    code_source_hint: Optional[str] = None,
+):
+    """
+    Generate deployment instructions for a veFaaS function.
+
+    Args:
+        function_id: Target veFaaS function ID.
+        region: Deployment region (defaults to cn-beijing).
+        local_folder_path: Local path to upload (if using filesystem upload).
+        local_folder_exclude: Patterns to exclude during upload.
+        code_source_hint: Free-form context about where updated code lives (optional).
+    """
+    folder_hint = f"Use `local_folder_path={local_folder_path!r}`" if local_folder_path else "Provide `local_folder_path` pointing at the prepared project root"
+    exclude_hint = (
+        f"`local_folder_exclude={local_folder_exclude!r}`"
+        if local_folder_exclude
+        else "Set `local_folder_exclude` to skip noise (e.g., ['.venv', 'node_modules', '.git', '*.pyc'])"
+    )
+    extra_hint = f"Context: {code_source_hint}\n" if code_source_hint else ""
+
+    instructions = "\n".join(
+        [
+            f"{extra_hint}Deploy veFaaS function `{function_id}` in `{region}`.",
+            "Tool names might include prefixes (e.g., `vefaas__upload_code`, `vefaas__release_function`); invoke whichever variant ends with the base name shown below.",
+            f"1. Call `upload_code` ({folder_hint}; {exclude_hint}) and follow its checklist.",
+            "2. If the response sets `dependency.dependency_task_created = true`, poll `poll_dependency_install_task_status` until it finishes (stop after three tries, surface logs on failure).",
+            f"3. When upload (and dependency install) is done, call `release_function` for `{function_id}` / `{region}`.",
+            "4. Immediately poll `poll_function_release_status` until it returns Succeeded/Failed (max three polls); report the outcome, platform URL, or errors before retrying.",
+        ]
+    )
+
+    return [instructions]
