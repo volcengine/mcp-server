@@ -75,12 +75,13 @@ Note:
  - On success, append `application_id` to `vefaas.yaml` immediately.
 
 **CRITICAL REQUIREMENT**:
- - Invoke only after the current workflow has just run `create_function`; otherwise reuse the existing application.
- - Before calling, confirm (and if not already done in this workflow, perform):
+ - Invoke **ONLY AFTER** the current workflow has just run `create_function`; otherwise reuse the existing application.
+ - If need to create a new application, follow these steps:
    - Step 1: List templates via `list_vefaas_application_templates`.
    - Step 2: Pull details/code with `get_vefaas_application_template` if a template fits.
    - Step 3: Create the veFaaS function and confirm its release succeeded.
    - Step 4: Ensure a running API gateway is ready.
+   - Step 5: Create the application with `create_vefaas_application`.
  - On success, immediately call `poll_vefaas_application_status` until deployment finishes (success or fail, max three polls). If creation fails or raises, stop and surface the error instead of polling.
 
 Error Handle Tips:
@@ -104,7 +105,7 @@ def create_vefaas_application(function_id: Required[str], function_name: Require
 
     region = validate_and_set_region(region)
 
-    applicationName = append_random_suffix(function_name, 3) + "-app"
+    applicationName = (append_random_suffix(function_name, 3) + "-app").lower()
 
     body = {
         "Name": applicationName,
@@ -125,7 +126,7 @@ def create_vefaas_application(function_id: Required[str], function_name: Require
         result = response_body.get("Result") or {}
     application_id = result.get("Id")
     if not application_id:
-        raise ValueError("Failed to determine application ID from create response.")
+        raise ValueError(f"Failed to determine application ID from create response. response_body: {response_body}")
 
     release_body = {"Id": application_id}
     try:
@@ -148,7 +149,7 @@ Args:
 Note:
  - Application deployment status is independent of function releases.
  - Call after `create_vefaas_application` (which auto-submits release) to monitor progress.
- - When it finishes, report application_id, region, status, access_url, and app_platform_url derived from the response.
+ - When it finishes, **MUST** report application_id, region, status, access_url, and app_platform_url derived from the response.
 
 **CRITICAL REQUIREMENT**:
  - Do not use alternative methods to check application deployment status—only this tool.
@@ -238,7 +239,7 @@ def poll_vefaas_application_status(application_id: Required[str], region: Option
 @mcp.tool(description="""Create a veFaaS function.
 
 Args:
- - name: function name (unique, with a 6 length random string).
+ - name: function name (unique, with a 6 length lowercase random string).
  - runtime: function runtime.
  - command: function startup script (./run.sh by default).
  - region: function region. (`cn-beijing` by default)
@@ -259,7 +260,7 @@ Error Handle Tips:
 
 **CRITICAL REQUIREMENT**:
  - If `vefaas.yaml` already holds a valid `function_id`, reuse it and skip this tool.
- - On success, write `function_id`, `name`, `region`, `runtime`, `command` to `vefaas.yaml`.
+ - On success, write `function_id`, `name`, `region`, `runtime`, `command` to `vefaas.yaml`, vefaas.yaml should be created in the **project root directory**.
  - Then execute in order:
    - Step 0 (for new services without an existing template choice): call `list_vefaas_application_templates`, pick a template, and pull its source via `get_vefaas_application_template` to guide code changes before uploading.
    - Step 1: Run `upload_code` (per its checklist; required for TOS sources).
@@ -539,8 +540,7 @@ Note:
 
 **CRITICAL REQUIREMENT**:
  - Can **only** use this tool to check vefaas function release status, **NEVER** try to get release status by other ways.
- - After function release finished, provide some important info for user: function_id, region, release status, and vefaas function platform url.
-  - `vefaas function platform url` is `https://console.volcengine.com/vefaas/function/detail?functionId={function_id}&region={region}`
+ - When it finishes, **MUST** report: function_id, region, release_status, vefaas_function_access_link and vefaas_function_platform_url derived from the response.
 """)
 def poll_function_release_status(function_id: str, region: str = None):
     region = validate_and_set_region(region)
@@ -557,9 +557,69 @@ def poll_function_release_status(function_id: str, region: str = None):
         if response.status == "inprogress":
             time.sleep(interval)
         else:
-            return response
+            break
+    
+    responseInfo = {
+        "function_id": function_id,
+        "region": region,
+        "release_status": response.status or "unknown",
+        "status_message": response.status_message or '',
+        "target_traffic_weight": response.target_traffic_weight or -1,
+        "current_traffic_weight": response.current_traffic_weight or -1,
+        "new_revision_number": response.new_revision_number or -1,
+        "old_revision_number": response.old_revision_number or -1,
+        "start_time": response.start_time or '',
+        "vefaas_function_platform_url": f"https://console.volcengine.com/vefaas/region:vefaas+{region}/function/detail/{function_id}?tab=config",
+        "vefaas_function_access_link": get_function_access_link(function_id, region),
+    }
+    return responseInfo
 
-    return response
+def get_function_access_link(function_id: str, region: str = None):
+    region = validate_and_set_region(region)
+    
+    triggers = list_function_triggers(function_id, region).get("Result", {}).get("Items", [])
+    upstream_id = ''
+    try:
+        for trigger in triggers:
+            if trigger.get("Type") == "apig":
+                upstream_id = json.loads(trigger.get("DetailedConfig", '')).get("UpstreamId", '')
+                break
+    except Exception as e:
+        logger.error(f"Failed to parse trigger config: {str(e)}")
+        raise ValueError(f"Failed to parse trigger config: {str(e)}")
+
+    if upstream_id == '':
+        return ''
+    
+    try:
+        body = {
+            'PageNumber': 1,
+            'PageSize': 100,
+            'UpstreamId': upstream_id,
+        }
+
+        now = datetime.datetime.utcnow()
+        try:
+            ak, sk, token = get_authorization_credentials(mcp.get_context())
+        except ValueError as e:
+            raise ValueError(f"Authorization failed: {str(e)}")
+
+        response = request("POST", now, {}, {}, ak, sk, token, "ListRoutes", json.dumps(body), region)
+        items = response.get("Result", {}).get("Items", [])
+        if len(items) == 0:
+            return ''
+        domains = items[0].get("Domains", [])
+        if len(domains) == 0:
+            return ''
+        for domainInfo in domains:
+            if domainInfo.get("Domain").startswith("https://"):
+                return domainInfo.get("Domain")
+    except Exception as e:
+        logger.error(f"Failed to parse route config: {str(e)}")
+        return f"Failed to parse route config: {str(e)}"
+
+    return ''
+
 
 def generate_random_name(prefix="mcp", length=8):
     """Generate a random string for function name"""
@@ -1227,6 +1287,8 @@ def pull_function_code(function_id: str, region: Optional[str] = "", dest_dir: s
                 f.write(f"region: {region}\n")
                 f.write(f"runtime: {function_detail.runtime}\n")
                 f.write(f"command: {function_detail.command}\n")
+                f.write(f"vefaas_function_platform: https://console.volcengine.com/vefaas/region:vefaas+{region}/function/detail/{function_id}?tab=config\n")
+                f.write(f"vefaas_access_link: {get_function_access_link(function_id, region)}\n")
                 f.write(f"triggers:\n")
                 for trigger in triggers:
                     f.write(f"  - id: {trigger.get('Id', '')}\n")
