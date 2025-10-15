@@ -20,7 +20,6 @@ TR MCP Server 是一个模型上下文协议(Model Context Protocol)服务器，
 业务数据查询
 - `DescribeTransitRouters`: [查询满足指定条件的中转路由器实例](https://www.volcengine.com/docs/6979/156017)
 - `DescribeTransitRouterAttachments`: [查询满足指定条件的TR连接](https://www.volcengine.com/docs/6979/156015)
-- `DescribeTransitRouterGrantRules`: [查询满足指定条件的实例共享](https://www.volcengine.com/docs/6979/1113688)
 - `DescribeTransitRouterVpcAttachments`: [查询满足指定条件的VPC类型网络实例连接](https://www.volcengine.com/docs/6979/170304)
 - `DescribeTransitRouterVpnAttachments`: [查询满足指定条件的VPN类型网络实例连接](https://www.volcengine.com/docs/6979/170308)
 - `DescribeTransitRouterDirectConnectGatewayAttachments`: [查询满足指定条件的专线网关类型网络实例连接](https://www.volcengine.com/docs/6979/155992)
