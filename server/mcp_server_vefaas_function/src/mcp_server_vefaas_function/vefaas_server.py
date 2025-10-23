@@ -154,6 +154,10 @@ Note:
 **CRITICAL REQUIREMENT**:
  - Do not use alternative methods to check application deployment status—only this tool.
  - Poll immediately after `create_vefaas_application` returns (release is auto-submitted) and stop once you see `deploy_success` or `deploy_fail`, with at most three attempts.
+ - If it is a **streamlit type** application (will contain "streamlit" in the function_name or application_name), **MUST** update the `access_url` to function envs and release function again after application deployment finished.
+    - Detail step:
+        - 1. Use tool `update_function`, add environment STREAMLIT_BROWSER_SERVER_ADDRESS=`access_url` to param envs.
+        - 2. Call tool `release_function` and `poll_function_release_status` to check if the streamlit application is redeployed successfully.
 
 """)
 def poll_vefaas_application_status(application_id: Required[str], region: Optional[str] = None):
@@ -1354,7 +1358,7 @@ def list_vefaas_application_templates(page_number: int = 1, page_size: int = 100
         resp = request(
             "POST", now, {}, {}, ak, sk, token, "ListApplicationTemplates", json.dumps(body), None, 5,
         )
-        #print(f"list_templates resp: {resp}")
+        
     except Exception as e:
         raise ValueError(f"Failed to list application templates: {str(e)}")
 
@@ -1366,6 +1370,32 @@ def list_vefaas_application_templates(page_number: int = 1, page_size: int = 100
             "id": item.get("Id", ""),
             "description": item.get("Description", ""),
         })
+    
+    # TODO: dirty code, remove this
+    # get function templates for streamlit
+    try:
+        func_body = {
+            "PageNumber": page_number,
+            "PageSize": page_size,
+            "Filters": [{
+                "Item": {
+                    "Key": "SourceType",
+                    "Value": ["function"],
+                }
+            }]
+        }
+        func_resp = request("POST", now, {}, {}, ak, sk, token, "ListTemplates", json.dumps(func_body), None, 5)
+        func_items = func_resp.get("Result", {}).get("Items", [])
+        for item in func_items:
+            if item.get("Name", "") == "vefaas-native-streamlit":
+                result.append({
+                "name": item.get("Name", ""),
+                "id": item.get("Id", ""),
+                "description": item.get("Description", ""),
+            })
+    except Exception as e:
+        logger.error(f"Failed to list function templates: {str(e)}")
+    
     return result
 
 @mcp.tool(description="""Download a veFaaS application template.
@@ -1387,12 +1417,21 @@ def get_vefaas_application_template(template_id: str, destination_dir: str):
     now = datetime.datetime.utcnow()
     body = {"Id": template_id}
 
-    try:
-        resp = request(
-            "POST", now, {}, {}, ak, sk, token, "GetApplicationTemplateDetail", json.dumps(body), None, 20,
-        )
-    except Exception as e:
-        raise ValueError(f"Failed to get application template detail: {str(e)}")
+    # TODO: dirty code, remove this. Adapt streamlit template.
+    if template_id == "68f9cd2474c2090008469163":
+        try:
+             resp = request(
+                "POST", now, {}, {}, ak, sk, token, "GetTemplateDetail", json.dumps(body), None, 20,
+            )
+        except Exception as e:
+            raise ValueError(f"Failed to get application template detail: {str(e)}")
+    else:
+        try:
+            resp = request(
+                "POST", now, {}, {}, ak, sk, token, "GetApplicationTemplateDetail", json.dumps(body), None, 20,
+            )
+        except Exception as e:
+            raise ValueError(f"Failed to get application template detail: {str(e)}")
 
     try:
         source_location = resp.get("Result", {}).get("SourceLocation")
