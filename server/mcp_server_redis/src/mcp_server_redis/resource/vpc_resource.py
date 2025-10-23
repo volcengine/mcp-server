@@ -2,6 +2,7 @@ import volcenginesdkcore
 from .configs import get_vpc_service_endpoint_by_region, vpc_supported_regions
 from volcenginesdkvpc.api.vpc_api import VPCApi
 from volcenginesdkvpc.models import DescribeVpcsRequest, DescribeVpcsResponse, \
+    DescribeEipAddressesRequest, DescribeEipAddressesResponse, \
     DescribeSubnetsRequest, DescribeSubnetsResponse
 
 class VpcSDK:
@@ -25,3 +26,6 @@ class VpcSDK:
 
     def describe_subnets(self, args:dict) -> DescribeSubnetsResponse:
         return self.client.describe_subnets(DescribeSubnetsRequest(**args))
+
+    def describe_eip_addresses(self, args: dict) -> DescribeEipAddressesResponse:
+        return self.client.describe_eip_addresses(DescribeEipAddressesRequest(**args))
