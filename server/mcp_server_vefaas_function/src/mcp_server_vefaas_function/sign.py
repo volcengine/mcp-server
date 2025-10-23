@@ -99,7 +99,7 @@ def request(method, date, query, header, ak, sk, token, action, body, region = N
 
     if action in ['CodeUploadCallback', 'CreateDependencyInstallTask', 'GetDependencyInstallTaskStatus',
                   'GetDependencyInstallTaskLogDownloadURI', "ListApplicationTemplates", "GetApplicationTemplateDetail", "GetRevision",
-                  "CreateApplication", "GetApplication", "ReleaseApplication", "ListTriggers", "GetApplicationRevisionLog"]:
+                  "CreateApplication", "GetApplication", "ReleaseApplication", "ListTriggers", "GetApplicationRevisionLog", "ListTemplates", "GetTemplateDetail"]:
         credential["service"] = "vefaas"
 
     content_type = ContentType
