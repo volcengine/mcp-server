@@ -106,6 +106,74 @@
 - **Detailed Description**: Create a new IP whitelist.
 - **Trigger Example**: `"Unbind instance redis-cnlf57snuxxxxxxxx from whitelist acl-cnlf61xhhfrgxxxxx"`
 
+### 24. `describe_db_instance_shards`
+- **Detailed Description**: Query shard information of target Redis instance.
+- **Trigger Example**: `"View shard details of instance redis-cnlf57snuxxxxxxxx"`
+
+### 25. `describe_node_ids`
+- **Detailed Description**: Query node IDs of target Redis instance.
+- **Trigger Example**: `"View node IDs of instance redis-cnlf57snuxxxxxxxx"`
+
+### 26. `modify_db_instance_name`
+- **Detailed Description**: Modify name of target Redis instance.
+- **Trigger Example**: `"Rename instance redis-cnlf57snuxxxxxxxx to new-instance-name"`
+
+### 27. `describe_tags_by_resource`
+- **Detailed Description**: Query tag information bound to target Redis instance.
+- **Trigger Example**: `"View tags of instance redis-cnlf57snuxxxxxxxx"`
+
+### 28. `describe_backup_plan`
+- **Detailed Description**: Query backup plan of target Redis instance.
+- **Trigger Example**: `"View backup plan of instance redis-cnlf57snuxxxxxxxx"`
+
+### 29. `describe_pitr_time_window`
+- **Detailed Description**: Query PITR (Point-in-Time Recovery) time window of target Redis instance.
+- **Trigger Example**: `"View PITR time window of instance redis-cnlf57snuxxxxxxxx"`
+
+### 30. `describe_backup_point_download_urls`
+- **Detailed Description**: Query download URLs of backup points for target Redis instance.
+- **Trigger Example**: `"Get download URLs for backup point id b-cnlf7khq9vpzazekat176mzxxxxxxx of instance redis-cnlf57snuxxxxxxxx"`
+
+### 31. `describe_cross_region_backup_policy`
+- **Detailed Description**: Query cross-region backup policy of target Redis instance.
+- **Trigger Example**: `"View cross-region backup policy of instance redis-cnlf57snuxxxxxxxx"`
+
+### 32. `describe_cross_region_backups`
+- **Detailed Description**: Query cross-region backups of target Redis instance.
+- **Trigger Example**: `"View cross-region backups of instance redis-cnlf57snuxxxxxxxx"`
+
+### 33. `create_parameter_group`
+- **Detailed Description**: Create a new parameter group.
+- **Trigger Example**: `"Create a Redis 5.0 parameter template named custom-group, and set the maxmemory-policy parameter to volatile-lfu"`
+
+### 34. `create_db_endpoint_public_address`
+- **Detailed Description**: Create public address for target Redis instance endpoint.
+- **Trigger Example**: `"Create public address for instance redis-cnlf57snuxxxxxxxx"`
+
+### 35. `describe_db_instance_bandwidth_per_shard`
+- **Detailed Description**: Query bandwidth per shard for target Redis instance.
+- **Trigger Example**: `"View bandwidth per shard for instance redis-cnlf57snuxxxxxxxx"`
+
+### 36. `describe_db_instance_acl_commands`
+- **Detailed Description**: Query ACL commands supported by target Redis instance.
+- **Trigger Example**: `"View ACL commands supported by instance redis-cnlf57snuxxxxxxxx"`
+
+### 37. `describe_db_instance_acl_categories`
+- **Detailed Description**: Query ACL categories supported by target Redis instance.
+- **Trigger Example**: `"View ACL categories supported by instance redis-cnlf57snuxxxxxxxx"`
+
+### 38. `describe_planned_events`
+- **Detailed Description**: Query planned events of target Redis instance.
+- **Trigger Example**: `"View planned events for instance redis-cnlf57snuxxxxxxxx"`
+
+### 39. `describe_key_scan_jobs`
+- **Detailed Description**: Query key scan jobs of target Redis instance.
+- **Trigger Example**: `"View key scan jobs for instance redis-cnlf57snuxxxxxxxx"`
+
+### 40. `describe_eip_addresses`
+- **Detailed Description**: Query EIP (Elastic IP) addresses that meet specified conditions.
+- **Trigger Example**: `"View EIP addresses under current account"`
+
 ---
 
 ## Service Activation Link
