@@ -9,8 +9,7 @@ from mcp_server_redis.resource.redis_resource import RedisSDK
 from mcp_server_redis.params import func_available_params_map
 
 # Initialize the MCP service
-mcp_server = FastMCP("redis_mcp_server", port=int(os.getenv("MCP_SERVER_PORT", "8000")),
-                     description="Volcengine(火山引擎) Redis(缓存数据库) MCP , 你的缓存数据库管理助手")
+mcp_server = FastMCP("redis_mcp_server", port=int(os.getenv("MCP_SERVER_PORT", "8000")))
 redis_resource = RedisSDK(
     region=os.getenv('VOLCENGINE_REGION'), host=os.getenv('VOLCENGINE_ENDPOINT'),
     ak=os.getenv('VOLCENGINE_ACCESS_KEY'), sk=os.getenv('VOLCENGINE_SECRET_KEY')
@@ -389,7 +388,7 @@ def describe_hot_keys(
     """Query hot key details of the target Redis instance within specified time period
        Args:
            instance_id (str): The instance ID.
-                             You can call DescribeDBInstances to query basic information of all Redis instances.
+                             You can call describe_db_instances to query basic information of all Redis instances.
            page_size (int): The number of records per page, range: 1-1000.
            query_start_time (str, optional): The start time of the query in format yyyy-MM-ddTHH:mm:ssZ (UTC).
                                            If not specified, defaults to 1 hour before current time.
@@ -404,7 +403,7 @@ def describe_hot_keys(
            shard_ids (list[str], optional): The list of shard IDs to filter results.
                                           Maximum 40 shard IDs, separated by commas.
                                           If not specified, no filtering by shard ID.
-                                          You can call DescribeDBInstanceShards to query shard details.
+                                          You can call describe_db_instanceshards to query shard details.
     """
     req = {
         "instance_id": instance_id,
@@ -434,7 +433,7 @@ def describe_big_keys(
     """Query big key details of the target Redis instance within specified time period
        Args:
            instance_id (str): The instance ID.
-                             You can call DescribeDBInstances to query basic information of all Redis instances.
+                             You can call describe_db_instances to query basic information of all Redis instances.
            page_size (int): The number of records per page, range: 1-100.
            query_start_time (str, optional): The start time of the query in format yyyy-MM-ddTHH:mm:ssZ (UTC).
                                            If not specified, defaults to 24 hours before current time.
@@ -487,7 +486,7 @@ def describe_backups(
                                        'AccountInstances' (query current account)
            instance_id (str, optional): The instance ID.
                                       Required when scope is 'OneInstance'.
-                                      You can call DescribeDBInstances to query instance information.
+                                      You can call describe_db_instances to query instance information.
            start_time (str, optional): The start time in format yyyy-MM-ddTHH:mm:ssZ (UTC).
                                      If specified, end_time is required.
            end_time (str, optional): The end time in format yyyy-MM-ddTHH:mm:ssZ (UTC).
@@ -1126,6 +1125,527 @@ def disassociate_allow_list(
         return {
             "result": "please call describe_allow_list_detail to check disassociate_allow_list result!",
         }
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_db_instance_shards",
+    description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query shard information of the target Redis instance"
+)
+def describe_db_instance_shards(
+    instance_id: str,
+    page_number: int = 1,
+    page_size: int = 10
+) -> dict[str, Any]:
+    """Query shard information of the target Redis instance
+       Args:
+           instance_id (str): The instance ID.
+                           You can call describe_db_instances to query basic information of all Redis instances.
+           page_number (int, optional): The page number, starting from 1. Default: 1.
+           page_size (int, optional): The number of records per page, range: 1-100. Default: 10.
+    """
+    req = {
+        "instance_id": instance_id,
+        "page_number": page_number,
+        "page_size": page_size
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = redis_resource.describe_db_instance_shards(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_node_ids",
+    description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query all Proxy and Server node IDs in the target Redis instance"
+)
+def describe_node_ids(
+    instance_id: str
+) -> dict[str, Any]:
+    """Query all Proxy and Server node IDs in the target Redis instance
+       Args:
+           instance_id (str): The instance ID.
+                           You can call describe_db_instances to query basic information of all Redis instances.
+    """
+    req = {
+        "instance_id": instance_id
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = redis_resource.describe_node_ids(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="modify_db_instance_name",
+    description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Modify the name of the target Redis instance"
+)
+def modify_db_instance_name(
+    instance_id: str,
+    instance_name: str,
+    client_token: str = None
+) -> dict[str, Any]:
+    """Modify the name of the target Redis instance
+       Args:
+           instance_id (str): The instance ID.
+                           You can call describe_db_instances to query basic information of all Redis instances.
+           instance_name (str): The new instance name.
+                              Rules:
+                              - Cannot start with number or hyphen
+                              - Can contain Chinese characters, letters, numbers, underscores (_) and hyphens (-)
+                              - Length: 1-128 characters
+           client_token (str, optional): Idempotency token.
+                                      Used to ensure the idempotency of the request. Generated by client.
+                                      Must be unique among different requests. Case-sensitive.
+                                      Maximum 127 ASCII characters.
+    """
+    req = {
+        "instance_id": instance_id,
+        "instance_name": instance_name,
+        "client_token": client_token
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = redis_resource.modify_db_instance_name(req)
+    if resp is None or (isinstance(resp, dict) and len(resp) == 0):
+        return {
+            "result": "please call describe_db_instance_detail to check modify_db_instance_name result!",
+        }
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_tags_by_resource",
+    description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query tag information of specified Redis instances"
+)
+def describe_tags_by_resource(
+    instance_ids: list[str],
+    tag_filters: list[dict[str, str]] = None,
+    page_number: int = 1,
+    page_size: int = 10
+) -> dict[str, Any]:
+    """Query tag information of specified Redis instances
+       Args:
+           instance_ids (list[str]): List of instance IDs. Supports querying multiple instances at once, with multiple instance IDs separated by commas.
+                                    You can call describe_db_instances to query basic information of all Redis instances.
+           tag_filters (list[dict], optional): Tag filtering conditions used to filter tags that meet the criteria. Each dict contains:
+                                         - 'key' (str): Tag key
+                                         - 'value' (str): Tag value
+           page_number (int, optional): Page number. Value range: 1-10000. Default: 1.
+           page_size (int, optional): Number of records per page. Value range: 1-100. Default: 10.
+    """
+    req = {
+        "instance_ids": instance_ids,
+        "tag_filters": tag_filters,
+        "page_number": page_number,
+        "page_size": page_size
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = redis_resource.describe_tags_by_resource(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_backup_plan",
+    description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query the backup plan of the specified Redis instance"
+)
+def describe_backup_plan(instance_id: str) -> dict[str, Any]:
+    """Query the backup plan of the specified Redis instance
+       Args:
+           instance_id (str): The instance ID. You can call describe_db_instances to query basic information of all Redis instances.
+    """
+    req = {
+        "instance_id": instance_id
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = redis_resource.describe_backup_plan(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_pitr_time_window",
+    description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query the point-in-time recovery (PITR) time window supported by the specified Redis instance"
+)
+def describe_pitr_time_window(instance_id: str) -> dict[str, Any]:
+    """Query the point-in-time recovery (PITR) time window supported by the specified Redis instance
+       Args:
+           instance_id (str): The instance ID. You can call describe_db_instances to query basic information of all Redis instances.
+    """
+    req = {
+        "instance_id": instance_id
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = redis_resource.describe_pitr_time_window(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_backup_point_download_urls",
+    description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query the download URLs of backup files for the specified Redis instance"
+)
+def describe_backup_point_download_urls(instance_id: str, backup_point_id: str) -> dict[str, Any]:
+    """Query the download URLs of backup files for the specified Redis instance
+       Args:
+           instance_id (str): The instance ID. You can call describe_db_instances to query basic information of all Redis instances.
+           backup_point_id (str): The ID of the backup point. You can call describe_backups to query all backup points of the Redis instance.
+    """
+    req = {
+        "instance_id": instance_id,
+        "backup_point_id": backup_point_id
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = redis_resource.describe_backup_point_download_urls(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_cross_region_backup_policy",
+    description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query the cross-region backup policy of the specified Redis instance"
+)
+def describe_cross_region_backup_policy(instance_id: str) -> dict[str, Any]:
+    """Query the cross-region backup policy of the specified Redis instance
+       Args:
+           instance_id (str): The instance ID. You can call describe_db_instances to query basic information of all Redis instances.
+    """
+    req = {
+        "instance_id": instance_id
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = redis_resource.describe_cross_region_backup_policy(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_cross_region_backups",
+    description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query cross-region backups"
+)
+def describe_cross_region_backups(
+    scope: str = None,
+    instance_id: str = None,
+    status: str = None,
+    start_time: str = None,
+    end_time: str = None,
+    backup_strategy_list: list = None,
+    backup_point_name: str = None,
+    backup_point_id: str = None,
+    project_name: str = None,
+    page_size: int = None,
+    page_number: int = None
+) -> dict[str, Any]:
+    """Query cross-region backups
+       Args:
+           scope (str, optional): Backup query scope. Available values: OneInstance (default), AccountInstances
+           instance_id (str, optional): The instance ID. Required when Scope is OneInstance.
+           status (str, optional): Backup status. Available values: Creating, Available, Unavailable, Deleting
+           start_time (str, optional): Start time of the query. Format: yyyy-MM-ddTHH:mm:ssZ (UTC)
+           end_time (str, optional): End time of the query. Format: yyyy-MM-ddTHH:mm:ssZ (UTC)
+           backup_strategy_list (list[str], optional): List of backup methods. Available values: ManualBackup, AutomatedBackup
+           backup_point_name (str, optional): Backup name. Fuzzy query is supported.
+           backup_point_id (str, optional): Backup ID. Fuzzy query is supported.
+           project_name (str, optional): Project name.
+           page_size (int, optional): Number of records per page. Value range: 1-100
+           page_number (int, optional): Page number. Value range: 1-Max(Integer)
+    """
+    req = {
+        "scope": scope,
+        "instance_id": instance_id,
+        "status": status,
+        "start_time": start_time,
+        "end_time": end_time,
+        "backup_strategy_list": backup_strategy_list,
+        "backup_point_name": backup_point_name,
+        "backup_point_id": backup_point_id,
+        "project_name": project_name,
+        "page_size": page_size,
+        "page_number": page_number
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = redis_resource.describe_cross_region_backups(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="create_parameter_group",
+    description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Create a parameter template"
+)
+def create_parameter_group(
+    name: str,
+    engine_version: str,
+    description: str,
+    param_values: list[dict[str, str]],
+    client_token: str = None
+) -> dict[str, Any]:
+    """Create a parameter template
+       Args:
+           name (str): Parameter template name. Requirements: Cannot start with a number or dash (-). Can contain Chinese characters, letters, numbers, underscores (_), and hyphens (-). Length: 1-32 characters.
+           engine_version (str): Redis version. Available values: 5.0, 6.0, 7.0.
+           description (str): Parameter template description. Maximum length: 200 characters.
+           param_values (list[dict[str, str]]): Parameter value list. Each element in the list must be a dict that contains only two required keys: "name" and "value" (do not use the parameter name as a direct key of the dict).
+                                   - 'name' (str, required): The name of the Redis parameter (e.g., "maxmemory-policy").
+                                   - 'value' (str, required): The corresponding value of the Redis parameter (e.g., "volatile-lfu").
+                                   Correct example:
+                                       "param_values": [
+                                           {
+                                               "name": "maxmemory-policy",
+                                               "value": "volatile-lfu"
+                                           }
+                                       ]
+                                   Wrong example (invalid format):
+                                       "param_values": [
+                                           {
+                                               "maxmemory-policy": "volatile-lfu"  # Error: Uses parameter name as key
+                                           }
+                                       ]
+                                   You can call describe_db_instance_params to get supported parameters.
+           client_token (str, optional): Idempotency token. Maximum length: 127 ASCII characters. Must be unique among different requests.
+    """
+    req = {
+        "name": name,
+        "engine_version": engine_version,
+        "description": description,
+        "param_values": param_values,
+        "client_token": client_token
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = redis_resource.create_parameter_group(req)
+    if resp is None or (isinstance(resp, dict) and len(resp) == 0):
+        return {
+            "result": "please call describe_parameter_groups to check create_parameter_group result!",
+        }
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_eip_addresses",
+    description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query EIP (Elastic IP) addresses"
+)
+def describe_eip_addresses(
+    max_results: int = None,
+    name: str = None,
+    next_token: str = None,
+    page_number: int = 1,
+    page_size: int = 10,
+    status: str = None
+) -> dict[str, Any]:
+    """Query EIP (Elastic IP) addresses
+       Args:
+           max_results (int, optional): Maximum number of results to return. Range: 1-100.
+           name (str, optional): Name of the EIP.
+           next_token (str, optional): Pagination token.
+           page_number (int, optional): Page number. Starting from 1. Default: 1.
+                                       Note: This parameter will be deprecated,
+                                       use next_token and max_results instead.
+           page_size (int, optional): Number of records per page. Range: 1-100. Default: 10.
+                                     Note: This parameter will be deprecated,
+                                     use next_token and max_results instead.
+           status (str, optional): Status of the EIP. available values: Attaching, Detaching, Attached, Available, Deleting
+       Note:
+           - This API is used to query EIP addresses.
+           - All parameters are optional but at least one filtering condition should be provided if needed."""
+    req = {
+        "max_results": max_results,
+        "name": name,
+        "next_token": next_token,
+        "page_number": page_number,
+        "page_size": page_size,
+        "status": status
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = vpc_resource.describe_eip_addresses(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="create_db_endpoint_public_address",
+    description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Create a public endpoint address for Redis instance"
+)
+def create_db_endpoint_public_address(
+    instance_id: str,
+    eip_id: str,
+    port: int = None,
+    client_token: str = None
+) -> dict[str, Any]:
+    """Create a public endpoint address for Redis instance
+       Args:
+           instance_id (str): The instance ID. You can call describe_db_instances to query basic information of all Redis instances in the target region.
+           eip_id (str): The EIP ID to be bound to the instance. You can call describe_eip_addresses to query detailed information of available status created EIPs, including EIP ID.
+           port (int, optional): Port number for the public address. Valid range: 1024-65535. Default: 6379.
+           client_token (str, optional): Idempotency token. Maximum length: 127 ASCII characters. Must be unique among different requests.
+       Note:
+           - This operation will enable public access to the Redis instance.
+           - Only primary-secondary and cluster instances support creating public endpoints.
+           - The public endpoint will be assigned an IPv4 address.
+           - After creation, you can call modify_db_instance_visit_address to modify the domain name and port number of the public address.
+    """
+    req = {
+        "instance_id": instance_id,
+        "eip_id": eip_id,
+        "port": port,
+        "client_token": client_token
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = redis_resource.create_db_endpoint_public_address(req)
+    if resp is None or (isinstance(resp, dict) and len(resp) == 0):
+        return {
+            "result": "please wait a minute, then call describe_db_instance_detail to check create_db_endpoint_public_address result!",
+        }
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_db_instance_bandwidth_per_shard",
+    description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query bandwidth information per shard for Redis instance"
+)
+def describe_db_instance_bandwidth_per_shard(
+    instance_id: str
+) -> dict[str, Any]:
+    """Query bandwidth information per shard for Redis instance
+       Args:
+           instance_id (str): The instance ID. You can call describe_db_instances to query basic information of all Redis instances in the target region.
+       Returns:
+           dict: Response containing bandwidth information.
+           - "DefaultBandwidthPerShard" (int): Default bandwidth per shard in MB/s.
+           - "AdditionalBandwidthPerShard" (int): Additional bandwidth per shard in MB/s.
+       Note:
+           - This API is used to query the bandwidth limit per shard for the Redis instance.
+           - The bandwidth is calculated as the sum of the default bandwidth and additional bandwidth.
+           - For cluster instances, each shard has its own bandwidth limit.
+           - The default bandwidth varies by instance specification.
+    """
+    req = {
+        "instance_id": instance_id
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = redis_resource.describe_db_instance_bandwidth_per_shard(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_db_instance_acl_commands",
+    description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query the list of commands supported by a specific command category for Redis instance"
+)
+def describe_db_instance_acl_commands(
+    instance_id: str,
+    category: str = "admin"
+) -> dict[str, Any]:
+    """Query the list of commands supported by a specific category for Redis instance
+           Args:
+               instance_id (str): The instance ID. You can call describe_db_instances to query basic information of all Redis instances in the target region.
+               category (str, optional): category name. You can call describe_db_instance_acl_categories to query supported categories.
+           Returns:
+               dict: Response containing command list information.
+               - "Commands" (list[str]): List of commands supported by the specified category.
+           Note:
+               - This API is used to query the commands supported by a specific command category for the Redis instance.
+               - You can use describe_db_instance_acl_command_categories to query all command categories supported by Redis instances.
+    """
+    req = {
+        "instance_id": instance_id,
+        "category": category
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = redis_resource.describe_db_instance_acl_commands(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_db_instance_acl_categories",
+    description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query the list of command categories supported by Redis instance"
+)
+def describe_db_instance_acl_categories(
+    instance_id: str
+) -> dict[str, Any]:
+    """Query the list of command categories supported by Redis instance
+       Args:
+           instance_id (str): The instance ID. You can call describe_db_instances to query basic information of all Redis instances in the target region.
+       Returns:
+           dict: Response containing command category list information.
+           - "Categories" (list[str]): List of command categories supported by the Redis instance.
+       Note:
+           - This API is used to query all command categories supported by the Redis instance.
+           - The returned categories can be used as parameters for describe_db_instance_acl_commands.
+    """
+    req = {
+        "instance_id": instance_id
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = redis_resource.describe_db_instance_acl_categories(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_planned_events",
+    description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query the planned events of Redis instances"
+)
+def describe_planned_events(
+    page_number: int = 1,
+    page_size: int = 10,
+    instance_id: str = None,
+    min_start_time: str = None,
+    max_start_time: str = None
+) -> dict[str, Any]:
+    """Query the planned events of Redis instances
+       Args:
+           page_number (int): Page number for pagination. Default: 1.
+           page_size (int): Number of rows per page. Range: 1-1000. Default: 10.
+           instance_id (str, optional): Instance ID. Fuzzy query supported.
+           min_start_time (str, optional): The earliest execution time of planned events to query. Format: yyyy-MM-ddTHH:mm:ssZ (UTC time).
+           max_start_time (str, optional): The latest execution time of planned events to query. Format: yyyy-MM-ddTHH:mm:ssZ (UTC time).
+       Returns:
+           dict: Response containing planned events information.
+           - "PageNumber" (int): Page number.
+           - "PageSize" (int): Number of rows per page.
+           - "TotalCount" (int): Total number of records.
+           - "PlannedEvents" (array): List of planned events.
+       Note:
+           - This API is used to query the planned events of Redis instances.
+           - If instance_id is left empty, it means not filtering by instance ID.
+           - You can call describe_db_instances API to query basic information of all Redis instances in the target region, including instance IDs.
+           - If min_start_time is left empty, it means not filtering by the earliest planned execution time.
+           - If max_start_time is left empty, it means not filtering by the latest planned execution time.
+           - The end time of the query must be later than the start time.
+    """
+    req = {
+        "page_number": page_number,
+        "page_size": page_size,
+        "instance_id": instance_id,
+        "min_start_time": min_start_time,
+        "max_start_time": max_start_time
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = redis_resource.describe_planned_events(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_key_scan_jobs",
+    description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query the key scan jobs of Redis instances"
+)
+def describe_key_scan_jobs(
+    instance_id: str,
+    page_size: int = 10,
+    page_number: int = 1,
+    query_start_time: str = None,
+    query_end_time: str = None
+) -> dict[str, Any]:
+    """Query the key scan jobs of Redis instances
+       Args:
+           instance_id (str): Instance ID. You can call describe_db_instances to query instance IDs.
+           page_size (int): Number of rows per page. Range: 1-1000. Default: 10.
+           page_number (int): Page number for pagination. Default: 1.
+           query_start_time (str, optional): Start time of the query. Format: yyyy-MM-ddTHH:mm:ssZ (UTC time).
+           query_end_time (str, optional): End time of the query. Format: yyyy-MM-ddTHH:mm:ssZ (UTC time).
+       Note:
+           - This API is used to query the key scan jobs of Redis instances.
+           - If query_start_time is left empty, it means not filtering by start time.
+           - If query_end_time is left empty, it means not filtering by end time.
+    """
+    req = {
+        "instance_id": instance_id,
+        "page_size": page_size,
+        "page_number": page_number,
+        "query_start_time": query_start_time,
+        "query_end_time": query_end_time
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+    resp = redis_resource.describe_key_scan_jobs(req)
     return resp.to_dict()
 
 

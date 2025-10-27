@@ -21,7 +21,23 @@ from volcenginesdkredis.models import DescribeRegionsRequest, DescribeRegionsRes
     CreateDBAccountRequest, CreateDBAccountResponse, \
     CreateAllowListRequest, CreateAllowListResponse, \
     AssociateAllowListRequest, AssociateAllowListResponse, \
-    DisassociateAllowListRequest, DisassociateAllowListResponse
+    DescribeDBInstanceShardsRequest, DescribeDBInstanceShardsResponse, \
+    DisassociateAllowListRequest, DisassociateAllowListResponse, \
+    DescribeNodeIdsRequest, DescribeNodeIdsResponse, \
+    ModifyDBInstanceNameRequest, ModifyDBInstanceNameResponse, \
+    DescribeTagsByResourceRequest, DescribeTagsByResourceResponse, \
+    DescribeBackupPlanRequest, DescribeBackupPlanResponse, \
+    DescribePitrTimeWindowRequest, DescribePitrTimeWindowResponse, \
+    DescribeBackupPointDownloadUrlsRequest, DescribeBackupPointDownloadUrlsResponse, \
+    DescribeCrossRegionBackupPolicyRequest, DescribeCrossRegionBackupPolicyResponse, \
+    DescribeCrossRegionBackupsRequest, DescribeCrossRegionBackupsResponse, \
+    CreateParameterGroupRequest, CreateParameterGroupResponse, \
+    CreateDBEndpointPublicAddressRequest, CreateDBEndpointPublicAddressResponse, \
+    DescribeDBInstanceBandwidthPerShardRequest, DescribeDBInstanceBandwidthPerShardResponse, \
+    DescribeDBInstanceAclCommandsRequest, DescribeDBInstanceAclCommandsResponse, \
+    DescribeDBInstanceAclCategoriesRequest, DescribeDBInstanceAclCategoriesResponse, \
+    DescribePlannedEventsRequest, DescribePlannedEventsResponse, \
+    DescribeKeyScanJobsRequest, DescribeKeyScanJobsResponse
 
 class RedisSDK:
     """初始化 Volcano Redis SDK Client"""
@@ -101,3 +117,51 @@ class RedisSDK:
 
     def disassociate_allow_list(self, args:dict) -> DisassociateAllowListResponse:
         return self.client.disassociate_allow_list(DisassociateAllowListRequest(**args))
+
+    def describe_db_instance_shards(self, args: dict) -> DescribeDBInstanceShardsResponse:
+        return self.client.describe_db_instance_shards(DescribeDBInstanceShardsRequest(**args))
+
+    def describe_node_ids(self, args: dict) -> DescribeNodeIdsResponse:
+        return self.client.describe_node_ids(DescribeNodeIdsRequest(**args))
+
+    def modify_db_instance_name(self, args: dict) -> ModifyDBInstanceNameResponse:
+        return self.client.modify_db_instance_name(ModifyDBInstanceNameRequest(**args))
+
+    def describe_tags_by_resource(self, args: dict) -> DescribeTagsByResourceResponse:
+        return self.client.describe_tags_by_resource(DescribeTagsByResourceRequest(**args))
+
+    def describe_backup_plan(self, args: dict) -> DescribeBackupPlanResponse:
+        return self.client.describe_backup_plan(DescribeBackupPlanRequest(**args))
+
+    def describe_pitr_time_window(self, args: dict) -> DescribePitrTimeWindowResponse:
+        return self.client.describe_pitr_time_window(DescribePitrTimeWindowRequest(**args))
+
+    def describe_backup_point_download_urls(self, args: dict) -> DescribeBackupPointDownloadUrlsResponse:
+        return self.client.describe_backup_point_download_urls(DescribeBackupPointDownloadUrlsRequest(**args))
+
+    def describe_cross_region_backup_policy(self, args: dict) -> DescribeCrossRegionBackupPolicyResponse:
+        return self.client.describe_cross_region_backup_policy(DescribeCrossRegionBackupPolicyRequest(**args))
+
+    def describe_cross_region_backups(self, args: dict) -> DescribeCrossRegionBackupsResponse:
+        return self.client.describe_cross_region_backups(DescribeCrossRegionBackupsRequest(**args))
+
+    def create_parameter_group(self, args: dict) -> CreateParameterGroupResponse:
+        return self.client.create_parameter_group(CreateParameterGroupRequest(**args))
+
+    def create_db_endpoint_public_address(self, args: dict) -> CreateDBEndpointPublicAddressResponse:
+        return self.client.create_db_endpoint_public_address(CreateDBEndpointPublicAddressRequest(**args))
+
+    def describe_db_instance_bandwidth_per_shard(self, args: dict) -> DescribeDBInstanceBandwidthPerShardResponse:
+        return self.client.describe_db_instance_bandwidth_per_shard(DescribeDBInstanceBandwidthPerShardRequest(**args))
+
+    def describe_db_instance_acl_commands(self, args: dict) -> DescribeDBInstanceAclCommandsResponse:
+        return self.client.describe_db_instance_acl_commands(DescribeDBInstanceAclCommandsRequest(**args))
+
+    def describe_db_instance_acl_categories(self, args: dict) -> DescribeDBInstanceAclCategoriesResponse:
+        return self.client.describe_db_instance_acl_categories(DescribeDBInstanceAclCategoriesRequest(**args))
+
+    def describe_planned_events(self, args: dict) -> DescribePlannedEventsResponse:
+        return self.client.describe_planned_events(DescribePlannedEventsRequest(**args))
+
+    def describe_key_scan_jobs(self, args: dict) -> DescribeKeyScanJobsResponse:
+        return self.client.describe_key_scan_jobs(DescribeKeyScanJobsRequest(**args))
