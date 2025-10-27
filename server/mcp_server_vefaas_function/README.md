@@ -24,6 +24,24 @@ veFaaS MCP Server 提供创建、更新、发布 veFaaS 函数以及管理应用
   }
 }
 ```
+如果github访问有问题，也可以用pypi源
+```json
+{
+  "mcpServers": {
+    "vefaas": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-vefaas-function@latest"
+      ],
+      "env": {
+        "VOLC_ACCESSKEY": "xxx",
+        "VOLC_SECRETKEY": "xxx"
+      }
+    }
+  }
+}
+```
+
 
 ## 前置条件与注意事项
 
