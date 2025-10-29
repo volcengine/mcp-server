@@ -21,7 +21,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Create MCP server
-mcp = FastMCP("VeDB MySQL MCP Server", port=int(os.getenv("MCP_SERVER_PORT", "8000")))
+mcp = FastMCP("VeDB MySQL MCP Server", port=int(os.getenv("MCP_SERVER_PORT", "8000")),
+              streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"))
 
 
 @mcp.tool(
@@ -239,7 +240,7 @@ def create_vedb_mysql_instance(
 def main():
     parser = argparse.ArgumentParser(description="Run the VeDB MySQL MCP Server")
     parser.add_argument("--config", "-c", help="Path to config file")  # 新增config参数
-    parser.add_argument("--transport", "-t", choices=["sse", "stdio"], default="stdio")
+    parser.add_argument("--transport", "-t", choices=["sse", "stdio", "streamable-http"], default="stdio")
     
     args = parser.parse_args()
     try:
