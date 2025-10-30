@@ -253,4 +253,5 @@ git clone git@github.com:volcengine/mcp-server.git
 
 
 ## License
+This project contains code copy from [ccapi-mcp-server](https://github.com/awslabs/mcp/tree/main/src/ccapi-mcp-server)
 [MIT License](https://github.com/volcengine/mcp-server/blob/main/LICENSE)

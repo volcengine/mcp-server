@@ -1,6 +1,6 @@
 # Copyright (c) Amazon.com, Inc. or its affiliates.
 # Copyright (c) 2025 ByteDance Ltd. and/or its affiliates.
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0
 #
 # This file has been modified by ByteDance Ltd. and/or its affiliates on 2025-10-30.
 #
@@ -8,9 +8,7 @@
 # The full license text is available at:
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-# This modified file is re-licensed under the MIT License by ByteDance Ltd.
-# The MIT License text is available at:
-#     https://opensource.org/licenses/MIT
+# This modified file is released under the same license.
 
 import json
 from mcp_server_ccapi.impl.tools.credential import (
