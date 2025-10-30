@@ -1,16 +1,16 @@
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright (c) Amazon.com, Inc. or its affiliates.
+# Copyright (c) 2025 ByteDance Ltd. and/or its affiliates.
+# SPDX-License-Identifier: MIT
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# This file has been modified by ByteDance Ltd. and/or its affiliates on 2025-10-30.
 #
+# Original file was released under the Apache License, Version 2.0.
+# The full license text is available at:
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR zxCONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# This modified file is re-licensed under the MIT License by ByteDance Ltd.
+# The MIT License text is available at:
+#     https://opensource.org/licenses/MIT
 
 """VolcengineLabs Cloud Control API MCP Server implementation."""
 
@@ -82,11 +82,6 @@ mcp = FastMCP(
   6. IMMEDIATELY show the user  the complete explanation from step 5 in detail
   7. create_resource() with credentials_token from get_volcengine_session_info() and explained_token
 • ALWAYS follow this exact sequence for resource updates:
-  1. get_resource_schema_information() retrieves the resource schema definition, and based on the schema definition and the user's input, generates the patch document .
-  2. generate_infrastructure_code() with identifier and patch_document → returns properties_token
-  3. explain() with properties_token → returns explanation + explained_token
-  4. IMMEDIATELY show the user the complete explanation from step 3 in detail
-  5. update_resource() with credentials_token from get_volcengine_session_info() and explained_token
   1. get_resource_schema_information() retrieves the resource schema definition, and based on the schema definition and the user's input, generates the patch document .
   2. generate_infrastructure_code() with identifier and patch_document → returns properties_token
   3. explain() with properties_token → returns explanation + explained_token
@@ -536,7 +531,7 @@ async def create_resource(
         STEP 3: get_resource_schema_information() retrieves the resource schema definition, and based on the schema definition and the user's input, generates the final properties. -ALWAYS THIRD
         STEP 4: generate_infrastructure_code() with volcengine_session_info and ALL tags included in properties → returns properties_token + properties_for_explanation
         STEP 5: explain() with content=properties_for_explanation AND properties_token → returns explanation + explained_token
-        STEP 6: IMMEDIATELY show the user  the complete explanation from step 2 in detail
+        STEP 6: IMMEDIATELY show the user the complete explanation from step 2 in detail
         STEP 7: create_resource() with credentials_token from get_volcengine_session_info() and explained_token
 
     ## ⚠️ MANDATORY Error Handling

@@ -1,16 +1,16 @@
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright (c) Amazon.com, Inc. or its affiliates.
+# Copyright (c) 2025 ByteDance Ltd. and/or its affiliates.
+# SPDX-License-Identifier: MIT
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# This file has been modified by ByteDance Ltd. and/or its affiliates on 2025-10-30.
 #
+# Original file was released under the Apache License, Version 2.0.
+# The full license text is available at:
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# This modified file is re-licensed under the MIT License by ByteDance Ltd.
+# The MIT License text is available at:
+#     https://opensource.org/licenses/MIT
 
 """Session management implementation for CCAPI MCP server."""
 
@@ -118,11 +118,11 @@ async def get_volcengine_session_info_impl(environment_token: str, workflow_stor
             else ''
         ),
         'credentials_valid': True,
-        'voclengine_auth_type': 'env',
+        'volcengine_auth_type': 'env',
     }
 
     # Add masked environment variables if using env vars
-    if session_data['voclengine_auth_type'] == 'env':
+    if session_data['volcengine_auth_type'] == 'env':
         access_key = environ.get(VOLCENGINE_ACCESS_KEY_ENV, '')
         secret_key = environ.get(VOLCENGINE_SECRET_KEY_ENV, '')
         session_token = environ.get(VOLCENGINE_SESSION_TOKEN_ENV, '')
@@ -249,3 +249,4 @@ def get_volcengine_profile_info():
             'using_env_vars': environ.get(VOLCENGINE_ACCESS_KEY_ENV, '') != ''
             and environ.get(VOLCENGINE_SECRET_KEY_ENV, '') != '',
         }
+    return {}
