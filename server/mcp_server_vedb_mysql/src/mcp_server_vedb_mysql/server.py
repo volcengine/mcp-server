@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 # Create MCP server
 mcp = FastMCP("VeDB MySQL MCP Server", port=int(os.getenv("MCP_SERVER_PORT", "8000")),
+              host=os.getenv("MCP_SERVER_HOST", "0.0.0.0"),
               streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"))
 
 
