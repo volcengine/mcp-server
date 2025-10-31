@@ -121,6 +121,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 
 ### **开发者工具**  
 
+- **[CCAPI MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_ccapi)**：基于火山引擎的Cloud Control API管理火山资源的MCP工具。  
 - **[Browser-Use MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_vefaas_browser_use)**：基于 Browser-use 的MCP浏览器工具。  
 - **[Code-Sandbox MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_vefaas_sandbox)**：面向LLM 的代码沙箱。  
 - **[Computer-Use MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_computer_use)**：自然语言驱动对云服务器实例内的应用进行高效的管理。  
