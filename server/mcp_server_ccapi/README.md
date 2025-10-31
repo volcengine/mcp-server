@@ -250,7 +250,20 @@ git clone git@github.com:volcengine/mcp-server.git
         }
     }
 }
+```
+### 4. 示例
 
+- 在cn-beijing创建一个新的vpc,并在vpc内创建一个ecs.g4i.large规格的ECS实例
+- 修改“my-ecs-instance”的描述为“update by mcp-server-ccapi”
+- 获取“my-ecs-instance”ECS实例的详细信息，包括实例ID、规格、状态等。
+- 删除“my-ecs-instance”云服务器实例，确认删除后执行操作。
+- 查询cn-beijing区域的所有的VPC列表
+
+### 5. 局限性
+
+- 操作仅限于火山引擎云控制API支持的[资源列表](https://www.volcengine.com/docs/86682/1850848)
+- 某些复杂的场景资源创建可能需要多次操作，模型进行多次思考反馈后才能最终成功。
+- 模型可能无法处理所有可能的错误情况，用户需要自行检查和处理。
 
 ## License
 This project contains code copy from [ccapi-mcp-server](https://github.com/awslabs/mcp/tree/main/src/ccapi-mcp-server)
