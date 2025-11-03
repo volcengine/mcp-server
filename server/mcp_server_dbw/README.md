@@ -20,6 +20,22 @@
 - **详细描述**：根据自然语言问题生成SQL语句
 - **触发示例**：`"查询所有用户的用户名"`
 
+### 2. `execute_sql`
+- **详细描述**：执行SQL语句并返回执行结果
+- **触发示例**：`"执行select * from user"`
+
+### 3. `list_databases`
+- **详细描述**：查询数据库实例的Database列表
+- **触发示例**：`"查询mysql-abc实例有哪些database"`
+
+### 4. `list_tables`
+- **详细描述**：查询数据库实例的Table列表
+- **触发示例**：`"查询mysql-abc实例的company database有哪些表"`
+
+### 5. `get_table_info`
+- **详细描述**：查询数据库实例的Table元信息
+- **触发示例**：`"查询mysql-abc实例的company database的employee表的元信息"`
+
 ---
 
 ## 服务开通链接
