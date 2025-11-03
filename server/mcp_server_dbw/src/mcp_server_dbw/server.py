@@ -133,6 +133,7 @@ def execute_sql(
         "instance_id": instance_id,
         "instance_type": instance_type,
         "database": database,
+        "time_out_seconds": 10
     }
 
     resp = dbw_client.execute_sql(req)
