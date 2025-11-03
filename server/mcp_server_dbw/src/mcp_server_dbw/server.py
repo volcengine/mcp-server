@@ -139,6 +139,60 @@ def execute_sql(
     return resp.to_dict()
 
 
+@mcp_server.tool(
+    name="list_databases",
+    description="查询数据库实例的Database列表",
+)
+def list_databases(
+        instance_id: Optional[str] = Field(default=None, description="火山引擎数据库实例ID（需开启安全管控）"),
+        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（当前支持MySQL和VeDBMySQL，严格要求大小写一致）"),
+        page_number: Optional[int] = Field(default=1, description="分页查询时的页码（默认为1，即从第一页数据开始返回）"),
+        page_size: Optional[int] = Field(default=100, description="分页大小（默认为100）")
+) -> dict[str, Any]:
+    """
+    查询数据库实例的Database列表
+
+    Args:
+        instance_id (str, optional): 火山引擎数据库实例ID（需开启安全管控）
+        instance_type (str, optional): 火山引擎数据库实例类型（当前支持MySQL和VeDBMySQL，严格要求大小写一致）
+        page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
+        page_size (int, optional): 分页大小（默认为100）
+    Returns:
+        total (int): 数据库实例的Database总数
+        items (list): Database元信息列表，列表中的每个值对应一个Database的元信息，结构如下
+            - name (str): Database名称
+            - character_set_name (str): Database字符集名称
+            - collation_name (str): Database排序集规则
+            - is_system_db (bool): Database是否为系统库
+            - description (str): Database描述
+    """
+    if REMOTE_MCP_SERVER:
+        dbw_client = get_dbw_client(mcp_server.get_context())
+    else:
+        dbw_client = DBW_CLIENT
+
+    instance_id = dbw_client.instance_id or instance_id
+    if not instance_id:
+        raise ValueError("instance_id is required")
+    instance_type = dbw_client.instance_type or instance_type
+    if not instance_type:
+        raise ValueError("instance_type is required")
+    if page_number is None:
+        page_number = 1
+    if page_size is None:
+        page_size = 100
+
+    req = {
+        "instance_id": instance_id,
+        "instance_type": instance_type,
+        "page_number": page_number,
+        "page_size": page_size,
+    }
+
+    resp = dbw_client.list_databases(req)
+    return resp.to_dict()
+
+
 def get_dbw_client(ctx: Context[ServerSession, object, any]) -> DBWClient:
     auth = None
     raw_request: Request = ctx.request_context.request
