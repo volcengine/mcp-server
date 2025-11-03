@@ -108,5 +108,5 @@ urllib3==2.5.0
     # via volcengine-python-sdk
 uvicorn==0.35.0
     # via mcp
-volcengine-python-sdk==4.0.15
+volcengine-python-sdk==4.0.29
     # via mcp-server-dbw (pyproject.toml)

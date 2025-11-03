@@ -201,7 +201,7 @@ cli = [
 
 [[package]]
 name = "mcp-server-dbw"
-version = "0.1.0"
+version = "0.1.1"
 source = { editable = "." }
 dependencies = [
     { name = "mcp", extra = ["cli"] },
@@ -211,7 +211,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "mcp", extras = ["cli"], specifier = ">=1.12.0" },
-    { name = "volcengine-python-sdk", specifier = ">=4.0.15" },
+    { name = "volcengine-python-sdk", specifier = ">=4.0.29" },
 ]
 
 [[package]]
@@ -675,7 +675,7 @@ wheels = [
 
 [[package]]
 name = "volcengine-python-sdk"
-version = "4.0.15"
+version = "4.0.29"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
@@ -683,7 +683,7 @@ dependencies = [
     { name = "six" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6d/0a/66cdd8c48bb7b6c250d2edc4118e12600d9cbcb320c33b049c2cb8a5929c/volcengine-python-sdk-4.0.15.tar.gz", hash = "sha256:55f902432c95ebb028a03956968227f3e12c1e431a0ce6661260d1030bb08479", size = 6668504, upload-time = "2025-08-28T13:07:53.741Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e2/d2/84779d19e330b3218d16ddd51900ab628eddd9fafc1a7ea73bde16f79316/volcengine_python_sdk-4.0.29.tar.gz", hash = "sha256:be5ef197c13710f71bc1a6ebad873e2d75f9235c198071d894a1e114b9151afb", size = 6593354, upload-time = "2025-10-27T12:50:54.752Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4a/bc/5561b210cc9a605794842421145113d2164e6a704c489c4608797abcabd6/volcengine_python_sdk-4.0.15-py2.py3-none-any.whl", hash = "sha256:50dbf46b0b55b96cda248e100f416aa02bf5eda32345102bda7b04da26b5b560", size = 22046876, upload-time = "2025-08-28T13:07:47.058Z" },
+    { url = "https://files.pythonhosted.org/packages/69/0c/eb5be45ca2d9a8ce7cc8d9179204add7daa254a175c2016e5deec7f4b3c7/volcengine_python_sdk-4.0.29-py2.py3-none-any.whl", hash = "sha256:fd96770b3e2bf4019818f4f52decc5f92402a1f3fe71daf8d7dfd9772ad4a506", size = 25804354, upload-time = "2025-10-28T03:58:11.199Z" },
 ]
