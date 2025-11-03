@@ -40,7 +40,7 @@ DBW_CLIENT = DBWClient(
 def nl2sql(
         query: str = Field(default="", description="待生成SQL语句的自然语言问题"),
         instance_id: Optional[str] = Field(default=None, description="火山引擎数据库实例ID（需开启安全管控）"),
-        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（当前支持MySQL和VeDBMySQL，严格要求大小写一致）"),
+        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）"),
         database: Optional[str] = Field(default=None, description="Database名称"),
         tables: Optional[List[str]] = Field(default=None, description="可选的Database内涉及的Table或Collection列表（关系型数据库实例推荐不填写，Mongo实例必填一个Collection）"),
 ) -> dict[str, Any]:
@@ -50,7 +50,7 @@ def nl2sql(
     Args:
         query (str): 待生成SQL语句的自然语言问题
         instance_id (str, optional): 火山引擎数据库实例ID（需开启安全管控）
-        instance_type (str, optional): 火山引擎数据库实例类型（当前支持MySQL和VeDBMySQL，严格要求大小写一致）
+        instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）
         database (str, optional): Database名称
         tables (List[str], optional): 可选的Database内涉及的Table或Collection列表（关系型数据库实例推荐不填写，Mongo实例必填一个Collection）
     Returns:
@@ -91,7 +91,7 @@ def nl2sql(
 def execute_sql(
         commands: str = Field(default="", description="待执行的SQL语句集合"),
         instance_id: Optional[str] = Field(default=None, description="火山引擎数据库实例ID（需开启安全管控）"),
-        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（当前支持MySQL和VeDBMySQL，严格要求大小写一致）"),
+        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）"),
         database: Optional[str] = Field(default=None, description="Database名称"),
 ) -> dict[str, Any]:
     """
@@ -100,7 +100,7 @@ def execute_sql(
     Args:
         commands (str): 待执行的SQL语句集合
         instance_id (str, optional): 火山引擎数据库实例ID（需开启安全管控）
-        instance_type (str, optional): 火山引擎数据库实例类型（当前支持MySQL和VeDBMySQL，严格要求大小写一致）
+        instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）
         database (str, optional): Database名称
     Returns:
         results (list): SQL语句集合执行结果列表，列表中的每个值对应一条SQL语句的执行结果，结构如下
@@ -146,7 +146,7 @@ def execute_sql(
 )
 def list_databases(
         instance_id: Optional[str] = Field(default=None, description="火山引擎数据库实例ID（需开启安全管控）"),
-        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（当前支持MySQL和VeDBMySQL，严格要求大小写一致）"),
+        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）"),
         page_number: Optional[int] = Field(default=1, description="分页查询时的页码（默认为1，即从第一页数据开始返回）"),
         page_size: Optional[int] = Field(default=100, description="分页大小（默认为100）")
 ) -> dict[str, Any]:
@@ -155,7 +155,7 @@ def list_databases(
 
     Args:
         instance_id (str, optional): 火山引擎数据库实例ID（需开启安全管控）
-        instance_type (str, optional): 火山引擎数据库实例类型（当前支持MySQL和VeDBMySQL，严格要求大小写一致）
+        instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）
         page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
         page_size (int, optional): 分页大小（默认为100）
     Returns:
@@ -200,7 +200,7 @@ def list_databases(
 )
 def list_tables(
         instance_id: Optional[str] = Field(default=None, description="火山引擎数据库实例ID（需开启安全管控）"),
-        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（当前支持MySQL和VeDBMySQL，严格要求大小写一致）"),
+        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）"),
         database: Optional[str] = Field(default=None, description="Database名称"),
         page_number: Optional[int] = Field(default=1, description="分页查询时的页码（默认为1，即从第一页数据开始返回）"),
         page_size: Optional[int] = Field(default=100, description="分页大小（默认为100）")
@@ -210,7 +210,7 @@ def list_tables(
 
     Args:
         instance_id (str, optional): 火山引擎数据库实例ID（需开启安全管控）
-        instance_type (str, optional): 火山引擎数据库实例类型（当前支持MySQL和VeDBMySQL，严格要求大小写一致）
+        instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）
         database (str, optional): Database名称
         page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
         page_size (int, optional): 分页大小（默认为100）
@@ -256,7 +256,7 @@ def list_tables(
 def get_table_info(
         table: str = Field(default="", description="Table名称"),
         instance_id: Optional[str] = Field(default=None, description="火山引擎数据库实例ID（需开启安全管控）"),
-        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（当前支持MySQL和VeDBMySQL，严格要求大小写一致）"),
+        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）"),
         database: Optional[str] = Field(default=None, description="Database名称")
 ) -> dict[str, Any]:
     """
@@ -265,7 +265,7 @@ def get_table_info(
     Args:
         table (str): Table名称
         instance_id (str, optional): 火山引擎数据库实例ID（需开启安全管控）
-        instance_type (str, optional): 火山引擎数据库实例类型（当前支持MySQL和VeDBMySQL，严格要求大小写一致）
+        instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）
         database (str, optional): Database名称
     Returns:
         table_meta (dict[str, dict[str, Any]]): Table元信息，结构如下
