@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 Service = "las"
 Version = "2024-06-30"
 Region = "cn-beijing"
-Host = "open.volcengineapi.com"
+Host = "las.cn-beijing.volcengineapi.com"
 ContentType = "application/json"
 
 
