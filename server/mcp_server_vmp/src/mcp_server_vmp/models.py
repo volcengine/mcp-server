@@ -1,6 +1,7 @@
 
 from ast import Expression
 from dataclasses import dataclass, field
+from re import T
 from typing import List, Optional
 
 from volcenginesdkcore.interceptor import RuntimeOption
@@ -23,35 +24,50 @@ class RequestBase:
 class ListWorkspacesRequest(RequestBase):
     PageNumber: int = 1
     PageSize: int = 100
+    ShowAggregateQueryWorkspaces: bool = True
 
 @dataclass
 class QueryInstantMetricsRequest(RequestBase):
-    WorkspaceId: str
-    Expression: str
-    Time: Optional[str] = None
+    query: str
+    time: Optional[str] = None
 
 @dataclass
 class QueryRangeMetricsRequest(RequestBase):
-    WorkspaceId: str
-    Expression: str
-    Start: str
-    End: str
-    Step: Optional[str] = None
+    workspace: str
+    query: str
+    start: str
+    end: str
+    step: Optional[str] = None
        
 @dataclass
-class QueryLabelValuesRequest(RequestBase):
-    WorkspaceId: str
-    Label: str
-    Start: Optional[str] = None
-    End: Optional[str] = None
-    Match: Optional[List[str]] = None
-    Limit: Optional[int] = None
+class GetLabelValuesRequest(RequestBase):
+    workspace: str
+    label: str
+    start: Optional[str] = None
+    end: Optional[str] = None
+    matches: Optional[List[str]] = None
+    limit: Optional[int] = None
 
 @dataclass
-class QueryLabelNamesRequest(RequestBase):
-    WorkspaceId: str
-    Start: Optional[str] = None
-    End: Optional[str] = None
-    Match: Optional[List[str]] = None
-    Limit: Optional[int] = None
+class GetLabelsRequest(RequestBase):
+    workspace: str
+    start: Optional[str] = None
+    end: Optional[str] = None
+    matches: Optional[List[str]] = None
+    limit: Optional[int] = None
 
+@dataclass
+class GetSeriesRequest(RequestBase):
+    workspace: str
+    matches: Optional[List[str]]
+    start: Optional[str] = None
+    end: Optional[str] = None
+    limit: Optional[int] = None
+
+@dataclass
+class Credentials:
+    access_key_id: str
+    secret_access_key: str
+    region: str
+    service: str
+    session_token: Optional[str] = None

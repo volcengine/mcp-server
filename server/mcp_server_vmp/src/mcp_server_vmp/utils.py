@@ -15,7 +15,7 @@ class UniversalApi(volcenginesdkcore.UniversalApi):
         return await wait_for_async_result(result)
 
     def do_call_with_http_info(self, info, body, **kwargs):  # noqa: E501
-        all_params = ['body', 'async_req', '_return_http_data_only', '_preload_content',
+        all_params = ['body', 'query', 'async_req', '_return_http_data_only', '_preload_content',
                       '_request_timeout']  # noqa: E501
 
         params = locals()
