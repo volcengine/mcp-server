@@ -22,7 +22,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Initialize FastMCP server
-mcp = FastMCP(os.getenv(config.ENV_MCP_SERVER_NAME, "mcp_server_vmp"), host=os.getenv(config.ENV_MCP_SERVER_HOST, "0.0.0.0"), port=int(os.getenv(config.ENV_MCP_SERVER_PORT, "8000")))
+mcp = FastMCP(os.getenv(config.ENV_MCP_SERVER_NAME, "mcp_server_vmp"),
+                    host=os.getenv(config.ENV_MCP_SERVER_HOST, "0.0.0.0"), 
+                    port=int(os.getenv(config.ENV_MCP_SERVER_PORT, "8000")),
+                    stateless_http=os.getenv("STATLESS_HTTP", "true").lower() == "true",
+                    streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"))
 vmpApiClient : vmpapi.VMPApiClient = None
 
 @mcp.tool()
