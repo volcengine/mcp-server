@@ -141,7 +141,7 @@ CR MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端
 
 #### 最容易被唤起的 Prompt示例
 
-创建镜像仓库实例
+列举一下账号下的镜像仓库实例
 
 ### Tool 2: create_registry
 
@@ -240,7 +240,7 @@ CR MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端
 
 #### 最容易被唤起的 Prompt示例
 
-请帮我创建一个名为 xxx 的镜像仓库标准版实例
+请帮我创建一个名为 xxx 的镜像仓库实例
 
 ### Tool 3: create_namespace
 
@@ -524,7 +524,7 @@ CR MCP Server 是一个 Model Context Protocol 服务器，为 MCP 客户端
 
 #### 最容易被唤起的 Prompt示例
 
-请帮我在 xxx 镜像仓库实例 xxx 命名空间下创建 xxx OCI制品仓库
+请帮我在 xxx 镜像仓库实例 xxx 命名空间下创建 xxx 制品仓库
 
 ### Tool 8: list_repositories
 
