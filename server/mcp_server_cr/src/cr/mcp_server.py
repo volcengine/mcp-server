@@ -8,6 +8,10 @@ def create_mcp_server():
     service = CrAPI()
     mcp = FastMCP(
         name="CR MCP",
+        host=os.getenv("MCP_SERVER_HOST", "0.0.0.0"),
+        port=int(os.getenv("MCP_SERVER_PORT", "8000")),
+        stateless_http=os.getenv("STATLESS_HTTP", "true").lower() == "true",
+        streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"),
         instructions="""
       ## MCP Invocation Method Guide
       - For task decomposition, it is necessary to use the mcp tool.
