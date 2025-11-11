@@ -2,6 +2,7 @@ from src.cr.api.api import CrAPI
 from mcp.server.fastmcp import FastMCP
 from .note import note
 import json
+import os
 
 
 def create_mcp_server():

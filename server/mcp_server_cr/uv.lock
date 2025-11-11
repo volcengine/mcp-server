@@ -374,7 +374,7 @@ wheels = [
 ]
 
 [[package]]
-name = "mcp-server"
+name = "mcp-cr"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
@@ -388,7 +388,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "mcp", specifier = ">=1.12.3" },
+    { name = "mcp", specifier = "==1.21.0" },
     { name = "pydantic", specifier = ">=2.11.3" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
     { name = "retry", specifier = ">=0.9.2" },
