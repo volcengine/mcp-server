@@ -52,6 +52,11 @@ def las_search_dataset_by_name(AK :str, SK :str, SessionToken :str, data :dict[s
     logger.info(f"las_search_dataset_by_name with data: {data}")
     return request("POST", now, {}, {}, AK, SK, SessionToken, "ListDatasets", json.dumps(data))
 
+def las_create_dataset_api(AK :str, SK :str, SessionToken :str, data :dict[str, str]):
+    now = datetime.datetime.utcnow()
+    logger.info(f"las_create_dataset_api with data: {data}")
+    return request("POST", now, {}, {}, AK, SK, SessionToken, "CreateDataset", json.dumps(data))
+
 def norm_query(params):
     query = ""
     for key in sorted(params.keys()):
