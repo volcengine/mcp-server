@@ -22,7 +22,7 @@ import json
 from urllib.parse import quote
 import logging
 from typing import Optional
-
+import os
 import requests
 
 logging.basicConfig(
@@ -32,8 +32,8 @@ logger = logging.getLogger(__name__)
 
 Service = "las"
 Version = "2024-06-30"
-Region = "cn-beijing"
-Host = "open.volcengineapi.com"
+Region = os.environ.get("REGION", "cn-beijing")
+Host = f"las.{Region}.volcengineapi.com"
 ContentType = "application/json"
 
 
@@ -51,6 +51,11 @@ def las_search_dataset_by_name(AK :str, SK :str, SessionToken :str, data :dict[s
     now = datetime.datetime.utcnow()
     logger.info(f"las_search_dataset_by_name with data: {data}")
     return request("POST", now, {}, {}, AK, SK, SessionToken, "ListDatasets", json.dumps(data))
+
+def las_create_dataset_api(AK :str, SK :str, SessionToken :str, data :dict[str, str]):
+    now = datetime.datetime.utcnow()
+    logger.info(f"las_create_dataset_api with data: {data}")
+    return request("POST", now, {}, {}, AK, SK, SessionToken, "CreateDataset", json.dumps(data))
 
 def norm_query(params):
     query = ""
