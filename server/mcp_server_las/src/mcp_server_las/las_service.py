@@ -22,7 +22,7 @@ import json
 from urllib.parse import quote
 import logging
 from typing import Optional
-
+import os
 import requests
 
 logging.basicConfig(
@@ -32,8 +32,8 @@ logger = logging.getLogger(__name__)
 
 Service = "las"
 Version = "2024-06-30"
-Region = "cn-beijing"
-Host = "las.cn-beijing.volcengineapi.com"
+Region = os.environ.get("REGION", "cn-beijing")
+Host = f"las.{Region}.volcengineapi.com"
 ContentType = "application/json"
 
 
