@@ -308,7 +308,7 @@ Analyze failed tasks and failure logs from the second execution of the demo-ppl 
 [Volcano Continuous Delivery Service Activation Link](https://console.volcengine.com/cp)
 
 ## Authentication Method
-Obtain the corresponding access ak/sk for your account in the Volcano Engine management console. You need to set VOLCENGINE_AK and VOLCENGINE_SK in the configuration based on the obtained ak and sk.
+Obtain the corresponding access ak/sk for your account in the Volcano Engine management console. You need to set VOLCENGINE_ACCESS_KEY and VOLCENGINE_SECRET_KEY in the configuration based on the obtained ak and sk.
 
 ## Compatible Platforms
 Trae/Cursor/Claude
@@ -326,8 +326,8 @@ To integrate Volcano Continuous Delivery functionality in AI tools such as Trae,
       ],
       "env": {
         "VOLCENGINE_ENDPOINT": "cp.<your_region>.volcengineapi.com",
-        "VOLCENGINE_AK": "<your_volcengin_account_access_key>",
-        "VOLCENGINE_SK": "<your_volcengin_account_secret_key>",
+        "VOLCENGINE_ACCESS_KEY": "<your_volcengin_account_access_key>",
+        "VOLCENGINE_SECRET_KEY": "<your_volcengin_account_secret_key>",
         "VOLCENGINE_REGION": "<your_region>"
       }
     }

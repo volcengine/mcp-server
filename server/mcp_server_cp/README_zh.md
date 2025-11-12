@@ -311,7 +311,7 @@ saas
 [火山持续交付服务开通链接](https://console.volcengine.com/cp)
 
 ## 鉴权方式
-在火山引擎管理控制台获取账号相应的访问ak/sk。 需要在配置中根据获取到的ak，sk，设置 VOLCENGINE_AK 和 VOLCENGINE_SK
+在火山引擎管理控制台获取账号相应的访问ak/sk。 需要在配置中根据获取到的ak，sk，设置 VOLCENGINE_ACCESS_KEY 和 VOLCENGINE_SECRET_KEY
 
 
 ## 可适配平台
@@ -330,8 +330,8 @@ Trae/Cursor/Claude
       ],
       "env": {
         "VOLCENGINE_ENDPOINT": "cp.<your_region>.volcengineapi.com",
-        "VOLCENGINE_AK": "<your_volcengin_account_access_key>",
-        "VOLCENGINE_SK": "<your_volcengin_account_secret_key>",
+        "VOLCENGINE_ACCESS_KEY": "<your_volcengin_account_access_key>",
+        "VOLCENGINE_SECRET_KEY": "<your_volcengin_account_secret_key>",
         "VOLCENGINE_REGION": "<your_region>"
       }
     }
