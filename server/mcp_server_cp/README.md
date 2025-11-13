@@ -336,3 +336,11 @@ To integrate Volcano Continuous Delivery functionality in AI tools such as Trae,
 ```
 
 Currently supported regions: ["cn-beijing"]
+
+
+## Prompt Examples
+
+* list workspaces with name containing "demo"
+* list pipelines in workspace "demo-workspace" or with id "xxx"
+* view the latest execution record of pipeline "demo-pipeline" or with id "xxxx"
+* view failed tasks in execution record with id "xxx"

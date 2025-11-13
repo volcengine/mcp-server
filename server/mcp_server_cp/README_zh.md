@@ -340,3 +340,11 @@ Trae/Cursor/Claude
 ```
 
 当前支持的Region: ["cn-beijing"]
+
+
+## 使用示例
+
+* 查看名称包含"demo"的工作区列表
+* 查看名称为"demo-workspace"工作区下的流水线列表 或 查看id为"xxx"的工作区下的流水线列表
+* 查看名称为"demo-pipeline"最新的执行记录 或 查看id为"xxxx"最新的执行记录
+* 查看执行记录id为"xxx"中执行失败的任务详情
