@@ -8,6 +8,7 @@ class TestModels(unittest.TestCase):
         request = models.ListWorkspacesRequest()
         self.assertEqual(request.PageNumber, 1)
         self.assertEqual(request.PageSize, 100)
+        self.assertEqual(request.ShowAggregateQueryWorkspaces, True)
 
 
 if __name__ == '__main__':

@@ -33,7 +33,7 @@ deps = [
     "pip-system-certs",
 ]
 
-mcp = FastMCP(MCP_SERVER_NAME, dependencies=deps, port=int(os.getenv("PORT", "8000")))
+mcp = FastMCP(MCP_SERVER_NAME, dependencies=deps, host=os.getenv("MCP_SERVER_HOST","0.0.0.0"), port=int(os.getenv("PORT", "8000")), streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"))
 
 
 @mcp.tool()

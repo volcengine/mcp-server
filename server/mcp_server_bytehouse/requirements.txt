@@ -2,24 +2,34 @@
 #    uv pip compile pyproject.toml -o requirements.txt
 annotated-types==0.7.0
     # via pydantic
-anyio==4.9.0
+anyio==4.7.0
     # via
     #   httpx
     #   mcp
     #   sse-starlette
     #   starlette
-certifi==2025.1.31
+attrs==25.4.0
+    # via
+    #   jsonschema
+    #   referencing
+certifi==2024.12.14
     # via
     #   clickhouse-connect
     #   httpcore
     #   httpx
+cffi==1.17.1
+    # via cryptography
 click==8.1.8
     # via
     #   typer
     #   uvicorn
-clickhouse-connect==0.8.16
+clickhouse-connect==0.8.11
     # via mcp-bytehouse (pyproject.toml)
-h11>=0.16.0
+cryptography==46.0.0
+    # via pyjwt
+exceptiongroup==1.2.2
+    # via anyio
+h11==0.14.0
     # via
     #   httpcore
     #   uvicorn
@@ -33,55 +43,77 @@ idna==3.10
     # via
     #   anyio
     #   httpx
-lz4==4.4.4
+jsonschema==4.25.1
+    # via mcp
+jsonschema-specifications==2025.9.1
+    # via jsonschema
+lz4==4.3.3
     # via clickhouse-connect
 markdown-it-py==3.0.0
     # via rich
-mcp==1.6.0
+mcp==1.21.0
     # via mcp-bytehouse (pyproject.toml)
 mdurl==0.1.2
     # via markdown-it-py
 pip-system-certs==4.0
     # via mcp-bytehouse (pyproject.toml)
-pydantic==2.11.3
+pycparser==2.22
+    # via cffi
+pydantic==2.12.4
     # via
     #   mcp
     #   pydantic-settings
-pydantic-core==2.33.1
+pydantic-core==2.41.5
     # via pydantic
 pydantic-settings==2.8.1
     # via mcp
 pygments==2.19.1
     # via rich
-python-dotenv==1.1.0
+pyjwt==2.10.1
+    # via mcp
+python-dotenv==1.0.1
     # via
     #   mcp-bytehouse (pyproject.toml)
     #   mcp
     #   pydantic-settings
-pytz==2025.2
+python-multipart==0.0.20
+    # via mcp
+pytz==2024.2
     # via clickhouse-connect
-rich==14.0.0
+referencing==0.37.0
+    # via
+    #   jsonschema
+    #   jsonschema-specifications
+rich==13.9.4
     # via typer
+rpds-py==0.28.0
+    # via
+    #   jsonschema
+    #   referencing
 shellingham==1.5.4
     # via typer
 sniffio==1.3.1
     # via anyio
-sse-starlette==2.2.1
+sse-starlette==2.2.0
     # via mcp
-starlette==0.46.1
+starlette==0.42.0
     # via
     #   mcp
     #   sse-starlette
-typer==0.15.2
+typer==0.20.0
     # via mcp
-typing-extensions==4.13.1
+typing-extensions==4.15.0
     # via
     #   anyio
+    #   cryptography
     #   pydantic
     #   pydantic-core
+    #   referencing
+    #   rich
     #   typer
     #   typing-inspection
-typing-inspection==0.4.0
+    #   uvicorn
+typing-inspection==0.4.2
     # via pydantic
 urllib3==2.3.0
     # via clickhouse-connect
