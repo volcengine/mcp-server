@@ -143,11 +143,10 @@
         "mcp-server-vedbm"
       ],
       "env": {
-        "VOLCENGINE_ACCESS_KEY": "your-access-key",
-        "VOLCENGINE_SECRET_KEY": "your-secret-key",
-        "VOLCENGINE_REGION": "<VOLCENGINE_REGION>",
-        "MCP_SERVER_PORT": "<PORT>",
-        "VOLCENGINE_ENDPOINT": "<ENDPOINT>"
+        "VOLCENGINE_ACCESS_KEY": "<your-access-key>",
+        "VOLCENGINE_SECRET_KEY": "<your-secret-key>",
+        "VOLCENGINE_REGION": "cn-beijing",
+        "MCP_SERVER_PORT": "8000"
       }
     }
   }
