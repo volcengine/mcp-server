@@ -394,7 +394,7 @@ cli = [
 
 [[package]]
 name = "mcp-server-vedb-mysql"
-version = "1.0.0"
+version = "1.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },
@@ -408,7 +408,7 @@ requires-dist = [
     { name = "aiohttp", specifier = ">=3.11.14" },
     { name = "deprecated", specifier = ">=1.2.18" },
     { name = "mcp", extras = ["cli"], specifier = ">=1.5.0" },
-    { name = "volcengine-python-sdk", specifier = ">=3.0.6" },
+    { name = "volcengine-python-sdk", specifier = ">=4.0.31" },
 ]
 
 [[package]]
@@ -888,7 +888,7 @@ wheels = [
 
 [[package]]
 name = "volcengine-python-sdk"
-version = "3.0.7"
+version = "4.0.33"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
@@ -896,7 +896,10 @@ dependencies = [
     { name = "six" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/10/e4/e6b73bc0ab8eb7d1fec3183b775e1c6bec24f71ef0ca2e3a76f2f7216dd3/volcengine-python-sdk-3.0.7.tar.gz", hash = "sha256:54a5556838a434d18c741e9461577d91da7867f06a3848307aea111306e6cba6", size = 5116889 }
+sdist = { url = "https://files.pythonhosted.org/packages/16/73/b557bc630fc2df1cbc33f698089d1c5ea336c3457449af770fcc9e455b22/volcengine_python_sdk-4.0.33.tar.gz", hash = "sha256:2c94e1837cc20f969ae108cc900ebc9e2c5a4039ce06b9fb62a6d4c84a3ba26d", size = 6816629 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b9/5b/e31676e0ed9aab2ecdfd09de3e27b0c8049d6a9d640dc05db5c3da1cd929/volcengine_python_sdk-4.0.33-py2.py3-none-any.whl", hash = "sha256:aa2da7383cd5670e4d4f4cef378f0e8e514cf1ecf5f69808e8c88c0420bb9f86", size = 26738228 },
+]
 
 [[package]]
 name = "wrapt"
