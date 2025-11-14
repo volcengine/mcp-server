@@ -21,7 +21,7 @@ def cancel_schedule_events(event_id: list[str],
     return resp.to_dict()
 
 @mcp_server.tool(
-    description="查看当前账号下的计划内事件。触发示例：查看北京地域下实例vedbm-r3xq0zdl****的所有待执行事件"
+    description="查看当前账号下的计划内事件。触发示例：查看北京地域下实例vedbm-****的所有待执行事件"
 )
 def describe_schedule_events(begin_time: Optional[Annotated[str,Field(description='UTC时间', examples=['2024-03-13T03:07:19Z'])]] = None,
                              end_time: str = None,
@@ -66,7 +66,7 @@ def modify_schedule_events(event_id: list[str],
     return resp.to_dict()
 
 @mcp_server.tool(
-    description="修改实例的可维护时间段。触发示例：将实例vedbm-r3xq0zdl****的可维护时间段修改为每周日的19:00Z-20:59Z"
+    description="修改实例的可维护时间段。触发示例：将实例vedbm-****的可维护时间段修改为每周日的19:00Z-20:59Z"
 )
 def modify_db_instance_maintenance_window(instance_id: str,
                                           maintenance_time: Annotated[str, Field(description='UTC时间', examples=['19:00Z-20:59Z'])],

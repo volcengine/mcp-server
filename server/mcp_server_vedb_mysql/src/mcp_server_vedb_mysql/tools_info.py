@@ -7,9 +7,9 @@ import volcenginesdkvedbm
 logger = logging.getLogger(__name__)
 
 
-@mcp_server.tool(
-    description="查询存储单价。触发示例：查询北京地域下存储容量为100GB的存储费用价格"
-)
+# @mcp_server.tool(
+#     description="查询存储单价。触发示例：查询北京地域下存储容量为100GB的存储费用价格"
+# )
 def describe_storage_payable_price(storage_types: Annotated[str, Field(examples=['Clusterpool'])]) -> dict[str, Any]:
     req = {
         "storage_types": storage_types,
@@ -20,9 +20,9 @@ def describe_storage_payable_price(storage_types: Annotated[str, Field(examples=
 
 
 @mcp_server.tool(
-    description="查询当前地域下实例支持的可用区资源。触发示例：查询北京地域下支持的所有可用区信息"
+    description="查询当前地域下实例支持的可用区。触发示例：查询北京地域下支持的所有可用区信息"
 )
-def describe_availability_zones(region_id: Optional[Annotated[str,Field(examples=['cn-beijing'])]] = None) -> dict[str, Any]:
+def list_availability_zones(region_id: str = 'cn-beijing') -> dict[str, Any]:
     req = {
         "region_id": region_id,
     }
@@ -34,17 +34,16 @@ def describe_availability_zones(region_id: Optional[Annotated[str,Field(examples
 @mcp_server.tool(
     description="查询指定可用区支持的节点规格信息。触发示例：查询北京地域下可用的所有veDB MySQL实例规格"
 )
-def describe_db_instance_specs(zone_ids: Optional[Annotated[str,Field(examples=['cn-beijing-b'])]] = None) -> dict[str, Any]:
+def list_available_db_specs() -> dict[str, Any]:
     req = {
-        "zone_ids": zone_ids,
     }
     req = {k: v for k, v in req.items() if v is not None}
     resp = vedbm_resource_sdk.describe_db_instance_specs(req)
     return resp.to_dict()
 
-@mcp_server.tool(
-    description="查询指定配置实例的价格详情。触发示例：查询北京地域下规格为vedb.mysql.x4.large、节点数为2的按量付费实例价格"
-)
+# @mcp_server.tool(
+#     description="查询指定配置实例的价格详情。触发示例：查询北京地域下规格为vedb.mysql.x4.large、节点数为2的按量付费实例价格"
+# )
 def describe_db_instance_price_detail(node_spec: Annotated[str, Field(examples=['vedb.mysql.x4.xlarge'])],
                                       node_number: int,
                                       charge_type: Optional[Annotated[str,Field(examples=['PostPaid','PrePaid'])]] = None,
@@ -68,9 +67,9 @@ def describe_db_instance_price_detail(node_spec: Annotated[str, Field(examples=[
     return resp.to_dict()
 
 @mcp_server.tool(
-    description="查询实例可用的地域资源。触发示例：查询veDB MySQL支持的所有地域列表"
+    description="查询实例可用的地域。触发示例：查询veDB MySQL支持的所有地域列表"
 )
-def describe_regions() -> dict[str, Any]:
+def list_region_names() -> dict[str, Any]:
     req = {
     }
     req = {k: v for k, v in req.items() if v is not None}

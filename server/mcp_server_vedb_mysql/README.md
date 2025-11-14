@@ -14,109 +14,47 @@
 
 ## Tools
 
-
-### Instance Management
-
-| Tool Name | Description |
-|-----------|-------------|
-| `list_vedb_mysql_instances` | Retrieve a list of all VeDB MySQL instances for the user, including instance IDs and basic information |
-| `describe_vedb_mysql_detail` | Retrieve detailed information about a specific VeDB MySQL instance |
-| `modify_vedb_mysql_instance_alias` | Modify a specific VeDB MySQL instance's alias |
-| `create_vedb_mysql_instance` | Create a VeDB MySQL instance |
-| `switch_instance_deletion_protection` | Enable or disable instance deletion protection |
-| `describe_db_instance_version` | Query the version of the target instance |
-| `add_tags_to_resource` | Bind tags to one or more instances |
-| `remove_tags_from_resource` | Unbind tags from one or more instances |
-| `modify_db_instance_spec` | Modify node configuration of the specified instance |
-| `restart_db_instance` | Restart the instance |
-| `change_master` | Switch the primary node |
-| `delete_db_instance` | Delete the instance |
-| `modify_db_node_config` | Set the priority of a specified node to be elected as primary during failover |
-
-### Database and Account Management
-
-| Tool Name | Description |
-|-----------|-------------|
-| `list_vedb_mysql_instance_databases` | Retrieve a list of databases created in a specific VeDB MySQL instance, including privilege information |
-| `list_vedb_mysql_instance_accounts` | Obtain a list of accounts in a single VeDB MySQL instance, with their privilege details |
-| `modify_db_account_description` | Modify the description information of a mysqld account |
-| `modify_database_description` | Modify the description information of a mysqld database |
-| `reset_account_priv` | Reset high-privilege account permissions to initial state |
-| `revoke_db_account_privilege` | Revoke database privileges from an account |
-| `grant_db_account_privilege` | Grant database privileges to an account |
-| `reset_account_passwd` | Modify database account password |
-| `create_db_account` | Create database management account |
-| `create_database` | Create database for the instance |
-| `delete_db_account` | Delete database account |
-| `delete_database` | Delete database from the instance |
-
-### Backup and Recovery
-
-| Tool Name | Description |
-|-----------|-------------|
-| `restore_table` | Restore historical databases and tables to the original instance |
-| `modify_backup_policy` | Modify data backup policy for the specified instance |
-| `restore_to_new_instance` | Restore backup data from an existing instance to a new instance |
-| `create_backup` | Create data backup for the specified instance |
-| `delete_backup` | Delete manually created backup files for the specified instance |
-| `describe_backup_policy` | Query data backup policy for the specified instance |
-| `describe_backups` | Query backup file list information for the specified instance |
-| `describe_recoverable_time` | Query the recoverable time range for instance backups |
-
-### Connection Endpoint Management
-
-| Tool Name | Description |
-|-----------|-------------|
-| `modify_db_endpoint_address` | Modify connection address port or prefix |
-| `modify_db_endpoint_dns` | Modify resolution method of private network addresses |
-| `describe_db_endpoint` | Query detailed information of specified instance connection endpoints |
-| `delete_db_endpoint` | Delete connection endpoint |
-| `create_db_endpoint` | Create connection endpoint |
-| `modify_db_endpoint` | Modify connection endpoint |
-| `create_db_endpoint_public_address` | Create public network connection address for the specified instance, enabling public network access |
-| `delete_db_endpoint_public_address` | Delete public network connection address for the specified instance, disabling public network access |
-
-### Task and Event Management
-
-| Tool Name | Description |
-|-----------|-------------|
-| `cancel_schedule_events` | Cancel pending scheduled events |
-| `describe_schedule_events` | View scheduled events under the current account |
-| `modify_schedule_events` | Modify execution time of pending events |
-| `modify_db_instance_maintenance_window` | Modify the maintenance window of the instance |
-
-### Parameter Management
-
-| Tool Name | Description |
-|-----------|-------------|
-| `save_as_parameter_template` | Save parameter configuration of specified instance as a parameter template |
-| `create_parameter_template` | Create parameter template |
-| `apply_parameter_template` | Apply parameter template |
-| `describe_parameter_templates` | Query parameter template list |
-| `list_parameter_change_history` | Query instance parameter modification history |
-| `delete_parameter_template` | Delete parameter template |
-| `describe_parameter_template_detail` | Query parameter template details |
-| `describe_db_instance_parameters` | Query parameter list of target instance |
-| `modify_db_instance_parameters` | Modify mysqld data plane parameters of the instance |
-| `describe_modifiable_parameters` | Query list of modifiable parameters |
-
-### Information Query
-
-| Tool Name | Description |
-|-----------|-------------|
-| `create_vedb_mysql_allowlist` | Create a Network AllowList for VeDB MySQL |
-| `bind_allowlist_to_vedb_mysql_instances` | Bind a Network AllowList to VeDB MySQL instances |
-| `describe_instance_allow_lists` | Query allowlist information bound to the instance |
-| `modify_allow_list` | Modify target allowlist settings, such as allowlist name, IP allowlist addresses, etc. |
-| `describe_allow_list_detail` | Query detailed information of target allowlist, such as IP addresses and bound instance details |
-| `delete_allow_list` | Delete target allowlist |
-| `describe_allow_lists` | Query all IP allowlist information in the specified region under the current account |
-| `disassociate_allow_list` | Unbind target instance from specified IP allowlist |
-| `describe_storage_payable_price` | Query storage pricing |
-| `describe_availability_zones` | Query available zone resources supported by instances in the current region |
-| `describe_db_instance_specs` | Query node specifications supported in the specified availability zone |
-| `describe_db_instance_price_detail` | Query price details for specified configuration instances |
-| `describe_regions` | Query available region resources for instances |
+| Tool Name | Description | Trigger Example |
+|----------|-------------|---------------|
+| **Parameter Management Tools** | |
+| `save_as_parameter_template` | Save parameter configuration of specified instance as a parameter template | Save current parameter configuration of instance vedbm-**** as a new parameter template named custom_template |
+| `create_parameter_template` | Create parameter template | Create a MySQL 8.0 parameter template named new_template containing parameter max_connections=1000 |
+| `list_parameter_templates` | Query parameter template list | Query all parameter templates for MySQL 8.0 version |
+| `describe_parameter_template_detail` | Query parameter template details | Query detailed configuration of parameter template vedbmpt-**** |
+| `describe_db_parameters` | Query MySQL parameter list of the instance | Query all kernel parameters of instance vedbm-instanceid |
+| **Database and Account Management Tools** | |
+| `list_vedb_mysql_instance_databases` | Retrieve list of databases created in a specific VeDB MySQL instance, including privilege information | Query all database lists and privilege details in the instance |
+| `list_vedb_mysql_instance_accounts` | Retrieve list of accounts in a single VeDB MySQL instance with their privilege details | Query all account lists and privilege details in the instance |
+| `modify_db_account_description` | Modify description information of a MySQL account within the instance | Modify description of account user1 to "development account" under vedbm-instanceid |
+| `modify_database_description` | Modify description information of a MySQL database within the instance | Modify description of database test_db to "test database" under vedbm-instanceid |
+| `create_db_account` | Create MySQL account within the instance | Create new ordinary account test_mcp with password Password123 in instance vedbm-instanceid |
+| `create_database` | Create MySQL database within the instance | Create database test_db under vedbm-instanceid |
+| **Backup and Recovery Tools** | |
+| `restore_to_new_instance` | Restore backup data from existing instance to a new instance | Create a new instance using backup data from instance vedbm-**** (backup ID: snap-**-**), specification: vedb.mysql.x4.large, node count: 2, VPC and subnet same as original instance |
+| `create_backup` | Create data backup for specified instance | Create a manual full backup for instance vedbm-instanceid |
+| `get_backup_policy` | Query data backup policy for specified instance | Query current data backup policy of instance vedbm-**** |
+| `list_backups` | Query backup list for specified instance | Query all successfully completed snapshots of instance vedbm-instanceid |
+| `get_recoverable_time` | Query recoverable time range for instance backups | Query recoverable time range for instance vedbm-instanceid |
+| **Instance Management Tools** | |
+| `list_vedb_mysql_instances` | Retrieve list of all VeDB MySQL instances for the user, including instance IDs and basic information | Query all instance lists |
+| `describe_vedb_mysql_detail` | Retrieve detailed information about a specific VeDB MySQL instance | Query detailed information of specified instance |
+| `modify_vedb_mysql_instance_alias` | Modify alias of a specific VeDB MySQL instance | Modify instance alias |
+| `create_vedb_mysql_instance` | Create VeDB MySQL instance | Create new database instance |
+| `add_tags_to_resource` | Bind tags to one or more instances | Add tag test=mcp to instance vedbm-instanceid |
+| `remove_tags_from_resource` | Unbind tags from one or more instances | Remove tag test from instance vedbm-instanceid |
+| `change_master` | Switch primary node | Switch instance primary node to vedbm-xxxx-1 |
+| **Network and Allowlist Management Tools** | |
+| `create_vedb_mysql_allowlist` | Create network allowlist for VeDB MySQL | Create an IP allowlist named test_whitelist allowing IP address 192.168.1.0/24 to access |
+| `bind_allowlist_to_vedb_mysql_instances` | Bind network allowlist to VeDB MySQL instances | Bind allowlist to specified instance |
+| `list_bound_allow_lists` | Query allowlist information bound to the instance | Query all currently bound allowlist information for instance vedbm-**** |
+| `get_db_endpoint` | Query detailed information of specified instance connection endpoints | Query all connection endpoint details for instance vedbm-**** |
+| `create_db_endpoint` | Create connection endpoint | Create new connection endpoint in the instance |
+| `list_allow_lists` | Query all IP allowlists | Query all allowlist lists in Beijing region |
+| `describe_allow_list_detail` | Query detailed information of target allowlist | Query detailed information and bound instances of the allowlist |
+| **Information Query Tools** | |
+| `list_availability_zones` | Query availability zones supported by instances in current region | Query all availability zone information supported in Beijing region |
+| `list_available_db_specs` | Query node specification information supported in specified availability zone | Query all available VeDB MySQL instance specifications in Beijing region |
+| `list_region_names` | Query regions available for instances | Query all region lists supported by VeDB MySQL |
 
 ---
 
