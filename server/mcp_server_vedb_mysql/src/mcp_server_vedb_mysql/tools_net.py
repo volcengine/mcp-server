@@ -23,7 +23,7 @@ def create_vedb_mysql_allowlist(
 
 
 @mcp_server.tool(
-    description="Bind a Network AllowList to VeDB MySQL instances. 触发示例：将白名单acl-c2402ba601374808aeb19d06acc2绑定到实例vedbm-ca12cbqv",
+    description="Bind a Network AllowList to VeDB MySQL instances. 触发示例：将白名单acl-****绑定到实例vedbm-****",
 )
 def bind_allowlist_to_vedb_mysql_instances(
         allow_list_id: str,
@@ -198,7 +198,7 @@ def modify_db_endpoint(instance_id: str,
 # @mcp_server.tool(
 #     description="修改目标白名单设置，例如白名单名称、IP白名单地址等。触发示例：将白名单acl-d1fd76693bd54e658912e7337d5b****的名称修改为new_name，并添加IP地址10.0.0.0/24"
 # )
-def modify_allow_list(allow_list_id: Annotated[str, Field(examples=['acl-d1fd76693bd54e658912e7337d5b****'])],
+def modify_allow_list(allow_list_id: Annotated[str, Field(examples=['acl-****'])],
                       allow_list_name: str,
                       allow_list: Optional[Annotated[str,Field(examples=['192.168.1.0,0.0.0.0/0'])]] = None,
                       allow_list_desc: Optional[Annotated[str,Field(description='备注信息')]] = None,
@@ -218,7 +218,7 @@ def modify_allow_list(allow_list_id: Annotated[str, Field(examples=['acl-d1fd766
 
 
 @mcp_server.tool(
-    description="查询目标白名单的详细信息，例如 IP 地址和绑定的实例详情。触发示例：查询白名单acl-d1fd76693bd54e658912e7337d5b****的详细信息，包括绑定的实例"
+    description="查询目标白名单的详细信息，例如 IP 地址和绑定的实例详情。触发示例：查询白名单acl-****的详细信息，包括绑定的实例"
 )
 def describe_allow_list_detail(allow_list_id: str) -> dict[str, Any]:
     req = {
