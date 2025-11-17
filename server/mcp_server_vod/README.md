@@ -1,145 +1,175 @@
-# VOD MCP Server
-An efficient and convenient video editing assistant that enables various editing operations through conversational interaction, including multi-video timeline splicing, long video segmentation and splicing, and adding transition animations, lowering the technical barrier and operational costs of video editing.
+#MCP Server 产品名称：[MCP Server 产品名称]
+[![产品Logo]([产品Logo的URL或本地路径])]
 
-| Version | v1.0.0                   | 
-|----|--------------------------|
-| Description | Volcano Engine VOD Intelligent Editing Assistant |
-| Category | Video Cloud, Video-on-Demand |
-| Tags | VOD, Video-on-Demand, Video Editing |
+## 版本信息
 
+[请在此处填写版本信息，例如 v1，v2，小写。]
 
-## Feature Demos
-- [Example of splicing multiple videos by timeline](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/多视频按时域拼接.mp4): In Trae, through conversation, two local videos are spliced together at specified time intervals to create a new address, and returns the playback address of the synthesized video (this step requires having configured a domain in Volcano Engine VOD service)
-- [Example of multi-segment video extraction and composition](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/单视频多段截取.mp4): Through conversation, videos can be segmented and extracted, then spliced together by timeline to create a new video
-- [Example of adding text and transition animations](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/添加文字及转场动画.mp4): Multiple videos are spliced together by timeline to create a new video, with transition animation effects and fixed text added to the new video.
+## 产品描述
+
+###短描述（建议 20 个字）
+[请在此处填写简略、准确、吸引人的产品描述，突出产品在 MCP 广场上的独特价值。主要用于官网卡片与详情页]
+
+### 长描述（建议 50 字，不超过 100 字）
+
+[请在此处填写详细、准确、吸引人的产品描述，包括核心功能、优势、适用场景等。突出产品在 MCP 广场上的独特价值。主要用于官网卡片与详情页]
+
+## 分类
+
+[请在此处填写准确的产品分类，方便用户浏览和查找。例如，存储，计算，数据库]
+
+## 标签
+
+[请在此处填写便于用户搜索和发现产品的关键词标签，多个标签请用逗号分隔，建议不超过 4 个。例如：搜索，位置，安全，数据清洗等]
 
 ## Tools
 
-This MCP Server product provides the following Tools (capabilities):
+本 MCP Server 产品提供以下 Tools (工具/能力):
 
-### Tool 1: [get_space_detail](https://www.volcengine.com/docs/4/107689) 
+### Tool 1: [Tool 1 名称]
 
-#### Detailed Description
-Get detailed information of a specified space, including region, space description and creation time.
+#### 类型
 
-#### Prompt Example
-Call get_space_detail to get space details
+[请在此处填写此 Tool 是 saas ？还是实例型？]
 
-### Tool 2: [list_space](https://www.volcengine.com/docs/4/107686)
+#### 详细描述
 
-#### Detailed Description
-Query user's video on demand space list, can get information of all spaces under current account.
+[请在此处填写 Tool 1 的详细描述，包括其功能、特点、解决的问题等。 不超过 100 个字]
 
-#### Prompt Example
-Call list_space to get space list
+#### 调试所需的输入参数:
 
-### Tool 3: [create_space](https://www.volcengine.com/docs/4/107685)
+输入：
 
-#### Detailed Description
-Create video on demand space. Space is the basic unit of resource isolation, each space can independently configure business resources, business templates, business flows and business strategies.
+```json
+{
+  "inputSchema": {
+    "type": "object",
+    "required": ["location"],
+    "properties": {
+      "location": {
+        "description": "经纬度",
+        "type": "string"
+      }
+    }
+  },
+  "name": "maps_regeocode",
+  "description": "将一个高德经纬度坐标转换为行政区划地址信息"
+}
+```
 
-#### Prompt Example
-Call create_space to create VOD space
+输出： - 输出结果描述 - Current status of working directory as text output
 
-### Tool 4: [upload_media](https://www.volcengine.com/docs/4/65647#%E4%B8%8A%E4%BC%A0%E9%9F%B3%E8%A7%86%E9%A2%91)
+#### 最容易被唤起的 Prompt 示例
 
-#### Detailed Description
-Upload local videos, can upload local videos to specified VOD space.
+[请在此处填写最容易触发 Tool 1 功能的 Prompt 示例]
 
-#### Prompt Example
-Call upload_media to upload local videos
+## 可适配平台
 
-### Tool 5: [submit_direct_edit_task_async](https://www.volcengine.com/docs/4/102240)
-#### Detailed Description
-Submit video editing tasks, can edit video resources in specified VOD space, enabling multi-video timeline splicing, single video multi-segment extraction, adding text and transition animations.
-#### Prompt Example
-Call submit_direct_edit_task_async to submit editing task
+[请在此处列出该 MCP Server 产品可以适配的平台或环境。例如：方舟，python，cursor]
 
-## Tool 6: [get_direct_edit_progress](https://www.volcengine.com/docs/4/102241)
+## 服务开通链接 (整体产品)
 
-#### Detailed Description
-Query video editing task processing progress, can query editing task processing progress after submission.
+[请在此处填写该 MCP Server 产品的整体服务开通链接]
 
-#### Prompt Example
-Call get_direct_edit_progress to query editing task progress
+## 鉴权方式
 
-## Tool 7: [get_direct_edit_result](https://www.volcengine.com/docs/4/102242)
+[请在此处说明该 MCP Server 产品使用的鉴权方式。例如：API Key，OAuth 2.0，Token 等，并简要说明如何获取和使用凭证。]
 
-#### Detailed Description
-Query editing task processing result.
+## 安装部署
 
-#### Prompt Example
-Call get_direct_edit_result to query editing task result
+[请在此处提供详细的安装和部署说明，根据您的产品特性选择合适的描述方式。]
+[示例如下]
 
-## Tool 8: [get_play_info](https://www.volcengine.com/docs/4/2918)
-#### Detailed Description
-Get video playback information, can get video playback information including playback address, cover etc.
+### Using uv (recommended)
 
-#### Prompt Example
-Call get_play_info to query video playback address
+When using [`uv`](https://docs.astral.sh/uv/) no specific installation is needed. We will
+use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run _mcp-server-git_.
 
-## Tool 9: [list_domain](https://www.volcengine.com/docs/4/106062)
+### Using PIP
 
-#### Detailed Description
-Query domain list, query all domain lists configured under user's specified space.
+Alternatively you can install `mcp-server-git` via pip:
 
-#### Prompt Example
-Call list_domain to query VOD space configured domains
+```
+pip install mcp-server-git
+```
 
-## Tool 10: [get_media_info](https://www.volcengine.com/docs/4/1256363)
+After installation, you can run it as a script using:
 
-#### Detailed Description
-Query media asset information, get media asset information through Vid (video ID), including basic information, source information and media processing output file information.
+```
+python -m mcp_server_git
+```
 
-#### Prompt Example
-Call get_media_info to query video details
+##在不同平台的配置
 
-## Tool 11: [get_media_list](https://www.volcengine.com/docs/4/69205)
+### 方舟
 
-#### Detailed Description
-Get audio/video information, get audio/video information of specified Vid (video ID).
+#### 体验中心
 
-#### Prompt Example
-Call get_media_list to query VOD space media asset list
+[示例如下]
 
-## Supported Platforms  
-Ark, Cursor, Trae etc.
+1. 查看 MCP Server 详情
+   在大模型生态广场，选择合适的 MCP Server，并查看详情
+2. 选择 MCP Server 即将运行的平台
+   检查当前 MCP Server 已适配的平台，并选择合适的平台
+3. 查看并对比可用的 Tools
+   仔细查看可用的 Tools 的功能描述与所需的输入参数，并尝试运行对应的功能。
+4. 获取专属的 URL 或代码示例
+   检查账号登录状态与服务开通情况，生成唯一 URL
+5. 去对应的 Client 的平台进行使用
+   点击快捷跳转按钮，前往方舟平台的体验中心进行对应 MCP Server 的体验
 
-## Service Activation Link (Full Product)  
-[Volcano Engine-Video on Demand-Console](https://www.volcengine.com/product/vod)
+## 资源列表 - optional
 
-## Authentication Method  
-Please apply for VOLCENGINE_ACCESS_KEY, VOLCENGINE_SECRET_KEY at [Volcano Engine-Video on Demand-Console](https://www.volcengine.com/product/vod)
+## 商业化 - optional
 
-## Installation
+## 产品截图/视频 - optional
 
-### Environment Requirements
+### Cursor
 
-- Python 3.13+
-- Volcano Engine account and AccessKey/SecretKey
+## 部署
 
-## Deployment
-### Integration in MCP Client
+[常见的部署方式，例如 docker 和 uvx]
+[示例如下]
 
-Configure MCP service in mcp client, MCP JSON configuration:
+### Docker
+
 ```json
 {
   "mcpServers": {
-    "vevod": {
-      "command": "uvx",
+    "git": {
+      "command": "docker",
       "args": [
-          "--from",
-          "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vod",
-          "mcp-server-vod"
-      ],
-      "env": {
-        "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
-        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK"
-      }
+        "run",
+        "--rm",
+        "-i",
+        "--mount",
+        "type=bind,src=/Users/username/Desktop,dst=/projects/Desktop",
+        "--mount",
+        "type=bind,src=/path/to/other/allowed/dir,dst=/projects/other/allowed/dir,ro",
+        "--mount",
+        "type=bind,src=/path/to/file.txt,dst=/projects/path/to/file.txt",
+        "mcp/git"
+      ]
     }
   }
 }
 ```
 
+### UVX
+
+```json
+{
+"mcpServers": {
+  "git": {
+    "command": "uv",
+    "args": [
+      "--directory",
+      "/<path to mcp-servers>/mcp-servers/src/git",
+      "run",
+      "mcp-server-git"
+    ]
+  }
+}
+```
+
 ## License
-MIT
