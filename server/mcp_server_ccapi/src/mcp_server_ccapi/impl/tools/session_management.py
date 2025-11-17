@@ -60,6 +60,17 @@ async def check_environment_variables_impl(workflow_store: dict) -> dict:
     }
 
     env_data = workflow_store[environment_token]['data']
+    # 对 ak/sk 进行中间脱敏
+    if 'ak' in env_data and env_data['ak']:
+        ak = env_data['ak']
+        env_data['ak'] = (
+            f'{ak[:4]}{"*" * (len(ak) - 8)}{ak[-4:]}' if len(ak) > 8 else f'{"*" * len(ak)}'
+        )
+    if 'sk' in env_data and env_data['sk']:
+        sk = env_data['sk']
+        env_data['sk'] = (
+            f'{sk[:4]}{"*" * (len(sk) - 8)}{sk[-4:]}' if len(sk) > 8 else f'{"*" * len(sk)}'
+        )
 
     return {
         'environment_token': environment_token,
