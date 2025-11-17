@@ -178,9 +178,9 @@ def list_databases(
     instance_type = dbw_client.instance_type or instance_type
     if not instance_type:
         raise ValueError("instance_type is required")
-    if page_number is None:
+    if not page_number:
         page_number = 1
-    if page_size is None:
+    if not page_size:
         page_size = 100
 
     req = {
@@ -232,9 +232,9 @@ def list_tables(
     database = dbw_client.database or database
     if not database:
         raise ValueError("database is required")
-    if page_number is None:
+    if not page_number:
         page_number = 1
-    if page_size is None:
+    if not page_size:
         page_size = 100
 
     req = {
@@ -308,6 +308,89 @@ def get_table_info(
     }
 
     resp = dbw_client.get_table_info(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_slow_logs",
+    description="查询数据库实例的慢日志信息",
+)
+def describe_slow_logs(
+        start_time: int = Field(default=None, description="查询慢日志的开始时间，使用秒时间戳格式"),
+        end_time: int = Field(default=None, description="查询慢日志的结束时间，使用秒时间戳格式"),
+        instance_id: Optional[str] = Field(default=None, description="火山引擎数据库实例ID"),
+        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）"),
+        node_id: Optional[str] = Field(default=None, description="火山引擎数据库实例节点ID"),
+        page_number: Optional[int] = Field(default=1, description="分页查询时的页码（默认为1，即从第一页数据开始返回）"),
+        page_size: Optional[int] = Field(default=100, description="分页大小（默认为100）"),
+        sort_by: Optional[str] = Field(default="ASC", description="按照降序或升序方式排列慢日志（ASC表示升序，DESC表示降序）"),
+        order_by: Optional[str] = Field(default="Timestamp", description="返回结果的排序方法（Timestamp按照查询开始时间排序，QueryTime按照查询时间排序，LockTime按照锁的等待时间排序，RowsExamined按照扫描的行数排序，RowsSent按照返回的行数排序")
+) -> dict[str, Any]:
+    """
+    查询数据库实例的慢日志信息
+
+    Args:
+        start_time (int): 查询慢日志的开始时间，使用秒时间戳格式
+        end_time (int): 查询慢日志的结束时间，使用秒时间戳格式
+        instance_id (str, optional): 火山引擎数据库实例ID（需开启安全管控）
+        instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）
+        node_id (str, optional): 火山引擎数据库实例节点ID
+        page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
+        page_size (int, optional): 分页大小（默认为100）
+        sort_by (str, optional): 按照降序或升序方式排列慢日志（ASC表示升序，DESC表示降序）
+        order_by (str, optional): 返回结果的排序方法（Timestamp按照查询开始时间排序，QueryTime按照查询时间排序，LockTime按照锁的等待时间排序，RowsExamined按照扫描的行数排序，RowsSent按照返回的行数排序
+    Returns:
+        total (int): 慢日志数量
+        slow_logs (list): 慢日志列表信息，列表中的每个值对应一条慢日志记录，结构如下
+            - connection_id (int): 连接ID
+            - db (str): Database名称
+            - lock_time (float): 表示执行被查询对象时需要的锁等待时间，即查询对象可能在别的会话中被锁定，其他语言就需要等待锁释放才可以执行查询操作，这段时间就是锁等待时间
+            - query_time (float): 表示查询语句的耗时
+            - timestamp (int): 按照查询开始时间排序
+            - rows_examined (int): 表示查询时需要扫描的行数
+            - rows_sent (int): 命中查询结果后返回数据的行数
+            - sql_template (str): SQL模板
+            - sql_text (str): SQL文本即实际执行的查询语句
+            - source_ip (str): IP地址
+            - user (str): 执行者名称
+    """
+    if REMOTE_MCP_SERVER:
+        dbw_client = get_dbw_client(mcp_server.get_context())
+    else:
+        dbw_client = DBW_CLIENT
+
+    if start_time is None:
+        raise ValueError("start_time is required")
+    if end_time is None:
+        raise ValueError("end_time is required")
+    instance_id = dbw_client.instance_id or instance_id
+    if not instance_id:
+        raise ValueError("instance_id is required")
+    instance_type = dbw_client.instance_type or instance_type
+    if not instance_type:
+        raise ValueError("instance_type is required")
+    if not page_number:
+        page_number = 1
+    if not page_size:
+        page_size = 100
+    if not sort_by:
+        sort_by = "ASC"
+    if not order_by:
+        order_by = "Timestamp"
+
+    req = {
+        "region_id": dbw_client.region,
+        "instance_id": instance_id,
+        "instance_type": instance_type,
+        "page_number": page_number,
+        "page_size": page_size,
+        "sort_by": sort_by,
+        "order_by": order_by,
+    }
+    if node_id is not None:
+        req["node_id"] = node_id
+
+    resp = dbw_client.describe_slow_logs(req)
     return resp.to_dict()
 
 
