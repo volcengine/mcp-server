@@ -14,12 +14,12 @@ openapi_cli = vedbm_resource_sdk.client
 def create_vedb_mysql_allowlist(
         name: str,
         contents: str = "0.0.0.0/0,127.0.0.1"
-) -> str:
+) -> dict[str, Any]:
     req = volcenginesdkvedbm.models.CreateAllowListRequest(
         allow_list=contents,
         allow_list_name=name,
     )
-    return "allow_list_id: " + openapi_cli.create_allow_list(req).allow_list_id
+    return {"allow_list_id": openapi_cli.create_allow_list(req).allow_list_id}
 
 
 @mcp_server.tool(
@@ -28,13 +28,13 @@ def create_vedb_mysql_allowlist(
 def bind_allowlist_to_vedb_mysql_instances(
         allow_list_id: str,
         instances_id: set[str],
-) -> str:
+) -> dict[str, Any]:
     req = volcenginesdkvedbm.models.AssociateAllowListRequest(
         allow_list_ids=[allow_list_id],
         instance_ids=list(instances_id),
     )
     openapi_cli.associate_allow_list(req)
-    return "bind success"
+    return {"bind": "success"}
 
 @mcp_server.tool(
     description="查询实例绑定的白名单信息。触发示例：查询实例vedbm-****当前绑定的所有白名单信息"
