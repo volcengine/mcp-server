@@ -8,41 +8,6 @@ logger = logging.getLogger(__name__)
 openapi_cli = vedbm_resource_sdk.client
 
 
-# @mcp_server.tool(
-#     description="将实例的历史数据库和表恢复至原实例中。触发示例：将实例vedbm-****中的数据库src恢复为dst，使用备份ID为snap-6511-ce0d"
-# )
-def restore_table(instance_id: str,
-                  table_meta: Annotated[list[dict[str, Any]], Field(description='进行恢复的库表信息(可通过调用DescribeRecoverableTables接口查看实例可恢复的库和表)', examples=['[{"DBName":"src","NewDBName":"dst"}]'])],
-                  backup_id: Optional[Annotated[str,Field(description='备份文件ID。通过调用DescribeBackups接口可查询')]] = None,
-                  restore_time: Optional[Annotated[str,Field(description='UTC时间。调用DescribeRecoverableTime可查询(该参数与BackupId二选一)', examples=['2023-09-19T07:21:09Z'])]] = None) -> dict[str, Any]:
-    req = {
-        "instance_id": instance_id,
-        "table_meta": table_meta,
-        "backup_id": backup_id,
-        "restore_time": restore_time,
-    }
-    req = {k: v for k, v in req.items() if v is not None}
-    resp = vedbm_resource_sdk.restore_table(req)
-    return resp.to_dict()
-
-# @mcp_server.tool(
-#     description="修改指定实例的数据备份策略。触发示例：将实例vedbm-****的备份策略修改为每周一、三、五的00:00-02:00进行全量备份，保留30天"
-# )
-def modify_backup_policy(instance_id: str,
-                         backup_time: Annotated[str, Field(description='UTC', examples=['02:00Z-04:00Z','04:00Z-06:00Z'])],
-                         full_backup_period: Annotated[str, Field(examples=['Monday,Wednesday'])],
-                         backup_retention_period: Annotated[int, Field(description='数据备份保留天数', examples=[7])]) -> dict[str, Any]:
-    req = {
-        "instance_id": instance_id,
-        "backup_time": backup_time,
-        "full_backup_period": full_backup_period,
-        "backup_retention_period": backup_retention_period,
-    }
-    req = {k: v for k, v in req.items() if v is not None}
-    resp = vedbm_resource_sdk.modify_backup_policy(req)
-    return resp.to_dict()
-
-
 @mcp_server.tool(
     description="将已有实例的备份数据恢复至一个新的实例中。触发示例：使用实例vedbm-****的备份数据（备份ID：snap-**-**）创建一个新实例，规格为vedb.mysql.x4.large，节点数为2，VPC和子网与原实例保持一致"
 )
@@ -110,18 +75,6 @@ def create_backup(instance_id: str) -> dict[str, Any]:
     resp = vedbm_resource_sdk.create_backup(req)
     return resp.to_dict()
 
-# @mcp_server.tool(
-#     description="删除指定实例的手动备份文件。触发示例：删除实例vedbm-****的手动备份文件，备份ID为snap-a3a9-8b96"
-# )
-def delete_backup(instance_id: str, backup_id: str) -> dict[str, Any]:
-    req = {
-        "instance_id": instance_id,
-        "backup_id": backup_id,
-    }
-    req = {k: v for k, v in req.items() if v is not None}
-    resp = vedbm_resource_sdk.delete_backup(req)
-    return resp.to_dict()
-
 
 @mcp_server.tool(
     description="查询指定实例的数据备份策略。触发示例：查询实例vedbm-****当前的数据备份策略"
@@ -164,21 +117,7 @@ def list_backups(instance_id: str,
 def get_recoverable_time(instance_id: str) -> dict[str, Any]:
     req = {
         "instance_id": instance_id,
-        # "for_recover_table": for_recover_table,
     }
     req = {k: v for k, v in req.items() if v is not None}
     resp = vedbm_resource_sdk.describe_recoverable_time(req)
-    return resp.to_dict()
-
-
-# @mcp_server.tool(
-#     description="将目标实例从指定IP白名单中解绑。触发示例：将实例vedbm-ca12cbqv从白名单acl-c2402ba601374808aeb19d06acc2中解绑"
-# )
-def disassociate_allow_list(allow_list_ids: list[str], instance_ids: list[str]) -> dict[str, Any]:
-    req = {
-        "allow_list_ids": allow_list_ids,
-        "instance_ids": instance_ids,
-    }
-    req = {k: v for k, v in req.items() if v is not None}
-    resp = vedbm_resource_sdk.disassociate_allow_list(req)
     return resp.to_dict()

@@ -103,66 +103,6 @@ def modify_database_description(instance_id: str,
     vedbm_resource_sdk.modify_database_description(req)
     return "succ"
 
-
-# @mcp_server.tool(
-#     description="将高权限账号的权限重置到初始状态。触发示例：重置高权限账号admin的权限到初始状态"
-# )
-def reset_account_priv(instance_id: str,
-                       account_name: str) -> dict[str, Any]:
-    req = {
-        "instance_id": instance_id,
-        "account_name": account_name,
-    }
-    req = {k: v for k, v in req.items() if v is not None}
-    resp = vedbm_resource_sdk.reset_account(req)
-    return resp.to_dict()
-
-# @mcp_server.tool(
-#     description="为账号撤销对数据库的权限。触发示例：撤销账号user1对数据库test_db的所有权限"
-# )
-def revoke_db_account_privilege(instance_id: str,
-                                account_name: str,
-                                db_names: Annotated[str, Field(description='多个数据库用英文逗号隔开')]) -> dict[str, Any]:
-    req = {
-        "instance_id": instance_id,
-        "account_name": account_name,
-        "db_names": db_names,
-    }
-    req = {k: v for k, v in req.items() if v is not None}
-    resp = vedbm_resource_sdk.revoke_db_account_privilege(req)
-    return resp.to_dict()
-
-# @mcp_server.tool(
-#     description="为账号赋予指定数据库的权限。触发示例：为账号user1授予对数据库test_db的读写权限"
-# )
-def grant_db_account_privilege(instance_id: str,
-                               account_name: str,
-                               account_privileges: Annotated[list[dict[str, Any]], Field(examples=['[{"DBName":"db1","AccountPrivilege":"ReadWrite"}]'])]) -> dict[str, Any]:
-    req = {
-        "instance_id": instance_id,
-        "account_name": account_name,
-        "account_privileges": account_privileges,
-    }
-    req = {k: v for k, v in req.items() if v is not None}
-    resp = vedbm_resource_sdk.grant_db_account_privilege(req)
-    return resp.to_dict()
-
-# @mcp_server.tool(
-#     description="修改数据库账号密码。调用 ResetDBAccount 接口修改数据库账号密码。触发示例：修改账号user1的密码为NewPassword456"
-# )
-def reset_account_passwd(instance_id: str,
-                     account_name: str,
-                     account_password: str) -> dict[str, Any]:
-    req = {
-        "instance_id": instance_id,
-        "account_name": account_name,
-        "account_password": account_password,
-    }
-    req = {k: v for k, v in req.items() if v is not None}
-    resp = vedbm_resource_sdk.reset_db_account(req)
-    return resp.to_dict()
-
-
 @mcp_server.tool(
     description="在实例内创建mysql账号。触发示例：在实例vedbm-instanceid内创建普通新账号test_mcp，密码为Password123"
 )
@@ -202,30 +142,3 @@ def create_database(instance_id: str,
     req = {k: v for k, v in req.items() if v is not None}
     vedbm_resource_sdk.create_database(req)
     return "succ"
-
-# @mcp_server.tool(
-#     description="删除数据库账号。触发示例：删除账号user1"
-# )
-def delete_db_account(instance_id: str,
-                      account_name: str) -> dict[str, Any]:
-    req = {
-        "instance_id": instance_id,
-        "account_name": account_name,
-    }
-    req = {k: v for k, v in req.items() if v is not None}
-    resp = vedbm_resource_sdk.delete_db_account(req)
-    return resp.to_dict()
-
-
-# @mcp_server.tool(
-#     description="删除实例的数据库。触发示例：删除数据库test_db"
-# )
-def delete_database(instance_id: str,
-                    db_name: str) -> dict[str, Any]:
-    req = {
-        "instance_id": instance_id,
-        "db_name": db_name,
-    }
-    req = {k: v for k, v in req.items() if v is not None}
-    resp = vedbm_resource_sdk.delete_database(req)
-    return resp.to_dict()

@@ -126,36 +126,6 @@ def create_vedb_mysql_instance(
         rsp["suggests"] = "Wait for instance creating finish (Running status)"
     return rsp
 
-
-# @mcp_server.tool(
-#     description="开启或关闭实例删除保护功能"
-# )
-def switch_instance_deletion_protection(deletion_protection: Annotated[str, Field(examples=['disabled','enabled'])],
-                                                  instance_id: str) -> dict[str, Any]:
-    req = {
-        "deletion_protection": deletion_protection,
-        "instance_id": instance_id,
-    }
-    req = {k: v for k, v in req.items() if v is not None}
-    resp = vedbm_resource_sdk.modify_db_instance_deletion_protection_policy(req)
-    return resp.to_dict()
-
-
-# @mcp_server.tool()
-def describe_db_instance_version(instance_id: str) -> dict[str, Any]:
-    """查询目标实例的版本
-    Returns: 
-        实例兼容版本。`MySQL_8_0`，`MySQL_5_7`
-        实例小版本。示例值：3.0
-        实例内核版本。示例值：3.0.1.1
-    """
-    req = {
-        "instance_id": instance_id,
-    }
-    req = {k: v for k, v in req.items() if v is not None}
-    resp = vedbm_resource_sdk.describe_db_instance_version(req)
-    return resp.to_dict()
-
 @mcp_server.tool(
     description="为实例绑定标签，支持批量操作"
 )
@@ -184,45 +154,6 @@ def remove_tags_from_resource(instance_ids: list[str],
     vedbm_resource_sdk.remove_tags_from_resource(req)
     return "success"
 
-# @mcp_server.tool(
-#     description="修改指定实例的节点配置"
-# )
-def modify_db_instance_spec(instance_id: str,
-                            node_spec: Annotated[str, Field(examples=['vedb.mysql.g4.4xlarge','vedb.mysql.g4.large'])],
-                            node_number: int,
-                            schedule_type: Annotated[str, Field(examples=['Immediate','MaintainTime'])],
-                            pre_paid_storage_in_gb: Optional[Annotated[int,Field(description='若存储计费类型为包年包月，则需输入变更后的存储空间大小', examples=[60])]] = None,
-                            zone_node_infos: Optional[Annotated[list[dict[str, Any]],Field(description='从实例可用区的节点信息')]] = None) -> dict[str, Any]:
-    req = {
-        "instance_id": instance_id,
-        "node_spec": node_spec,
-        "node_number": node_number,
-        "schedule_type": schedule_type,
-        "one_step_order": True,
-        "pre_paid_storage_in_gb": pre_paid_storage_in_gb,
-        "zone_node_infos": zone_node_infos,
-    }
-    req = {k: v for k, v in req.items() if v is not None}
-    resp = vedbm_resource_sdk.modify_db_instance_spec(req)
-    return resp.to_dict()
-
-
-# @mcp_server.tool(
-#     description="重启实例或重启单个节点"
-# )
-def restart_db_instance(instance_id: str,
-                        schedule_type: Annotated[str, Field(examples=['Immediate','MaintainTime'])],
-                        node_id: Optional[Annotated[str,Field(description='传入该参数时，表示重启指定的节点', examples=['vedbm-****-1'])]] = None) -> dict[str, Any]:
-    req = {
-        "instance_id": instance_id,
-        "schedule_type": schedule_type,
-        "node_id": node_id,
-    }
-    req = {k: v for k, v in req.items() if v is not None}
-    resp = vedbm_resource_sdk.restart_db_instance(req)
-    return resp.to_dict()
-
-
 @mcp_server.tool(
     description="切换实例主节点到指定节点"
 )
@@ -235,16 +166,3 @@ def change_master(instance_id: str,
     req = {k: v for k, v in req.items() if v is not None}
     vedbm_resource_sdk.change_master(req)
     return "success"
-
-
-# @mcp_server.tool(
-#     description="删除实例"
-# )
-def delete_db_instance(instance_id: str) -> dict[str, Any]:
-    req = {
-        "instance_id": instance_id,
-        "data_keep_policy": "Last",
-    }
-    req = {k: v for k, v in req.items() if v is not None}
-    resp = vedbm_resource_sdk.delete_db_instance(req)
-    return resp.to_dict()
