@@ -332,7 +332,7 @@ def describe_slow_logs(
     Args:
         start_time (int): 查询慢日志的开始时间，使用秒时间戳格式
         end_time (int): 查询慢日志的结束时间，使用秒时间戳格式
-        instance_id (str, optional): 火山引擎数据库实例ID（需开启安全管控）
+        instance_id (str, optional): 火山引擎数据库实例ID
         instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）
         node_id (str, optional): 火山引擎数据库实例节点ID
         page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
@@ -359,16 +359,16 @@ def describe_slow_logs(
     else:
         dbw_client = DBW_CLIENT
 
-    if start_time is None:
-        raise ValueError("start_time is required")
-    if end_time is None:
-        raise ValueError("end_time is required")
     instance_id = dbw_client.instance_id or instance_id
     if not instance_id:
         raise ValueError("instance_id is required")
     instance_type = dbw_client.instance_type or instance_type
     if not instance_type:
         raise ValueError("instance_type is required")
+    if start_time is None:
+        raise ValueError("start_time is required")
+    if end_time is None:
+        raise ValueError("end_time is required")
     if not page_number:
         page_number = 1
     if not page_size:
@@ -391,6 +391,112 @@ def describe_slow_logs(
         req["node_id"] = node_id
 
     resp = dbw_client.describe_slow_logs(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="list_slow_query_advice",
+    description="获取数据库实例的慢日志诊断详情信息",
+)
+def list_slow_query_advice(
+        advice_type: str = Field(default="", description="建议类型（no_advice表示无建议，index_advice表示索引建议，rewrite_sql_advice表示改写SQL建议）"),
+        summary_id: str = Field(default="", description="每次慢日志诊断的唯一标识"),
+        group_by: str = Field(default="", description="聚合类型（Advice表示按建议聚合，Module表示按模块聚合）"),
+        order_by: str = Field(default="", description="排序类型（QueryTimeRatioNow表示按当前查询时间占比排序，Benefit表示按收益排序）"),
+        instance_id: Optional[str] = Field(default=None, description="火山引擎数据库实例ID"),
+        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）"),
+        page_number: Optional[int] = Field(default=1, description="分页查询时的页码（默认为1，即从第一页数据开始返回）"),
+        page_size: Optional[int] = Field(default=100, description="分页大小（默认为100）"),
+) -> dict[str, Any]:
+    """
+    获取数据库实例的慢日志诊断详情信息
+
+    Args:
+        advice_type (str): 建议类型（no_advice表示无建议，index_advice表示索引建议，rewrite_sql_advice表示改写SQL建议）
+        summary_id (str): 每次慢日志诊断的唯一标识
+        group_by (str): 聚合类型（Advice表示按建议聚合，Module表示按模块聚合）
+        order_by (str): 排序类型（QueryTimeRatioNow表示按当前查询时间占比排序，Benefit表示按收益排序）
+        instance_id (str, optional): 火山引擎数据库实例ID
+        instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）
+        page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
+        page_size (int, optional): 分页大小（默认为100）
+    Returns:
+        total (int): 慢日志诊断建议总数
+        advices (list[Advice]): 按模块聚合的诊断建议，如果请求参数中group_by取值为Module，则返回advices字段，列表中的每个值为Advice Object，定义如下：
+            - db (str): Database名称
+            - agg (Agg): 聚合信息，结构定义如下：
+                - db (str): Database名称
+                - user (str): 用户名
+                - table (str): 表名
+                - source_ip (str): 客户端地址
+                - sql_method (str): SQL类型
+                - sql_template (str): 慢SQL模板
+                - execute_count (int): 执行次数
+                - lock_time_ratio (double): 锁总耗时占比
+                - lock_time_stats (dict): 锁耗时的统计结果，以秒为单位
+                - rows_sent_ratio (double): 返回总行数占比
+                - rows_sent_stats (dict): 返回行数的统计结果
+                - sql_template_id (str): 慢SQL模板哈希值
+                - last_appear_time (int): 最后一次出现的时间
+                - query_time_ratio (double): 查询总耗时占比
+                - query_time_stats (dict): 查询耗时的统计结果，以秒为单位
+                - sql_fingerprint (str): SQL指纹
+                - first_appear_time (int): 第一次出现的时间
+                - pt_analysis_result (str): 仿PT解析工具输出结果的文本字符串
+                - execute_count_ratio (double): 执行总次数占比
+                - rows_examined_ratio (double): 扫描总行数占比
+                - rows_examined_stats (dict): 扫描行数的统计结果
+            - rist (str): 风险
+            - user (list[str]): 用户名列表
+            - advice (str): 诊断建议（如果请求参数中advice_type取值为index_advice，该字段为索引SQL；如果请求参数中advice_type取值为rewrite_sql_advice，该字段为SQL建议）
+            - benefit (double): 优化后预估总耗时收益
+            - speed_up (double): 优化后预估性能提升倍数
+            - sql_module (str): SQL模版
+            - source_ips (list[str]): 客户端IP列表
+            - table_name (str): 表名
+            - advice_level (str): 优化推荐程度
+            - advice_index_size (double): 推荐索引大小预估
+            - query_time_avg_after (double): 优化后查询时间预估
+        advices_by_group (list): 按建议聚合的诊断建议，如果请求参数中group_by取值为Advice，则返回advices_by_group字段，列表中的每个值的定义如下：
+            - advice (str): 按建议聚合的诊断建议（如果请求参数中advice_type取值为index_advice，该字段为索引SQL；如果请求参数中advice_type取值为rewrite_sql_advice，该字段为SQL建议）
+            - advices (list[Advice]): 按模块聚合的诊断建议，结构定义同上述advices字段
+    """
+    if REMOTE_MCP_SERVER:
+        dbw_client = get_dbw_client(mcp_server.get_context())
+    else:
+        dbw_client = DBW_CLIENT
+
+    instance_id = dbw_client.instance_id or instance_id
+    if not instance_id:
+        raise ValueError("instance_id is required")
+    instance_type = dbw_client.instance_type or instance_type
+    if not instance_type:
+        raise ValueError("instance_type is required")
+    if not advice_type:
+        raise ValueError("advice_type is required")
+    if not summary_id:
+        raise ValueError("summary_id is required")
+    if not group_by:
+        raise ValueError("group_by is required")
+    if not order_by:
+        raise ValueError("order_by is required")
+    if not page_number:
+        page_number = 1
+    if not page_size:
+        page_size = 100
+
+    req = {
+        "instance_id": instance_id,
+        "instance_type": instance_type,
+        "advice_type": advice_type,
+        "summary_id": summary_id,
+        "group_by": group_by,
+        "order_by": order_by,
+        "page_number": page_number,
+        "page_size": page_size,
+    }
+
+    resp = dbw_client.list_slow_query_advice_api(req)
     return resp.to_dict()
 
 
