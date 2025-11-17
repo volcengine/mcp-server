@@ -34,7 +34,7 @@ def bind_allowlist_to_vedb_mysql_instances(
         instance_ids=list(instances_id),
     )
     openapi_cli.associate_allow_list(req)
-    return {"status": "bind success"}
+    return {"bind": "success"}
 
 @mcp_server.tool(
     description="查询实例绑定的白名单信息。触发示例：查询实例vedbm-****当前绑定的所有白名单信息"

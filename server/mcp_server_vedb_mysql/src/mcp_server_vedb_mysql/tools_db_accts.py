@@ -77,7 +77,7 @@ def list_vedb_mysql_instance_accounts(
 )
 def modify_db_account_description(instance_id: str,
                                   account_name: str,
-                                  account_desc: str) -> str:
+                                  account_desc: str) -> dict[str, Any]:
     req = {
         "instance_id": instance_id,
         "account_name": account_name,
@@ -85,7 +85,7 @@ def modify_db_account_description(instance_id: str,
     }
     req = {k: v for k, v in req.items() if v is not None}
     vedbm_resource_sdk.modify_db_account_description(req)
-    return "succ"
+    return {"succ": "true"}
 
 
 @mcp_server.tool(
@@ -93,7 +93,7 @@ def modify_db_account_description(instance_id: str,
 )
 def modify_database_description(instance_id: str,
                                 db_name: str,
-                                db_desc: str) -> str:
+                                db_desc: str) -> dict[str, Any]:
     req = {
         "instance_id": instance_id,
         "db_name": db_name,
@@ -101,7 +101,7 @@ def modify_database_description(instance_id: str,
     }
     req = {k: v for k, v in req.items() if v is not None}
     vedbm_resource_sdk.modify_database_description(req)
-    return "succ"
+    return {"succ": "true"}
 
 @mcp_server.tool(
     description="在实例内创建mysql账号。触发示例：在实例vedbm-instanceid内创建普通新账号test_mcp，密码为Password123"
@@ -111,7 +111,7 @@ def create_db_account(instance_id: str,
                       account_password: str,
                       account_type: Annotated[str, Field(examples=['Normal','Super'])],
                       account_desc: str = None,
-                      account_privileges: list[dict[str, Any]] = None) -> str:
+                      account_privileges: list[dict[str, Any]] = None) -> dict[str, Any]:
     req = {
         "instance_id": instance_id,
         "account_name": account_name,
@@ -122,7 +122,7 @@ def create_db_account(instance_id: str,
     }
     req = {k: v for k, v in req.items() if v is not None}
     vedbm_resource_sdk.create_db_account(req)
-    return "succ"
+    return {"succ": "true"}
 
 @mcp_server.tool(
     description="在实例内创建mysql数据库。触发示例：vedbm-instanceid下创建数据库test_db"
@@ -131,7 +131,7 @@ def create_database(instance_id: str,
                     db_name: str,
                     character_set_name: Optional[str] = 'utf8mb4',
                     databases_privileges: Optional[list[dict[str, Any]]] = None,
-                    db_desc: Optional[str] = None) -> str:
+                    db_desc: Optional[str] = None) -> dict[str, Any]:
     req = {
         "instance_id": instance_id,
         "db_name": db_name,
@@ -141,4 +141,4 @@ def create_database(instance_id: str,
     }
     req = {k: v for k, v in req.items() if v is not None}
     vedbm_resource_sdk.create_database(req)
-    return "succ"
+    return {"succ": "true"}
