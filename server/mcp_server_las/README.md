@@ -133,6 +133,56 @@ LAS中，有哪些关于 image 的数据集
 
 LAS中，数据集中关于 RAY 相关的内容有哪些
 
+## Tool 4: 创建数据集
+### 详细描述
+
+创建为LAS数据集，关联tos具体的地址
+
+### 调试所需的输入参数:
+
+输入：
+
+```json
+{
+    "inputSchema": {
+      "type": "object",
+      "required": ["query"],
+      "properties": {
+        "DataPath": {
+          "description": "tos地址,tos://",
+          "type": "string"
+        },
+        "ProjectName": {
+          "description": "项目名称",
+          "type": "string"
+        },
+        "DatasetName": {
+          "description": "数据集名称",
+          "type": "string"
+        },
+        "Format": {
+          "description": "数据格式",
+          "type": "string"
+        },
+        "Privacy": {
+          "description": "数据集隐私",
+          "type": "string"
+        }
+      }
+    },
+    "name": "create_dataset",
+    "description": "创建数据集，关联tos具体的地址，创建为LAS数据集"
+}
+```
+
+输出：
+
+- 输出结果描述,新创建的数据集的具体描述
+
+### 最容易被唤起的 Prompt示例
+
+在LAS上创建个数据集， tos地址是 tos://testbucket1031/csv/
+
 # 可适配平台
 
 方舟，python，cursor， Claude Desktop

@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp-server-cp"
+version = "0.1.0"
+description = "CodePipeline MCP Server for interacting with Volcengine CodePipeline services"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "httpx>=0.28.1",
+    "mcp[cli]>=1.15.0",
+    "volcengine-python-sdk>=4.0.0",
+    "PyYAML>=6.0",
+]
+
+[project.scripts]
+mcp-server-cp = "mcp_server_cp.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["mcp_server_cp*"]

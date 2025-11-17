@@ -22,8 +22,12 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Initialize FastMCP server
-mcp = FastMCP(os.getenv(config.ENV_MCP_SERVER_NAME, "mcp_server_vmp"), host=os.getenv(config.ENV_MCP_SERVER_HOST, "0.0.0.0"), port=int(os.getenv(config.ENV_MCP_SERVER_PORT, "8000")))
-vmpApiClient : vmpapi.VMPApi = None
+mcp = FastMCP(os.getenv(config.ENV_MCP_SERVER_NAME, "mcp_server_vmp"),
+                    host=os.getenv(config.ENV_MCP_SERVER_HOST, "0.0.0.0"), 
+                    port=int(os.getenv(config.ENV_MCP_SERVER_PORT, "8000")),
+                    stateless_http=os.getenv("STATLESS_HTTP", "true").lower() == "true",
+                    streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"))
+vmpApiClient : vmpapi.VMPApiClient = None
 
 @mcp.tool()
 async def list_workspaces(region: str = "cn-beijing"):
@@ -37,6 +41,144 @@ async def list_workspaces(region: str = "cn-beijing"):
     """
     conf = init_auth_config(region)
     return await vmpApiClient.list_workspaces(conf)
+
+@mcp.tool()
+async def list_workspace_instance_types(region: str = "cn-beijing", instanceTypeId: Optional[str] = None):
+    """list volcengine managed prometheus(VMP) workspace instance types.
+
+    Args:
+        instanceTypeId: target prometheus instance type id
+        region: target region
+
+    Returns:
+        A list of prometheus instance types
+    """
+    conf = init_auth_config(region)
+
+    return await vmpApiClient.list_workspace_instance_types(conf, instanceTypeId=instanceTypeId)
+
+@mcp.tool()
+async def create_workspace(region: str = "cn-beijing",
+        delete_protection_enabled: bool = True,
+        description: Optional[str] = None,
+        instance_type_id: str = "vmp.standard.15d",
+        name: str = "default",
+        password: Optional[str] = None,
+        project_name: Optional[str] = None,
+        public_access_enabled: bool = False,
+        username: Optional[str] = None,
+):
+    """create volcengine managed prometheus(VMP) workspace in specific region.
+
+    Args:
+        delete_protection_enabled: enable delete protection for workspace,
+        description: workspace description
+        instance_type_id: workspace instance type id
+        name: workspace name
+        password: workspace basic auth password
+        project_name: workspace project name
+        public_access_enabled: enable public access for workspace
+        username: workspace basic auth username
+
+    Returns:
+        A list of prometheus workspaces
+    """
+    conf = init_auth_config(region)
+    req = {
+        "delete_protection_enabled": delete_protection_enabled,
+        "description": description,
+        "instance_type_id": instance_type_id,
+        "name": name,
+        "password": password,
+        "project_name": project_name,
+        "public_access_enabled": public_access_enabled,
+        "username": username
+    }
+    req = {k: v for k, v in req.items() if v is not None}
+    return await vmpApiClient.create_workspace(req, conf)
+
+@mcp.tool()
+async def delete_workspace(workspaceId: str, region: str = "cn-beijing"):
+    """delete volcengine managed prometheus(VMP) workspace in specific region.
+
+    Args:
+        workspaceId: target prometheus workspace id
+        region: target region
+
+    Returns:
+        Prometheus workspaceID
+    """
+    conf = init_auth_config(region)
+    return await vmpApiClient.delete_workspace(workspaceId, conf)
+
+@mcp.tool()
+async def update_workspace(region: str = "cn-beijing",
+        workspaceId: str = None,
+        delete_protection_enabled: Optional[bool] = None,
+        description: Optional[str] = None,
+        name: Optional[str] = None,
+        password: Optional[str] = None,
+        public_access_enabled: Optional[bool] = None,
+        search_latency_offset: Optional[str] = None,
+        username: Optional[str] = None,
+        active_series: Optional[int] = None,
+        ingest_samples_per_second: Optional[int] = None,
+        public_query_bandwidth: Optional[int] = None,
+        public_write_bandwidth: Optional[int] = None,
+        query_per_second: Optional[int] = None,
+        scan_samples_per_second: Optional[int] = None,
+        scan_series_per_second: Optional[int] = None
+        ):
+    """update volcengine managed prometheus(VMP) workspace in specific region.
+
+    Args:
+        WorkspaceId: target prometheus workspace id
+        region: target region
+        delete_protection_enabled: enable delete protection for workspace,
+        description: workspace description
+        name: workspace name
+        password: workspace password
+        public_access_enabled: enable public access for workspace
+        search_latency_offset: search latency offset for workspace
+        username: workspace username
+        active_series: active series quota for workspace
+        ingest_samples_per_second: ingest samples per second quota for workspace
+        public_query_bandwidth: public query bandwidth quota for workspace
+        public_write_bandwidth: public write bandwidth quota for workspace
+        query_per_second: query per second quota for workspace
+        scan_samples_per_second: scan samples per second quota for workspace
+        scan_series_per_second: scan series per second quota for workspace
+    Returns:
+        Prometheus workspaceID
+    """
+    init_auth_config(region)
+    req = {
+        "id": workspaceId,
+        "delete_protection_enabled": delete_protection_enabled,
+        "description": description,
+        "name": name,
+        "password": password,
+        "public_access_enabled": public_access_enabled,
+        "quota": {
+            "active_series": active_series,
+            "ingest_samples_per_second": ingest_samples_per_second,
+            "public_query_bandwidth": public_query_bandwidth,
+            "public_write_bandwidth": public_write_bandwidth,
+            "query_per_second": query_per_second,
+            "scan_samples_per_second": scan_samples_per_second,
+            "scan_series_per_second": scan_series_per_second
+        },
+        "search_latency_offset": search_latency_offset,
+        "username": username
+    }
+    filtered_req = {k: v for k, v in req.items() if v is not None}
+    if "quota" in filtered_req and isinstance(filtered_req["quota"], dict):
+        filtered_req["quota"] = {k: v for k, v in filtered_req["quota"].items() if v is not None}
+        if not filtered_req["quota"]:
+            del filtered_req["quota"]
+    req = filtered_req
+    conf = init_auth_config(region)
+    return await vmpApiClient.update_workspace(req, conf)
 
 @mcp.tool()
 async def query_metrics(workspaceId: str, query: str, time: Optional[str] = None, region: str = "cn-beijing"):
@@ -100,6 +242,23 @@ async def query_metric_labels(workspaceId: str, metricName: str, region: str = "
     conf = init_auth_config(region)
     return await vmpApiClient.query_label_names(workspaceId, match=[metricName], dynamicConf=conf)
 
+@mcp.tool()
+async def query_series(workspaceId: str, match: str, start: Optional[str] = None, end: Optional[str] = None, region: str = "cn-beijing"):
+    """List all series in specific volcengine managed prometheus(VMP) workspace that match the given series selector.
+
+    Args:
+        workspaceId: target prometheus workspace id
+        match: series selector that selects the series to return (e.g. 'up{job="node"}')
+        start: Optional RFC3339 or Unix timestamp (default: current time)
+        end: Optional RFC3339 or Unix timestamp (default: current time)
+        region: target region
+
+    Returns:
+        A list of series
+    """
+    conf = init_auth_config(region)
+    return await vmpApiClient.query_series(workspaceId, match, start, end, dynamicConf=conf)
+
 mcp.add_resource(HttpResource(
     uri="resource://vmp/metrics/dcgm",
     name="DCGM 常见指标",
@@ -133,6 +292,8 @@ def init_auth_config(region: str) -> config.VMPConfig:
     conf = config.load_env_config() # load default config from env
     if region and len(region) > 0:
         conf.volcengine_region = region
+        if conf.volcengine_endpoint is None or len(conf.volcengine_endpoint) == 0:
+            conf.volcengine_endpoint = get_vmp_service_endpoint_by_region(region)
 
     # 从 context 中获取 header
     ctx: Context[ServerSession, object] = mcp.get_context()
@@ -166,6 +327,9 @@ def init_auth_config(region: str) -> config.VMPConfig:
         raise ValueError("No valid auth info found")
     return conf
 
+def get_vmp_service_endpoint_by_region(region_id: str = None) -> str:
+    return f"vmp.{region_id}.volcengineapi.com"
+
 def main():
     """Start A Volcengine Managed Prometheus server."""
     load_dotenv()
@@ -182,7 +346,7 @@ def main():
     conf = config.load_env_config()
     volcenginesdkcore.Configuration.set_default(conf.to_volc_configuration())
     global vmpApiClient 
-    vmpApiClient = vmpapi.VMPApi(conf)
+    vmpApiClient = vmpapi.VMPApiClient(conf)
 
     args = parser.parse_args()
     logger.info(f"Starting Volcengine Managed Prometheus Server with {args.transport} transport")
