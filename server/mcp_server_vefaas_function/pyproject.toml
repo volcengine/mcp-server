@@ -1,6 +1,6 @@
 [project]
 name = "mcp-server-vefaas-function"
-version = "0.0.3"
+version = "0.0.4"
 description = "MCP server for managing veFaaS (Volc Engine Function as a Service) functions"
 readme = "README.md"
 requires-python = ">=3.12"
