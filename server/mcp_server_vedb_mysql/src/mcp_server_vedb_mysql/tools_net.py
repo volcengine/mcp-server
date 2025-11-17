@@ -42,7 +42,7 @@ def bind_allowlist_to_vedb_mysql_instances(
 # )
 def modify_db_node_config(instance_id: str,
                           failover_priority: Annotated[int,Field(examples=[0,15])],
-                          node_id: Annotated[str,Field(examples=['vedbm-h441603c68-1'])]) -> dict[str, Any]:
+                          node_id: Annotated[str,Field(examples=['vedbm-****-1'])]) -> dict[str, Any]:
     req = {
         "instance_id": instance_id,
         "failover_priority": failover_priority,
@@ -233,7 +233,7 @@ def describe_allow_list_detail(allow_list_id: str) -> dict[str, Any]:
 #     description="为指定的实例创建公网连接地址，即开启实例的公网访问功能。触发示例：为实例vedbm-****的连接终端vedbm-****-Custom-50yv创建公网地址"
 # )
 def create_db_endpoint_public_address(instance_id: str,
-                                      endpoint_id: Annotated[str, Field(description='连接终端ID(可调用DescribeDBEndpoint接口，获取连接终端的详细信息，包括连接终端 ID)', examples=['vedbm-2pf2xk5v****-Custom-50yv'])],
+                                      endpoint_id: Annotated[str, Field(description='连接终端ID(可调用DescribeDBEndpoint接口，获取连接终端的详细信息，包括连接终端 ID)', examples=['vedbm-****-Custom-***'])],
                                       eip_id: Annotated[str, Field(description='实例需要绑定的EIP ID(可调用DescribeEipAddresses接口查询已创建的EIP的详细信息)')]) -> dict[str, Any]:
     req = {
         "instance_id": instance_id,

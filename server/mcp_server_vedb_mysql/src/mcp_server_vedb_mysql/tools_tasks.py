@@ -2,13 +2,12 @@ import logging
 from typing import Any, Annotated, Optional
 from pydantic import Field
 from mcp_server_vedb_mysql.config import mcp as mcp_server, openapi_cli as vedbm_resource_sdk
-import volcenginesdkvedbm
 
 logger = logging.getLogger(__name__)
 
 
 @mcp_server.tool(
-    description="取消待执行的计划内事件。触发示例：取消实例vedbm-ca12cbqv下ID为uo7bx101rr291mgi的待执行事件"
+    description="取消待执行的计划内事件。触发示例：取消实例vedbm-****下ID为xxx的待执行事件"
 )
 def cancel_schedule_events(event_id: list[str],
                            instance_ids: list[str]) -> dict[str, Any]:
@@ -21,7 +20,7 @@ def cancel_schedule_events(event_id: list[str],
     return resp.to_dict()
 
 @mcp_server.tool(
-    description="查看当前账号下的计划内事件。触发示例：查看北京地域下实例vedbm-****的所有待执行事件"
+    description="查看当前账号下的计划内事件。触发示例：查看实例vedbm-****的所有待执行事件"
 )
 def describe_schedule_events(begin_time: Optional[Annotated[str,Field(description='UTC时间', examples=['2024-03-13T03:07:19Z'])]] = None,
                              end_time: str = None,
@@ -49,7 +48,7 @@ def describe_schedule_events(begin_time: Optional[Annotated[str,Field(descriptio
     return resp.to_dict()
 
 @mcp_server.tool(
-    description="修改待执行事件的执行时间。触发示例：将实例vedbm-ca12cbqv****中ID为uo7bx101rr291mgi的事件修改为在可维护时间段执行"
+    description="修改待执行事件的执行时间。触发示例：将实例vedbm-****中ID为xxx的事件修改为在可维护时间段执行"
 )
 def modify_schedule_events(event_id: list[str],
                            instance_ids: list[str],

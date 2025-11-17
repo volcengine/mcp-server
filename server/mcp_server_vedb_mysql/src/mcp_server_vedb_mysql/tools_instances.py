@@ -227,7 +227,7 @@ def restart_db_instance(instance_id: str,
     description="切换实例主节点到指定节点"
 )
 def change_master(instance_id: str,
-                  target_node: Annotated[str, Field(examples=['vedbm-gzwdsf9b-0'])]) -> str:
+                  target_node: Annotated[str, Field(examples=['vedbm-****-1'])]) -> str:
     req = {
         "cluster_name": instance_id,
         "target_node": target_node,
