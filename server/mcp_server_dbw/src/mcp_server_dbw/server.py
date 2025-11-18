@@ -774,6 +774,57 @@ def describe_tickets(
     # return resp.to_dict()
 
 
+@mcp_server.tool(
+    name="describe_ticket_detail",
+    description="查询数据库实例的单个工单详情",
+)
+def describe_ticket_detail(
+        ticket_id: str = Field(default="", description="工单号")
+) -> dict[str, Any]:
+    """
+    查询数据库实例的单个工单详情
+
+    Args:
+        ticket_id (str): 工单号
+    Returns:
+        instance_id (str): 数据库实例ID
+        instance_type (str): 数据库实例类型
+        db_name (str): Database名称
+        ticket_id (str): 工单号
+        title (str): 工单标题
+        memo (str): 工单备注信息
+        sql_text (str): 待执行的SQL文本
+        ticket_execute_type (str): 工单执行类型（Auto表示审批完成自动执行；Manual表示手动执行；Cron表示定时执行）
+        ticket_status (str): 工单状态（TicketUndo：未开始；TicketPreCheck：预检查中；TicketPreCheckError：预检查失败；
+                                     TicketExamine：审批中；TicketCancel：已取消；TicketReject：已拒绝；TicketWaitExecute：等待执行；
+                                     TicketExecute：执行中；TicketFinished：执行成功；TicketError：执行失败）
+        ticket_type (str): 工单类型（NormalSqlChange：普通SQL变更工单；FreeLockStructChange：无锁结构变更工单；
+                                   FreeLockSqlChange：无锁数据变更工单；DataMigrationImport：数据导入工单；
+                                   DataMigrationExportDB：数据导出工单；DataMigrationExportSqlResult：SQL结果集导出工单；DataClean：数据清理归档工单）
+        create_time (str): 工单创建时间
+        update_time (str): 工单更新时间
+        create_user (dict): 工单创建人信息
+        current_user (dict): 当前处理人信息
+        current_user_role (str): 当前处理人角色
+        exec_start_time (int): 执行开始时间，使用秒时间戳格式（当ticket_execute_type设置为Cron时，需要指定执行开始时间）
+        exec_end_time (int): 执行结束时间，使用秒时间戳格式（当ticket_execute_type设置为Cron时，需要指定执行结束时间，且需要晚于执行开始时间）
+    """
+    if REMOTE_MCP_SERVER:
+        dbw_client = get_dbw_client(mcp_server.get_context())
+    else:
+        dbw_client = DBW_CLIENT
+
+    if not ticket_id:
+        raise ValueError("ticket_id is required")
+
+    req = {
+        "ticket_id": ticket_id,
+    }
+
+    # resp = dbw_client.
+    # return resp.to_dict()
+
+
 def get_dbw_client(ctx: Context[ServerSession, object, any]) -> DBWClient:
     auth = None
     raw_request: Request = ctx.request_context.request
