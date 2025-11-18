@@ -4,7 +4,7 @@
 |:--: |:-----------------------:|
 | 描述 | 基于 Model Context Protocol（MCP）的服务器，使大语言模型（LLM）能够通过自然语言直接创建和管理超过 数百个火山引擎（Volcengine）资源，底层基于 Volcengine Cloud Control API 与 IaC Generator，实现符合基础设施即代码（Infrastructure as Code, IaC）最佳实践的自动化资源管理。|
 | 分类 | 工具类 |
-| 标签 | 资源管理、云控API |
+| 标签 | 资源管理、云控制API |
 
 ## Tools
 
