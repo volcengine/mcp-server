@@ -627,6 +627,76 @@ def create_dml_sql_change_ticket(
     # return resp.to_dict()
 
 
+@mcp_server.tool(
+    name="create_ddl_sql_change_ticket",
+    description="针对数据库实例创建DDL结构变更工单",
+)
+def create_ddl_sql_change_ticket(
+        sql_text: str = Field(default="", description="待执行的DDL SQL语句（普通SQL变更可以下发多条DDL语句，多条SQL语句间用英文分号隔开。注意DDL有锁表风险，建议选择无锁结构变更逐条提交）"),
+        ticket_execute_type: str = Field(default="Auto", description="工单执行类型（Auto表示审批完成自动执行；Manual表示手动执行；Cron表示定时执行）"),
+        instance_id: Optional[str] = Field(default=None, description="火山引擎数据库实例ID"),
+        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL、VeDBMySQL和Postgres，并严格要求大小写一致）"),
+        database: Optional[str] = Field(default=None, description="Database名称"),
+        exec_start_time: Optional[int] = Field(default=None, description="执行开始时间，使用秒时间戳格式（当ticket_execute_type设置为Cron时，需要指定执行开始时间）"),
+        exec_end_time: Optional[int] = Field(default=None, description="执行结束时间，使用秒时间戳格式（当ticket_execute_type设置为Cron时，需要指定执行结束时间，且需要晚于执行开始时间）"),
+        title: Optional[str] = Field(default=None, description="工单标题"),
+        memo: Optional[str] = Field(default=None, description="工单备注信息，详实的备注信息有利于后期维护")
+) -> dict[str, Any]:
+    """
+    针对数据库实例创建DDL结构变更工单
+
+    Args:
+        sql_text (str): 待执行的DDL SQL语句（普通SQL变更可以下发多条DDL语句，多条SQL语句间用英文分号隔开。注意DDL有锁表风险，建议选择无锁结构变更逐条提交）
+        ticket_execute_type (str): 工单执行类型（Auto表示审批完成自动执行；Manual表示手动执行；Cron表示定时执行）
+        instance_id (str, optional): 火山引擎数据库实例ID
+        instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL、VeDBMySQL和Postgres，并严格要求大小写一致）
+        database (str, optional): Database名称
+        exec_start_time (int, optional): 执行开始时间，使用秒时间戳格式（当ticket_execute_type设置为Cron时，需要指定执行开始时间）
+        exec_end_time (int, optional): 执行结束时间，使用秒时间戳格式（当ticket_execute_type设置为Cron时，需要指定执行结束时间，且需要晚于执行开始时间）
+        title (str, optional): 工单标题
+        memo (str, optional): 工单备注信息，详实的备注信息有利于后期维护
+    Returns:
+        ticket_id (str): 工单号
+    """
+    if REMOTE_MCP_SERVER:
+        dbw_client = get_dbw_client(mcp_server.get_context())
+    else:
+        dbw_client = DBW_CLIENT
+
+    instance_id = dbw_client.instance_id or instance_id
+    if not instance_id:
+        raise ValueError("instance_id is required")
+    instance_type = dbw_client.instance_type or instance_type
+    if not instance_type:
+        raise ValueError("instance_type is required")
+    database = dbw_client.database or database
+    if not database:
+        raise ValueError("database is required")
+    if not sql_text:
+        raise ValueError("sql_text is required")
+    if not ticket_execute_type:
+        ticket_execute_type = "Auto"
+
+    req = {
+        "instance_id": instance_id,
+        "instance_type": instance_type,
+        "database_name": database,
+        "sql_text": sql_text,
+        "ticket_execute_type": ticket_execute_type,
+    }
+    if exec_start_time is not None:
+        req["exec_start_time"] = exec_start_time
+    if exec_end_time is not None:
+        req["exec_end_time"] = exec_end_time
+    if title is not None:
+        req["title"] = title
+    if memo is not None:
+        req["memo"] = memo
+
+    # resp = dbw_client.
+    # return resp.to_dict()
+
+
 def get_dbw_client(ctx: Context[ServerSession, object, any]) -> DBWClient:
     auth = None
     raw_request: Request = ctx.request_context.request
