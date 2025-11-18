@@ -13,5 +13,7 @@ api_info = {
         {},
         {},
     ),
-    "McpGetPlayInfo": ApiInfo("GET", "/", {"Action": "GetPlayInfo", "Version": "2020-08-01"}, {}, {}),
+    "McpGetVideoPlayInfo": ApiInfo("GET", "/", {"Action": "GetVideoPlayInfo", "Version": "2018-01-01"}, {}, {}),
+    "McpUpdateMediaPublishStatus": ApiInfo("POST", "/", {"Action": "UpdateMediaPublishStatus", "Version": "2020-08-01"}, {}, {}),
+
 }

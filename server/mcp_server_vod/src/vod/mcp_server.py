@@ -22,41 +22,49 @@ def create_mcp_server():
     def update_media_publish_status  (vid: str, SpaceName: str, PublishStatus: str) ->  str: 
         """Update the publish status of a media."""
         try:
-            service.update_media_publish_status({
-                "SpaceName": SpaceName,
+            service.mcp_post("McpUpdateMediaPublishStatus", {}, json.dumps({
                 "Vid": vid,
-                "PublishStatus": PublishStatus,
-            })
+                "Status": PublishStatus,
+            }))
             return "success"
         except Exception as e:
-            return "failed"
+           raise Exception("update_media_publish_status: %s" % e)
 
+    # @mcp.tool()
     def get_play_video_info  (vid: str, SpaceName: str, DataType: int = 0, OutputType: str = 'CDN') ->  str: 
         """Get the publish status of a media."""
-        reqs = service.get_media_publish_status({
-            "SpaceName": SpaceName,
+        reqs = service.mcp_get("McpGetVideoPlayInfo", {
+            "Space": SpaceName,
             "Vid": vid,
             "DataType": DataType,
             "OutputType": OutputType,
-        })
+        },json.dumps({}))
         url =  None
         if isinstance(reqs, str):
             reqs = json.loads(reqs)
             result = reqs.get("Result", {})
-            videoDetailInfo = result.get("VideoDetailInfo", {})
+            videoDetail = result.get("VideoDetail", {})
+            videoDetailInfo = videoDetail.get("VideoDetailInfo", {})
+            playInfo = videoDetailInfo.get("PlayInfo", {})
+          
+
             if videoDetailInfo.get("PublishStatus") == 'Published':
-                url = videoDetailInfo.get("MainPlayURL", None) or videoDetailInfo.get("BackupPlayUrl", None)
+                url = playInfo.get("MainPlayURL", None) or playInfo.get("BackupPlayUrl", None)
                 if url is None:
-                   url = get_video_publish_info(vid, SpaceName, DataType, 'Origin')
+                    urlDta = get_play_video_info(vid, SpaceName, DataType, 'Origin')
+                    urlTmp = json.loads(urlDta)
+                    url = urlTmp.get("PlayURL", "")
             else:
                 publishStatus = update_media_publish_status(vid, SpaceName, 'Published')
                 if publishStatus == 'success':
-                    url = get_video_publish_info(vid, SpaceName, DataType, 'Origin')
+                    urlDta = get_play_video_info(vid, SpaceName, DataType, 'Origin')
+                    urlTmp = json.loads(urlDta)
+                    url = urlTmp.get("PlayURL", "")
                 else:
-                     raise Exception("%s: update publish status failed" % vid)
+                     raise Exception("update publish status failed：", reqs, publishStatus)
         if url is None:
             raise Exception("%s: get publish url failed" % vid)
-        return url
+        return json.dumps({"PlayURL": url})
 
 
     @mcp.tool()
@@ -68,13 +76,16 @@ def create_mcp_server():
             -  ** directurl://{fileName} 格式指定资源的 FileName。示例：directurl://test.mp3**
             -  ** http(s):// 格式指定资源的 URL。示例：http://example.com/test.mp4**
          Args:
+            - type(str): **  必选字段 ** , 拼接类型。 `audio` | `video`
             - SpaceName(str):  **  必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
-            - videos(List[str]): **  必选字段 **
+            - videos(List[str]): **视频下必选字段，音频下不传递 **
                 - 待拼接的视频列表：支持 ** vid:// ** 、 ** http:// ** 格式，** directUrl:// ** 格式
                     *** 视频要求： *** 
                         - 支持处理 MP4、AVI、MKV、MOV 等常见格式的视频。 
                         - 建议总视频时长在 5 分钟以内。 
-            - transitions(List[str]): 非必选字段
+            - audios(List[str]): **音频下必选字段，视频下不传递 **
+                - 待拼接的音频列表：支持 ** vid:// ** 、 ** http:// ** 格式，** directUrl:// ** 格式
+            - transitions(List[str]): 非必选字段，，音频下不传递
                 - 转场效果 ID：例如 ["1182359"]。concat_videos 工具支持非交叠转场的效果，
                     - 可用于非交叠转场的动画
                     - 分类：交替出场，ID：1182359
@@ -106,24 +117,40 @@ def create_mcp_server():
             raise TypeError("audio_video_stitching: params['SpaceName'] must be a string")
         if not params["SpaceName"].strip():
             raise ValueError("audio_video_stitching: params['SpaceName'] cannot be empty")
-        if "videos" not in params:
-            raise ValueError("audio_video_stitching: params must contain videos")
-        if not isinstance(params["videos"], list):
-            raise TypeError("audio_video_stitching: params['videos'] must be a list")
-        if not params["videos"]:
-            raise ValueError("audio_video_stitching: params['videos'] must contain at least one video")
         
+        ParamObj = None
+        WorkflowId = "loki://154775772"
         
-        ParamObj = {
-            "space_name": params["SpaceName"],
-            "videos": params["videos"],
-            "transitions": params.get("transitions", []),
-        }
+        if params["type"] == "audio":
+            if "audios" not in params:
+                raise ValueError("audio_video_stitching: params must contain audios")
+            if not isinstance(params["audios"], list):
+                raise TypeError("audio_video_stitching: params['audios'] must be a list")
+            if not params["audios"]:
+                raise ValueError("audio_video_stitching: params['audios'] must contain at least one audio")
+            ParamObj = {
+                "space_name": params["SpaceName"],
+                "audios": params["audios"],
+            }
+            WorkflowId = "loki://158487089"
+        else:
+            if "videos" not in params:
+                raise ValueError("audio_video_stitching: params must contain videos")
+            if not isinstance(params["videos"], list):
+                raise TypeError("audio_video_stitching: params['videos'] must be a list")
+            if not params["videos"]:
+                raise ValueError("audio_video_stitching: params['videos'] must contain at least one video")
+            ParamObj = {
+                "space_name": params["SpaceName"],
+                "videos": params["videos"],
+                "transitions": params.get("transitions", []),
+            }
+            WorkflowId = "loki://154775772"
 
         audioVideoStitchingParams ={
-            "ParamObj": str(ParamObj),
+            "ParamObj": ParamObj,
             "Uploader": params["SpaceName"],
-            "WorkflowId": "loki://154775772",
+            "WorkflowId": WorkflowId,
         }
         reqs = None
         try:
@@ -147,17 +174,14 @@ def create_mcp_server():
     def audio_video_clipping(params: dict) -> str:
         """ Invoke the current tools to complete the cropping of audio and video，需要参考 Note 中的要求。
          Note:
-            -  **audio splicing does not support transitions. **
             -  ** vid 模式下需要增加  vid://  前缀， 示例：vid://123456 **
             -  ** directurl://{fileName} 格式指定资源的 FileName。示例：directurl://test.mp3**
             -  ** http(s):// 格式指定资源的 URL。示例：http://example.com/test.mp4**
          Args:
+            - type(str): **  必选字段 ** , 拼接类型。 `audio` | `video`
             - SpaceName(str):  **  必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
-            - videos(List[str]): **  必选字段 **
-                - 待拼接的视频列表：支持 ** vid:// ** 、 ** http:// ** 格式，** directUrl:// ** 格式
-                    *** 视频要求： *** 
-                        - 支持处理 MP4、AVI、MKV、MOV 等常见格式的视频。 
-                        - 建议总视频时长在 5 分钟以内。 
+            - source(str): **  必选字段 **
+                - 输入视频：支持 ** vid:// ** 、 ** http:// ** 格式，** directUrl:// ** 格式
             - end_time(int): **  必选字段 **
                 - 裁剪结束时间，默认为片源结尾。支持设置为 2 位小数，单位：秒。 设置设置为 8，则表示在 8 秒位置结束裁剪。 
             - start_time(int): **  必选字段 **
@@ -175,25 +199,27 @@ def create_mcp_server():
             raise TypeError("audio_video_stitching: params['SpaceName'] must be a string")
         if not params["SpaceName"].strip():
             raise ValueError("audio_video_stitching: params['SpaceName'] cannot be empty")
-        if "videos" not in params:
+        if "source" not in params:
             raise ValueError("audio_video_stitching: params must contain videos")
-        if not isinstance(params["videos"], list):
-            raise TypeError("audio_video_stitching: params['videos'] must be a list")
-        if not params["videos"]:
-            raise ValueError("audio_video_stitching: params['videos'] must contain at least one video")
+      
         
         
         ParamObj = {
             "space_name": params["SpaceName"],
-            "videos": params["videos"],
-            "transitions": params.get("transitions", []),
+            "source": params["source"],
+            "end_time": params["end_time"],
+            "start_time": params["start_time"],
         }
 
         audioVideoStitchingParams ={
-            "ParamObj": str(ParamObj),
+            "ParamObj": ParamObj,
             "Uploader": params["SpaceName"],
             "WorkflowId": "loki://154419276",
         }
+        if params["type"] == "audio":
+            audioVideoStitchingParams["WorkflowId"] = "loki://158666752"
+        else:
+            audioVideoStitchingParams["WorkflowId"] = "loki://154419276"
         reqs = None
         try:
             reqs = service.mcp_post("VodMcpAsyncVCreativeTask", {}, json.dumps(audioVideoStitchingParams))
@@ -251,22 +277,38 @@ def create_mcp_server():
             reqs = json.loads(reqs)
             reqsTmp = reqs.get('Result', {})
             # BaseResp = reqsTmp.get("BaseResp", {})
-            url = reqsTmp.get("url", "")
+            url = None
             # 任务状态
             taskStatus = reqsTmp.get("Status", "")
-            if taskStatus is "success":
+            if taskStatus == "success":
                 outputJson = reqsTmp.get("OutputJson", {})
-                vid = outputJson.get("vid")
+                # 确保outputJson是字典类型
+                tempOutputJson = {}
+                if isinstance(outputJson, str):
+                    try:
+                        tempOutputJson = json.loads(outputJson)
+                    except json.JSONDecodeError:
+                        tempOutputJson = {}
+                elif isinstance(outputJson, dict):
+                    tempOutputJson = outputJson
+                vid = tempOutputJson.get("vid")
+
                 if vid is None:
                     raise Exception("get_v_creative_task_result: vid is None")
                 else:
-                   url = get_play_video_info(vid, params["SpaceName"])
+                    urlDta = get_play_video_info(vid, params["SpaceName"])
+                 
+                    if isinstance(urlDta, str):
+                        urlTmp = json.loads(urlDta)
+                        url = urlTmp.get("PlayURL", "")
+                    else:
+                        url = None
                 return json.dumps({
-                    outputJson: {
+                    "OutputJson": {
                         "vid": vid,
-                        "resolution": outputJson.get("resolution"),
-                        "duration": outputJson.get("duration"),
-                        "filename": outputJson.get("filename"),
+                        "resolution": tempOutputJson.get("resolution"),
+                        "duration": tempOutputJson.get("duration"),
+                        "filename": tempOutputJson.get("filename"),
                         "url": url,
                     },
                     "Status": taskStatus,
