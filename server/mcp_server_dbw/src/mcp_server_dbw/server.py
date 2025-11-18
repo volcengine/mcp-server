@@ -863,6 +863,38 @@ def describe_workflow(
     # return resp.to_dict()
 
 
+@mcp_server.tool(
+    name="manual_execute_ticket",
+    description="手动执行工单",
+)
+def manual_execute_ticket(
+        ticket_id: str = Field(default="", description="工单号")
+) -> dict[str, Any]:
+    """
+    手动执行工单
+
+    Args:
+        ticket_id (str): 工单号
+    Returns:
+        Code (str): 接口响应码
+        ErrMsg (str): 接口错误信息
+    """
+    if REMOTE_MCP_SERVER:
+        dbw_client = get_dbw_client(mcp_server.get_context())
+    else:
+        dbw_client = DBW_CLIENT
+
+    if not ticket_id:
+        raise ValueError("ticket_id is required")
+
+    req = {
+        "ticket_id": ticket_id,
+    }
+
+    # resp = dbw_client.
+    # return resp.to_dict()
+
+
 def get_dbw_client(ctx: Context[ServerSession, object, any]) -> DBWClient:
     auth = None
     raw_request: Request = ctx.request_context.request
