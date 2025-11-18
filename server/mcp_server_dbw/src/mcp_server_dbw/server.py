@@ -70,12 +70,14 @@ def nl2sql(
     database = dbw_client.database or database
     if not database:
         raise ValueError("database is required")
+    if not query:
+        raise ValueError("query is required")
 
     req = {
-        "query": query,
         "instance_id": instance_id,
         "instance_type": instance_type,
         "database": database,
+        "query": query,
     }
     if tables is not None:
         req["tables"] = tables
@@ -127,12 +129,14 @@ def execute_sql(
     database = dbw_client.database or database
     if not database:
         raise ValueError("database is required")
+    if not commands:
+        raise ValueError("commands is required")
 
     req = {
-        "commands": commands,
         "instance_id": instance_id,
         "instance_type": instance_type,
         "database": database,
+        "commands": commands,
         "time_out_seconds": 10
     }
 
@@ -299,6 +303,8 @@ def get_table_info(
     database = dbw_client.database or database
     if not database:
         raise ValueError("database is required")
+    if not table:
+        raise ValueError("table is required")
 
     req = {
         "instance_id": instance_id,
@@ -382,6 +388,8 @@ def describe_slow_logs(
         "region_id": dbw_client.region,
         "instance_id": instance_id,
         "instance_type": instance_type,
+        "start_time": start_time,
+        "end_time": end_time,
         "page_number": page_number,
         "page_size": page_size,
         "sort_by": sort_by,
@@ -692,6 +700,75 @@ def create_ddl_sql_change_ticket(
         req["title"] = title
     if memo is not None:
         req["memo"] = memo
+
+    # resp = dbw_client.
+    # return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_tickets",
+    description="批量查询数据库实例的工单",
+)
+def describe_tickets(
+        list_type: str = Field(default="", description="批量查询的工单类型（All表示全部；CreatedByMe表示我创建的；ApprovedByMe表示我审批的）"),
+        order_by: Optional[str] = Field(default=None, description="返回结果的排序字段"),
+        sort_by: Optional[str] = Field(default="ASC", description="按照降序或升序方式排列（ASC表示升序；DESC表示降序）"),
+        page_number: Optional[int] = Field(default=1, description="分页查询时的页码（默认为1，即从第一页数据开始返回）"),
+        page_size: Optional[int] = Field(default=100, description="分页大小（默认为100）")
+) -> dict[str, Any]:
+    """
+    批量查询数据库实例的工单
+
+    Args:
+        list_type (str): 批量查询的工单类型（All表示全部；CreatedByMe表示我创建的；ApprovedByMe表示我审批的）
+        order_by (str): 返回结果的排序字段
+        sort_by (str): 按照降序或升序方式排列（ASC表示升序；DESC表示降序）
+        page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
+        page_size (int, optional): 分页大小（默认为100）
+    Returns:
+        total (int): 数据库实例的工单总数
+        tickets (list): 数据库实例的工单列表，列表中的每个值对应一个工单记录，结构如下：
+            - instance_id (str): 数据库实例ID
+            - instance_type (str): 数据库实例类型
+            - db_name (str): Database名称
+            - ticket_id (str): 工单号
+            - title (str): 工单标题
+            - memo (str): 工单备注信息
+            - ticket_execute_type (str): 工单执行类型（Auto表示审批完成自动执行；Manual表示手动执行；Cron表示定时执行）
+            - ticket_status (str): 工单状态（TicketUndo：未开始；TicketPreCheck：预检查中；TicketPreCheckError：预检查失败；
+                                          TicketExamine：审批中；TicketCancel：已取消；TicketReject：已拒绝；TicketWaitExecute：等待执行；
+                                          TicketExecute：执行中；TicketFinished：执行成功；TicketError：执行失败）
+            - ticket_type (str): 工单类型（NormalSqlChange：普通SQL变更工单；FreeLockStructChange：无锁结构变更工单；
+                                         FreeLockSqlChange：无锁数据变更工单；DataMigrationImport：数据导入工单；
+                                         DataMigrationExportDB：数据导出工单；DataMigrationExportSqlResult：SQL结果集导出工单；DataClean：数据清理归档工单）
+            - create_time (str): 工单创建时间
+            - update_time (str): 工单更新时间
+            - create_user (dict): 工单创建人信息
+            - current_user (dict): 当前处理人信息
+            - current_user_role (str): 当前处理人角色
+    """
+    if REMOTE_MCP_SERVER:
+        dbw_client = get_dbw_client(mcp_server.get_context())
+    else:
+        dbw_client = DBW_CLIENT
+
+    if not list_type:
+        raise ValueError("list_type is required")
+    if not sort_by:
+        sort_by = "ASC"
+    if not page_number:
+        page_number = 1
+    if not page_size:
+        page_size = 100
+
+    req = {
+        "list_type": list_type,
+        "sort_by": sort_by,
+        "page_number": page_number,
+        "page_size": page_size,
+    }
+    if order_by is not None:
+        req["order_by"] = order_by
 
     # resp = dbw_client.
     # return resp.to_dict()
