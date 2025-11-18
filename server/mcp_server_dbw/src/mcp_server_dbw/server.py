@@ -717,7 +717,7 @@ def describe_tickets(
         page_size: Optional[int] = Field(default=100, description="分页大小（默认为100）")
 ) -> dict[str, Any]:
     """
-    批量查询数据库实例的工单
+    批量查询数据库实例的工单详情
 
     Args:
         list_type (str): 批量查询的工单类型（All表示全部；CreatedByMe表示我创建的；ApprovedByMe表示我审批的）
@@ -808,6 +808,44 @@ def describe_ticket_detail(
         current_user_role (str): 当前处理人角色
         exec_start_time (int): 执行开始时间，使用秒时间戳格式（当ticket_execute_type设置为Cron时，需要指定执行开始时间）
         exec_end_time (int): 执行结束时间，使用秒时间戳格式（当ticket_execute_type设置为Cron时，需要指定执行结束时间，且需要晚于执行开始时间）
+    """
+    if REMOTE_MCP_SERVER:
+        dbw_client = get_dbw_client(mcp_server.get_context())
+    else:
+        dbw_client = DBW_CLIENT
+
+    if not ticket_id:
+        raise ValueError("ticket_id is required")
+
+    req = {
+        "ticket_id": ticket_id,
+    }
+
+    # resp = dbw_client.
+    # return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_workflow",
+    description="查询数据库实例的审批工单详情",
+)
+def describe_workflow(
+        ticket_id: str = Field(default="", description="工单号")
+) -> dict[str, Any]:
+    """
+    查询数据库实例的审批工单详情
+
+    Args:
+        ticket_id (str): 工单号
+    Returns:
+        Code (str): 接口响应码
+        ErrMsg (str): 接口错误信息
+        FlowNodes (list): 审批工单节点详情列表，列表中的每个值对应一个审批节点详情，结构如下：
+            - node_name (str): 审批节点名称
+            - operator (str): 当前处理人名称（如果当前处理人有多个，每个人之间由英文逗号分隔）
+            - operator_id (str): 当前处理人 ID（如果当前处理人有多个，每个人之间由英文逗号分隔）
+            - status (str): 审批状态（Undo：未开始；Approval：审批中；Pass：审批通过；Reject：审批拒绝；Cancel：审批撤销）
+            - step (int): 审批节点顺序
     """
     if REMOTE_MCP_SERVER:
         dbw_client = get_dbw_client(mcp_server.get_context())
