@@ -68,7 +68,7 @@ def create_mcp_server():
 
 
     @mcp.tool()
-    def audio_video_stitching(params: dict) -> str:
+    def audio_video_stitching(type: str, SpaceName: str, videos: list = None, audios: list = None, transitions: list = None) -> dict:
         """ Carry out video stitching, audio stitching, and support for transitions and other capabilities，需要参考 Note 中的要求。
          Note:
             -  **audio splicing does not support transitions. **
@@ -111,6 +111,7 @@ def create_mcp_server():
         
         """
         try:
+            params = {"type": type, "SpaceName": SpaceName, "videos": videos, "audios": audios, "transitions": transitions}
             if "SpaceName" not in params:
                 raise ValueError("audio_video_stitching: params must contain SpaceName")
             if not isinstance(params["SpaceName"], str):
@@ -120,7 +121,8 @@ def create_mcp_server():
             
             ParamObj = None
             WorkflowId = "loki://154775772"
-            if params["type"] == "audio":
+            ParamType = params.get("type", "video")
+            if ParamType == "audio":
                 if "audios" not in params:
                     raise ValueError("audio_video_stitching: params must contain audios")
                 if not isinstance(params["audios"], list):
@@ -129,7 +131,7 @@ def create_mcp_server():
                     raise ValueError("audio_video_stitching: params['audios'] must contain at least one audio")
                 ParamObj = {
                     "space_name": params["SpaceName"],
-                    "audios": params["audios"],
+                    "audios": params.get("audios", []),
                 }
                 WorkflowId = "loki://158487089"
             else:
@@ -141,7 +143,7 @@ def create_mcp_server():
                     raise Exception("audio_video_stitching: params['videos'] must contain at least one video", params)
                 ParamObj = {
                     "space_name": params["SpaceName"],
-                    "videos": params["videos"],
+                    "videos": params.get("videos", []),
                     "transitions": params.get("transitions", []),
                 }
                 WorkflowId = "loki://154775772"
@@ -172,7 +174,7 @@ def create_mcp_server():
             raise Exception("audio_video_stitching: %s" % e, params)
 
     @mcp.tool()
-    def audio_video_clipping(params: dict) -> str:
+    def audio_video_clipping(type: str, SpaceName: str, source: str, start_time: int, end_time: int) -> dict:
         """ Invoke the current tools to complete the cropping of audio and video，需要参考 Note 中的要求。
          Note:
             -  ** vid 模式下需要增加  vid://  前缀， 示例：vid://123456 **
@@ -196,21 +198,23 @@ def create_mcp_server():
         
         """
         try:
+            params = {"type": type, "SpaceName": SpaceName, "source": source, "start_time": start_time, "end_time": end_time}
             if "SpaceName" not in params:
                 raise Exception("audio_video_clipping: params must contain SpaceName", params)
             if not isinstance(params["SpaceName"], str):
-                raise Exception("audio_video_clipping: params['SpaceName'] must be a string", params)
+                raise Exception("audio_video_clipping: params['SpaceName'] must be a string")
             if not params["SpaceName"].strip():
-                raise Exception("audio_video_clipping: params['SpaceName'] cannot be empty", params)
+                raise Exception("audio_video_clipping: params['SpaceName'] cannot be empty")
             if "source" not in params:
-                raise Exception("audio_video_clipping: params must contain source", params)
+                raise Exception("audio_video_clipping: params must contain source")
     
-        
+            startTime = params.get("start_time", 0)
+            endTime = params.get("end_time", startTime + 1)
             ParamObj = {
                 "space_name": params["SpaceName"],
-                "source": params["source"],
-                "end_time": params["end_time"],
-                "start_time": params["start_time"],
+                "source": params.get("source", ""),
+                "end_time": endTime,
+                "start_time": startTime,
             }
 
             audioVideoStitchingParams ={
@@ -218,7 +222,9 @@ def create_mcp_server():
                 "Uploader": params["SpaceName"],
                 "WorkflowId": "loki://154419276",
             }
-            if params["type"] == "audio":
+            
+            ParamType = params.get("type", "video")
+            if ParamType == "audio":
                 audioVideoStitchingParams["WorkflowId"] = "loki://158666752"
             else:
                 audioVideoStitchingParams["WorkflowId"] = "loki://154419276"
@@ -238,12 +244,12 @@ def create_mcp_server():
                 else:
                     return reqs
             except Exception as e:
-                raise Exception("audio_video_clipping: %s" % e, params)
+                raise Exception("audio_video_clipping: %s" % e)
         except Exception as e:
-            raise Exception("audio_video_clipping: %s" % e, params)
+            raise Exception("audio_video_clipping: %s" % e)
     
     @mcp.tool()
-    def get_v_creative_task_result(params: dict) -> str:
+    def get_v_creative_task_result(VCreativeId: str, SpaceName: str) -> dict:
         """ Query the execution status and results of video stitching, audio stitching, and audio-video cropping by using the  `VCreativeId`.
         Note:   
             -  **audio splicing does not support transitions. **
@@ -262,6 +268,7 @@ def create_mcp_server():
                 - url:  产物链接，仅当任务成功时返回
                 - duration： 时长， 单位：秒(s)
         """
+        params={"VCreativeId": VCreativeId, "SpaceName": SpaceName}
         if "VCreativeId" not in params:
             raise ValueError("get_v_creative_task_result: params must contain VCreativeId")
         if not isinstance(params["VCreativeId"], str):
