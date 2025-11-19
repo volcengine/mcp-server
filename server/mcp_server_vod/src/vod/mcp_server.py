@@ -91,7 +91,6 @@ def create_mcp_server():
                     - 分类：交替出场，ID：1182359
                     - 分类：旋转放大，ID：1182360
                     - 分类：泛开，ID：1182358
-                    - 分类：风车，ID：1182362
                     - 分类：六角形，ID：1182365
                     - 分类：故障转换，ID：1182367
                     - 分类：飞眼，ID：1182368
@@ -111,64 +110,66 @@ def create_mcp_server():
             - StatusCode(int):  接口请求的状态码。0表示成功，其他值表示不同的错误状态。
         
         """
-        if "SpaceName" not in params:
-            raise ValueError("audio_video_stitching: params must contain SpaceName")
-        if not isinstance(params["SpaceName"], str):
-            raise TypeError("audio_video_stitching: params['SpaceName'] must be a string")
-        if not params["SpaceName"].strip():
-            raise ValueError("audio_video_stitching: params['SpaceName'] cannot be empty")
-        
-        ParamObj = None
-        WorkflowId = "loki://154775772"
-        
-        if params["type"] == "audio":
-            if "audios" not in params:
-                raise ValueError("audio_video_stitching: params must contain audios")
-            if not isinstance(params["audios"], list):
-                raise TypeError("audio_video_stitching: params['audios'] must be a list")
-            if not params["audios"]:
-                raise ValueError("audio_video_stitching: params['audios'] must contain at least one audio")
-            ParamObj = {
-                "space_name": params["SpaceName"],
-                "audios": params["audios"],
-            }
-            WorkflowId = "loki://158487089"
-        else:
-            if "videos" not in params:
-                raise ValueError("audio_video_stitching: params must contain videos")
-            if not isinstance(params["videos"], list):
-                raise TypeError("audio_video_stitching: params['videos'] must be a list")
-            if not params["videos"]:
-                raise ValueError("audio_video_stitching: params['videos'] must contain at least one video")
-            ParamObj = {
-                "space_name": params["SpaceName"],
-                "videos": params["videos"],
-                "transitions": params.get("transitions", []),
-            }
-            WorkflowId = "loki://154775772"
-
-        audioVideoStitchingParams ={
-            "ParamObj": ParamObj,
-            "Uploader": params["SpaceName"],
-            "WorkflowId": WorkflowId,
-        }
-        reqs = None
         try:
-            reqs = service.mcp_post("VodMcpAsyncVCreativeTask", {}, json.dumps(audioVideoStitchingParams))
-            if isinstance(reqs, str):
-                reqs = json.loads(reqs)
-                reqsTmp = reqs.get('Result', {})
-                BaseResp = reqsTmp.get("BaseResp", {})
-                return json.dumps({
-                    "VCreativeId": reqsTmp.get("VCreativeId", ""),
-                    "Code": reqsTmp.get("Code"),
-                    "StatusMessage":BaseResp.get("StatusMessage", ""),
-                    "StatusCode": BaseResp.get("StatusCode", 0),
-                })
+            if "SpaceName" not in params:
+                raise ValueError("audio_video_stitching: params must contain SpaceName")
+            if not isinstance(params["SpaceName"], str):
+                raise TypeError("audio_video_stitching: params['SpaceName'] must be a string")
+            if not params["SpaceName"].strip():
+                raise ValueError("audio_video_stitching: params['SpaceName'] cannot be empty")
+            
+            ParamObj = None
+            WorkflowId = "loki://154775772"
+            if params["type"] == "audio":
+                if "audios" not in params:
+                    raise ValueError("audio_video_stitching: params must contain audios")
+                if not isinstance(params["audios"], list):
+                    raise TypeError("audio_video_stitching: params['audios'] must be a list")
+                if not params["audios"]:
+                    raise ValueError("audio_video_stitching: params['audios'] must contain at least one audio")
+                ParamObj = {
+                    "space_name": params["SpaceName"],
+                    "audios": params["audios"],
+                }
+                WorkflowId = "loki://158487089"
             else:
-                return reqs
+                if "videos" not in params:
+                    raise Exception("audio_video_stitching: params must contain videos", params)
+                if not isinstance(params["videos"], list):
+                    raise Exception("audio_video_stitching: params['videos'] must be a list", params)
+                if not params["videos"]:
+                    raise Exception("audio_video_stitching: params['videos'] must contain at least one video", params)
+                ParamObj = {
+                    "space_name": params["SpaceName"],
+                    "videos": params["videos"],
+                    "transitions": params.get("transitions", []),
+                }
+                WorkflowId = "loki://154775772"
+
+            audioVideoStitchingParams ={
+                "ParamObj": ParamObj,
+                "Uploader": params["SpaceName"],
+                "WorkflowId": WorkflowId,
+            }
+            reqs = None
+            try:
+                reqs = service.mcp_post("VodMcpAsyncVCreativeTask", {}, json.dumps(audioVideoStitchingParams))
+                if isinstance(reqs, str):
+                    reqs = json.loads(reqs)
+                    reqsTmp = reqs.get('Result', {})
+                    BaseResp = reqsTmp.get("BaseResp", {})
+                    return json.dumps({
+                        "VCreativeId": reqsTmp.get("VCreativeId", ""),
+                        "Code": reqsTmp.get("Code"),
+                        "StatusMessage":BaseResp.get("StatusMessage", ""),
+                        "StatusCode": BaseResp.get("StatusCode", 0),
+                    })
+                else:
+                    return reqs
+            except Exception as e:
+                raise Exception("audio_video_stitching: %s" % e, params)
         except Exception as e:
-            raise Exception("audio_video_stitching: %s" % e)
+            raise Exception("audio_video_stitching: %s" % e, params)
 
     @mcp.tool()
     def audio_video_clipping(params: dict) -> str:
@@ -177,6 +178,7 @@ def create_mcp_server():
             -  ** vid 模式下需要增加  vid://  前缀， 示例：vid://123456 **
             -  ** directurl://{fileName} 格式指定资源的 FileName。示例：directurl://test.mp3**
             -  ** http(s):// 格式指定资源的 URL。示例：http://example.com/test.mp4**
+            -  `start_time` 和 `end_time` 必须同时指定，且 `end_time` 必须大于 `start_time`
          Args:
             - type(str): **  必选字段 ** , 拼接类型。 `audio` | `video`
             - SpaceName(str):  **  必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
@@ -193,50 +195,52 @@ def create_mcp_server():
             - StatusCode(int):  接口请求的状态码。0表示成功，其他值表示不同的错误状态。
         
         """
-        if "SpaceName" not in params:
-            raise ValueError("audio_video_stitching: params must contain SpaceName")
-        if not isinstance(params["SpaceName"], str):
-            raise TypeError("audio_video_stitching: params['SpaceName'] must be a string")
-        if not params["SpaceName"].strip():
-            raise ValueError("audio_video_stitching: params['SpaceName'] cannot be empty")
-        if "source" not in params:
-            raise ValueError("audio_video_stitching: params must contain videos")
-      
-        
-        
-        ParamObj = {
-            "space_name": params["SpaceName"],
-            "source": params["source"],
-            "end_time": params["end_time"],
-            "start_time": params["start_time"],
-        }
-
-        audioVideoStitchingParams ={
-            "ParamObj": ParamObj,
-            "Uploader": params["SpaceName"],
-            "WorkflowId": "loki://154419276",
-        }
-        if params["type"] == "audio":
-            audioVideoStitchingParams["WorkflowId"] = "loki://158666752"
-        else:
-            audioVideoStitchingParams["WorkflowId"] = "loki://154419276"
-        reqs = None
         try:
-            reqs = service.mcp_post("VodMcpAsyncVCreativeTask", {}, json.dumps(audioVideoStitchingParams))
-            if isinstance(reqs, str):
-                reqs = json.loads(reqs)
-                reqsTmp = reqs.get('Result', {})
-                BaseResp = reqsTmp.get("BaseResp", {})
-                return json.dumps({
-                    "VCreativeId": reqsTmp.get("VCreativeId", ""),
-                    "Code": reqsTmp.get("Code"),
-                    "StatusMessage":BaseResp.get("StatusMessage", ""),
-                    "StatusCode": BaseResp.get("StatusCode", 0),
-                })
+            if "SpaceName" not in params:
+                raise Exception("audio_video_clipping: params must contain SpaceName", params)
+            if not isinstance(params["SpaceName"], str):
+                raise Exception("audio_video_clipping: params['SpaceName'] must be a string", params)
+            if not params["SpaceName"].strip():
+                raise Exception("audio_video_clipping: params['SpaceName'] cannot be empty", params)
+            if "source" not in params:
+                raise Exception("audio_video_clipping: params must contain source", params)
+    
+        
+            ParamObj = {
+                "space_name": params["SpaceName"],
+                "source": params["source"],
+                "end_time": params["end_time"],
+                "start_time": params["start_time"],
+            }
+
+            audioVideoStitchingParams ={
+                "ParamObj": ParamObj,
+                "Uploader": params["SpaceName"],
+                "WorkflowId": "loki://154419276",
+            }
+            if params["type"] == "audio":
+                audioVideoStitchingParams["WorkflowId"] = "loki://158666752"
             else:
-                return reqs
+                audioVideoStitchingParams["WorkflowId"] = "loki://154419276"
+            reqs = None
+            try:
+                reqs = service.mcp_post("VodMcpAsyncVCreativeTask", {}, json.dumps(audioVideoStitchingParams))
+                if isinstance(reqs, str):
+                    reqs = json.loads(reqs)
+                    reqsTmp = reqs.get('Result', {})
+                    BaseResp = reqsTmp.get("BaseResp", {})
+                    return json.dumps({
+                        "VCreativeId": reqsTmp.get("VCreativeId", ""),
+                        "Code": reqsTmp.get("Code"),
+                        "StatusMessage":BaseResp.get("StatusMessage", ""),
+                        "StatusCode": BaseResp.get("StatusCode", 0),
+                    })
+                else:
+                    return reqs
+            except Exception as e:
+                raise Exception("audio_video_clipping: %s" % e, params)
         except Exception as e:
-            raise Exception("audio_video_stitching: %s" % e)
+            raise Exception("audio_video_clipping: %s" % e, params)
     
     @mcp.tool()
     def get_v_creative_task_result(params: dict) -> str:
