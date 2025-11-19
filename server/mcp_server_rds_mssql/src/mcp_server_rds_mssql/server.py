@@ -779,7 +779,7 @@ def describe_db_instance_specs(db_engine_version: Optional[Annotated[str,Field(d
             示例值：cn-beijing-a
 
     Returns: 包含以下字段的字典
-        instance_spec_info (list[dict[str, Any]], optional): 规格列表。
+        instance_specs_info (list[dict[str, Any]], optional): 规格列表。
     """
     req = {
         "db_engine_version": db_engine_version,
