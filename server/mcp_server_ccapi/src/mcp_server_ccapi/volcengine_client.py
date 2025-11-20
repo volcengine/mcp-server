@@ -88,7 +88,11 @@ def get_volcengine_client(
     config.region = region
     if session_token:
         config.session_token = session_token
-    return UniversalApi(ApiClient(config))
+    api_client = ApiClient(config)
+    from mcp_server_ccapi import __version__
+
+    api_client.user_agent = 'mcp-server-ccapi/' + __version__
+    return UniversalApi(api_client)
 
 
 # 使用示例

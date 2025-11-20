@@ -2,7 +2,7 @@ import fnmatch
 import io
 from pdb import run
 from socket import timeout
-from typing import Required, Union, Optional, List
+from typing import Union, Optional, List
 import datetime
 import volcenginesdkcore
 import volcenginesdkvefaas
@@ -88,7 +88,7 @@ Error Handle Tips:
  - If there is **any authentication** error about vefaas application(create/release/get), let user apply auth by link: https://console.volcengine.com/iam/service/attach_custom_role?ServiceName=vefaas&policy1_1=APIGFullAccess&policy1_2=VeFaaSFullAccess&role1=ServerlessApplicationRole, then retry.
 
 """)
-def create_vefaas_application(function_id: Required[str], function_name: Required[str], gateway_name: Required[str], region: Optional[str] = None):
+def create_vefaas_application(function_id: str, function_name: str, gateway_name: str, region: Optional[str] = None):
     now = datetime.datetime.utcnow()
     try:
         ak, sk, token = get_authorization_credentials(mcp.get_context())
@@ -160,7 +160,7 @@ Note:
         - 2. Call tool `release_function` and `poll_function_release_status` to check if the streamlit application is redeployed successfully.
 
 """)
-def poll_vefaas_application_status(application_id: Required[str], region: Optional[str] = None):
+def poll_vefaas_application_status(application_id: str, region: Optional[str] = None):
     region = validate_and_set_region(region)
     now = datetime.datetime.utcnow()
     try:
