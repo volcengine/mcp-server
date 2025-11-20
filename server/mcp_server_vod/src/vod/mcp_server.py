@@ -174,7 +174,7 @@ def create_mcp_server():
             raise Exception("audio_video_stitching: %s" % e, params)
 
     @mcp.tool()
-    def audio_video_clipping(type: str, SpaceName: str, source: str, start_time: int, end_time: int) -> dict:
+    def audio_video_clipping(type: str, SpaceName: str, source: str, start_time: float, end_time: float) -> dict:
         """ Invoke the current tools to complete the cropping of audio and video，需要参考 Note 中的要求。
          Note:
             -  ** vid 模式下需要增加  vid://  前缀， 示例：vid://123456 **
@@ -186,9 +186,9 @@ def create_mcp_server():
             - SpaceName(str):  **  必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
             - source(str): **  必选字段 **
                 - 输入视频：支持 ** vid:// ** 、 ** http:// ** 格式，** directUrl:// ** 格式
-            - end_time(int): **  必选字段 **
+            - end_time(float): **  必选字段 **
                 - 裁剪结束时间，默认为片源结尾。支持设置为 2 位小数，单位：秒。 设置设置为 8，则表示在 8 秒位置结束裁剪。 
-            - start_time(int): **  必选字段 **
+            - start_time(float): **  必选字段 **
                 - 裁剪开始时间，默认为 0， 表示从头开始裁剪。支持设置为 2 位小数，单位：秒。 例如设置为 2，则表示从 2 秒的位置开始裁剪。 
         Returns：
             - VCreativeId(str)：AI 智剪任务 ID
