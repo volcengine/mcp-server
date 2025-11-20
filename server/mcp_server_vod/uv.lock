@@ -251,7 +251,7 @@ wheels = [
 ]
 
 [[package]]
-name = "mcp-vod"
+name = "mcp-server-vod"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

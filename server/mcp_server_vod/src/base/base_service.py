@@ -15,10 +15,7 @@ class BaseService(VodService):
         self.set_ak(os.getenv("VOLCENGINE_ACCESS_KEY"))
         self.set_sk(os.getenv("VOLCENGINE_SECRET_KEY"))
         self.service_info.header["x-tt-mcp"] = 'volc'
-        self.service_info.header["x-tt-env"] = 'ppe_volcengine'
-        self.service_info.header["x-use-ppe"] = '1'
-        self.service_info.header["x-volc-env"] = 'ppe_vedit_gateway'
-        print(os.getenv("VOLCENGINE_ACCESS_KEY"), os.getenv("VOLCENGINE_SECRET_KEY"))
+      
         
     @staticmethod
     def get_api_info():

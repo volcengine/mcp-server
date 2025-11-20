@@ -1,6 +1,6 @@
 
 [project]
-name = "mcp-vod"
+name = "mcp-server-vod"
 version = "0.1.0"
 description = " MCP server for vod"
 readme = "README.md"
@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.scripts]
-mcp-vod= "src.vod.server:main"
+mcp-server-vod= "src.vod.server:main"
 
 
 [build-system]
