@@ -27,6 +27,7 @@ files = [
 [package.dependencies]
 idna = ">=2.8"
 sniffio = ">=1.1"
+typing_extensions = {version = ">=4.5", markers = "python_version < \"3.13\""}
 
 [package.extras]
 trio = ["trio (>=0.31.0)"]
@@ -592,14 +593,14 @@ testing = ["coverage", "pytest", "pytest-cov", "pytest-regressions", "requests"]
 
 [[package]]
 name = "mcp"
-version = "1.21.1"
+version = "1.22.0"
 description = "Model Context Protocol SDK"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "mcp-1.21.1-py3-none-any.whl", hash = "sha256:dd35abe36d68530a8a1291daa25d50276d8731e545c0434d6e250a3700dd2a6d"},
-    {file = "mcp-1.21.1.tar.gz", hash = "sha256:540e6ac4b12b085c43f14879fde04cbdb10148a09ea9492ff82d8c7ba651a302"},
+    {file = "mcp-1.22.0-py3-none-any.whl", hash = "sha256:bed758e24df1ed6846989c909ba4e3df339a27b4f30f1b8b627862a4bade4e98"},
+    {file = "mcp-1.22.0.tar.gz", hash = "sha256:769b9ac90ed42134375b19e777a2858ca300f95f2e800982b3e2be62dfc0ba01"},
 ]
 
 [package.dependencies]
@@ -1099,6 +1100,7 @@ files = [
 [package.dependencies]
 attrs = ">=22.2.0"
 rpds-py = ">=0.7.0"
+typing-extensions = {version = ">=4.4.0", markers = "python_version < \"3.13\""}
 
 [[package]]
 name = "requests"
@@ -1365,6 +1367,7 @@ files = [
 
 [package.dependencies]
 anyio = ">=3.6.2,<5"
+typing-extensions = {version = ">=4.10.0", markers = "python_version < \"3.13\""}
 
 [package.extras]
 full = ["httpx (>=0.27.0,<0.29.0)", "itsdangerous", "jinja2", "python-multipart (>=0.0.18)", "pyyaml"]
@@ -1454,13 +1457,13 @@ standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.6.3)
 
 [[package]]
 name = "volcengine"
-version = "1.0.206"
+version = "1.0.207"
 description = "The Volcengine SDK for Python"
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "volcengine-1.0.206.tar.gz", hash = "sha256:42104f35a6a839b0a4b000f449ae9f89fc9615c30452c786b2545a0f2fec1ca1"},
+    {file = "volcengine-1.0.207.tar.gz", hash = "sha256:46e29d97470d1ec5b842924640245599472988e5db47a16eab117138dedb4260"},
 ]
 
 [package.dependencies]
@@ -1495,5 +1498,5 @@ ark = ["anyio (>=3.5.0,<5)", "cached-property ; python_version < \"3.8\"", "cryp
 
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.13"
-content-hash = "ed3c06d3d9c55ea9d57b7dec79e63e834a09518a95080deb3791afdd87723ab9"
+python-versions = ">=3.12"
+content-hash = "cf90d761b12b8d93254ffc6873fb01f478aab2b521fc0b6262c795dbafdf85bc"
