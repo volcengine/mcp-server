@@ -33,11 +33,15 @@ async def mcp_http_client():
                 for tool in tools_result.tools:
                     print(f"  - {tool.name}: {tool.description}")
 
-                # 3. 调用list_jobs工具
+                # 3. 调用工具
                 print("🔧 测试list_serverless_jobs工具...")
                 jobs_result = await session.call_tool("list_serverless_jobs", {"limit": 3})
-                jobs_data = jobs_result.content
-                print(f"  查询到 {len(jobs_data)} 个作业")
+                print(f"  查询到 {len(jobs_result.content)} 个作业")
+                ecs_clusters_result = await session.call_tool("list_emr_on_ecs_clusters", {"page_size": 3})
+                clusters_data = ecs_clusters_result.content
+                print(f"  查询到 {len(clusters_data)} 个emr on ecs集群")
+                vke_clusters_result = await session.call_tool("list_emr_on_vke_clusters", {"page_size": 3})
+                print(f"  查询到 {len(vke_clusters_result.content)} 个emr on vke集群")
 
                 print("\n✅ HTTP客户端测试完成！")
     except Exception as e:
