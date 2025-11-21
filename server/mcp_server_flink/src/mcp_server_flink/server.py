@@ -46,7 +46,7 @@ def list_flink_application(
         job_state: JobStateEnum = JobStateEnum.ALL,
         job_type: JobTypeEnum = JobTypeEnum.FLINK_JOB_TYPE_ALL,
         region: Optional[str] = "",
-) -> str:
+):
     """Tool function to get the Serverless Flink application metadata (id, name, accountId, state) list.
 
     Args:
@@ -101,7 +101,7 @@ def get_flink_application_detail(
         project_name: str,
         job_name: str,
         region: Optional[str] = "",
-) -> str:
+):
     """Tool function to retrieve detailed information about a Serverless Flink application.
 
     Args:
@@ -140,7 +140,7 @@ def get_flink_runtime_application_info(
         project_name: str,
         job_name: str,
         region: Optional[str] = "",
-) -> str:
+):
     """
     Tool function to retrieve runtime information for a Serverless Flink application.
 
@@ -192,7 +192,7 @@ def list_flink_application_log(
         cursor: str = "",
         page_size: int = 500,
         region: Optional[str] = "",
-) -> str:
+):
     """Tool function to retrieve logs for a Serverless Flink application.
 
     This function fetches log entries for a specified Flink application based on the provided
@@ -261,23 +261,23 @@ def get_flink_application_event(
         job_name: str,
         limit: int = 50,
         region: Optional[str] = "",
-) -> str:
+):
     """
     Tool function to retrieve events for a Serverless Flink application.
-    
+
     This function fetches event logs for a specified Flink application based on the provided
     project name, job name, and optional filtering parameters.
-    
+
     Args:
         project_name: Flink project name used to identify the project containing the application.
         job_name: The name of the Flink job application to retrieve events for.
         limit: Optional maximum number of events to return (default: 50).
         region: Optional region name used to filter applications by region (default: "").
-        
+
     Returns:
         str: The response containing the requested event list in JSON format.
             In case of an error, an error message will be returned as a string.
-            
+
     Examples:
         # Get events with default limit
         get_flink_application_event("project_123", "my_job")
@@ -305,13 +305,13 @@ def get_flink_application_event(
 def list_flink_project(
         search_key: Optional[str] = "",
         region: Optional[str] = "",
-) -> str:
+):
     """Tool function to query Flink project list
-    
+
     Args:
         search_key: Optional Search keyword used to filter project list (default: ""). If not provided, query the total flink project list.
         region: Optional region name used to filter applications by region (default: "").
-        
+
     Returns:
         str: List of the serverless flink projects. Each project entry is a dictionary
         containing the project name, projectId, and other metadata.
@@ -339,7 +339,7 @@ def list_flink_project(
 def list_flink_directory(
         project_name: Optional[str] = "",
         region: Optional[str] = "",
-) -> str:
+):
     """Tool function to get the Serverless Flink directory list
 
     Args:
@@ -348,7 +348,7 @@ def list_flink_directory(
         region: Optional region name used to filter applications by region (default: "").
 
     Returns:
-        str: List of serverless flink directories. Each directory entry contains 
+        str: List of serverless flink directories. Each directory entry contains
             directory information such as name, directory_id, Applications(include draft_id) and other metadata.
 
     Examples:
@@ -378,13 +378,13 @@ def list_flink_resource_pool(
         name: Optional[str] = "",
         name_key: Optional[str] = "",
         region: Optional[str] = "",
-) -> str:
+):
     """
     Tool function to list Serverless Flink resource pools.
-    
+
     This function retrieves information about resource pools associated with a specific Flink project.
     It supports filtering resource pools by a search key for the name.
-    
+
     Args:
         project_name: Flink project name used to identify the project to query.
         name: Optional resource pool name used to filter resource pools by name (default: "").
@@ -392,13 +392,13 @@ def list_flink_resource_pool(
         name_key: Optional search keyword used to filter resource pools by name (default: "").
             If not provided, all resource pools for the project will be returned.
         region: Optional region name used to filter applications by region (default: "").
-    
+
     Returns:
         str: The response containing a list of serverless Flink resource pools. Each pool entry
             contains information such as name, queue full_name, ID, region, zone, BillingType,and other metadata.
             The BillingType field indicates the billing mode: POST means pay-as-you-go billing， PRE means subscription-based billing (annual or monthly).
             In case of an error, an error message will be returned as a string.
-    
+
     Examples:
         # Get resource pools filtered by a name keyword
         list_flink_resource_pool("project_123", "compute-pool")
@@ -430,7 +430,7 @@ def create_flink_application_draft(
         job_type: JobTypeEnum = JobTypeEnum.FLINK_STREAMING_SQL,
         engine_version: EngineVersionEnum = EngineVersionEnum.FLINK_VERSION_1_17,
         region: Optional[str] = "",
-) -> str:
+):
     """Tool function to create a new Serverless Flink application draft
 
     Args:
@@ -451,9 +451,9 @@ def create_flink_application_draft(
 
         # create serverless flink application draft with specific parameters
         create_flink_application_draft(
-            "my_batch_job", 
-            "project_123", 
-            "dir_456", 
+            "my_batch_job",
+            "project_123",
+            "dir_456",
             JobTypeEnum.FLINK_BATCH_SQL,
             EngineVersionEnum.FLINK_VERSION_1_16
         )
@@ -481,22 +481,22 @@ def get_flink_application_draft(
         draft_id: str,
         project_name: str,
         region: Optional[str] = "",
-) -> str:
+):
     """
     Tool function to retrieve a Serverless Flink application draft.
-    
+
     This function fetches the details of a previously created Flink application draft
     based on the provided draft ID and project name.
-    
+
     Args:
         draft_id: The unique identifier of the application draft to retrieve.
         project_name: Flink project name used to identify the project containing the draft.
         region: Optional region name used to filter applications by region (default: "").
-        
+
     Returns:
         str: The response containing the application draft details in JSON format.
             In case of an error, an error message will be returned as a string.
-            
+
     Examples:
         # Get an application draft by draft ID and project name
         get_flink_application_draft("1986054013710225409", "project_name")
@@ -533,7 +533,7 @@ def update_flink_application_draft(
         job_type: JobTypeEnum = JobTypeEnum.FLINK_STREAMING_SQL,
         engine_version: EngineVersionEnum = EngineVersionEnum.FLINK_VERSION_1_17,
         region: Optional[str] = "",
-) -> str:
+):
     """Tool function to update an existing Serverless Flink application draft
 
     Args:
@@ -610,12 +610,12 @@ def deploy_flink_application_draft(
         schedule_policy: SchedulePolicyEnum = SchedulePolicyEnum.GANG,
         schedule_timeout: Optional[int] = 60,
         region: Optional[str] = "",
-) -> str:
+):
     """
     Tool function to deploy a Serverless Flink application draft.
 
-    This function deploys a previously created Flink application draft with specified 
-    resource allocation parameters. It handles the deployment process including 
+    This function deploys a previously created Flink application draft with specified
+    resource allocation parameters. It handles the deployment process including
     resource pool assignment, queue selection, priority setting, and scheduling policies.
 
     Args:
@@ -628,14 +628,14 @@ def deploy_flink_application_draft(
         region: Optional region name used to filter applications by region (default: "").
 
     Returns:
-        str: The response from the deployment API, containing information about the 
+        str: The response from the deployment API, containing information about the
             deployed application. In case of an error, an error message will be returned as a string.
 
     Examples:
         # Deploy an application draft with default priority and scheduling
         deploy_flink_application_draft(
-            project_id="project_123", 
-            id="draft_456", 
+            project_id="project_123",
+            id="draft_456",
             resource_pool="compute_pool"
         )
 
@@ -673,7 +673,7 @@ def offline_flink_application_to_draft(
         job_name: str,
         project_name: str,
         region: Optional[str] = "",
-) -> str:
+):
     """
     Tool function to offline a Serverless Flink application and transition it to the draft state. If the application is still running, the
     offline request will fail. If the job is already in the Stopped state, it can be Offline to the job draft state and then redeployed.
@@ -711,7 +711,7 @@ def start_flink_application(
         project_name: str,
         start_type: StartTypeEnum = StartTypeEnum.FROM_NEW,
         region: Optional[str] = "",
-) -> str:
+):
     """
     Tool function to start a Serverless Flink application.
 
@@ -753,18 +753,18 @@ def stop_flink_application(
         job_name: str,
         project_name: str,
         region: Optional[str] = "",
-) -> str:
+):
     """
     Tool function to stop a running Serverless Flink application.
-    
+
     This function stops the execution of a currently running Flink application
     identified by its job name and project name.
-    
+
     Args:
         job_name: The name of the Flink job application to stop.
         project_name: Flink project name used to identify the project containing the application.
         region: Optional region name used to filter applications by region (default: "").
-        
+
     Returns:
         str: The response from the stop API call, containing information about the operation result.
             In case of an error, an error message will be returned as a string.
@@ -793,13 +793,13 @@ def restart_flink_application(
         project_name: str,
         start_type: StartTypeEnum = StartTypeEnum.FROM_NEW,
         region: Optional[str] = "",
-) -> str:
+):
     """
     Tool function to restart a Serverless Flink application by using atomic operation.
-    
+
     This function restarts a Flink application with specified start type, allowing users to choose between starting from new state or resuming from latest checkpoint.
     It will first stop the running application (if any), and then start it again according to the selected start mode.
-    
+
     Args:
         job_name: The name of the Flink job application to restart.
         project_name: Flink project name used to identify the project containing the application.
@@ -807,11 +807,11 @@ def restart_flink_application(
             FROM_NEW: Start from a completely new state
             FROM_LATEST: Resume from the latest available checkpoint
         region: Optional region name used to filter applications by region (default: "").
-        
+
     Returns:
         str: The response from the restart API call, containing information about the operation result.
             In case of an error, an error message will be returned as a string.
-            
+
     Examples:
         # Restart a Flink application from new state
         restart_flink_application("my_job", "project_123")

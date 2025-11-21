@@ -8,6 +8,7 @@ from typing import Dict, Literal, Any, List, Tuple
 import volcenginesdkcore
 from mcp import ServerSession
 from mcp.server.fastmcp import Context
+from mcp.server.lowlevel.server import LifespanResultT
 from mcp.types import Request
 from pydantic import BaseModel
 
@@ -61,7 +62,7 @@ class RequestParams(BaseModel):
 
 
 def init_auth_openapi_context(region: str, project_name: str,
-                              ctx: Context[ServerSession, object] = None) -> OpenAPIContext:
+                              ctx: Context[ServerSession, LifespanResultT, Request] = None) -> OpenAPIContext:
     """Initialize auth config from env or request context."""
     openapi_context = OpenAPIContext(
         project_name=DEFAULT_FLINK_CONFIG.project_name,
