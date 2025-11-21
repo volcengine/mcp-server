@@ -55,6 +55,5 @@ async def main():
     """主函数"""
     await mcp_http_client()
 
-
 if __name__ == "__main__":
     asyncio.run(main())
