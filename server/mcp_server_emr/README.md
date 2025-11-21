@@ -17,3 +17,7 @@
 ## 关键文件
 - `run.sh`：启动入口（会在本地自动激活 `.venv`）
 - `zip.sh`：打包脚本（排除 `.venv/`、`site-packages/`、`.wheels/`）
+
+## 测试
+- 运行 `run.sh` 本地启动emr mcp server
+- 运行 `http_client_test.py` 测试emr mcp server

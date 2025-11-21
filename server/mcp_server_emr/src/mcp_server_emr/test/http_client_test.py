@@ -34,7 +34,7 @@ async def mcp_http_client():
                     print(f"  - {tool.name}: {tool.description}")
 
                 # 3. 调用list_jobs工具
-                print("🔧 测试list_jobs工具...")
+                print("🔧 测试list_serverless_jobs工具...")
                 jobs_result = await session.call_tool("list_serverless_jobs", {"limit": 3})
                 jobs_data = jobs_result.content
                 print(f"  查询到 {len(jobs_data)} 个作业")
