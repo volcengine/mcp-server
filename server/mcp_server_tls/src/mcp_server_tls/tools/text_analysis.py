@@ -52,7 +52,7 @@ async def text2sql(
         # Convert the session type to resolve the json.loads type issue.
         session_id = str(session_id) if session_id is not None else None
 
-        topic_id = TLS_CONFIG.topic_id or topic_id
+        topic_id = topic_id or TLS_CONFIG.topic_id
         if not topic_id:
             raise ValueError("topic id is required")
 

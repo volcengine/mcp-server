@@ -131,5 +131,5 @@ urllib3==2.3.0
     # via requests
 uvicorn==0.34.0
     # via mcp
-volcengine==1.0.175
+volcengine==1.0.205
     # via mcp-server-tls (pyproject.toml)
