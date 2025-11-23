@@ -150,7 +150,8 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 - **[汉得-精准营销](https://github.com/koudaiDemon/mcp-server-hand)**：通过分析用户对话，精准提取多维度标签，与行业数据库中的商品标签智能匹配，从而为用户精准推荐契合需求的商品，提升购物体验与转化率。  
 - **[水滴信用-企业大数据](https://github.com/shuididata/mcp-server)**：用好数据服务好企业， 企业信用信息服务商。  
 - **[飞常准-Aviation](https://github.com/variflight/variflight-mcp)**：Aviation MCP Server 提供了7个核心API接口，涵盖航班实时动态、OD对航班查询、航班中转方案、乘机舒适度（包括机上座舱设施和餐食）、飞机实时定位、机场未来天气、以及机票运价等服务。  
-- **[Brave Search](https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search)**：Web and local search using Brave's Search API.  
+- **[Brave Search](https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search)**：Web and local search using Brave's Search API.
+- **[Bright Data](https://github.com/brightdata/brightdata-mcp)**：Discover, extract, and interact with the web - one interface powering automated access across the public internet.
 - **[Fetch](https://github.com/modelcontextprotocol/servers/tree/main/src/fetch)**：Web content fetching and conversion for efficient LLM usage.  
 - **[Tavily search](https://github.com/RamXX/mcp-tavily)**：An MCP server for Tavily's search & news API, with explicit site inclusions/exclusions.  
 - **[AWS KB Retrieval](https://github.com/modelcontextprotocol/servers/tree/main/src/aws-kb-retrieval-server)**：Retrieval from AWS Knowledge Base using Bedrock Agent Runtime.  
