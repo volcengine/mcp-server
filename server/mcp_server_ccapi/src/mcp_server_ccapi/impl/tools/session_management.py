@@ -23,8 +23,9 @@ from mcp_server_ccapi.impl.tools.credential import (
     VOLCENGINE_REGION_ENV,
     VOLCENGINE_SECRET_KEY_ENV,
     VOLCENGINE_SESSION_TOKEN_ENV,
-    get_volcengine_credentials,
+    get_volcengine_credentials_base,
 )
+from mcp_server_ccapi.schema_manager import get_volcengine_credentials
 from mcp_server_ccapi.volcengine_client import (
     create_universal_info,
     get_volcengine_client,
@@ -35,9 +36,7 @@ from volcenginesdkcore.rest import ApiException
 
 async def check_environment_variables_impl(workflow_store: dict) -> dict:
     """Check if required environment variables are set correctly implementation."""
-    if not (environ.get(VOLCENGINE_ACCESS_KEY_ENV) and environ.get(VOLCENGINE_SECRET_KEY_ENV)):
-        raise ClientError('Please provide VOLCENGINE_ACCESS_KEY and VOLCENGINE_SECRET_KEY')
-
+    credential = get_volcengine_credentials_base()
     # Generate environment token
     environment_token = f'env_{str(uuid.uuid4())}'
 
@@ -48,11 +47,11 @@ async def check_environment_variables_impl(workflow_store: dict) -> dict:
             'environment_variables': {
                 'SECURITY_SCANNING': environ.get('SECURITY_SCANNING', 'disable'),
             },
-            'ak': environ.get(VOLCENGINE_ACCESS_KEY_ENV),
-            'sk': environ.get(VOLCENGINE_SECRET_KEY_ENV),
+            'ak': credential.access_key_id,
+            'sk': credential.secret_access_key,
             'region': environ.get(VOLCENGINE_REGION_ENV, 'cn-beijing'),
             'host': environ.get(VOLCENGINE_HOST_ENV, ''),
-            'session_token': environ.get(VOLCENGINE_SESSION_TOKEN_ENV, ''),
+            'session_token': credential.session_token,
             'properly_configured': True,
         },
         'parent_token': None,  # Root token
@@ -71,7 +70,6 @@ async def check_environment_variables_impl(workflow_store: dict) -> dict:
         env_data['sk'] = (
             f'{sk[:4]}{"*" * (len(sk) - 8)}{sk[-4:]}' if len(sk) > 8 else f'{"*" * len(sk)}'
         )
-
     return {
         'environment_token': environment_token,
         'message': 'Environment validation completed. Use this token with get_volcengine_session_info().',
@@ -132,9 +130,10 @@ async def get_volcengine_session_info_impl(environment_token: str, workflow_stor
 
     # Add masked environment variables if using env vars
     if session_data['volcengine_auth_type'] == 'env':
-        access_key = environ.get(VOLCENGINE_ACCESS_KEY_ENV, '')
-        secret_key = environ.get(VOLCENGINE_SECRET_KEY_ENV, '')
-        session_token = environ.get(VOLCENGINE_SESSION_TOKEN_ENV, '')
+        credential = get_volcengine_credentials_base()
+        access_key = credential.access_key_id
+        secret_key = credential.secret_access_key
+        session_token = credential.session_token
 
         session_data['masked_credentials'] = {
             VOLCENGINE_ACCESS_KEY_ENV: (
