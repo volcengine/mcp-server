@@ -1,6 +1,6 @@
-import asyncio
 import json
 import logging
+import os
 from typing import Dict, Any, Optional
 
 import aiohttp
@@ -50,14 +50,14 @@ def list_serverless_jobs(secret_key: str,
     api_url = f"https://{endpoint}"
 
     try:
-        response = request(method="POST", date=utc_now(),
-                           query={}, header={"Content-Type": "application/json"},
+        response = request(method="GET", date=utc_now(),
+                           query=request_body if request_body else {},
+                           header={"Content-Type": "application/json"},
                            ak=access_key, sk=secret_key,
-                           action="ListJob", version="2024-03-25",
+                           action="ListJobInstances", version="2024-03-25",
                            url=api_url, host=endpoint,
                            service="emr_serverless", region=region,
-                           content_type="application/json",
-                           body=request_body)
+                           content_type="application/json", )
         return response
     except aiohttp.ClientError as e:
         logging.error(f"Error requesting EMR Serverless API from {api_url} error: {str(e)}",
@@ -74,20 +74,6 @@ def list_serverless_jobs(secret_key: str,
 
 
 if __name__ == "__main__":
-    accountId = "2100075559"
-    region = "cn-beijing"
-    ak = ""
-    sk = ""
-    # Spark sql Job
-    jobId = "310931377"
-
-
-    async def main():
-        """主异步函数"""
-        # Spark sql Job
-        job_list = await list_serverless_jobs(access_key=ak, secret_key=sk, region=region)
-        print(f"Job list: {job_list}")
-
-
-    # 运行异步主函数
-    asyncio.run(main())
+    job_list = list_serverless_jobs(access_key=os.getenv("VOLCENGINE_ACCESS_KEY"), secret_key=os.getenv("VOLCENGINE_SECRET_KEY"),
+                                    region=os.getenv("VOLCENGINE_REGION"))
+    print(f"Job list: {job_list}")

@@ -80,5 +80,5 @@ def list_clusters(
 
 
 if __name__ == "__main__":
-    job_list = list_clusters(os.getenv("AK"), os.getenv("SK"), "cn-beijing")
+    job_list = list_clusters(os.getenv("VOLCENGINE_ACCESS_KEY"), os.getenv("VOLCENGINE_SECRET_KEY"), os.getenv("VOLCENGINE_REGION"),)
     print(f"Cluster list: {job_list}")

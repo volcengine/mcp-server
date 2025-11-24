@@ -79,5 +79,7 @@ def list_virtual_clusters(
 
 
 if __name__ == "__main__":
-    cluster_list = list_virtual_clusters(os.getenv("AK"), os.getenv("SK"), "cn-beijing")
+    cluster_list = list_virtual_clusters(access_key=os.getenv("VOLCENGINE_ACCESS_KEY"),
+                                         secret_key=os.getenv("VOLCENGINE_SECRET_KEY"),
+                                         region=os.getenv("VOLCENGINE_REGION"))
     print(f"Virtual cluster list: {cluster_list}")
