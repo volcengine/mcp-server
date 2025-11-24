@@ -5,7 +5,7 @@ from typing import Dict, Any, Optional
 
 import aiohttp
 
-from server.mcp_server_emr.src.mcp_server_emr.utils.sign_utils import request, utc_now
+from mcp_server_emr.utils.sign_utils import request, utc_now
 
 logger = logging.getLogger(__name__)
 

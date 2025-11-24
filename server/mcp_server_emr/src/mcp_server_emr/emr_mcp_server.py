@@ -5,9 +5,9 @@ from typing import List, Dict, Any
 
 from mcp.server.fastmcp import FastMCP
 
-from server.mcp_server_emr.src.mcp_server_emr.api.on_ecs_api import list_clusters
-from server.mcp_server_emr.src.mcp_server_emr.api.on_serverless_api import list_serverless_jobs
-from server.mcp_server_emr.src.mcp_server_emr.api.on_vke_api import list_virtual_clusters
+from mcp_server_emr.api.on_ecs_api import list_clusters
+from mcp_server_emr.api.on_serverless_api import list_serverless_jobs
+from mcp_server_emr.api.on_vke_api import list_virtual_clusters
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -23,26 +23,16 @@ mcp = FastMCP("EMR MCP Server",
 
 
 @mcp.tool()
-def list_serverless_jobs(
-        job_id: str = "",
-        job_name: str = "",
-        start_time: str = "",
-        finish_time: str = "",
-        queue: str = "",
+def list_emr_on_serverless_jobs(
         limit: int = 20,
-        offset: int = 1,
+        offset: int = 0,
 ) -> List[Dict[str, Any]]:
     """
-    获取EMR Serverless作业列表
+    获取EMR on Serverless作业列表
 
     Args:
-        job_id: 作业ID筛选
-        job_name: 作业名称筛选
-        start_time: 开始时间 "yyyy-MM-dd"
-        finish_time: 结束时间 "yyyy-MM-dd"
-        queue: 队列名称筛选
         limit: 每页数量，默认20
-        offset: 页码，从1开始
+        offset: 页码，从0开始
 
     Returns:
         作业列表
@@ -50,13 +40,8 @@ def list_serverless_jobs(
     try:
         # 过滤作业数据
         request_body = {
-            "JobId": job_id,
-            "JobName": job_name,
-            "StartTime": start_time,
-            "FinishTime": finish_time,
-            "QueueName": queue,
-            "Limit": limit,
-            "Offset": offset,
+            "Limit": str(limit),
+            "Offset": str(offset),
         }
         access_key = os.environ.get("VOLCENGINE_ACCESS_KEY")
         secret_key = os.environ.get("VOLCENGINE_SECRET_KEY")
@@ -65,12 +50,12 @@ def list_serverless_jobs(
             logger.error("缺少必要的环境变量: VOLCENGINE_ACCESS_KEY, VOLCENGINE_SECRET_KEY, VOLCENGINE_REGION")
             return []
 
-        jobs = list_serverless_jobs(access_key=access_key, secret_key=secret_key,
+        response = list_serverless_jobs(access_key=access_key, secret_key=secret_key,
                                     region=region, request_body=request_body)
+        jobs = response.get("Result", {}).get("JobList", [])
 
         # 转换为字典格式返回
-        result = [job.to_dict() for job in jobs]
-        return result
+        return jobs
 
     except Exception as e:
         logger.error(f"查询作业列表时出错: {str(e)}")

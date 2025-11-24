@@ -4,7 +4,7 @@ EMR MCP Server
 import argparse
 import logging
 
-from server.mcp_server_emr.src.mcp_server_emr.emr_mcp_server import mcp
+from mcp_server_emr.emr_mcp_server import mcp
 
 logger = logging.getLogger(__name__)
 
