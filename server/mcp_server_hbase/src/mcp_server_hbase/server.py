@@ -10,8 +10,15 @@ from resource.hbase_resource import HBASESDK
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-mcp_server = FastMCP("hbase_mcp_server", port=int(os.getenv("MCP_SERVER_PORT", "8000")))
+
+mcp_server = FastMCP("hbase_mcp_server",
+                     host=os.getenv("MCP_SERVER_HOST", "0.0.0.0"),
+                     port=int(os.getenv("PORT", "8000")),
+                     stateless_http=os.getenv("STATLESS_HTTP", "true").lower() == "true",
+                     streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"))
+
 hbase_resource_sdk = HBASESDK(region=os.getenv('VOLCENGINE_REGION','cn-beijing'), ak=os.getenv('VOLCENGINE_ACCESS_KEY'), sk=os.getenv('VOLCENGINE_SECRET_KEY'), host=os.getenv('VOLCENGINE_ENDPOINT'))
+
 
 @mcp_server.tool(
     name="modify_db_instance_name",
