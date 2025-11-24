@@ -5,7 +5,7 @@ from typing import Dict, Any, List
 
 import aiohttp
 
-from utils.sign_utils import request, utc_now
+from server.mcp_server_emr.src.mcp_server_emr.utils.sign_utils import request, utc_now
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,8 @@ def list_virtual_clusters(
                            content_type="application/json",
                            body=json.dumps({"MaxResults": page_size, "ClusterStates": states}))
         if response.get("ResponseMetadata", {}).get("Error", None):
-            logging.error(f"Error requesting EMR API from {api_url} error, error: {response.get("ResponseMetadata", {}).get("Error")}")
+            logging.error(
+                f"Error requesting EMR API from {api_url} error, error: {response.get("ResponseMetadata", {}).get("Error")}")
             return []
         elif response.get("Result", {}).get("Items", None):
             return response.get("Result", {}).get("Items")
@@ -71,9 +72,11 @@ def list_virtual_clusters(
                       exc_info=True)
         return []
     except Exception as e:
-        logging.error(f"Unknown error occurred while getting EMR on VKE virtual clusters from {api_url} error: {str(e)}",
-                      exc_info=True)
+        logging.error(
+            f"Unknown error occurred while getting EMR on VKE virtual clusters from {api_url} error: {str(e)}",
+            exc_info=True)
         return []
+
 
 if __name__ == "__main__":
     cluster_list = list_virtual_clusters(os.getenv("AK"), os.getenv("SK"), "cn-beijing")

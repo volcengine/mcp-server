@@ -1,11 +1,11 @@
 import json
 import logging
 import os
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, List
 
 import aiohttp
 
-from utils.sign_utils import request, utc_now
+from server.mcp_server_emr.src.mcp_server_emr.utils.sign_utils import request, utc_now
 
 logger = logging.getLogger(__name__)
 
@@ -42,8 +42,9 @@ def list_clusters(
         return []
 
     api_url = f"https://{endpoint}"
-    states = ["CREATING","FAILED","TERMINATED_WITH_ERROR",
-              "RUNNING","EXCEPTION","WARNING","PAUSED","PAUSING","RESTORING","SHUTDOWN","TERMINATING","PENDING_FOR_PAYMENT"]
+    states = ["CREATING", "FAILED", "TERMINATED_WITH_ERROR",
+              "RUNNING", "EXCEPTION", "WARNING", "PAUSED", "PAUSING", "RESTORING", "SHUTDOWN", "TERMINATING",
+              "PENDING_FOR_PAYMENT"]
     try:
         response = request(method="POST", date=utc_now(),
                            query={}, header={"Content-Type": "application/json"},
@@ -54,7 +55,8 @@ def list_clusters(
                            content_type="application/json",
                            body=json.dumps({"MaxResults": page_size, "ClusterStates": states}))
         if response.get("ResponseMetadata", {}).get("Error", None):
-            logging.error(f"Error requesting EMR API from {api_url} error, error: {response.get("ResponseMetadata", {}).get("Error")}")
+            logging.error(
+                f"Error requesting EMR API from {api_url} error, error: {response.get("ResponseMetadata", {}).get("Error")}")
             return []
         elif response.get("Result", {}).get("Items", None):
             return response.get("Result", {}).get("Items")
@@ -75,6 +77,7 @@ def list_clusters(
         logging.error(f"Unknown error occurred while getting EMR on ecs clusters from {api_url} error: {str(e)}",
                       exc_info=True)
         return []
+
 
 if __name__ == "__main__":
     job_list = list_clusters(os.getenv("AK"), os.getenv("SK"), "cn-beijing")

@@ -83,3 +83,4 @@ typing-inspection==0.4.1
 uvicorn==0.35.0 ; sys_platform != 'emscripten'
     # via mcp
 requests==2.32.5
+aiohttp==3.13.2
