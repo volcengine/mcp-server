@@ -36,9 +36,6 @@ def list_serverless_jobs(
     获取EMR Serverless作业列表
 
     Args:
-        ak: 火山引擎AccessKey
-        sk: 火山引擎SecretKey
-        region: 火山引擎Region
         job_id: 作业ID筛选
         job_name: 作业名称筛选
         start_time: 开始时间 "yyyy-MM-dd"
@@ -85,9 +82,6 @@ def list_emr_on_ecs_clusters(page_size: int = 20) -> List[Dict[str, Any]]:
     """
     获取 EMR on ECS 形态的集群列表信息
     Args:
-        ak: 火山引擎AccessKey
-        sk: 火山引擎SecretKey
-        region: 火山引擎Region
         page_size: 每页数量, 默认 20
     """
     access_key = os.environ.get("VOLCENGINE_ACCESS_KEY")
@@ -105,9 +99,6 @@ def list_emr_on_vke_clusters(
     """
     获取 EMR on VKE 形态的虚拟集群列表信息
     Args:
-        ak: 火山引擎AccessKey
-        sk: 火山引擎SecretKey
-        region: 火山引擎Region
         page_size: 每页数量, 默认 20
     """
     access_key = os.environ.get("VOLCENGINE_ACCESS_KEY")
