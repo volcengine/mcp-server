@@ -130,21 +130,21 @@ def create_vedb_mysql_instance(
     description="为实例绑定标签，支持批量操作"
 )
 def add_tags_to_resource(instance_ids: list[str],
-                         tags: list[dict[str, Any]]) -> str:
+                         tags: list[dict[str, Any]]) -> dict[str, Any]:
     req = {
         "instance_ids": instance_ids,
         "tags": tags,
     }
     req = {k: v for k, v in req.items() if v is not None}
     vedbm_resource_sdk.add_tags_to_resource(req)
-    return "success"
+    return {"succ": "true"}
 
 @mcp_server.tool(
     description="为实例解绑标签，支持批量操作"
 )
 def remove_tags_from_resource(instance_ids: list[str],
                               all: Optional[Annotated[bool,Field(description='是否解绑指定实例上的所有标签')]] = None,
-                              tag_keys: list[str] = None) -> str:
+                              tag_keys: list[str] = None) -> dict[str, Any]:
     req = {
         "instance_ids": instance_ids,
         "all": all,
@@ -152,17 +152,17 @@ def remove_tags_from_resource(instance_ids: list[str],
     }
     req = {k: v for k, v in req.items() if v is not None}
     vedbm_resource_sdk.remove_tags_from_resource(req)
-    return "success"
+    return {"succ": "true"}
 
 @mcp_server.tool(
     description="切换实例主节点到指定节点"
 )
 def change_master(instance_id: str,
-                  target_node: Annotated[str, Field(examples=['vedbm-****-1'])]) -> str:
+                  target_node: Annotated[str, Field(examples=['vedbm-****-1'])]) -> dict[str, Any]:
     req = {
         "cluster_name": instance_id,
         "target_node": target_node,
     }
     req = {k: v for k, v in req.items() if v is not None}
     vedbm_resource_sdk.change_master(req)
-    return "success"
+    return {"succ": "true"}
