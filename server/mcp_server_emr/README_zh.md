@@ -1,30 +1,30 @@
 # EMR MCP Server 
 
-## Version
+## 版本信息
 v0.1.0
 
-## Overview
+## 产品描述
 
 EMR MCP Server is a Model Context Protocol server that provides MCP clients (such as Claude Desktop) with the ability to interact with the Volcengine EMR service. 
 
-## Category
-EMR
+## 分类
+火山引擎 E-MapReduce（简称“EMR”）
 
-## Features
-- Query serverless jobs information
-- Query emr on ecs clusters information
-- Query emr on vke clusters information
+## 功能
+- 查询EMR on Serverless 作业实例信息
+- 查询EMR on ECS集群信息
+- 查询EMR on VKE集群信息
 
-## Available Tools
-Since some interfaces have a lot of input parameters and return content, some uncommon content will cause too much context burden on llm. In order to avoid unnecessary token waste, EMR MCP Server only provides queries for common content.
+## 可用工具
+由于部分接口涉及大量输入参数和返回内容，某些非常规内容会为大型语言模型（LLM）带来过重的上下文负担。为避免不必要的令牌浪费，EMR MCP服务器仅提供常见内容的查询服务。
 
-- `list_serverless_jobs`: [query serverless jobs](https://www.volcengine.com/docs/6491/1263265)
-- `list_emr_on_ecs_clusters`: [query emr on ecs clusters](https://www.volcengine.com/docs/6491/1208305)
-- `list_emr_on_vke_clusters`: [query emr on vke clusters](https://www.volcengine.com/docs/6491/1230115)
+- `list_serverless_jobs`: [查询EMR on Serverless 作业实例信息](https://www.volcengine.com/docs/6491/1263265)
+- `list_emr_on_ecs_clusters`: [查询EMR on ECS集群信息](https://www.volcengine.com/docs/6491/1208305)
+- `list_emr_on_vke_clusters`: [查询EMR on VKE集群信息](https://www.volcengine.com/docs/6491/1230115)
 
-## Usage Guide
+## 使用指南
 
-### Prerequisites
+### 前置准备
 - Python 3.12+
 - UV
 
@@ -38,13 +38,13 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-### Installation
-Clone the repository:
+### 安装
+克隆仓库:
 ```bash
 git clone git@github.com:volcengine/mcp-server.git
 ```
 
-### Usage
+### 使用方法
 Start the server:
 
 #### UV
@@ -52,32 +52,33 @@ Start the server:
 cd mcp-server/server/mcp_server_emr
 uv run mcp-server-emr
 
-# Start with streamable-http mode (default is stdio)
+# 使用 streamable-http 模式启动(默认为stdio)
 uv run mcp-server-emr -t streamable-http
 ```
 
-Use a client to interact with the server:
+使用客户端与服务器交互:
 ```
 Trae | Cursor ｜ Claude Desktop | Cline | ...
 ```
 
-## Configuration
+## 配置
 
-### Environment Variables
-The following environment variables are available for configuring the MCP server:
+### 环境变量
+以下环境变量可用于配置MCP服务器:
 
-| Environment Variable | Description | Default Value |
+| 环境变量 | 描述 | 默认值 |
 |----------|------|--------|
-| `VOLCENGINE_ACCESS_KEY` | Volcengine account ACCESSKEY | - |
-| `VOLCENGINE_SECRET_KEY` | Volcengine account SECRETKEY | - |
-| `VOLCENGINE_REGION` | Volcengine account REGION | - |
-| `MCP_SERVER_HOST` | MCP server listening host | `0.0.0.0` |
-| `MCP_SERVER_PORT` | MCP server listening port | `8000` |
-| `STREAMABLE_HTTP_PATH` | Streamable HTTP path | `/mcp` |
-| `STATLESS_HTTP` | Whether to enable stateless HTTP | `true` |
+| `VOLCENGINE_ACCESS_KEY` | 火山引擎账号ACCESSKEY | - |
+| `VOLCENGINE_SECRET_KEY` | 火山引擎账号SECRETKEY | - |
+| `VOLCENGINE_REGION` | 火山引擎资源region | - |
+| `MCP_SERVER_HOST` | MCP server监听主机 | `0.0.0.0` |
+| `MCP_SERVER_PORT` | MCP server监听端口 | `8000` |
+| `STREAMABLE_HTTP_PATH` | Streamable HTTP路径 | `/mcp` |
+| `STATLESS_HTTP` | 是否启用无状态HTTP | `true` |
 
 
-For example, set these environment variables before starting the server:
+
+例如，在启动服务器前设置这些环境变量:
 
 ```bash
 export VOLCENGINE_ACCESS_KEY={ak}
@@ -89,7 +90,7 @@ export STREAMABLE_HTTP_PATH=/mcp
 export STATLESS_HTTP=true
 ```
 
-### Run with uvx
+### uvx 启动
 
 ```json
 {

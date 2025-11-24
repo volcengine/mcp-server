@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 # Create server
 mcp = FastMCP("EMR MCP Server",
-              host=os.getenv("MCP_SERVER_HOST", "0.0.0.0"),
-              port=int(os.getenv("MCP_SERVER_PORT", "8000")),
-              streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"))
+              host=os.getenv("MCP_SERVER_HOST", os.getenv("MCP_SERVER_HOST", "0.0.0.0")),
+              port=int(os.getenv("MCP_SERVER_PORT", int(os.getenv("PORT", "8000")))),
+              streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", os.getenv("STREAMABLE_HTTP_PATH", "/mcp")),
+              stateless_http=os.getenv("STATLESS_HTTP", "true").lower() == "true")

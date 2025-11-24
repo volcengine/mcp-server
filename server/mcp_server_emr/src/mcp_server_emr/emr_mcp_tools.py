@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import List, Dict, Any
 
 from server.mcp_server_emr.src.mcp_server_emr.api.on_ecs_api import list_clusters
@@ -11,9 +12,9 @@ logger = logging.getLogger(__name__)
 
 @mcp.tool()
 def list_serverless_jobs(
-        ak: str,
-        sk: str,
-        region: str,
+        ak: str = "",
+        sk: str = "",
+        region: str = "",
         job_id: str = "",
         job_name: str = "",
         start_time: str = "",
@@ -51,7 +52,10 @@ def list_serverless_jobs(
             "Limit": limit,
             "Offset": offset,
         }
-        jobs = list_serverless_jobs(access_key=ak, secret_key=sk,
+        access_key = ak if ak else os.environ.get("VOLCENGINE_ACCESS_KEY")
+        secret_key = sk if sk else os.environ.get("VOLCENGINE_SECRET_KEY")
+        region = region if region else os.environ.get("VOLCENGINE_REGION")
+        jobs = list_serverless_jobs(access_key=access_key, secret_key=secret_key,
                                     region=region, request_body=request_body)
 
         # 转换为字典格式返回
@@ -77,7 +81,10 @@ def list_emr_on_ecs_clusters(
         region: 火山引擎Region
         page_size: 每页数量, 默认 20
     """
-    return list_clusters(ak, sk, region, page_size)
+    access_key = ak if ak else os.environ.get("VOLCENGINE_ACCESS_KEY")
+    secret_key = sk if sk else os.environ.get("VOLCENGINE_SECRET_KEY")
+    region = region if region else os.environ.get("VOLCENGINE_REGION")
+    return list_clusters(access_key, secret_key, region, page_size)
 
 
 @mcp.tool()
@@ -94,4 +101,7 @@ def list_emr_on_vke_clusters(
         region: 火山引擎Region
         page_size: 每页数量, 默认 20
     """
-    return list_virtual_clusters(ak, sk, region, page_size)
+    access_key = ak if ak else os.environ.get("VOLCENGINE_ACCESS_KEY")
+    secret_key = sk if sk else os.environ.get("VOLCENGINE_SECRET_KEY")
+    region = region if region else os.environ.get("VOLCENGINE_REGION")
+    return list_virtual_clusters(access_key, secret_key, region, page_size)
