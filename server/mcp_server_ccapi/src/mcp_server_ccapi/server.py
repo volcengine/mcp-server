@@ -190,13 +190,18 @@ async def list_resource_types(
         default=None,
     ),
 ) -> dict:
-    """Get all available Volcengine resource types (e.g., "Volcengine::ECS::Instance", "Volcengine::VPC::VPC").
-
+    """Get all available Volcengine resource types 
     Parameters:
         region: optional (e.g., "cn-beijing")
-
     Returns:
-        The resource types
+        user_guide: A string that explains how to use the resource_types list
+        resource_types: A list of Volcengine resource types
+            - Each resource type is a dictionary with the following keys:
+                - TypeName: The full resource type name (e.g., "Volcengine::IAM::User")
+                - Description: A brief description of the resource type
+            - example
+                - Volcengine::IAM::Group: IAM user group Resource
+     
     """
     cloudcontrol = get_volcengine_client_from_config(region)
     info = create_universal_info(
@@ -219,7 +224,10 @@ async def list_resource_types(
                 }
             )
 
-    response: dict[str, Any] = {'resource_types': resource_types}
+    response: dict[str, Any] = {
+        'resource_types': resource_types,
+        'user_guide': 'Select the most appropriate resource type based on the Description field and TypeName. e.g. "Volcengine::IAM::Group" is IAM user group Resource.'
+    }
     return response
 
 
