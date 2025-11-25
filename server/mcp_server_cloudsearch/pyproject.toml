@@ -1,17 +1,26 @@
+
 [project]
 name = "mcp-server-cloudsearch"
 version = "0.1.0"
-description = "MCP Server For CloudSearch"
+description = " MCP server for ESCloud"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
-    "mcp[cli]>=1.6.0",
-    "volcengine-python-sdk>=3.0.1",
+    "mcp==1.12.0",
+    "pydantic>=2.11.3",
+    "python-dotenv>=1.1.0",
+    "retry>=0.9.2",
+    "starlette>=0.46.2",
+    "volcengine>=1.0.180",
 ]
 
 [project.scripts]
-mcp-server-cloudsearch = "mcp_server_cloudsearch:main"
+mcp-server-cloudsearch= "src.ESCloud.server:main"
+
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]

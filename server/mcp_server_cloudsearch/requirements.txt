@@ -2,21 +2,31 @@
 #    uv pip compile pyproject.toml --output-file requirements.txt
 annotated-types==0.7.0
     # via pydantic
-anyio==4.9.0
+anyio==4.11.0
     # via
     #   httpx
     #   mcp
     #   sse-starlette
     #   starlette
-certifi==2025.4.26
+attrs==25.4.0
+    # via
+    #   jsonschema
+    #   referencing
+beautifulsoup4==4.14.2
+    # via google
+certifi==2025.11.12
     # via
     #   httpcore
     #   httpx
-    #   volcengine-python-sdk
-click==8.2.0
-    # via
-    #   typer
-    #   uvicorn
+    #   requests
+charset-normalizer==3.4.4
+    # via requests
+click==8.3.1
+    # via uvicorn
+decorator==5.2.1
+    # via retry
+google==3.0.0
+    # via volcengine
 h11==0.16.0
     # via
     #   httpcore
@@ -25,68 +35,84 @@ httpcore==1.0.9
     # via httpx
 httpx==0.28.1
     # via mcp
-httpx-sse==0.4.0
+httpx-sse==0.4.3
     # via mcp
-idna==3.10
+idna==3.11
     # via
     #   anyio
     #   httpx
-markdown-it-py==3.0.0
-    # via rich
-mcp==1.8.1
+    #   requests
+jsonschema==4.25.1
+    # via mcp
+jsonschema-specifications==2025.9.1
+    # via jsonschema
+mcp==1.12.0
     # via mcp-server-cloudsearch (pyproject.toml)
-mdurl==0.1.2
-    # via markdown-it-py
-pydantic==2.11.4
+protobuf==6.33.1
+    # via volcengine
+py==1.11.0
+    # via retry
+pycryptodome==3.23.0
+    # via volcengine
+pydantic==2.12.4
     # via
+    #   mcp-server-cloudsearch (pyproject.toml)
     #   mcp
     #   pydantic-settings
-pydantic-core==2.33.2
+pydantic-core==2.41.5
     # via pydantic
-pydantic-settings==2.9.1
+pydantic-settings==2.12.0
     # via mcp
-pygments==2.19.1
-    # via rich
-python-dateutil==2.9.0.post0
-    # via volcengine-python-sdk
-python-dotenv==1.1.0
+python-dotenv==1.2.1
     # via
-    #   mcp
+    #   mcp-server-cloudsearch (pyproject.toml)
     #   pydantic-settings
 python-multipart==0.0.20
     # via mcp
-rich==14.0.0
-    # via typer
-shellingham==1.5.4
-    # via typer
-six==1.17.0
+pytz==2025.2
+    # via volcengine
+referencing==0.37.0
     # via
-    #   python-dateutil
-    #   volcengine-python-sdk
+    #   jsonschema
+    #   jsonschema-specifications
+requests==2.32.5
+    # via volcengine
+retry==0.9.2
+    # via
+    #   mcp-server-cloudsearch (pyproject.toml)
+    #   volcengine
+rpds-py==0.29.0
+    # via
+    #   jsonschema
+    #   referencing
+six==1.17.0
+    # via volcengine
 sniffio==1.3.1
     # via anyio
-sse-starlette==2.3.5
+soupsieve==2.8
+    # via beautifulsoup4
+sse-starlette==3.0.3
     # via mcp
-starlette==0.46.2
+starlette==0.50.0
     # via
+    #   mcp-server-cloudsearch (pyproject.toml)
     #   mcp
-    #   sse-starlette
-typer==0.15.3
-    # via mcp
-typing-extensions==4.13.2
+typing-extensions==4.15.0
     # via
     #   anyio
+    #   beautifulsoup4
     #   pydantic
     #   pydantic-core
-    #   typer
+    #   referencing
+    #   starlette
     #   typing-inspection
-typing-inspection==0.4.0
+typing-inspection==0.4.2
     # via
     #   pydantic
     #   pydantic-settings
-urllib3==2.4.0
-    # via volcengine-python-sdk
-uvicorn==0.34.2
+urllib3==2.5.0
+    # via requests
+uvicorn==0.38.0
     # via mcp
-volcengine-python-sdk==3.0.1
+volcengine==1.0.207
     # via mcp-server-cloudsearch (pyproject.toml)

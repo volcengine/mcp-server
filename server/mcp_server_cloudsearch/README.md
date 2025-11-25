@@ -7,42 +7,31 @@
 
 ## Tools
 This MCP Server product provides the following Tools:
-### 1. cloudsearch_describe_zones
-Query available zone list in a specified region
-- Parameters:
-  - `region_id`: region id
-
-### 2. cloudsearch_describe_instance
-Query the detail information of an instance
-- Parameters:
-  - `region_id`: region id
-  - `instance_id`: instance id
-
-### 3. cloudsearch_describe_instances
-Query the instance list in a specified region
-- Parameters:
-  - `region_id`: region id
-  - `zone_id`: zone id, support fuzzy query
-  - `instance_id`: instance id, support fuzzy query
-  - `instance_name`: instance name, support fuzzy query
-  - `status`: instance status
-  - `version`: instance version
-  - `charge_type`: instance charge type
-  - `project_name`: project name
-  - `page_number`: page number
-  - `page_size`: page size
-
-### 4. cloudsearch_describe_instance_nodes
-Query the node list of an instance
-- Parameters:
-  - `region_id`: region id
-  - `instance_id`: instance id,
-
-### 5. cloudsearch_describe_instance_plugins
-Query the plugin list of an instance
-- Parameters:
-  - `region_id`: region id
-  - `instance_id`: instance id
+### 1. describe_zones
+ - Detailed Description: Query the list of available zones.
+### 2. describe_instances
+ - Detailed Description: Query the list of Cloud Search instances and their configuration details.
+### 3. create_instance_in_one_step
+ - Detailed Description: This interface is used to create an instance (runs immediately and starts billing). It supports creating ElasticSearch (ES) or OpenSearch (OS) instances.
+### 4. describe_node_available_specs
+ - Detailed Description: Query the list of available node types, node specifications, and storage specifications; returns billing configuration codes.
+### 5. describe_instance_plugins
+ - Detailed Description: Query the list of plugins installed on the instance.
+### 6. rename_instance
+ - Detailed Description: Modify the name of the target instance.
+### 7. modify_maintenance_setting
+ - Detailed Description: Modify the maintenance time of the instance.
+### 8. modify_deletion_protection
+ - Detailed Description: Enable or disable the deletion protection feature for the instance.
+### 9. describe_instance
+ - Detailed Description: Query the configuration details of a specified instance; only applicable to instances with IDs starting with "o-".
+### 10. restart_node
+ - Detailed Description: Restart a specific member node of the instance.
+### 11. describe_instance_nodes
+ - Detailed Description: Query details of the instance's member nodes, including node type, running status, resource configuration, etc.; only applicable to instances with IDs starting with "o-".
+### 12. create_instance
+ - Detailed Description: This interface is used to create an instance (order placed only, pending payment). It supports creating ElasticSearch (ES) or OpenSearch (OS) instances.
+   When creating an instance using this interface, dedicated Master nodes must be configured, and the number of Master nodes must be 3.
 
 ## Platform  
 ark，python，cursor
@@ -71,6 +60,7 @@ Add the following configuration to your mcp settings file
         "mcp-server-cloudsearch"
       ],
       "env": {
+        "VOLCENGINE_REGION": "cn-beijing",
         "VOLC_ACCESSKEY": "your_volcengine_ak",
         "VOLC_SECRETKEY": "your_volcengine_sk"
       }
@@ -86,11 +76,12 @@ Or clone the repository to your local and start from the local code repository
       "command": "uv",
       "args": [
         "--directory",
-        "path/to/src/mcp_server_cloudsearch",
+        "path/to/server/mcp_server_cloudsearch/src/ESCloud",
         "run",
         "server.py"
       ],
       "env": {
+        "VOLCENGINE_REGION": "cn-beijing",
         "VOLC_ACCESSKEY": "your_volcengine_ak",
         "VOLC_SECRETKEY": "your_volcengine_sk"
       }
