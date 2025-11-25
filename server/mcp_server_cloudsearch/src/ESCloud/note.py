@@ -29,6 +29,14 @@ note = {
             Values ( Array of String ): 否  用于筛选的字符串值。 
                   - Performs a case-insensitive substring match. 
                   - Treats input as a raw string; regular expressions and wildcards are NOT supported. 
+                  - Note for 'Status' field: Requires a strict, case-sensitive exact match. Must be one of: 
+                    - WaitingPaid  
+                    - Creating 
+                    - Running 
+                    - Updating 
+                    - Scaling 
+                    - Restoring 
+                    - Releasing 
            "字段"： TagFilter
             参数 ( 类型 ): 是否必选  描述 
             ---- ( ---- ): ----  ---- 
@@ -310,6 +318,7 @@ note = {
                   - 示例：["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"] 
             MaintenanceTime ( String ): 是  在一天内允许平台进行维护的 UTC 时间段。 
                   - 示例："23:00-01:00" 
+                  - 请注意时区转换。 
     """,
     "modify_deletion_protection": r""" 
    Args: 
