@@ -1,0 +1,26 @@
+[project]
+name = "mcp-server-vke"
+version = "0.1.0"
+description = "MCP server for Volcengine Kubernetes Engine(VKE)"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "mcp>=1.12.0",
+    "pydantic>=2.11.3",
+    "python-dotenv>=1.1.0",
+    "retry>=0.9.2",
+    "starlette>=0.46.2",
+    "volcengine>=1.0.180",
+    "pyyaml>=6.0.2",
+    "kubernetes>=34.1.0",
+]
+
+[project.scripts]
+mcp-server-vke= "vke.server:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

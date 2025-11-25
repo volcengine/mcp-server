@@ -1,0 +1,20 @@
+[project]
+name = "mcp-server-hbase"
+version = "1.0.0"
+description = "MCP server for hbase"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp[cli]",
+    "mcp>=1.12.0",
+    "volcengine-python-sdk>=4.0.35"
+]
+
+[project.scripts]
+mcp-server-hbase = "mcp_server_hbase.server:main"
+
+[build-system]
+requires = [
+    "hatchling"
+]
+build-backend = "hatchling.build"
