@@ -91,10 +91,6 @@ mcp = FastMCP(
 • CRITICAL: Never proceed with create/update/delete without first showing the user what will happen
 • UNIVERSAL: Use explain() tool to explain ANY complex data - infrastructure, API responses, configurations, etc.
 • Volcengine session info must be passed to resource creation/modification tools
-• CRITICAL: ALWAYS include these required management tags in properties for ALL operations:
-  - MANAGED_BY: CCAPI-MCP-SERVER
-  - MCP_SERVER_SOURCE_CODE: https://github.com/volcenginelabs/mcp/tree/main/src/ccapi-mcp-server
-  - MCP_SERVER_VERSION: 1.0.0
 • TRANSPARENCY REQUIREMENT: Use explain() tool to show users complete resource definitions
 • Users will see ALL properties, tags, configurations, and changes before approval
 • Ask users if they want additional custom tags beyond the required management tags
@@ -464,7 +460,8 @@ async def update_resource(
         • CRITICAL: Never proceed with create/update/delete without first showing the user what will happen
         • UNIVERSAL: Use explain() tool to explain ANY complex data - infrastructure, API responses, configurations, etc.
         • Volcengine session info must be passed to resource creation/modification tools
-        • CRITICAL: ALWAYS include these required management tags in properties for ALL operations:
+        • CRITICAL: If the resource does not support tags property, the tags property must not set.
+        • CRITICAL: If the resource supports tag properties, you must include the required management tags in the properties for all operations:
             - MANAGED_BY: CCAPI-MCP-SERVER
             - MCP_SERVER_SOURCE_CODE: https://github.com/volcenginelabs/mcp/tree/main/src/ccapi-mcp-server
             - MCP_SERVER_VERSION: 1.0.0
@@ -544,7 +541,8 @@ async def create_resource(
     • CRITICAL: Use explained_token (from explain) for create_resource/update_resource/delete_resource
     • CRITICAL: Never proceed with create/update/delete without first showing the user what will happen
     • CRITICAL: Volcengine session info must be passed to resource creation/modification tools
-    • CRITICAL: ALWAYS include these required management tags in properties for ALL operations:
+    • CRITICAL: If the resource does not support tags property, the tags property must not set.
+    • CRITICAL: If the resource supports tag properties, you must include the required management tags in the properties for all operations:
         - MANAGED_BY: CCAPI-MCP-SERVER
         - MCP_SERVER_SOURCE_CODE: https://github.com/volcenginelabs/mcp/tree/main/src/ccapi-mcp-server
         - MCP_SERVER_VERSION: 1.0.0
