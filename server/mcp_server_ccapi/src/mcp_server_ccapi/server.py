@@ -212,7 +212,7 @@ async def list_resource_types(
         content_type='application/json',
     )
     params = {'MaxResults': 100}
-    resp, _, _ = cloudcontrol.do_call_with_http_info(info=info, body=params)
+    resp, _, _ = cloudcontrol.do_call_with_http_info(info=info, body=params)  # pyright: ignore[reportUnknownMemberType, reportGeneralTypeIssues]
 
     resource_types = []
     for resource_type in resp['TypeList']:
@@ -264,7 +264,7 @@ async def list_resources(
         content_type='application/json',
     )
     params = {'TypeName': resource_type, 'MaxResults': 50}
-    resp, _, _ = cloudcontrol.do_call_with_http_info(info=info, body=params)
+    resp, _, _ = cloudcontrol.do_call_with_http_info(info=info, body=params)  # pyright: ignore[reportUnknownMemberType, reportGeneralTypeIssues]
 
     results = resp['ResourceDescriptions']  # pyright: ignore[reportCallIssue, reportArgumentType, reportIndexIssue]
     response: dict[str, Any] = {'resources': results}

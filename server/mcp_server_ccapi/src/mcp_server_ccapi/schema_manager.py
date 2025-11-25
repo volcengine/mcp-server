@@ -168,7 +168,7 @@ class SchemaManager:
                     content_type='text/plain',
                 )
                 params = {'TypeName': resource_type}
-                resp, _, _ = volcengine_client.do_call_with_http_info(info=info, body=params)
+                resp, _, _ = volcengine_client.do_call_with_http_info(info=info, body=params)  # pyright: ignore[reportUnknownMemberType, reportGeneralTypeIssues]
 
                 schema_str = json.dumps(resp['Schema'], ensure_ascii=False)  # pyright: ignore[reportCallIssue, reportArgumentType, reportIndexIssue]
 

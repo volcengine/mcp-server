@@ -6,6 +6,13 @@
 | 分类 | 工具类 |
 | 标签 | 资源管理、云控制API |
 
+## 权限说明
+您可以为 IAM 子用户授予下述权限以支持访问 CloudControl API 的业务场景.
+系统预设策略，策略详情请前往 [策略管理-系统预设策略](https://console.volcengine.com/iam/policymanage?scope=System)查看
+- `CloudControlFullAccess`：云管控 API（cloudcontrol）全部管理权限
+- `IAMReadOnlyAccess`：IAM 只读权限
+- 拥有 CloudControl API 的权限不代表拥有了云资源的操作权限，要通过 CloudControl API 操作云资源，需要同时拥有 CloudControl API 和云资源相关的操作权限。
+
 ## Tools
 
 ### `get_resource_schema_information`

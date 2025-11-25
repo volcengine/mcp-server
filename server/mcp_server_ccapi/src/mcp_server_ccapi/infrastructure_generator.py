@@ -28,11 +28,11 @@ from typing import List
 
 async def generate_infrastructure_code(
     resource_type: str,
-    properties: dict = {},
+    properties: dict = {},  # pyright: ignore[reportMissingTypeArgument]
     identifier: str = '',
-    patch_document: List = [],
+    patch_document: List = [],  # pyright: ignore[reportMissingTypeArgument]
     region: str = '',
-) -> dict:
+) -> dict:  # pyright: ignore[reportMissingTypeArgument]
     """Generate infrastructure code for security scanning before resource creation or update."""
     if not resource_type:
         raise ClientError('Please provide a resource type (e.g., Volcengine::IAM::User)')
@@ -67,7 +67,7 @@ async def generate_infrastructure_code(
                 'TypeName': resource_type,
                 'Identifier': identifier,
             }
-            current_resource, _, _ = cloudcontrol_client.do_call_with_http_info(
+            current_resource, _, _ = cloudcontrol_client.do_call_with_http_info(  # pyright: ignore[reportUnknownMemberType, reportGeneralTypeIssues]
                 info=universal_info,
                 body=params,
             )
@@ -161,6 +161,6 @@ async def generate_infrastructure_code(
     }
 
     if patch_document_with_tags:
-        result['recommended_patch_document'] = patch_document_with_tags
+        result['recommended_patch_document'] = patch_document_with_tags  # pyright: ignore[reportArgumentType]
 
     return result
