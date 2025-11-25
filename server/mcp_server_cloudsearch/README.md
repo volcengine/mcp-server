@@ -24,11 +24,11 @@ This MCP Server product provides the following Tools:
 ### 8. modify_deletion_protection
  - Detailed Description: Enable or disable the deletion protection feature for the instance.
 ### 9. describe_instance
- - Detailed Description: Query the configuration details of a specified instance; only applicable to instances with IDs starting with "o-".
+ - Detailed Description: Query the configuration details of a specified instance.
 ### 10. restart_node
  - Detailed Description: Restart a specific member node of the instance.
 ### 11. describe_instance_nodes
- - Detailed Description: Query details of the instance's member nodes, including node type, running status, resource configuration, etc.; only applicable to instances with IDs starting with "o-".
+ - Detailed Description: Query details of the instance's member nodes, including node type, running status, resource configuration, etc.
 ### 12. create_instance
  - Detailed Description: This interface is used to create an instance (order placed only, pending payment). It supports creating ElasticSearch (ES) or OpenSearch (OS) instances.
    When creating an instance using this interface, dedicated Master nodes must be configured, and the number of Master nodes must be 3.

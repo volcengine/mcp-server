@@ -24,11 +24,11 @@
 ### 8. modify_deletion_protection
  - 详细描述：启停实例的删除保护功能
 ### 9. describe_instance
- - 详细描述：查询指定实例的配置详情，只适用于实例 ID 为 o- 开头的实例
+ - 详细描述：查询指定实例的配置详情
 ### 10. restart_node
  - 详细描述：重启实例的特定成员节点
 ### 11. describe_instance_nodes
- - 详细描述：查询实例的成员节点详情，包括节点类型、运行状态、资源配置等信息，只适用于实例 ID 为 o- 开头的实例
+ - 详细描述：查询实例的成员节点详情，包括节点类型、运行状态、资源配置等信息
 ### 12. create_instance
  - 详细描述： 该接口用于创建实例（仅下单，待支付）。支持创建 ElasticSearch (ES) 或 OpenSearch (OS)  实例。
    使用该接口创建实例时，必须配置专用 Master 节点，Master 节点数量为 3。

@@ -152,7 +152,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_instance(body: dict) -> str:
         """
-        查询指定实例的配置详情，只适用于实例 ID 为 o- 开头的实例
+        查询指定实例的配置详情
         Call steps:
         1. Pass "describe_instance" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_instance
@@ -176,7 +176,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_instance_nodes(body: dict) -> str:
         """
-        查询实例的成员节点详情，包括节点类型、运行状态、资源配置等信息，只适用于实例 ID 为 o- 开头的实例
+        查询实例的成员节点详情，包括节点类型、运行状态、资源配置等信息
         Call steps:
         1. Pass "describe_instance_nodes" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_instance_nodes
