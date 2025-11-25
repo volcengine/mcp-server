@@ -19,8 +19,16 @@ note = {
            "字段"： InstanceListFilter
             参数 ( 类型 ): 是否必选  描述 
             ---- ( ---- ): ----  ---- 
-            Name ( String ): 否  过滤条件名称。支持的查询条件如下InstanceId：实例 IDInstanceName：实例名称ZoneId：可用区 IDStatus：实例状态Version：实例版本ChargeType：计费类型 
-            Values ( Array of String ): 否  过滤条件值。 
+            Name ( String ): 否  过滤条件名称。支持的查询条件如下： 
+                  - InstanceId：实例 ID 
+                  - InstanceName：实例名称 
+                  - ZoneId：可用区 ID 
+                  - Status：实例状态 
+                  - Version：实例版本 
+                  - ChargeType：计费类型 
+            Values ( Array of String ): 否  用于筛选的字符串值。 
+                  - Performs a case-insensitive substring match. 
+                  - Treats input as a raw string; regular expressions and wildcards are NOT supported. 
            "字段"： TagFilter
             参数 ( 类型 ): 是否必选  描述 
             ---- ( ---- ): ----  ---- 
