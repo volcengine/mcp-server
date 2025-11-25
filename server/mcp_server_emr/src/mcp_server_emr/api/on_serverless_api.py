@@ -75,5 +75,5 @@ def list_serverless_jobs(secret_key: str,
 
 if __name__ == "__main__":
     job_list = list_serverless_jobs(access_key=os.getenv("VOLCENGINE_ACCESS_KEY"), secret_key=os.getenv("VOLCENGINE_SECRET_KEY"),
-                                    region=os.getenv("VOLCENGINE_REGION"))
+                                    region=os.getenv("VOLCENGINE_REGION", "cn-beijing"))
     print(f"Job list: {job_list}")
