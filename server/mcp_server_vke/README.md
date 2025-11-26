@@ -57,7 +57,16 @@ Ark, Trae, Cursor, Python
 
 ## Authentication
 
-Create an API Key (AccessKey/SecretKey) in the IAM console and ensure that the API Key has `VKEFullAccess` permission for VKE.
+AccessKey/SecretKey
+
+Recommendations:
+
+1. Create a dedicated IAM role specifically for MCP server operations.
+2. Apply the principle of least privilege by attaching only the necessary policies for your use case.
+  - If only query operations are needed, configure the `VKEReadOnlyAccess` policy.
+  - If support for creating clusters and other operations is also required, configure the `VKEFullAccess` policy.
+3. Use resource-scoped policies whenever possible.
+4. Apply permission boundaries to limit the maximum permissions.
 
 ## Installation and Deployment
 

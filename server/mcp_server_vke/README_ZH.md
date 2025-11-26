@@ -57,7 +57,16 @@ K8s 资源管理操作：
 
 ## 鉴权方式
 
-在 IAM 控制台创建 API Key（AccessKey/SecretKey）并确保该 API Key 具备 VKE 的 `VKEFullAccess` 权限。
+AccessKey/SecretKey
+
+建议：
+
+1. 创建专用的 IAM 角色，专门用于 MCP 服务器操作
+2. 应用最小权限，根据您的用例仅附加必要的策略
+  - 若仅需要查询等操作，则配置 `VKEReadOnlyAccess` 策略
+  - 若还需要支持创建集群等操作，则需要配置 `VKEFullAccess` 策略
+3. 尽可能使用范围缩小的资源策略
+4. 应用权限边界以限制最大权限
 
 ## 安装部署
 
