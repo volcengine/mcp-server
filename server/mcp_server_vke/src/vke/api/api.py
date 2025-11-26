@@ -10,6 +10,8 @@ from base.base_service import BaseService
 
 from .config import api_info
 
+VEFAAS_IAM_CRIDENTIAL_PATH = "/var/run/secrets/iam/credential"
+
 
 class VkeAPI(BaseService):
 
@@ -38,15 +40,21 @@ class VkeAPI(BaseService):
 
             except Exception as e:
                 raise ValueError(f"decode authorization info error: {e}")
+        elif os.path.exists(VEFAAS_IAM_CRIDENTIAL_PATH):
+            with open(VEFAAS_IAM_CRIDENTIAL_PATH, "r") as f:
+                cred_dict = json.load(f)
+                ak = cred_dict["access_key_id"]
+                sk = cred_dict["secret_access_key"]
+                session_token = cred_dict.get("session_token", "")
         else:
-            if "VOLCENGINE_ACCESS_KEY" not in os.environ:
-                raise ValueError("VOLCENGINE_ACCESS_KEY is not set")
-            if "VOLCENGINE_SECRET_KEY" not in os.environ:
-                raise ValueError("VOLCENGINE_SECRET_KEY is not set")
-
             ak = os.getenv("VOLCENGINE_ACCESS_KEY")
             sk = os.getenv("VOLCENGINE_SECRET_KEY")
             session_token = os.getenv("VOLCENGINE_SESSION_TOKEN", "")
+
+        if not ak:
+            raise ValueError("access key is not provided")
+        if not sk:
+            raise ValueError("secret key is not provided")
 
         super().__init__(
             region=region,
