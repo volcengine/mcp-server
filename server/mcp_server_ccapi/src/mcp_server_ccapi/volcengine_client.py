@@ -123,7 +123,7 @@ if __name__ == '__main__':
         if not hasattr(ae, 'body'):
             raise ae
         try:
-            body_dict = json.loads(ae.body)
+            body_dict = json.loads(ae.body)  # pyright: ignore[reportUnknownMemberType, reportArgumentType]
             # 检查是否需要添加处理建议
             if (
                 'ResponseMetadata' in body_dict

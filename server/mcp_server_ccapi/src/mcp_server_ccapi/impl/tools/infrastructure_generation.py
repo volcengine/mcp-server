@@ -66,7 +66,7 @@ async def generate_infrastructure_code_impl_wrapper(
 
     return {
         'generated_code_token': generated_code_token,
-        'message': 'Infrastructure code generated successfully. Use generated_code_token with  explain()',
+        'message': 'Infrastructure code generated successfully. Use generated_code_token with explain()',
         'next_step': 'Use explain() with generated_code_token, then create_resource() with explained_token.',
         **result,  # Include all infrastructure code data for display
     }
