@@ -70,6 +70,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 - **[veFaaS MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_vefaas_function)**：veFaaS MCP Server 助你轻松管理函数和触发器生命周期。  
 - **[VMP MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_vmp)**：自然语言驱动查询分析 Prometheus 指标数据。  
 - **[APMPlus MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_apmplus)**：自然语言驱动查询应用服务的链路追踪日志和运行时指标。  
+- **[VKE MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_vke)**：自然语言驱动管理火山引擎容器服务 VKE 实例。  
 
 
 ### **CDN与边缘**  
