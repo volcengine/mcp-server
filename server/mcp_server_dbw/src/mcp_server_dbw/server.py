@@ -631,8 +631,8 @@ def create_dml_sql_change_ticket(
     if memo is not None:
         req["memo"] = memo
 
-    # resp = dbw_client.
-    # return resp.to_dict()
+    resp = dbw_client.create_dml_sql_change_ticket(req)
+    return resp.to_dict()
 
 
 @mcp_server.tool(
@@ -701,8 +701,8 @@ def create_ddl_sql_change_ticket(
     if memo is not None:
         req["memo"] = memo
 
-    # resp = dbw_client.
-    # return resp.to_dict()
+    resp = dbw_client.create_ddl_sql_change_ticket(req)
+    return resp.to_dict()
 
 
 @mcp_server.tool(
@@ -770,8 +770,8 @@ def describe_tickets(
     if order_by is not None:
         req["order_by"] = order_by
 
-    # resp = dbw_client.
-    # return resp.to_dict()
+    resp = dbw_client.describe_tickets(req)
+    return resp.to_dict()
 
 
 @mcp_server.tool(
@@ -821,8 +821,8 @@ def describe_ticket_detail(
         "ticket_id": ticket_id,
     }
 
-    # resp = dbw_client.
-    # return resp.to_dict()
+    resp = dbw_client.describe_ticket_detail(req)
+    return resp.to_dict()
 
 
 @mcp_server.tool(
@@ -859,8 +859,8 @@ def describe_workflow(
         "ticket_id": ticket_id,
     }
 
-    # resp = dbw_client.
-    # return resp.to_dict()
+    resp = dbw_client.describe_workflow(req)
+    return resp.to_dict()
 
 
 @mcp_server.tool(
@@ -891,8 +891,8 @@ def manual_execute_ticket(
         "ticket_id": ticket_id,
     }
 
-    # resp = dbw_client.
-    # return resp.to_dict()
+    resp = dbw_client.manual_execute_ticket(req)
+    return resp.to_dict()
 
 
 def get_dbw_client(ctx: Context[ServerSession, object, any]) -> DBWClient:
