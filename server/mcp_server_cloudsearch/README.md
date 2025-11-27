@@ -75,7 +75,7 @@ Add the following configuration to your mcp settings file
       ],
       "env": {
         "VOLCENGINE_REGION": "cn-beijing",
-        "VOLC_ACCESSKEY": "your_volcengine_ak",
+        "VOLCENGINE_ACCESS_KEY": "your_volcengine_ak",
         "VOLC_SECRETKEY": "your_volcengine_sk"
       }
     }
@@ -96,7 +96,7 @@ Or clone the repository to your local and start from the local code repository
       ],
       "env": {
         "VOLCENGINE_REGION": "cn-beijing",
-        "VOLC_ACCESSKEY": "your_volcengine_ak",
+        "VOLCENGINE_ACCESS_KEY": "your_volcengine_ak",
         "VOLC_SECRETKEY": "your_volcengine_sk"
       }
     }
