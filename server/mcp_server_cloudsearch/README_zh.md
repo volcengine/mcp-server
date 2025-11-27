@@ -8,30 +8,29 @@
 ## Tools
 本 MCP Server 产品提供以下 Tools (工具/能力):
 ### 1. describe_zones
- - 详细描述：查询可用区列表
+ - 查询可用区列表
 ### 2. describe_instances
- - 详细描述：查询云搜索实例列表，以及实例配置详情
+ - 查询云搜索实例列表，以及实例配置详情
 ### 3. create_instance_in_one_step
- - 详细描述：该接口用于创建实例（立刻运行并开始计费）。支持创建 ElasticSearch (ES) 或 OpenSearch (OS) 实例。
+ - 创建实例（立刻运行并开始计费）。支持创建 ElasticSearch (ES) 或 OpenSearch (OS) 实例。
 ### 4. describe_node_available_specs
- - 详细描述：查询可用的节点类型、节点规格和存储规格列表，并会返回计费配置码
+ - 查询可用的节点类型、节点规格和存储规格列表，并会返回计费配置码
 ### 5. describe_instance_plugins
- - 详细描述：查询实例中已经安装的插件列表
+ - 查询实例中已经安装的插件列表
 ### 6. rename_instance
- - 详细描述：修改目标实例名称
+ - 修改目标实例名称
 ### 7. modify_maintenance_setting
- - 详细描述：修改实例的可维护时间
+ - 修改实例的可维护时间
 ### 8. modify_deletion_protection
- - 详细描述：启停实例的删除保护功能
+ - 启停实例的删除保护功能
 ### 9. describe_instance
- - 详细描述：查询指定实例的配置详情
+ - 查询指定实例的配置详情
 ### 10. restart_node
- - 详细描述：重启实例的特定成员节点
+ - 重启实例的特定成员节点
 ### 11. describe_instance_nodes
- - 详细描述：查询实例的成员节点详情，包括节点类型、运行状态、资源配置等信息
+ - 查询实例的成员节点详情，包括节点类型、运行状态、资源配置等信息
 ### 12. create_instance
- - 详细描述： 该接口用于创建实例（仅下单，待支付）。支持创建 ElasticSearch (ES) 或 OpenSearch (OS)  实例。
-   使用该接口创建实例时，必须配置专用 Master 节点，Master 节点数量为 3。
+ - 创建实例（仅下单，待支付）。支持创建 ElasticSearch (ES) 或 OpenSearch (OS) 实例。
 
 ## 可适配平台  
 方舟、Trae、Cursor、Python

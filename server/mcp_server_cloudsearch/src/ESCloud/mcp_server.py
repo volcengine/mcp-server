@@ -70,7 +70,7 @@ def create_mcp_server():
     @mcp.tool()
     def create_instance_in_one_step(body: dict) -> str:
         """
-        该接口用于创建实例（立刻运行并开始计费）。支持创建 ElasticSearch (ES) 或 OpenSearch (OS) 实例。
+        创建实例（立刻运行并开始计费）。支持创建 ElasticSearch (ES) 或 OpenSearch (OS) 实例。
         Call steps:
         1. Pass "create_instance_in_one_step" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  create_instance_in_one_step
@@ -190,7 +190,7 @@ def create_mcp_server():
     @mcp.tool()
     def create_instance(body: dict) -> str:
         """
-        该接口用于创建实例（仅下单，待支付）。支持创建 ElasticSearch (ES) 或 OpenSearch (OS)  实例。
+        创建实例（仅下单，待支付）。支持创建 ElasticSearch (ES) 或 OpenSearch (OS) 实例。
         使用该接口创建实例时，必须配置专用 Master 节点，Master 节点数量为 3。
         Call steps:
         1. Pass "create_instance" as an input parameter to invoke the `get_note` method to obtain the parameter description.

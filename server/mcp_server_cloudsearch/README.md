@@ -8,30 +8,29 @@
 ## Tools
 This MCP Server product provides the following Tools:
 ### 1. describe_zones
- - Detailed Description: Query the list of available zones.
+ - Query the list of available zones.
 ### 2. describe_instances
- - Detailed Description: Query the list of Cloud Search instances and their configuration details.
+ - Query the list of Cloud Search instances and their configuration details.
 ### 3. create_instance_in_one_step
- - Detailed Description: This interface is used to create an instance (runs immediately and starts billing). It supports creating ElasticSearch (ES) or OpenSearch (OS) instances.
+ - Create an instance (runs immediately and starts billing). It supports creating ElasticSearch (ES) or OpenSearch (OS) instances.
 ### 4. describe_node_available_specs
- - Detailed Description: Query the list of available node types, node specifications, and storage specifications; returns billing configuration codes.
+ - Query the list of available node types, node specifications, and storage specifications; returns billing configuration codes.
 ### 5. describe_instance_plugins
- - Detailed Description: Query the list of plugins installed on the instance.
+ - Query the list of plugins installed on the instance.
 ### 6. rename_instance
- - Detailed Description: Modify the name of the target instance.
+ - Modify the name of the target instance.
 ### 7. modify_maintenance_setting
- - Detailed Description: Modify the maintenance time of the instance.
+ - Modify the maintenance time of the instance.
 ### 8. modify_deletion_protection
- - Detailed Description: Enable or disable the deletion protection feature for the instance.
+ - Enable or disable the deletion protection feature for the instance.
 ### 9. describe_instance
- - Detailed Description: Query the configuration details of a specified instance.
+ - Query the configuration details of a specified instance.
 ### 10. restart_node
- - Detailed Description: Restart a specific member node of the instance.
+ - Restart a specific member node of the instance.
 ### 11. describe_instance_nodes
- - Detailed Description: Query details of the instance's member nodes, including node type, running status, resource configuration, etc.
+ - Query details of the instance's member nodes, including node type, running status, resource configuration, etc.
 ### 12. create_instance
- - Detailed Description: This interface is used to create an instance (order placed only, pending payment). It supports creating ElasticSearch (ES) or OpenSearch (OS) instances.
-   When creating an instance using this interface, dedicated Master nodes must be configured, and the number of Master nodes must be 3.
+ - Create an instance (order placed only, pending payment). It supports creating ElasticSearch (ES) or OpenSearch (OS) instances.
 
 ## Platform  
 Ark, Trae, Cursor, Python
