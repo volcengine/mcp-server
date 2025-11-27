@@ -71,12 +71,12 @@ https://console.volcengine.com/es/region:es+cn-beijing/v2/create?projectName=def
 
 - 请从 [volcengine](https://www.volcengine.com/docs/6291/65568) 获取 ak/sk。
 - 默认区域为 `cn-beijing`，当前支持的区域代码如下：
-  - `cn-beijing': 华北2（北京）
-  - `cn-shanghai': 华东2（上海）
-  - `cn-guangzhou': 华南1（广州）
-  - `cn-hongkong': 中国香港
-  - `ap-southeast-1': 亚太东南（柔佛）
-  - `ap-southeast-3': 亚太东南（雅加达）
+  - `cn-beijing`: 华北2（北京）
+  - `cn-shanghai`: 华东2（上海）
+  - `cn-guangzhou`: 华南1（广州）
+  - `cn-hongkong`: 中国香港
+  - `ap-southeast-1`: 亚太东南（柔佛）
+  - `ap-southeast-3`: 亚太东南（雅加达）
 
 ### 部署
 添加以下配置到你的 mcp settings 文件中
