@@ -29,10 +29,10 @@ Used to manage the instance creation, deployment, and initialization processes.
 ### Instance Information
 Used to retrieve detailed status, configuration, and topology information of instances and their components.
 
-- **`describe_instance`**
-  Retrieves detailed configuration information for a specific instance, including version, network settings, billing mode, and running status.
 - **`describe_instances`**
-  Queries the list of Cloud Search instances under the account with pagination, returning a summary of basic instance information.
+  Queries the instance list. Supports filtering by ID, name, status, etc., returning detailed configurations including network and specs.
+- **`describe_instance`**
+  Retrieves full details for a specific instance ID. Provides more granular configuration data than the list query.
 - **`describe_instance_nodes`**
   Lists details of all member nodes within an instance, including node roles (e.g., Master/Data), hardware specifications, IP addresses, and real-time running status.
 - **`describe_instance_plugins`**
