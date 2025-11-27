@@ -83,7 +83,7 @@ https://console.volcengine.com/es/region:es+cn-beijing/v2/create?projectName=def
 ```json
 {
   "mcpServers": {
-    "mcp-server-cloudsearch": {
+    "CloudSearch": {
       "command": "uvx",
       "args": [
         "--from",
@@ -103,7 +103,7 @@ https://console.volcengine.com/es/region:es+cn-beijing/v2/create?projectName=def
 ```json
 {
   "mcpServers": {
-    "mcp-server-cloudsearch": {
+    "CloudSearch": {
       "command": "uv",
       "args": [
         "--directory",

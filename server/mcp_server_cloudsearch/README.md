@@ -83,7 +83,7 @@ Add the following configuration to your mcp settings file
 ```json
 {
   "mcpServers": {
-    "mcp-server-cloudsearch": {
+    "CloudSearch": {
       "command": "uvx",
       "args": [
         "--from",
@@ -103,7 +103,7 @@ Or clone the repository to your local and start from the local code repository
 ```json
 {
   "mcpServers": {
-    "mcp-server-cloudsearch": {
+    "CloudSearch": {
       "command": "uv",
       "args": [
         "--directory",
