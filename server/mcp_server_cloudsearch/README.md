@@ -45,7 +45,18 @@ Get ak/sk from [volcengine](https://www.volcengine.com/docs/6291/65568), then ad
 ```shell
 VOLC_ACCESSKEY=your_volcengine_ak
 VOLC_SECRETKEY=your_volcengine_sk
+VOLCENGINE_REGION=cn-beijing
 ```
+
+The default region is cn-beijing. The currently supported region codes are as follows:
+
+ - `cn-beijing`: China North 2 (Beijing)
+ - `cn-shanghai`: China East 2 (Shanghai)
+ - `cn-guangzhou`: China South 1 (Guangzhou)
+ - `cn-hongkong`: China (Hong Kong)
+ - `ap-southeast-1`: Asia Pacific Southeast 1 (Johor)
+ - `ap-southeast-3`: Asia Pacific Southeast 3 (Jakarta)
+
 
 ## Using uv
 Add the following configuration to your mcp settings file
