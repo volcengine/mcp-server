@@ -93,7 +93,7 @@ https://console.volcengine.com/es/region:es+cn-beijing/v2/create?projectName=def
       "env": {
         "VOLCENGINE_REGION": "cn-beijing",
         "VOLCENGINE_ACCESS_KEY": "your_volcengine_ak",
-        "VOLCENGINE_ACCESS_KEY": "your_volcengine_sk"
+        "VOLCENGINE_SECRET_KEY": "your_volcengine_sk"
       }
     }
   }
@@ -114,7 +114,7 @@ https://console.volcengine.com/es/region:es+cn-beijing/v2/create?projectName=def
       "env": {
         "VOLCENGINE_REGION": "cn-beijing",
         "VOLCENGINE_ACCESS_KEY": "your_volcengine_ak",
-        "VOLCENGINE_ACCESS_KEY": "your_volcengine_sk"
+        "VOLCENGINE_SECRET_KEY": "your_volcengine_sk"
       }
     }
   }
