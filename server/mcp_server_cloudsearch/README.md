@@ -5,6 +5,7 @@
 | Description | Cloud Search is a fully managed, one-stop information retrieval and analytics platform provided by Volcengine, supporting core capabilities such as full-text search, vector search, hybrid search, and spatio-temporal retrieval. |
 | Category    | Database |
 | Tags        | ES，Elasticsearch，OpenSearch，Search |
+| Console     | [Cloud Search - Volcengine](https://console.volcengine.com/es/) |
 
 ## 🛠️ Core Capabilities (Tools)
 
@@ -52,15 +53,10 @@ Used to modify instance attributes and perform critical maintenance operations.
 - **`restart_node`**
   Executes a restart operation on a specific node within an instance, typically used for fault recovery or enforcing certain configurations.
 
-## Supported Platforms
+## 💻 Integration Guide
 This Server follows the MCP standard protocol and supports various common platforms:
 * **IDE**: Cursor, Trae, VS Code
 * **Platform**: Ark (方舟)
-
-## Service Link (Product Page)
-https://console.volcengine.com/es/region:es+cn-beijing/v2/create?projectName=default
-
-## 💻 Integration Guide
 
 ### 1. Dependencies
 - Python >= 3.11
