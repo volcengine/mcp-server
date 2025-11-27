@@ -1,6 +1,6 @@
 # MCP Server: CloudSearch
 
-| Version | v2.0.0 |
+| Version | v0.2.0 |
 |:---|:--------------------------------------------|
 | Description | Cloud Search is a fully managed, one-stop information retrieval and analytics platform provided by Volcengine, supporting core capabilities such as full-text search, vector search, hybrid search, and spatio-temporal retrieval. |
 | Category    | Database |
