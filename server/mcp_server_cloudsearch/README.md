@@ -34,31 +34,34 @@ This MCP Server product provides the following Tools:
    When creating an instance using this interface, dedicated Master nodes must be configured, and the number of Master nodes must be 3.
 
 ## Platform  
-ark，python，cursor
+Ark, Trae, Cursor, Python
 
 ## Service Link
 https://console.volcengine.com/es/region:es+cn-beijing/v2/create?projectName=default
 
-## Installation
-Get ak/sk from [volcengine](https://www.volcengine.com/docs/6291/65568), then add ak/sk to the mcp server configuration, or configure it in the .env file in the working directory, the format is as follows
+## Installation and Deployment
 
-```shell
-VOLC_ACCESSKEY=your_volcengine_ak
-VOLC_SECRETKEY=your_volcengine_sk
-VOLCENGINE_REGION=cn-beijing
-```
+### Dependencies
+- Python 3.12+
+- UV
 
-The default region is cn-beijing. The currently supported region codes are as follows:
+### Environment Variables
+| Environment Variable | Description | Default | Required |
+| :--- | :--- | :--- | :--- |
+| `VOLCENGINE_ACCESS_KEY` | Your Access Key | - | Yes |
+| `VOLCENGINE_SECRET_KEY` | Your Secret Key | - | Yes |
+| `VOLCENGINE_REGION` | The region | `cn-beijing` | No |
 
- - `cn-beijing`: China North 2 (Beijing)
- - `cn-shanghai`: China East 2 (Shanghai)
- - `cn-guangzhou`: China South 1 (Guangzhou)
- - `cn-hongkong`: China (Hong Kong)
- - `ap-southeast-1`: Asia Pacific Southeast 1 (Johor)
- - `ap-southeast-3`: Asia Pacific Southeast 3 (Jakarta)
+- Please get ak/sk from [volcengine](https://www.volcengine.com/docs/6291/65568).
+- The default region is `cn-beijing`. The currently supported region codes are:
+  - `cn-beijing`: China North 2 (Beijing)
+  - `cn-shanghai`: China East 2 (Shanghai)
+  - `cn-guangzhou`: China South 1 (Guangzhou)
+  - `cn-hongkong`: China (Hong Kong)
+  - `ap-southeast-1`: Asia Pacific Southeast 1 (Johor)
+  - `ap-southeast-3`: Asia Pacific Southeast 3 (Jakarta)
 
-
-## Using uv
+### Deployment
 Add the following configuration to your mcp settings file
 ```json
 {

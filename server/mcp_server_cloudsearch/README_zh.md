@@ -34,29 +34,34 @@
    使用该接口创建实例时，必须配置专用 Master 节点，Master 节点数量为 3。
 
 ## 可适配平台  
-方舟，python，cursor
+方舟、Trae、Cursor、Python
 
 ## 服务开通链接 (整体产品)
 https://console.volcengine.com/es/region:es+cn-beijing/v2/create?projectName=default
 
 ## 安装部署  
-从 [volcengine](https://www.volcengine.com/docs/6291/65568) 获取 ak/sk, 然后将 ak/sk 添加到 mcp server 配置中, 或者在工作目录下的 `.env` 文件中配置, 格式如下:
-```shell
-VOLC_ACCESSKEY=your_volcengine_ak
-VOLC_SECRETKEY=your_volcengine_sk
-VOLCENGINE_REGION=cn-beijing
-```
 
-默认区域为 `cn-beijing`，当前支持的区域代码如下：
+### 依赖
+- Python >= 3.11
+- UV
 
- - `cn-beijing': 华北2（北京）
- - `cn-shanghai': 华东2（上海）
- - `cn-guangzhou': 华南1（广州）
- - `cn-hongkong': 中国香港
- - `ap-southeast-1': 亚太东南（柔佛）
- - `ap-southeast-3': 亚太东南（雅加达）
+### 环境配置
+| 环境变量 | 描述 | 默认值 | 是否必选 |
+| :--- | :--- | :--- | :--- |
+| `VOLCENGINE_ACCESS_KEY` | 访问密钥 | - | 是 |
+| `VOLCENGINE_SECRET_KEY` | 私有密钥 | - | 是 |
+| `VOLCENGINE_REGION` | 区域 | `cn-beijing` | 否 |
 
-## 使用 uv
+- 请从 [volcengine](https://www.volcengine.com/docs/6291/65568) 获取 ak/sk。
+- 默认区域为 `cn-beijing`，当前支持的区域代码如下：
+  - `cn-beijing': 华北2（北京）
+  - `cn-shanghai': 华东2（上海）
+  - `cn-guangzhou': 华南1（广州）
+  - `cn-hongkong': 中国香港
+  - `ap-southeast-1': 亚太东南（柔佛）
+  - `ap-southeast-3': 亚太东南（雅加达）
+
+### 部署
 添加以下配置到你的 mcp settings 文件中
 ```json
 {
