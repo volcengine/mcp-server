@@ -6,31 +6,49 @@
 | Tags        | ES，Elasticsearch，OpenSearch，Search                                                                                                                                                |
 
 ## Tools
-This MCP Server product provides the following Tools:
-### 1. describe_zones
- - Query the list of available zones.
-### 2. describe_instances
- - Query the list of Cloud Search instances and their configuration details.
-### 3. create_instance_in_one_step
- - Create an instance (runs immediately and starts billing). It supports creating ElasticSearch (ES) or OpenSearch (OS) instances.
-### 4. describe_node_available_specs
- - Query the list of available node types, node specifications, and storage specifications; returns billing configuration codes.
-### 5. describe_instance_plugins
- - Query the list of plugins installed on the instance.
-### 6. rename_instance
- - Modify the name of the target instance.
-### 7. modify_maintenance_setting
- - Modify the maintenance time of the instance.
-### 8. modify_deletion_protection
- - Enable or disable the deletion protection feature for the instance.
-### 9. describe_instance
- - Query the configuration details of a specified instance.
-### 10. restart_node
- - Restart a specific member node of the instance.
-### 11. describe_instance_nodes
- - Query details of the instance's member nodes, including node type, running status, resource configuration, etc.
-### 12. create_instance
- - Create an instance (order placed only, pending payment). It supports creating ElasticSearch (ES) or OpenSearch (OS) instances.
+This MCP Server product provides the following Tools (capabilities), organized by functional category:
+
+### Basic Resource Query
+Used to query the basic environment and specifications required for instance creation.
+
+- **`describe_zones`**
+  Retrieves the list of Availability Zones (AZs) that support Cloud Search instance deployment in the current region.
+- **`describe_node_available_specs`**
+  Queries available node specifications, storage types, and corresponding billing configuration codes to assist in resource selection during instance creation.
+
+### Lifecycle Management
+Used to manage the instance creation, deployment, and initialization processes.
+
+- **`create_instance`**
+  Creates a new Cloud Search instance order (supports Elasticsearch or OpenSearch).
+  *Note: This API only generates a pending order; resource deployment begins only after payment is completed.*
+- **`create_instance_in_one_step`**
+  Completes Cloud Search instance creation and payment in one step (supports Elasticsearch or OpenSearch).
+  *Note: Once successfully called, the instance will immediately start deploying and billing.*
+
+### Instance Information
+Used to retrieve detailed status, configuration, and topology information of instances and their components.
+
+- **`describe_instance`**
+  Retrieves detailed configuration information for a specific instance, including version, network settings, billing mode, and running status.
+- **`describe_instances`**
+  Queries the list of Cloud Search instances under the account with pagination, returning a summary of basic instance information.
+- **`describe_instance_nodes`**
+  Lists details of all member nodes within an instance, including node roles (e.g., Master/Data), hardware specifications, IP addresses, and real-time running status.
+- **`describe_instance_plugins`**
+  Retrieves the list of plugins currently installed on the instance, including plugin names, versions, and enablement status.
+
+### Configuration & Operations
+Used to modify instance attributes and perform critical maintenance operations.
+
+- **`rename_instance`**
+  Updates the display name (Alias) of a specific instance to facilitate business identification and management.
+- **`modify_maintenance_setting`**
+  Sets or adjusts the maintenance window for the instance. The system will perform necessary upgrades or patch updates during this period.
+- **`modify_deletion_protection`**
+  Enables or disables the "Deletion Protection" feature for the instance to prevent accidental release due to misoperation.
+- **`restart_node`**
+  Executes a restart operation on a specific node within an instance, typically used for fault recovery or enforcing certain configurations.
 
 ## Platform  
 Ark, Trae, Cursor, Python

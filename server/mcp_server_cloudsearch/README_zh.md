@@ -6,31 +6,49 @@
 | 标签 | ES，Elasticsearch，OpenSearch，搜索              |
 
 ## Tools
-本 MCP Server 产品提供以下 Tools (工具/能力):
-### 1. describe_zones
- - 查询可用区列表
-### 2. describe_instances
- - 查询云搜索实例列表，以及实例配置详情
-### 3. create_instance_in_one_step
- - 创建实例（立刻运行并开始计费）。支持创建 ElasticSearch (ES) 或 OpenSearch (OS) 实例。
-### 4. describe_node_available_specs
- - 查询可用的节点类型、节点规格和存储规格列表，并会返回计费配置码
-### 5. describe_instance_plugins
- - 查询实例中已经安装的插件列表
-### 6. rename_instance
- - 修改目标实例名称
-### 7. modify_maintenance_setting
- - 修改实例的可维护时间
-### 8. modify_deletion_protection
- - 启停实例的删除保护功能
-### 9. describe_instance
- - 查询指定实例的配置详情
-### 10. restart_node
- - 重启实例的特定成员节点
-### 11. describe_instance_nodes
- - 查询实例的成员节点详情，包括节点类型、运行状态、资源配置等信息
-### 12. create_instance
- - 创建实例（仅下单，待支付）。支持创建 ElasticSearch (ES) 或 OpenSearch (OS) 实例。
+本 MCP Server 产品提供以下 Tools (工具/能力)，已按功能类别整理如下：
+
+### 基础资源查询
+用于查询创建实例所需的基础环境与规格信息。
+
+- **`describe_zones`**
+  获取当前地域下支持部署云搜索实例的可用区（Zones）列表。
+- **`describe_node_available_specs`**
+  查询可用的节点规格、存储类型及对应的计费配置码，用于辅助实例创建时的资源选型。
+
+### 实例生命周期管理 
+用于管理实例的创建、部署与初始化流程。
+
+- **`create_instance`**
+  创建一个新的云搜索实例订单（支持 Elasticsearch 或 OpenSearch）。
+  *注意：此接口仅生成待支付订单，需完成支付后才会开始部署资源。*
+- **`create_instance_in_one_step`**
+  一步完成云搜索实例的创建与支付（支持 Elasticsearch 或 OpenSearch）。
+  *注意：调用成功后实例将立即开始部署并进入计费状态。*
+
+### 实例信息查询
+用于获取实例及其组件的详细状态、配置与拓扑信息。
+
+- **`describe_instance`**
+  获取指定实例的详细配置信息，包括版本、网络配置、计费模式及运行状态等。
+- **`describe_instances`**
+  分页查询账户下的云搜索实例列表，返回实例的基本信息概览。
+- **`describe_instance_nodes`**
+  列出实例内的所有成员节点详情，包含节点角色（如 Master/Data）、硬件规格、IP 地址及实时运行状态。
+- **`describe_instance_plugins`**
+  获取实例当前已安装的插件列表，包含插件名称、版本号及启用状态。
+
+### 实例配置与运维
+用于修改实例属性及执行关键的运维操作。
+
+- **`rename_instance`**
+  更新指定实例的显示名称（Alias），便于业务识别与管理。
+- **`modify_maintenance_setting`**
+  设置或调整实例的可维护时间窗口，系统将在该时段内进行必要的升级或补丁更新。
+- **`modify_deletion_protection`**
+  开启或关闭实例的“删除保护”功能，防止实例因误操作被意外释放。
+- **`restart_node`**
+  对实例中的指定节点执行重启操作，通常用于故障恢复或某些配置的强制生效。
 
 ## 可适配平台  
 方舟、Trae、Cursor、Python
