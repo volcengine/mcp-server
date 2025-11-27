@@ -107,7 +107,7 @@ Or clone the repository to your local and start from the local code repository
       "command": "uv",
       "args": [
         "--directory",
-        "path/to/server/mcp_server_cloudsearch/src/ESCloud",
+        "/absolute/path/to/mcp-server/server/mcp_server_cloudsearch/src/ESCloud",
         "run",
         "server.py"
       ],

@@ -107,7 +107,7 @@ https://console.volcengine.com/es/region:es+cn-beijing/v2/create?projectName=def
       "command": "uv",
       "args": [
         "--directory",
-        "path/to/server/mcp_server_cloudsearch/src/ESCloud",
+        "/absolute/path/to/mcp-server/server/mcp_server_cloudsearch/src/ESCloud",
         "run",
         "server.py"
       ],
