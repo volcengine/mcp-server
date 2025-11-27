@@ -19,24 +19,22 @@ note = {
            "字段"： InstanceListFilter
             参数 ( 类型 ): 是否必选  描述 
             ---- ( ---- ): ----  ---- 
-            Name ( String ): 否  过滤条件名称。支持的查询条件如下： 
-                  - InstanceId：实例 ID 
-                  - InstanceName：实例名称 
-                  - ZoneId：可用区 ID 
-                  - Status：实例状态 
-                  - Version：实例版本 
-                  - ChargeType：计费类型 
-            Values ( Array of String ): 否  用于筛选的字符串值。 
-                  - Performs a case-insensitive substring match. 
-                  - Treats input as a raw string; regular expressions and wildcards are NOT supported. 
-                  - Note for 'Status' field: Requires a strict, case-sensitive exact match. Must be one of: 
-                    - WaitingPaid  
-                    - Creating 
-                    - Running 
-                    - Updating 
-                    - Scaling 
-                    - Restoring 
-                    - Releasing 
+            Name ( String ): 否  过滤条件的字段名称。可选值如下： 
+                  - InstanceId: 实例 ID 
+                  - InstanceName: 实例名称 
+                  - Version: 版本号 
+                  - ChargeType: 付费类型 
+                  - Status: 实例状态 
+                  - ZoneId: 可用区 ID 
+            Values ( Array of String ): 否  过滤值的列表（同一字段内的多个值之间为 OR 关系）。 
+                  1. InstanceName 和 InstanceId: 采用子串匹配（不区分大小写）。 
+                  2. Version: 将版本号中的点替换为下划线。 
+                     - ElasticSearch: 添加前缀 V (例: 7.10 -> V7_10，常用版本 6.8, 7.10, 8.18) 
+                     - OpenSearch: 添加前缀 OPEN_SEARCH_ (例: 2.9 -> OPEN_SEARCH_2_9，常用版本 2.9) 
+                  3. 其他字段: 采用精确匹配（区分大小写），支持的枚举值如下： 
+                     - ChargeType: PostPaid, PrePaid 
+                     - Status: WaitingPaid, Creating, Running, Updating, Scaling, Restoring, Releasing 
+                     - ZoneId: 请通过 describe_zones 接口查询可用值。 
            "字段"： TagFilter
             参数 ( 类型 ): 是否必选  描述 
             ---- ( ---- ): ----  ---- 
