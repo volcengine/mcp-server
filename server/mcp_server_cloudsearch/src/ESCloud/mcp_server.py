@@ -46,7 +46,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_zones(body: dict) -> str:
         """
-        查询可用区列表
+        Retrieves the list of available Availability Zones (AZs) in the current region. Use this tool before creating an instance to ensure the target zone supports deployment.
         Call steps:
         1. Pass "describe_zones" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_zones
@@ -58,7 +58,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_instances(body: dict) -> str:
         """
-        查询云搜索实例列表，以及实例配置详情
+        Searches for instances using filters like ID, name, status, or version. Use this tool for discovery, listing, or finding instances based on criteria. Returns detailed configuration objects.
         Call steps:
         1. Pass "describe_instances" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_instances
@@ -70,7 +70,7 @@ def create_mcp_server():
     @mcp.tool()
     def create_instance_in_one_step(body: dict) -> str:
         """
-        创建实例（立刻运行并开始计费）。支持创建 ElasticSearch (ES) 或 OpenSearch (OS) 实例。
+        Creates, pays for, and immediately provisions a new Elasticsearch or OpenSearch instance. Use this tool when the user wants to start using the instance right away. Warning: This action incurs immediate charges.
         Call steps:
         1. Pass "create_instance_in_one_step" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  create_instance_in_one_step
@@ -98,7 +98,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_instance_plugins(body: dict) -> str:
         """
-        查询实例中已经安装的插件列表
+        Retrieves the list of installed plugins for a specific instance. Use this tool to verify if specific extensions (e.g., analysis plugins) are enabled.
         Call steps:
         1. Pass "describe_instance_plugins" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_instance_plugins
@@ -112,7 +112,7 @@ def create_mcp_server():
     @mcp.tool()
     def rename_instance(body: dict) -> str:
         """
-        修改目标实例名称
+        Updates the display name (alias) of an instance. Use this tool when the user wants to retag or organize their instances with human-readable names.
         Call steps:
         1. Pass "rename_instance" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  rename_instance
@@ -124,7 +124,7 @@ def create_mcp_server():
     @mcp.tool()
     def modify_maintenance_setting(body: dict) -> str:
         """
-        修改实例的可维护时间
+        Configures the preferred maintenance window for an instance. Use this tool to schedule system upgrades during off-peak hours.
         Call steps:
         1. Pass "modify_maintenance_setting" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  modify_maintenance_setting
@@ -138,7 +138,7 @@ def create_mcp_server():
     @mcp.tool()
     def modify_deletion_protection(body: dict) -> str:
         """
-        启停实例的删除保护功能
+        Toggles the "Deletion Protection" flag. Use this tool to lock an instance against accidental deletion or to unlock it prior to a valid deletion request.
         Call steps:
         1. Pass "modify_deletion_protection" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  modify_deletion_protection
@@ -152,7 +152,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_instance(body: dict) -> str:
         """
-        查询指定实例的配置详情
+        Retrieves the most comprehensive details for a single, specific instance ID. Use this tool when the exact ID is known and maximum granularity is required (more detailed than describe_instances).
         Call steps:
         1. Pass "describe_instance" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_instance
@@ -164,7 +164,7 @@ def create_mcp_server():
     @mcp.tool()
     def restart_node(body: dict) -> str:
         """
-        重启实例的特定成员节点
+        Restarts a specific node within an instance. Use this tool only when necessary for fault recovery or to force a configuration refresh on a specific node.
         Call steps:
         1. Pass "restart_node" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  restart_node
@@ -176,7 +176,7 @@ def create_mcp_server():
     @mcp.tool()
     def describe_instance_nodes(body: dict) -> str:
         """
-        查询实例的成员节点详情，包括节点类型、运行状态、资源配置等信息
+        Lists detailed information about the member nodes within a specific instance, including roles (Master/Data), hardware specs, and IP addresses. Use this tool for topology inspection or connection troubleshooting.
         Call steps:
         1. Pass "describe_instance_nodes" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  describe_instance_nodes
@@ -190,8 +190,8 @@ def create_mcp_server():
     @mcp.tool()
     def create_instance(body: dict) -> str:
         """
-        创建实例（仅下单，待支付）。支持创建 ElasticSearch (ES) 或 OpenSearch (OS) 实例。
-        使用该接口创建实例时，必须配置专用 Master 节点，Master 节点数量为 3。
+        Creates a pending, unpaid order for a new Elasticsearch or OpenSearch instance. Use this tool when the user wants to set up an instance configuration but proceed with payment manually later. Note: This does not provision the instance immediately.
+        Constraint: When calling this tool, dedicated Master nodes are mandatory, and the quantity of Master nodes must be set to exactly 3.
         Call steps:
         1. Pass "create_instance" as an input parameter to invoke the `get_note` method to obtain the parameter description.
         2. After obtaining the parameter description, invoke  create_instance
