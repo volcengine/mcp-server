@@ -68,7 +68,7 @@ https://console.volcengine.com/es/region:es+cn-beijing/v2/create?projectName=def
 
 ### 2. Obtain Credentials
 Please visit the [Volcengine IAM: API Access Key](https://console.volcengine.com/iam/keymanage/) page to obtain your `Access Key` and `Secret Key`.
-Reference Document: [https://www.volcengine.com/docs/6291/65568]
+- Reference Document: [Access Key Management](https://www.volcengine.com/docs/6291/65568).
 
 ### 3. Parameter Configuration
 Running the MCP Server requires configuring the following environment variables:

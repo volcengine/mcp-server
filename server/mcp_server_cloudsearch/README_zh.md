@@ -68,7 +68,7 @@ https://console.volcengine.com/es/region:es+cn-beijing/v2/create?projectName=def
 
 ### 2. 获取凭证
 请前往 [火山引擎访问控制：API访问密钥](https://console.volcengine.com/iam/keymanage/) 页面获取 `Access Key` 和 `Secret Key`。
-参考文档：[https://www.volcengine.com/docs/6291/65568]
+- 参考文档：[Access Key（密钥）管理](https://www.volcengine.com/docs/6291/65568)。
 
 ### 3. 参数配置
 运行 MCP Server 需要配置以下环境变量：
