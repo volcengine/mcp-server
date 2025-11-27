@@ -28,11 +28,11 @@ from typing import List
 
 async def generate_infrastructure_code(
     resource_type: str,
-    properties: dict = {},
+    properties: dict = {},  # pyright: ignore[reportMissingTypeArgument]
     identifier: str = '',
-    patch_document: List = [],
+    patch_document: List = [],  # pyright: ignore[reportMissingTypeArgument]
     region: str = '',
-) -> dict:
+) -> dict:  # pyright: ignore[reportMissingTypeArgument]
     """Generate infrastructure code for security scanning before resource creation or update."""
     if not resource_type:
         raise ClientError('Please provide a resource type (e.g., Volcengine::IAM::User)')
@@ -67,7 +67,7 @@ async def generate_infrastructure_code(
                 'TypeName': resource_type,
                 'Identifier': identifier,
             }
-            current_resource, _, _ = cloudcontrol_client.do_call_with_http_info(
+            current_resource, _, _ = cloudcontrol_client.do_call_with_http_info(  # pyright: ignore[reportUnknownMemberType, reportGeneralTypeIssues]
                 info=universal_info,
                 body=params,
             )
@@ -125,7 +125,10 @@ async def generate_infrastructure_code(
             update_properties = current_properties
 
         # V1: Always add required MCP server identification tags for updates too
-        properties_with_tags = add_default_tags(update_properties, schema)
+        if supports_tagging:
+            properties_with_tags = add_default_tags(properties, schema)
+        else:
+            properties_with_tags = properties
 
         operation = 'update'
     else:
@@ -134,7 +137,11 @@ async def generate_infrastructure_code(
             raise ClientError('Please provide the properties for the desired resource')
 
         # V1: Always add required MCP server identification tags
-        properties_with_tags = add_default_tags(properties, schema)
+        # Check if resource supports tagging
+        if supports_tagging:
+            properties_with_tags = add_default_tags(properties, schema)
+        else:
+            properties_with_tags = properties
 
         operation = 'create'
 
@@ -154,6 +161,6 @@ async def generate_infrastructure_code(
     }
 
     if patch_document_with_tags:
-        result['recommended_patch_document'] = patch_document_with_tags
+        result['recommended_patch_document'] = patch_document_with_tags  # pyright: ignore[reportArgumentType]
 
     return result

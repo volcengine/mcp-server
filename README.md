@@ -70,6 +70,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 - **[veFaaS MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_vefaas_function)**：veFaaS MCP Server 助你轻松管理函数和触发器生命周期。  
 - **[VMP MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_vmp)**：自然语言驱动查询分析 Prometheus 指标数据。  
 - **[APMPlus MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_apmplus)**：自然语言驱动查询应用服务的链路追踪日志和运行时指标。  
+- **[VKE MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_vke)**：自然语言驱动管理火山引擎容器服务 VKE 实例。  
 
 
 ### **CDN与边缘**  
@@ -169,7 +170,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 
 ### **位置服务**  
 
-- **[高德地图](https://github.com/baidu-maps/mcp)**：高德地图官方 MCP Server。  
+- **高德地图**：高德地图官方 MCP Server。  
 - **[百度地图](https://github.com/baidu-maps/mcp)**：百度地图核心API现已全面兼容MCP协议，是国内首家兼容MCP协议的地图服务商。  
 - **[Google Maps](https://github.com/modelcontextprotocol/servers/tree/main/src/google-maps)**：Location services, directions, and place details.  
 - **[FlightRadar24](https://github.com/sunsetcoder/flightradar24-mcp-server)**：A Claude Desktop MCP server that helps you track flights in real-time using Flightradar24 data.  

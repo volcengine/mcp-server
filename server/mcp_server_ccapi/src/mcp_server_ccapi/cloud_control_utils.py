@@ -14,7 +14,7 @@ from mcp_server_ccapi.errors import ClientError
 from typing import Any, Dict
 
 
-def add_default_tags(properties: Dict, schema: Dict) -> Dict:
+def add_default_tags(properties: Dict, schema: Dict) -> Dict:  # pyright: ignore[reportMissingTypeArgument]
     """Add default tags to resource properties. Always tries to add tags - let VOLCENGINE reject if unsupported."""
     # Return empty dict when properties is None or empty dict {}
     # This prevents processing invalid/missing resource properties

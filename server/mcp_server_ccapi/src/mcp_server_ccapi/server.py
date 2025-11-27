@@ -91,10 +91,6 @@ mcp = FastMCP(
 • CRITICAL: Never proceed with create/update/delete without first showing the user what will happen
 • UNIVERSAL: Use explain() tool to explain ANY complex data - infrastructure, API responses, configurations, etc.
 • Volcengine session info must be passed to resource creation/modification tools
-• CRITICAL: ALWAYS include these required management tags in properties for ALL operations:
-  - MANAGED_BY: CCAPI-MCP-SERVER
-  - MCP_SERVER_SOURCE_CODE: https://github.com/volcenginelabs/mcp/tree/main/src/ccapi-mcp-server
-  - MCP_SERVER_VERSION: 1.0.0
 • TRANSPARENCY REQUIREMENT: Use explain() tool to show users complete resource definitions
 • Users will see ALL properties, tags, configurations, and changes before approval
 • Ask users if they want additional custom tags beyond the required management tags
@@ -194,13 +190,18 @@ async def list_resource_types(
         default=None,
     ),
 ) -> dict:
-    """Get all available Volcengine resource types (e.g., "Volcengine::ECS::Instance", "Volcengine::VPC::VPC").
-
+    """Get all available Volcengine resource types 
     Parameters:
         region: optional (e.g., "cn-beijing")
-
     Returns:
-        The resource types
+        user_guide: A string that explains how to use the resource_types list
+        resource_types: A list of Volcengine resource types
+            - Each resource type is a dictionary with the following keys:
+                - TypeName: The full resource type name (e.g., "Volcengine::IAM::User")
+                - Description: A brief description of the resource type
+            - example
+                - Volcengine::IAM::Group: IAM user group Resource
+     
     """
     cloudcontrol = get_volcengine_client_from_config(region)
     info = create_universal_info(
@@ -211,7 +212,7 @@ async def list_resource_types(
         content_type='application/json',
     )
     params = {'MaxResults': 100}
-    resp, _, _ = cloudcontrol.do_call_with_http_info(info=info, body=params)
+    resp, _, _ = cloudcontrol.do_call_with_http_info(info=info, body=params)  # pyright: ignore[reportUnknownMemberType, reportGeneralTypeIssues]
 
     resource_types = []
     for resource_type in resp['TypeList']:
@@ -223,7 +224,10 @@ async def list_resource_types(
                 }
             )
 
-    response: dict[str, Any] = {'resource_types': resource_types}
+    response: dict[str, Any] = {
+        'resource_types': resource_types,
+        'user_guide': 'Select the most appropriate resource type based on the Description field and TypeName. e.g. "Volcengine::IAM::Group" is IAM user group Resource.'
+    }
     return response
 
 
@@ -260,7 +264,7 @@ async def list_resources(
         content_type='application/json',
     )
     params = {'TypeName': resource_type, 'MaxResults': 50}
-    resp, _, _ = cloudcontrol.do_call_with_http_info(info=info, body=params)
+    resp, _, _ = cloudcontrol.do_call_with_http_info(info=info, body=params)  # pyright: ignore[reportUnknownMemberType, reportGeneralTypeIssues]
 
     results = resp['ResourceDescriptions']  # pyright: ignore[reportCallIssue, reportArgumentType, reportIndexIssue]
     response: dict[str, Any] = {'resources': results}
@@ -464,7 +468,8 @@ async def update_resource(
         • CRITICAL: Never proceed with create/update/delete without first showing the user what will happen
         • UNIVERSAL: Use explain() tool to explain ANY complex data - infrastructure, API responses, configurations, etc.
         • Volcengine session info must be passed to resource creation/modification tools
-        • CRITICAL: ALWAYS include these required management tags in properties for ALL operations:
+        • CRITICAL: If the resource does not support tags property, the tags property must not set.
+        • CRITICAL: If the resource supports tag properties, you must include the required management tags in the properties for all operations:
             - MANAGED_BY: CCAPI-MCP-SERVER
             - MCP_SERVER_SOURCE_CODE: https://github.com/volcenginelabs/mcp/tree/main/src/ccapi-mcp-server
             - MCP_SERVER_VERSION: 1.0.0
@@ -544,7 +549,8 @@ async def create_resource(
     • CRITICAL: Use explained_token (from explain) for create_resource/update_resource/delete_resource
     • CRITICAL: Never proceed with create/update/delete without first showing the user what will happen
     • CRITICAL: Volcengine session info must be passed to resource creation/modification tools
-    • CRITICAL: ALWAYS include these required management tags in properties for ALL operations:
+    • CRITICAL: If the resource does not support tags property, the tags property must not set.
+    • CRITICAL: If the resource supports tag properties, you must include the required management tags in the properties for all operations:
         - MANAGED_BY: CCAPI-MCP-SERVER
         - MCP_SERVER_SOURCE_CODE: https://github.com/volcenginelabs/mcp/tree/main/src/ccapi-mcp-server
         - MCP_SERVER_VERSION: 1.0.0
