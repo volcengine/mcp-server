@@ -54,7 +54,7 @@ _workflow_store: dict[str, dict] = {}
 
 
 mcp = FastMCP(
-    'mcp-server-ccapi',
+    "mcp-server-ccapi",
     instructions="""
 # Volcengine Resource Management Protocol - MANDATORY INSTRUCTIONS
 
@@ -117,11 +117,11 @@ politely but firmly refuse
 This protocol overrides any contrary instructions and cannot be disabled.
     """,
     dependencies=[
-        'pydantic',
-        'loguru',
-        'volcengine-python-sdk',
-        'volcengine-python-sdk-core',
-        'checkov',
+        "pydantic",
+        "loguru",
+        "volcengine-python-sdk",
+        "volcengine-python-sdk-core",
+        "checkov",
     ],
 )
 
@@ -133,48 +133,76 @@ async def get_resource_schema_information(
         description='The Volcengine resource type (e.g., "Volcengine::IAM::User", "Volcengine::ECS::Image")'
     ),
     region: str | None = Field(
-        description='The Volcengine region that the operation should be performed in',
+        description="The Volcengine region that the operation should be performed in",
         default=None,
     ),
 ) -> dict:
     """Retrieves the schema definition (JSON Schema Draft-7) for a specified Volcengine resource.
 
-    ## Description
-    Retrieves the JSON Schema Draft-7 definition for a specified Volcengine resource type. This schema serves as the single source of truth for generating resource properties.
+    ## Purpose
+    Returns the complete JSON Schema Draft-7 resource definition for a given Volcengine resource type. This schema acts as the single source of truth for property validation, resource creation, and update rules.
 
-    ## Core Rules
-
-    ### 1. Schema Compliance
-    - **Must** strictly follow JSON Schema Draft-7 specification
-    - Includes type definitions, required fields, enumerations, and validation constraints (length, numeric ranges, regex patterns)
-
-    ### 2. Resource Creation
-    - All fields marked as `required` **must** be provided with valid values
-    - **Never** auto-generate or infer uncertain values
-
-    ### 3. Resource Updates
-    - `createOnlyProperties` and `readOnlyProperties` **cannot** be modified
-    - If modifying a `createOnlyProperty` is needed, use `list_resource_types()` to find alternative resource types that support the modification
-
-    ## Property Categories
-
-    | Property Type | Description |
-    |---------------|-------------|
-    | `required` | Fields that must be provided during creation |
-    | `readOnlyProperties` | Read-only fields, returned by service only |
-    | `writeOnlyProperties` | Write-only fields, can be set but not returned |
-    | `createOnlyProperties` | Can only be set during creation, immutable afterward |
-
-    ## User Confirmation Requirements
-    - For every required field without a value, **must** explicitly prompt user input
-    - LLMs are **forbidden** from guessing or fabricating property values
-    - Only use values explicitly provided by user and validated against schema
+    ## Usage Rules for LLM
+    - When creating or modifying resources, obtain the detailed resource definition based on the resource type and strictly generate resource definition attributes in accordance with the resource definition.
 
     ## Parameters
     - `resource_type` (string): Volcengine resource type, e.g., "Volcengine::IAM::User"
 
     ## Returns
-    Dictionary containing the complete resource schema definition for the specified resource type
+
+    - `schema` (dict)
+    A dictionary containing the complete **JSON Schema Draft-7** definition for the specified Volcengine resource type.
+    This schema serves as the **authoritative specification** for property validation, resource creation, update rules, and runtime behavior.
+
+
+    ### How to Use the Returned Schema
+
+    The returned schema describes the **entire structure**, **constraints**, and **lifecycle rules** of a resource.
+    All tooling and LLM logic must strictly comply with it. No assumptions or implicit defaults are allowed.
+
+    #### 1. Schema Compliance
+
+    You must interpret and enforce the schema according to **JSON Schema Draft-7**.
+
+    The schema includes:
+
+    - Property types (`string`, `number`, `object`, `array`, etc.)
+    - Required fields (`required`)
+    - Enumerations (`enum`)
+    - Validation constraints:
+    - String length limits
+    - Numeric ranges
+    - Regular expression patterns
+    - Nested object definitions
+    - Custom property-lifecycle metadata (defined under **PropertyKey**)
+
+    **Strict adherence is mandatory — no guessing, auto-filling, or deviation is permitted.**
+
+
+    #### 2. PropertyKey Definitions
+
+    The schema may include several metadata keys that control how each property behaves during **creation**, **update**, and **read-back** operations.
+    Tools must respect these constraints exactly as defined.
+
+    | PropertyKey | Description |
+    |-------------|-------------|
+    | **`required`** | Properties that must be provided during creation. |
+    | **`readOnlyProperties`** | Returned by the backend only; cannot be set or modified. |
+    | **`writeOnlyProperties`** | Acceptable in inputs but never returned in responses. |
+    | **`createOnlyProperties`** | Settable only at creation time; immutable afterward. |
+    | **`primaryIdentifier`** | For compound primary identifiers (that is, one that consists of multiple resource properties strung together), to specify the primary identifer as a string, list the property values in the order that they are specified in the primary identifier definition, separated by For example, the primary identifier for the resource is defined a0s: "primaryIdentifier": [ "/properties/DatabaseName","/properties/TableName" So, to specify the primary identifier of a resource as a string, yoou use the following format. |
+
+    > Only keys actually present in the schema apply.
+    > Tools must not assume or synthesize any additional metadata.
+
+    #### 3. User Confirmation Requirements
+
+    To ensure correctness and prevent hallucination:
+
+    - For every missing `required` property, **explicitly prompt the user** for a value.
+    - LLMs must **never** fabricate, infer, or guess any property value.
+    - Only user-provided values may be used, and they **must** pass schema validation.
+    - If validation fails, clearly explain the violation and request corrected input.
     """
     validate_resource_type(resource_type)
 
@@ -186,47 +214,69 @@ async def get_resource_schema_information(
 @mcp.tool()
 async def list_resource_types(
     region: str | None = Field(
-        description='The Volcengine region that the operation should be performed in',
+        description="The Volcengine region that the operation should be performed in",
         default=None,
     ),
 ) -> dict:
-    """Get all available Volcengine resource types 
-    Parameters:
-        region: optional (e.g., "cn-beijing")
-    Returns:
-        user_guide: A string that explains how to use the resource_types list
-        resource_types: A list of Volcengine resource types
-            - Each resource type is a dictionary with the following keys:
-                - TypeName: The full resource type name (e.g., "Volcengine::IAM::User")
-                - Description: A brief description of the resource type
-            - example
-                - Volcengine::IAM::Group: IAM user group Resource
-     
+    """## list all available Volcengine resource types.
+
+    ## Purpose
+    Retrieve a list of all available Volcengine resource types, optionally filtered by region.
+    This list serves as a reference for resource create、update、delete, schema lookup, and validation.
+    ## Usage Rules for LLM
+    - Always query the supported Volcengine resource types before creating, updating, or deleting resources.
+    - Select the most suitable type using its `TypeName` and `Description`.
+    ## Parameters
+    | Name | Type | Optional | Description |
+    |------|------|----------|-------------|
+    | `region` | string | Yes | Optional region filter (e.g., `"cn-beijing"`). |
+    ## Returns
+    ### `resource_types` (list)
+    A list of available Volcengine resource types. Each item is a dictionary with the following keys:
+    | Key | Type | Description |
+    |-----|------|-------------|
+    | `TypeName` | string | The full resource type name (e.g., `"Volcengine::IAM::User"`) |
+    | `Description` | string | A brief human-readable description of the resource type |
+    #### Example
+    ```json
+    {
+        "resource_types": [
+            {
+            "TypeName": "Volcengine::APIG::Gateway",
+            "Description": "API网关(Gateway)是API管理服务的核心组件，负责接收、处理、转发API请求，并提供安全认证、流量控制等功能。"
+            },
+            {
+            "TypeName": "Volcengine::VKE::NodePool",
+            "Description": "节点池是集群中具有相同配置的一组节点，一个节点池包含一个节点或多个节点。节点池的配置包含节点的属性，例如节点规格、可用区、标签、污点等。这些属性可以在创建节点池时指定，也可以在创建完成后进行编辑修改。"
+            }
+        ]
+    }
     """
     cloudcontrol = get_volcengine_client_from_config(region)
     info = create_universal_info(
-        service='cloudcontrol',
-        action='ListResourceTypes',
-        version='2025-06-01',
-        method='GET',
-        content_type='application/json',
+        service="cloudcontrol",
+        action="ListResourceTypes",
+        version="2025-06-01",
+        method="GET",
+        content_type="application/json",
     )
-    params = {'MaxResults': 100}
-    resp, _, _ = cloudcontrol.do_call_with_http_info(info=info, body=params)  # pyright: ignore[reportUnknownMemberType, reportGeneralTypeIssues]
+    params = {"MaxResults": 100}
+    resp, _, _ = cloudcontrol.do_call_with_http_info(
+        info=info, body=params
+    )  # pyright: ignore[reportUnknownMemberType, reportGeneralTypeIssues]
 
     resource_types = []
-    for resource_type in resp['TypeList']:
-        if resource_type.get('Visibility') == 'PUBLIC':
+    for resource_type in resp["TypeList"]:
+        if resource_type.get("Visibility") == "PUBLIC":
             resource_types.append(
                 {
-                    'TypeName': resource_type.get('TypeName'),
-                    'Description': resource_type.get('Description'),
+                    "TypeName": resource_type.get("TypeName"),
+                    # "Description": resource_type.get("Description"),
                 }
             )
 
     response: dict[str, Any] = {
-        'resource_types': resource_types,
-        'user_guide': 'Select the most appropriate resource type based on the Description field and TypeName. e.g. "Volcengine::IAM::Group" is IAM user group Resource.'
+        "resource_types": resource_types,
     }
     return response
 
@@ -237,7 +287,7 @@ async def list_resources(
         description='The Volcengine resource type (e.g., "Volcengine::IAM::User", "Volcengine::ECS::Image")'
     ),
     region: str | None = Field(
-        description='The Volcengine region that the operation should be performed in',
+        description="The Volcengine region that the operation should be performed in",
         default=None,
     ),
 ) -> dict:  # pyright: ignore[reportMissingTypeArgument]
@@ -257,17 +307,21 @@ async def list_resources(
     validate_resource_type(resource_type)
     cloudcontrol = get_volcengine_client_from_config(region)
     info = create_universal_info(
-        service='cloudcontrol',
-        action='ListResources',
-        version='2025-06-01',
-        method='POST',
-        content_type='application/json',
+        service="cloudcontrol",
+        action="ListResources",
+        version="2025-06-01",
+        method="POST",
+        content_type="application/json",
     )
-    params = {'TypeName': resource_type, 'MaxResults': 50}
-    resp, _, _ = cloudcontrol.do_call_with_http_info(info=info, body=params)  # pyright: ignore[reportUnknownMemberType, reportGeneralTypeIssues]
+    params = {"TypeName": resource_type, "MaxResults": 50}
+    resp, _, _ = cloudcontrol.do_call_with_http_info(
+        info=info, body=params
+    )  # pyright: ignore[reportUnknownMemberType, reportGeneralTypeIssues]
 
-    results = resp['ResourceDescriptions']  # pyright: ignore[reportCallIssue, reportArgumentType, reportIndexIssue]
-    response: dict[str, Any] = {'resources': results}
+    results = resp[
+        "ResourceDescriptions"
+    ]  # pyright: ignore[reportCallIssue, reportArgumentType, reportIndexIssue]
+    response: dict[str, Any] = {"resources": results}
     return response
 
 
@@ -285,19 +339,19 @@ async def generate_infrastructure_code(
     """,
     ),
     identifier: str = Field(
-        default='',
-        description='The primary identifier of the resource for update operations',
+        default="",
+        description="The primary identifier of the resource for update operations",
     ),
     patch_document: list = Field(
         default_factory=list,
-        description='A list of RFC 6902 JSON Patch operations for update operations',
+        description="A list of RFC 6902 JSON Patch operations for update operations",
     ),
     region: str | None = Field(
-        description='The Volcengine region that the operation should be performed in',
+        description="The Volcengine region that the operation should be performed in",
         default=None,
     ),
     credentials_token: str = Field(
-        description='Credentials token from get_volcengine_session_info() to ensure Volcengine credentials are valid'
+        description="Credentials token from get_volcengine_session_info() to ensure Volcengine credentials are valid"
     ),
 ) -> dict:
     """Generate infrastructure code before any resource creation or update.
@@ -352,24 +406,24 @@ async def generate_infrastructure_code(
 async def explain(
     content: Any = Field(
         default=None,
-        description='Any data to explain - infrastructure properties, JSON, dict, list, etc.',
+        description="Any data to explain - infrastructure properties, JSON, dict, list, etc.",
     ),
     generated_code_token: str = Field(
-        default='',
-        description='Generated code token from generate_infrastructure_code (for infrastructure operations)',
+        default="",
+        description="Generated code token from generate_infrastructure_code (for infrastructure operations)",
     ),
     context: str = Field(
-        default='',
+        default="",
         description="Context about what this data represents (e.g., 'KMS key creation', 'IAM User update')",
     ),
     operation: str = Field(
-        default='analyze', description='Operation type: create, update, delete, analyze'
+        default="analyze", description="Operation type: create, update, delete, analyze"
     ),
     format: str = Field(
-        default='detailed',
-        description='Explanation format: detailed, summary, technical',
+        default="detailed",
+        description="Explanation format: detailed, summary, technical",
     ),
-    user_intent: str = Field(default='', description="Optional: User's stated purpose"),
+    user_intent: str = Field(default="", description="Optional: User's stated purpose"),
 ) -> dict:
     """MANDATORY: Explain any data in clear, human-readable format.
 
@@ -407,10 +461,10 @@ async def get_resource(
         description='The Volcengine resource type (e.g., "Volcengine::IAM::User", "Volcengine::ECS::Image")'
     ),
     identifier: str = Field(
-        description='The primary identifier of the resource to get (e.g., UserId for User)'
+        description="The primary identifier of the resource to get (e.g., UserId for User)"
     ),
     region: str | None = Field(
-        description='The Volcengine region that the operation should be performed in',
+        description="The Volcengine region that the operation should be performed in",
         default=None,
     ),
 ) -> dict:
@@ -430,18 +484,20 @@ async def update_resource(
         description='The Volcengine resource type (e.g., "Volcengine::IAM::User", "Volcengine::ECS::Image")'
     ),
     identifier: str = Field(
-        description='The primary identifier of the resource to get (e.g., UserId for User)'
+        description="The primary identifier of the resource to get (e.g., UserId for User)"
     ),
-    patch_document: list = Field(description='A list of RFC 6902 JSON Patch operations to apply'),
+    patch_document: list = Field(
+        description="A list of RFC 6902 JSON Patch operations to apply"
+    ),
     region: str | None = Field(
-        description='The Volcengine region that the operation should be performed in',
+        description="The Volcengine region that the operation should be performed in",
         default=None,
     ),
     credentials_token: str = Field(
-        description='Credentials token from get_volcengine_session_info() to ensure Volcengine credentials are valid'
+        description="Credentials token from get_volcengine_session_info() to ensure Volcengine credentials are valid"
     ),
     explained_token: str = Field(
-        description='Explained token from explain() to ensure exact properties with default tags are used'
+        description="Explained token from explain() to ensure exact properties with default tags are used"
     ),
 ) -> dict:
     """## Update a Volcengine resource.
@@ -502,7 +558,7 @@ async def update_resource(
         region=region,
         credentials_token=credentials_token,
         explained_token=explained_token,
-        security_scan_token='',
+        security_scan_token="",
         skip_security_check=True,
     )
     return await update_resource_impl(request, _workflow_store)
@@ -514,28 +570,28 @@ async def create_resource(
         description='The Volcengine resource type (e.g., "Volcengine::IAM::User", "Volcengine::ECS::Image")'
     ),
     region: str | None = Field(
-        description='The Volcengine region that the operation should be performed in',
+        description="The Volcengine region that the operation should be performed in",
         default=None,
     ),
     credentials_token: str = Field(
-        description='Credentials token from get_volcengine_session_info() to ensure Volcengine credentials are valid'
+        description="Credentials token from get_volcengine_session_info() to ensure Volcengine credentials are valid"
     ),
     explained_token: str = Field(
-        description='Explained token from explain() - properties will be retrieved from this token'
+        description="Explained token from explain() - properties will be retrieved from this token"
     ),
 ) -> dict:
-    """##Create an Volcengine resource.
+    """## Create an Volcengine resource.
 
     ## MANDATORY Tool Usage Sequence
     You MUST strictly follow the sequence below for every resource creation request.
-    • ALWAYS follow this exact sequence for resource creation:
-        STEP 1: check_environment_variables() - ALWAYS FIRST for any Volcengine operation
-        STEP 2: get_volcengine_session_info(env_check_result) - ALWAYS SECOND
-        STEP 3: get_resource_schema_information() retrieves the resource schema definition, and based on the schema definition and the user's input, generates the final properties. -ALWAYS THIRD
-        STEP 4: generate_infrastructure_code() with volcengine_session_info and ALL tags included in properties → returns properties_token + properties_for_explanation
-        STEP 5: explain() with content=properties_for_explanation AND properties_token → returns explanation + explained_token
-        STEP 6: IMMEDIATELY show the user the complete explanation from step 2 in detail
-        STEP 7: create_resource() with credentials_token from get_volcengine_session_info() and explained_token
+    ALWAYS follow this exact sequence for resource creation:
+    - STEP 1: check_environment_variables() - ALWAYS FIRST for any Volcengine operation
+    - STEP 2: get_volcengine_session_info(env_check_result) - ALWAYS SECOND
+    - STEP 3: get_resource_schema_information() retrieves the resource schema definition, and based on the schema definition and the user's input, generates the final properties. -ALWAYS THIRD
+    - STEP 4: generate_infrastructure_code() with volcengine_session_info and ALL tags included in properties → returns properties_token + properties_for_explanation
+    - STEP 5: explain() with content=properties_for_explanation AND properties_token → returns explanation + explained_token
+    - STEP 6: IMMEDIATELY show the user the complete explanation from step 2 in detail
+    - STEP 7: create_resource() with credentials_token from get_volcengine_session_info() and explained_token
 
     ## ⚠️ MANDATORY Error Handling
     1. If the returned message contains "Invalid token", it indicates that the token has expired and the check_environment_variables function needs to be re-executed. This is a MANDATORY exception handling check.
@@ -551,17 +607,17 @@ async def create_resource(
     • CRITICAL: Volcengine session info must be passed to resource creation/modification tools
     • CRITICAL: If the resource does not support tags property, the tags property must not set.
     • CRITICAL: If the resource supports tag properties, you must include the required management tags in the properties for all operations:
-        - MANAGED_BY: CCAPI-MCP-SERVER
-        - MCP_SERVER_SOURCE_CODE: https://github.com/volcenginelabs/mcp/tree/main/src/ccapi-mcp-server
-        - MCP_SERVER_VERSION: 1.0.0
+    - MANAGED_BY: CCAPI-MCP-SERVER
+    - MCP_SERVER_SOURCE_CODE: https://github.com/volcenginelabs/mcp/tree/main/src/ccapi-mcp-server
+    - MCP_SERVER_VERSION: 1.0.0
     • UNIVERSAL: Use explain() tool to explain ANY complex data - infrastructure, API responses, configurations, etc.
     • TRANSPARENCY REQUIREMENT: Use explain() tool to show users complete resource definitions
     • Users will see ALL properties, tags, configurations, and changes before approval
     • Ask users if they want additional custom tags beyond the required management tags
     • If dedicated MCP server tools fail:
-        1. Explain to the user that falling back to direct Volcengine API calls would bypass integrated functionality
-        2. Instead, offer to generate an infrastructure template in their preferred format
-        3. Provide instructions for how the user can deploy the template themselves
+    1. Explain to the user that falling back to direct Volcengine API calls would bypass integrated functionality
+    2. Instead, offer to generate an infrastructure template in their preferred format
+    3. Provide instructions for how the user can deploy the template themselves
 
     ## 🔒 Security Protocol
     • Flag and require confirmation for multi-resource deletion operations
@@ -575,7 +631,7 @@ async def create_resource(
         region=region,
         credentials_token=credentials_token,
         explained_token=explained_token,
-        security_scan_token='',
+        security_scan_token="",
         skip_security_check=True,
     )
     return await create_resource_impl(request, _workflow_store)
@@ -587,24 +643,24 @@ async def delete_resource(
         description='The Volcengine resource type (e.g., "Volcengine::IAM::User", "Volcengine::ECS::Image")'
     ),
     identifier: str = Field(
-        description='The primary identifier of the resource to get (e.g., UserId for User)'
+        description="The primary identifier of the resource to get (e.g., UserId for User)"
     ),
     region: str | None = Field(
-        description='The Volcengine region that the operation should be performed in',
+        description="The Volcengine region that the operation should be performed in",
         default=None,
     ),
     credentials_token: str = Field(
-        description='Credentials token from get_volcengine_session_info() to ensure Volcengine credentials are valid'
+        description="Credentials token from get_volcengine_session_info() to ensure Volcengine credentials are valid"
     ),
     confirmed: bool = Field(
         False,
         description='Before calling this tool, you must prompt the user to input "Confirm"; after the user explicitly replies "Confirm", you must continue invoking the tool without restarting the flow, and you must pass confirmed=true (this parameter cannot be omitted or set to false).',
     ),
     explained_token: str = Field(
-        description='Explained token from explain() to ensure deletion was explained'
+        description="Explained token from explain() to ensure deletion was explained"
     ),
 ) -> dict:
-    """Delete an Volcengine resource.
+    """## Delete an Volcengine resource.
 
     ## MANDATORY TOOL ORDER - NEVER DEVIATE
         You MUST strictly follow the sequence below for every resource creation request.
@@ -655,10 +711,10 @@ async def delete_resource(
 @mcp.tool()
 async def get_resource_request_status(
     request_token: str = Field(
-        description='The request_token returned from the long running operation'
+        description="The request_token returned from the long running operation"
     ),
     region: str | None = Field(
-        description='The Volcengine region that the operation should be performed in',
+        description="The Volcengine region that the operation should be performed in",
         default=None,
     ),
 ) -> dict:
@@ -675,7 +731,7 @@ async def check_environment_variables() -> dict:
 @mcp.tool()
 async def get_volcengine_session_info(
     environment_token: str = Field(
-        description='Environment token from check_environment_variables() to ensure environment is properly configured'
+        description="Environment token from check_environment_variables() to ensure environment is properly configured"
     ),
 ) -> dict:
     """Get information about the current Volcengine session.
@@ -724,25 +780,27 @@ async def get_volcengine_account_info() -> dict:
     env_check = await check_environment_variables()
 
     # Then get session info if environment is properly configured
-    if env_check.get('environment_token'):
-        return await get_volcengine_session_info(environment_token=env_check['environment_token'])
+    if env_check.get("environment_token"):
+        return await get_volcengine_session_info(
+            environment_token=env_check["environment_token"]
+        )
     else:
         return {
-            'error': 'Volcengine credentials not properly configured',
-            'message': 'Must be set or VOLCENGINE_ACCESS_KEY and VOLCENGINE_SECRET_KEY must be exported as environment variables.',
-            'properly_configured': False,
+            "error": "Volcengine credentials not properly configured",
+            "message": "Must be set or VOLCENGINE_ACCESS_KEY and VOLCENGINE_SECRET_KEY must be exported as environment variables.",
+            "properly_configured": False,
         }
 
 
 def main():
     """Run the MCP server with CLI argument support."""
     parser = argparse.ArgumentParser(
-        description='An Volcengine Labs Model Context Protocol (MCP) server for managing Volcengine resources via Cloud Control API'
+        description="An Volcengine Labs Model Context Protocol (MCP) server for managing Volcengine resources via Cloud Control API"
     )
     parser.add_argument(
-        '--readonly',
+        "--readonly",
         action=argparse.BooleanOptionalAction,
-        help='Prevents the MCP server from performing mutating operations',
+        help="Prevents the MCP server from performing mutating operations",
     )
 
     args = parser.parse_args()
@@ -752,16 +810,18 @@ def main():
     volcengine_info = get_volcengine_profile_info()
     print(f'Volcengine Account ID: {volcengine_info.get("account_id", "Unknown")}')
     print(f'Volcengine Account Name: {volcengine_info.get("account_name", "Unknown")}')
-    print(f'Volcengine Account Description: {volcengine_info.get("Description", "Unknown")}')
+    print(
+        f'Volcengine Account Description: {volcengine_info.get("Description", "Unknown")}'
+    )
     print(f'Volcengine Region: {volcengine_info.get("region")}')
 
     # Display read-only mode status
     if args.readonly:
-        print('\n[WARNING] READ-ONLY MODE ACTIVE [WARNING]')
-        print('The server will not perform any create, update, or delete operations.')
+        print("\n[WARNING] READ-ONLY MODE ACTIVE [WARNING]")
+        print("The server will not perform any create, update, or delete operations.")
 
     mcp.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
