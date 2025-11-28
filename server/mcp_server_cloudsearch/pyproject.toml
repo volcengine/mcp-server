@@ -1,8 +1,8 @@
 
 [project]
 name = "mcp-server-cloudsearch"
-version = "0.1.0"
-description = " MCP server for ESCloud"
+version = "0.2.0"
+description = "MCP server for CloudSearch"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

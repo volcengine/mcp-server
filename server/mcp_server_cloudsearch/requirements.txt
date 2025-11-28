@@ -54,7 +54,7 @@ py==1.11.0
     # via retry
 pycryptodome==3.23.0
     # via volcengine
-pydantic==2.12.4
+pydantic==2.12.5
     # via
     #   mcp-server-cloudsearch (pyproject.toml)
     #   mcp
