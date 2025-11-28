@@ -1,68 +1,98 @@
-# MCP Server CloudSearch
-| 版本 | v1                                          |
+# MCP Server: CloudSearch
+
+| 版本 | v0.2.0 |
 |:---|:--------------------------------------------|
-| 描述 | 云搜索服务（Cloud Search）是火山引擎提供的全托管一站式信息检索和分析平台  |
-| 分类 | 数据库                                         |
-| 标签 | ES，Elasticsearch，OpenSearch，搜索              |
+| 描述 | 云搜索服务（Cloud Search）是火山引擎提供的全托管、一站式信息检索与分析平台，支持全文检索、向量检索、混合搜索及时空检索等多种核心能力。 |
+| 分类 | 数据库 |
+| 标签 | ES，Elasticsearch，OpenSearch，搜索 |
+| 控制台 | [云搜索服务 - 火山引擎](https://console.volcengine.com/es/) |
 
-## Tools
-本 MCP Server 产品提供以下 Tools (工具/能力):
-### 1. cloudsearch_describe_zones
-查询云搜索服务在指定区域下的可用区列表
-- 参数:
-  - `region_id`: 地域 id
+## 🛠️ 核心能力 (Tools)
 
-### 2. cloudsearch_describe_instance
-查询云搜索服务在指定区域下的实例详细信息
-- 参数:
-  - `region_id`: 地域 id
-  - `instance_id`: 实例 id
+本服务提供了一组工具，允许 AI 模型在对话中直接执行以下操作：
 
-### 3. cloudsearch_describe_instances
-查询云搜索服务在指定区域下的实例列表
-- 参数:
-  - `region_id`: 地域 id
-  - `zone_id`: 可用区 id, 支持模糊查询
-  - `instance_id`: 实例 id, 支持模糊查询
-  - `instance_name`: 实例名称, 支持模糊查询
-  - `status`: 实例状态
-  - `version`: 实例版本
-  - `charge_type`: 计费类型
-  - `project_name`: 项目名称
-  - `page_number`: 分页页码
-  - `page_size`: 分页大小
+### 1. 基础资源查询
+用于查询创建实例所需的基础环境与规格信息。
 
-### 4. cloudsearch_describe_instance_nodes
-查询云搜索服务在指定区域下的实例节点列表
-- 参数:
-  - `region_id`: 地域 id
-  - `instance_id`: 实例 id
+- **`describe_zones`**
+  获取当前地域下支持部署云搜索实例的可用区（Zones）列表。
+- **`describe_node_available_specs`**
+  查询可用的节点规格、存储类型及对应的计费配置码，用于辅助实例创建时的资源选型。
 
-### 5. cloudsearch_describe_instance_plugins
-查询云搜索服务在指定区域下的实例的插件列表
-- 参数:
-  - `region_id`: 地域 id
-  - `instance_id`: 实例 id
+### 2. 实例生命周期管理 
+用于管理实例的创建、部署与初始化流程。
 
-## 可适配平台  
-方舟，python，cursor
+- **`create_instance`**
+  创建一个新的云搜索实例订单（支持 Elasticsearch 或 OpenSearch）。
+  *注意：此接口仅生成待支付订单，需完成支付后才会开始部署资源。*
+- **`create_instance_in_one_step`**
+  一步完成云搜索实例的创建与支付（支持 Elasticsearch 或 OpenSearch）。
+  *注意：调用成功后实例将立即开始部署并进入计费状态。*
 
-## 服务开通链接 (整体产品)
-https://console.volcengine.com/es/region:es+cn-beijing/v2/create?projectName=default
+### 3. 实例信息查询
+用于获取实例及其组件的详细状态、配置与拓扑信息。
 
-## 安装部署  
-从 [volcengine](https://www.volcengine.com/docs/6291/65568) 获取 ak/sk, 然后将 ak/sk 添加到 mcp server 配置中, 或者在工作目录下的 `.env` 文件中配置, 格式如下:
-```shell
-VOLC_ACCESSKEY=your_volcengine_ak
-VOLC_SECRETKEY=your_volcengine_sk
-```
+- **`describe_instances`**
+  查询实例列表。支持按 ID、名称、状态、版本等条件进行过滤，返回包含规格、网络及维护窗口等维度的详细配置。
+- **`describe_instance`**
+  精确查询指定实例的完整详情。需提供实例 ID，返回比列表查询更详尽的配置数据。
+- **`describe_instance_nodes`**
+  列出实例内的所有成员节点详情，包含节点角色（如 Master/Data）、硬件规格、IP 地址及实时运行状态。
+- **`describe_instance_plugins`**
+  获取实例当前已安装的插件列表，包含插件名称、版本号及启用状态。
 
-## 使用 uv
-添加以下配置到你的 mcp settings 文件中
+### 4. 实例配置与运维
+用于修改实例属性及执行关键的运维操作。
+
+- **`rename_instance`**
+  更新指定实例的显示名称（Alias），便于业务识别与管理。
+- **`modify_maintenance_setting`**
+  设置或调整实例的可维护时间窗口，系统将在该时段内进行必要的升级或补丁更新。
+- **`modify_deletion_protection`**
+  开启或关闭实例的“删除保护”功能，防止实例因误操作被意外释放。
+- **`restart_node`**
+  对实例中的指定节点执行重启操作，通常用于故障恢复或某些配置的强制生效。
+
+## 💻 接入指南
+本服务遵循 MCP 标准协议，支持各种常见平台：
+* **IDE**: Cursor, Trae, VS Code
+* **平台**: 方舟 (Ark)
+
+### 1. 环境依赖
+- Python >= 3.11
+- 安装 [UV](https://github.com/astral-sh/uv)
+
+### 2. 获取凭证
+请前往 [火山引擎访问控制：API访问密钥](https://console.volcengine.com/iam/keymanage/) 页面获取 `Access Key` 和 `Secret Key`。
+- 参考文档：[Access Key（密钥）管理](https://www.volcengine.com/docs/6291/65568)。
+
+### 3. 参数配置
+运行 MCP Server 需要配置以下环境变量：
+
+| 环境变量 | 描述 | 示例 |
+| :--- | :--- | :--- |
+| `VOLCENGINE_ACCESS_KEY` | 访问密钥 ID | `AKLTzte...` |
+| `VOLCENGINE_SECRET_KEY` | 私有密钥 | `TnpCa1...` |
+| `VOLCENGINE_REGION` | 区域代码 (默认 `cn-beijing`) | `cn-shanghai` |
+
+**支持的区域代码：**
+- `cn-beijing`: 华北2（北京）
+- `cn-shanghai`: 华东2（上海）
+- `cn-guangzhou`: 华南1（广州）
+- `cn-hongkong`: 中国香港
+- `ap-southeast-1`: 亚太东南（柔佛）
+- `ap-southeast-3`: 亚太东南（雅加达）
+
+## 🚀 快速部署 (MCP Settings)
+请将以下配置添加到你的 MCP 客户端配置文件中（例如 Cursor 的 `mcp.json` 或 Trae 的设置）。
+
+### 方式一：使用 uvx 直接运行 (推荐)
+无需下载源码，直接从远程仓库加载，适合快速使用。
+
 ```json
 {
   "mcpServers": {
-    "mcp-server-cloudsearch": {
+    "CloudSearch": {
       "command": "uvx",
       "args": [
         "--from",
@@ -70,33 +100,39 @@ VOLC_SECRETKEY=your_volcengine_sk
         "mcp-server-cloudsearch"
       ],
       "env": {
-        "VOLC_ACCESSKEY": "your_volcengine_ak",
-        "VOLC_SECRETKEY": "your_volcengine_sk"
-      }
-    }
-  }
-}
-```
-或者克隆仓库到本地, 从本地代码仓库中启动
-```json
-{
-  "mcpServers": {
-    "mcp-server-cloudsearch": {
-      "command": "uv",
-      "args": [
-        "--directory",
-        "path/to/src/mcp_server_cloudsearch",
-        "run",
-        "server.py"
-      ],
-      "env": {
-        "VOLC_ACCESSKEY": "your_volcengine_ak",
-        "VOLC_SECRETKEY": "your_volcengine_sk"
+        "VOLCENGINE_REGION": "cn-beijing",
+        "VOLCENGINE_ACCESS_KEY": "your_volcengine_ak",
+        "VOLCENGINE_SECRET_KEY": "your_volcengine_sk"
       }
     }
   }
 }
 ```
 
+### 方式二：本地源码运行
+
+```json
+{
+  "mcpServers": {
+    "CloudSearch": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/absolute/path/to/mcp-server/server/mcp_server_cloudsearch/src/ESCloud",
+        "run",
+        "server.py"
+      ],
+      "env": {
+        "VOLCENGINE_REGION": "cn-beijing",
+        "VOLCENGINE_ACCESS_KEY": "your_volcengine_ak",
+        "VOLCENGINE_SECRET_KEY": "your_volcengine_sk"
+      }
+    }
+  }
+}
+```
+
+*注意：本地运行时，请务必将 args 中的路径替换为你本地仓库的**绝对路径**。*
+
 ## License
-[MIT](https://github.com/volcengine/mcp-server/blob/main/LICENSE)
+volcengine/mcp-server 采用 [MIT 许可证](https://github.com/volcengine/mcp-server/blob/main/LICENSE) 授权。
