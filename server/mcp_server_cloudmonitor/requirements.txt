@@ -92,5 +92,5 @@ urllib3==2.4.0
     # via volcengine-python-sdk
 uvicorn==0.34.2
     # via mcp
-volcengine-python-sdk==2.0.1
+volcengine-python-sdk==4.0.36
     # via mcp-server-cloudmonitor (pyproject.toml)

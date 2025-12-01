@@ -5,7 +5,7 @@ import os
 import time
 import traceback
 
-import volcenginesdkvolcobserve
+import volcenginesdkcloudmonitor
 
 from mcp_server_cloudmonitor import client
 from mcp.server.fastmcp import FastMCP
@@ -27,7 +27,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(MCP_SERVER_NAME)
 
-SERVICE_NAME = "Volc_Observe"
+SERVICE_NAME = "cloudmonitor"
 VERSION = "2018-01-01"
 
 @mcp.resource("schema://{code}", mime_type="application/json")
@@ -50,7 +50,7 @@ def get_metric_data(
         if request.Instances is None:
             request.Instances = []
         response = api_instance.get_metric_data(
-            volcenginesdkvolcobserve.GetMetricDataRequest(
+            volcenginesdkcloudmonitor.GetMetricDataRequest(
                 start_time=request.StartTime,
                 end_time=request.EndTime,
                 metric_name=request.MetricName,
@@ -59,9 +59,9 @@ def get_metric_data(
                 period=request.Period,
                 group_by=request.GroupBy,
                 instances=[
-                    volcenginesdkvolcobserve.InstanceForGetMetricDataInput(
+                    volcenginesdkcloudmonitor.InstanceForGetMetricDataInput(
                         dimensions=[
-                            volcenginesdkvolcobserve.DimensionForGetMetricDataInput(
+                            volcenginesdkcloudmonitor.DimensionForGetMetricDataInput(
                                 name=dimension.Name, value=dimension.Value
                             )
                             for dimension in instance.Dimensions
@@ -71,7 +71,7 @@ def get_metric_data(
                 ],
             )
         )
-        if not isinstance(response, volcenginesdkvolcobserve.GetMetricDataResponse):
+        if not isinstance(response, volcenginesdkcloudmonitor.GetMetricDataResponse):
             raise Exception("InternalError: unexpected response")
         response = response.to_dict()
     except Exception as e:
