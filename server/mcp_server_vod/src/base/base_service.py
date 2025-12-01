@@ -1,6 +1,8 @@
 from volcengine.vod.VodService import VodService
 import json
 import os
+from typing import Dict, Any
+
 
 
 class BaseService(VodService):
@@ -15,7 +17,7 @@ class BaseService(VodService):
         self.set_ak(os.getenv("VOLCENGINE_ACCESS_KEY"))
         self.set_sk(os.getenv("VOLCENGINE_SECRET_KEY"))
         self.service_info.header["x-tt-mcp"] = 'volc'
-      
+        self.mcp_state = {}
         
     @staticmethod
     def get_api_info():
@@ -37,3 +39,10 @@ class BaseService(VodService):
             raise Exception("%s: empty response" % action)
         res_json = json.loads(json.dumps(res))
         return res_json
+    def set_state(self, state: Dict[str, Any] = {}):
+        self.mcp_state = {
+            **self.mcp_state,
+            **state
+        }
+    def get_state(self):
+        return self.mcp_state

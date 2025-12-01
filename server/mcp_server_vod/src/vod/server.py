@@ -22,9 +22,8 @@ def main():
         )
         args = parser.parse_args()
         print(args.transport)
-        mcp = create_mcp_server()
-
-        asyncio.run(mcp.run(transport=args.transport))
+        mcp_instance = create_mcp_server()
+        asyncio.run(mcp_instance.run(transport=args.transport))
     except Exception as e:
         print(f"Error occurred while starting the server: {e}", file=sys.stderr)
         sys.exit(1)
