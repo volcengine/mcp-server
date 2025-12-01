@@ -152,7 +152,7 @@ def list_databases(
         instance_id: Optional[str] = Field(default=None, description="火山引擎数据库实例ID（需开启安全管控）"),
         instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）"),
         page_number: Optional[int] = Field(default=1, description="分页查询时的页码（默认为1，即从第一页数据开始返回）"),
-        page_size: Optional[int] = Field(default=100, description="分页大小（默认为100）")
+        page_size: Optional[int] = Field(default=10, description="分页大小（默认为10）")
 ) -> dict[str, Any]:
     """
     查询数据库实例的Database列表
@@ -161,7 +161,7 @@ def list_databases(
         instance_id (str, optional): 火山引擎数据库实例ID（需开启安全管控）
         instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）
         page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
-        page_size (int, optional): 分页大小（默认为100）
+        page_size (int, optional): 分页大小（默认为10）
     Returns:
         total (int): 数据库实例的Database总数
         items (list): Database元信息列表，列表中的每个值对应一个Database的元信息，结构如下
@@ -185,7 +185,7 @@ def list_databases(
     if not page_number:
         page_number = 1
     if not page_size:
-        page_size = 100
+        page_size = 10
 
     req = {
         "instance_id": instance_id,
@@ -207,7 +207,7 @@ def list_tables(
         instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）"),
         database: Optional[str] = Field(default=None, description="Database名称"),
         page_number: Optional[int] = Field(default=1, description="分页查询时的页码（默认为1，即从第一页数据开始返回）"),
-        page_size: Optional[int] = Field(default=100, description="分页大小（默认为100）")
+        page_size: Optional[int] = Field(default=10, description="分页大小（默认为10）")
 ) -> dict[str, Any]:
     """
     查询数据库实例的Table列表
@@ -217,7 +217,7 @@ def list_tables(
         instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）
         database (str, optional): Database名称
         page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
-        page_size (int, optional): 分页大小（默认为100）
+        page_size (int, optional): 分页大小（默认为10）
     Returns:
         total (int): 指定Database的Table总数
         items (list[str]): 指定Database的Table名称列表
@@ -239,7 +239,7 @@ def list_tables(
     if not page_number:
         page_number = 1
     if not page_size:
-        page_size = 100
+        page_size = 10
 
     req = {
         "instance_id": instance_id,
@@ -328,7 +328,7 @@ def describe_slow_logs(
         instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）"),
         node_id: Optional[str] = Field(default=None, description="火山引擎数据库实例节点ID"),
         page_number: Optional[int] = Field(default=1, description="分页查询时的页码（默认为1，即从第一页数据开始返回）"),
-        page_size: Optional[int] = Field(default=100, description="分页大小（默认为100）"),
+        page_size: Optional[int] = Field(default=10, description="分页大小（默认为10）"),
         sort_by: Optional[str] = Field(default="ASC", description="按照降序或升序方式排列慢日志（ASC表示升序，DESC表示降序）"),
         order_by: Optional[str] = Field(default="Timestamp", description="返回结果的排序方法（Timestamp按照查询开始时间排序，QueryTime按照查询时间排序，LockTime按照锁的等待时间排序，RowsExamined按照扫描的行数排序，RowsSent按照返回的行数排序")
 ) -> dict[str, Any]:
@@ -342,7 +342,7 @@ def describe_slow_logs(
         instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）
         node_id (str, optional): 火山引擎数据库实例节点ID
         page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
-        page_size (int, optional): 分页大小（默认为100）
+        page_size (int, optional): 分页大小（默认为10）
         sort_by (str, optional): 按照降序或升序方式排列慢日志（ASC表示升序，DESC表示降序）
         order_by (str, optional): 返回结果的排序方法（Timestamp按照查询开始时间排序，QueryTime按照查询时间排序，LockTime按照锁的等待时间排序，RowsExamined按照扫描的行数排序，RowsSent按照返回的行数排序
     Returns:
@@ -378,7 +378,7 @@ def describe_slow_logs(
     if not page_number:
         page_number = 1
     if not page_size:
-        page_size = 100
+        page_size = 10
     if not sort_by:
         sort_by = "ASC"
     if not order_by:
@@ -414,7 +414,7 @@ def list_slow_query_advice(
         instance_id: Optional[str] = Field(default=None, description="火山引擎数据库实例ID"),
         instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）"),
         page_number: Optional[int] = Field(default=1, description="分页查询时的页码（默认为1，即从第一页数据开始返回）"),
-        page_size: Optional[int] = Field(default=100, description="分页大小（默认为100）"),
+        page_size: Optional[int] = Field(default=10, description="分页大小（默认为10）"),
 ) -> dict[str, Any]:
     """
     获取数据库实例的慢日志诊断详情信息
@@ -427,7 +427,7 @@ def list_slow_query_advice(
         instance_id (str, optional): 火山引擎数据库实例ID
         instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）
         page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
-        page_size (int, optional): 分页大小（默认为100）
+        page_size (int, optional): 分页大小（默认为10）
     Returns:
         total (int): 慢日志诊断建议总数
         advices (list[Advice]): 按模块聚合的诊断建议，如果请求参数中group_by取值为Module，则返回advices字段，列表中的每个值为Advice Object，定义如下：
@@ -491,7 +491,7 @@ def list_slow_query_advice(
     if not page_number:
         page_number = 1
     if not page_size:
-        page_size = 100
+        page_size = 10
 
     req = {
         "instance_id": instance_id,
@@ -516,7 +516,7 @@ def slow_query_advice_task_history(
         instance_id: Optional[str] = Field(default=None, description="火山引擎数据库实例ID"),
         instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）"),
         page_number: Optional[int] = Field(default=1, description="分页查询时的页码（默认为1，即从第一页数据开始返回）"),
-        page_size: Optional[int] = Field(default=100, description="分页大小（默认为100）"),
+        page_size: Optional[int] = Field(default=10, description="分页大小（默认为10）"),
 ) -> dict[str, Any]:
     """
     获取数据库实例的慢日志诊断历史信息
@@ -525,7 +525,7 @@ def slow_query_advice_task_history(
         instance_id (str, optional): 火山引擎数据库实例ID
         instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）
         page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
-        page_size (int, optional): 分页大小（默认为100）
+        page_size (int, optional): 分页大小（默认为10）
     Returns:
         total (int): 慢日志诊断任务总数
         res_list (list): 慢日志诊断历史列表（由创建时间从新到旧排序），列表中的每个值对应一条慢日志诊断记录，结构如下：
@@ -552,7 +552,7 @@ def slow_query_advice_task_history(
     if not page_number:
         page_number = 1
     if not page_size:
-        page_size = 100
+        page_size = 10
 
     req = {
         "instance_id": instance_id,
@@ -707,24 +707,24 @@ def create_ddl_sql_change_ticket(
 
 @mcp_server.tool(
     name="describe_tickets",
-    description="批量查询数据库实例的工单",
+    description="批量查询工单详情",
 )
 def describe_tickets(
         list_type: str = Field(default="", description="批量查询的工单类型（All表示全部；CreatedByMe表示我创建的；ApprovedByMe表示我审批的）"),
         order_by: Optional[str] = Field(default=None, description="返回结果的排序字段"),
         sort_by: Optional[str] = Field(default="ASC", description="按照降序或升序方式排列（ASC表示升序；DESC表示降序）"),
         page_number: Optional[int] = Field(default=1, description="分页查询时的页码（默认为1，即从第一页数据开始返回）"),
-        page_size: Optional[int] = Field(default=100, description="分页大小（默认为100）")
+        page_size: Optional[int] = Field(default=10, description="分页大小（默认为10）")
 ) -> dict[str, Any]:
     """
-    批量查询数据库实例的工单详情
+    批量查询工单详情
 
     Args:
         list_type (str): 批量查询的工单类型（All表示全部；CreatedByMe表示我创建的；ApprovedByMe表示我审批的）
         order_by (str): 返回结果的排序字段
         sort_by (str): 按照降序或升序方式排列（ASC表示升序；DESC表示降序）
         page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
-        page_size (int, optional): 分页大小（默认为100）
+        page_size (int, optional): 分页大小（默认为10）
     Returns:
         total (int): 数据库实例的工单总数
         tickets (list): 数据库实例的工单列表，列表中的每个值对应一个工单记录，结构如下：
@@ -759,7 +759,7 @@ def describe_tickets(
     if not page_number:
         page_number = 1
     if not page_size:
-        page_size = 100
+        page_size = 10
 
     req = {
         "list_type": list_type,
@@ -776,13 +776,13 @@ def describe_tickets(
 
 @mcp_server.tool(
     name="describe_ticket_detail",
-    description="查询数据库实例的单个工单详情",
+    description="查询单个工单详情",
 )
 def describe_ticket_detail(
         ticket_id: str = Field(default="", description="工单号")
 ) -> dict[str, Any]:
     """
-    查询数据库实例的单个工单详情
+    查询单个工单详情
 
     Args:
         ticket_id (str): 工单号
@@ -827,13 +827,13 @@ def describe_ticket_detail(
 
 @mcp_server.tool(
     name="describe_workflow",
-    description="查询数据库实例的审批工单详情",
+    description="查询审批工单详情",
 )
 def describe_workflow(
         ticket_id: str = Field(default="", description="工单号")
 ) -> dict[str, Any]:
     """
-    查询数据库实例的审批工单详情
+    查询审批工单详情
 
     Args:
         ticket_id (str): 工单号
