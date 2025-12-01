@@ -6,7 +6,7 @@ from typing import List, Dict, Any, Optional, Annotated
 from mcp.server.fastmcp import FastMCP
 from pydantic import Field
 
-from resource.hbase_resource import HBASESDK
+from mcp_server_hbase.resource.hbase_resource import HBASESDK
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

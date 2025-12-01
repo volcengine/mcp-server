@@ -70,12 +70,14 @@ def nl2sql(
     database = dbw_client.database or database
     if not database:
         raise ValueError("database is required")
+    if not query:
+        raise ValueError("query is required")
 
     req = {
-        "query": query,
         "instance_id": instance_id,
         "instance_type": instance_type,
         "database": database,
+        "query": query,
     }
     if tables is not None:
         req["tables"] = tables
@@ -127,12 +129,14 @@ def execute_sql(
     database = dbw_client.database or database
     if not database:
         raise ValueError("database is required")
+    if not commands:
+        raise ValueError("commands is required")
 
     req = {
-        "commands": commands,
         "instance_id": instance_id,
         "instance_type": instance_type,
         "database": database,
+        "commands": commands,
         "time_out_seconds": 10
     }
 
@@ -148,7 +152,7 @@ def list_databases(
         instance_id: Optional[str] = Field(default=None, description="火山引擎数据库实例ID（需开启安全管控）"),
         instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）"),
         page_number: Optional[int] = Field(default=1, description="分页查询时的页码（默认为1，即从第一页数据开始返回）"),
-        page_size: Optional[int] = Field(default=100, description="分页大小（默认为100）")
+        page_size: Optional[int] = Field(default=10, description="分页大小（默认为10）")
 ) -> dict[str, Any]:
     """
     查询数据库实例的Database列表
@@ -157,7 +161,7 @@ def list_databases(
         instance_id (str, optional): 火山引擎数据库实例ID（需开启安全管控）
         instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）
         page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
-        page_size (int, optional): 分页大小（默认为100）
+        page_size (int, optional): 分页大小（默认为10）
     Returns:
         total (int): 数据库实例的Database总数
         items (list): Database元信息列表，列表中的每个值对应一个Database的元信息，结构如下
@@ -178,10 +182,10 @@ def list_databases(
     instance_type = dbw_client.instance_type or instance_type
     if not instance_type:
         raise ValueError("instance_type is required")
-    if page_number is None:
+    if not page_number:
         page_number = 1
-    if page_size is None:
-        page_size = 100
+    if not page_size:
+        page_size = 10
 
     req = {
         "instance_id": instance_id,
@@ -203,7 +207,7 @@ def list_tables(
         instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）"),
         database: Optional[str] = Field(default=None, description="Database名称"),
         page_number: Optional[int] = Field(default=1, description="分页查询时的页码（默认为1，即从第一页数据开始返回）"),
-        page_size: Optional[int] = Field(default=100, description="分页大小（默认为100）")
+        page_size: Optional[int] = Field(default=10, description="分页大小（默认为10）")
 ) -> dict[str, Any]:
     """
     查询数据库实例的Table列表
@@ -213,7 +217,7 @@ def list_tables(
         instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）
         database (str, optional): Database名称
         page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
-        page_size (int, optional): 分页大小（默认为100）
+        page_size (int, optional): 分页大小（默认为10）
     Returns:
         total (int): 指定Database的Table总数
         items (list[str]): 指定Database的Table名称列表
@@ -232,10 +236,10 @@ def list_tables(
     database = dbw_client.database or database
     if not database:
         raise ValueError("database is required")
-    if page_number is None:
+    if not page_number:
         page_number = 1
-    if page_size is None:
-        page_size = 100
+    if not page_size:
+        page_size = 10
 
     req = {
         "instance_id": instance_id,
@@ -299,6 +303,8 @@ def get_table_info(
     database = dbw_client.database or database
     if not database:
         raise ValueError("database is required")
+    if not table:
+        raise ValueError("table is required")
 
     req = {
         "instance_id": instance_id,
@@ -308,6 +314,584 @@ def get_table_info(
     }
 
     resp = dbw_client.get_table_info(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_slow_logs",
+    description="查询数据库实例的慢日志信息",
+)
+def describe_slow_logs(
+        start_time: int = Field(default=None, description="查询慢日志的开始时间，使用秒时间戳格式"),
+        end_time: int = Field(default=None, description="查询慢日志的结束时间，使用秒时间戳格式"),
+        instance_id: Optional[str] = Field(default=None, description="火山引擎数据库实例ID"),
+        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）"),
+        node_id: Optional[str] = Field(default=None, description="火山引擎数据库实例节点ID"),
+        page_number: Optional[int] = Field(default=1, description="分页查询时的页码（默认为1，即从第一页数据开始返回）"),
+        page_size: Optional[int] = Field(default=10, description="分页大小（默认为10）"),
+        sort_by: Optional[str] = Field(default="ASC", description="按照降序或升序方式排列慢日志（ASC表示升序，DESC表示降序）"),
+        order_by: Optional[str] = Field(default="Timestamp", description="返回结果的排序方法（Timestamp按照查询开始时间排序，QueryTime按照查询时间排序，LockTime按照锁的等待时间排序，RowsExamined按照扫描的行数排序，RowsSent按照返回的行数排序")
+) -> dict[str, Any]:
+    """
+    查询数据库实例的慢日志信息
+
+    Args:
+        start_time (int): 查询慢日志的开始时间，使用秒时间戳格式
+        end_time (int): 查询慢日志的结束时间，使用秒时间戳格式
+        instance_id (str, optional): 火山引擎数据库实例ID
+        instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）
+        node_id (str, optional): 火山引擎数据库实例节点ID
+        page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
+        page_size (int, optional): 分页大小（默认为10）
+        sort_by (str, optional): 按照降序或升序方式排列慢日志（ASC表示升序，DESC表示降序）
+        order_by (str, optional): 返回结果的排序方法（Timestamp按照查询开始时间排序，QueryTime按照查询时间排序，LockTime按照锁的等待时间排序，RowsExamined按照扫描的行数排序，RowsSent按照返回的行数排序
+    Returns:
+        total (int): 慢日志数量
+        slow_logs (list): 慢日志列表信息，列表中的每个值对应一条慢日志记录，结构如下
+            - connection_id (int): 连接ID
+            - db (str): Database名称
+            - lock_time (float): 表示执行被查询对象时需要的锁等待时间，即查询对象可能在别的会话中被锁定，其他语言就需要等待锁释放才可以执行查询操作，这段时间就是锁等待时间
+            - query_time (float): 表示查询语句的耗时
+            - timestamp (int): 按照查询开始时间排序
+            - rows_examined (int): 表示查询时需要扫描的行数
+            - rows_sent (int): 命中查询结果后返回数据的行数
+            - sql_template (str): SQL模板
+            - sql_text (str): SQL文本即实际执行的查询语句
+            - source_ip (str): IP地址
+            - user (str): 执行者名称
+    """
+    if REMOTE_MCP_SERVER:
+        dbw_client = get_dbw_client(mcp_server.get_context())
+    else:
+        dbw_client = DBW_CLIENT
+
+    instance_id = dbw_client.instance_id or instance_id
+    if not instance_id:
+        raise ValueError("instance_id is required")
+    instance_type = dbw_client.instance_type or instance_type
+    if not instance_type:
+        raise ValueError("instance_type is required")
+    if start_time is None:
+        raise ValueError("start_time is required")
+    if end_time is None:
+        raise ValueError("end_time is required")
+    if not page_number:
+        page_number = 1
+    if not page_size:
+        page_size = 10
+    if not sort_by:
+        sort_by = "ASC"
+    if not order_by:
+        order_by = "Timestamp"
+
+    req = {
+        "region_id": dbw_client.region,
+        "instance_id": instance_id,
+        "instance_type": instance_type,
+        "start_time": start_time,
+        "end_time": end_time,
+        "page_number": page_number,
+        "page_size": page_size,
+        "sort_by": sort_by,
+        "order_by": order_by,
+    }
+    if node_id is not None:
+        req["node_id"] = node_id
+
+    resp = dbw_client.describe_slow_logs(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="list_slow_query_advice",
+    description="获取数据库实例的慢日志诊断详情信息",
+)
+def list_slow_query_advice(
+        advice_type: str = Field(default="", description="建议类型（no_advice表示无建议，index_advice表示索引建议，rewrite_sql_advice表示改写SQL建议）"),
+        summary_id: str = Field(default="", description="每次慢日志诊断的唯一标识"),
+        group_by: str = Field(default="", description="聚合类型（Advice表示按建议聚合，Module表示按模块聚合）"),
+        order_by: str = Field(default="", description="排序类型（QueryTimeRatioNow表示按当前查询时间占比排序，Benefit表示按收益排序）"),
+        instance_id: Optional[str] = Field(default=None, description="火山引擎数据库实例ID"),
+        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）"),
+        page_number: Optional[int] = Field(default=1, description="分页查询时的页码（默认为1，即从第一页数据开始返回）"),
+        page_size: Optional[int] = Field(default=10, description="分页大小（默认为10）"),
+) -> dict[str, Any]:
+    """
+    获取数据库实例的慢日志诊断详情信息
+
+    Args:
+        advice_type (str): 建议类型（no_advice表示无建议，index_advice表示索引建议，rewrite_sql_advice表示改写SQL建议）
+        summary_id (str): 每次慢日志诊断的唯一标识
+        group_by (str): 聚合类型（Advice表示按建议聚合，Module表示按模块聚合）
+        order_by (str): 排序类型（QueryTimeRatioNow表示按当前查询时间占比排序，Benefit表示按收益排序）
+        instance_id (str, optional): 火山引擎数据库实例ID
+        instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）
+        page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
+        page_size (int, optional): 分页大小（默认为10）
+    Returns:
+        total (int): 慢日志诊断建议总数
+        advices (list[Advice]): 按模块聚合的诊断建议，如果请求参数中group_by取值为Module，则返回advices字段，列表中的每个值为Advice Object，定义如下：
+            - db (str): Database名称
+            - agg (Agg): 聚合信息，结构定义如下：
+                - db (str): Database名称
+                - user (str): 用户名
+                - table (str): 表名
+                - source_ip (str): 客户端地址
+                - sql_method (str): SQL类型
+                - sql_template (str): 慢SQL模板
+                - execute_count (int): 执行次数
+                - lock_time_ratio (double): 锁总耗时占比
+                - lock_time_stats (dict): 锁耗时的统计结果，以秒为单位
+                - rows_sent_ratio (double): 返回总行数占比
+                - rows_sent_stats (dict): 返回行数的统计结果
+                - sql_template_id (str): 慢SQL模板哈希值
+                - last_appear_time (int): 最后一次出现的时间
+                - query_time_ratio (double): 查询总耗时占比
+                - query_time_stats (dict): 查询耗时的统计结果，以秒为单位
+                - sql_fingerprint (str): SQL指纹
+                - first_appear_time (int): 第一次出现的时间
+                - pt_analysis_result (str): 仿PT解析工具输出结果的文本字符串
+                - execute_count_ratio (double): 执行总次数占比
+                - rows_examined_ratio (double): 扫描总行数占比
+                - rows_examined_stats (dict): 扫描行数的统计结果
+            - rist (str): 风险
+            - user (list[str]): 用户名列表
+            - advice (str): 诊断建议（如果请求参数中advice_type取值为index_advice，该字段为索引SQL；如果请求参数中advice_type取值为rewrite_sql_advice，该字段为SQL建议）
+            - benefit (double): 优化后预估总耗时收益
+            - speed_up (double): 优化后预估性能提升倍数
+            - sql_module (str): SQL模版
+            - source_ips (list[str]): 客户端IP列表
+            - table_name (str): 表名
+            - advice_level (str): 优化推荐程度
+            - advice_index_size (double): 推荐索引大小预估
+            - query_time_avg_after (double): 优化后查询时间预估
+        advices_by_group (list): 按建议聚合的诊断建议，如果请求参数中group_by取值为Advice，则返回advices_by_group字段，列表中的每个值的定义如下：
+            - advice (str): 按建议聚合的诊断建议（如果请求参数中advice_type取值为index_advice，该字段为索引SQL；如果请求参数中advice_type取值为rewrite_sql_advice，该字段为SQL建议）
+            - advices (list[Advice]): 按模块聚合的诊断建议，结构定义同上述advices字段
+    """
+    if REMOTE_MCP_SERVER:
+        dbw_client = get_dbw_client(mcp_server.get_context())
+    else:
+        dbw_client = DBW_CLIENT
+
+    instance_id = dbw_client.instance_id or instance_id
+    if not instance_id:
+        raise ValueError("instance_id is required")
+    instance_type = dbw_client.instance_type or instance_type
+    if not instance_type:
+        raise ValueError("instance_type is required")
+    if not advice_type:
+        raise ValueError("advice_type is required")
+    if not summary_id:
+        raise ValueError("summary_id is required")
+    if not group_by:
+        raise ValueError("group_by is required")
+    if not order_by:
+        raise ValueError("order_by is required")
+    if not page_number:
+        page_number = 1
+    if not page_size:
+        page_size = 10
+
+    req = {
+        "instance_id": instance_id,
+        "instance_type": instance_type,
+        "advice_type": advice_type,
+        "summary_id": summary_id,
+        "group_by": group_by,
+        "order_by": order_by,
+        "page_number": page_number,
+        "page_size": page_size,
+    }
+
+    resp = dbw_client.list_slow_query_advice_api(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="slow_query_advice_task_history",
+    description="获取数据库实例的慢日志诊断历史信息",
+)
+def slow_query_advice_task_history(
+        instance_id: Optional[str] = Field(default=None, description="火山引擎数据库实例ID"),
+        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）"),
+        page_number: Optional[int] = Field(default=1, description="分页查询时的页码（默认为1，即从第一页数据开始返回）"),
+        page_size: Optional[int] = Field(default=10, description="分页大小（默认为10）"),
+) -> dict[str, Any]:
+    """
+    获取数据库实例的慢日志诊断历史信息
+
+    Args:
+        instance_id (str, optional): 火山引擎数据库实例ID
+        instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL和VeDBMySQL，并严格要求大小写一致）
+        page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
+        page_size (int, optional): 分页大小（默认为10）
+    Returns:
+        total (int): 慢日志诊断任务总数
+        res_list (list): 慢日志诊断历史列表（由创建时间从新到旧排序），列表中的每个值对应一条慢日志诊断记录，结构如下：
+            - db (str): Database名称
+            - date (str): 诊断日期（使用UTC+8时区，例如20250427）
+            - status (str): 诊断任务状态（INIT表示诊断中，SUCCESS表示诊断成功，EXCEPTION表示诊断异常）
+            - summary_id (str): 每次诊断的唯一标识
+            - slow_query_num (int): 总诊断慢SQL数量
+            - advice_index_num (int): 索引建议SQL数量
+            - no_advice_sql_num (int): 无建议SQL数量
+            - advice_rewrite_num (int): 待改写SQL数量
+    """
+    if REMOTE_MCP_SERVER:
+        dbw_client = get_dbw_client(mcp_server.get_context())
+    else:
+        dbw_client = DBW_CLIENT
+
+    instance_id = dbw_client.instance_id or instance_id
+    if not instance_id:
+        raise ValueError("instance_id is required")
+    instance_type = dbw_client.instance_type or instance_type
+    if not instance_type:
+        raise ValueError("instance_type is required")
+    if not page_number:
+        page_number = 1
+    if not page_size:
+        page_size = 10
+
+    req = {
+        "instance_id": instance_id,
+        "instance_type": instance_type,
+        "page_number": page_number,
+        "page_size": page_size,
+    }
+
+    resp = dbw_client.slow_query_advice_task_history_api(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="create_dml_sql_change_ticket",
+    description="针对数据库实例创建DML数据变更工单",
+)
+def create_dml_sql_change_ticket(
+        sql_text: str = Field(default="", description="待执行的DML SQL语句（普通SQL变更可以支持多条DML语句，多条SQL语句间用英文分号隔开；普通SQL变更，适用于少量数据变更场景，支持多条语句）"),
+        ticket_execute_type: str = Field(default="Auto", description="工单执行类型（Auto表示审批完成自动执行；Manual表示手动执行；Cron表示定时执行）"),
+        instance_id: Optional[str] = Field(default=None, description="火山引擎数据库实例ID"),
+        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL、VeDBMySQL和Postgres，并严格要求大小写一致）"),
+        database: Optional[str] = Field(default=None, description="Database名称"),
+        exec_start_time: Optional[int] = Field(default=None, description="执行开始时间，使用秒时间戳格式（当ticket_execute_type设置为Cron时，需要指定执行开始时间）"),
+        exec_end_time: Optional[int] = Field(default=None, description="执行结束时间，使用秒时间戳格式（当ticket_execute_type设置为Cron时，需要指定执行结束时间，且需要晚于执行开始时间）"),
+        title: Optional[str] = Field(default=None, description="工单标题"),
+        memo: Optional[str] = Field(default=None, description="工单备注信息，详实的备注信息有利于后期维护")
+) -> dict[str, Any]:
+    """
+    针对数据库实例创建DML数据变更工单
+
+    Args:
+        sql_text (str): 待执行的DML SQL语句（普通SQL变更可以支持多条DML语句，多条SQL语句间用英文分号隔开；普通SQL变更，适用于少量数据变更场景，支持多条语句）
+        ticket_execute_type (str): 工单执行类型（Auto表示审批完成自动执行；Manual表示手动执行；Cron表示定时执行）
+        instance_id (str, optional): 火山引擎数据库实例ID
+        instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL、VeDBMySQL和Postgres，并严格要求大小写一致）
+        database (str, optional): Database名称
+        exec_start_time (int, optional): 执行开始时间，使用秒时间戳格式（当ticket_execute_type设置为Cron时，需要指定执行开始时间）
+        exec_end_time (int, optional): 执行结束时间，使用秒时间戳格式（当ticket_execute_type设置为Cron时，需要指定执行结束时间，且需要晚于执行开始时间）
+        title (str, optional): 工单标题
+        memo (str, optional): 工单备注信息，详实的备注信息有利于后期维护
+    Returns:
+        ticket_id (str): 工单号
+    """
+    if REMOTE_MCP_SERVER:
+        dbw_client = get_dbw_client(mcp_server.get_context())
+    else:
+        dbw_client = DBW_CLIENT
+
+    instance_id = dbw_client.instance_id or instance_id
+    if not instance_id:
+        raise ValueError("instance_id is required")
+    instance_type = dbw_client.instance_type or instance_type
+    if not instance_type:
+        raise ValueError("instance_type is required")
+    database = dbw_client.database or database
+    if not database:
+        raise ValueError("database is required")
+    if not sql_text:
+        raise ValueError("sql_text is required")
+    if not ticket_execute_type:
+        ticket_execute_type = "Auto"
+
+    req = {
+        "instance_id": instance_id,
+        "instance_type": instance_type,
+        "database_name": database,
+        "sql_text": sql_text,
+        "ticket_execute_type": ticket_execute_type,
+    }
+    if exec_start_time is not None:
+        req["exec_start_time"] = exec_start_time
+    if exec_end_time is not None:
+        req["exec_end_time"] = exec_end_time
+    if title is not None:
+        req["title"] = title
+    if memo is not None:
+        req["memo"] = memo
+
+    resp = dbw_client.create_dml_sql_change_ticket(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="create_ddl_sql_change_ticket",
+    description="针对数据库实例创建DDL结构变更工单",
+)
+def create_ddl_sql_change_ticket(
+        sql_text: str = Field(default="", description="待执行的DDL SQL语句（普通SQL变更可以下发多条DDL语句，多条SQL语句间用英文分号隔开。注意DDL有锁表风险，建议选择无锁结构变更逐条提交）"),
+        ticket_execute_type: str = Field(default="Auto", description="工单执行类型（Auto表示审批完成自动执行；Manual表示手动执行；Cron表示定时执行）"),
+        instance_id: Optional[str] = Field(default=None, description="火山引擎数据库实例ID"),
+        instance_type: Optional[str] = Field(default=None, description="火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL、VeDBMySQL和Postgres，并严格要求大小写一致）"),
+        database: Optional[str] = Field(default=None, description="Database名称"),
+        exec_start_time: Optional[int] = Field(default=None, description="执行开始时间，使用秒时间戳格式（当ticket_execute_type设置为Cron时，需要指定执行开始时间）"),
+        exec_end_time: Optional[int] = Field(default=None, description="执行结束时间，使用秒时间戳格式（当ticket_execute_type设置为Cron时，需要指定执行结束时间，且需要晚于执行开始时间）"),
+        title: Optional[str] = Field(default=None, description="工单标题"),
+        memo: Optional[str] = Field(default=None, description="工单备注信息，详实的备注信息有利于后期维护")
+) -> dict[str, Any]:
+    """
+    针对数据库实例创建DDL结构变更工单
+
+    Args:
+        sql_text (str): 待执行的DDL SQL语句（普通SQL变更可以下发多条DDL语句，多条SQL语句间用英文分号隔开。注意DDL有锁表风险，建议选择无锁结构变更逐条提交）
+        ticket_execute_type (str): 工单执行类型（Auto表示审批完成自动执行；Manual表示手动执行；Cron表示定时执行）
+        instance_id (str, optional): 火山引擎数据库实例ID
+        instance_type (str, optional): 火山引擎数据库实例类型（可通过instance_id前缀获取，当前支持MySQL、VeDBMySQL和Postgres，并严格要求大小写一致）
+        database (str, optional): Database名称
+        exec_start_time (int, optional): 执行开始时间，使用秒时间戳格式（当ticket_execute_type设置为Cron时，需要指定执行开始时间）
+        exec_end_time (int, optional): 执行结束时间，使用秒时间戳格式（当ticket_execute_type设置为Cron时，需要指定执行结束时间，且需要晚于执行开始时间）
+        title (str, optional): 工单标题
+        memo (str, optional): 工单备注信息，详实的备注信息有利于后期维护
+    Returns:
+        ticket_id (str): 工单号
+    """
+    if REMOTE_MCP_SERVER:
+        dbw_client = get_dbw_client(mcp_server.get_context())
+    else:
+        dbw_client = DBW_CLIENT
+
+    instance_id = dbw_client.instance_id or instance_id
+    if not instance_id:
+        raise ValueError("instance_id is required")
+    instance_type = dbw_client.instance_type or instance_type
+    if not instance_type:
+        raise ValueError("instance_type is required")
+    database = dbw_client.database or database
+    if not database:
+        raise ValueError("database is required")
+    if not sql_text:
+        raise ValueError("sql_text is required")
+    if not ticket_execute_type:
+        ticket_execute_type = "Auto"
+
+    req = {
+        "instance_id": instance_id,
+        "instance_type": instance_type,
+        "database_name": database,
+        "sql_text": sql_text,
+        "ticket_execute_type": ticket_execute_type,
+    }
+    if exec_start_time is not None:
+        req["exec_start_time"] = exec_start_time
+    if exec_end_time is not None:
+        req["exec_end_time"] = exec_end_time
+    if title is not None:
+        req["title"] = title
+    if memo is not None:
+        req["memo"] = memo
+
+    resp = dbw_client.create_ddl_sql_change_ticket(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_tickets",
+    description="批量查询工单详情",
+)
+def describe_tickets(
+        list_type: str = Field(default="", description="批量查询的工单类型（All表示全部；CreatedByMe表示我创建的；ApprovedByMe表示我审批的）"),
+        order_by: Optional[str] = Field(default=None, description="返回结果的排序字段"),
+        sort_by: Optional[str] = Field(default="ASC", description="按照降序或升序方式排列（ASC表示升序；DESC表示降序）"),
+        page_number: Optional[int] = Field(default=1, description="分页查询时的页码（默认为1，即从第一页数据开始返回）"),
+        page_size: Optional[int] = Field(default=10, description="分页大小（默认为10）")
+) -> dict[str, Any]:
+    """
+    批量查询工单详情
+
+    Args:
+        list_type (str): 批量查询的工单类型（All表示全部；CreatedByMe表示我创建的；ApprovedByMe表示我审批的）
+        order_by (str): 返回结果的排序字段
+        sort_by (str): 按照降序或升序方式排列（ASC表示升序；DESC表示降序）
+        page_number (int, optional): 分页查询时的页码（默认为1，即从第一页数据开始返回）
+        page_size (int, optional): 分页大小（默认为10）
+    Returns:
+        total (int): 数据库实例的工单总数
+        tickets (list): 数据库实例的工单列表，列表中的每个值对应一个工单记录，结构如下：
+            - instance_id (str): 数据库实例ID
+            - instance_type (str): 数据库实例类型
+            - db_name (str): Database名称
+            - ticket_id (str): 工单号
+            - title (str): 工单标题
+            - memo (str): 工单备注信息
+            - ticket_execute_type (str): 工单执行类型（Auto表示审批完成自动执行；Manual表示手动执行；Cron表示定时执行）
+            - ticket_status (str): 工单状态（TicketUndo：未开始；TicketPreCheck：预检查中；TicketPreCheckError：预检查失败；
+                                          TicketExamine：审批中；TicketCancel：已取消；TicketReject：已拒绝；TicketWaitExecute：等待执行；
+                                          TicketExecute：执行中；TicketFinished：执行成功；TicketError：执行失败）
+            - ticket_type (str): 工单类型（NormalSqlChange：普通SQL变更工单；FreeLockStructChange：无锁结构变更工单；
+                                         FreeLockSqlChange：无锁数据变更工单；DataMigrationImport：数据导入工单；
+                                         DataMigrationExportDB：数据导出工单；DataMigrationExportSqlResult：SQL结果集导出工单；DataClean：数据清理归档工单）
+            - create_time (str): 工单创建时间
+            - update_time (str): 工单更新时间
+            - create_user (dict): 工单创建人信息
+            - current_user (dict): 当前处理人信息
+            - current_user_role (str): 当前处理人角色
+    """
+    if REMOTE_MCP_SERVER:
+        dbw_client = get_dbw_client(mcp_server.get_context())
+    else:
+        dbw_client = DBW_CLIENT
+
+    if not list_type:
+        raise ValueError("list_type is required")
+    if not sort_by:
+        sort_by = "ASC"
+    if not page_number:
+        page_number = 1
+    if not page_size:
+        page_size = 10
+
+    req = {
+        "list_type": list_type,
+        "sort_by": sort_by,
+        "page_number": page_number,
+        "page_size": page_size,
+    }
+    if order_by is not None:
+        req["order_by"] = order_by
+
+    resp = dbw_client.describe_tickets(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_ticket_detail",
+    description="查询单个工单详情",
+)
+def describe_ticket_detail(
+        ticket_id: str = Field(default="", description="工单号")
+) -> dict[str, Any]:
+    """
+    查询单个工单详情
+
+    Args:
+        ticket_id (str): 工单号
+    Returns:
+        instance_id (str): 数据库实例ID
+        instance_type (str): 数据库实例类型
+        db_name (str): Database名称
+        ticket_id (str): 工单号
+        title (str): 工单标题
+        memo (str): 工单备注信息
+        sql_text (str): 待执行的SQL文本
+        ticket_execute_type (str): 工单执行类型（Auto表示审批完成自动执行；Manual表示手动执行；Cron表示定时执行）
+        ticket_status (str): 工单状态（TicketUndo：未开始；TicketPreCheck：预检查中；TicketPreCheckError：预检查失败；
+                                     TicketExamine：审批中；TicketCancel：已取消；TicketReject：已拒绝；TicketWaitExecute：等待执行；
+                                     TicketExecute：执行中；TicketFinished：执行成功；TicketError：执行失败）
+        ticket_type (str): 工单类型（NormalSqlChange：普通SQL变更工单；FreeLockStructChange：无锁结构变更工单；
+                                   FreeLockSqlChange：无锁数据变更工单；DataMigrationImport：数据导入工单；
+                                   DataMigrationExportDB：数据导出工单；DataMigrationExportSqlResult：SQL结果集导出工单；DataClean：数据清理归档工单）
+        create_time (str): 工单创建时间
+        update_time (str): 工单更新时间
+        create_user (dict): 工单创建人信息
+        current_user (dict): 当前处理人信息
+        current_user_role (str): 当前处理人角色
+        exec_start_time (int): 执行开始时间，使用秒时间戳格式（当ticket_execute_type设置为Cron时，需要指定执行开始时间）
+        exec_end_time (int): 执行结束时间，使用秒时间戳格式（当ticket_execute_type设置为Cron时，需要指定执行结束时间，且需要晚于执行开始时间）
+    """
+    if REMOTE_MCP_SERVER:
+        dbw_client = get_dbw_client(mcp_server.get_context())
+    else:
+        dbw_client = DBW_CLIENT
+
+    if not ticket_id:
+        raise ValueError("ticket_id is required")
+
+    req = {
+        "ticket_id": ticket_id,
+    }
+
+    resp = dbw_client.describe_ticket_detail(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="describe_workflow",
+    description="查询审批工单详情",
+)
+def describe_workflow(
+        ticket_id: str = Field(default="", description="工单号")
+) -> dict[str, Any]:
+    """
+    查询审批工单详情
+
+    Args:
+        ticket_id (str): 工单号
+    Returns:
+        Code (str): 接口响应码
+        ErrMsg (str): 接口错误信息
+        FlowNodes (list): 审批工单节点详情列表，列表中的每个值对应一个审批节点详情，结构如下：
+            - node_name (str): 审批节点名称
+            - operator (str): 当前处理人名称（如果当前处理人有多个，每个人之间由英文逗号分隔）
+            - operator_id (str): 当前处理人 ID（如果当前处理人有多个，每个人之间由英文逗号分隔）
+            - status (str): 审批状态（Undo：未开始；Approval：审批中；Pass：审批通过；Reject：审批拒绝；Cancel：审批撤销）
+            - step (int): 审批节点顺序
+    """
+    if REMOTE_MCP_SERVER:
+        dbw_client = get_dbw_client(mcp_server.get_context())
+    else:
+        dbw_client = DBW_CLIENT
+
+    if not ticket_id:
+        raise ValueError("ticket_id is required")
+
+    req = {
+        "ticket_id": ticket_id,
+    }
+
+    resp = dbw_client.describe_workflow(req)
+    return resp.to_dict()
+
+
+@mcp_server.tool(
+    name="manual_execute_ticket",
+    description="手动执行工单",
+)
+def manual_execute_ticket(
+        ticket_id: str = Field(default="", description="工单号")
+) -> dict[str, Any]:
+    """
+    手动执行工单
+
+    Args:
+        ticket_id (str): 工单号
+    Returns:
+        Code (str): 接口响应码
+        ErrMsg (str): 接口错误信息
+    """
+    if REMOTE_MCP_SERVER:
+        dbw_client = get_dbw_client(mcp_server.get_context())
+    else:
+        dbw_client = DBW_CLIENT
+
+    if not ticket_id:
+        raise ValueError("ticket_id is required")
+
+    req = {
+        "ticket_id": ticket_id,
+    }
+
+    resp = dbw_client.manual_execute_ticket(req)
     return resp.to_dict()
 
 
