@@ -104,6 +104,167 @@ def get_metric_data(
             result.extend(current_datapoints)
     return json.dumps(result)
 
+@mcp.tool(description="查询采集插件相关的终端节点")
+def list_o11y_agent_vpc_endpoints(
+        region: str = Field(
+            description="地域code,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+) -> str:
+    api_instance = client.init_client(region=region, ctx=mcp.get_context())
+    response = api_instance.list_o11y_agent_vpc_endpoints(volcenginesdkcloudmonitor.ListO11yAgentVpcEndpointsRequest(
+        page_number=1,
+        page_size=100,
+    ))
+    if not isinstance(response, volcenginesdkcloudmonitor.ListO11yAgentVpcEndpointsResponse):
+        raise Exception("InternalError: unexpected response")
+    return json.dumps(response.to_dict())
+
+@mcp.tool(description="对指定ECS实例设置自定义进程监控")
+def update_o11y_agent_ecs_process_config(
+        region: str = Field(
+            description="地域code,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+        instance_id: str = Field(
+            description="ECS实例ID,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+        processes: list = Field(
+            description="监控进程列表,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+) -> str:
+    api_instance = client.init_client(region=region, ctx=mcp.get_context())
+    response = api_instance.update_o11y_agent_ecs_process_config(volcenginesdkcloudmonitor.UpdateO11yAgentECSProcessConfigRequest(
+        instance_ids=[instance_id],
+        processes=[volcenginesdkcloudmonitor.ProcessForUpdateO11yAgentECSProcessConfigInput(
+            name=process,
+        ) for process in processes
+        ],
+    ))
+    if not isinstance(response, volcenginesdkcloudmonitor.UpdateO11yAgentECSProcessConfigResponse):
+        raise Exception("InternalError: unexpected response")
+    return json.dumps(response.to_dict())
+
+@mcp.tool(description="查询指定ECS实例的自定义进程监控配置")
+def list_o11y_agent_ecs_process_configs(
+        region: str = Field(
+            description="地域code,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+        instance_id: str = Field(
+            description="ECS实例ID,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+) -> str:
+    api_instance = client.init_client(region=region, ctx=mcp.get_context())
+    response = api_instance.list_o11y_agent_ecs_process_configs(volcenginesdkcloudmonitor.ListO11yAgentECSProcessConfigsRequest(
+        instance_id=instance_id,
+    ))
+    if not isinstance(response, volcenginesdkcloudmonitor.ListO11yAgentECSProcessConfigsResponse):
+        raise Exception("InternalError: unexpected response")
+    res = [process.name for process in response.processes]
+    return json.dumps(res)
+
+@mcp.tool(description="获取ECS采集插件自动安装配置")
+def get_o11y_agent_ecs_auto_install(
+        region: str = Field(
+            description="地域code,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+) -> str:
+    api_instance = client.init_client(region=region, ctx=mcp.get_context())
+    response = api_instance.get_o11y_agent_ecs_auto_install(volcenginesdkcloudmonitor.GetO11yAgentECSAutoInstallRequest())
+    if not isinstance(response, volcenginesdkcloudmonitor.GetO11yAgentECSAutoInstallResponse):
+        raise Exception("InternalError: unexpected response")
+    return json.dumps(response.to_dict())
+
+@mcp.tool(description="设置ECS采集插件自动安装配置")
+def update_o11y_agent_ecs_auto_install(
+        region: str = Field(
+            description="地域code,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+        enable: bool = Field(
+            description="是否开启自动安装采集插件,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+) -> str:
+    api_instance = client.init_client(region=region, ctx=mcp.get_context())
+    api_instance.update_o11y_agent_ecs_auto_install(volcenginesdkcloudmonitor.UpdateO11yAgentECSAutoInstallRequest(
+        enable=enable,
+    ))
+    return ""
+
+@mcp.tool(description="创建ECS采集插件部署任务")
+def create_o11y_agent_ecs_deploy_task(
+        region: str = Field(
+            description="地域code,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+        task_type: str = Field(
+            description="任务类型,支持升级(upgrade)采集插件和安装(install)采集插件,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+        select_all: bool = Field(
+            description="是否选择全部实例,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+        instance_ids: list = Field(
+            description="指定ECS实例ID,不全选时有效,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+) -> str:
+    api_instance = client.init_client(region=region, ctx=mcp.get_context())
+    api_instance.create_o11y_agent_ecs_deploy_task(volcenginesdkcloudmonitor.CreateO11yAgentECSDeployTaskRequest(
+        task_type=task_type,
+        filter=volcenginesdkcloudmonitor.FilterForCreateO11yAgentECSDeployTaskInput(
+            instance_ids=instance_ids,
+            select_all=select_all,
+        ),
+    ))
+    return ""
+
+@mcp.tool(description="操作ECS采集插件部署任务")
+def perform_o11y_agent_ecs_deploy_task(
+        region: str = Field(
+            description="地域code,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+        task_type: str = Field(
+            description="任务类型,支持升级(upgrade)采集插件和安装(install)采集插件,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+        action: str = Field(
+            description="操作类型,支持结束(finish)任务,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+) -> str:
+    api_instance = client.init_client(region=region, ctx=mcp.get_context())
+    api_instance.perform_o11y_agent_ecs_deploy_task(volcenginesdkcloudmonitor.PerformO11yAgentECSDeployTaskRequest(
+        task_type=task_type,
+        action=action,
+    ))
+    return ""
+
+@mcp.tool(description="查询指定ECS实例下的采集插件状态")
+def list_o11y_agent_ecs_instances(
+        region: str = Field(
+            description="地域code,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+        instance_ids: list = Field(
+            description="ECS实例Id集合,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+) -> str:
+    api_instance = client.init_client(region=region, ctx=mcp.get_context())
+    response = api_instance.list_o11y_agent_ecs_instances(volcenginesdkcloudmonitor.ListO11yAgentECSInstancesRequest(
+        instance_ids=instance_ids,
+    ))
+    if not isinstance(response, volcenginesdkcloudmonitor.ListO11yAgentECSInstancesResponse):
+        raise Exception("InternalError: unexpected response")
+    return json.dumps(response.to_dict())
+
+@mcp.tool(description="查询指定ECS实例下的采集插件元信息")
+def list_o11y_agent_ecs_instance_metadata(
+        region: str = Field(
+            description="地域code,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+        instance_ids: list = Field(
+            description="ECS实例Id集合,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
+        ),
+) -> str:
+    api_instance = client.init_client(region=region, ctx=mcp.get_context())
+    response = api_instance.list_o11y_agent_ecs_instance_metadata(volcenginesdkcloudmonitor.ListO11yAgentECSInstanceMetadataRequest(
+        instance_ids=instance_ids,
+    ))
+    if not isinstance(response, volcenginesdkcloudmonitor.ListO11yAgentECSInstanceMetadataResponse):
+        raise Exception("InternalError: unexpected response")
+    return json.dumps(response.to_dict())
 
 def _match_get_metric_data_filter(value, _filter: GetMetricsDataFilter) -> bool:
     if _filter.Operator == "=":

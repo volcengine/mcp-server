@@ -18,6 +18,15 @@ CloudMonitor MCP Server Provide capabilities such as query metric data。
 
 This MCP Server product provides the following Tools:
 - `get_metric_data`: [get_metric_data](https://www.volcengine.com/docs/6408/105542)
+- `list_o11y_agent_vpc_endpoints`: [list_o11y_agent_vpc_endpoints](https://www.volcengine.com/docs/6408/1986343)
+- `update_o11y_agent_ecs_process_config`: [update_o11y_agent_ecs_process_config](https://www.volcengine.com/docs/6408/1986344)
+- `list_o11y_agent_ecs_process_configs`: [list_o11y_agent_ecs_process_configs](https://www.volcengine.com/docs/6408/1986345)
+- `get_o11y_agent_ecs_auto_install`: [get_o11y_agent_ecs_auto_install](https://www.volcengine.com/docs/6408/1986339)
+- `update_o11y_agent_ecs_auto_install`: [update_o11y_agent_ecs_auto_install](https://www.volcengine.com/docs/6408/1986338)
+- `create_o11y_agent_ecs_deploy_task`: [create_o11y_agent_ecs_deploy_task](https://www.volcengine.com/docs/6408/1986340)
+- `perform_o11y_agent_ecs_deploy_task`: [perform_o11y_agent_ecs_deploy_task](https://www.volcengine.com/docs/6408/1986341)
+- `list_o11y_agent_ecs_instances`: [list_o11y_agent_ecs_instances](https://www.volcengine.com/docs/6408/1986342)
+- `list_o11y_agent_ecs_instance_metadata`: [list_o11y_agent_ecs_instance_metadata](https://www.volcengine.com/docs/6408/1990483)
 
 ### Tool 1: get_metric_data
 
@@ -130,6 +139,458 @@ output：
 
 ```
 Query the CpuTotal metric data of the Instance i-cnlfk3hz2nf95hjlz under the Instance subnamespace of the VCM_ECS product in the cn-beijing area in the recent 5 minutes.
+```
+
+### Tool 2: list_o11y_agent_vpc_endpoints
+
+#### Type
+
+SaaS
+
+#### Detail
+
+Query the vpc endpoints related to the O11yAgent collection plug-in
+
+#### The input parameters required for debugging
+
+Input：
+
+```json
+{
+    "name": "list_o11y_agent_vpc_endpoints",
+    "description": "Query the vpc endpoints related to the O11yAgent collection plug-in",
+    "inputSchema": {
+        "type": "object",
+        "properties": {
+            "region": {
+                "default": "cn-beijing",
+                "description": "target region(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
+                "type": "string"
+            }
+        },
+        "required": []
+    }
+}
+```
+
+output：
+
+- Return all vpc endpoints related to the O11yAgent collection plug-in
+
+#### The most easily evoked Prompt example
+
+```
+Please help me search for the terminal nodes related to the O11yAgent collection plugin-in the cn beijing region.
+```
+
+### Tool 3: update_o11y_agent_ecs_process_config
+
+#### Type
+
+SaaS
+
+#### Detail
+
+Update the process monitoring config of the specified ecs instance
+
+#### The input parameters required for debugging
+
+Input：
+
+```json
+{
+    "name": "update_o11y_agent_ecs_process_config",
+    "description": "Update the process monitoring config of the specified ecs instance",
+    "inputSchema": {
+        "type": "object",
+        "properties": {
+            "region": {
+                "default": "cn-beijing",
+                "description": "target region(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
+                "type": "string"
+            },
+            "instance_id": {
+                "default": "",
+                "description": "target instance",
+                "type": "string"
+            },
+            "processes": {
+                "default": "",
+                "description": "target monitoring processes",
+                "type": "list"
+            }
+        },
+        "required": [
+            "instance_id",
+            "processes"
+        ]
+    }
+}
+```
+
+output：
+
+- Return the instance id that was successfully modified 
+
+#### The most easily evoked Prompt example
+
+```
+Please modify the custom process monitoring configuration for the i-cnlfk3hz2nf95hjlz instance in the cn beijing region to nginx and Java.
+```
+
+### Tool 4: list_o11y_agent_ecs_process_configs
+
+#### Type
+
+SaaS
+
+#### Detail
+
+Query the process monitoring config of the specified ecs instance
+
+#### The input parameters required for debugging
+
+Input：
+
+```json
+{
+    "name": "list_o11y_agent_ecs_process_configs",
+    "description": "Query the process monitoring config of the specified ecs instance",
+    "inputSchema": {
+        "type": "object",
+        "properties": {
+            "region": {
+                "default": "cn-beijing",
+                "description": "target region(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
+                "type": "string"
+            },
+            "instance_id": {
+                "default": "",
+                "description": "target instance",
+                "type": "string"
+            }
+        },
+        "required": [
+            "instance_id"
+        ]
+    }
+}
+```
+
+output：
+
+- Return the monitoring processes of the instance
+
+#### The most easily evoked Prompt example
+
+```
+Please help me check the custom process monitoring configuration for the i-cnlfk3hz2nf95hjlz instance in the cn beijing region.
+```
+
+### Tool 5: get_o11y_agent_ecs_auto_install
+
+#### Type
+
+SaaS
+
+#### Detail
+
+Query if enable to auto install O11yAgent collection plug-in
+
+#### The input parameters required for debugging
+
+Input：
+
+```json
+{
+    "name": "get_o11y_agent_ecs_auto_install",
+    "description": "Query if enable to auto install O11yAgent collection plug-in",
+    "inputSchema": {
+        "type": "object",
+        "properties": {
+            "region": {
+                "default": "cn-beijing",
+                "description": "target region(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
+                "type": "string"
+            }
+        },
+        "required": [
+        ]
+    }
+}
+```
+
+output：
+
+- Return the result of the query
+
+#### The most easily evoked Prompt example
+
+```
+Please help me check if the automatic installation of O11yAgent collection plugin-in is enabled in the cn beijing region.
+```
+
+### Tool 6: update_o11y_agent_ecs_auto_install
+
+#### Type
+
+SaaS
+
+#### Detail
+
+Update the O11yAgent collection plug-in's auto install config
+
+#### The input parameters required for debugging
+
+Input：
+
+```json
+{
+    "name": "update_o11y_agent_ecs_auto_install",
+    "description": "Update the O11yAgent collection plug-in's auto install config",
+    "inputSchema": {
+        "type": "object",
+        "properties": {
+            "region": {
+                "default": "cn-beijing",
+                "description": "target region(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
+                "type": "string"
+            },
+            "enable": {
+                "default": "true",
+                "description": "whether to enable auto install",
+                "type": "bool"
+            }
+        },
+        "required": [
+            "enable"
+        ]
+    }
+}
+```
+
+output：
+
+- Empty
+
+#### The most easily evoked Prompt example
+
+```
+Please help me enable the automatic installation of O11yAgent collection plugin-in for the cn beijing region.
+```
+
+### Tool 7: create_o11y_agent_ecs_deploy_task
+
+#### Type
+
+SaaS
+
+#### Detail
+
+Create O11yAgent collection plug-in's deployment task
+
+#### The input parameters required for debugging
+
+Input：
+
+```json
+{
+    "name": "create_o11y_agent_ecs_deploy_task",
+    "description": "Create O11yAgent collection plug-in's deployment task",
+    "inputSchema": {
+        "type": "object",
+        "properties": {
+            "region": {
+                "default": "cn-beijing",
+                "description": "target region(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
+                "type": "string"
+            },
+            "task_type": {
+                "default": "",
+                "description": "target task type(e.g. upgrade, install)",
+                "type": "string"
+            },
+            "instance_ids": {
+                "default": "",
+                "description": "target instance ids",
+                "type": "list"
+            },
+            "select_all": {
+                "default": "false",
+                "description": "whether to change all instances",
+                "type": "bool"
+            }
+        },
+        "required": [
+            "task_type",
+            "instance_ids",
+            "select_all"
+        ]
+    }
+}
+```
+
+output：
+
+- Empty
+
+#### The most easily evoked Prompt example
+
+```
+Please help me upgrade the O11yAgent collection plugin-in version for all instances in the cn beijing region.
+```
+
+### Tool 8: perform_o11y_agent_ecs_deploy_task
+
+#### Type
+
+SaaS
+
+#### Detail
+
+Perform operations on the deployment task of the O11yAgent collection plug-in
+
+#### The input parameters required for debugging
+
+Input：
+
+```json
+{
+    "name": "perform_o11y_agent_ecs_deploy_task",
+    "description": "Perform operations on the deployment task of the O11yAgent collection plug-in",
+    "inputSchema": {
+        "type": "object",
+        "properties": {
+            "region": {
+                "default": "cn-beijing",
+                "description": "target region(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
+                "type": "string"
+            },
+            "task_type": {
+                "default": "",
+                "description": "target task type(e.g. upgrade, install)",
+                "type": "string"
+            },
+            "action": {
+                "default": "finish",
+                "description": "action(e.g. finish)",
+                "type": "string"
+            }
+        },
+        "required": [
+            "task_type",
+            "action"
+        ]
+    }
+}
+```
+
+output：
+
+- Empty
+
+#### The most easily evoked Prompt example
+
+```
+Please help me complete the upgrade and deployment task of the O11yAgent collection plugin-in the cn-beijing region.
+```
+
+### Tool 9: list_o11y_agent_ecs_instances
+
+#### Type
+
+SaaS
+
+#### Detail
+
+Query the O11yAgent collection plug-in's info of the specified instances
+
+#### The input parameters required for debugging
+
+Input：
+
+```json
+{
+    "name": "list_o11y_agent_ecs_instances",
+    "description": "Query the O11yAgent collection plug-in's info of the specified instances",
+    "inputSchema": {
+        "type": "object",
+        "properties": {
+            "region": {
+                "default": "cn-beijing",
+                "description": "target region(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
+                "type": "string"
+            },
+            "instance_ids": {
+                "default": "",
+                "description": "instance ids to be queried",
+                "type": "list"
+            }
+        },
+        "required": [
+            "instance_ids"
+        ]
+    }
+}
+```
+
+output：
+
+- Return the O11yAgent collection plug-in's info of the query
+
+#### The most easily evoked Prompt example
+
+```
+Please help me query the information about the O11yAgent collection plugin-in for the instance i-cnlfk3hz2nf95hjlz in the cn-beijing region.
+```
+
+### Tool 10: list_o11y_agent_ecs_instance_metadata
+
+#### Type
+
+SaaS
+
+#### Detail
+
+Query the O11yAgent collection plug-in's metadata of the specified instances
+
+#### The input parameters required for debugging
+
+Input：
+
+```json
+{
+    "name": "list_o11y_agent_ecs_instance_metadata",
+    "description": "Query the O11yAgent collection plug-in's metadata of the instance",
+    "inputSchema": {
+        "type": "object",
+        "properties": {
+            "region": {
+                "default": "cn-beijing",
+                "description": "target region(e.g. cn-beijing, cn-shanghai, cn-guangzhou)",
+                "type": "string"
+            },
+            "instance_ids": {
+                "default": "",
+                "description": "instance ids to be queried",
+                "type": "list"
+            }
+        },
+        "required": [
+            "instance_ids"
+        ]
+    }
+}
+```
+
+output：
+
+- Return the O11yAgent collection plug-in's metadata of the query
+
+#### The most easily evoked Prompt example
+
+```
+Please help me query the metadata of the O11yAgent collection plugin-in for the instance i-cnlfk3hz2nf95hjlz in the cn-beijing region.
 ```
 
 ## Adaptable platform  
