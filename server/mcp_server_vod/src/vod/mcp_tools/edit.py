@@ -217,7 +217,7 @@ def create_edit_mcp_server(mcp, service: VodAPI, public_methods: dict):
         if not params["SpaceName"].strip():
             raise ValueError("get_v_creative_task_result: params['SpaceName'] cannot be empty")
         
-        reqs = service.mcp_get("VodMcpGetVCreativeTaskResult", {"VCreativeId": params["VCreativeId"]}, json.dumps({}))
+        reqs = service.mcp_get("McpGetVCreativeTaskResult", {"VCreativeId": params["VCreativeId"]}, json.dumps({}))
 
         if isinstance(reqs, str):
             reqs = json.loads(reqs)
