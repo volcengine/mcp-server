@@ -32,7 +32,7 @@ def modify_db_instance_name(instance_name: Annotated[str, Field(description='修
     Args:
         instance_name (str): 修改后的实例新名称。名称需同时满足以下要求：
             - 不能以数字、中划线（-）开头。
-            - 只能包含中文、字母、数字、下划线（\_）和中划线（-）。
+            - 只能包含中文、字母、数字、下划线和中划线。
             - 长度需要在 1~128 个字符内。
             示例值：test_api
         instance_id (str): 实例 ID。
