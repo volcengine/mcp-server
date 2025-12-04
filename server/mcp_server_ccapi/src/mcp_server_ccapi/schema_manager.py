@@ -80,7 +80,7 @@ class SchemaManager:
             try:
                 with open(schema_file, "r") as f:
                     schema = json.load(f)
-                    if "typeNam–––e" in schema:
+                    if "typeName" in schema:
                         resource_type = schema["typeName"]
                         self.schema_registry[resource_type] = schema
                         print(f"Loaded schema for {resource_type} from cache")
