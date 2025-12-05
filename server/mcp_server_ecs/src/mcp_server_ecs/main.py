@@ -7,6 +7,7 @@ This server provides MCP tools to interact with ECS OpenAPI.
 import argparse
 
 from mcp_server_ecs.common.logs import LOG
+from mcp_server_ecs.common.middleware import install_metrics_handler
 from mcp_server_ecs.tools import event, instance, mcp, region
 
 
@@ -24,6 +25,9 @@ def main():
     LOG.info(
         f"Including tool types: {event.__name__}, {instance.__name__}, {region.__name__}"
     )
+    
+    install_metrics_handler(mcp)
+    
     LOG.info(f"Starting ECS MCP Server with {args.transport} transport")
 
     mcp.run(transport=args.transport)

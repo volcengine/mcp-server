@@ -16,7 +16,7 @@ from mcp_server_ecs.tools import mcp
 
 @mcp.tool(
     name="describe_regions",
-    description="Query region list",
+    description="查询地域列表 (Query region list)\n\n查询火山引擎ECS支持的地域信息。\n地域是指物理的数据中心所在位置，如 cn-beijing、cn-shanghai、ap-southeast-1 等。",
 )
 async def describe_regions(
     region: str = Field(
@@ -41,10 +41,11 @@ async def describe_regions(
                 )
             )
 
-            if not response or not getattr(response, "regions", None):
-                return handle_error("describe_regions")
+            if not response:
+                handle_error("describe_regions")
 
-            for region in response.regions:
+            regions = getattr(response, "regions", None) or []
+            for region in regions:
                 total_results.append(region.region_id)
 
             if not response.next_token:
@@ -55,12 +56,12 @@ async def describe_regions(
         return [types.TextContent(type="text", text=f"Results: {total_results}")]
 
     except Exception as e:
-        return handle_error("describe_regions", e)
+        handle_error("describe_regions", e)
 
 
 @mcp.tool(
     name="describe_zones",
-    description="Query available zone list",
+    description="查询可用区列表 (Query available zone list)\n\n查询指定地域下的可用区信息。\n可用区是地域内的独立电力和网络域，如 cn-beijing-a、cn-beijing-b 等。",
 )
 async def describe_zones(
     region: str = Field(
@@ -82,13 +83,14 @@ async def describe_zones(
             )
         )
 
-        if not response or not getattr(response, "zones", None):
-            return handle_error("describe_zones")
+        if not response:
+            handle_error("describe_zones")
 
-        for zone in response.zones:
+        zones = getattr(response, "zones", None) or []
+        for zone in zones:
             total_results.append(zone.zone_id)
 
         return [types.TextContent(type="text", text=f"Results: {total_results}")]
 
     except Exception as e:
-        return handle_error("describe_zones", e)
+        handle_error("describe_zones", e)
