@@ -128,7 +128,7 @@ def create_media_mcp_server(mcp, service: VodAPI, public_methods: dict):
                     subtitles_removal_file_name = subtitles_removal_file.get("FileName", "")
                     video_urls.append({
                         "DirectUrl": subtitles_removal_file_name,
-                        "Vid": subtitles_removal.get("Vid", ""),
+                        "Vid": subtitles_removal_file.get("Vid", ""),
                         "Url": get_play_url(space_name, subtitles_removal_file_name),
                     })
                 # OCR文本转写字幕
@@ -398,6 +398,7 @@ def create_media_mcp_server(mcp, service: VodAPI, public_methods: dict):
                 "Type": "Task",
                 "Task": {
                     "Type": "Erase",
+                    
                     "Erase": {
                         "Mode": "Auto",
                         "NewVid": True,
@@ -456,7 +457,7 @@ def create_media_mcp_server(mcp, service: VodAPI, public_methods: dict):
 
     # 绿幕抠图
     @mcp.tool()
-    def green_screen_task(type: str, video: str, spaceName: str, outputFormat: str) -> Any:
+    def green_screen_task(type: str, video: str, spaceName: str, outputFormat: str = "WEBM") -> Any:
         """Green Screen （绿幕抠图） is supported, with two input modes available: `Vid` and  `DirectUrl`.
             Args：
             - type(str)：** 必选字段 **，文件类型，默认值为 `Vid` 。字段取值如下
@@ -464,7 +465,7 @@ def create_media_mcp_server(mcp, service: VodAPI, public_methods: dict):
                 - DirectUrl
             - spaceName(str)： ** 必选字段 **,  视频空间名称
             - video： ** 必选字段 **,  视频文件信息, 当 type 为 `Vid` 时， video 为视频文件 ID；当 type 为 `DirectUrl` 时， video 为 FileName
-            - outputFormat：  ** 必选字段 **,   输出视频的封装格式，默认 `MOV`，支持的取值如下：
+            - outputFormat：  ** 必选字段 **,   输出视频的封装格式，默认 `WEBM`，支持的取值如下：
                 - MOV
                 - WEBM
             Returns
@@ -495,7 +496,7 @@ def create_media_mcp_server(mcp, service: VodAPI, public_methods: dict):
     # 人像抠图
     @mcp.tool()
     def portrait_image_retouching_task(
-        type: str, video: str, spaceName: str, outputFormat: str
+        type: str, video: str, spaceName: str, outputFormat: str = "WEBM"
     ) -> Any:
         """Portrait image retouching is supported, with two input modes available: `Vid` and  `DirectUrl`.
             Args：
@@ -504,7 +505,7 @@ def create_media_mcp_server(mcp, service: VodAPI, public_methods: dict):
                 - DirectUrl
             - spaceName(str)： ** 必选字段 **,  视频空间名称
             - video： ** 必选字段 **,  视频文件信息, 当 type 为 `Vid` 时， video 为视频文件 ID；当 type 为 `DirectUrl` 时， video 为 FileName
-            - outputFormat：  ** 必选字段 **,   输出视频的封装格式，默认 `MOV`，支持的取值如下：
+            - outputFormat：  ** 必选字段 **,   输出视频的封装格式，默认 `WEBM`，支持的取值如下：
                 - MOV
                 - WEBM
             Returns
