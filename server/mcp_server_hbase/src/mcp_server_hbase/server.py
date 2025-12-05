@@ -24,15 +24,15 @@ hbase_resource_sdk = HBASESDK(region=os.getenv('VOLCENGINE_REGION','cn-beijing')
     name="modify_db_instance_name",
     description="调用 ModifyDBInstanceName 接口修改实例名称。"
 )
-def modify_db_instance_name(instance_name: Annotated[str, Field(description='修改后的实例新名称。名称需同时满足以下要求：- 不能以数字、中划线（-）开头。- 只能包含中文、字母、数字、下划线（\_）和中划线（-）。- 长度需要在 1~128 个字符内。', examples=['test_api'])],
-                            instance_id: Annotated[str, Field(description='实例 ID。:::tip您可以调用[DescribeDBInstances](https://www.volcengine.com/docs/6695/152923)接口查询目标地域下所有 HBase 实例的基本信息，包括实例 ID。:::', examples=['hb-cn019f341d51****'])],
+def modify_db_instance_name(instance_name: Annotated[str, Field(description='修改后的实例新名称。名称需同时满足以下要求：- 不能以数字、中划线（-）开头。- 只能包含中文、字母、数字、下划线和中划线, 长度需要在 1~128 个字符内。', examples=['test_api'])],
+                            instance_id: Annotated[str, Field(description='实例 ID', examples=['hb-cn019f341d51****'])],
                             client_token: Optional[Annotated[str,Field(description='用于保证请求的幂等性，防止重复提交请求。由客户端生成该参数值，要保证在不同请求间唯一，大小写敏感且不超过 127 个 ASCII 字符。', examples=['WbiAlPqJM6tMoSOYhT****'])]] = None) -> dict[str, Any]:
     """调用 ModifyDBInstanceName 接口修改实例名称。
 
     Args:
         instance_name (str): 修改后的实例新名称。名称需同时满足以下要求：
             - 不能以数字、中划线（-）开头。
-            - 只能包含中文、字母、数字、下划线（\_）和中划线（-）。
+            - 只能包含中文、字母、数字、下划线和中划线。
             - 长度需要在 1~128 个字符内。
             示例值：test_api
         instance_id (str): 实例 ID。
