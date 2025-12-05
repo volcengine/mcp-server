@@ -141,7 +141,7 @@ def create_media_mcp_server(mcp, service: VodAPI, public_methods: dict):
                     asr = output.get("Asr", {})
                     utterances = asr.get("Utterances", [])
                     for utterance in utterances:
-                        attribute = utterance.get("Attribute", "")
+                        attribute = utterance.get("Attribute", {})
                         speaker = attribute.get("Speaker", "")
                         texts.append({
                             "Speaker": speaker,
@@ -271,23 +271,14 @@ def create_media_mcp_server(mcp, service: VodAPI, public_methods: dict):
             - type(str)：** 必选字段 **，文件类型，默认值为 `Vid` 。字段取值如下
                 - Vid
                 - DirectUrl
-            - video： ** 必选字段 **,  视频文件信息, 当 type 为 `Vid` 时， video 为视频文件 ID；当 type 为 `DirectUrl` 时， video 为 FileName
+            - video(str)： ** 必选字段 **,  视频文件信息, 当 type 为 `Vid` 时， video 为视频文件 ID；当 type 为 `DirectUrl` 时， video 为 FileName
             - spaceName(str)： ** 必选字段 **,  视频空间名称
-            - Res(str):  目标分辨率。支持的取值如下所示。
-                - 240p
-                - 360p
-                - 480p
-                - 540p
-                - 720p
-                - 1080p
-                - 2k
-                - 4k
-            - ResLimit(int): 目标长宽限制，用于指定输出视频的长边或短边的最大像素值，取值范围为 [64, 2160]。
+            - Fps(Float):  目标帧率，单位为 fps。取值范围为 (0, 120]。
         Returns
              - RunId(str):  媒体处理任务执行 ID, 可通过 `get_media_execution_task_result` 方法进行结果查询,输入 type 为 `videSuperResolution`
         """
-        if not isinstance(Fps, (int, float)) or Fps <= 0 or Fps > 128:
-            raise ValueError("Fps must be > 0 and <= 128")
+        if not isinstance(Fps, (int, float)) or Fps <= 0 or Fps >= 120:
+            raise ValueError("Fps must be > 0 and <= 120")
 
         media_input = _build_media_input(type, video, spaceName)
         params = {
@@ -354,7 +345,9 @@ def create_media_mcp_server(mcp, service: VodAPI, public_methods: dict):
         media_input = _build_media_input(type, video, spaceName)
         params = {
             "Input": media_input,
-            "Operation": {"Type": "Task", "Task": {"Type": "Asr", "Asr": {}}},
+            "Operation": {"Type": "Task", "Task": {"Type": "Asr", "Asr": {
+                "WithSpeakerInfo": True
+            }}},
         }
         return _start_execution(params)
 
