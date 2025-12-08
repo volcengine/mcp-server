@@ -2,7 +2,7 @@ from volcengine.vod.VodService import VodService
 import json
 import os
 from typing import Dict, Any
-from .credential import get_volcengine_credentials_base
+from src.base.credential import get_volcengine_credentials_base
 
 class BaseService(VodService):
 
