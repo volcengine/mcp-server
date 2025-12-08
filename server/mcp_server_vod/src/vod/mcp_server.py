@@ -176,7 +176,7 @@ def create_mcp_server():
 
     def _get_Domain_config(domain: str, spaceName: str, domain_type: str = "play"):
         detail = service.mcp_get(
-                "MCPDescribeDomainConfig",
+                "McpDescribeDomainConfig",
                 {"SpaceName": spaceName, "Domain": domain, "DomainType": domain_type},
             )
         auth_info = {}
@@ -215,7 +215,7 @@ def create_mcp_server():
         domain_list: list[Dict[str, Any]] = []
         while offset < total:
             data = service.mcp_get(
-                "MCPListDomain",
+                "McpListDomain",
                 {"SpaceName": spaceName, "SourceStationType": 1, "DomainType": "play", "Offset": offset},
             )
             if isinstance(data, str):
@@ -290,7 +290,7 @@ def create_mcp_server():
         if storage_config_cache:
             return storage_config_cache
         reqs = service.mcp_get(
-                "MCPGetStorageConfig",
+                "McpGetStorageConfig",
                 {"SpaceName": spaceName},
             )
 
@@ -335,5 +335,6 @@ def create_mcp_server():
         create_media_mcp_server(mcp, service, public_methods)
     if "upload" in current_type:
         create_upload_mcp_server(mcp, service, public_methods)
+
    
     return mcp

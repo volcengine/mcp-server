@@ -52,7 +52,7 @@ def create_media_mcp_server(mcp, service: VodAPI, public_methods: dict):
             }
     
     def _get_media_execution_task_result(run_id: str, task_type: str) -> Any:
-        response = service.mcp_get("MCPGetExecution", {"RunId": run_id})
+        response = service.mcp_get("McpGetExecution", {"RunId": run_id})
         ## 视频处理结果
         video_urls = []
         ## 音频处理结果

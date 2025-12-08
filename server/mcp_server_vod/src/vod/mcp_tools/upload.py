@@ -5,7 +5,7 @@ def create_upload_mcp_server(mcp, service: VodAPI, public_methods: dict):
     get_play_url = public_methods['get_play_url']
     @mcp.tool()
     def video_batch_upload(space_name: str, urls: list[dict[str, any]] = None, ) -> dict:
-        """ Batch retrieval and upload of URLs upload audio/video to specified space via synchronous upload
+        """ Batch retrieval and upload of URLs upload video to specified space via synchronous upload
             Note:
                 - 本接口主要适用于文件没有存储在本地服务器或终端，需要通过公网访问的 URL 地址上传的场景。源文件 URL 支持 HTTP 和 HTTPS。
                 - 本接口为异步上传接口。上传任务成功提交后，系统会生成异步执行的任务，排队执行，不保证时效性。
@@ -60,7 +60,7 @@ def create_upload_mcp_server(mcp, service: VodAPI, public_methods: dict):
         try:
             req = {}
             req['JobIds'] = job_ids
-            resp = service.mcp_get('MCPQueryUploadTaskInfo', req)
+            resp = service.mcp_get('McpQueryUploadTaskInfo', req)
         except Exception as e:
             raise e
         else:
@@ -78,18 +78,20 @@ def create_upload_mcp_server(mcp, service: VodAPI, public_methods: dict):
                     vid = item.get('Vid', '')
                     source_info = item.get('SourceInfo', {})
                     file_name = source_info.get('FileName', '')
+
+                    url_info = {
+                        'Vid': vid, 
+                        'DirectUrl': file_name, 
+                        'RequestId': item.get('RequestId', ''), 
+                        'JobId': item.get('JobId', ''), 
+                        'State': state, 
+                        'SpaceName': space_name
+                    }
                     if state == 'success' and space_name and source_info and file_name:
                         play_url = get_play_url(space_name, file_name)
-                        Urls.append({
-                            'Vid': vid, 
-                            'Url': play_url, 
-                            'DirectUrl': file_name, 
-                            'RequestId': item.get('RequestId', ''), 
-                            'JobId': item.get('JobId', ''), 
-                            'State': state, 
-                            'SpaceName': space_name
-                            })
-                    return {'Urls': Urls}
+                        url_info['Url'] = play_url
+                    Urls.append(url_info)   
+                return {'Urls': Urls}
             else:
                 return {'Urls': []}
            
