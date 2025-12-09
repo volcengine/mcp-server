@@ -22,7 +22,7 @@ from typing import Dict, Literal, Any
 from pydantic import BaseModel
 import volcenginesdkcore
 import volcenginesdksts
-import volcenginesdkvolcobserve
+import volcenginesdkcloudmonitor
 
 
 lock = threading.Lock()
