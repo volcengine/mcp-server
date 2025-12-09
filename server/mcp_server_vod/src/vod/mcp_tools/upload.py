@@ -1,7 +1,7 @@
 import json
 from src.vod.api.api import VodAPI
 from volcengine.vod.models.request.request_vod_pb2 import VodUrlUploadRequest
-def create_upload_mcp_server(mcp, service: VodAPI, public_methods: dict):
+def create_mcp_server(mcp,  public_methods: dict, service: VodAPI,):
     get_play_url = public_methods['get_play_url']
     @mcp.tool()
     def video_batch_upload(space_name: str, urls: list[dict[str, any]] = None, ) -> dict:
@@ -66,7 +66,7 @@ def create_upload_mcp_server(mcp, service: VodAPI, public_methods: dict):
         else:
             if isinstance(resp, str):
                 tempResp = json.loads(resp)
-                # 添加兜底逻辑，检查Data是否存在
+                # add fallback logic to check if Data exists
                 result = tempResp.get('Result', {})
                 data = result.get('Data', {})
                 mediaInfoList = data.get('MediaInfoList', [])

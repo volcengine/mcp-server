@@ -1,6 +1,6 @@
 import json
 from src.vod.api.api import VodAPI
-def create_edit_mcp_server(mcp, service: VodAPI, public_methods: dict):
+def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
 
     @mcp.tool()
     def audio_video_stitching(type: str, SpaceName: str, videos: list = None, audios: list = None, transitions: list = None) -> dict:

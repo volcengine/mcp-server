@@ -219,7 +219,8 @@ OCR 文字转字幕，支持 Vid 和 DirectUrl 两种输入模式。
       ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
-        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK"
+        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK",
+        "MCP_TOOL_GROUPS": "YOUR_TOOL_GROUPS"
       }
     }
   }

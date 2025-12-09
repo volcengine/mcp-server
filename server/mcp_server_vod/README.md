@@ -215,7 +215,8 @@ Configure MCP service in mcp client, MCP JSON configuration:
       ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
-        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK"
+        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK",
+        "MCP_TOOL_GROUPS": "YOUR_TOOL_GROUPS"
       }
     }
   }
