@@ -85,6 +85,8 @@ def register_video_play_methods(service: VodAPI, public_methods: dict,):
                 status = 'enable'
             else:
                 status = base_domain.get("ConfigStatus") 
+            if len(signed_url_auth_rules) == 0:
+                return {}            
             auth_info = {
                 "AuthType": signed_url_auth_action.get("URLAuthType"),
                 "AuthKey": signed_url_auth_action.get("MasterSecretKey") or signed_url_auth_action.get("BackupSecretKey") or "",
