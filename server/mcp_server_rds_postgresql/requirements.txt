@@ -85,5 +85,5 @@ urllib3==2.5.0
     # via volcengine-python-sdk
 uvicorn==0.34.3
     # via mcp
-volcengine-python-sdk==4.0.1
+volcengine-python-sdk>=4.0.41
     # via mcp-server-rds-postgresql (pyproject.toml)
