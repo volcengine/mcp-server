@@ -112,6 +112,7 @@ def create_vefaas_application(function_id: str, function_name: str, gateway_name
         "Config": {
             "FunctionName": function_name,
             "GatewayName": gateway_name,
+            "Region": region,
         },
         "TemplateId": TemplateIdForRegion.get(region, "68d24592162cb40008217d6f"),
     }
