@@ -35,10 +35,10 @@ mcp = FastMCP("veFaaS MCP Server",
               streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"))
 
 TemplateIdForRegion = {
-    "ap-southeast-1": "68d24592162cb40008217d6f",
+    "ap-southeast-1": "6943ba21735f270008330d1c",
     "cn-beijing": "68d24592162cb40008217d6f",
-    "cn-shanghai": "68d24592162cb40008217d6f",
-    "cn-guangzhou": "68d24592162cb40008217d6f",
+    "cn-shanghai": "6943b9de4fa45c0008ea04e1",
+    "cn-guangzhou": "6943b95bc69585000819d70f",
 }
 
 def validate_and_set_region(region: str = None) -> str:
@@ -562,7 +562,7 @@ def poll_function_release_status(function_id: str, region: str = None):
             time.sleep(interval)
         else:
             break
-    
+
     responseInfo = {
         "function_id": function_id,
         "region": region,
@@ -580,7 +580,7 @@ def poll_function_release_status(function_id: str, region: str = None):
 
 def get_function_access_link(function_id: str, region: str = None):
     region = validate_and_set_region(region)
-    
+
     triggers = list_function_triggers(function_id, region).get("Result", {}).get("Items", [])
     upstream_id = ''
     try:
@@ -594,7 +594,7 @@ def get_function_access_link(function_id: str, region: str = None):
 
     if upstream_id == '':
         return ''
-    
+
     try:
         body = {
             'PageNumber': 1,
@@ -1358,7 +1358,7 @@ def list_vefaas_application_templates(page_number: int = 1, page_size: int = 100
         resp = request(
             "POST", now, {}, {}, ak, sk, token, "ListApplicationTemplates", json.dumps(body), None, 5,
         )
-        
+
     except Exception as e:
         raise ValueError(f"Failed to list application templates: {str(e)}")
 
@@ -1370,7 +1370,7 @@ def list_vefaas_application_templates(page_number: int = 1, page_size: int = 100
             "id": item.get("Id", ""),
             "description": item.get("Description", ""),
         })
-    
+
     # TODO: dirty code, remove this
     # get function templates for streamlit
     try:
@@ -1395,7 +1395,7 @@ def list_vefaas_application_templates(page_number: int = 1, page_size: int = 100
             })
     except Exception as e:
         logger.error(f"Failed to list function templates: {str(e)}")
-    
+
     return result
 
 @mcp.tool(description="""Download a veFaaS application template.
