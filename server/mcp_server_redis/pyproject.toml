@@ -6,8 +6,8 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "mcp[cli]",
-    "mcp>=1.9.4",
-    "volcengine-python-sdk>=1.0.130",
+    "mcp>=1.12.0",
+    "volcengine-python-sdk>=4.0.24",
 ]
 [project.scripts]
 mcp-server-redis = "mcp_server_redis.server:main"

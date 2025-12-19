@@ -20,15 +20,18 @@ class LASConfig:
 
 def load_config() -> LASConfig:
     """Load configuration from environment variables."""
-    required_vars = [
-        "VOLCENGINE_ACCESS_KEY",
-        "VOLCENGINE_SECRET_KEY",
-    ]
+    # Accept either VOLCENGINE_ACCESS_KEY or VOLC_ACCESSKEY (and similarly for secret key)
+    access_key = os.environ.get("VOLCENGINE_ACCESS_KEY") or os.environ.get("VOLC_ACCESSKEY")
+    secret_key = os.environ.get("VOLCENGINE_SECRET_KEY") or os.environ.get("VOLC_SECRETKEY")
 
-    # Check if all required environment variables are set
-    missing_vars = [var for var in required_vars if not os.environ.get(var)]
-    if missing_vars:
-        error_msg = f"Missing required environment variables: {', '.join(missing_vars)}"
+    # Check if we have at least one variant of the required variables
+    if not access_key:
+        error_msg = "Missing required environment variable: VOLCENGINE_ACCESS_KEY or VOLC_ACCESSKEY"
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+    
+    if not secret_key:
+        error_msg = "Missing required environment variable: VOLCENGINE_SECRET_KEY or VOLC_SECRETKEY"
         logger.error(error_msg)
         raise ValueError(error_msg)
 
@@ -36,8 +39,8 @@ def load_config() -> LASConfig:
     return LASConfig(
         endpoint=os.getenv("VOLCENGINE_ENDPOINT", "https://las-cn-beijing.volces.com"),
         region=os.getenv("REGION", "cn-beijing"),
-        access_key_id=os.environ["VOLCENGINE_ACCESS_KEY"],
-        access_key_secret=os.environ["VOLCENGINE_SECRET_KEY"],
+        access_key_id=access_key,
+        access_key_secret=secret_key,
         session_token='',
         dataset_id=os.getenv("LAS_DATASET_ID", ""),
     )

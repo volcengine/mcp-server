@@ -59,7 +59,7 @@ func_available_params_map = {
            page_number (int, optional): The page number, starting from 1. Default: 1.
            page_size (int, optional): The number of records per page, range: 1-1000. Default: 10.
            zone_id (str, optional): The availability zone ID (supports fuzzy search).
-                                  Call DescribeZones to query available zones.
+                                  Call describe_zones to query available zones.
            instance_id (str, optional): The instance ID (exact match).
            instance_name (str, optional): The instance name (supports fuzzy search).
            sharded_cluster (int, optional): Whether sharding is enabled.
@@ -118,7 +118,7 @@ func_available_params_map = {
     "describe_hot_keys": r"""Query hot key details of the target Redis instance within specified time period
        Args:
            instance_id (str): The instance ID.
-                             You can call DescribeDBInstances to query basic information of all Redis instances.
+                             You can call describe_db_instances to query basic information of all Redis instances.
            page_size (int): The number of records per page, range: 1-1000.
            query_start_time (str, optional): The start time of the query in format yyyy-MM-ddTHH:mm:ssZ (UTC).
                                            If not specified, defaults to 1 hour before current time.
@@ -133,11 +133,11 @@ func_available_params_map = {
            shard_ids (list[str], optional): The list of shard IDs to filter results.
                                           Maximum 40 shard IDs, separated by commas.
                                           If not specified, no filtering by shard ID.
-                                          You can call DescribeDBInstanceShards to query shard details.""",
+                                          You can call describe_db_instance_shards to query shard details.""",
     "describe_big_keys": r"""Query big key details of the target Redis instance within specified time period
        Args:
            instance_id (str): The instance ID.
-                             You can call DescribeDBInstances to query basic information of all Redis instances.
+                             You can call describe_db_instances to query basic information of all Redis instances.
            page_size (int): The number of records per page, range: 1-100.
            query_start_time (str, optional): The start time of the query in format yyyy-MM-ddTHH:mm:ssZ (UTC).
                                            If not specified, defaults to 24 hours before current time.
@@ -160,7 +160,7 @@ func_available_params_map = {
                                        'AccountInstances' (query current account)
            instance_id (str, optional): The instance ID.
                                       Required when scope is 'OneInstance'.
-                                      You can call DescribeDBInstances to query instance information.
+                                      You can call describe_db_instances to query instance information.
            start_time (str, optional): The start time in format yyyy-MM-ddTHH:mm:ssZ (UTC).
                                      If specified, end_time is required.
            end_time (str, optional): The end time in format yyyy-MM-ddTHH:mm:ssZ (UTC).
@@ -233,7 +233,7 @@ func_available_params_map = {
     "create_db_instance": r"""Create a Redis instance
        Args:
            region_id (str): The region ID.
-                           You can call DescribeRegions to query available regions.
+                           You can call describe_regions to query available regions.
            engine_version (str): Redis version.
                                Values: '5.0', '6.0', '7.0'
            sharded_cluster (int): Whether to enable sharding cluster.
@@ -483,5 +483,159 @@ func_available_params_map = {
            You can only:
            - Unbind multiple instances from one whitelist, OR
            - Unbind one instance from multiple whitelists
-           You cannot unbind multiple instances from multiple whitelists in a single request."""
+           You cannot unbind multiple instances from multiple whitelists in a single request.""",
+    "describe_db_instance_shards": r"""Query shard information of the target Redis instance
+       Args:
+           instance_id (str): The instance ID.
+                             You can call describe_db_instances to query basic information of all Redis instances.
+           page_number (int, optional): The page number, starting from 1. Default: 1.
+           page_size (int, optional): The number of records per page, range: 1-100. Default: 10.""",
+    "describe_node_ids": r"""Query all Proxy and Server node IDs in the target Redis instance
+       Args:
+           instance_id (str): The instance ID.
+                             You can call describe_db_instances to query basic information of all Redis instances.""",
+    "modify_db_instance_name": r"""Modify the name of the target Redis instance
+       Args:
+           instance_id (str): The instance ID.
+                             You can call describe_db_instances to query basic information of all Redis instances.
+           instance_name (str): The new instance name.
+                              Rules:
+                              - Cannot start with number or hyphen
+                              - Can contain Chinese characters, letters, numbers, underscores (_) and hyphens (-)
+                              - Length: 1-128 characters
+           client_token (str, optional): Idempotency token.
+                                        Used to ensure the idempotency of the request. Generated by client.
+                                        Must be unique among different requests. Case-sensitive.
+                                        Maximum 127 ASCII characters.""",
+    "describe_tags_by_resource": r"""Query tag information of specified Redis instances
+       Args:
+           instance_ids (list[str]): List of instance IDs. Supports querying multiple instances at once, with multiple instance IDs separated by commas. 
+                                    You can call describe_db_instances to query basic information of all Redis instances.
+           tag_filters (list[dict], optional): Tag filtering conditions used to filter tags that meet the criteria. Each dict contains:
+                                         - 'key' (str): Tag key
+                                         - 'value' (str): Tag value
+           page_number (int, optional): Page number. Value range: 1-10000. Default: 1.
+           page_size (int, optional): Number of records per page. Value range: 1-100. Default: 10.""",
+    "describe_backup_plan": r"""Query the backup plan of the specified Redis instance
+       Args:
+           instance_id (str): The instance ID. You can call describe_db_instances to query basic information of all Redis instances.""",
+    "describe_pitr_time_window": r"""Query the point-in-time recovery (PITR) time window supported by the specified Redis instance
+       Args:
+           instance_id (str): The instance ID. You can call describe_db_instances to query basic information of all Redis instances.""",
+    "describe_backup_point_download_urls": r"""Query the download URLs of backup files for the specified Redis instance
+       Args:
+           instance_id (str): The instance ID. You can call describe_db_instances to query basic information of all Redis instances.
+           backup_point_id (str): The ID of the backup point. You can call describe_backups to query all backup points of the Redis instance.""",
+    "describe_cross_region_backup_policy": r"""Query the cross-region backup policy of the specified Redis instance
+       Args:
+           instance_id (str): The instance ID. You can call describe_db_instances to query basic information of all Redis instances.""",
+    "describe_cross_region_backups": r"""Query cross-region backups
+       Args:
+           scope (str, optional): Backup query scope. Available values: OneInstance (default), AccountInstances
+           instance_id (str, optional): The instance ID. Required when Scope is OneInstance. You can call describe_db_instances to query basic information of all Redis instances.
+                                        when instance_id is not empty, scope must set to OneInstance, otherwise, scope must set to AccountInstances
+           status (str, optional): Backup status. Available values: Creating, Available, Unavailable, Deleting
+           start_time (str, optional): Start time of the query. Format: yyyy-MM-ddTHH:mm:ssZ (UTC). If set, EndTime is required.
+           end_time (str, optional): End time of the query. Format: yyyy-MM-ddTHH:mm:ssZ (UTC). Must be later than StartTime.
+           backup_strategy_list (list[str], optional): List of backup methods. Available values: ManualBackup, AutomatedBackup
+           backup_point_name (str, optional): Backup name. Fuzzy query is supported. Not effective when Scope is OneInstance.
+           backup_point_id (str, optional): Backup ID. Fuzzy query is supported. Only effective when Scope is AccountInstances.
+           project_name (str, optional): Project name. Only effective when Scope is AccountInstances.
+           page_size (int, optional): Number of records per page. Value range: 1-100. Required when page_number is set.
+           page_number (int, optional): Page number. Value range: 1-Max(Integer). Default: 1. Required when page_size is set.""",
+    "create_parameter_group": r"""Create a parameter template
+       Args:
+           name (str): Parameter template name. Requirements: Cannot start with a number or dash (-). Can contain Chinese characters, letters, numbers, underscores (_), and hyphens (-). Length: 1-32 characters.
+           engine_version (str): Redis version. Available values: 5.0, 6.0, 7.0.
+           description (str): Parameter template description. Maximum length: 200 characters.
+           param_values (list[dict[str, str]]): Parameter value list. Each element in the list must be a dict that contains only two required keys: "name" and "value" (do not use the parameter name as a direct key of the dict).
+                                   - 'name' (str, required): The name of the Redis parameter (e.g., "maxmemory-policy").
+                                   - 'value' (str, required): The corresponding value of the Redis parameter (e.g., "volatile-lfu").
+                                   Correct example:
+                                       "param_values": [
+                                           {
+                                               "name": "maxmemory-policy",
+                                               "value": "volatile-lfu"
+                                           }
+                                       ]
+                                   Wrong example (invalid format):
+                                       "param_values": [
+                                           {
+                                               "maxmemory-policy": "volatile-lfu"  # Error: Uses parameter name as key
+                                           }
+                                       ]
+                                   You can call describe_db_instance_params to get supported parameters.
+           client_token (str, optional): Idempotency token. Maximum length: 127 ASCII characters. Must be unique among different requests.""",
+    "describe_eip_addresses": r"""Query EIP (Elastic IP) addresses
+       Args:
+           max_results (int, optional): Maximum number of results to return. Range: 1-100.
+           name (str, optional): Name of the EIP.
+           next_token (str, optional): Pagination token.
+           page_number (int, optional): Page number. Starting from 1. Default: 1.
+                                       Note: This parameter will be deprecated,
+                                       use next_token and max_results instead.
+           page_size (int, optional): Number of records per page. Range: 1-100. Default: 10.
+                                     Note: This parameter will be deprecated,
+                                     use next_token and max_results instead.
+           status (str, optional): Status of the EIP. available values: Attaching, Detaching, Attached, Available, Deleting
+       Note:
+           - This API is used to query EIP addresses.
+           - All parameters are optional but at least one filtering condition should be provided if needed.""",
+    "create_db_endpoint_public_address": r"""Create a public endpoint address for Redis instance
+       Args:
+           instance_id (str): The instance ID. You can call describe_db_instances to query basic information of all Redis instances in the target region.
+           eip_id (str): The EIP ID to be bound to the instance. You can call describe_eip_addresses to query detailed information of created EIPs, including EIP ID.
+           port (int, optional): Port number for the public address. Valid range: 1024-65535. Default: 6379.
+           client_token (str, optional): Idempotency token. Maximum length: 127 ASCII characters. Must be unique among different requests.
+       Note:
+           - This operation will enable public access to the Redis instance.
+           - Only primary-secondary and cluster instances support creating public endpoints.
+           - The public endpoint will be assigned an IPv4 address.
+           - After creation, you can call modify_db_instance_visit_address to modify the domain name and port number of the public address.""",
+    "describe_db_instance_bandwidth_per_shard": r"""Query bandwidth information per shard for Redis instance
+       Args:
+           instance_id (str): The instance ID. You can call describe_db_instances to query basic information of all Redis instances in the target region.
+       Note:
+           - This API is used to query the bandwidth limit per shard for the Redis instance.
+           - The bandwidth is calculated as the sum of the default bandwidth and additional bandwidth.
+           - For cluster instances, each shard has its own bandwidth limit.
+           - The default bandwidth varies by instance specification.""",
+    "describe_db_instance_acl_commands": r"""Query the list of commands supported by a specific command category for Redis instance
+       Args:
+           instance_id (str): The instance ID. You can call describe_db_instances to query basic information of all Redis instances in the target region.
+           category (str, optional): category name. You can call describe_db_instance_acl_categories to query supported categories.
+       Note:
+           - This API is used to query the commands supported by a specific command category for the Redis instance.
+           - You can use describe_db_instance_acl_command_categories to query all command categories supported by Redis instances.""",
+    "describe_db_instance_acl_categories": r"""Query the list of command categories supported by Redis instance
+       Args:
+           instance_id (str): The instance ID. You can call describe_db_instances to query basic information of all Redis instances in the target region.
+       Note:
+           - This API is used to query all command categories supported by the Redis instance.
+           - The returned categories can be used as parameters for describe_db_instance_acl_commands.""",
+    "describe_planned_events": r"""Query the planned events of Redis instances
+       Args:
+           page_number (int, required): Page number for pagination. Default: 1.
+           page_size (int, required): Number of rows per page. Range: 1-1000. Default: 10.
+           instance_id (str, optional): Instance ID. Fuzzy query supported.
+           min_start_time (str, optional): The earliest execution time of planned events to query. Format: yyyy-MM-ddTHH:mm:ssZ (UTC time).
+           max_start_time (str, optional): The latest execution time of planned events to query. Format: yyyy-MM-ddTHH:mm:ssZ (UTC time).
+       Note:
+           - This API is used to query the planned events of Redis instances.
+           - If instance_id is left empty, it means not filtering by instance ID.
+           - You can call describe_db_instances API to query basic information of all Redis instances in the target region, including instance IDs.
+           - If min_start_time is left empty, it means not filtering by the earliest planned execution time.
+           - If max_start_time is left empty, it means not filtering by the latest planned execution time.
+           - The end time of the query must be later than the start time.""",
+    "describe_key_scan_jobs": r"""Query the key scan jobs of Redis instances
+       Args:
+           instance_id (str, required): Instance ID. You can call describe_db_instances to query instance IDs.
+           query_start_time (str, optional): Start time of the query. Format: yyyy-MM-ddTHH:mm:ssZ (UTC time).
+           query_end_time (str, optional): End time of the query. Format: yyyy-MM-ddTHH:mm:ssZ (UTC time).
+           page_size (int, required): Number of rows per page. Range: 1-1000. Default: 10.
+           page_number (int, required): Page number for pagination. Default: 1.
+       Note:
+           - This API is used to query the key scan jobs of Redis instances.
+           - If query_start_time is left empty, it means not filtering by start time.
+           - If query_end_time is left empty, it means not filtering by end time.""",
 }

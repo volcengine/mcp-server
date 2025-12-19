@@ -1,114 +1,193 @@
 # VOD MCP Server
+
 An efficient and convenient video editing assistant that enables various editing operations through conversational interaction, including multi-video timeline splicing, long video segmentation and splicing, and adding transition animations, lowering the technical barrier and operational costs of video editing.
 
-| Version | v1.0.0                   | 
-|----|--------------------------|
+| Version     | v1.0.0                                           |
+| ----------- | ------------------------------------------------ |
 | Description | Volcano Engine VOD Intelligent Editing Assistant |
-| Category | Video Cloud, Video-on-Demand |
-| Tags | VOD, Video-on-Demand, Video Editing |
+| Category    | Video Cloud, Video-on-Demand                     |
+| Tags        | VOD, Video-on-Demand, Video Editing              |
 
+### Tool 1: audio_video_stitching
 
-## Feature Demos
-- [Example of splicing multiple videos by timeline](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/多视频按时域拼接.mp4): In Trae, through conversation, two local videos are spliced together at specified time intervals to create a new address, and returns the playback address of the synthesized video (this step requires having configured a domain in Volcano Engine VOD service)
-- [Example of multi-segment video extraction and composition](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/单视频多段截取.mp4): Through conversation, videos can be segmented and extracted, then spliced together by timeline to create a new video
-- [Example of adding text and transition animations](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/添加文字及转场动画.mp4): Multiple videos are spliced together by timeline to create a new video, with transition animation effects and fixed text added to the new video.
+#### Description
 
-## Tools
+Concatenate multiple audio and video files into a new audio and video file, supporting three input methods: vid, url, and directurl
 
-This MCP Server product provides the following Tools (capabilities):
+#### Trigger Example
 
-### Tool 1: [get_space_detail](https://www.volcengine.com/docs/4/107689) 
+Concatenate vid1, vid2 and the video, with the space being space1.
 
-#### Detailed Description
-Get detailed information of a specified space, including region, space description and creation time.
+### Tool 2: audio_video_clipping
 
-#### Prompt Example
-Call get_space_detail to get space details
+#### Description
 
-### Tool 2: [list_space](https://www.volcengine.com/docs/4/107686)
+Clip an audio or video file to a new audio or video file, with the specified start and end time, supporting three input methods: vid, url, and directurl.
 
-#### Detailed Description
-Query user's video on demand space list, can get information of all spaces under current account.
+#### Trigger Example
 
-#### Prompt Example
-Call list_space to get space list
+Clip vid1, vid2 and the video, with the space being space1. Start time being 1s, end time being 30s.
 
-### Tool 3: [create_space](https://www.volcengine.com/docs/4/107685)
+### Tool 3: get_v_creative_task_result
 
-#### Detailed Description
-Create video on demand space. Space is the basic unit of resource isolation, each space can independently configure business resources, business templates, business flows and business strategies.
+#### Description
 
-#### Prompt Example
-Call create_space to create VOD space
+Query the result of a video creative task, including task status, processing progress, and processing results.
 
-### Tool 4: [upload_media](https://www.volcengine.com/docs/4/65647#%E4%B8%8A%E4%BC%A0%E9%9F%B3%E8%A7%86%E9%A2%91)
+#### Trigger Example
 
-#### Detailed Description
-Upload local videos, can upload local videos to specified VOD space.
+Query the result of VCreativeId video creative task, with the space being space1.
 
-#### Prompt Example
-Call upload_media to upload local videos
+### Tool 4 video_batch_upload
 
-### Tool 5: [submit_direct_edit_task_async](https://www.volcengine.com/docs/4/102240)
-#### Detailed Description
-Submit video editing tasks, can edit video resources in specified VOD space, enabling multi-video timeline splicing, single video multi-segment extraction, adding text and transition animations.
-#### Prompt Example
-Call submit_direct_edit_task_async to submit editing task
+#### Description
 
-## Tool 6: [get_direct_edit_progress](https://www.volcengine.com/docs/4/102241)
+Batch fetch and upload by URLs. Synchronously upload audio/video to the specified space.
 
-#### Detailed Description
-Query video editing task processing progress, can query editing task processing progress after submission.
+#### Trigger Example
 
-#### Prompt Example
-Call get_direct_edit_progress to query editing task progress
+Upload the files at URLs url1 and url2 to the space named "your space", ensuring the file extensions are .mp4.
 
-## Tool 7: [get_direct_edit_result](https://www.volcengine.com/docs/4/102242)
+### Tool 5 query_batch_upload_task_info
 
-#### Detailed Description
-Query editing task processing result.
+#### Description
 
-#### Prompt Example
-Call get_direct_edit_result to query editing task result
+Query the status of URL batch upload tasks.
 
-## Tool 8: [get_play_info](https://www.volcengine.com/docs/4/2918)
-#### Detailed Description
-Get video playback information, can get video playback information including playback address, cover etc.
+#### Trigger Example
 
-#### Prompt Example
-Call get_play_info to query video playback address
+Query the upload task status with JobId xxx.
 
-## Tool 9: [list_domain](https://www.volcengine.com/docs/4/106062)
+### Tool 6 video_quality_enhancement_task
 
-#### Detailed Description
-Query domain list, query all domain lists configured under user's specified space.
+#### Description
 
-#### Prompt Example
-Call list_domain to query VOD space configured domains
+Video enhancement, supporting Vid and DirectUrl input modes.
 
-## Tool 10: [get_media_info](https://www.volcengine.com/docs/4/1256363)
+#### Trigger Example
 
-#### Detailed Description
-Query media asset information, get media asset information through Vid (video ID), including basic information, source information and media processing output file information.
+Enhance video vid1 in space space1.
 
-#### Prompt Example
-Call get_media_info to query video details
+### Tool 7 video_super_resolution_task
 
-## Tool 11: [get_media_list](https://www.volcengine.com/docs/4/69205)
+#### Description
 
-#### Detailed Description
-Get audio/video information, get audio/video information of specified Vid (video ID).
+Video super-resolution, supporting Vid and DirectUrl input modes.
 
-#### Prompt Example
-Call get_media_list to query VOD space media asset list
+#### Trigger Example
 
-## Supported Platforms  
+Apply super-resolution to video vid1 in space space1.
+
+### Tool 8 video_interlacing_task
+
+#### Description
+
+Video frame interpolation, supporting Vid and DirectUrl input modes.
+
+#### Trigger Example
+
+Apply frame interpolation to video vid1 in space space1.
+
+### Tool 9 audio\_ noise_reduction_task
+
+#### Description
+
+Audio noise reduction, supporting Vid and DirectUrl input modes.
+
+#### Trigger Example
+
+Apply noise reduction to audio vid1 in space space1.
+
+### Tool 10 asr_speech_to_text_task
+
+#### Description
+
+ASR speech-to-text captioning, supporting Vid and DirectUrl input modes.
+
+#### Trigger Example
+
+Run ASR recognition on video vid1 in space space1.
+
+### Tool 11 ocr_text_to_subtitles_task
+
+#### Description
+
+OCR text to subtitles, supporting Vid and DirectUrl input modes.
+
+#### Trigger Example
+
+Run OCR recognition on video vid1 in space space1.
+
+### Tool 12 video_subtitles_removal_task
+
+#### Description
+
+Video subtitle removal, supporting Vid and DirectUrl input modes.
+
+#### Trigger Example
+
+Remove subtitles from video vid1 in space space1.
+
+### Tool 13 voice_separation_task
+
+#### Description
+
+Vocal separation from video, supporting Vid and DirectUrl input modes.
+
+#### Trigger Example
+
+Separate vocals for video vid1 in space space1.
+
+### Tool 14 intelligent_slicing_task
+
+#### Description
+
+Intelligent slicing, supporting Vid and DirectUrl input modes.
+
+#### Trigger Example
+
+Perform intelligent segment slicing on video vid1 in space space1.
+
+### Tool 15 green_screen_task
+
+#### Description
+
+Green screen keying, supporting Vid and DirectUrl input modes.
+
+#### Trigger Example
+
+Apply green screen keying to video vid1 in space space1.
+
+### Tool 16 portrait_image_retouching_task
+
+#### Description
+
+Portrait cutout, supporting Vid and DirectUrl input modes.
+
+#### Trigger Example
+
+Apply portrait cutout processing to video vid1 in space space1.
+
+### Tool 17 get_media_execution_task_result
+
+#### Description
+
+Query media processing task results, including task status, processing progress, and output information.
+
+#### Trigger Example
+
+Query the media processing result for the portrait cutout task with runId xxx in space space1.
+
+## Supported Platforms
+
 Ark, Cursor, Trae etc.
 
-## Service Activation Link (Full Product)  
+## Service Activation Link (Full Product)
+
 [Volcano Engine-Video on Demand-Console](https://www.volcengine.com/product/vod)
 
-## Authentication Method  
+## Authentication Method
+
 Please apply for VOLCENGINE_ACCESS_KEY, VOLCENGINE_SECRET_KEY at [Volcano Engine-Video on Demand-Console](https://www.volcengine.com/product/vod)
 
 ## Installation
@@ -119,22 +198,25 @@ Please apply for VOLCENGINE_ACCESS_KEY, VOLCENGINE_SECRET_KEY at [Volcano Engine
 - Volcano Engine account and AccessKey/SecretKey
 
 ## Deployment
+
 ### Integration in MCP Client
 
 Configure MCP service in mcp client, MCP JSON configuration:
+
 ```json
 {
   "mcpServers": {
     "vevod": {
       "command": "uvx",
       "args": [
-          "--from",
-          "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vod",
-          "mcp-server-vod"
+        "--from",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vod",
+        "mcp-server-vod"
       ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
-        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK"
+        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK",
+        "MCP_TOOL_GROUPS": "YOUR_TOOL_GROUPS"
       }
     }
   }
@@ -142,4 +224,5 @@ Configure MCP service in mcp client, MCP JSON configuration:
 ```
 
 ## License
+
 MIT

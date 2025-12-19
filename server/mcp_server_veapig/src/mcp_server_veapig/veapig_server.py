@@ -13,7 +13,14 @@ from .common.client20221112 import get_volc_apig_client20221112
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-mcp = FastMCP("VeAPIG", stateless_http=True, json_response=True)
+mcp = FastMCP(
+    "VeAPIG",
+    host=os.getenv("MCP_SERVER_HOST", "0.0.0.0"),
+    port=int(os.getenv("MCP_SERVER_PORT", "8000")),
+    streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"),
+    stateless_http=True,
+    json_response=True,
+)
 # Enable JSON response & stateless HTTP by default
 os.environ["FASTMCP_JSON_RESPONSE"] = "true"
 

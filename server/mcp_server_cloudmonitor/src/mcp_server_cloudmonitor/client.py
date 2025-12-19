@@ -2,7 +2,7 @@ import os
 import base64
 import json
 import volcenginesdkcore
-import volcenginesdkvolcobserve
+import volcenginesdkcloudmonitor
 from mcp.server.fastmcp import Context
 from mcp.server.session import ServerSession
 from starlette.requests import Request
@@ -55,4 +55,4 @@ def init_client(region: str = None, ctx: Context = None):
 
     # set default configuration
     volcenginesdkcore.Configuration.set_default(configuration)
-    return volcenginesdkvolcobserve.VOLCOBSERVEApi()
+    return volcenginesdkcloudmonitor.CLOUDMONITORApi()

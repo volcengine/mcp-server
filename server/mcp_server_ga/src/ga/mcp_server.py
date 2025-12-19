@@ -8,7 +8,7 @@ def create_mcp_server():
     service = GaAPI()
     mcp = FastMCP(
         "GA MCP",
-        description="Volcengine(火山引擎)全球加速 GA MCP，提供全球加速相关服务",
+        instructions="Volcengine(火山引擎)全球加速 GA MCP，提供全球加速相关服务",
     )
 
     @mcp.tool()
@@ -19,7 +19,7 @@ def create_mcp_server():
         - The first step requires invoking the `get_note` function to obtain the parameter description.
         - Subsequently, the corresponding method should be called to retrieve the data.
         """
-        return """use  `guide` description to get how to use Mcp Server"""
+        return """use  `guide` instructions to get how to use Mcp Server"""
 
     @mcp.tool()
     def get_note(func_name: str) -> str:

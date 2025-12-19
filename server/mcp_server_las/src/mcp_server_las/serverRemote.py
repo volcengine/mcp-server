@@ -5,13 +5,13 @@ from termios import IXOFF
 import base64
 import json
 import time
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Literal
 import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from mcp_server_las.config import load_config, LASConfig, load_config_by_sts
-from mcp_server_las.las_service import las_search_keyword_api,las_search_dataset_info_api,las_search_dataset_by_name
+from mcp_server_las.las_service import las_search_keyword_api,las_search_dataset_info_api,las_search_dataset_by_name, las_create_dataset_api
 
 from mcp.server.session import ServerSession
 from mcp.server.fastmcp import Context, FastMCP
@@ -132,6 +132,53 @@ def las_search_dataset(
         logger.error(f"Error in get_dataset_info: {str(e)}")
         return [str(e)]
 
+
+@mcp.tool()
+def las_create_dataset(
+    DataPath: str,
+    ProjectName: str = "default",
+    DatasetName: Optional[str] = None,
+    Format: Literal['JSONL', 'PARQUET', 'CSV', 'LANCE', 'AVRO', 'ICEBERG'] = "CSV",
+    Privacy: Literal['Public', 'Private'] = 'Public',
+) -> str:
+    """Create a new dataset in the LAS service.
+
+    This tool allows you to create a new dataset with the specified parameters.
+
+    Args:
+        DataPath: TOS path, start with tos://.
+        ProjectName: The name of the project (default: "default").
+        DatasetName: The name of the dataset. Defaults to "las_dataset_mcp_YYYYMMDD".
+        Format: The format of the data. Can be one of 'JSONL', 'PARQUET', 'CSV', 'LANCE', 'AVRO', 'ICEBERG'. Defaults to "CSV".
+        Privacy: The privacy setting for the dataset. Can be one of 'Public', 'Private'. Defaults to "Public".
+
+    Returns:
+        The response from the API as a string.
+    """
+    if DatasetName is None:
+        DatasetName = f"las_dataset_mcp_{time.strftime('%Y%m%d')}"
+    logger.info(f"Received create_dataset request with DatasetName: {DatasetName}")
+
+    try:
+        # 刷新凭证  sse接口特有
+        config, _ = refreshCredentials()
+
+        data = {
+            "ProjectName": ProjectName,
+            "DatasetName": DatasetName,
+            "Format": Format,
+            "Storage": "TOS",
+            "DataPath": DataPath,
+            "Privacy": Privacy,
+        }
+        #判断config不为空
+        if config is None:
+            raise ValueError("config is None")
+        response = las_create_dataset_api(config.access_key_id, config.access_key_secret, config.session_token, data)
+        return str(response)
+    except Exception as e:
+        logger.error(f"Error in create_dataset: {str(e)}")
+        return str(e)
 
 
 @mcp.tool()

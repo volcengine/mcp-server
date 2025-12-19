@@ -1,143 +1,226 @@
 # VOD MCP Server
+
 一款高效便捷的视频剪辑小助手，通过对话交互的方式，实现了多视频时域拼接、长视频分段截取与拼接、添加转场动画等剪辑操作，降低了视频剪辑的技术门槛和操作成本
 
-| 版本 | v1.0.0                   | 
-|----|--------------------------|
+| 版本 | v1.0.0                    |
+| ---- | ------------------------- |
 | 描述 | 火山引擎 VOD 智能剪辑助手 |
-| 分类 | 视频云，视频点播                       |
-| 标签 | 点播，视频点播，视频剪辑              |
-
-
-## 功能演示
-- [多个视频按时域拼接为一个视频示例](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/多视频按时域拼接.mp4)：在 Trae 中通过对话将两个本地视频按指定时域拼接在一起合成一个新的地址，并返回合成视频的播放地址（这一步需要已在火山引擎 VOD 服务中配置域名）
-- [视频多段截取合成示例](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/单视频多段截取.mp4) ：可以通过对话将视频分段截取，再按时域拼接为一个新的视频
-- [添加文字及转场动画示例](https://lf3-static.bytednsdoc.com/obj/eden-cn/2202eh7upinuhbnnuhd/添加文字及转场动画.mp4)：将多个视频按时域拼接为一个新视频，并针对新视频添加转场动画效果以及固定文案。
+| 分类 | 视频云，视频点播          |
+| 标签 | 点播，视频点播，视频剪辑  |
 
 ## Tools
 
 本 MCP Server 产品提供以下 Tools (工具/能力):
 
-### Tool 1: [get_space_detail](https://www.volcengine.com/docs/4/107689) 
+### Tool 1: audio_video_stitching
 
-#### 详细描述
+#### 功能描述
 
- 获取指定空间的详细信息 ，包含所属地域、空间描述以及空间创建时间等信息
+将多个音视频拼接为一个新音视频，支持 vid、url、directurl 三种输入方式
 
-#### 最容易被唤起的Prompt示例
-调用 get_space_detail 获取空间详情
+#### 最容易被唤起的 Prompt 示例
 
-### Tool 2:  [list_space](https://www.volcengine.com/docs/4/107686)
+把 vid1、vid2、视频进行拼接，空间为 space1
 
-#### 详细描述
+### Tool 2: audio_video_clipping
 
-查询用户视频点播空间列表，可获取当前账号下所有空间的信息
+#### 功能描述
 
-#### 最容易被唤起的Prompt示例
-调用 list_space 获取空间列表
+将音视频按照指定起止时间截取，输出一个新音视频，支持 vid、url、directurl 三种输入方式
 
-### Tool 3:  [create_space](https://www.volcengine.com/docs/4/107685)
+#### 最容易被唤起的 Prompt 示例
 
-#### 详细描述
-创建视频点播空间，空间是资源隔离的基本单位，每个空间可以独立配置业务资源、业务模板、业务流和业务策略
+把 vid1、vid2 视频截取 第 1s 到 第 30s 时间点的内容，空间为 space1
 
-#### 最容易被唤起的Prompt示例
-调用 create_space 创建点播空间
+### Tool 3: get_v_creative_task_result
 
-### Tool 4: [upload_media](https://www.volcengine.com/docs/4/65647#%E4%B8%8A%E4%BC%A0%E9%9F%B3%E8%A7%86%E9%A2%91)
+#### 功能描述
 
-#### 详细描述
-上传本地视频，可上传本地视频到视频点播指定空间
+查询视频创作任务结果，获取视频创作任务的处理结果，包括任务状态、处理进度、处理结果等信息。
 
-#### 最容易被唤起的Prompt示例
-调用 upload_media 上传本地视频
+#### 最容易被唤起的 Prompt 示例
 
-### Tool 5: [submit_direct_edit_task_async](https://www.volcengine.com/docs/4/102240)
-#### 详细描述
- 提交视频剪辑任务 ，可对视频点播指定空间下的视频资源进行剪辑，可以实现多视频按时域拼接、单视频多端截取、增加文字及转场动画
-#### 最容易被唤起的Prompt示例
-调用 submit_direct_edit_task_async 提交剪辑任务
+查询 VCreativeId 视频创作任务的处理结果，空间为 space1
 
-## Tool 6: [get_direct_edit_progress](https://www.volcengine.com/docs/4/102241)
+### Tool 4 video_batch_upload
 
-#### 详细描述
- 查询视频剪辑任务处理进度，提交剪辑任务后可以查询剪辑任务处理进度
+#### 功能描述
 
-#### 最容易被唤起的Prompt示例
-调用 get_direct_edit_progress 查询剪辑任务处理进度
+通过源文件 URL 批量拉取媒资并上传至视频点播
 
-## Tool 7: [get_direct_edit_result](https://www.volcengine.com/docs/4/102242)
+#### 最容易被唤起的 Prompt 示例
 
-#### 详细描述
-查询剪辑任务处理结果
+把文件 url1、url2 上传到 空间为 your space ，文件后缀为 .mp4
 
-#### 最容易被唤起的Prompt示例
-调用 get_direct_edit_result 查询剪辑任务处理结果
+### Tool 5 query_batch_upload_task_info
 
-## Tool 8: [get_play_info](https://www.volcengine.com/docs/4/2918)
-#### 详细描述
-获取视频播放信息，可获取视频播放信息，包括播放地址、封面等
+#### 功能描述
 
-#### 最容易被唤起的Prompt示例
-调用 get_play_info 查询视频播放地址
+查询 URL 批量上传任务状态。
 
-## Tool 9: [list_domain](https://www.volcengine.com/docs/4/106062)
+#### 最容易被唤起的 Prompt 示例
 
+查询上传任务状态 JobId 为 xxx
 
-#### 详细描述
-查询域名列表，查询用户指定空间下配置的全量域名列表
+### Tool 6 video_quality_enhancement_task
 
-#### 最容易被唤起的Prompt示例
-调用 list_domain 查询点播空间配置的域名
+#### 功能描述
 
-## Tool 10: [get_media_info](https://www.volcengine.com/docs/4/1256363)
+视频增强，支持 Vid 和 DirectUrl 两种输入模式。
 
-#### 详细描述
-查询媒资信息，通过 Vid（视频 ID）获取媒资信息，包含基础信息、片源信息及媒体处理输出文件信息
+#### 最容易被唤起的 Prompt 示例
 
-#### 最容易被唤起的Prompt示例
-调用 get_media_info 查询视频详细信息
+把视频 vid1 进行增强 ，空间为 space1
 
-## Tool 11: [get_media_list](https://www.volcengine.com/docs/4/69205)
+### Tool 7 video_super_resolution_task
 
-#### 详细描述
- 获取音视频信息，获取指定 Vid（视频 ID）的音视频信息
+#### 功能描述
 
-#### 最容易被唤起的Prompt示例
-调用 get_media_list 查询点播空间媒资列表
+视频超分，支持 Vid 和 DirectUrl 两种输入模式。
 
-## 可适配平台  
+#### 最容易被唤起的 Prompt 示例
+
+把视频 vid1 进行超分 ，空间为 space1
+
+### Tool 8 video_interlacing_task
+
+#### 功能描述
+
+视频插帧，支持 Vid 和 DirectUrl 两种输入模式。
+
+#### 最容易被唤起的 Prompt 示例
+
+把视频 vid1 进行插帧 ，空间为 space1
+
+### Tool 9 audio\_ noise_reduction_task
+
+#### 功能描述
+
+音频去噪，支持 Vid 和 DirectUrl 两种输入模式。
+
+#### 最容易被唤起的 Prompt 示例
+
+把音频 vid1 进行去噪 ，空间为 space1
+
+### Tool 10 asr_speech_to_text_task
+
+#### 功能描述
+
+ASR 语音转写字幕，支持 Vid 和 DirectUrl 两种输入模式。
+
+#### 最容易被唤起的 Prompt 示例
+
+把视频 vid1 进行 ASR 识别处理，空间为 space1
+
+### Tool 11 ocr_text_to_subtitles_task
+
+#### 功能描述
+
+OCR 文字转字幕，支持 Vid 和 DirectUrl 两种输入模式。
+
+#### 最容易被唤起的 Prompt 示例
+
+把视频 vid1 进行 OCR 识别处理，空间为 space1
+
+### Tool 12 video_subtitles_removal_task
+
+#### 功能描述
+
+视频字幕擦除，支持 Vid 和 DirectUrl 两种输入模式。
+
+#### 最容易被唤起的 Prompt 示例
+
+把视频 vid1 进行字幕擦除处理，空间为 space1
+
+### Tool 13 voice_separation_task
+
+#### 功能描述
+
+视频人声分离，支持 Vid 和 DirectUrl 两种输入模式。
+
+#### 最容易被唤起的 Prompt 示例
+
+把视频 vid1 进行人声分离处理，空间为 space1
+
+### Tool 14 intelligent_slicing_task
+
+#### 功能描述
+
+智能切片，支持 Vid 和 DirectUrl 两种输入模式。
+
+#### 最容易被唤起的 Prompt 示例
+
+把视频 vid1 进行智能分段切片处理，空间为 space1
+
+### Tool 15 green_screen_task
+
+#### 功能描述
+
+绿幕抠图，支持 Vid 和 DirectUrl 两种输入模式。
+
+#### 最容易被唤起的 Prompt 示例
+
+把视频 vid1 进行绿幕抠图处理，空间为 space1
+
+### Tool 16 portrait_image_retouching_task
+
+#### 功能描述
+
+人像抠图，支持 Vid 和 DirectUrl 两种输入模式。
+
+#### 最容易被唤起的 Prompt 示例
+
+把视频 vid1 进行人像抠图处理，空间为 space1
+
+### Tool 17 get_media_execution_task_result
+
+#### 功能描述
+
+查询视频处理任务结果，获取视频处理任务的处理结果，包括任务状态、处理进度、处理结果等信息。
+
+#### 最容易被唤起的 Prompt 示例
+
+查询人像抠图任务的视频处理任务的处理结果，runId 为 xxx，空间为 space1
+
+## 可适配平台
+
 方舟，Cursor，Trae 等
 
-## 服务开通链接 (整体产品)  
+## 服务开通链接 (整体产品)
+
 [火山引擎-视频点播-控制台](https://www.volcengine.com/product/vod)
 
-## 鉴权方式  
-请在[火山引擎-视频点播-控制台](https://www.volcengine.com/product/vod)申请VOLCENGINE_ACCESS_KEY、VOLCENGINE_SECRET_KEY
+## 鉴权方式
+
+请在[火山引擎-视频点播-控制台](https://www.volcengine.com/product/vod)申请 VOLCENGINE_ACCESS_KEY、VOLCENGINE_SECRET_KEY
 
 ## 安装
 
 ### 环境要求
 
 - Python 3.13+
-- 火山引擎账号及AccessKey/SecretKey
+- 火山引擎账号及 AccessKey/SecretKey
 
 ## 部署
+
 ### 在 MCP Client 中集成
 
 在 mcp client 中配置 mcp 服务, 配置的 MCP JSON：
+
 ```json
 {
   "mcpServers": {
     "vevod": {
       "command": "uvx",
       "args": [
-          "--from",
-          "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vod",
-          "mcp-server-vod"
+        "--from",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_vod",
+        "mcp-server-vod"
       ],
       "env": {
         "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
-        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK"
+        "VOLCENGINE_SECRET_KEY": "Your Volcengine SK",
+        "MCP_TOOL_GROUPS": "YOUR_TOOL_GROUPS"
       }
     }
   }
@@ -145,4 +228,5 @@
 ```
 
 ## License
+
 MIT

@@ -7,7 +7,7 @@
 
 | 项目 | 详情             |
 |----|----------------|
-| 版本 | v1.0.0         |
+| 版本 | v1.0.2         |
 | 描述 | 火山引擎数据库工作台 DBW |
 | 分类 | 数据库            |
 | 标签 | 数据库, 数据库生态工具   |
@@ -19,6 +19,58 @@
 ### 1. `nl2sql`
 - **详细描述**：根据自然语言问题生成SQL语句
 - **触发示例**：`"查询所有用户的用户名"`
+
+### 2. `execute_sql`
+- **详细描述**：执行SQL语句并返回执行结果
+- **触发示例**：`"执行select * from user"`
+
+### 3. `list_databases`
+- **详细描述**：查询数据库实例的Database列表
+- **触发示例**：`"查询mysql-abc实例有哪些database"`
+
+### 4. `list_tables`
+- **详细描述**：查询数据库实例的Table列表
+- **触发示例**：`"查询mysql-abc实例的company database有哪些表"`
+
+### 5. `get_table_info`
+- **详细描述**：查询数据库实例的Table元信息
+- **触发示例**：`"查询mysql-abc实例的company database的employee表的元信息"`
+
+### 6. `describe_slow_logs`
+- **详细描述**：查询数据库实例的慢日志信息
+- **触发示例**：`"查询mysql-abc实例过去一小时的慢日志信息"`
+
+### 7. `list_slow_query_advice`
+- **详细描述**：获取数据库实例的慢日志诊断详情信息
+- **触发示例**：`"获取mysql-abc实例的慢日志诊断详情信息"`
+
+### 8. `slow_query_advice_task_history`
+- **详细描述**：获取数据库实例的慢日志诊断历史信息
+- **触发示例**：`"获取mysql-abc实例的慢日志诊断历史信息"`
+
+### 9. `create_dml_sql_change_ticket`
+- **详细描述**：针对数据库实例创建DML数据变更工单
+- **触发示例**：`"对mysql-abc实例的test数据库创建DML数据变更工单，DML SQL为delete from test_table where id = 1"`
+
+### 10. `create_ddl_sql_change_ticket`
+- **详细描述**：针对数据库实例创建DDL结构变更工单
+- **触发示例**：`"对mysql-abc实例的test数据库创建DDL结构变更工单，DDL SQL为CREATE TABLE test (id INT PRIMARY KEY)"`
+
+### 11. `describe_tickets`
+- **详细描述**：批量查询工单详情
+- **触发示例**：`"批量查询全部工单详情"`
+
+### 12. `describe_ticket_detail`
+- **详细描述**：查询单个工单详情
+- **触发示例**：`"查询1829132226739105792工单详情"`
+
+### 13. `describe_workflow`
+- **详细描述**：查询审批工单详情
+- **触发示例**：`"查询1947260219893497856审批工单详情"`
+
+### 14. `manual_execute_ticket`
+- **详细描述**：手动执行工单
+- **触发示例**：`"手动执行1928009240169988096工单"`
 
 ---
 

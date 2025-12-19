@@ -8,7 +8,7 @@ def create_mcp_server():
     service = IotAPI()
     mcp = FastMCP(
         "IoT MCP Server",
-        description="火山引擎物联网平台 MCP 服务",
+        instructions="火山引擎物联网平台 MCP 服务",
     )
 
     @mcp.tool()

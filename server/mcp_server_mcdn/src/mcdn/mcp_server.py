@@ -8,7 +8,7 @@ def create_mcp_server():
     service = McdnAPI()
     mcp = FastMCP(
         "MCDN MCP",
-        description="Volcengine(火山引擎) MCDN(多云CDN) MCP",
+        instructions="Volcengine(火山引擎) MCDN(多云CDN) MCP",
     )
 
     @mcp.tool()

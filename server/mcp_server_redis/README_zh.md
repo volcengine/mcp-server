@@ -61,7 +61,7 @@
 
 ### 12. `describe_db_instance_params`
 - **详细描述**：查询目标 Redis 实例支持的参数列表。
-- **触发示例**：`"查看实例 redis-cnlf57snu3tt8vyja 的参数列表"`
+- **触发示例**：`"查看实例 redis-cnlf57snuxxxxxxxx 的参数列表"`
 
 ### 13. `describe_parameter_groups`
 - **详细描述**：查询当前账号和地域下的参数模板的基本信息。
@@ -106,6 +106,74 @@
 ### 23. `disassociate_allow_list`
 - **详细描述**：创建一个新的 IP 白名单。
 - **触发示例**：`"将实例redis-cnlf57snuxxxxxxxx从白名单 acl-cnlf61xhhfrgxxxxx 解绑"`
+
+### 24. `describe_db_instance_shards`
+- **详细描述**：查询目标 Redis 实例的分片信息。
+- **触发示例**：`"查看实例 redis-cnlf57snuxxxxxxxx 的分片详情"`
+
+### 25. `describe_node_ids`
+- **详细描述**：查询目标 Redis 实例的节点 ID 列表。
+- **触发示例**：`"查看实例 redis-cnlf57snuxxxxxxxx 的节点 ID 列表"`
+
+### 26. `modify_db_instance_name`
+- **详细描述**：修改目标 Redis 实例的名称。
+- **触发示例**：`"将实例 redis-cnlf57snuxxxxxxxx 重命名为 new-instance-name"`
+
+### 27. `describe_tags_by_resource`
+- **详细描述**：查询绑定到目标 Redis 实例的标签信息。
+- **触发示例**：`"查看实例 redis-cnlf57snuxxxxxxxx 的标签信息"`
+
+### 28. `describe_backup_plan`
+- **详细描述**：查询目标 Redis 实例的备份计划。
+- **触发示例**：`"查看实例 redis-cnlf57snuxxxxxxxx 的备份计划"`
+
+### 29. `describe_pitr_time_window`
+- **详细描述**：查询目标 Redis 实例的 PITR（时间点恢复）时间窗口。
+- **触发示例**：`"查看实例 redis-cnlf57snuxxxxxxxx 的 PITR 时间窗口"`
+
+### 30. `describe_backup_point_download_urls`
+- **详细描述**：查询目标 Redis 实例备份点的下载链接。
+- **触发示例**：`"获取实例 redis-cnlf57snuxxxxxxxx 备份ID为 b-cnlf7khq9vpzazekat176mzxxxxxxx 的下载链接"`
+
+### 31. `describe_cross_region_backup_policy`
+- **详细描述**：查询目标 Redis 实例的跨地域备份策略。
+- **触发示例**：`"查看实例 redis-cnlf57snuxxxxxxxx 的跨地域备份策略"`
+
+### 32. `describe_cross_region_backups`
+- **详细描述**：查询目标 Redis 实例的跨地域备份。
+- **触发示例**：`"查看实例 redis-cnlf57snuxxxxxxxx 的跨地域备份"`
+
+### 33. `create_parameter_group`
+- **详细描述**：创建新的参数模板。
+- **触发示例**：`"创建一个名为 custom-group 的 Redis 5.0 参数模板, 设置maxmemory-policy参数为volatile-lfu"`
+
+### 34. `create_db_endpoint_public_address`
+- **详细描述**：为目标 Redis 实例的访问端点创建公网地址。
+- **触发示例**：`"为实例 redis-cnlf57snuxxxxxxxx 创建公网地址"`
+
+### 35. `describe_db_instance_bandwidth_per_shard`
+- **详细描述**：查询目标 Redis 实例每个分片的带宽信息。
+- **触发示例**：`"查看实例 redis-cnlf57snuxxxxxxxx 每个分片的带宽"`
+
+### 36. `describe_db_instance_acl_commands`
+- **详细描述**：查询目标 Redis 实例支持的 ACL 命令。
+- **触发示例**：`"查看实例 redis-cnlf57snuxxxxxxxx 支持的 ACL 命令"`
+
+### 37. `describe_db_instance_acl_categories`
+- **详细描述**：查询目标 Redis 实例支持的 ACL 命令分类。
+- **触发示例**：`"查看实例 redis-cnlf57snuxxxxxxxx 支持的 ACL 命令分类"`
+
+### 38. `describe_planned_events`
+- **详细描述**：查询目标 Redis 实例的计划内事件。
+- **触发示例**：`"查看实例 redis-cnlf57snuxxxxxxxx 的计划内事件"`
+
+### 39. `describe_key_scan_jobs`
+- **详细描述**：查询目标 Redis 实例的键扫描任务。
+- **触发示例**：`"查看实例 redis-cnlf57snuxxxxxxxx 的键扫描任务"`
+
+### 40. `describe_eip_addresses`
+- **详细描述**：查询满足指定条件的弹性公网 IP 地址。
+- **触发示例**：`"查看当前账号下的弹性公网 IP 地址"`
 
 ---
 

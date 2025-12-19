@@ -9,7 +9,7 @@ def create_mcp_server():
     service = LiveAPI()
     mcp = FastMCP(
         "LIVE MCP",
-        description="Volcengine(火山引擎) LIVE(视频直播) MCP",
+        instructions="Volcengine(火山引擎) LIVE(视频直播) MCP",
     )
 
     @mcp.tool()
