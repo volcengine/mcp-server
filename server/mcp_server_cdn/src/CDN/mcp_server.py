@@ -9,7 +9,7 @@ def create_mcp_server():
     service = CdnAPI()
     mcp = FastMCP(
         "CDN MCP",
-        description="Volcengine(火山引擎) 内容分发网络(CDN)MCP 服务",
+        instructions="Volcengine(火山引擎) 内容分发网络(CDN)MCP 服务",
     )
 
     @mcp.tool()
