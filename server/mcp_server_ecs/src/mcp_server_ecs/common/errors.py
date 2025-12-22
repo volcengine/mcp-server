@@ -1,34 +1,29 @@
-from mcp import types
-
 from mcp_server_ecs.common.logs import LOG
 
 
-# handle empty response error
-def _handle_empty_response(action_name):
-    LOG.error(f"{action_name} returned empty response")
-    return [types.TextContent(type="text", text="Error: empty response")]
+class ToolExecutionError(Exception):
+    """工具执行错误，会被框架捕获并设置 isError=True"""
+    pass
 
 
-# handle exception error
-def _handle_exception(action_name, error):
-    LOG.error(f"Exception when calling {action_name}: {str(error)}")
-    return [types.TextContent(type="text", text=f"Error: {str(error)}")]
-
-
-def handle_error(action_name, error=None):
-    """Handle API error response
+def handle_error(action_name: str, error: Exception | None = None) -> None:
+    """
+    处理 API 错误，抛出异常让框架设置 isError=True
+    
+    符合 MCP 规范：通过抛出异常让框架自动设置 CallToolResult.isError = True，
+    而不是返回错误文本（那样 isError 会保持 False）。
 
     Args:
         action_name: API action name
         error: Exception object (optional)
-
-    Returns:
-        A list of TextContent objects representing the error in a unified format
+    
+    Raises:
+        ToolExecutionError: 包含错误信息的异常
     """
-    # create a mapping table for handling functions
-    handlers = {
-        True: lambda: _handle_exception(action_name, error),
-        False: lambda: _handle_empty_response(action_name),
-    }
-
-    return handlers[error is not None]()
+    if error:
+        error_msg = str(error)
+        LOG.error(f"Exception when calling {action_name}: {error_msg}")
+        raise ToolExecutionError(error_msg) from error
+    else:
+        LOG.error(f"{action_name} returned empty response")
+        raise ToolExecutionError("empty response")

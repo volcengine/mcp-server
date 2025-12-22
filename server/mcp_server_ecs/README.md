@@ -14,22 +14,39 @@ ECS
 ## Features
 
 - Query instance information
-- Query event information 
+- Query event information
 - Query region information
 - Simple instance operations
+- Event subscription management
+- Instance console diagnostics
 
 ## Available Tools
 Since some interfaces have a lot of input parameters and return content, some uncommon content will cause too much context burden on llm. In order to avoid unnecessary token waste, ECS MCP Server only provides queries for common content.
 
+### Instance Management
 - `describe_instances`: [query instance list](https://www.volcengine.com/docs/6396/70466)
 - `describe_images`: [query image list](https://www.volcengine.com/docs/6396/70808)
 - `describe_instance_types`: [query instance type list](https://www.volcengine.com/docs/6396/92769)
+- `describe_instance_type_families`: [query instance type family list](https://www.volcengine.com/docs/6396/120172)
 - `describe_available_resource`: [query available resources](https://www.volcengine.com/docs/6396/76279)
-- `describe_system_events`: [query system events](https://www.volcengine.com/docs/6396/129399)
-- `describe_regions`: [query region list](https://www.volcengine.com/docs/6396/1053194)
-- `describe_zones`: [query availability zone list](https://www.volcengine.com/docs/6396/120518)
 - `start_instances`: [start instances](https://www.volcengine.com/docs/6396/101068)
 - `renew_instance`: [renew instance](https://www.volcengine.com/docs/6396/76276)
+
+### Region & Availability Zone
+- `describe_regions`: [query region list](https://www.volcengine.com/docs/6396/1053194)
+- `describe_zones`: [query availability zone list](https://www.volcengine.com/docs/6396/120518)
+
+### System Events
+- `describe_system_events`: [query system events](https://www.volcengine.com/docs/6396/129399)
+- `update_system_events`: [update system event status](https://www.volcengine.com/docs/6396/129400)
+- `describe_event_types`: [query event type list](https://www.volcengine.com/docs/6396/196424)
+
+### Event Subscription
+- `describe_subscriptions`: [query event subscription list](https://www.volcengine.com/docs/6396/166018)
+
+### Instance Diagnostics
+- `get_console_output`: [get instance console output](https://www.volcengine.com/docs/6396/176876)
+- `get_console_screenshot`: [get instance console screenshot](https://www.volcengine.com/docs/6396/176875)
 
 ## Usage Guide
 

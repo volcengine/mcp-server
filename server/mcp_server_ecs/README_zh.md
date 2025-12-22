@@ -16,19 +16,36 @@ ECS MCP Server 是一个模型上下文协议(Model Context Protocol)服务器�
 - 查询事件信息
 - 查询地域信息
 - 简单操作实例
+- 事件订阅管理
+- 实例控制台诊断
 
 ## 可用工具
 由于部分接口的入参和返回内容较多，一些不常用的内容会对大模型造成过长的上下文负担，为了避免不必要的token浪费，ECS MCP Server仅提供常见内容的查询。
 
+### 实例管理
 - `describe_instances`: [查询实例列表](https://www.volcengine.com/docs/6396/70466)
 - `describe_images`: [查询镜像列表](https://www.volcengine.com/docs/6396/70808)
 - `describe_instance_types`: [查询实例规格列表](https://www.volcengine.com/docs/6396/92769)
+- `describe_instance_type_families`: [查询实例规格族列表](https://www.volcengine.com/docs/6396/120172)
 - `describe_available_resource`: [查询可用资源](https://www.volcengine.com/docs/6396/76279)
-- `describe_system_events`: [查询系统事件](https://www.volcengine.com/docs/6396/129399)
-- `describe_regions`: [查询地域列表](https://www.volcengine.com/docs/6396/1053194)
-- `describe_zones`: [查询可用区列表](https://www.volcengine.com/docs/6396/120518)
 - `start_instances`: [启动实例](https://www.volcengine.com/docs/6396/101068)
 - `renew_instance`: [续费实例](https://www.volcengine.com/docs/6396/76276)
+
+### 地域与可用区
+- `describe_regions`: [查询地域列表](https://www.volcengine.com/docs/6396/1053194)
+- `describe_zones`: [查询可用区列表](https://www.volcengine.com/docs/6396/120518)
+
+### 系统事件
+- `describe_system_events`: [查询系统事件](https://www.volcengine.com/docs/6396/129399)
+- `update_system_events`: [更新系统事件状态](https://www.volcengine.com/docs/6396/129400)
+- `describe_event_types`: [查询事件类型列表](https://www.volcengine.com/docs/6396/196424)
+
+### 事件订阅
+- `describe_subscriptions`: [查询事件订阅列表](https://www.volcengine.com/docs/6396/166018)
+
+### 实例诊断
+- `get_console_output`: [获取实例控制台输出](https://www.volcengine.com/docs/6396/176876)
+- `get_console_screenshot`: [获取实例控制台截图](https://www.volcengine.com/docs/6396/176875)
 
 ## 使用指南
 
