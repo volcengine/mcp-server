@@ -2,6 +2,13 @@ from typing import Any
 from src.vod.mcp_tools.edit import _format_source
 import json
 
+def_font_pos_config = {
+    "height": "20%",          
+    "pos_x": "5%",         
+    "pos_y": "68%",           
+    "width": "90%"
+}
+
 def create_mcp_server(mcp, public_methods: dict,service):
     _build_media_input = public_methods["_build_media_input"]
     _start_execution = public_methods["_start_execution"]
@@ -183,8 +190,19 @@ def create_mcp_server(mcp, public_methods: dict,service):
                 ParamObj["text_list"] = params["text_list"]
             
             if params.get("subtitle_config"):
-                ParamObj["subtitle_config"] = params["subtitle_config"]
-            
+                # 获取用户提供的 font_pos_config，如果不存在则使用空字典
+                user_font_pos_config = params["subtitle_config"].get("font_pos_config", {})
+                # 合并默认配置和用户配置，用户配置优先级更高
+                merged_font_pos_config = {**def_font_pos_config, **user_font_pos_config}
+                ParamObj["subtitle_config"] = {
+                    **params["subtitle_config"],
+                    "font_pos_config": merged_font_pos_config
+                }
+            else:
+                ParamObj["subtitle_config"] = {
+                    "font_pos_config": def_font_pos_config
+                }
+
             audioVideoStitchingParams = {
                 "ParamObj": ParamObj,
                 "Uploader": params["space_name"],

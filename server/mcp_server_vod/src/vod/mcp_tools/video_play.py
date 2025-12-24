@@ -328,6 +328,7 @@ def create_mcp_server(mcp: FastMCP, public_methods: dict, service: VodAPI):
         Note:
             - ** directurl 模式：仅支持点播存储 **
             - ** vid 模式：通过 get_play_video_info 获取数据 **
+            - ** 不支持 http 模式**
         Args:
             - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
                 - directurl：仅仅支持点播存储

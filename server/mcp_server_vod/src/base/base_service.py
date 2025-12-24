@@ -18,6 +18,8 @@ class BaseService(VodService):
         self.set_sk(credentials.secret_access_key)
         self.set_session_token(credentials.session_token)
         self.service_info.header["x-tt-mcp"] = 'volc'
+        if os.getenv("VOLCENGINE_HOST"):
+           self.set_host(os.getenv("VOLCENGINE_HOST"))  
         self.mcp_state = {}
         
     @staticmethod

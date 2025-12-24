@@ -804,8 +804,6 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
         """`水印贴片`，Add the capability of video watermarking, support adjusting the width and height of the watermark, as well as the position in the horizontal or vertical direction, and determine the timing of the watermark's appearance in the original video by setting start_time and end_time，.
         Note:
             - 如果设置的水印开始时间、结束时间超出原始视频时长，那么输出视频的长度将以水印的结束时间为准，超出原始视频部分将以黑屏形式延续。例如原始视频为 20 秒，设置 end_time 为 30，那么输出时长为 30 秒
-            - pos_x 像素
-            - pos_y 像素
         Args:
             - video(dict): ** 必选字段 **，视频信息
                 - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
@@ -866,7 +864,14 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
             }
             
             if params.get("sub_options"):
-                ParamObj["sub_options"] = params["sub_options"]
+              
+                ParamObj["sub_options"] = {
+                    "width": params["sub_options"].get("width", "20%"),
+                    "height": params["sub_options"].get("height", "20%"),
+                    "pos_x": params["sub_options"].get("pos_x", "0"),
+                    "pos_y": params["sub_options"].get("pos_y", "0"),
+                    **params["sub_options"],
+                }
             
             audioVideoStitchingParams = {
                 "ParamObj": ParamObj,
