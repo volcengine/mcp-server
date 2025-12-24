@@ -5,7 +5,7 @@ def create_mcp_server(mcp,  public_methods: dict, service: VodAPI,):
     get_play_url = public_methods['get_play_url']
     @mcp.tool()
     def video_batch_upload(space_name: str, urls: list[dict[str, any]] = None, ) -> dict:
-        """ Batch retrieval and upload of URLs upload video to specified space via synchronous upload
+        """ Batch retrieval and upload of URLs upload video、 audio to specified space via synchronous upload
             Note:
                 - 本接口主要适用于文件没有存储在本地服务器或终端，需要通过公网访问的 URL 地址上传的场景。源文件 URL 支持 HTTP 和 HTTPS。
                 - 本接口为异步上传接口。上传任务成功提交后，系统会生成异步执行的任务，排队执行，不保证时效性。

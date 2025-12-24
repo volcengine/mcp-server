@@ -41,13 +41,16 @@ TRANSCODE_GROUPS = {
     "intelligent_slicing",
     # 智能抠图相关tools
     "intelligent_matting",
-    # 字幕处理相关tools
-    "subtitle_processing",
+    # # 字幕处理相关tools
+    # "subtitle_processing",
     # 音频处理相关tools
     "audio_processing",
     # 视频增强相关tools
     "video_enhancement",
 }
+
+ALL_GROUPS = 'all'
+
 def create_mcp_server(groups: list[str] = None, mcp: FastMCP = None):
     ## init api client
     service = VodAPI()
@@ -57,19 +60,25 @@ def create_mcp_server(groups: list[str] = None, mcp: FastMCP = None):
     ## init tool groups
     current_tool_groups = []
     env_type = os.getenv("MCP_TOOL_GROUPS")
-    
+   
     if groups is not None:
-        current_tool_groups = groups
+       if ALL_GROUPS in groups:
+            current_tool_groups = AVAILABLE_GROUPS
+       else:
+            current_tool_groups = groups
     elif env_type is not None:
+        env_grops= [group.strip() for group in env_type.split(",") if group.strip()]
         try:
-            current_tool_groups = [group.strip() for group in env_type.split(",") if group.strip()]
+            if ALL_GROUPS in env_grops:
+                current_tool_groups = AVAILABLE_GROUPS
+            else:
+                current_tool_groups = env_grops
             print(f"[MCP] Loaded tool groups from environment: {current_tool_groups}")
         except Exception as e:
             print(f"[MCP] Error parsing MCP_TOOL_GROUPS environment variable: {e}")
             current_tool_groups = DEFAULT_GROUPS
     else:
         current_tool_groups = DEFAULT_GROUPS
-    
 
     
     ## update media publish status
@@ -103,7 +112,14 @@ def create_mcp_server(groups: list[str] = None, mcp: FastMCP = None):
         
         Returns:
             - PlayURL (str): 视频播放地址.
-            - Duration (int): 视频时长，单位秒.
+            - Duration (float): 视频时长，单位秒.
+            - FormatName (str): 容器名称.
+            - Size (float): 大小，单位为字节.
+            - BitRate (str): 码率，单位为 bps.
+            - CodecName (str): 编码器名称.
+            - AvgFrameRate (str): 视频平均帧率，单位为 fps.
+            - Width (int): 视频宽，单位为 px.
+            - Height (int): 视频高，单位为 px.
         
         """
         reqs = service.mcp_get("McpGetVideoPlayInfo", {
@@ -114,6 +130,13 @@ def create_mcp_server(groups: list[str] = None, mcp: FastMCP = None):
         },json.dumps({}))
         url =  None
         duration = 0
+        formatName = ""
+        size = 0
+        bitRate = ""
+        codecName = ""
+        avgFrameRate = ""
+        width = 0
+        height = 0
 
         if isinstance(reqs, str):
             reqs = json.loads(reqs)
@@ -121,7 +144,18 @@ def create_mcp_server(groups: list[str] = None, mcp: FastMCP = None):
             videoDetail = result.get("VideoDetail", {})
             videoDetailInfo = videoDetail.get("VideoDetailInfo", {})
             playInfo = videoDetailInfo.get("PlayInfo", {})
-            duration = videoDetailInfo.get("Duration", 0)
+            durationValue = videoDetailInfo.get("Duration")
+            duration = float(durationValue) if durationValue is not None else 0
+            
+            # 提取完整的视频信息
+            formatName = videoDetailInfo.get("Format", "")
+            sizeValue = videoDetailInfo.get("Size")
+            size = float(sizeValue) if sizeValue is not None else 0
+            bitRate = str(videoDetailInfo.get("Bitrate", "")) if videoDetailInfo.get("Bitrate") else ""
+            codecName = videoDetailInfo.get("Codec", "")
+            avgFrameRate = str(videoDetailInfo.get("Fps", "")) if videoDetailInfo.get("Fps") else ""
+            width = int(videoDetailInfo.get("Width", 0)) if videoDetailInfo.get("Width") else 0
+            height = int(videoDetailInfo.get("Height", 0)) if videoDetailInfo.get("Height") else 0
 
             if videoDetailInfo.get("PublishStatus") == 'Published':
                 url = playInfo.get("MainPlayURL", None) or playInfo.get("BackupPlayUrl", None)
@@ -139,7 +173,17 @@ def create_mcp_server(groups: list[str] = None, mcp: FastMCP = None):
                      raise Exception("update publish status failed：", reqs, publishStatus)
         if url is None:
             raise Exception("%s: get publish url failed" % vid)
-        return json.dumps({"PlayURL": url, "Duration": duration})
+        return json.dumps({
+            "PlayURL": url,
+            "Duration": duration,
+            "FormatName": formatName,
+            "Size": size,
+            "BitRate": bitRate,
+            "CodecName": codecName,
+            "AvgFrameRate": avgFrameRate,
+            "Width": width,
+            "Height": height,
+        })
     
     public_methods["update_media_publish_status"] = update_media_publish_status
     public_methods["get_play_video_info"] = get_play_video_info

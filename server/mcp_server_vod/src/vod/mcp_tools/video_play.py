@@ -5,10 +5,12 @@ from mcp.server.fastmcp import FastMCP
 from typing import Any, Dict
 from datetime import datetime, timezone, timedelta
 import hashlib
-from urllib.parse import quote
+from urllib.parse import quote, urlparse, urlencode, parse_qs, urlunparse
 import secrets
 import json
 import re
+import urllib.request
+import urllib.error
 
 def register_video_play_methods(service: VodAPI, public_methods: dict,):
     def str_to_number(s, default=None):
@@ -219,6 +221,92 @@ def register_video_play_methods(service: VodAPI, public_methods: dict,):
         return urlPath
     public_methods["get_play_url"] = get_play_directurl
 
+    def get_video_audio_info_directurl(spaceName: str, source: str) -> dict:
+        """通过 directurl 模式获取音视频元数据
+        Args:
+            spaceName: 空间名称
+            source: 文件名
+        Returns:
+            音视频元数据字典
+        """
+        # 获取播放地址
+        playUrl = get_play_directurl(spaceName, source, 60)
+        if not playUrl:
+            raise Exception("get_video_audio_info: failed to get play url")
+        
+        # 在链接上拼接 x-vod-process=video/info
+        parsed = urlparse(playUrl)
+        query_params = parse_qs(parsed.query)
+        query_params['x-vod-process'] = ['video/info']
+        new_query = urlencode(query_params, doseq=True)
+        info_url = urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, new_query, parsed.fragment))
+        
+        # 发起 GET 请求
+        try:
+            req = urllib.request.Request(info_url)
+            with urllib.request.urlopen(req, timeout=30) as response:
+                result_data = json.loads(response.read().decode('utf-8'))
+        except urllib.error.URLError as e:
+            raise Exception(f"get_video_audio_info: failed to fetch video info: {e}")
+        except json.JSONDecodeError as e:
+            raise Exception(f"get_video_audio_info: failed to parse JSON response: {e}")
+        
+        # 解析结果
+        format_info = result_data.get("format", {})
+        streams = result_data.get("streams", [])
+        
+        # 提取视频流信息
+        video_stream = None
+        audio_stream = None
+        for stream in streams:
+            codec_type = stream.get("codec_type", "")
+            if codec_type == "video" and video_stream is None:
+                video_stream = stream
+            elif codec_type == "audio" and audio_stream is None:
+                audio_stream = stream
+        
+        # 构建返回结果
+        durationValue = format_info.get("duration")
+        duration = float(durationValue) if durationValue is not None else 0
+        sizeValue = format_info.get("size")
+        size = float(sizeValue) if sizeValue is not None else 0
+        
+        result = {
+            "FormatName": format_info.get("format_name", ""),
+            "Duration": duration,
+            "Size": size,
+            "BitRate": format_info.get("bit_rate", ""),
+            "CodecName": "",
+            "AvgFrameRate": "",
+            "Width": 0,
+            "Height": 0,
+            "Channels": 0,
+            "SampleRate": "",
+            "BitsPerSample": "",
+            "PlayURL": playUrl,
+        }
+        
+        # 填充视频信息
+        if video_stream:
+            result["CodecName"] = video_stream.get("codec_name", "")
+            result["AvgFrameRate"] = video_stream.get("avg_frame_rate", "")
+            result["Width"] = int(video_stream.get("width", 0)) if video_stream.get("width") else 0
+            result["Height"] = int(video_stream.get("height", 0)) if video_stream.get("height") else 0
+            if not result["BitRate"]:
+                result["BitRate"] = str(video_stream.get("bit_rate", ""))
+        
+        # 填充音频信息
+        if audio_stream:
+            result["Channels"] = int(audio_stream.get("channels", 0)) if audio_stream.get("channels") else 0
+            result["SampleRate"] = str(audio_stream.get("sample_rate", ""))
+            bits_per_sample = audio_stream.get("bits_per_sample")
+            if bits_per_sample:
+                result["BitsPerSample"] = str(bits_per_sample)
+        
+        return result
+    
+    public_methods["get_video_audio_info_directurl"] = get_video_audio_info_directurl
+
 
 def create_mcp_server(mcp: FastMCP, public_methods: dict, service: VodAPI):
     @mcp.tool()
@@ -233,5 +321,81 @@ def create_mcp_server(mcp: FastMCP, public_methods: dict, service: VodAPI):
             - 播放地址
         """
         return public_methods["get_play_url"](spaceName, fileName, expired_minutes)
+
+    @mcp.tool()
+    def get_video_audio_info(type: str, source: str, space_name: str) -> dict:
+        """Obtaining audio and video metadata
+        Note:
+            - ** directurl 模式：仅支持点播存储 **
+            - ** vid 模式：通过 get_play_video_info 获取数据 **
+        Args:
+            - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
+                - directurl：仅仅支持点播存储
+                - vid
+            - source(str): 文件信息
+            - space_name(str): ** 必选字段 ** , 点播空间
+        Returns:
+            - FormatName(str): 容器名称。
+            - Duration(float): 时长，单位为秒。
+            - Size(float): 大小，单位为字节。
+            - BitRate(str): 码率，单位为 bps
+            - CodecName(str): 编码器名称。
+            - AvgFrameRate(str): 视频平均帧率，单位为 fps。
+            - Width(int): 视频宽，单位为 px。
+            - Height(int): 视频高，单位为 px。
+            - Channels(int): 音频通道数
+            - SampleRate(str): 音频采样率，单位 Hz。
+            - BitsPerSample(str): 音频采样码率，单位 bit。
+            - PlayURL(str): 播放地址
+        """
+        try:
+            params = {"type": type, "source": source, "space_name": space_name}
+            if "space_name" not in params:
+                raise ValueError("get_video_audio_info: params must contain space_name")
+            if not isinstance(params["space_name"], str):
+                raise TypeError("get_video_audio_info: params['space_name'] must be a string")
+            if not params["space_name"].strip():
+                raise ValueError("get_video_audio_info: params['space_name'] cannot be empty")
+            if "source" not in params:
+                raise ValueError("get_video_audio_info: params must contain source")
+            
+            sourceType = params.get("type", "vid")
+            sourceValue = params.get("source", "")
+            
+            if sourceType == "directurl":
+                # directurl 模式
+                result = public_methods["get_video_audio_info_directurl"](params["space_name"], sourceValue)
+                return json.dumps(result)
+            elif sourceType == "vid":
+                # vid 模式 - 直接使用 get_play_video_info 的返回结果
+                videoInfo = public_methods["get_play_video_info"](sourceValue, params["space_name"])
+                if isinstance(videoInfo, str):
+                    videoInfo = json.loads(videoInfo)
+                
+                durationValue = videoInfo.get("Duration")
+                duration = float(durationValue) if durationValue is not None else 0
+                sizeValue = videoInfo.get("Size")
+                size = float(sizeValue) if sizeValue is not None else 0
+                
+                result = {
+                    "FormatName": videoInfo.get("FormatName", ""),
+                    "Duration": duration,
+                    "Size": size,
+                    "BitRate": videoInfo.get("BitRate", ""),
+                    "CodecName": videoInfo.get("CodecName", ""),
+                    "AvgFrameRate": videoInfo.get("AvgFrameRate", ""),
+                    "Width": int(videoInfo.get("Width", 0)) if videoInfo.get("Width") else 0,
+                    "Height": int(videoInfo.get("Height", 0)) if videoInfo.get("Height") else 0,
+                    "Channels": 0,
+                    "SampleRate": "",
+                    "BitsPerSample": "",
+                    "PlayURL": videoInfo.get("PlayURL", ""),
+                }
+                
+                return json.dumps(result)
+            else:
+                raise ValueError(f"get_video_audio_info: unsupported type: {sourceType}")
+        except Exception as e:
+            raise Exception("get_video_audio_info: %s" % e, params)
 
        

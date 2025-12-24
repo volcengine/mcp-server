@@ -126,7 +126,7 @@ def create_mcp_server(mcp, public_methods: dict):
         Returns
              - RunId(str):  媒体处理任务执行 ID, 可通过 `get_media_execution_task_result` 方法进行结果查询,输入 type 为 `videSuperResolution`
         """
-        if not isinstance(Fps, (int, float)) or Fps <= 0 or Fps >= 120:
+        if not isinstance(Fps, (int, float)) or Fps <= 0 or Fps > 120:
             raise ValueError("Fps must be > 0 and <= 120")
 
         media_input = _build_media_input(type, video, spaceName)
