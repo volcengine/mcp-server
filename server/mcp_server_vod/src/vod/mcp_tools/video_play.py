@@ -11,6 +11,10 @@ import json
 import re
 import urllib.request
 import urllib.error
+import logging
+import inspect
+
+
 
 def register_video_play_methods(service: VodAPI, public_methods: dict,):
     def str_to_number(s, default=None):
@@ -312,7 +316,7 @@ def create_mcp_server(mcp: FastMCP, public_methods: dict, service: VodAPI):
     @mcp.tool()
     def get_play_url(spaceName: str, fileName: str, expired_minutes: int = 60) -> str:
         """
-        Obtain the video playback link through `fileName`
+        Obtain the video playback link through `fileName`， 通过 fileName 获取视频播放地址
         Args:
             - spaceName: **必选字段** 空间名称
             - fileName: **必选字段** 文件名
@@ -320,11 +324,12 @@ def create_mcp_server(mcp: FastMCP, public_methods: dict, service: VodAPI):
         Returns:
             - 播放地址
         """
+   
         return public_methods["get_play_url"](spaceName, fileName, expired_minutes)
 
     @mcp.tool()
     def get_video_audio_info(type: str, source: str, space_name: str) -> dict:
-        """Obtaining audio and video metadata
+        """Obtaining audio and video metadata， 获取音视频播放信息
         Note:
             - ** directurl 模式：仅支持点播存储 **
             - ** vid 模式：通过 get_play_video_info 获取数据 **
@@ -349,6 +354,15 @@ def create_mcp_server(mcp: FastMCP, public_methods: dict, service: VodAPI):
             - BitsPerSample(str): 音频采样码率，单位 bit。
             - PlayURL(str): 播放地址
         """
+        frame = inspect.currentframe()
+        arguments = inspect.getargvalues(frame).locals
+        ctx = mcp.get_context()
+        raw_request: Request = ctx.request_context.request.headers
+        logging.info(f"get_play_url: {space_name} {source} {type}")
+        logging.info(f"get_play_url_ctx: {raw_request.get('ak')}")
+        logging.info(f"get_play_url_ctx: {raw_request.get('sk')}")
+        print(f"get_play_urframe: {arguments}")   
+
         try:
             params = {"type": type, "source": source, "space_name": space_name}
             if "space_name" not in params:

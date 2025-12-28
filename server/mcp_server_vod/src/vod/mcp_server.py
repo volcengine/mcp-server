@@ -1,15 +1,18 @@
 
 import importlib
+from tokenize import group
+from typing import Optional
 from src.vod.api.api import VodAPI
 from src.vod.mcp_tools.media_tasks import create_transcode_result_server
 from src.vod.utils.transcode import register_transcode_base_fn
 from src.vod.mcp_tools.video_play import register_video_play_methods
 from mcp.server.fastmcp import FastMCP
 from pathlib import Path
+from src.base.base_mcp import TOOL_NAME_TO_GROUP_MAP, TOOL_GROUP_MAP
 
-from urllib.parse import quote
 import json
 import os
+import logging
 
 AVAILABLE_GROUPS = [
 # 视频剪辑相关tools
@@ -51,35 +54,60 @@ TRANSCODE_GROUPS = {
 
 ALL_GROUPS = 'all'
 
-def create_mcp_server(groups: list[str] = None, mcp: FastMCP = None):
+# 工具名到工具分组的映射从 base_mcp 导入
+# TOOL_NAME_TO_GROUP_MAP: 工具名 -> 分组名 (用于根据工具名查找分组)
+# TOOL_GROUP_MAP: 分组名 -> 工具列表 (用于根据分组名获取工具列表)
+
+
+def create_mcp_server(mcp: FastMCP = None):
     ## init api client
     service = VodAPI()
     ## init public methods
     public_methods = {}
-
-    ## init tool groups
-    current_tool_groups = []
-    env_type = os.getenv("MCP_TOOL_GROUPS")
-   
-    if groups is not None:
-       if ALL_GROUPS in groups:
-            current_tool_groups = AVAILABLE_GROUPS
-       else:
-            current_tool_groups = groups
-    elif env_type is not None:
-        env_grops= [group.strip() for group in env_type.split(",") if group.strip()]
-        try:
-            if ALL_GROUPS in env_grops:
-                current_tool_groups = AVAILABLE_GROUPS
-            else:
-                current_tool_groups = env_grops
-            print(f"[MCP] Loaded tool groups from environment: {current_tool_groups}")
-        except Exception as e:
-            print(f"[MCP] Error parsing MCP_TOOL_GROUPS environment variable: {e}")
-            current_tool_groups = DEFAULT_GROUPS
-    else:
-        current_tool_groups = DEFAULT_GROUPS
-
+    
+    # 确保 mcp 不为 None
+    if mcp is None:
+        raise ValueError("mcp parameter cannot be None")
+    
+    mcp.set_base_mcp_store({
+        'apiRequestInstance': service
+    })
+    # ## init tool groups
+    # # 优先级：1. groups 参数 2. MCP header 3. 环境变量 4. 默认值
+    # current_tool_groups = []
+    
+    # if groups is not None:
+    #     if ALL_GROUPS in groups:
+    #         current_tool_groups = AVAILABLE_GROUPS
+    #     else:
+    #         current_tool_groups = groups
+    #     print(f"[MCP] Loaded tool groups from parameter: {current_tool_groups}")
+    # else:
+    #     # 尝试从 MCP 上下文 header 获取
+    #     header_groups = get_tool_groups_from_context(mcp)
+    #     if header_groups:
+    #         if ALL_GROUPS in header_groups:
+    #             current_tool_groups = AVAILABLE_GROUPS
+    #         else:
+    #             current_tool_groups = header_groups
+    #         print(f"[MCP] Loaded tool groups from header: {current_tool_groups}")
+    #     else:
+    #         # 从环境变量获取
+    #         env_type = os.getenv("MCP_TOOL_GROUPS")
+    #         if env_type is not None:
+    #             env_grops = [group.strip() for group in env_type.split(",") if group.strip()]
+    #             try:
+    #                 if ALL_GROUPS in env_grops:
+    #                     current_tool_groups = AVAILABLE_GROUPS
+    #                 else:
+    #                     current_tool_groups = env_grops
+    #                 print(f"[MCP] Loaded tool groups from environment: {current_tool_groups}")
+    #             except Exception as e:
+    #                 print(f"[MCP] Error parsing MCP_TOOL_GROUPS environment variable: {e}")
+    #                 current_tool_groups = DEFAULT_GROUPS
+    #         else:
+    #             current_tool_groups = DEFAULT_GROUPS
+    #             print(f"[MCP] Using default tool groups: {current_tool_groups}")
     
     ## update media publish status
     def update_media_publish_status  (vid: str, SpaceName: str, PublishStatus: str) ->  str: 
@@ -220,5 +248,14 @@ def create_mcp_server(groups: list[str] = None, mcp: FastMCP = None):
                     module.create_mcp_server(mcp, public_methods, service)
                     print(f"[MCP] Loaded tool: {module_name}")
 
-    _load_tools(current_tool_groups)
+    # Store mcp instance in service for context access
+    service._mcp_instance = mcp
+    logging.info(f"Set _mcp_instance on service: {mcp is not None}")
+    
+    # 注册所有工具（启动时注册所有工具，在 streamable HTTP 建联时会根据 header 动态过滤）
+    # 注意：这里注册所有工具，而不是只注册 current_tool_groups
+    # 因为 streamable HTTP 模式下，每次请求的 header 可能不同
+    _load_tools(AVAILABLE_GROUPS)
+    
+    
     return mcp
