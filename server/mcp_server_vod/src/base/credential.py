@@ -130,9 +130,9 @@ def get_volcengine_credentials_base(ctx: Optional[Context[ServerSession, object]
         secret_key = vefaas_cred.secret_access_key
         session_token = vefaas_cred.session_token
 
-    # 如果仍未获取到有效凭证，则抛出异常
+    # 如果仍未获取到有效凭证，仅打印警告（支持通过 Header 动态传递凭证）
     if not (access_key and secret_key):
-        logging.error("无法获取有效的 Volcengine 凭证，请检查环境变量或 VeFaaS IAM 配置")
+        logging.warning("未检测到 Volcengine 凭证（环境变量/IAM），服务将以无凭证模式启动。请确保在请求 Header 中传递凭证。")
     return VeIAMCredential(
         access_key_id=access_key,
         secret_access_key=secret_key,
