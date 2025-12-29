@@ -202,8 +202,11 @@ class SchemaManager:
                 schema_file = (
                     self.cache_dir / f'{resource_type.replace("::", "_")}.json'
                 )
-                with open(schema_file, "w") as f:
-                    f.write(schema_str)
+                try:
+                    with open(schema_file, "w") as f:
+                        f.write(schema_str)
+                except (OSError, IOError, PermissionError) as e:
+                    print(f"Unable to write schema file: {e}")
 
                 # Update registry with the valid schema
                 self.schema_registry[resource_type] = spec
