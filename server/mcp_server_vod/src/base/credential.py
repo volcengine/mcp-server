@@ -18,8 +18,8 @@ from src.base.constant import (
     VOLCENGINE_ACCESS_KEY_ENV,
     VOLCENGINE_SECRET_KEY_ENV,
     VOLCENGINE_SESSION_TOKEN_ENV,
-    VOLCENGINE_HOST_ENV,
-    VOLCENGINE_REGION_ENV,
+    # VOLCENGINE_HOST_ENV,
+    # VOLCENGINE_REGION_ENV,
 )
 
 VEFAAS_IAM_CRIDENTIAL_PATH = "/var/run/secrets/iam/credential"
@@ -35,7 +35,7 @@ class VeIAMCredential(BaseModel):
 # VOLCENGINE_HOST_ENV = 'VOLCENGINE_HOST'
 # VOLCENGINE_REGION_ENV = 'VOLCENGINE_REGION'
 
-def get_volcengine_credentials_from_context(ctx: Optional[Context[ServerSession, object]] = None) -> Optional[Dict[str, Any]]:
+def get_volcengine_credentials_from_context(ctx: Optional[Context[ServerSession, object, Any]] = None) -> Optional[Dict[str, Any]]:
     """Get Volcengine credentials from MCP context headers.
     
     Args:
