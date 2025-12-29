@@ -19,14 +19,17 @@ from mcp_server_ccapi.errors import (
     handle_volcengine_api_error,
 )
 from mcp_server_ccapi.schema_manager import schema_manager
+from mcp.server.fastmcp import Context
 from mcp_server_ccapi.volcengine_client import (
     create_universal_info,
     get_volcengine_client_from_config,
+    do_call_with_http_info_async
 )
 from typing import List
 
 
 async def generate_infrastructure_code(
+    ctx: Context,
     resource_type: str,
     properties: dict = {},  # pyright: ignore[reportMissingTypeArgument]
     identifier: str = '',
@@ -42,7 +45,7 @@ async def generate_infrastructure_code(
 
     # Validate the resource type against the schema
     sm = schema_manager()
-    schema = await sm.get_schema(resource_type, region)
+    schema = await sm.get_schema(ctx, resource_type, region)
 
     # Check if resource supports tagging
     supports_tagging = 'Tags' in schema.get('properties', {})
@@ -53,7 +56,7 @@ async def generate_infrastructure_code(
             raise ClientError('Please provide a resource identifier for update operations')
 
         # Get the current resource state
-        cloudcontrol_client = get_volcengine_client_from_config(region)
+        cloudcontrol_client = get_volcengine_client_from_config(ctx, region)
         try:
             # 创建UniversalInfo
             universal_info = create_universal_info(
@@ -67,9 +70,10 @@ async def generate_infrastructure_code(
                 'TypeName': resource_type,
                 'Identifier': identifier,
             }
-            current_resource, _, _ = cloudcontrol_client.do_call_with_http_info(  # pyright: ignore[reportUnknownMemberType, reportGeneralTypeIssues]
-                info=universal_info,
-                body=params,
+            current_resource, _, _ = await do_call_with_http_info_async(
+                cloudcontrol_client,
+                universal_info,
+                params,
             )
             current_properties = json.loads(current_resource['ResourceDescription']['Properties'])
         except Exception as e:

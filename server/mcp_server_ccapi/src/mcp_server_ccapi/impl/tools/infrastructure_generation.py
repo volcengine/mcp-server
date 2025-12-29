@@ -15,6 +15,7 @@
 import datetime
 import uuid
 from mcp_server_ccapi.errors import ClientError
+from mcp.server.fastmcp import Context
 from mcp_server_ccapi.impl.utils.validation import (
     validate_workflow_token,
 )
@@ -27,6 +28,7 @@ from mcp_server_ccapi.models.models import (
 
 
 async def generate_infrastructure_code_impl_wrapper(
+    ctx: Context,
     request: GenerateInfrastructureCodeRequest, workflow_store: dict
 ) -> dict:
     """Generate infrastructure code before resource creation or update implementation."""
@@ -41,6 +43,7 @@ async def generate_infrastructure_code_impl_wrapper(
 
     # Generate infrastructure code using the existing implementation
     result = await generate_infrastructure_code_impl(
+        ctx=ctx,
         resource_type=request.resource_type,
         properties=request.properties,
         identifier=request.identifier,

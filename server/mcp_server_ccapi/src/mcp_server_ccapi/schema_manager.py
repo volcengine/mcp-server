@@ -14,12 +14,14 @@ import json
 import os
 from datetime import datetime, timedelta
 from mcp_server_ccapi.errors import ClientError
+from mcp.server.fastmcp import Context
 from mcp_server_ccapi.impl.tools.credential import (
     get_volcengine_credentials,
 )
 from mcp_server_ccapi.volcengine_client import (
     create_universal_info,
     get_volcengine_client,
+    do_call_with_http_info_async
 )
 from pathlib import Path
 
@@ -88,7 +90,7 @@ class SchemaManager:
                 print(f"Error loading schema from {schema_file}: {str(e)}")
 
     async def get_schema(
-        self, resource_type: str, region: str | None = None
+            self, ctx :Context ,resource_type: str, region: str | None = None
     ) -> dict:  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
         """Get schema for a resource type, downloading it if necessary."""
         # Check if schema is in registry
@@ -127,11 +129,11 @@ class SchemaManager:
                     return cached_schema
 
         # Download schema (either not cached, expired, or corrupted)
-        schema = await self._download_resource_schema(resource_type, region)
+        schema = await self._download_resource_schema(ctx, resource_type, region)
         return schema
 
     async def _download_resource_schema(
-        self, resource_type: str, region: str | None = None
+        self, ctx: Context, resource_type: str, region: str | None = None
     ) -> dict:  # pyright: ignore[reportMissingTypeArgument]
         """Download schema for a specific resource type.
 
@@ -157,7 +159,7 @@ class SchemaManager:
                 print(
                     f"Downloading schema for {resource_type} using Cloud Control API (attempt {attempt + 1}/{max_retries})"
                 )
-                credentials = get_volcengine_credentials()
+                credentials = get_volcengine_credentials(ctx, region)
                 volcengine_client = get_volcengine_client(
                     ak=credentials["access_key_id"],
                     sk=credentials["secret_access_key"],
@@ -174,10 +176,11 @@ class SchemaManager:
                     content_type="text/plain",
                 )
                 params = {"TypeName": resource_type}
-                resp, _, _ = volcengine_client.do_call_with_http_info(
-                    info=info, body=params
-                )  # pyright: ignore[reportUnknownMemberType, reportGeneralTypeIssues]
-
+                resp, _, _ = await do_call_with_http_info_async(
+                    volcengine_client,
+                    info,
+                    params,
+                )
                 schema_str = json.dumps(
                     resp["Schema"], ensure_ascii=False
                 )  # pyright: ignore[reportCallIssue, reportArgumentType, reportIndexIssue]

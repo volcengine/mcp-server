@@ -17,7 +17,8 @@ from mcp_server_ccapi.cloud_control_utils import (
     progress_event,
     validate_patch,
 )
-from mcp_server_ccapi.context import Context
+from mcp.server.fastmcp import Context
+from mcp_server_ccapi.context import Context as ServerContext
 from mcp_server_ccapi.errors import (
     ClientError,
     handle_volcengine_api_error,
@@ -38,6 +39,7 @@ from mcp_server_ccapi.models.models import (
 from mcp_server_ccapi.volcengine_client import (
     create_universal_info,
     get_volcengine_client_from_config,
+    do_call_with_http_info_async
 )
 from os import environ
 from volcenginesdkcore.rest import ApiException
@@ -45,7 +47,7 @@ from volcenginesdkcore.rest import ApiException
 
 def check_readonly_mode(volcengine_session_data: dict) -> None:
     """Check if server is in read-only mode and raise error if so."""
-    if Context.readonly_mode() or volcengine_session_data.get('readonly_mode', False):
+    if ServerContext.readonly_mode() or volcengine_session_data.get('readonly_mode', False):
         raise ClientError('Server is in read-only mode')
 
 
@@ -85,7 +87,7 @@ def _validate_token_chain(
     workflow_store[security_scan_token]['parent_token'] = explained_token
 
 
-async def create_resource_impl(request: CreateResourceRequest, workflow_store: dict) -> dict:
+async def create_resource_impl(ctx:Context, request: CreateResourceRequest, workflow_store: dict) -> dict:
     """Create an Volcengine resource implementation."""
     validate_resource_type(request.resource_type)
 
@@ -125,7 +127,7 @@ async def create_resource_impl(request: CreateResourceRequest, workflow_store: d
 
     # Ensure region is a string, not a FieldInfo object
     region_str = ensure_region_string(request.region)
-    cloudcontrol_client = get_volcengine_client_from_config(region_str)
+    cloudcontrol_client = get_volcengine_client_from_config(ctx, region_str)
     try:
         universal_info = create_universal_info(
             method='POST',
@@ -135,7 +137,11 @@ async def create_resource_impl(request: CreateResourceRequest, workflow_store: d
             content_type='application/json',
         )
         param = {'TypeName': request.resource_type, 'TargetState': properties}
-        response, _, _ = cloudcontrol_client.do_call_with_http_info(universal_info, param)
+        response, _, _ = await do_call_with_http_info_async(
+            cloudcontrol_client,
+            universal_info,
+            param,
+        )
     except ApiException as ae:
         error_message = getattr(ae, 'body', None)
         try:
@@ -162,7 +168,7 @@ async def create_resource_impl(request: CreateResourceRequest, workflow_store: d
     return result
 
 
-async def update_resource_impl(request: UpdateResourceRequest, workflow_store: dict) -> dict:
+async def update_resource_impl(ctx: Context, request: UpdateResourceRequest, workflow_store: dict) -> dict:
     """Update a Volcengine resource implementation."""
     validate_resource_type(request.resource_type)
     validate_identifier(request.identifier)
@@ -201,7 +207,7 @@ async def update_resource_impl(request: UpdateResourceRequest, workflow_store: d
     validate_patch(request.patch_document)
     # Ensure region is a string, not a FieldInfo object
     region_str = ensure_region_string(request.region)
-    cloudcontrol_client = get_volcengine_client_from_config(region_str)
+    cloudcontrol_client = get_volcengine_client_from_config(ctx, region_str)
     response = None
     # Update the resource
     try:
@@ -217,9 +223,10 @@ async def update_resource_impl(request: UpdateResourceRequest, workflow_store: d
             'Identifier': request.identifier,
             'PatchDocument': request.patch_document,
         }
-        response, _, _ = cloudcontrol_client.do_call_with_http_info(
-            info=universal_info,
-            body=params,
+        response, _, _ = await do_call_with_http_info_async(
+            cloudcontrol_client,
+            universal_info,
+            params,
         )
     except ApiException as ae:
         # 解析错误响应
@@ -257,7 +264,7 @@ async def update_resource_impl(request: UpdateResourceRequest, workflow_store: d
     return result
 
 
-async def delete_resource_impl(request: DeleteResourceRequest, workflow_store: dict) -> dict:
+async def delete_resource_impl(ctx: Context, request: DeleteResourceRequest, workflow_store: dict) -> dict:
     """Delete an Volcengine resource implementation."""
     validate_resource_type(request.resource_type)
     validate_identifier(request.identifier)
@@ -289,7 +296,7 @@ async def delete_resource_impl(request: DeleteResourceRequest, workflow_store: d
             'You have configured this tool in readonly mode. To make this change you will have to update your configuration.'
         )
 
-    cloudcontrol_client = get_volcengine_client_from_config(request.region)
+    cloudcontrol_client = get_volcengine_client_from_config(ctx, request.region)
     try:
         universal_info = create_universal_info(
             service='cloudcontrol',
@@ -302,9 +309,10 @@ async def delete_resource_impl(request: DeleteResourceRequest, workflow_store: d
             'TypeName': request.resource_type,
             'Identifier': request.identifier,
         }
-        response, _, _ = cloudcontrol_client.do_call_with_http_info(
-            info=universal_info,
-            body=params,
+        response, _, _ = await do_call_with_http_info_async(
+            cloudcontrol_client,
+            universal_info,
+            params,
         )
     except Exception as e:
         raise handle_volcengine_api_error(e)
@@ -316,13 +324,15 @@ async def delete_resource_impl(request: DeleteResourceRequest, workflow_store: d
 
 
 async def get_resource_impl(
-    request: GetResourceRequest, workflow_store: dict | None = None
+    ctx: Context,
+    request: GetResourceRequest,
+    workflow_store: dict | None = None
 ) -> dict:
     """Get details of a specific Volcengine resource implementation."""
     validate_resource_type(request.resource_type)
     validate_identifier(request.identifier)
 
-    cloudcontrol = get_volcengine_client_from_config(request.region)
+    cloudcontrol = get_volcengine_client_from_config(ctx, request.region)
     try:
         info = create_universal_info(
             service='cloudcontrol',
@@ -332,9 +342,10 @@ async def get_resource_impl(
             content_type='application/json',
         )
         params = {'TypeName': request.resource_type, 'Identifier': request.identifier}
-        result, _, _ = cloudcontrol.do_call_with_http_info(
-            info=info,
-            body=params,
+        result, _, _ = await do_call_with_http_info_async(
+            cloudcontrol,
+            info,
+            params,
         )
         properties_str = result['ResourceDescription']['Properties']  # pyright: ignore[reportCallIssue, reportArgumentType]
         properties = (
@@ -367,9 +378,9 @@ async def get_resource_impl(
             security_scan_token = None
             try:
                 # Get credentials token first
-                env_check = await check_environment_variables_impl(workflow_store)
+                env_check = await check_environment_variables_impl(ctx, workflow_store)
                 env_token = env_check['environment_token']
-                session_info = await get_volcengine_session_info_impl(env_token, workflow_store)
+                session_info = await get_volcengine_session_info_impl(ctx, env_token, workflow_store)
                 creds_token = session_info['credentials_token']
 
                 # Use existing security analysis workflow
@@ -387,7 +398,7 @@ async def get_resource_impl(
                     region=request.region,
                 )
                 generated_code = await generate_infrastructure_code_impl_wrapper(
-                    gen_request, workflow_store
+                    ctx, gen_request, workflow_store
                 )
                 gen_token = generated_code['generated_code_token']
 
@@ -428,12 +439,12 @@ async def get_resource_impl(
         raise handle_volcengine_api_error(e)
 
 
-async def get_resource_request_status_impl(request_token: str, region: str | None = None) -> dict:
+async def get_resource_request_status_impl(ctx: Context, request_token: str, region: str | None = None) -> dict:
     """Get the status of a long running operation implementation."""
     if not request_token:
         raise ClientError('Please provide a request token to track the request')
 
-    cloudcontrol_client = get_volcengine_client_from_config(region)
+    cloudcontrol_client = get_volcengine_client_from_config(ctx, region)
     try:
         info = create_universal_info(
             service='cloudcontrol',
@@ -443,9 +454,10 @@ async def get_resource_request_status_impl(request_token: str, region: str | Non
             content_type='application/json',
         )
         params = {'TaskID': request_token}
-        response, _, _ = cloudcontrol_client.do_call_with_http_info(
-            info=info,
-            body=params,
+        response, _, _ = await do_call_with_http_info_async(
+            cloudcontrol_client,
+            info,
+            params,
         )
     except Exception as e:
         raise handle_volcengine_api_error(e)
