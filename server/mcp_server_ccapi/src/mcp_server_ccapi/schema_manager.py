@@ -45,7 +45,10 @@ class SchemaManager:
         )  # pyright: ignore[reportMissingTypeArgument]
 
         # Ensure cache directory exists
-        self.cache_dir.mkdir(exist_ok=True)
+        try:
+            self.cache_dir.mkdir(exist_ok=True)
+        except (OSError, IOError, PermissionError) as e:
+            print(f"Unable to create cache directory: {e}")
 
         # Load metadata if it exists
         self.metadata = (
@@ -68,8 +71,11 @@ class SchemaManager:
         metadata = {"version": "1", "schemas": {}}
 
         # Save default metadata
-        with open(self.metadata_file, "w") as f:
-            json.dump(metadata, f, indent=2)
+        try:
+            with open(self.metadata_file, "w") as f:
+                json.dump(metadata, f, indent=2)
+        except (OSError, IOError, PermissionError) as e:
+            print(f"Unable to write schema file: {e}")
 
         return metadata
 
@@ -218,8 +224,11 @@ class SchemaManager:
                     "source": "cc_api",
                 }
 
-                with open(self.metadata_file, "w") as f:
-                    json.dump(self.metadata, f, indent=2)
+                try:
+                    with open(self.metadata_file, "w") as f:
+                        json.dump(self.metadata, f, indent=2)
+                except (OSError, IOError, PermissionError) as e:
+                    print(f"Unable to write schema file: {e}")
 
                 print(f"Processed and cached schema for {resource_type}")
                 return spec
