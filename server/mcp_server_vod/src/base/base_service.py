@@ -74,7 +74,7 @@ class BaseService(VodService):
     def get_state(self):
         return self.mcp_state
     
-    def update_credentials_from_context(self, ctx: Optional[Context[ServerSession, object]] = None):
+    def update_credentials_from_context(self, ctx: Optional[Context[ServerSession, object, Any]] = None):
         """Update credentials from MCP context headers.
         
         Args:
