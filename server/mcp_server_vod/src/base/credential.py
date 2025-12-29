@@ -98,7 +98,7 @@ def get_volcengine_credentials_from_context(ctx: Optional[Context[ServerSession,
         return None
 
 
-def get_volcengine_credentials_base(ctx: Optional[Context[ServerSession, object]] = None) -> VeIAMCredential:
+def get_volcengine_credentials_base(ctx: Optional[Context[ServerSession, object, Any]] = None) -> VeIAMCredential:
     """Get Volcengine credentials from context headers, environment variables, or VeFaaS IAM.
     
     Args:
