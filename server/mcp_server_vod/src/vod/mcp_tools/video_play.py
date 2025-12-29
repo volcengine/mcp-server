@@ -314,7 +314,7 @@ def register_video_play_methods(service: VodAPI, public_methods: dict,):
 
 def create_mcp_server(mcp: FastMCP, public_methods: dict, service: VodAPI):
     @mcp.tool()
-    def get_play_url(spaceName: str, fileName: str, expired_minutes: int = 60) -> str:
+    def get_play_url(spaceName: str, fileName: str, expired_minutes: int = 60) -> Any:
         """
         Obtain the video playback link through `fileName`， 通过 fileName 获取视频播放地址
         Args:
