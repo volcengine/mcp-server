@@ -1,5 +1,7 @@
 import json
 from src.vod.api.api import VodAPI
+from typing import List, Optional
+from src.vod.models.request.request_models import InputSource,addSubVideoOptions
 
 
 def _format_source(type: str, source: str) -> str:
@@ -28,7 +30,7 @@ def _format_source(type: str, source: str) -> str:
 def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
 
     @mcp.tool()
-    def audio_video_stitching(type: str, SpaceName: str, videos: list = None, audios: list = None, transitions: list = None) -> dict:
+    def audio_video_stitching(type: str, SpaceName: str, videos: List[str] = None, audios: List[str] = None, transitions: List[str] = None) -> dict:
         """ Carry out video stitching, audio stitching, and support for transitions and other capabilities，需要参考 Note 中的要求。
          Note:
             -  **audio splicing does not support transitions. **
@@ -449,7 +451,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
             raise Exception("speedup_video: %s" % e, params)
 
     @mcp.tool()
-    def image_to_video(images: list, space_name: str, transitions: list = None) -> dict:
+    def image_to_video(images: List[InputSource], space_name: str, transitions: List[str] = None) -> dict:
         """The image-to-video conversion function supports non-overlapping transition effects. When the number of videos exceeds the number of transitions by 2 or more, the system will automatically cycle through the transitions. ** Default: No transition **
         Args:
             - images(list[dict]): ** 必选字段 **，待合成的图片列表，子类型取值如下
@@ -526,6 +528,16 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
                     if "animation_out" in image:
                         formattedImage["animation_out"] = image["animation_out"]
                     formattedImages.append(formattedImage)
+                elif hasattr(image, 'type') and hasattr(image, 'source'):
+                    # InputSource 对象
+                    imgType = image.type or "vid"
+                    imgSource = image.source or ""
+                    formattedSource = _format_source(imgType, imgSource) if imgType in ["vid", "directurl"] else imgSource
+                    formattedImage = {
+                        "type": imgType,
+                        "source": formattedSource,
+                    }
+                    formattedImages.append(formattedImage)
                 else:
                     formattedImages.append(image)
             
@@ -562,7 +574,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
             raise Exception("image_to_video: %s" % e, params)
 
     @mcp.tool()
-    def compile_video_audio(video: dict, audio: dict, space_name: str, is_audio_reserve: bool = True, is_video_audio_sync: bool = False, sync_mode: str = "video", sync_method: str = "trim") -> dict:
+    def compile_video_audio(video: InputSource, audio: InputSource, space_name: str, is_audio_reserve: bool = True, is_video_audio_sync: bool = False, sync_mode: str = "video", sync_method: str = "trim") -> dict:
         """The compilation of video and audio capabilities require the transmission of both ** audio and video resources ** for processing.
         Args:
             - video(dict): ** 必选字段 **，视频信息
@@ -606,20 +618,28 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
                 raise ValueError("compile_video_audio: params['space_name'] cannot be empty")
             if "video" not in params:
                 raise ValueError("compile_video_audio: params must contain video")
-            if not isinstance(params["video"], dict):
-                raise TypeError("compile_video_audio: params['video'] must be a dict")
+            if not isinstance(params["video"], dict) and not hasattr(params["video"], 'type'):
+                raise TypeError("compile_video_audio: params['video'] must be a dict or InputSource object")
             if "audio" not in params:
                 raise ValueError("compile_video_audio: params must contain audio")
-            if not isinstance(params["audio"], dict):
-                raise TypeError("compile_video_audio: params['audio'] must be a dict")
+            if not isinstance(params["audio"], dict) and not hasattr(params["audio"], 'type'):
+                raise TypeError("compile_video_audio: params['audio'] must be a dict or InputSource object")
             
             # 格式化视频和音频
-            videoType = params["video"].get("type", "vid")
-            videoSource = params["video"].get("source", "")
+            if isinstance(params["video"], dict):
+                videoType = params["video"].get("type", "vid")
+                videoSource = params["video"].get("source", "")
+            else:
+                videoType = params["video"].type or "vid"
+                videoSource = params["video"].source or ""
             formattedVideoSource = _format_source(videoType, videoSource) if videoType in ["vid", "directurl"] else videoSource
             
-            audioType = params["audio"].get("type", "vid")
-            audioSource = params["audio"].get("source", "")
+            if isinstance(params["audio"], dict):
+                audioType = params["audio"].get("type", "vid")
+                audioSource = params["audio"].get("source", "")
+            else:
+                audioType = params["audio"].type or "vid"
+                audioSource = params["audio"].source or ""
             formattedAudioSource = _format_source(audioType, audioSource) if audioType in ["vid", "directurl"] else audioSource
             
             ParamObj = {
@@ -726,7 +746,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
             raise Exception("extract_audio: %s" % e, params)
 
     @mcp.tool()
-    def mix_audios(audios: list, space_name: str) -> dict:
+    def mix_audios(audios: List[InputSource], space_name: str) -> dict:
         """Mix audios
         Args:
             - audios(list[dict]): ** 必选字段 **，叠加的音频列表
@@ -765,6 +785,12 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
                     audioSource = audio.get("source", "")
                     formattedSource = _format_source(audioType, audioSource) if audioType in ["vid", "directurl"] else audioSource
                     formattedAudios.append(formattedSource)
+                elif hasattr(audio, 'type') and hasattr(audio, 'source'):
+                    # InputSource 对象
+                    audioType = audio.type or "vid"
+                    audioSource = audio.source or ""
+                    formattedSource = _format_source(audioType, audioSource) if audioType in ["vid", "directurl"] else audioSource
+                    formattedAudios.append(formattedSource)
                 else:
                     formattedAudios.append(audio)
             
@@ -800,7 +826,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
             raise Exception("mix_audios: %s" % e, params)
 
     @mcp.tool()
-    def add_sub_video(video: dict, sub_video: dict, space_name: str, sub_options: dict = None) -> dict:
+    def add_sub_video(video: InputSource, sub_video: InputSource, space_name: str, sub_options: Optional[addSubVideoOptions] = None) -> dict:
         """`水印贴片`，Add the capability of video watermarking, support adjusting the width and height of the watermark, as well as the position in the horizontal or vertical direction, and determine the timing of the watermark's appearance in the original video by setting start_time and end_time，.
         Note:
             - 如果设置的水印开始时间、结束时间超出原始视频时长，那么输出视频的长度将以水印的结束时间为准，超出原始视频部分将以黑屏形式延续。例如原始视频为 20 秒，设置 end_time 为 30，那么输出时长为 30 秒
@@ -841,20 +867,28 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
                 raise ValueError("add_sub_video: params['space_name'] cannot be empty")
             if "video" not in params:
                 raise ValueError("add_sub_video: params must contain video")
-            if not isinstance(params["video"], dict):
-                raise TypeError("add_sub_video: params['video'] must be a dict")
+            if not isinstance(params["video"], dict) and not hasattr(params["video"], 'type'):
+                raise TypeError("add_sub_video: params['video'] must be a dict or InputSource object")
             if "sub_video" not in params:
                 raise ValueError("add_sub_video: params must contain sub_video")
-            if not isinstance(params["sub_video"], dict):
-                raise TypeError("add_sub_video: params['sub_video'] must be a dict")
+            if not isinstance(params["sub_video"], dict) and not hasattr(params["sub_video"], 'type'):
+                raise TypeError("add_sub_video: params['sub_video'] must be a dict or InputSource object")
             
             # 格式化视频和水印视频
-            videoType = params["video"].get("type", "vid")
-            videoSource = params["video"].get("source", "")
+            if isinstance(params["video"], dict):
+                videoType = params["video"].get("type", "vid")
+                videoSource = params["video"].get("source", "")
+            else:
+                videoType = params["video"].type or "vid"
+                videoSource = params["video"].source or ""
             formattedVideoSource = _format_source(videoType, videoSource) if videoType in ["vid", "directurl"] else videoSource
             
-            subVideoType = params["sub_video"].get("type", "vid")
-            subVideoSource = params["sub_video"].get("source", "")
+            if isinstance(params["sub_video"], dict):
+                subVideoType = params["sub_video"].get("type", "vid")
+                subVideoSource = params["sub_video"].get("source", "")
+            else:
+                subVideoType = params["sub_video"].type or "vid"
+                subVideoSource = params["sub_video"].source or ""
             formattedSubVideoSource = _format_source(subVideoType, subVideoSource) if subVideoType in ["vid", "directurl"] else subVideoSource
             
             ParamObj = {
@@ -864,14 +898,39 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
             }
             
             if params.get("sub_options"):
-              
-                ParamObj["sub_options"] = {
-                    "width": params["sub_options"].get("width", "20%"),
-                    "height": params["sub_options"].get("height", "20%"),
-                    "pos_x": params["sub_options"].get("pos_x", "0"),
-                    "pos_y": params["sub_options"].get("pos_y", "0"),
-                    **params["sub_options"],
-                }
+                if isinstance(params["sub_options"], dict):
+                    ParamObj["sub_options"] = {
+                        "width": params["sub_options"].get("width", "20%"),
+                        "height": params["sub_options"].get("height", "20%"),
+                        "pos_x": params["sub_options"].get("pos_x", "0"),
+                        "pos_y": params["sub_options"].get("pos_y", "0"),
+                        **params["sub_options"],
+                    }
+                else:
+                    # addSubVideoOptions 对象
+                    sub_options_dict = {}
+                    if hasattr(params["sub_options"], 'width') and params["sub_options"].width is not None:
+                        sub_options_dict["width"] = params["sub_options"].width
+                    if hasattr(params["sub_options"], 'height') and params["sub_options"].height is not None:
+                        sub_options_dict["height"] = params["sub_options"].height
+                    if hasattr(params["sub_options"], 'pos_x') and params["sub_options"].pos_x is not None:
+                        sub_options_dict["pos_x"] = params["sub_options"].pos_x
+                    if hasattr(params["sub_options"], 'pos_y') and params["sub_options"].pos_y is not None:
+                        sub_options_dict["pos_y"] = params["sub_options"].pos_y
+                    if hasattr(params["sub_options"], 'start_time') and params["sub_options"].start_time is not None:
+                        sub_options_dict["start_time"] = params["sub_options"].start_time
+                    if hasattr(params["sub_options"], 'end_time') and params["sub_options"].end_time is not None:
+                        sub_options_dict["end_time"] = params["sub_options"].end_time
+                    # 设置默认值
+                    if "width" not in sub_options_dict:
+                        sub_options_dict["width"] = "20%"
+                    if "height" not in sub_options_dict:
+                        sub_options_dict["height"] = "20%"
+                    if "pos_x" not in sub_options_dict:
+                        sub_options_dict["pos_x"] = "0"
+                    if "pos_y" not in sub_options_dict:
+                        sub_options_dict["pos_y"] = "0"
+                    ParamObj["sub_options"] = sub_options_dict
             
             audioVideoStitchingParams = {
                 "ParamObj": ParamObj,
