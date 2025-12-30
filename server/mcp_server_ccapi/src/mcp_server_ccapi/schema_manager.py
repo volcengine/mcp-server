@@ -14,12 +14,14 @@ import json
 import os
 from datetime import datetime, timedelta
 from mcp_server_ccapi.errors import ClientError
+from mcp.server.fastmcp import Context
 from mcp_server_ccapi.impl.tools.credential import (
     get_volcengine_credentials,
 )
 from mcp_server_ccapi.volcengine_client import (
     create_universal_info,
     get_volcengine_client,
+    do_call_with_http_info_async
 )
 from pathlib import Path
 
@@ -43,7 +45,10 @@ class SchemaManager:
         )  # pyright: ignore[reportMissingTypeArgument]
 
         # Ensure cache directory exists
-        self.cache_dir.mkdir(exist_ok=True)
+        try:
+            self.cache_dir.mkdir(exist_ok=True)
+        except (OSError, IOError, PermissionError) as e:
+            print(f"Unable to create cache directory: {e}")
 
         # Load metadata if it exists
         self.metadata = (
@@ -66,8 +71,11 @@ class SchemaManager:
         metadata = {"version": "1", "schemas": {}}
 
         # Save default metadata
-        with open(self.metadata_file, "w") as f:
-            json.dump(metadata, f, indent=2)
+        try:
+            with open(self.metadata_file, "w") as f:
+                json.dump(metadata, f, indent=2)
+        except (OSError, IOError, PermissionError) as e:
+            print(f"Unable to write schema file: {e}")
 
         return metadata
 
@@ -88,7 +96,7 @@ class SchemaManager:
                 print(f"Error loading schema from {schema_file}: {str(e)}")
 
     async def get_schema(
-        self, resource_type: str, region: str | None = None
+            self, ctx :Context ,resource_type: str, region: str | None = None
     ) -> dict:  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
         """Get schema for a resource type, downloading it if necessary."""
         # Check if schema is in registry
@@ -127,11 +135,11 @@ class SchemaManager:
                     return cached_schema
 
         # Download schema (either not cached, expired, or corrupted)
-        schema = await self._download_resource_schema(resource_type, region)
+        schema = await self._download_resource_schema(ctx, resource_type, region)
         return schema
 
     async def _download_resource_schema(
-        self, resource_type: str, region: str | None = None
+        self, ctx: Context, resource_type: str, region: str | None = None
     ) -> dict:  # pyright: ignore[reportMissingTypeArgument]
         """Download schema for a specific resource type.
 
@@ -157,7 +165,7 @@ class SchemaManager:
                 print(
                     f"Downloading schema for {resource_type} using Cloud Control API (attempt {attempt + 1}/{max_retries})"
                 )
-                credentials = get_volcengine_credentials()
+                credentials = get_volcengine_credentials(ctx, region)
                 volcengine_client = get_volcengine_client(
                     ak=credentials["access_key_id"],
                     sk=credentials["secret_access_key"],
@@ -174,10 +182,11 @@ class SchemaManager:
                     content_type="text/plain",
                 )
                 params = {"TypeName": resource_type}
-                resp, _, _ = volcengine_client.do_call_with_http_info(
-                    info=info, body=params
-                )  # pyright: ignore[reportUnknownMemberType, reportGeneralTypeIssues]
-
+                resp, _, _ = await do_call_with_http_info_async(
+                    volcengine_client,
+                    info,
+                    params,
+                )
                 schema_str = json.dumps(
                     resp["Schema"], ensure_ascii=False
                 )  # pyright: ignore[reportCallIssue, reportArgumentType, reportIndexIssue]
@@ -199,8 +208,11 @@ class SchemaManager:
                 schema_file = (
                     self.cache_dir / f'{resource_type.replace("::", "_")}.json'
                 )
-                with open(schema_file, "w") as f:
-                    f.write(schema_str)
+                try:
+                    with open(schema_file, "w") as f:
+                        f.write(schema_str)
+                except (OSError, IOError, PermissionError) as e:
+                    print(f"Unable to write schema file: {e}")
 
                 # Update registry with the valid schema
                 self.schema_registry[resource_type] = spec
@@ -212,8 +224,11 @@ class SchemaManager:
                     "source": "cc_api",
                 }
 
-                with open(self.metadata_file, "w") as f:
-                    json.dump(self.metadata, f, indent=2)
+                try:
+                    with open(self.metadata_file, "w") as f:
+                        json.dump(self.metadata, f, indent=2)
+                except (OSError, IOError, PermissionError) as e:
+                    print(f"Unable to write schema file: {e}")
 
                 print(f"Processed and cached schema for {resource_type}")
                 return spec

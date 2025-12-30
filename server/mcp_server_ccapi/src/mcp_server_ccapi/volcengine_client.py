@@ -11,11 +11,15 @@
 # This modified file is released under the same license.
 
 import json
+import os
+import asyncio
+from typing import Any
 from mcp_server_ccapi.impl.tools.credential import (
     get_volcengine_credentials,
 )
 from volcenginesdkcore import ApiClient, Configuration, UniversalApi, UniversalInfo
 from volcenginesdkcore.rest import ApiException
+from mcp.server.fastmcp import Context
 
 
 def create_universal_info(
@@ -39,22 +43,22 @@ def create_universal_info(
     )
 
 
-def get_volcengine_client_from_config(region: str | None):
+def get_volcengine_client_from_config(ctx: Context, region: str | None):
     """Create and return a Volcengine service client from configuration.
 
     Args:
-        credentials: A dictionary containing Volcengine credentials with keys 'ak', 'sk', 'session_token', 'host', and 'scheme'
+        ctx (Context): Volcengine configuration context.
         region: Volcengine region name (defaults to 'cn-beijing')
 
     Returns:
         volcenginesdkcore UniversalApi client
     """
-    credentials = get_volcengine_credentials()
+    credentials = get_volcengine_credentials(ctx, region)
     return get_volcengine_client(
         ak=credentials['access_key_id'],
         sk=credentials['secret_access_key'],
         session_token=credentials['session_token'],
-        region=region if region else credentials['region'],
+        region=region or credentials['region'],
         host=credentials['host'],
     )
 
@@ -94,6 +98,27 @@ def get_volcengine_client(
     api_client.user_agent = 'mcp-server-ccapi/' + __version__
     return UniversalApi(api_client)
 
+
+_CONCURRENCY = int(os.getenv('MCP_SERVER_CONCURRENCY', '16') or '16')
+_api_semaphore: asyncio.Semaphore | None = None
+
+def _get_semaphore() -> asyncio.Semaphore:
+    global _api_semaphore
+    if _api_semaphore is None:
+        _api_semaphore = asyncio.Semaphore(_CONCURRENCY)
+    return _api_semaphore
+
+async def do_call_with_http_info_async(
+    client: UniversalApi,
+    info: UniversalInfo,
+    body: dict | None
+) -> Any:
+    async with _get_semaphore():
+        return await asyncio.to_thread(
+            client.do_call_with_http_info,
+            info=info,
+            body=body
+        )
 
 # 使用示例
 if __name__ == '__main__':
