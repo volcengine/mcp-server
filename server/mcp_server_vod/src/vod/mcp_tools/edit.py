@@ -1,6 +1,6 @@
 import json
 from src.vod.api.api import VodAPI
-from typing import List, Optional
+from typing import List, Optional,Dict
 from src.vod.models.request.request_models import InputSource,addSubVideoOptions
 
 
@@ -451,7 +451,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
             raise Exception("speedup_video: %s" % e, params)
 
     @mcp.tool()
-    def image_to_video(images: List[InputSource], space_name: str, transitions: List[str] = None) -> dict:
+    def image_to_video(images: List[dict], space_name: str, transitions: List[str] = None) -> dict:
         """The image-to-video conversion function supports non-overlapping transition effects. When the number of videos exceeds the number of transitions by 2 or more, the system will automatically cycle through the transitions. ** Default: No transition **
         Args:
             - images(list[dict]): ** 必选字段 **，待合成的图片列表，子类型取值如下
@@ -574,7 +574,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
             raise Exception("image_to_video: %s" % e, params)
 
     @mcp.tool()
-    def compile_video_audio(video: InputSource, audio: InputSource, space_name: str, is_audio_reserve: bool = True, is_video_audio_sync: bool = False, sync_mode: str = "video", sync_method: str = "trim") -> dict:
+    def compile_video_audio(video: dict, audio: dict, space_name: str, is_audio_reserve: bool = True, is_video_audio_sync: bool = False, sync_mode: str = "video", sync_method: str = "trim") -> dict:
         """The compilation of video and audio capabilities require the transmission of both ** audio and video resources ** for processing.
         Args:
             - video(dict): ** 必选字段 **，视频信息
@@ -746,7 +746,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
             raise Exception("extract_audio: %s" % e, params)
 
     @mcp.tool()
-    def mix_audios(audios: List[InputSource], space_name: str) -> dict:
+    def mix_audios(audios: List[dict], space_name: str) -> dict:
         """Mix audios
         Args:
             - audios(list[dict]): ** 必选字段 **，叠加的音频列表
@@ -826,7 +826,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
             raise Exception("mix_audios: %s" % e, params)
 
     @mcp.tool()
-    def add_sub_video(video: InputSource, sub_video: InputSource, space_name: str, sub_options: Optional[addSubVideoOptions] = None) -> dict:
+    def add_sub_video(video: dict, sub_video: dict, space_name: str, sub_options: Optional[dict] = None) -> dict:
         """`水印贴片`，Add the capability of video watermarking, support adjusting the width and height of the watermark, as well as the position in the horizontal or vertical direction, and determine the timing of the watermark's appearance in the original video by setting start_time and end_time，.
         Note:
             - 如果设置的水印开始时间、结束时间超出原始视频时长，那么输出视频的长度将以水印的结束时间为准，超出原始视频部分将以黑屏形式延续。例如原始视频为 20 秒，设置 end_time 为 30，那么输出时长为 30 秒
@@ -897,8 +897,8 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
                 "sub_video": formattedSubVideoSource,
             }
             
-            if params.get("sub_options"):
-                if isinstance(params["sub_options"], dict):
+            if params.get("sub_options") and isinstance(params["sub_options"], dict):
+
                     ParamObj["sub_options"] = {
                         "width": params["sub_options"].get("width", "20%"),
                         "height": params["sub_options"].get("height", "20%"),
@@ -906,31 +906,6 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
                         "pos_y": params["sub_options"].get("pos_y", "0"),
                         **params["sub_options"],
                     }
-                else:
-                    # addSubVideoOptions 对象
-                    sub_options_dict = {}
-                    if hasattr(params["sub_options"], 'width') and params["sub_options"].width is not None:
-                        sub_options_dict["width"] = params["sub_options"].width
-                    if hasattr(params["sub_options"], 'height') and params["sub_options"].height is not None:
-                        sub_options_dict["height"] = params["sub_options"].height
-                    if hasattr(params["sub_options"], 'pos_x') and params["sub_options"].pos_x is not None:
-                        sub_options_dict["pos_x"] = params["sub_options"].pos_x
-                    if hasattr(params["sub_options"], 'pos_y') and params["sub_options"].pos_y is not None:
-                        sub_options_dict["pos_y"] = params["sub_options"].pos_y
-                    if hasattr(params["sub_options"], 'start_time') and params["sub_options"].start_time is not None:
-                        sub_options_dict["start_time"] = params["sub_options"].start_time
-                    if hasattr(params["sub_options"], 'end_time') and params["sub_options"].end_time is not None:
-                        sub_options_dict["end_time"] = params["sub_options"].end_time
-                    # 设置默认值
-                    if "width" not in sub_options_dict:
-                        sub_options_dict["width"] = "20%"
-                    if "height" not in sub_options_dict:
-                        sub_options_dict["height"] = "20%"
-                    if "pos_x" not in sub_options_dict:
-                        sub_options_dict["pos_x"] = "0"
-                    if "pos_y" not in sub_options_dict:
-                        sub_options_dict["pos_y"] = "0"
-                    ParamObj["sub_options"] = sub_options_dict
             
             audioVideoStitchingParams = {
                 "ParamObj": ParamObj,

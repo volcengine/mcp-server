@@ -6,7 +6,7 @@ from typing import List
 def create_mcp_server(mcp,  public_methods: dict, service: VodAPI,):
     get_play_url = public_methods['get_play_url']
     @mcp.tool()
-    def video_batch_upload(space_name: str, urls: List[BatchUploadUrlItem] = None, ) -> dict:
+    def video_batch_upload(space_name: str, urls: List[dict[str, str]] = None, ) -> dict:
         """ Batch retrieval and upload of URLs upload video、 audio to specified space via synchronous upload
             Note:
                 - 本接口主要适用于文件没有存储在本地服务器或终端，需要通过公网访问的 URL 地址上传的场景。源文件 URL 支持 HTTP 和 HTTPS。
@@ -14,7 +14,7 @@ def create_mcp_server(mcp,  public_methods: dict, service: VodAPI,):
                 - SourceUrl 必须是可公网直接访问的文件 URL，而非包含视频的网页 URL。
             Args:
                 - space_name:** 必选字段 ** 空间名称 
-                -  urls(list[dict[str, any]]): ** 必选字段 **  资源URL列表，每个元素是一个包含URL信息的字典
+                -  urls(list[dict[str, str]]): ** 必选字段 **  资源URL列表，每个元素是一个包含URL信息的字典
                     - SourceUrl （str）:** 必选字段 **  源文件 URL。
                     - FileExtension（str）:** 必选字段 **  文件后缀，即点播存储中文件的类型
                         - 文件后缀必须以 . 开头，不超过 8 位。
@@ -27,8 +27,8 @@ def create_mcp_server(mcp,  public_methods: dict, service: VodAPI,):
             req.SpaceName = space_name
             for video_info in urls:
                 url_set = req.URLSets.add()
-                url_set.SourceUrl = video_info.SourceUrl
-                url_set.FileExtension = video_info.FileExtension
+                url_set.SourceUrl = video_info.get('SourceUrl', '')
+                url_set.FileExtension = video_info.get('FileExtension', '')
             resp = service.upload_media_by_url(req)
         except Exception as e:
             raise Exception(f'video_batch_upload failed, space_name: {space_name}, urls: {urls}, error: {e}')
