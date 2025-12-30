@@ -11,6 +11,7 @@ dependencies = [
     "concurrent-log-handler==0.9.25",
     "dynaconf==3.2.10",
     "jsonref>=1.1.0",
+    "aiohttp>=3.13.2"
 ]
 
 [tool.hatch.metadata]
