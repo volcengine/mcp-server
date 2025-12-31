@@ -82,14 +82,15 @@ TOOL_GROUP_MAP = {
         "audio_video_stitching",
         "audio_video_clipping",
         "get_v_creative_task_result",
+             "flip_video",
+                     "speedup_video"
         "image_to_video",
         "compile_video_audio",
         "extract_audio",
         "mix_audios",
         "add_sub_video",
-        "add_subtitle",
-        "flip_video",
-        "speedup_video"
+   
+
     ],
     # video_play 分组
     "video_play": [
@@ -112,9 +113,10 @@ TOOL_GROUP_MAP = {
     ],
     # subtitle_processing 分组
     "subtitle_processing": [
-        "subtitles_removal_task",
-        "ocr_task",
-        "asr_task"
+        "asr_speech_to_text_task",
+        "ocr_text_to_subtitles_task",
+        "video_subtitles_removal_task"
+         "add_subtitle",
     ],
     # audio_processing 分组
     "audio_processing": [

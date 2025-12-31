@@ -827,7 +827,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
 
     @mcp.tool()
     def add_sub_video(video: dict, sub_video: dict, space_name: str, sub_options: Optional[dict] = None) -> dict:
-        """`水印贴片`，Add the capability of video watermarking, support adjusting the width and height of the watermark, as well as the position in the horizontal or vertical direction, and determine the timing of the watermark's appearance in the original video by setting start_time and end_time，.
+        """`水印贴片`, `画中画`，Add the capability of video watermarking, support adjusting the width and height of the watermark, as well as the position in the horizontal or vertical direction, and determine the timing of the watermark's appearance in the original video by setting start_time and end_time，.
         Note:
             - 如果设置的水印开始时间、结束时间超出原始视频时长，那么输出视频的长度将以水印的结束时间为准，超出原始视频部分将以黑屏形式延续。例如原始视频为 20 秒，设置 end_time 为 30，那么输出时长为 30 秒
         Args:
