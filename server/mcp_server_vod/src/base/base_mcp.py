@@ -115,8 +115,8 @@ TOOL_GROUP_MAP = {
     "subtitle_processing": [
         "asr_speech_to_text_task",
         "ocr_text_to_subtitles_task",
-        "video_subtitles_removal_task"
-         "add_subtitle",
+        "video_subtitles_removal_task",
+        "add_subtitle",
     ],
     # audio_processing 分组
     "audio_processing": [
@@ -297,6 +297,7 @@ class BaseMCP(FastMCP):
                         logger.info(f"BaseMCP.list_tools: returning all {len(res)} tools (all groups)")
                         return res
                     if group_name in TOOL_GROUP_MAP:
+                        logger.info(f"TOOL_GROUP_MAP {TOOL_GROUP_MAP[group_name]} tools in group {group_name}")
                         allowed_tools.update(TOOL_GROUP_MAP[group_name])
             
             # 过滤工具
