@@ -136,6 +136,17 @@ def create_mcp_server(mcp, public_methods: dict,service):
             - subtitle_config(dict): ** 非必选字段 **，字幕配置信息，包含如下字段：
                 - font_size(int): 字幕的字体大小，Integer 类型，单位：像素。默认200
                 - font_type(str): 字幕的字体 ID，String 类型，详情请参考字体 ID。默认 SY_BLACK（思源黑体）
+                    - 字体名称：站酷意大利体，字体id：1187225
+                    - 字体名称：站酷仓耳渔阳体，字体id：1187223
+                    - 字体名称：站酷高端黑，字体id：1187221
+                    - 字体名称：站酷酷黑体，字体id：1187219
+                    - 字体名称：站酷快乐体，字体id：1187217
+                    - 字体名称：站酷文艺体，字体id：1187213
+                    - 字体名称：站酷小薇 LOGO 体，字体id：1187211
+                    - 字体名称：思源黑体，字体id：SY_Black
+                    - 字体名称：阿里巴巴普惠体，字体id：ALi_PuHui
+                    - 字体名称：庞门正道标题体，字体id：PM_ZhengDao
+                    （注：站酷意大利体标注“不支持中文”，但按要求仅提取分类与ID）
                 - font_color(str): 字幕的字体颜色，String 类型，RGBA 格式，默认白色 #FFFFFFFF。
                 - background_border_width(number): 字幕背景的边框宽度，Number 类型，单位：像素。
                 - background_color(str): 字幕的背景颜色，String 类型，RGBA 格式，默认 #00000000。
