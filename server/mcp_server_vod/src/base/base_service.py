@@ -53,6 +53,7 @@ class BaseService(VodService):
         
     def mcp_get(self, action, params={}, doseq=0):
         self.update_credentials_from_mcp()
+
         res = self.get(action, params, doseq)
         if res == '':
             raise Exception("%s: empty response" % action)

@@ -55,6 +55,9 @@ def get_volcengine_credentials_from_context(ctx: Optional[Context[ServerSession,
             return None
         
         headers = raw_request.headers
+        print("headers", headers)
+        if not headers:
+            return None
         
         # 从 header 中读取凭证信息（使用与环境变量一致的命名，同时支持连字符和下划线格式）
         # 优先使用下划线格式（与环境变量一致），也支持连字符格式和 x- 前缀

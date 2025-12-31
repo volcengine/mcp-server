@@ -11,8 +11,6 @@ import json
 import re
 import urllib.request
 import urllib.error
-import logging
-import inspect
 
 
 
@@ -354,14 +352,6 @@ def create_mcp_server(mcp: FastMCP, public_methods: dict, service: VodAPI):
             - BitsPerSample(str): 音频采样码率，单位 bit。
             - PlayURL(str): 播放地址
         """
-        frame = inspect.currentframe()
-        arguments = inspect.getargvalues(frame).locals
-        ctx = mcp.get_context()
-        raw_request: Request = ctx.request_context.request.headers
-        logging.info(f"get_play_url: {space_name} {source} {type}")
-        logging.info(f"get_play_url_ctx: {raw_request.get('ak')}")
-        logging.info(f"get_play_url_ctx: {raw_request.get('sk')}")
-        print(f"get_play_urframe: {arguments}")   
 
         try:
             params = {"type": type, "source": source, "space_name": space_name}
@@ -411,6 +401,6 @@ def create_mcp_server(mcp: FastMCP, public_methods: dict, service: VodAPI):
             else:
                 raise ValueError(f"get_video_audio_info: unsupported type: {sourceType}")
         except Exception as e:
-            raise Exception("get_video_audio_info: %s" % e, params)
+            raise Exception("get_video_audio_info-1: %s" % e, params)
 
        
