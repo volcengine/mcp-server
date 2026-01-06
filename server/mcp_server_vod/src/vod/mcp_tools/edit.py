@@ -900,10 +900,6 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
             if params.get("sub_options") and isinstance(params["sub_options"], dict):
 
                     ParamObj["sub_options"] = {
-                        "width": params["sub_options"].get("width", "20%"),
-                        "height": params["sub_options"].get("height", "20%"),
-                        "pos_x": params["sub_options"].get("pos_x", "0"),
-                        "pos_y": params["sub_options"].get("pos_y", "0"),
                         **params["sub_options"],
                     }
             

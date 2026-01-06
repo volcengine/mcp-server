@@ -302,7 +302,7 @@ def register_video_play_methods(service: VodAPI, public_methods: dict,):
             result["Channels"] = int(audio_stream.get("channels", 0)) if audio_stream.get("channels") else 0
             result["SampleRate"] = str(audio_stream.get("sample_rate", ""))
             bits_per_sample = audio_stream.get("bits_per_sample")
-            if bits_per_sample:
+            if bits_per_sample is not None and bits_per_sample != 0:
                 result["BitsPerSample"] = str(bits_per_sample)
         
         return result
