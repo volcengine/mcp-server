@@ -82,8 +82,9 @@ TOOL_GROUP_MAP = {
         "audio_video_stitching",
         "audio_video_clipping",
         "get_v_creative_task_result",
-             "flip_video",
-                     "speedup_video"
+        "flip_video",
+        "speedup_video",
+        "speedup_audio",
         "image_to_video",
         "compile_video_audio",
         "extract_audio",

@@ -449,6 +449,73 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
                 raise Exception("speedup_video: %s" % e, params)
         except Exception as e:
             raise Exception("speedup_video: %s" % e, params)
+    @mcp.tool()
+    def speedup_audio(type: str, source: str, space_name: str, speed: float = 1.0) -> dict:
+        """Adjust the speed multiplier of the audio, of type Float, with a range from 0.1 to 4.
+        Args:
+            - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
+                - directurl
+                - http
+                - vid
+            - source(str): ** 必选字段 **, 视频文件信息
+            - speed(float): ** 非必选字段 **, 调整速度的倍数，Float类型，取值范围为** 0.1～4 **。参考如下：
+                - 0.1：放慢至原速的 0.1 倍。
+                - 1（默认值）：原速。
+                - 4：加速至原速的 4 倍。
+            - space_name(str): ** 必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
+        Returns:
+            - VCreativeId(str): AI 智剪任务 ID，用于查询任务状态。可以通过调用 `get_v_creative_task_result` 接口查询任务状态。
+            - Code(int): 任务状态码。为 0 表示任务执行成功。
+            - StatusMessage(str): 接口请求的状态信息。当 StatusCode 为 0 时，此时该字段返回 success，表示成功；其他状态码时，该字段会返回具体的错误信息。
+            - StatusCode(int): 接口请求的状态码。0 表示成功，其他值表示不同的错误状态。
+        """
+        try:
+            params = {"type": type, "source": source, "space_name": space_name, "speed": speed}
+            if "space_name" not in params:
+                raise ValueError("speedup_video: params must contain space_name")
+            if not isinstance(params["space_name"], str):
+                raise TypeError("speedup_video: params['space_name'] must be a string")
+            if not params["space_name"].strip():
+                raise ValueError("speedup_video: params['space_name'] cannot be empty")
+            if "source" not in params:
+                raise ValueError("speedup_video: params must contain source")
+            
+            speedValue = params.get("speed", 1.0)
+            if speedValue < 0.1 or speedValue > 4:
+                raise ValueError("speedup_video: speed must be between 0.1 and 4")
+            
+            formattedSource = _format_source(params.get("type", "vid"), params.get("source", ""))
+            ParamObj = {
+                "space_name": params["space_name"],
+                "source": formattedSource,
+                "speed": speedValue,
+            }
+            
+            audioVideoStitchingParams = {
+                "ParamObj": ParamObj,
+                "Uploader": params["space_name"],
+                "WorkflowId": "loki://174663067",
+            }
+            
+            reqs = None
+            try:
+                reqs = service.mcp_post("McpAsyncVCreativeTask", {}, json.dumps(audioVideoStitchingParams))
+                if isinstance(reqs, str):
+                    reqs = json.loads(reqs)
+                    reqsTmp = reqs.get('Result', {})
+                    BaseResp = reqsTmp.get("BaseResp", {})
+                    return json.dumps({
+                        "VCreativeId": reqsTmp.get("VCreativeId", ""),
+                        "Code": reqsTmp.get("Code"),
+                        "StatusMessage": BaseResp.get("StatusMessage", ""),
+                        "StatusCode": BaseResp.get("StatusCode", 0),
+                    })
+                else:
+                    return reqs
+            except Exception as e:
+                raise Exception("speedup_video: %s" % e, params)
+        except Exception as e:
+            raise Exception("speedup_video: %s" % e, params)
 
     @mcp.tool()
     def image_to_video(images: List[dict], space_name: str, transitions: List[str] = None) -> dict:
