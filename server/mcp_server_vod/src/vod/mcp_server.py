@@ -72,42 +72,6 @@ def create_mcp_server(mcp: FastMCP = None):
     mcp.set_base_mcp_store({
         'apiRequestInstance': service
     })
-    # ## init tool groups
-    # # 优先级：1. groups 参数 2. MCP header 3. 环境变量 4. 默认值
-    # current_tool_groups = []
-    
-    # if groups is not None:
-    #     if ALL_GROUPS in groups:
-    #         current_tool_groups = AVAILABLE_GROUPS
-    #     else:
-    #         current_tool_groups = groups
-    #     print(f"[MCP] Loaded tool groups from parameter: {current_tool_groups}")
-    # else:
-    #     # 尝试从 MCP 上下文 header 获取
-    #     header_groups = get_tool_groups_from_context(mcp)
-    #     if header_groups:
-    #         if ALL_GROUPS in header_groups:
-    #             current_tool_groups = AVAILABLE_GROUPS
-    #         else:
-    #             current_tool_groups = header_groups
-    #         print(f"[MCP] Loaded tool groups from header: {current_tool_groups}")
-    #     else:
-    #         # 从环境变量获取
-    #         env_type = os.getenv("MCP_TOOL_GROUPS")
-    #         if env_type is not None:
-    #             env_grops = [group.strip() for group in env_type.split(",") if group.strip()]
-    #             try:
-    #                 if ALL_GROUPS in env_grops:
-    #                     current_tool_groups = AVAILABLE_GROUPS
-    #                 else:
-    #                     current_tool_groups = env_grops
-    #                 print(f"[MCP] Loaded tool groups from environment: {current_tool_groups}")
-    #             except Exception as e:
-    #                 print(f"[MCP] Error parsing MCP_TOOL_GROUPS environment variable: {e}")
-    #                 current_tool_groups = DEFAULT_GROUPS
-    #         else:
-    #             current_tool_groups = DEFAULT_GROUPS
-    #             print(f"[MCP] Using default tool groups: {current_tool_groups}")
     
     ## update media publish status
     def update_media_publish_status  (vid: str, SpaceName: str, PublishStatus: str) ->  str: 

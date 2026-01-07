@@ -312,18 +312,30 @@ def register_video_play_methods(service: VodAPI, public_methods: dict,):
 
 def create_mcp_server(mcp: FastMCP, public_methods: dict, service: VodAPI):
     @mcp.tool()
-    def get_play_url(spaceName: str, fileName: str, expired_minutes: int = 60) -> Any:
+    def get_play_url( type: str, source: str,  spaceName: str, expired_minutes: int = 60) -> Any:
         """
-        Obtain the video playback link through `fileName`， 通过 fileName 获取视频播放地址
+        Obtain the video playback link through `directurl` or `vid`， 通过 directurl or vid 获取视频播放地址,
+        Note:
+            expired_minutes 仅在 directurl 模式下生效
         Args:
             - spaceName: **必选字段** 空间名称
-            - fileName: **必选字段** 文件名
-            - expired_minutes: **可选字段** 过期时间，默认60分钟
+            - source: **必选字段** 文件名 or vid
+                - 文件名：直接传入文件名，例如 `test.mp4`
+                - vid：直接传入 vid
+            - type: **必选字段** 文件类型，默认值为 `directurl` 。字段取值如下
+                - directurl：仅仅支持点播存储
+                - vid
+            - expired_minutes: **可选字段** 过期时间，默认60分钟, vid 模式下不生效
         Returns:
             - 播放地址
         """
-   
-        return public_methods["get_play_url"](spaceName, fileName, expired_minutes)
+        if type == "directurl":
+            return public_methods["get_play_url"](spaceName, source, expired_minutes)
+        elif type == "vid":
+            videoInfo = public_methods["get_play_video_info"](source, spaceName)
+            if isinstance(videoInfo, str):
+                videoInfo = json.loads(videoInfo)
+            return videoInfo.get("PlayURL", "")
 
     @mcp.tool()
     def get_video_audio_info(type: str, source: str, space_name: str) -> dict:
