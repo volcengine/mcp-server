@@ -24,7 +24,7 @@ veFaaS MCP Server 提供创建、更新、发布 veFaaS 函数以及管理应用
   }
 }
 ```
-如果github访问有问题，也可以用pypi源
+如果 github 访问有问题，也可以用 pypi 源
 ```json
 {
   "mcpServers": {

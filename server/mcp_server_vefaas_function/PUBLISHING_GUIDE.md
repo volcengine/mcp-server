@@ -81,7 +81,7 @@ python -m twine upload --repository testpypi dist/*
 然后从 TestPyPI 安装测试：
 
 ```bash
-pip install --index-url https://test.pypi.org/simple/ mcp-server-vefaas-function
+pip install --index-url https://test.pypi.org/simple/mcp-server-vefaas-function
 ```
 
 ## 注意事项
