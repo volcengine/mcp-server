@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.12"
 
 [[package]]
@@ -205,10 +205,11 @@ wheels = [
 
 [[package]]
 name = "mcp-server-vefaas-function"
-version = "0.0.1"
+version = "0.0.5"
 source = { editable = "." }
 dependencies = [
     { name = "mcp" },
+    { name = "pathspec" },
     { name = "pyzipper" },
     { name = "requests" },
     { name = "volcengine-python-sdk" },
@@ -217,9 +218,19 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "mcp", specifier = ">=1.12.3" },
+    { name = "pathspec", specifier = ">=0.12.0" },
     { name = "pyzipper", specifier = "==0.3.6" },
     { name = "requests", specifier = "==2.32.3" },
     { name = "volcengine-python-sdk", specifier = ">=3.0.8" },
+]
+
+[[package]]
+name = "pathspec"
+version = "1.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/28/2e/83722ece0f6ee24387d6cb830dd562ddbcd6ce0b9d76072c6849670c31b4/pathspec-1.0.1.tar.gz", hash = "sha256:e2769b508d0dd47b09af6ee2c75b2744a2cb1f474ae4b1494fd6a1b7a841613c", size = 129791, upload-time = "2026-01-06T13:02:55.15Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d2/fe/2257c71721aeab6a6e8aa1f00d01f2a20f58547d249a6c8fef5791f559fc/pathspec-1.0.1-py3-none-any.whl", hash = "sha256:8870061f22c58e6d83463cfce9a7dd6eca0512c772c1001fb09ac64091816721", size = 54584, upload-time = "2026-01-06T13:02:53.601Z" },
 ]
 
 [[package]]

@@ -9,6 +9,7 @@ dependencies = [
     "volcengine-python-sdk>=3.0.8",
     "requests==2.32.3",
     "pyzipper==0.3.6",
+    "pathspec>=0.12.0",
 ]
 
 [project.scripts]
@@ -20,3 +21,6 @@ build-backend = "hatchling.build"
 
 [tool.hatch.metadata]
 allow-direct-references = true
+
+[tool.autopep8]
+max_line_length = 240

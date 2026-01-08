@@ -5,132 +5,233 @@ import unittest
 import zipfile
 from io import BytesIO
 
-import pyzipper
+from mcp_server_vefaas_function.vefaas_server import zip_and_encode_folder
+from mcp_server_vefaas_function.vefaas_cli_sdk.deploy import (
+    package_directory,
+    read_gitignore_patterns,
+    read_vefaasignore_patterns,
+    create_ignore_filter,
+    DEFAULT_VEFAASIGNORE,
+)
 
-from vefaas_server import python_zip_implementation, zip_and_encode_folder, \
-    does_function_exist
 
+class TestPackageDirectory(unittest.TestCase):
+    """Test directory packaging functionality - no network credentials required"""
 
-class TestVeFaaSServerIntegration(unittest.TestCase):
     def setUp(self):
-        # Check if credentials are available
-        self.ak = os.environ.get("VOLCENGINE_ACCESS_KEY")
-        self.sk = os.environ.get("VOLCENGINE_SECRET_KEY")
-        self.alt_ak = os.environ.get("VOLC_ACCESSKEY")
-        self.alt_sk = os.environ.get("VOLC_SECRETKEY")
-        if (not self.ak or not self.sk) and (not self.alt_ak or not self.alt_sk):
-            self.assertFalse(
-                "VOLCENGINE_ACCESS_KEY or VOLCENGINE_SECRET_KEY or VOLC_ACCESSKEY or VOLC_SECRETKEY environment variables not set"
-            )
-
-        # 创建临时目录
+        # Create temporary directory
         self.temp_dir = tempfile.mkdtemp()
-        # 创建一些测试文件和文件夹
+        # Create test files and directories
         os.makedirs(os.path.join(self.temp_dir, "__pycache__"))
         os.makedirs(os.path.join(self.temp_dir, "subfolder"))
+        os.makedirs(os.path.join(self.temp_dir, ".git"))
         with open(os.path.join(self.temp_dir, "file1.py"), "w") as f:
             f.write("print('hello')")
         with open(os.path.join(self.temp_dir, "file2.pyc"), "w") as f:
             f.write("compiled")
-        with open(os.path.join(self.temp_dir, "__pycache__", "cached.pyc"),
-                  "w") as f:
+        with open(os.path.join(self.temp_dir, "__pycache__", "cached.pyc"), "w") as f:
             f.write("cached")
         with open(os.path.join(self.temp_dir, "subfolder", "file3.txt"), "w") as f:
             f.write("text content")
+        with open(os.path.join(self.temp_dir, ".git", "config"), "w") as f:
+            f.write("git config")
         with open(os.path.join(self.temp_dir, ".gitignore"), "w") as f:
-            f.write("*")
+            f.write("*.log\n")
 
     def tearDown(self):
-        # 删除临时目录
         shutil.rmtree(self.temp_dir)
 
-    def test_does_function_exist_with_real_credentials(self):
-        # Test with a known non-existent function ID
-        non_existent_id = "non-existent-function-123"
-        result = does_function_exist(non_existent_id, "cn-beijing")
-        self.assertFalse(result)
-
-        # Note: To test a positive case, you would need a real function ID
-        # that exists in your account. You could add something like:
-        # known_function_id = "your-real-function-id"
-        # result = does_function_exist(known_function_id, "cn-beijing")
-        # self.assertTrue(result)
-
-    def test_python_zip_implementation(self):
-        with tempfile.TemporaryDirectory() as tmpdir:
-            file_path = os.path.join(tmpdir, "test.sh")
-            with open(file_path, "w") as f:
-                f.write("#!/bin/bash\necho hello\n")
-            os.chmod(file_path, 0o644)
-
-            zip_bytes = python_zip_implementation(tmpdir)
-
-            zip_path = os.path.join(tmpdir, "test.zip")
-            with open(zip_path, "wb") as fzip:
-                fzip.write(zip_bytes)
-
-            with pyzipper.AESZipFile(zip_path, 'r') as zipf:
-                namelist = zipf.namelist()
-                assert "test.sh" in namelist
-
-                info = zipf.getinfo("test.sh")
-                perm = (info.external_attr >> 16) & 0o777
-                assert perm == 0o755, f"Expected 755 permission but got {oct(perm)}"
-
-                content = zipf.read("test.sh").decode()
-                assert "echo hello" in content
-
-    def test_zip_exclude_patterns_with_python_impl(self):
-        # 设置排除规则
-        exclude_patterns = ["*.pyc", ".gitignore", "*/__pycache__/*"]
-
-        zip_bytes = python_zip_implementation(self.temp_dir, exclude_patterns)
-        self.assertIsInstance(zip_bytes, bytes)
-
-        # 解压验证
-        with zipfile.ZipFile(BytesIO(zip_bytes)) as zipf:
-            names = zipf.namelist()
-            print(names)
-            # 应该包含 file1.py 和 subfolder/file3.txt
-            self.assertIn("file1.py", names)
-            self.assertIn("subfolder/file3.txt", names)
-            # 不包含排除的文件
-            self.assertNotIn("file2.pyc", names)
-            self.assertNotIn(".gitignore", names)
-            self.assertNotIn("__pycache__/cached.pyc", names)
-
-    def test_zip_with_exclude_patterns_with_system_impl(self):
-        exclude_patterns = ["*.pyc", ".gitignore", "*/__pycache__/*"]
-        zip_bytes, size, err = zip_and_encode_folder(self.temp_dir, exclude_patterns)
+    def test_zip_and_encode_folder_basic(self):
+        """Test zip_and_encode_folder basic functionality"""
+        zip_bytes, size, err = zip_and_encode_folder(self.temp_dir)
 
         self.assertIsInstance(zip_bytes, bytes)
         self.assertIsInstance(size, int)
         self.assertIsNone(err)
+        self.assertGreater(size, 0)
 
-        # 验证 zip 内容
+        # Verify zip content
         with zipfile.ZipFile(BytesIO(zip_bytes)) as zipf:
             names = zipf.namelist()
-            print(names)
-            # 应该包含 file1.py 和 subfolder/file3.txt
+            # Should contain normal files
             self.assertIn("file1.py", names)
             self.assertIn("subfolder/file3.txt", names)
-            # 不应该包含排除文件
-            self.assertNotIn("file2.pyc", names)
-            self.assertNotIn(".gitignore", names)
+            # Default ignore patterns should exclude __pycache__ and .git
             self.assertNotIn("__pycache__/cached.pyc", names)
+            # .git directory should be excluded (default .vefaasignore rules)
+            git_dir_files = [n for n in names if n.startswith(".git/")]
+            self.assertEqual(len(git_dir_files), 0, f"Should not contain .git/ directory files, but found: {git_dir_files}")
 
-    def test_zip_empty_exclude_with_system_impl(self):
-        # 如果没有 exclude 规则，应该包含所有文件（除了默认规则）
-        zip_bytes, size, err = zip_and_encode_folder(self.temp_dir, [])
-        self.assertIsInstance(zip_bytes, bytes)
-        self.assertGreater(size, 0)
-        self.assertIsNone(err)
+    def test_package_directory_with_gitignore(self):
+        """Test package_directory with .gitignore rules applied"""
+        # Create a log file that should be ignored by .gitignore
+        with open(os.path.join(self.temp_dir, "test.log"), "w") as f:
+            f.write("log content")
+
+        zip_bytes = package_directory(self.temp_dir, include_gitignore=True)
+
         with zipfile.ZipFile(BytesIO(zip_bytes)) as zipf:
             names = zipf.namelist()
-            print(names)
+            # *.log should be excluded by .gitignore
+            self.assertNotIn("test.log", names)
+            # Normal files should be retained
             self.assertIn("file1.py", names)
-            self.assertNotIn("file2.pyc", names)
+
+    def test_package_directory_without_gitignore(self):
+        """Test package_directory without .gitignore rules (function code upload scenario)"""
+        # Create a log file that would normally be ignored by .gitignore
+        with open(os.path.join(self.temp_dir, "test.log"), "w") as f:
+            f.write("log content")
+
+        zip_bytes = package_directory(self.temp_dir, include_gitignore=False)
+
+        with zipfile.ZipFile(BytesIO(zip_bytes)) as zipf:
+            names = zipf.namelist()
+            # .gitignore not applied, so *.log should be retained
+            self.assertIn("test.log", names)
+            # Normal files should be retained
+            self.assertIn("file1.py", names)
+            # But .vefaasignore default rules should still apply
             self.assertNotIn("__pycache__/cached.pyc", names)
+
+    def test_read_gitignore_patterns(self):
+        """Test reading .gitignore patterns"""
+        patterns = read_gitignore_patterns(self.temp_dir)
+        self.assertIn("*.log", patterns)
+
+    def test_read_vefaasignore_patterns_creates_default(self):
+        """Test that .vefaasignore default file is auto-created when not exists"""
+        # Confirm .vefaasignore does not exist
+        vefaasignore_path = os.path.join(self.temp_dir, ".vefaasignore")
+        if os.path.exists(vefaasignore_path):
+            os.remove(vefaasignore_path)
+
+        patterns = read_vefaasignore_patterns(self.temp_dir)
+
+        # Should create default file
+        self.assertTrue(os.path.exists(vefaasignore_path))
+        # Should contain default patterns
+        self.assertTrue(len(patterns) > 0)
+
+    def test_create_ignore_filter(self):
+        """Test creating ignore filter"""
+        gitignore_patterns = ["*.log", "temp/"]
+        vefaasignore_patterns = [".git/", "__pycache__/"]
+
+        spec = create_ignore_filter(gitignore_patterns, vefaasignore_patterns)
+
+        # Verify filter works correctly
+        self.assertTrue(spec.match_file("test.log"))
+        self.assertTrue(spec.match_file(".git/config"))
+        self.assertTrue(spec.match_file("__pycache__/"))
+        self.assertFalse(spec.match_file("main.py"))
+
+
+class TestCaddyfileGeneration(unittest.TestCase):
+    """Test cases for Caddyfile generation functionality"""
+
+    def setUp(self):
+        # Create temporary directory
+        self.temp_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        # Delete temporary directory
+        shutil.rmtree(self.temp_dir)
+
+    def test_render_default_caddyfile_content(self):
+        """Test that default Caddyfile content is generated correctly"""
+        from mcp_server_vefaas_function.vefaas_cli_sdk.deploy import render_default_caddyfile_content
+
+        content = render_default_caddyfile_content()
+
+        # Verify content contains key configurations
+        self.assertIn(":8000", content)  # Listening port
+        self.assertIn("root * .", content)  # Static file root directory
+        self.assertIn("file_server", content)  # File server directive
+        self.assertIn("try_files", content)  # SPA routing support
+        self.assertIn("@unsafePath", content)  # Secure path configuration
+        self.assertIn("Cache-Control", content)  # Cache strategy
+
+    def test_ensure_caddyfile_in_output_creates_file(self):
+        """Test that ensure_caddyfile_in_output creates file in output directory"""
+        from mcp_server_vefaas_function.vefaas_cli_sdk.deploy import ensure_caddyfile_in_output, DEFAULT_CADDYFILE_NAME
+
+        # Create output subdirectory
+        output_path = "dist"
+        os.makedirs(os.path.join(self.temp_dir, output_path), exist_ok=True)
+
+        # Generate Caddyfile
+        result = ensure_caddyfile_in_output(self.temp_dir, output_path)
+
+        # Verify file creation
+        expected_path = os.path.join(self.temp_dir, output_path, DEFAULT_CADDYFILE_NAME)
+        self.assertEqual(result, expected_path)
+        self.assertTrue(os.path.exists(expected_path))
+
+        # Verify content
+        with open(expected_path, "r") as f:
+            content = f.read()
+        self.assertIn(":8000", content)
+        self.assertIn("file_server", content)
+
+    def test_ensure_caddyfile_in_output_root_directory(self):
+        """Test Caddyfile generation in project root (output_path = './')"""
+        from mcp_server_vefaas_function.vefaas_cli_sdk.deploy import ensure_caddyfile_in_output, DEFAULT_CADDYFILE_NAME
+
+        # Generate to root directory
+        result = ensure_caddyfile_in_output(self.temp_dir, "./")
+
+        # Verify file creation in root directory
+        expected_path = os.path.join(self.temp_dir, DEFAULT_CADDYFILE_NAME)
+        self.assertEqual(result, expected_path)
+        self.assertTrue(os.path.exists(expected_path))
+
+    def test_ensure_caddyfile_creates_output_dir_if_not_exists(self):
+        """Test that output directory is created if it doesn't exist"""
+        from mcp_server_vefaas_function.vefaas_cli_sdk.deploy import ensure_caddyfile_in_output, DEFAULT_CADDYFILE_NAME
+
+        output_path = "new_output_dir"
+
+        # Confirm directory does not exist
+        self.assertFalse(os.path.exists(os.path.join(self.temp_dir, output_path)))
+
+        # Generate Caddyfile
+        result = ensure_caddyfile_in_output(self.temp_dir, output_path)
+
+        # Verify directory and file are both created
+        self.assertTrue(os.path.exists(os.path.join(self.temp_dir, output_path)))
+        self.assertTrue(os.path.exists(result))
+
+
+class TestDetector(unittest.TestCase):
+    """Test cases for project detector"""
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
+
+    def test_detect_vite_project_is_static(self):
+        """Test that Vite project without SSR is detected as static"""
+        from mcp_server_vefaas_function.vefaas_cli_sdk.detector import auto_detect
+
+        # Create Vite project structure
+        pkg = {
+            "name": "test-vite",
+            "devDependencies": {"vite": "^5.0.0"},
+            "scripts": {"build": "vite build", "preview": "vite preview"}
+        }
+        with open(os.path.join(self.temp_dir, "package.json"), "w") as f:
+            import json
+            json.dump(pkg, f)
+
+        result = auto_detect(self.temp_dir)
+
+        self.assertEqual(result.framework, "vite")
+        self.assertEqual(result.runtime, "native-node20/v1")
+        self.assertTrue(result.is_static)
+        self.assertIn("caddy", result.start_command.lower())
 
 
 if __name__ == "__main__":

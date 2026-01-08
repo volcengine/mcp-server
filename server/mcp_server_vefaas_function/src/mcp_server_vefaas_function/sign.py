@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 Service = "apig"
 Version = "2021-03-03"
 Region = "cn-beijing"
-Host = "iam.volcengineapi.com"
+Host = "open.volcengineapi.com"
 ContentType = "application/x-www-form-urlencoded"
 
 AK_KEY = "VOLCENGINE_ACCESS_KEY"
@@ -62,7 +62,7 @@ def norm_query(params):
         if type(params[key]) == list:
             for k in params[key]:
                 query = (
-                        query + quote(key, safe="-_.~") + "=" + quote(k, safe="-_.~") + "&"
+                    query + quote(key, safe="-_.~") + "=" + quote(k, safe="-_.~") + "&"
                 )
         else:
             query = (query + quote(key, safe="-_.~") + "=" + quote(params[key], safe="-_.~") + "&")
@@ -82,7 +82,7 @@ def hash_sha256(content: str):
 
 
 # 第二步：签名请求函数
-def request(method, date, query, header, ak, sk, token, action, body, region = None, timeout=None):
+def request(method, date, query, header, ak, sk, token, action, body, region=None, timeout=None):
     # 第三步：创建身份证明。其中的 Service 和 Region 字段是固定的。ak 和 sk 分别代表
     # AccessKeyID 和 SecretAccessKey。同时需要初始化签名结构体。一些签名计算时需要的属性也在这里处理。
     # 初始化身份证明结构体
@@ -99,7 +99,8 @@ def request(method, date, query, header, ak, sk, token, action, body, region = N
 
     if action in ['CodeUploadCallback', 'CreateDependencyInstallTask', 'GetDependencyInstallTaskStatus',
                   'GetDependencyInstallTaskLogDownloadURI', "ListApplicationTemplates", "GetApplicationTemplateDetail", "GetRevision",
-                  "CreateApplication", "GetApplication", "ReleaseApplication", "ListTriggers", "GetApplicationRevisionLog", "ListTemplates", "GetTemplateDetail"]:
+                  "CreateApplication", "GetApplication", "ReleaseApplication", "ListTriggers", "GetApplicationRevisionLog", "ListTemplates", "GetTemplateDetail",
+                  "GenTempTosObjectUrl", "ListApplications", "CreateFunction", "UpdateFunction", "GetFunction", "Release", "GetReleaseStatus"]:
         credential["service"] = "vefaas"
 
     content_type = ContentType
@@ -150,11 +151,11 @@ def request(method, date, query, header, ak, sk, token, action, body, region = N
                  "x-content-sha256:" + x_content_sha256,
                  "x-date:" + x_date,
              ]
-         ),
-         "",
-         signed_headers_str,
-         x_content_sha256,
-         ]
+        ),
+            "",
+            signed_headers_str,
+            x_content_sha256,
+        ]
     )
 
     # 打印正规化的请求用于调试比对
@@ -195,13 +196,13 @@ def request(method, date, query, header, ak, sk, token, action, body, region = N
 def get_authorization_credentials(ctx: Context = None) -> tuple[str, str, str]:
     """
     Gets authorization credentials from either environment variables or request headers.
-    
+
     Args:
         ctx: The server context object
-        
+
     Returns:
         tuple: (access_key, secret_key, session_token)
-        
+
     Raises:
         ValueError: If authorization information is missing or invalid
     """
