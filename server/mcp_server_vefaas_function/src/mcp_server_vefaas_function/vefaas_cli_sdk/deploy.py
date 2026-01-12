@@ -72,10 +72,64 @@ Thumbs.db
 
 # veFaaS CLI config
 .vefaas/
+vefaas.yaml
 """
 
 # Default Caddyfile name for static sites
 DEFAULT_CADDYFILE_NAME = "DefaultCaddyFile"
+
+
+def generate_app_name_from_path(project_path: str) -> str:
+    """
+    Generate application name from project path.
+
+    Rules:
+    1. Get project folder name
+    2. Convert to lowercase
+    3. Replace non-alphanumeric characters with hyphens
+    4. Remove consecutive hyphens
+    5. Remove leading/trailing hyphens
+    6. Truncate if too long
+    7. Add random suffix to avoid conflicts
+
+    Args:
+        project_path: Absolute path to project
+
+    Returns:
+        Processed app name, e.g., "my-project-abc123"
+    """
+    import re
+    import random
+    import string
+
+    # Get folder name
+    folder_name = os.path.basename(os.path.normpath(project_path))
+
+    # Convert to lowercase
+    name = folder_name.lower()
+
+    # Replace non-alphanumeric with hyphens
+    name = re.sub(r'[^a-z0-9]', '-', name)
+
+    # Remove consecutive hyphens
+    name = re.sub(r'-+', '-', name)
+
+    # Remove leading/trailing hyphens
+    name = name.strip('-')
+
+    # Use default if empty
+    if not name:
+        name = "app"
+
+    # Truncate to reasonable length (reserve space for suffix)
+    max_base_len = 20
+    if len(name) > max_base_len:
+        name = name[:max_base_len].rstrip('-')
+
+    # Add random suffix to avoid conflicts
+    suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+
+    return f"{name}-{suffix}"
 
 
 def read_gitignore_patterns(base_dir: str) -> List[str]:
@@ -117,7 +171,7 @@ def create_ignore_filter(
 ) -> pathspec.PathSpec:
     """Create a pathspec filter from gitignore/vefaasignore patterns. Ported from vefaas-cli."""
     all_patterns = gitignore_patterns + vefaasignore_patterns + (additional_patterns or [])
-    return pathspec.PathSpec.from_lines("gitwildmatch", all_patterns)
+    return pathspec.PathSpec.from_lines("gitignore", all_patterns)
 
 
 def render_default_caddyfile_content() -> str:
@@ -245,10 +299,12 @@ class VeFaaSClient:
             # Check for common error patterns and provide clear guidance
             if "already exists" in message.lower() or "duplicate" in message.lower():
                 raise ValueError(
-                    f"[{action}] Name already exists: {message}\n"
-                    "To update an existing application, get the application_id from `.vefaas/config.json` or console, "
-                    "then call deploy_application with application_id parameter. "
-                    "Do NOT use function_id directly - always use application_id for updates."
+                    f"[{action}] NAME_CONFLICT: {message}\n"
+                    "**YOU MUST ASK THE USER** to choose one of the following options:\n"
+                    "  1. Update existing application: Get application_id from `.vefaas/config.json` or console, "
+                    "then call deploy_application with application_id parameter\n"
+                    "  2. Deploy as new application: Call deploy_application with a different name\n"
+                    "DO NOT automatically choose an option. Present both choices to the user and wait for their decision."
                 )
             elif "not found" in message.lower():
                 raise ValueError(f"[{action}] Resource not found: {message}")
@@ -381,6 +437,10 @@ class VeFaaSClient:
     def get_dependency_install_status(self, function_id: str) -> dict:
         """Get dependency installation task status"""
         return self.call("GetDependencyInstallTaskStatus", {"FunctionId": function_id})
+
+    def create_dependency_install_task(self, function_id: str) -> dict:
+        """Create dependency installation task for Python projects"""
+        return self.call("CreateDependencyInstallTask", {"FunctionId": function_id})
 
     # ========== Application Operations ==========
 
@@ -547,7 +607,7 @@ def wait_for_application_deploy(
                 return {"success": True, "access_url": access_url}
 
             if status.lower() in ("deploy_fail", "deleted", "delete_fail"):
-                # Try to get detailed error from GetReleaseStatus (like vefaas-cli)
+                # Try to get detailed error from GetReleaseStatus
                 error_details = {}
                 function_id = None
                 try:
@@ -617,8 +677,10 @@ def wait_for_dependency_install(
     """Wait for Python dependency installation to complete."""
     start_time = time.time()
     last_status = ""
+    poll_count = 0
 
     while time.time() - start_time < timeout_seconds:
+        poll_count += 1
         try:
             result = client.get_dependency_install_status(function_id)
             status = result.get("Result", {}).get("Status", "")
@@ -627,16 +689,29 @@ def wait_for_dependency_install(
                 logger.info(f"[dependency] Installation status: {status}")
                 last_status = status
 
+            # Success status
             if status.lower() in ("succeeded", "success", "done"):
                 return {"success": True, "status": status}
 
+            # Failed status
             if status.lower() == "failed":
                 raise ValueError("Dependency installation failed")
+
+            # In-progress status (Dequeued = queued, InProgress = installing)
+            if status.lower() in ("dequeued", "inprogress", "in_progress", "pending"):
+                # Normal intermediate status, continue polling
+                pass
+            elif not status and poll_count > 3:
+                # Empty status may indicate no dependencies to install
+                return {"success": True, "status": "no_dependency"}
 
         except ValueError:
             raise
         except Exception as e:
             logger.warning(f"[dependency] Error checking status: {e}")
+            # Multiple failures may indicate no dependency install task
+            if poll_count > 5:
+                return {"success": True, "status": "skipped"}
 
         time.sleep(poll_interval_seconds)
 
@@ -702,7 +777,30 @@ def package_directory(directory: str, base_dir: Optional[str] = None, include_gi
                     continue
 
                 file_path = os.path.join(root, file)
-                zf.write(file_path, arcname)
+
+                # Use ZipInfo to preserve file permissions (especially executable)
+                info = zipfile.ZipInfo(arcname)
+
+                # Get original file permissions
+                file_stat = os.stat(file_path)
+                original_mode = file_stat.st_mode & 0o777
+
+                # Grant execute permission (755) for script files
+                script_extensions = ('.sh', '.bash', '.py', '.pl', '.rb')
+                if file.lower().endswith(script_extensions):
+                    # Ensure execute permission: original | 0o755
+                    final_mode = original_mode | 0o755
+                else:
+                    final_mode = original_mode
+
+                # Unix permissions stored in high 16 bits of external_attr
+                # Format: (permissions << 16) | (file_type << 28)
+                # 0o100000 = regular file
+                info.external_attr = (final_mode << 16) | (0o100000 << 16)
+
+                # Read file content and write to zip
+                with open(file_path, 'rb') as f:
+                    zf.writestr(info, f.read())
 
     buffer.seek(0)
     zip_bytes = buffer.read()
@@ -757,16 +855,21 @@ def deploy_application(config: DeployConfig, client: VeFaaSClient) -> DeployResu
             else:
                 log(f"[config] Config region ({config_region}) differs from target region ({client.region}), will create new application")
 
+        # Auto-generate app name from project path if not provided for new app
         if not config.name and not config.application_id:
-            raise ValueError("Must provide name or application_id")
+            config.name = generate_app_name_from_path(config.project_path)
+            log(f"[config] Auto-generated app name: {config.name}")
 
         # 0. Early check for duplicate application name
         if config.name and not config.application_id:
             existing_app_id = client.find_application_by_name(config.name)
             if existing_app_id:
                 raise ValueError(
-                    f"Application name '{config.name}' already exists (ID: {existing_app_id}). "
-                    f"To update this application, pass application_id='{existing_app_id}' parameter."
+                    f"NAME_CONFLICT: Application name '{config.name}' already exists (existing_application_id: {existing_app_id}). "
+                    f"**YOU MUST ASK THE USER** to choose one of the following options:\n"
+                    f"  1. Update existing application: Call deploy_application with application_id='{existing_app_id}'\n"
+                    f"  2. Deploy as new application: Call deploy_application with a different name\n"
+                    f"DO NOT automatically choose an option. Present both choices to the user and wait for their decision."
                 )
 
         # 0.5 Early check: if updating existing app and deployment is in progress, return early
@@ -963,8 +1066,13 @@ def deploy_application(config: DeployConfig, client: VeFaaSClient) -> DeployResu
 
         # 6. Wait for dependency installation (Python)
         if is_python:
-            log("[6/7] Waiting for dependency installation...")
+            log("[6/7] Installing dependencies...")
             try:
+                # Trigger dependency install task
+                client.create_dependency_install_task(target_function_id)
+                log("  → Dependency installation task created")
+
+                # Wait for installation to complete
                 wait_for_dependency_install(client, target_function_id)
                 log("  → Dependencies installed")
             except Exception as e:

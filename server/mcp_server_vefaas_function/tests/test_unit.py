@@ -233,6 +233,127 @@ class TestDetector(unittest.TestCase):
         self.assertTrue(result.is_static)
         self.assertIn("caddy", result.start_command.lower())
 
+    def test_detect_fastapi_project(self):
+        """Test that FastAPI project is detected correctly"""
+        from mcp_server_vefaas_function.vefaas_cli_sdk.detector import auto_detect
+
+        # Create FastAPI project structure
+        with open(os.path.join(self.temp_dir, "requirements.txt"), "w") as f:
+            f.write("fastapi\nuvicorn\n")
+        with open(os.path.join(self.temp_dir, "app.py"), "w") as f:
+            f.write("from fastapi import FastAPI\napp = FastAPI()\n")
+
+        result = auto_detect(self.temp_dir)
+
+        self.assertEqual(result.framework, "fastapi")
+        self.assertEqual(result.runtime, "native-python3.12/v1")
+        self.assertFalse(result.is_static)
+        self.assertIn("uvicorn", result.start_command)
+
+    def test_detect_flask_project(self):
+        """Test that Flask project is detected correctly"""
+        from mcp_server_vefaas_function.vefaas_cli_sdk.detector import auto_detect
+
+        # Create Flask project structure
+        with open(os.path.join(self.temp_dir, "requirements.txt"), "w") as f:
+            f.write("flask\ngunicorn\n")
+        with open(os.path.join(self.temp_dir, "app.py"), "w") as f:
+            f.write("from flask import Flask\napp = Flask(__name__)\n")
+
+        result = auto_detect(self.temp_dir)
+
+        self.assertEqual(result.framework, "flask")
+        self.assertEqual(result.runtime, "native-python3.12/v1")
+        self.assertFalse(result.is_static)
+
+
+class TestConfig(unittest.TestCase):
+    """Test cases for configuration reading/writing"""
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
+
+    def test_write_and_read_config(self):
+        """Test writing and reading configuration"""
+        from mcp_server_vefaas_function.vefaas_cli_sdk.config import (
+            write_config, read_config, VefaasConfig, FunctionConfig
+        )
+
+        config = VefaasConfig(
+            function=FunctionConfig(
+                id="test-func-id",
+                region="cn-beijing",
+                runtime="native-python3.12/v1",
+                application_id="test-app-id",
+            ),
+            name="test-app",
+            command="./run.sh",
+        )
+
+        # Write config
+        write_config(self.temp_dir, config)
+
+        # Verify files exist
+        self.assertTrue(os.path.exists(os.path.join(self.temp_dir, ".vefaas", "config.json")))
+        self.assertTrue(os.path.exists(os.path.join(self.temp_dir, "vefaas.yaml")))
+
+        # Read config back
+        loaded_config = read_config(self.temp_dir)
+        self.assertIsNotNone(loaded_config)
+        self.assertEqual(loaded_config.function.id, "test-func-id")
+        self.assertEqual(loaded_config.function.region, "cn-beijing")
+        self.assertEqual(loaded_config.function.application_id, "test-app-id")
+
+    def test_get_linked_ids(self):
+        """Test getting linked IDs from config"""
+        from mcp_server_vefaas_function.vefaas_cli_sdk.config import (
+            write_config, get_linked_ids, VefaasConfig, FunctionConfig
+        )
+
+        config = VefaasConfig(
+            function=FunctionConfig(
+                id="func-123",
+                application_id="app-456",
+            ),
+        )
+        write_config(self.temp_dir, config)
+
+        func_id, app_id = get_linked_ids(self.temp_dir)
+        self.assertEqual(func_id, "func-123")
+        self.assertEqual(app_id, "app-456")
+
+
+class TestGenerateAppName(unittest.TestCase):
+    """Test cases for app name generation"""
+
+    def test_generate_app_name_from_path(self):
+        """Test generating app name from project path"""
+        from mcp_server_vefaas_function.vefaas_cli_sdk.deploy import generate_app_name_from_path
+
+        # Test with simple path
+        name = generate_app_name_from_path("/path/to/my-project")
+        self.assertTrue(name.startswith("my-project-"))
+        self.assertEqual(len(name), len("my-project-") + 6)  # 6 char suffix
+
+    def test_generate_app_name_handles_special_chars(self):
+        """Test that special characters are replaced"""
+        from mcp_server_vefaas_function.vefaas_cli_sdk.deploy import generate_app_name_from_path
+
+        name = generate_app_name_from_path("/path/to/My_Project.Name")
+        # Should be lowercase with hyphens
+        self.assertTrue(name.startswith("my-project-name-"))
+
+    def test_generate_app_name_truncates_long_names(self):
+        """Test that long names are truncated"""
+        from mcp_server_vefaas_function.vefaas_cli_sdk.deploy import generate_app_name_from_path
+
+        name = generate_app_name_from_path("/path/to/this-is-a-very-long-project-name-that-should-be-truncated")
+        # Base name should be max 20 chars + hyphen + 6 char suffix
+        self.assertLessEqual(len(name), 20 + 1 + 6)
+
 
 if __name__ == "__main__":
     unittest.main()

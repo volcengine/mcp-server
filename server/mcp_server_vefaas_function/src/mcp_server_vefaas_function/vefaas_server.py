@@ -192,7 +192,36 @@ def update_function(function_id: str, region: Optional[str] = None,
         except ApiException as e:
             raise ValueError(f"Failed to update function config: {str(e)}")
 
-    result["next_step"] = "Call release_function to publish changes (it will handle dependency installation automatically)"
+    # Save config to vefaas.yaml if project_path is provided
+    if project_path:
+        try:
+            from .vefaas_cli_sdk import write_config, VefaasConfig, FunctionConfig
+
+            # Get function info for config
+            try:
+                func_req = volcenginesdkvefaas.GetFunctionRequest(id=function_id)
+                func_resp = api_instance.get_function(func_req)
+                runtime = func_resp.runtime
+                func_name = func_resp.name
+            except Exception:
+                runtime = None
+                func_name = None
+
+            save_config = VefaasConfig(
+                function=FunctionConfig(
+                    id=function_id,
+                    runtime=runtime,
+                    region=region,
+                ),
+                name=func_name,
+                command=command,
+            )
+            write_config(project_path, save_config)
+            result["config_saved"] = True
+        except Exception as e:
+            logger.warning(f"Failed to save config: {e}")
+
+    result["next_step"] = "Code updated. If you want to publish changes, call release_function. Note: release_function will trigger dependency installation and deploy to production."
     result["platform_url"] = f"https://console.volcengine.com/vefaas/region:vefaas+{region}/function/detail/{function_id}"
 
     return json.dumps(result, ensure_ascii=False, indent=2)
@@ -256,64 +285,31 @@ def release_function(function_id: str, region: Optional[str] = None, skip_depend
         result["dependency_triggered"] = False
         result["dependency_status"] = "skipped"
     else:
-        logger.info("Checking if dependency installation is needed...")
+        logger.info("Triggering dependency installation...")
+        # Use SDK client for dependency operations
+        from .vefaas_cli_sdk import VeFaaSClient, wait_for_dependency_install
+        client = VeFaaSClient(ak, sk, token, region)
+
         try:
-            dep_body = {"FunctionId": function_id}
-            now = datetime.datetime.utcnow()
-            dep_resp = request(
-                "POST", now, {}, {}, ak, sk, token, "CreateDependencyInstallTask", json.dumps(dep_body), region
-            )
+            client.create_dependency_install_task(function_id)
             logger.info("Dependency install task created, waiting for completion...")
             result["dependency_triggered"] = True
+
+            # Step 2: Wait for dependency installation using SDK logic
+            dep_result = wait_for_dependency_install(client, function_id, timeout_seconds=300)
+            result["dependency_status"] = dep_result.get("status", "succeeded")
+            logger.info(f"Dependency installation completed: {result['dependency_status']}")
+
+        except ValueError as e:
+            # Dependency installation failed
+            result["dependency_triggered"] = True
+            result["dependency_status"] = "failed"
+            raise ValueError(f"Dependency installation failed: {e}")
         except Exception as e:
             # Dependency install may fail if no requirements.txt/package.json, that's OK
-            logger.info(f"Dependency install skipped or failed: {str(e)}")
+            logger.info(f"Dependency install skipped or not needed: {str(e)}")
             result["dependency_triggered"] = False
-
-    # Step 2: Wait for dependency installation to complete
-    if result.get("dependency_triggered"):
-        timeout_seconds = 120
-        poll_interval_seconds = 5
-        start_time = time.time()
-        dep_status = None
-
-        while time.time() - start_time < timeout_seconds:
-            try:
-                now = datetime.datetime.utcnow()
-                status_resp = request(
-                    "POST", now, {}, {}, ak, sk, token, "GetDependencyInstallTaskStatus",
-                    json.dumps({"FunctionId": function_id}), region, 5
-                )
-                dep_status = status_resp.get("Result", {}).get("Status")
-
-                if dep_status == "InProgress" or dep_status is None:
-                    time.sleep(poll_interval_seconds)
-                    continue
-                else:
-                    break
-            except Exception as ex:
-                logger.warning(f"Failed to get dependency status: {ex}")
-                break
-
-        if dep_status == "Failed":
-            # Try to get log for debugging
-            try:
-                now = datetime.datetime.utcnow()
-                log_resp = request(
-                    "POST", now, {}, {}, ak, sk, token,
-                    "GetDependencyInstallTaskLogDownloadURI",
-                    json.dumps({"FunctionId": function_id}), region, 5
-                )
-                log_url = log_resp.get("Result", {}).get("DownloadURL", "")
-                result["dependency_status"] = "failed"
-                result["dependency_log_url"] = log_url
-                raise ValueError(f"Dependency installation failed. Check logs: {log_url}")
-            except ValueError:
-                raise
-            except Exception:
-                raise ValueError("Dependency installation failed")
-
-        result["dependency_status"] = "succeeded" if dep_status == "Succeeded" else dep_status
+            result["dependency_status"] = "skipped"
 
     # Step 3: Submit release request
     logger.info("Submitting release request...")
@@ -1068,6 +1064,13 @@ def list_function_triggers(function_id: str, region: Optional[str] = None):
 
 **RECOMMENDED**: Call this BEFORE `deploy_application` to ensure correct configuration!
 
+**Supported Runtimes**:
+- **Node.js**: Next.js, Nuxt, Vite, VitePress, Rspress, Astro, Express, SvelteKit, Remix, CRA, Angular, Gatsby, etc.
+- **Python**: FastAPI, Flask, Streamlit, Django, etc.
+- **Static Sites**: HTML, Hugo, MkDocs, etc.
+
+> **Note**: Other runtimes (e.g., Go, Java, Rust, PHP) are NOT currently supported. If your project uses an unsupported runtime, you will need to deploy manually via the veFaaS console.
+
 This tool analyzes the project structure and automatically detects:
 - Framework (Next.js, Vite, FastAPI, Flask, Streamlit, etc.)
 - Runtime and startup command
@@ -1125,7 +1128,7 @@ def detect_project(project_path: str):
 
 This is the **recommended tool** for deploying applications. It handles the entire workflow automatically:
 1. Detect project configuration
-2. Build project (if needed)
+2. Build project (for Node.js/static sites only, Python projects automatically skip this step)
 3. Package and upload code to cloud storage
 4. Create/update function with code
 5. Wait for dependencies (Python)
@@ -1139,20 +1142,21 @@ This is the **recommended tool** for deploying applications. It handles the enti
 - This means subsequent deployments only need `project_path` - no need to specify IDs again.
 
 **Scenarios**:
-- **New deployment**: Provide `project_path` + `name` + `start_command` + `build_command` (non-Python) + `port`
+- **New Python app**: Provide `project_path` + `name` + `start_command` + `port`
+- **New Node.js app**: Provide `project_path` + `name` + `start_command` + `build_command` + `port`
 - **Update existing app**: Just provide `project_path` (IDs read from config automatically)
 - **Update by ID**: Use `application_id` to update an existing application
 - **Deploy to different region**: Provide `project_path` + `name` + `region` (existing config for other regions is ignored)
 
 Args:
  - project_path: Absolute path to the project root directory (required)
- - name: Application name (required for NEW apps only)
+ - name: Application name (required for NEW apps, will auto-generate from folder name if not provided)
  - application_id: Application ID for updates (auto-read from config if exists)
  - region: Region (cn-beijing, cn-shanghai, cn-guangzhou, ap-southeast-1)
- - build_command: Build command (e.g., "npm run build"). Required for non-Python runtimes unless skip_build=True.
+ - build_command: Build command (e.g., "npm run build"). Required for non-Python runtimes.
  - start_command: Startup command. **REQUIRED**. Use detect_project to auto-detect.
  - port: Service port. **IMPORTANT: Must match the actual listening port in start_command** (e.g., if start_command has --port 3000, then port must be 3000)
- - skip_build: Skip build step (default False). Set to True if project is already built.
+ - skip_build: Skip build step (default False). **Note: Python projects automatically skip build, this parameter is ignored for Python.**
  - gateway_name: API gateway name (optional, auto-selects first available gateway if not specified)
 
 Returns:
@@ -1163,8 +1167,10 @@ Returns:
 
 **Common Errors**:
 - "start_command is required": Call `detect_project` first or provide start_command
-- "build_command is required": Provide build_command or set skip_build=True if already built
-- "Name already exists": Use the `application_id` from `.vefaas/config.json` or console, then retry with `application_id` parameter
+- "build_command is required": For non-Python projects, provide build_command or set skip_build=True
+- "Name already exists (NAME_CONFLICT)": **YOU MAY ASK THE USER** whether to update existing or create new. Present these options:
+  1. Update existing: retry with `application_id` parameter (ID is in error message)
+  2. Create new: retry with a different `name` parameter
 - "deploy_fail": The returned error will include detailed error_message and error_logs_uri
 
 **Retry/Redeployment**:
@@ -1415,7 +1421,7 @@ deploy_application(project_path="/path/to/project")
 The tool will auto-read config and update the application
 
 ### Common Issues
-- **Name exists**: Use get_application_detail to get ID, then retry with application_id parameter
+- **NAME_CONFLICT (Name exists)**: **Ask the user** to choose: 1) Update existing (use application_id) or 2) Create new (use different name)
 - **start_command error**: Use detect_project to get correct command
 - **Deployment failed**: Check error_details for error message and logs
 
