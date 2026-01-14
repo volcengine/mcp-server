@@ -237,13 +237,20 @@ class BaseMCP(FastMCP):
         # 优先级2: 从环境变量获取
         tool_type_e = environ.get(VOLCENGINE_TOOLS_TYPE_ENV)
         tools_source_e = environ.get(VOLCENGINE_TOOLS_SOURCE_ENV)
-        
+
+        if tool_type_e is None and tools_source_e is None:
+            source_groups = environ.get("MCP_TOOL_GROUPS")
+            if source_groups:
+                tool_type_e = 'groups'
+                tools_source_e = source_groups
+
         if tool_type_e and tools_source_e:
             if tool_type_e in ['tools', 'groups']:
                 tools_type = tool_type_e
                 tools_source = [item.strip() for item in tools_source_e.split(',') if item.strip()]
                 logger.debug(f"Got tools_type and source from environment: {tools_type}, {tools_source}")
                 return (tools_type, tools_source)
+        
         
         # 优先级3: 从 _base_mcp_store 获取
         tools_type_store = self.get_base_mcp_store('tools_type')
