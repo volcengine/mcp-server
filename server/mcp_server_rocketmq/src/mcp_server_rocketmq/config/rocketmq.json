@@ -1,0 +1,6572 @@
+{
+ "components": {
+  "schemas": {
+   "ACLPair": {
+    "description": "ACLPair",
+    "properties": {
+     "AccessKey": {
+      "description": "AccessKey",
+      "type": "string"
+     },
+     "Permission": {
+      "description": "Permission",
+      "type": "string"
+     }
+    },
+    "required": [
+     "AccessKey",
+     "Permission"
+    ],
+    "type": "object"
+   },
+   "AccessPolicyForGroupObject": {
+    "description": "自定义权限配置，即可通过该字段设置某个AccessKey对哪些Group有何种权限。",
+    "properties": {
+     "Authority": {
+      "description": "AccessKey具备该Topic的权限。SUB：拥有订阅权限。DENY：不具备发布或订阅权限。",
+      "type": "string"
+     },
+     "GroupName": {
+      "description": "消费组的名称。",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Authority",
+     "GroupName"
+    ],
+    "type": "object"
+   },
+   "AccessPolicyForTopicObject": {
+    "description": "自定义权限配置，即可通过该字段设置某个AccessKey对哪些Topic有何种权限。",
+    "properties": {
+     "Authority": {
+      "description": "AccessKey 具备该 Topic 的权限。\n- ALL：拥有发布、订阅权限。\n- PUB：拥有发布权限。\n- SUB：拥有订阅权限。\n- DENY：不具备发布或订阅权限。",
+      "example": "DENY",
+      "maxLength": 4,
+      "minLength": 3,
+      "type": "string"
+     },
+     "TopicName": {
+      "description": "Topic 名称。",
+      "example": "test-topic",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Authority",
+     "TopicName"
+    ],
+    "type": "object"
+   },
+   "AccessPolicyObject": {
+    "description": "自定义权限配置，即为某些用户设置对于此Topic的自定义权限。",
+    "properties": {
+     "AccessKey": {
+      "description": "RocketMQ 密钥的 AccessKey。",
+      "example": "C3OmUvlr6*****",
+      "maxLength": 24,
+      "minLength": 24,
+      "type": "string"
+     },
+     "Authority": {
+      "description": "用户对于当前Topic的访问权限。\n- ALL：拥有发布、订阅权限。\n- PUB：拥有发布权限。\n- SUB：拥有订阅权限。\n- DENY：不具备发布或订阅权限。",
+      "example": "PUB",
+      "maxLength": 4,
+      "minLength": 3,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AccessKey",
+     "Authority"
+    ],
+    "type": "object"
+   },
+   "AllowListObject": {
+    "description": "白名单详情",
+    "properties": {
+     "AllowListDesc": {
+      "description": "白名单描述，长度为 0～200 字符。",
+      "example": "test",
+      "type": "string"
+     },
+     "AllowListIPNum": {
+      "description": "白名单中 IP 地址数量。",
+      "example": 2,
+      "format": "int64",
+      "type": "integer"
+     },
+     "AllowListId": {
+      "description": "白名单 ID。",
+      "example": "acl-90c721ca3f1648e7b980xxxxxx\n\n",
+      "type": "string"
+     },
+     "AllowListName": {
+      "description": "白名单名称，长度为 1～32 字符。",
+      "example": "test",
+      "type": "string"
+     },
+     "AllowListType": {
+      "description": "白名单类型。目前仅支持 IPv4。",
+      "example": "IPv4",
+      "type": "string"
+     },
+     "AssociatedInstanceNum": {
+      "description": "白名单已绑定的实例数量。",
+      "example": 1,
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "AllowListId",
+     "AllowListDesc",
+     "AllowListName",
+     "AllowListType",
+     "AllowListIPNum",
+     "AssociatedInstanceNum"
+    ],
+    "type": "object"
+   },
+   "AssociatedInstanceInfo": {
+    "description": "白名单绑定的完整的实例列表",
+    "properties": {
+     "InstanceId": {
+      "description": "实例 ID。",
+      "example": "rocketmq-cnoexxxxx",
+      "type": "string"
+     },
+     "InstanceName": {
+      "description": "实例名称。",
+      "example": "test",
+      "type": "string"
+     },
+     "VPC": {
+      "description": "实例绑定的VPC ID。",
+      "example": "vpc-3ret6bva9k54wxxxxx",
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceId",
+     "InstanceName",
+     "VPC"
+    ],
+    "type": "object"
+   },
+   "AuthKeyInfo": {
+    "description": "AuthKeyInfo",
+    "properties": {
+     "AclConfigJSON": {
+      "description": "AclConfigJSON",
+      "type": "string"
+     },
+     "Actived": {
+      "description": "Actived",
+      "type": "boolean"
+     },
+     "Ak": {
+      "description": "ak",
+      "type": "string"
+     },
+     "CreatedTime": {
+      "description": "CreatedTime",
+      "format": "int64",
+      "type": "integer"
+     },
+     "Description": {
+      "description": "Description",
+      "type": "string"
+     },
+     "TopicDefaultPermission": {
+      "description": "TopicDefaultPermission",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Ak",
+     "Actived",
+     "Description",
+     "CreatedTime",
+     "AclConfigJSON",
+     "TopicDefaultPermission"
+    ],
+    "type": "object"
+   },
+   "AuthKeyPermission": {
+    "description": "AuthKeyPermission",
+    "properties": {
+     "Ak": {
+      "description": "Ak",
+      "type": "string"
+     },
+     "DefaultPermission": {
+      "description": "DefaultPermission",
+      "type": "string"
+     },
+     "Permission": {
+      "description": "Permission",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Ak",
+     "Permission",
+     "DefaultPermission"
+    ],
+    "type": "object"
+   },
+   "BasicAccessKeyInfoObject": {
+    "description": "RocketMQ 密钥的详细信息。",
+    "properties": {
+     "AccessKey": {
+      "description": "RocketMQ 密钥的 AccessKey ID。",
+      "example": "2QdEgrGc97AL1p38Fq13****",
+      "type": "string"
+     },
+     "AclConfigJson": {
+      "description": "RocketMQ 密钥的所有 ACL 配置信息。",
+      "example": "{\\\"topicPerms\\\":{\\\"RMQ_SYS_TRACE_TOPIC\\\":\\\"PUB\\\",\\\"rocketmq123\\\":\\\"PUB|SUB\\\"},\\\"groupPerms\\\":{\\\"GID_test\\\":\\\"PUB|SUB\\\"}}",
+      "type": "string"
+     },
+     "Actived": {
+      "description": "RocketMQ 密钥的启用状态。\n- true：启用\n- false：未启用",
+      "example": true,
+      "type": "boolean"
+     },
+     "AllAuthority": {
+      "description": "RocketMQ 密钥的默认权限。\n- ALL：拥有发布、订阅权限\n- PUB：拥有发布权限\n- SUB：拥有订阅权限\n- DENY：不具备发布或订阅权限",
+      "example": "SUB",
+      "type": "string"
+     },
+     "CreateTime": {
+      "description": "RocketMQ 密钥的创建时间。时间显示格式为YYYY-MM-DD'T'HH:MM:SS'Z'。",
+      "example": "2022-11-04T07:12:56Z",
+      "type": "string"
+     },
+     "Description": {
+      "description": "RocketMQ 密钥的描述。",
+      "example": "test",
+      "type": "string"
+     },
+     "GroupAllAuthority": {
+      "description": "RocketMQ 密钥的消费组默认权限。 - SUB：拥有订阅权限 - DENY：不具备发布或订阅权限。",
+      "example": "DENY",
+      "type": "string"
+     }
+    },
+    "required": [
+     "AccessKey",
+     "AclConfigJson",
+     "Actived",
+     "AllAuthority",
+     "CreateTime",
+     "Description"
+    ],
+    "type": "object"
+   },
+   "BasicDLQMessageInfoObject": {
+    "description": "死信消息结构体",
+    "properties": {
+     "CreateTimestamp": {
+      "description": "消息生成的时间戳，单位为秒。",
+      "example": 1683784884,
+      "format": "int64",
+      "type": "integer"
+     },
+     "IsExist": {
+      "description": "消息是否仍旧保留在服务端。\n\n- true：消息存在。\n- false：消息不存在。",
+      "example": true,
+      "type": "boolean"
+     },
+     "MessageId": {
+      "description": "消息 ID。",
+      "example": "FDBD0FF1CE00003A0000000000000EFE425C18B4AAC23681EE4F0002",
+      "type": "string"
+     },
+     "MessageKey": {
+      "description": "消息 Key。为了避免特殊字符的影响，消息 Key 将会以 Base64 的编码的方式返回，需要通过 Base64 解码后才能查看。",
+      "example": "FDBD0",
+      "type": "string"
+     },
+     "MessageSize": {
+      "description": "消息大小，单位为 Byte。",
+      "example": 47276,
+      "format": "int32",
+      "type": "integer"
+     },
+     "ProducerHost": {
+      "description": "生产者实例地址。",
+      "example": "100.xx.xx.xx:xxxx",
+      "type": "string"
+     },
+     "ReconsumeTimes": {
+      "description": "消息重试消费的次数，即手动重发死信消息后，该消息再次进入死信队列的次数。",
+      "example": 1,
+      "format": "int32",
+      "type": "integer"
+     },
+     "StoreTimestamp": {
+      "description": "消息被服务端存储的时间戳，单位为秒。",
+      "example": 1683784893,
+      "format": "int64",
+      "type": "integer"
+     },
+     "Tag": {
+      "description": "消息 Tag。",
+      "example": "FDBD0",
+      "type": "string"
+     }
+    },
+    "required": [
+     "MessageId",
+     "IsExist",
+     "Tag",
+     "MessageKey",
+     "MessageSize",
+     "ProducerHost",
+     "ReconsumeTimes",
+     "CreateTimestamp",
+     "StoreTimestamp"
+    ],
+    "type": "object"
+   },
+   "BasicGroupInfo": {
+    "description": "Group 的基本信息。",
+    "properties": {
+     "Description": {
+      "description": "Group 的简单描述。",
+      "example": "test",
+      "type": "string"
+     },
+     "GroupId": {
+      "description": "消费组的 Group ID。",
+      "example": "GID_test_group_id",
+      "type": "string"
+     },
+     "GroupType": {
+      "description": "Group 适用的协议。取值说明如下：\nTCP：此 Group 仅适用于 TCP 协议的消息收发。",
+      "example": "TCP",
+      "type": "string"
+     }
+    },
+    "required": [
+     "GroupId",
+     "GroupType",
+     "Description"
+    ],
+    "type": "object"
+   },
+   "BasicGroupInfoForTopic": {
+    "description": "Group 的基本信息。",
+    "properties": {
+     "GroupId": {
+      "description": "消费组的 Group ID。",
+      "example": "GID_test_group_id",
+      "type": "string"
+     },
+     "MessageModel": {
+      "description": "消费模式。取值说明如下：\n- Clustering：集群消费模式\n- Broadcasting：广播消费模",
+      "example": "Clustering",
+      "type": "string"
+     },
+     "SubString": {
+      "description": "订阅的规则，此字段直接透传消费组订阅此 Topic 时指定的字符串，一般为 * 或 TAG1 || TAG2。",
+      "example": "\\*",
+      "type": "string"
+     }
+    },
+    "required": [
+     "GroupId",
+     "MessageModel",
+     "SubString"
+    ],
+    "type": "object"
+   },
+   "BasicInstanceInfoObject": {
+    "description": "实例详情信息",
+    "properties": {
+     "AccountId": {
+      "description": "创建实例的火山引擎主账号ID。",
+      "example": "200000****",
+      "type": "string"
+     },
+     "ApplyPrivateDNSToPublic": {
+      "description": "是否已开启私网域名支持公网解析功能。\ntrue：已开启\nfalse：已关闭",
+      "example": true,
+      "type": "boolean"
+     },
+     "AvailableQueueNumber": {
+      "description": "剩余可创建的分区数量。",
+      "example": 3944,
+      "format": "int32",
+      "type": "integer"
+     },
+     "ChargeDetail": {
+      "$ref": "#/components/schemas/ChargeDetailObject"
+     },
+     "ComputeSpec": {
+      "description": "实例的计算规格。",
+      "example": "rocketmq.n1.x2.small",
+      "type": "string"
+     },
+     "CreateTime": {
+      "description": "实例的创建时间。时间显示格式为YYYY-MM-DD'T'HH:MM:SS'Z'。",
+      "example": "2022-07-18T07:48:58Z",
+      "type": "string"
+     },
+     "EipId": {
+      "description": "EIP 的 ID。\n如果实例未开启公网访问方式，则不返回此参数。",
+      "example": "eip-mjhulvqza6805smt1bnc****",
+      "type": "string"
+     },
+     "EnableSSL": {
+      "description": "实例是否已开启 SSL 认证。\n开启实例的公网访问后，默认开启 SSL 认证。如果 SSLMode 设置为 permissive，则可以按需选择是否经由 SSL 认证。",
+      "example": false,
+      "type": "boolean"
+     },
+     "FileReservedTime": {
+      "description": "消息在消息队列 RocketMQ版服务端的保留时长，超过保留时长的消息将被过期清理。单位为小时。",
+      "example": 72,
+      "format": "int32",
+      "type": "integer"
+     },
+     "InstanceDescription": {
+      "description": "实例的简单描述。",
+      "example": "这是一个测试实例",
+      "type": "string"
+     },
+     "InstanceId": {
+      "description": "实例 ID。",
+      "example": "rocketmq-cnai1f0c29ca****",
+      "type": "string"
+     },
+     "InstanceName": {
+      "description": "实例名称。",
+      "example": "newnstance",
+      "type": "string"
+     },
+     "InstanceStatus": {
+      "description": "实例状态。",
+      "example": "Running",
+      "type": "string"
+     },
+     "InstanceTags": {
+      "description": "实例绑定的标签。",
+      "example": [
+       "/"
+      ],
+      "items": {
+       "$ref": "#/components/schemas/TagObject"
+      },
+      "type": "array"
+     },
+     "ProjectName": {
+      "description": "实例所属的 IAM 项目。如果实例不属于任何 IAM 项目，则不返回此参数。",
+      "example": "newproject",
+      "type": "string"
+     },
+     "RegionId": {
+      "description": "实例所在的地域 ID。",
+      "example": "cn-shanghai",
+      "type": "string"
+     },
+     "SSLMode": {
+      "description": "实例的公网连接策略，仅在开启公网访问时需要设置。支持设置为：\n\n- enforcing：通过公网访问实例时，必须经由 SSL 认证。SSL 认证可实现数据的加密传输，相较于普通公网访问方式具备更高的安全性，但性能会有所下降。\n- permissive：通过公网访问实例时，可以选择是否经由 SSL 认证。",
+      "example": "permissive",
+      "type": "string"
+     },
+     "StorageSpace": {
+      "description": "实例总存储空间。单位为 GiB。",
+      "example": 200,
+      "format": "int32",
+      "type": "integer"
+     },
+     "SubnetId": {
+      "description": "VPC 的子网 ID。",
+      "example": "subnet-min6uy01kuf45smt1a2i****",
+      "type": "string"
+     },
+     "Tags": {
+      "$ref": "#/components/schemas/Tags"
+     },
+     "UsedGroupNumber": {
+      "description": "当前实例已经创建的消费组（Group）个数。",
+      "example": 20,
+      "format": "int32",
+      "type": "integer"
+     },
+     "UsedQueueNumber": {
+      "description": "实例已经使用的队列数。",
+      "example": 1,
+      "format": "int32",
+      "type": "integer"
+     },
+     "UsedStorageSpace": {
+      "description": "实例已用储空间。单位为 GiB。",
+      "example": 100,
+      "format": "int32",
+      "type": "integer"
+     },
+     "UsedTopicNumber": {
+      "description": "当前实例已创建的 Topic 个数。",
+      "example": 20,
+      "format": "int32",
+      "type": "integer"
+     },
+     "Version": {
+      "description": "支持的 RocketMQ 版本。当前支持 4.8 版本，即兼容 RocketMQ 4.x 版本系列。",
+      "example": "4.8",
+      "type": "string"
+     },
+     "VpcId": {
+      "description": "私有网络（VPC） ID。",
+      "example": "vpc-13fo9gkz6j6683n6nu5ec****",
+      "type": "string"
+     },
+     "ZoneId": {
+      "description": "实例所在的可用区 ID。对于跨 AZ 的高可用实例，此处会返回多个可用区 ID。",
+      "example": "cn-guangzhou-a",
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceId",
+     "InstanceName",
+     "InstanceDescription",
+     "InstanceStatus",
+     "RegionId",
+     "ZoneId",
+     "Version",
+     "UsedTopicNumber",
+     "ComputeSpec",
+     "CreateTime",
+     "UsedStorageSpace",
+     "StorageSpace",
+     "VpcId",
+     "SubnetId",
+     "EnableSSL",
+     "FileReservedTime",
+     "AccountId",
+     "UsedGroupNumber",
+     "ChargeDetail",
+     "ApplyPrivateDNSToPublic"
+    ],
+    "type": "object"
+   },
+   "BasicMessageInfoObject": {
+    "description": "查询到的消息体信息。",
+    "properties": {
+     "Body": {
+      "description": "消息体。您需要按照自己定义的序列化方式解析消息内容。",
+      "example": "aGVsbG8g\u0026*****",
+      "type": "string"
+     },
+     "CreateTimestamp": {
+      "description": "消息生成的时间戳，单位为秒。",
+      "example": 1683313762,
+      "format": "int64",
+      "type": "integer"
+     },
+     "IsExist": {
+      "description": "消息是否仍旧保留在服务端。\ntrue：消息存在。\nfalse：消息不存在。",
+      "example": true,
+      "type": "boolean"
+     },
+     "MessageId": {
+      "description": "消息 ID。",
+      "example": "FDBDDC420003019700000000000000390017014AE5A51A6D2B75****",
+      "type": "string"
+     },
+     "MessageKey": {
+      "description": "消息 Key。为了避免特殊字符的影响，消息 Key 将会以 Base64 的编码的方式返回，需要通过 Base64 解码后才能查看。",
+      "example": "FDBD",
+      "type": "string"
+     },
+     "MessageSize": {
+      "description": "消息大小，单位为（Byte）。",
+      "example": 332,
+      "format": "int32",
+      "type": "integer"
+     },
+     "ProducerHost": {
+      "description": "生产者实例地址。",
+      "example": "100.xx.xx.xx:612",
+      "type": "string"
+     },
+     "StoreTimestamp": {
+      "description": "消息被服务端存储的时间戳，单位为秒。",
+      "example": 1683313762,
+      "format": "int64",
+      "type": "integer"
+     },
+     "Tag": {
+      "description": "消息 Tag。",
+      "example": "FDBD",
+      "type": "string"
+     },
+     "TopicName": {
+      "description": "Topic 名称。",
+      "example": "test",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Body",
+     "MessageKey",
+     "MessageId",
+     "MessageSize",
+     "ProducerHost",
+     "Tag",
+     "TopicName",
+     "IsExist",
+     "CreateTimestamp",
+     "StoreTimestamp"
+    ],
+    "type": "object"
+   },
+   "BasicQueueInfo": {
+    "description": "Topic队列信息。",
+    "properties": {
+     "EndOffset": {
+      "description": "当前队列的最大偏移量，即下一条消息的偏移量，当前最新消息的位置为 EndOffset - 1。",
+      "example": 1133024483,
+      "format": "int32",
+      "type": "integer"
+     },
+     "LastUpdateTimestamp": {
+      "description": "该队列最近一次消息写入的时间。",
+      "example": 1683546795534,
+      "format": "int64",
+      "type": "integer"
+     },
+     "MessageCount": {
+      "description": "当前队列队列内的消息个数。\nEndOffset 为下一条消息的偏移量，所以 MessageCount=EndOffset-StartOffset。",
+      "example": 95492440,
+      "format": "int32",
+      "type": "integer"
+     },
+     "QueueId": {
+      "description": "队列的编号 ID。",
+      "example": "rocketmq-cnai81fd122a****-broker-0-0",
+      "type": "string"
+     },
+     "StartOffset": {
+      "description": "当前队列最早消息的偏移量。",
+      "example": 1037532043,
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "EndOffset",
+     "MessageCount",
+     "QueueId",
+     "StartOffset",
+     "LastUpdateTimestamp"
+    ],
+    "type": "object"
+   },
+   "BasicTopicInfoObject": {
+    "description": "Topic详细信息。",
+    "properties": {
+     "CreateTime": {
+      "description": "Topic 创建时间。",
+      "example": "2023-01-09T06:30:18Z",
+      "type": "string"
+     },
+     "Description": {
+      "description": "Topic 描述。",
+      "example": "test",
+      "type": "string"
+     },
+     "MessageType": {
+      "description": "消息类型。取值说明如下：\n- 0：普通消息\n- 1：事务消息\n- 2:  分区顺序消息\n- 3:  全局顺序消息\n- 4：延时消息",
+      "example": 0,
+      "format": "int32",
+      "type": "integer"
+     },
+     "QueueNumber": {
+      "description": "队列个数。",
+      "example": 10,
+      "format": "int32",
+      "type": "integer"
+     },
+     "TopicName": {
+      "description": "Topic 名称。",
+      "example": "rocketmq123",
+      "type": "string"
+     }
+    },
+    "required": [
+     "CreateTime",
+     "Description",
+     "MessageType",
+     "QueueNumber",
+     "TopicName"
+    ],
+    "type": "object"
+   },
+   "ChargeDetailObject": {
+    "description": "实例的计费信息，包括计费方式等信息。",
+    "properties": {
+     "AutoRenew": {
+      "description": "包年包月实例到期后是否自动续费。\ntrue：自动续费。\nfalse：不自动续费。到期后需要手动续费，否则实例将被关停。",
+      "example": true,
+      "type": "boolean"
+     },
+     "ChargeExpireTime": {
+      "description": "包年包月实例的到期时间。时间显示格式为YYYY-MM-DD'T'HH:MM:SS'Z'。\n按量付费实例此字段默认显示为 1970-01-01T00:00:00Z。",
+      "example": "2022-07-18T07:48:58Z",
+      "type": "string"
+     },
+     "ChargeStartTime": {
+      "description": "实例的开始计费时间。时间显示格式为YYYY-MM-DD'T'HH:MM:SS'Z'。",
+      "example": "2022-07-18T07:48:58Z",
+      "type": "string"
+     },
+     "ChargeStatus": {
+      "description": "实例的计费状态。包括：\nNormal：正常\nOverdue：按量计费欠费\nExpired：包年包月到期",
+      "example": "Normal",
+      "type": "string"
+     },
+     "ChargeType": {
+      "description": "实例的计费类型。支持的类型包括：\nPostPaid ：按量付费\nPrePaid：包年包月",
+      "example": "PostPaid",
+      "type": "string"
+     },
+     "OverdueReclaimTime": {
+      "description": "实例欠费关停后的预计释放时间。时间显示格式为 YYYY-MM-DD'T'HH:MM:SS'Z'。",
+      "example": "2022-07-18T07:48:58Z",
+      "type": "string"
+     },
+     "OverdueTime": {
+      "description": "实例的欠费关停时间。时间显示格式为 YYYY-MM-DD'T'HH:MM:SS'Z'。",
+      "example": "2022-07-18T07:48:58Z",
+      "type": "string"
+     },
+     "PeriodUnit": {
+      "description": "包年包月类型实例的生命周期单位，即指定以月或以年为单位购买。其中：\nMonthly：（默认）包月\nYearly：包年",
+      "example": "Monthly",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ChargeType",
+     "ChargeStatus",
+     "ChargeStartTime",
+     "ChargeExpireTime",
+     "OverdueTime",
+     "OverdueReclaimTime"
+    ],
+    "type": "object"
+   },
+   "ChargeInfoObject": {
+    "description": "付费信息相关结构体",
+    "properties": {
+     "AutoRenew": {
+      "description": "包年包月实例到期后是否自动续费。\n- true：自动续费。\n- false：不自动续费。到期后需要手动续费，否则实例将被关停。\n仅包年包月类型的实例需要指定，即 ChargeType 指定为 PrePaid 时必选。",
+      "example": true,
+      "type": "boolean"
+     },
+     "ChargeType": {
+      "description": "付费类型。取值：\n- PostPaid：按量付费\n- PrePaid（默认）：包年包月",
+      "example": "zhangsan",
+      "type": "string"
+     },
+     "Period": {
+      "description": "包年包月类型实例的购买时长。\n\n- PeriodUnit 指定为 Monthly 时，取值范围为 1~9。\n- PeriodUnit 指定为 Yearly 时，取值范围为 1~3。\n\n仅包年包月类型的实例需要指定，即 ChargeType 指定为 PrePaid 时必选。",
+      "example": 1,
+      "format": "int32",
+      "type": "integer"
+     },
+     "PeriodUnit": {
+      "description": "包年包月类型实例的生命周期单位，即指定以月或以年为单位购买。其中：\n- Monthly：（默认）包月\n- Yearly：包年\n仅包年包月类型的实例需要指定，即 ChargeType 指定为 PrePaid 时必选。",
+      "example": "Month",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ChargeType"
+    ],
+    "type": "object"
+   },
+   "ChargeItemPriceObject": {
+    "description": "计费实体",
+    "properties": {
+     "ChargeItemCode": {
+      "description": "ChargeItemCode",
+      "type": "string"
+     },
+     "DiscountPrice": {
+      "description": "折扣价",
+      "format": "double",
+      "type": "number"
+     },
+     "OriginalPrice": {
+      "description": "OriginalPrice",
+      "format": "double",
+      "type": "number"
+     },
+     "PayablePrice": {
+      "description": "应付款",
+      "format": "double",
+      "type": "number"
+     },
+     "Quantity": {
+      "description": "Quantity",
+      "format": "double",
+      "type": "number"
+     },
+     "UnitPrice": {
+      "description": "UnitPrice",
+      "format": "double",
+      "type": "number"
+     }
+    },
+    "required": [
+     "ChargeItemCode",
+     "OriginalPrice",
+     "DiscountPrice",
+     "PayablePrice",
+     "UnitPrice",
+     "Quantity"
+    ],
+    "type": "object"
+   },
+   "ChargeItemPriceObjectV2": {
+    "description": "询价接口返回",
+    "properties": {
+     "BillingMethod": {
+      "description": "计费方式",
+      "type": "string"
+     },
+     "ChargeItemCode": {
+      "description": "计费项",
+      "type": "string"
+     },
+     "DiscountPrice": {
+      "description": "折扣价",
+      "type": "string"
+     },
+     "OriginalPrice": {
+      "description": "原价",
+      "type": "string"
+     },
+     "PayablePrice": {
+      "description": "应付价格",
+      "type": "string"
+     },
+     "Quantity": {
+      "description": "数量",
+      "format": "int64",
+      "type": "integer"
+     },
+     "UnitPrice": {
+      "description": "单价",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ChargeItemCode",
+     "OriginalPrice",
+     "DiscountPrice",
+     "PayablePrice",
+     "UnitPrice",
+     "BillingMethod",
+     "Quantity"
+    ],
+    "type": "object"
+   },
+   "CloudMonitorValue": {
+    "description": "云监控值",
+    "properties": {
+     "DescriptionCN": {
+      "description": "cn",
+      "type": "string"
+     },
+     "DescriptionEN": {
+      "description": "en",
+      "type": "string"
+     },
+     "Value": {
+      "description": "val",
+      "type": "string"
+     }
+    },
+    "required": [
+     "DescriptionCN",
+     "DescriptionEN",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "ComputeConfig": {
+    "description": "规格配置",
+    "properties": {
+     "CPU": {
+      "description": "cpu",
+      "format": "int32",
+      "type": "integer"
+     },
+     "MaxBurstTPS": {
+      "description": "最大突发tps",
+      "format": "int32",
+      "type": "integer"
+     },
+     "MaxDeferGroupCount": {
+      "description": "最大defer数量",
+      "format": "int32",
+      "type": "integer"
+     },
+     "MaxDiskSize": {
+      "description": "最大磁盘",
+      "format": "int32",
+      "type": "integer"
+     },
+     "MaxGroups": {
+      "description": "最大group",
+      "format": "int32",
+      "type": "integer"
+     },
+     "MaxQueues": {
+      "description": "最大队列",
+      "format": "int32",
+      "type": "integer"
+     },
+     "MaxTPS": {
+      "description": "最大tps",
+      "format": "int32",
+      "type": "integer"
+     },
+     "MaxTopics": {
+      "description": "最大tps",
+      "format": "int32",
+      "type": "integer"
+     },
+     "Maxconnections": {
+      "description": "最大连接",
+      "format": "int32",
+      "type": "integer"
+     },
+     "Memory": {
+      "description": "内存",
+      "format": "int32",
+      "type": "integer"
+     },
+     "MinDiskSize": {
+      "description": "最小磁盘",
+      "format": "int32",
+      "type": "integer"
+     },
+     "NodeNumber": {
+      "description": "节点数量",
+      "format": "int32",
+      "type": "integer"
+     },
+     "NormType": {
+      "description": "NormType",
+      "type": "string"
+     },
+     "ProductVersion": {
+      "description": "产品版本",
+      "type": "string"
+     },
+     "SpecAbility": {
+      "description": "规格能力",
+      "type": "string"
+     }
+    },
+    "required": [
+     "NormType"
+    ],
+    "type": "object"
+   },
+   "ComputeSpecsInfoObject": {
+    "description": "规格详情",
+    "properties": {
+     "BurstTPS": {
+      "description": "burst tps",
+      "format": "int32",
+      "type": "integer"
+     },
+     "ComputeSpec": {
+      "description": "规格",
+      "type": "string"
+     },
+     "ConnectionNumber": {
+      "description": "连接数量",
+      "format": "int32",
+      "type": "integer"
+     },
+     "Cpu": {
+      "description": "cpu",
+      "format": "double",
+      "type": "number"
+     },
+     "GroupNumber": {
+      "description": "group数量",
+      "format": "int32",
+      "type": "integer"
+     },
+     "MaxDeferGroupCount": {
+      "description": "最大defer组数",
+      "format": "int32",
+      "type": "integer"
+     },
+     "Memory": {
+      "description": "内存",
+      "format": "double",
+      "type": "number"
+     },
+     "NodeNumber": {
+      "description": "节点数量",
+      "format": "int32",
+      "type": "integer"
+     },
+     "ProductVersion": {
+      "description": "产品版本",
+      "type": "string"
+     },
+     "QueueNumber": {
+      "description": "队列数量",
+      "format": "int32",
+      "type": "integer"
+     },
+     "SpecAbility": {
+      "description": "规格能力",
+      "type": "string"
+     },
+     "SpecStatus": {
+      "description": "规格状态",
+      "type": "string"
+     },
+     "StorageSpaceMax": {
+      "description": "最大存储空间",
+      "format": "int32",
+      "type": "integer"
+     },
+     "StorageSpaceMin": {
+      "description": "最小存储空间",
+      "format": "int32",
+      "type": "integer"
+     },
+     "TPS": {
+      "description": "tps",
+      "format": "int32",
+      "type": "integer"
+     },
+     "TopicNumber": {
+      "description": "topic数量",
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "ComputeSpec",
+     "TPS",
+     "StorageSpaceMin",
+     "QueueNumber",
+     "GroupNumber",
+     "TopicNumber",
+     "ConnectionNumber",
+     "SpecStatus"
+    ],
+    "type": "object"
+   },
+   "ConfigItemPriceObjectV2": {
+    "description": "计费配置",
+    "properties": {
+     "ChargeItemPrices": {
+      "description": "。",
+      "items": {
+       "$ref": "#/components/schemas/ChargeItemPriceObjectV2"
+      },
+      "type": "array"
+     },
+     "ConfigurationCode": {
+      "description": "配置编码",
+      "type": "string"
+     },
+     "CouponAmount": {
+      "description": "代金券金额",
+      "type": "string"
+     },
+     "DiscountPrice": {
+      "description": "折扣价",
+      "type": "string"
+     },
+     "InstanceID": {
+      "description": "实例id",
+      "type": "string"
+     },
+     "OriginalPrice": {
+      "description": "原价",
+      "type": "string"
+     },
+     "PayablePrice": {
+      "description": "支付价格",
+      "type": "string"
+     },
+     "Quantity": {
+      "description": "数量",
+      "format": "int64",
+      "type": "integer"
+     },
+     "RefundAmount": {
+      "description": "退款金额",
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceID",
+     "ConfigurationCode",
+     "OriginalPrice",
+     "DiscountPrice",
+     "PayablePrice",
+     "RefundAmount",
+     "CouponAmount",
+     "Quantity",
+     "ChargeItemPrices"
+    ],
+    "type": "object"
+   },
+   "ConsumeRateLimitConfig": {
+    "description": "消费限流配置",
+    "properties": {
+     "Action": {
+      "description": "0: 生产 1: 消费",
+      "format": "int64",
+      "type": "integer"
+     },
+     "Configs": {
+      "description": "消费组限流配置",
+      "items": {
+       "$ref": "#/components/schemas/ConsumerGroupRateLimitConfig"
+      },
+      "type": "array"
+     },
+     "Default": {
+      "$ref": "#/components/schemas/RateLimitMode"
+     }
+    },
+    "required": [
+     "Action"
+    ],
+    "type": "object"
+   },
+   "ConsumeStatus": {
+    "description": "消费状态",
+    "properties": {
+     "ConsumeFailRate": {
+      "description": "消费失败速率",
+      "format": "double",
+      "type": "number"
+     },
+     "ConsumeRT": {
+      "description": "消费延迟",
+      "format": "double",
+      "type": "number"
+     },
+     "ConsumeSuccessRate": {
+      "description": "消费成功速率",
+      "format": "double",
+      "type": "number"
+     },
+     "MessageLag": {
+      "description": "堆积",
+      "format": "double",
+      "type": "number"
+     },
+     "Topic": {
+      "description": "topic",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Topic",
+     "ConsumeRT",
+     "ConsumeSuccessRate",
+     "ConsumeFailRate"
+    ],
+    "type": "object"
+   },
+   "ConsumedClientInfoObject": {
+    "description": "符合查询条件的消费客户端列表。",
+    "properties": {
+     "ClientAddress": {
+      "description": "该消费者实例的地址和端口。",
+      "example": "10.60.xxxx",
+      "type": "string"
+     },
+     "ClientId": {
+      "description": "该消费者实例的 ID。",
+      "example": "192.xxx.xx@16xxxx",
+      "type": "string"
+     },
+     "Diff": {
+      "description": "消息堆积量。",
+      "example": 10,
+      "format": "int64",
+      "type": "integer"
+     },
+     "Language": {
+      "description": "消费者应用的开发语言。",
+      "example": "JAVA",
+      "type": "string"
+     },
+     "Version": {
+      "description": "消费端版本。",
+      "example": "V4_8_0",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ClientAddress",
+     "ClientId",
+     "Language",
+     "Version",
+     "Diff"
+    ],
+    "type": "object"
+   },
+   "ConsumedQueueInfoObject": {
+    "description": "Group 订阅的 Topic 中，每个队列的消费进度信息。",
+    "properties": {
+     "ConsumeOffset": {
+      "description": "当前消费进度。",
+      "example": 300284750,
+      "format": "int32",
+      "type": "integer"
+     },
+     "DiffCount": {
+      "description": "未消费消息数。\nEndOffset 为下一条消息的偏移量，所以MessageCount=EndOffset-Consume Offset。",
+      "example": 0,
+      "format": "int32",
+      "type": "integer"
+     },
+     "EndOffset": {
+      "description": "当前队列下一条消息的偏移量。\n此参数定义为下一条消息的偏移量，则当前最新消息的位置为EndOffset - 1。",
+      "example": 300284750,
+      "format": "int32",
+      "type": "integer"
+     },
+     "LastTimeStamp": {
+      "description": "队列最近一次消费行为的时间戳，单位秒级。",
+      "example": 0,
+      "format": "int64",
+      "type": "integer"
+     },
+     "QueueId": {
+      "description": "队列编号。",
+      "example": "rocketmq-cnai81fd122a****-broker-0-3",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ConsumeOffset",
+     "DiffCount",
+     "EndOffset",
+     "QueueId",
+     "LastTimeStamp"
+    ],
+    "type": "object"
+   },
+   "ConsumedTopicInfoObject": {
+    "description": "Group 所订阅的 Topic 信息列表。",
+    "properties": {
+     "QueueNum": {
+      "description": "Topic 对应的队列数。每个 Topic 下有一到多个队列用于存储消息。",
+      "example": 8,
+      "format": "int32",
+      "type": "integer"
+     },
+     "SubString": {
+      "description": "订阅规则。",
+      "example": "/",
+      "type": "string"
+     },
+     "TopicName": {
+      "description": "客户端订阅的 Topic 名称。",
+      "example": "test",
+      "type": "string"
+     }
+    },
+    "required": [
+     "QueueNum",
+     "SubString",
+     "TopicName"
+    ],
+    "type": "object"
+   },
+   "ConsumedTopicsInfoForClient": {
+    "description": "客户端订阅topic信息",
+    "properties": {
+     "ConsumeFailRate": {
+      "description": "消费失败速率",
+      "type": "string"
+     },
+     "ConsumeResponseTime": {
+      "description": "消费耗时",
+      "type": "string"
+     },
+     "ConsumeSuccessRate": {
+      "description": "消费成功速率",
+      "type": "string"
+     },
+     "Diff": {
+      "description": "堆积",
+      "format": "int32",
+      "type": "integer"
+     },
+     "TopicName": {
+      "description": "TopicName",
+      "type": "string"
+     }
+    },
+    "required": [
+     "TopicName",
+     "ConsumeSuccessRate",
+     "ConsumeFailRate",
+     "ConsumeResponseTime",
+     "Diff"
+    ],
+    "type": "object"
+   },
+   "ConsumerConnectionInfoLite": {
+    "description": "消费连接详情",
+    "properties": {
+     "ClientId": {
+      "description": "ClientId",
+      "type": "string"
+     },
+     "ClientIp": {
+      "description": "client ip",
+      "type": "string"
+     },
+     "Language": {
+      "description": "Language",
+      "type": "string"
+     },
+     "MessageLag": {
+      "description": "lag",
+      "format": "int64",
+      "type": "integer"
+     },
+     "Version": {
+      "description": "Version",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ClientIp",
+     "Language",
+     "Version",
+     "ClientId"
+    ],
+    "type": "object"
+   },
+   "ConsumerGroupRateLimitConfig": {
+    "description": "消费组限流配置",
+    "properties": {
+     "Configs": {
+      "description": "topic限流配置",
+      "items": {
+       "$ref": "#/components/schemas/TopicRateLimitConfig"
+      },
+      "type": "array"
+     },
+     "ConsumerGroup": {
+      "description": "消费组",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ConsumerGroup"
+    ],
+    "type": "object"
+   },
+   "ConsumerTraceInfo": {
+    "description": "消费者消息轨迹",
+    "properties": {
+     "ConsumeStatus": {
+      "description": "消费状态，成功或者失败",
+      "example": "CONSUME_SUCCESS",
+      "type": "string"
+     },
+     "ConsumeSuccess": {
+      "description": "消费是否成功",
+      "example": true,
+      "type": "boolean"
+     },
+     "ConsumerHost": {
+      "description": "消费者客户端地址",
+      "example": "10.200.2xx.1xx@91050",
+      "type": "string"
+     },
+     "EndProcessTimestamp": {
+      "description": "消费完成的时间，单位秒",
+      "example": 1739862801,
+      "format": "int64",
+      "type": "integer"
+     },
+     "GroupName": {
+      "description": "消费组名称",
+      "example": "group-test",
+      "type": "string"
+     },
+     "ProcessCostTimeMs": {
+      "description": "消费消息耗时，单位毫秒",
+      "example": 3,
+      "format": "int32",
+      "type": "integer"
+     },
+     "ReconsumeTimes": {
+      "description": "重试消费次数",
+      "example": 2,
+      "format": "int32",
+      "type": "integer"
+     },
+     "StartProcessTimestamp": {
+      "description": "开始消费消息的时间，单位秒",
+      "example": 1739862800,
+      "format": "int64",
+      "type": "integer"
+     },
+     "Timestamp": {
+      "description": "开始消费时间，单位秒",
+      "example": 62800,
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "ConsumerHost",
+     "StartProcessTimestamp",
+     "EndProcessTimestamp",
+     "ProcessCostTimeMs",
+     "ReconsumeTimes",
+     "GroupName",
+     "ConsumeStatus",
+     "ConsumeSuccess",
+     "Timestamp"
+    ],
+    "type": "object"
+   },
+   "EndpointObject": {
+    "description": "实例接入点信息相关结构体",
+    "properties": {
+     "EndpointAddressIP": {
+      "description": "实例的接入点 IP 地址。",
+      "example": "/",
+      "type": "string"
+     },
+     "EndpointType": {
+      "description": "实例的接入点类型。",
+      "example": "TCP",
+      "type": "string"
+     },
+     "InternalEndpoint": {
+      "description": "实例的私网接入点地址。",
+      "example": "http://rocketmq-cnai1f0c29ca****.rocketmq.ivolces.com:9876",
+      "type": "string"
+     },
+     "NetworkType": {
+      "description": "实例接入点的网络类型。",
+      "example": "PrivateNetwork",
+      "type": "string"
+     },
+     "PublicEndpoint": {
+      "description": "实例的公网接入点地址。",
+      "example": "http://rocketmq-cnai1f0c29ca****.rocketmq.volces.com:9876",
+      "type": "string"
+     }
+    },
+    "required": [
+     "EndpointType",
+     "NetworkType",
+     "InternalEndpoint",
+     "PublicEndpoint"
+    ],
+    "type": "object"
+   },
+   "EventFilter": {
+    "description": "EventFilter",
+    "properties": {
+     "Key": {
+      "description": "Key：筛选项。支持设置为：\n- Source。其 Value 可设置为 OpenAPI 或 WebConsole。\n- Type。其 Value 可设置为 ModifyPlugin（插件变更）、ScaleInstance：（变更配置）或 RebootInstance（实例重启）。",
+      "example": "Type",
+      "type": "string"
+     },
+     "Value": {
+      "description": "筛选项的值",
+      "example": "WebConsole",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "Filter": {
+    "description": "云监控filter",
+    "properties": {
+     "Name": {
+      "description": "name",
+      "type": "string"
+     },
+     "Values": {
+      "description": "过滤值",
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Values"
+    ],
+    "type": "object"
+   },
+   "GroupInfo": {
+    "description": "group详情",
+    "properties": {
+     "ConsumeMessageOrderly": {
+      "description": "ConsumeMessageOrderly",
+      "type": "boolean"
+     },
+     "CreatedTime": {
+      "description": "CreatedTime",
+      "format": "int64",
+      "type": "integer"
+     },
+     "Description": {
+      "description": "Description",
+      "type": "string"
+     },
+     "GroupId": {
+      "description": "GroupId",
+      "type": "string"
+     },
+     "InstanceId": {
+      "description": "InstanceId",
+      "type": "string"
+     },
+     "InstanceName": {
+      "description": "InstanceName",
+      "type": "string"
+     },
+     "InstanceRegion": {
+      "description": "InstanceRegion",
+      "type": "string"
+     },
+     "InstanceType": {
+      "description": "InstanceType",
+      "type": "string"
+     },
+     "LastUpdateTimestamp": {
+      "description": "LastUpdateTimestamp",
+      "type": "string"
+     },
+     "RetryMaxTimes": {
+      "description": "RetryMaxTimes",
+      "format": "int32",
+      "type": "integer"
+     },
+     "RocketmqVersion": {
+      "description": "RocketmqVersion",
+      "type": "string"
+     },
+     "ServiceStatus": {
+      "description": "ServiceStatus",
+      "type": "string"
+     },
+     "Tags": {
+      "description": "Tags",
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "InstanceId",
+     "GroupId",
+     "Description",
+     "CreatedTime",
+     "Tags",
+     "InstanceName",
+     "InstanceRegion",
+     "RocketmqVersion",
+     "ConsumeMessageOrderly",
+     "RetryMaxTimes",
+     "ServiceStatus"
+    ],
+    "type": "object"
+   },
+   "GroupPermission": {
+    "description": "group权限",
+    "properties": {
+     "GroupName": {
+      "description": "消费组名称",
+      "type": "string"
+     },
+     "Permission": {
+      "description": "权限",
+      "type": "string"
+     }
+    },
+    "required": [
+     "GroupName",
+     "Permission"
+    ],
+    "type": "object"
+   },
+   "GroupResult": {
+    "description": "消费组校验结果",
+    "properties": {
+     "Code": {
+      "description": "错误编码",
+      "example": "1",
+      "type": "string"
+     },
+     "GroupName": {
+      "description": "Group名称",
+      "example": "my_group",
+      "type": "string"
+     },
+     "Message": {
+      "description": "错误描述",
+      "example": "group name is invalid",
+      "type": "string"
+     }
+    },
+    "required": [
+     "GroupName",
+     "Message",
+     "Code"
+    ],
+    "type": "object"
+   },
+   "GroupStatus": {
+    "description": "GroupStatus",
+    "properties": {
+     "ConsumeRate": {
+      "description": "ConsumeRate",
+      "format": "double",
+      "type": "number"
+     },
+     "GroupId": {
+      "description": "GroupId",
+      "type": "string"
+     },
+     "MessageDelayTimeMs": {
+      "description": "MessageDelayTimeMs",
+      "format": "int64",
+      "type": "integer"
+     },
+     "MessageMode": {
+      "description": "MessageMode",
+      "type": "string"
+     },
+     "MesssageLagNumber": {
+      "description": "MesssageLagNumber",
+      "format": "int64",
+      "type": "integer"
+     },
+     "Status": {
+      "description": "Status",
+      "type": "string"
+     },
+     "SubscriptionSame": {
+      "description": "SubscriptionSame",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "GroupId",
+     "Status"
+    ],
+    "type": "object"
+   },
+   "GroupStatusLite": {
+    "description": "GroupStatusLite",
+    "properties": {
+     "ExpType": {
+      "description": "ExpType",
+      "type": "string"
+     },
+     "GroupId": {
+      "description": "group id",
+      "type": "string"
+     },
+     "MessageMode": {
+      "description": "MessageMode",
+      "type": "string"
+     },
+     "SubString": {
+      "description": "SubString",
+      "type": "string"
+     }
+    },
+    "required": [
+     "GroupId",
+     "MessageMode",
+     "SubString",
+     "ExpType"
+    ],
+    "type": "object"
+   },
+   "ImportGroup": {
+    "description": "导入的消费组信息",
+    "properties": {
+     "ConsumeMessageOrderly": {
+      "description": "是否顺序消费",
+      "example": false,
+      "type": "boolean"
+     },
+     "Description": {
+      "description": "Group描述",
+      "example": "test group",
+      "type": "string"
+     },
+     "GroupId": {
+      "description": "Group名称",
+      "example": "my_group",
+      "type": "string"
+     },
+     "RetryMaxTimes": {
+      "description": "重试次数",
+      "example": 10,
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "GroupId",
+     "Description"
+    ],
+    "type": "object"
+   },
+   "ImportTopic": {
+    "description": "topic 导入信息",
+    "properties": {
+     "AccessPolicies": {
+      "description": "acl策略",
+      "type": "string"
+     },
+     "Description": {
+      "description": "描述",
+      "type": "string"
+     },
+     "QueueNumber": {
+      "description": "队列数量",
+      "format": "int32",
+      "type": "integer"
+     },
+     "TopicName": {
+      "description": "topic名称",
+      "example": "topic-test",
+      "type": "string"
+     },
+     "TopicType": {
+      "description": "topic类型",
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "TopicName",
+     "Description",
+     "QueueNumber",
+     "TopicType"
+    ],
+    "type": "object"
+   },
+   "InspectConfig": {
+    "description": "巡检配置项",
+    "properties": {
+     "Configurable": {
+      "$ref": "#/components/schemas/InspectConfigMutable"
+     },
+     "Describe": {
+      "description": "巡检配置项描述。",
+      "example": "实例queue分布不均衡\n",
+      "type": "string"
+     },
+     "InspectName": {
+      "description": "巡检项名称。",
+      "example": "queueBalance",
+      "type": "string"
+     },
+     "StartInspectTimeStamp": {
+      "description": "上次手动触发巡检的时间。",
+      "example": "1725968687",
+      "type": "string"
+     },
+     "Type": {
+      "description": "巡检项类型，可选值为 cluster、topic、group。",
+      "example": "cluster",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Type",
+     "InspectName",
+     "StartInspectTimeStamp",
+     "Configurable",
+     "Describe"
+    ],
+    "type": "object"
+   },
+   "InspectConfigMutable": {
+    "description": "巡检项可配置参数",
+    "properties": {
+     "Enable": {
+      "description": "是否开启巡检项。\n\n- true：开启\n- false：关闭",
+      "example": true,
+      "type": "boolean"
+     },
+     "Interval": {
+      "description": "巡检项巡检间隔周期，单位 s。",
+      "example": 30,
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "Enable",
+     "Interval"
+    ],
+    "type": "object"
+   },
+   "InspectResult": {
+    "description": "巡检异常结果",
+    "properties": {
+     "Describe": {
+      "description": "巡检项的描述。",
+      "example": "实例queue分布不均衡",
+      "type": "string"
+     },
+     "InspectName": {
+      "description": "巡检项的名称。",
+      "example": "queueBalance",
+      "type": "string"
+     },
+     "Level": {
+      "description": "巡检结果的风险等级。\n\n- low：低风险\n- medium：中风险\n- high：高风险",
+      "example": "medium",
+      "type": "string"
+     },
+     "Resource": {
+      "description": "巡检结果关联资源。",
+      "example": [
+       "test1",
+       "test2"
+      ],
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "ResultId": {
+      "description": "巡检结果唯一 ID。",
+      "example": "519fe2c3f72e4ea2a1e49de**",
+      "type": "string"
+     },
+     "Status": {
+      "description": "巡检异常结果的状态。\n\n- unSolved：未处理\n- Solved：已处理",
+      "example": "unSolved",
+      "type": "string"
+     },
+     "Suggestion": {
+      "description": "异常结果的处理建议。",
+      "example": [
+       "1. 扩容queue, 会自动将queue rebalance到其他broker",
+       "2. 联系管理员对queue进行重均衡"
+      ],
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "TimeStamp": {
+      "description": "巡检异常结果的发生时间戳。",
+      "example": "1722944022630",
+      "type": "string"
+     },
+     "Type": {
+      "description": "巡检项类型。",
+      "example": "Topic",
+      "type": "string"
+     }
+    },
+    "required": [
+     "InspectName",
+     "Type",
+     "ResultId",
+     "Level",
+     "TimeStamp",
+     "Status",
+     "Suggestion",
+     "Describe"
+    ],
+    "type": "object"
+   },
+   "InstanceForCloudMonitor": {
+    "description": "云监控实例",
+    "properties": {
+     "EnableConnector": {
+      "description": "是否开启connector",
+      "type": "boolean"
+     },
+     "GroupNum": {
+      "description": "group 数量",
+      "format": "int32",
+      "type": "integer"
+     },
+     "InstanceId": {
+      "description": "实例id",
+      "type": "string"
+     },
+     "InstanceName": {
+      "description": "实例名称",
+      "type": "string"
+     },
+     "ProjectName": {
+      "description": "project name",
+      "type": "string"
+     },
+     "Status": {
+      "description": "状态",
+      "type": "string"
+     },
+     "Tags": {
+      "description": "tag",
+      "items": {
+       "$ref": "#/components/schemas/TagObjectForCloudMonitor"
+      },
+      "type": "array"
+     },
+     "TopicNum": {
+      "description": "topic数量",
+      "format": "int32",
+      "type": "integer"
+     },
+     "Version": {
+      "description": "版本",
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceName",
+     "InstanceId",
+     "Status",
+     "TopicNum",
+     "GroupNum",
+     "EnableConnector",
+     "Version",
+     "ProjectName"
+    ],
+    "type": "object"
+   },
+   "InstanceNorm": {
+    "description": "InstanceNorm",
+    "properties": {
+     "ComputeNorm": {
+      "description": "ComputeNorm",
+      "type": "string"
+     },
+     "InstanceId": {
+      "description": "InstanceId",
+      "type": "string"
+     },
+     "StorageSize": {
+      "description": "StorageSize",
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "InstanceId",
+     "ComputeNorm",
+     "StorageSize"
+    ],
+    "type": "object"
+   },
+   "Map": {
+    "additionalProperties": true,
+    "description": "map类型",
+    "type": "object"
+   },
+   "MessageDataDetail": {
+    "description": "消息数据详情",
+    "properties": {
+     "MirrorTaskContainMessageSync": {
+      "description": "MirrorTaskContainMessageSync",
+      "type": "string"
+     },
+     "StartPosition": {
+      "description": "其实位点",
+      "format": "int32",
+      "type": "integer"
+     },
+     "SyncDiff": {
+      "description": "同步差异",
+      "items": {
+       "$ref": "#/components/schemas/MessageDataDiffDetail"
+      },
+      "type": "array"
+     },
+     "Total": {
+      "description": "总数",
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "MirrorTaskContainMessageSync",
+     "StartPosition",
+     "Total"
+    ],
+    "type": "object"
+   },
+   "MessageDataDiffDetail": {
+    "description": "消息数据差异详情",
+    "properties": {
+     "Diff": {
+      "description": "差异",
+      "type": "string"
+     },
+     "TopicName": {
+      "description": "topic名称",
+      "type": "string"
+     }
+    },
+    "required": [
+     "TopicName",
+     "Diff"
+    ],
+    "type": "object"
+   },
+   "MessageProperty": {
+    "description": "消息属性",
+    "properties": {
+     "Key": {
+      "description": "key",
+      "type": "string"
+     },
+     "Value": {
+      "description": "val",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "MessageQueue": {
+    "description": "topic 队列",
+    "properties": {
+     "BrokerName": {
+      "description": "broker 组名",
+      "type": "string"
+     },
+     "QueueId": {
+      "description": "队列id",
+      "format": "int32",
+      "type": "integer"
+     },
+     "TopicName": {
+      "description": "topic名称",
+      "type": "string"
+     }
+    },
+    "required": [
+     "BrokerName",
+     "QueueId",
+     "TopicName"
+    ],
+    "type": "object"
+   },
+   "MetaDataDetail": {
+    "description": "元数据详情",
+    "properties": {
+     "MirrorTaskContainMetaSync": {
+      "description": "元数据同步",
+      "type": "boolean"
+     },
+     "SyncDiff": {
+      "description": "同步差异",
+      "items": {
+       "$ref": "#/components/schemas/MetaDataDiffDetail"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "MirrorTaskContainMetaSync"
+    ],
+    "type": "object"
+   },
+   "MetaDataDiffDetail": {
+    "description": "diff ",
+    "properties": {
+     "Diff": {
+      "description": "差异",
+      "format": "int32",
+      "type": "integer"
+     },
+     "MetaDataType": {
+      "description": "元数据类型",
+      "type": "string"
+     },
+     "Total": {
+      "description": "总数",
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "MetaDataType",
+     "Diff",
+     "Total"
+    ],
+    "type": "object"
+   },
+   "ModifyInstanceDomainPrefixBase": {
+    "description": "域名前缀",
+    "properties": {
+     "Component": {
+      "description": "组件",
+      "type": "string"
+     },
+     "NetworkType": {
+      "description": "网络类型",
+      "type": "string"
+     },
+     "NewDomainPrefix": {
+      "description": "域名前缀",
+      "type": "string"
+     },
+     "OldDomain": {
+      "description": "旧域名",
+      "type": "string"
+     }
+    },
+    "required": [
+     "NetworkType",
+     "NewDomainPrefix",
+     "OldDomain",
+     "Component"
+    ],
+    "type": "object"
+   },
+   "OperationEvent": {
+    "description": "OperationEvent",
+    "properties": {
+     "Duration": {
+      "description": "后台任务的总耗时，单位为秒。",
+      "example": 10,
+      "format": "int32",
+      "type": "integer"
+     },
+     "EndTime": {
+      "description": "后台任务的结束时间，Unix 时间戳格式。",
+      "example": 1645523742,
+      "format": "int32",
+      "type": "integer"
+     },
+     "EventID": {
+      "description": "任务 ID。",
+      "example": 0,
+      "format": "int32",
+      "type": "integer"
+     },
+     "EventSource": {
+      "description": "后台任务来源。\n\n- WebConsole：通过控制台发起的任务。\n- OpenAPI：通过 OpenAPI 发起的任务。",
+      "example": "WebConsole",
+      "type": "string"
+     },
+     "InstanceId": {
+      "description": "实例 ID。",
+      "example": "rbtmq-******",
+      "type": "string"
+     },
+     "OperationDetail": {
+      "description": "后台任务操作详情。",
+      "example": "开启rocketmq_delayed_message_exchange, rocketmq_tracing",
+      "type": "string"
+     },
+     "OperationName": {
+      "description": "后台任务名称。",
+      "example": "ModifyPlugin",
+      "type": "string"
+     },
+     "OperationType": {
+      "description": "任务类型。\n\n- ModifyPlugin：插件变更。\n- ScaleInstance：变更配置\n- RebootInstance：实例重启",
+      "example": "ModifyPlugin",
+      "type": "string"
+     },
+     "StartTime": {
+      "description": "后台任务的开始时间，Unix 时间戳格式。",
+      "example": 1645523741,
+      "format": "int32",
+      "type": "integer"
+     },
+     "Status": {
+      "description": "任务状态。\n\n- Success：执行成功\n- Failed：执行失败\n- Executing：执行中\n- Waiting：等待执行\n- Timeout：已超时",
+      "example": "Success",
+      "type": "string"
+     }
+    },
+    "required": [
+     "StartTime",
+     "OperationName",
+     "EventSource",
+     "Status",
+     "Duration"
+    ],
+    "type": "object"
+   },
+   "ProduceRateLimitConfig": {
+    "description": "生产限流配置",
+    "properties": {
+     "Action": {
+      "description": "生产或者消费限流",
+      "example": "0: 生产 1: 消费",
+      "format": "int64",
+      "type": "integer"
+     },
+     "Configs": {
+      "description": "topic限流配置",
+      "items": {
+       "$ref": "#/components/schemas/TopicRateLimitConfig"
+      },
+      "type": "array"
+     },
+     "Default": {
+      "$ref": "#/components/schemas/RateLimitMode"
+     }
+    },
+    "required": [
+     "Action"
+    ],
+    "type": "object"
+   },
+   "ProducerTraceInfo": {
+    "description": "生产者消息轨迹",
+    "properties": {
+     "MessageBornHost": {
+      "description": "生产者地址",
+      "example": "127.0.0.1:23233",
+      "type": "string"
+     },
+     "MessageBornTimestamp": {
+      "description": "消息产生的时间戳，单位是秒",
+      "example": 1739862800,
+      "format": "int64",
+      "type": "integer"
+     },
+     "SendCostTimeMs": {
+      "description": "消息发送耗时",
+      "example": "3，单位ms",
+      "format": "int32",
+      "type": "integer"
+     },
+     "SendStatus": {
+      "description": "消息发送状态",
+      "example": "SEND_OK",
+      "type": "string"
+     },
+     "Timestamp": {
+      "description": "消息发送时间戳，单位是秒",
+      "example": 1739862800,
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "MessageBornHost",
+     "MessageBornTimestamp",
+     "SendCostTimeMs",
+     "SendStatus",
+     "Timestamp"
+    ],
+    "type": "object"
+   },
+   "ProductInfoObject": {
+    "description": "产品配置信息",
+    "properties": {
+     "SendReceiveRatio": {
+      "description": "修改读写限流比例，默认读写比例各占 50%。\n假设设置为 40，表示发送的 TPS 比列为 40%，订阅比列为 60%。\n:::tip\n仅 RocketMQ 5.x 版本实例支持调整实例的 TPS 占比。\n:::",
+      "example": 40,
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ProxyNumScope": {
+    "description": "byte proxy取值范围",
+    "properties": {
+     "ProxyNumMax": {
+      "description": "proxy最大值",
+      "format": "int32",
+      "type": "integer"
+     },
+     "ProxyNumMin": {
+      "description": "proxy 最小数量",
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "ProxyNumMin",
+     "ProxyNumMax"
+    ],
+    "type": "object"
+   },
+   "PublicNet": {
+    "description": "公网",
+    "properties": {
+     "EipIDs": {
+      "description": "eip",
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Status": {
+      "description": "状态",
+      "type": "string"
+     },
+     "SubnetID": {
+      "description": "子网id",
+      "type": "string"
+     },
+     "VpcID": {
+      "description": "vpc id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "VpcID",
+     "SubnetID",
+     "EipIDs",
+     "Status"
+    ],
+    "type": "object"
+   },
+   "RateLimitMode": {
+    "description": "限流模式",
+    "properties": {
+     "MaxBurstSecond": {
+      "description": "MaxBurstSecond",
+      "format": "float",
+      "type": "number"
+     },
+     "Throughput": {
+      "description": "Throughput",
+      "format": "double",
+      "type": "number"
+     },
+     "Tps": {
+      "description": "tps",
+      "format": "double",
+      "type": "number"
+     }
+    },
+    "required": [
+     "Tps",
+     "Throughput",
+     "MaxBurstSecond"
+    ],
+    "type": "object"
+   },
+   "RegionObject": {
+    "description": "地域信息。",
+    "properties": {
+     "Describeption": {
+      "description": "描述",
+      "type": "string"
+     },
+     "RegionId": {
+      "description": "地域 ID。",
+      "example": "cn-shanghai",
+      "type": "string"
+     },
+     "RegionName": {
+      "description": "地域名称。",
+      "example": "cn-shanghai",
+      "type": "string"
+     },
+     "RegionStatus": {
+      "description": "地域状态。\n- Available：启用。您可在此地域下进行查看、新建资源等动作。\n- Unavailable：停用。\n您不可在停用的地域新开通服务，但不可新购此地域下的商品。已开通的服务依然提供支持，直至服务到期。",
+      "example": "Available",
+      "type": "string"
+     }
+    },
+    "required": [
+     "RegionId",
+     "RegionName",
+     "RegionStatus",
+     "Describeption"
+    ],
+    "type": "object"
+   },
+   "ResendResult": {
+    "description": "消息重投结果",
+    "properties": {
+     "MessageId": {
+      "description": "消息 ID。",
+      "example": "FDBDDC005EA100BE00000000000012133D3418B4AAC259A379FA****",
+      "type": "string"
+     },
+     "Success": {
+      "description": "该条死信消息重新发送是否成功。\n\n- true：发送成功\n- false：发送失败",
+      "example": false,
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "MessageId",
+     "Success"
+    ],
+    "type": "object"
+   },
+   "TagFilterObject": {
+    "description": "tag筛选结构体",
+    "properties": {
+     "Key": {
+      "description": "标签的键。",
+      "example": "owner\n\n",
+      "type": "string"
+     },
+     "Value": {
+      "description": "标签的值。",
+      "example": "zhangsan",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key"
+    ],
+    "type": "object"
+   },
+   "TagFiltersObject": {
+    "description": "标签详情\n",
+    "properties": {
+     "Key": {
+      "description": "标签的键",
+      "example": "owner",
+      "type": "string"
+     },
+     "Values": {
+      "description": "标签的值",
+      "example": [
+       "zhangsan"
+      ],
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Key"
+    ],
+    "type": "object"
+   },
+   "TagObject": {
+    "description": "tag信息",
+    "properties": {
+     "Key": {
+      "description": "标签的键。",
+      "example": "owner",
+      "type": "string"
+     },
+     "Value": {
+      "description": "标签的值。",
+      "example": "zhangsan\n\n",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key"
+    ],
+    "type": "object"
+   },
+   "TagObjectForCloudMonitor": {
+    "description": "tag",
+    "properties": {
+     "Key": {
+      "description": "key",
+      "type": "string"
+     },
+     "Value": {
+      "description": "value",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "TagResource": {
+    "description": "Tag资源",
+    "properties": {
+     "InstanceId": {
+      "description": "实例ID",
+      "example": "rocketmq-cnai1f0c29ca****\n\n",
+      "type": "string"
+     },
+     "Key": {
+      "description": "实例标签的键。",
+      "example": "key",
+      "type": "string"
+     },
+     "Value": {
+      "description": "实例标签的值。",
+      "example": "value",
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceId",
+     "Key"
+    ],
+    "type": "object"
+   },
+   "Tags": {
+    "additionalProperties": true,
+    "description": "实例绑定的标签",
+    "type": "object"
+   },
+   "TopicInfo": {
+    "description": "topic详情",
+    "properties": {
+     "CreatedTime": {
+      "description": "创建时间",
+      "format": "int64",
+      "type": "integer"
+     },
+     "Description": {
+      "description": "描述",
+      "type": "string"
+     },
+     "InstanceId": {
+      "description": "实例id",
+      "type": "string"
+     },
+     "InstanceName": {
+      "description": "实例名",
+      "type": "string"
+     },
+     "InstanceRegion": {
+      "description": "region",
+      "type": "string"
+     },
+     "InstanceType": {
+      "description": "类型",
+      "type": "string"
+     },
+     "MessageType": {
+      "description": "类型",
+      "type": "string"
+     },
+     "ServiceStatus": {
+      "description": "状态",
+      "type": "string"
+     },
+     "Tags": {
+      "description": "tags",
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "TopicName": {
+      "description": "topic名称",
+      "type": "string"
+     },
+     "TopicQueueNumber": {
+      "description": "TopicQueueNumber",
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "InstanceId",
+     "TopicName",
+     "Description",
+     "MessageType",
+     "CreatedTime",
+     "Tags",
+     "InstanceName",
+     "TopicQueueNumber",
+     "ServiceStatus"
+    ],
+    "type": "object"
+   },
+   "TopicInfoLite": {
+    "description": "TopicInfoLite",
+    "properties": {
+     "QueueNumber": {
+      "description": "QueueNumber",
+      "format": "int32",
+      "type": "integer"
+     },
+     "Topic": {
+      "description": "Topic",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Topic",
+     "QueueNumber"
+    ],
+    "type": "object"
+   },
+   "TopicPermission": {
+    "description": "密钥的自定义权限列表。若无自定义权限，则显示为 null。",
+    "properties": {
+     "Permission": {
+      "description": "权限类型。",
+      "example": "ALL",
+      "type": "string"
+     },
+     "TopicName": {
+      "description": "Topic名称。",
+      "example": "test",
+      "type": "string"
+     }
+    },
+    "required": [
+     "TopicName",
+     "Permission"
+    ],
+    "type": "object"
+   },
+   "TopicQueueInfo": {
+    "description": "TopicQueueInfo",
+    "properties": {
+     "LastUpdateTime": {
+      "description": "LastUpdateTime",
+      "format": "int64",
+      "type": "integer"
+     },
+     "MaxOffset": {
+      "description": "MaxOffset",
+      "format": "int64",
+      "type": "integer"
+     },
+     "MinOffset": {
+      "description": "MinOffset",
+      "format": "int64",
+      "type": "integer"
+     },
+     "QueueId": {
+      "description": "QueueId",
+      "type": "string"
+     }
+    },
+    "required": [
+     "QueueId",
+     "MinOffset",
+     "MaxOffset",
+     "LastUpdateTime"
+    ],
+    "type": "object"
+   },
+   "TopicQueueInfoWithGroupProcess": {
+    "description": "TopicQueueInfoWithGroupProcess",
+    "properties": {
+     "ConsumeOffset": {
+      "description": "ConsumeOffset",
+      "format": "int64",
+      "type": "integer"
+     },
+     "LastConsumeMessageTimeStamp": {
+      "description": "LastConsumeMessageTimeStamp",
+      "format": "int64",
+      "type": "integer"
+     },
+     "MaxOffset": {
+      "description": "MaxOffset",
+      "format": "int64",
+      "type": "integer"
+     },
+     "NotConsumeMessage": {
+      "description": "NotConsumeMessage",
+      "format": "int64",
+      "type": "integer"
+     },
+     "QueueId": {
+      "description": "QueueId",
+      "type": "string"
+     }
+    },
+    "required": [
+     "QueueId",
+     "MaxOffset",
+     "ConsumeOffset",
+     "NotConsumeMessage",
+     "LastConsumeMessageTimeStamp"
+    ],
+    "type": "object"
+   },
+   "TopicRateLimitConfig": {
+    "description": "topic限流配置",
+    "properties": {
+     "Topic": {
+      "description": "topic名称",
+      "type": "string"
+     },
+     "Value": {
+      "$ref": "#/components/schemas/RateLimitMode"
+     }
+    },
+    "required": [
+     "Topic"
+    ],
+    "type": "object"
+   },
+   "TopicResult": {
+    "description": "topic检查结果",
+    "properties": {
+     "Code": {
+      "description": "检查结果编码",
+      "type": "string"
+     },
+     "Message": {
+      "description": "详情",
+      "type": "string"
+     },
+     "TopicName": {
+      "description": "topic名称",
+      "type": "string"
+     }
+    },
+    "required": [
+     "TopicName",
+     "Code",
+     "Message"
+    ],
+    "type": "object"
+   },
+   "ZoneObject": {
+    "description": "可用区信息。",
+    "properties": {
+     "Description": {
+      "description": "地域可用区中文名称。",
+      "example": "上海可用区A",
+      "type": "string"
+     },
+     "ZoneId": {
+      "description": "可用区 ID。",
+      "example": "cn-shanghai-a",
+      "type": "string"
+     },
+     "ZoneName": {
+      "description": "可用区名称。",
+      "example": "cn-shanghai-a",
+      "type": "string"
+     },
+     "ZoneStatus": {
+      "description": "可用区的状态，包含以下状态： - Normal：在售。 - Soldout：售罄。 - Unavailable：停用。 您不可在停用的可用区新开通服务，但不可新购此可用区下的商品。已开通的服务依然提供支持，直至服务到期。",
+      "example": "Normal",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ZoneId",
+     "ZoneName",
+     "Description",
+     "ZoneStatus"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "API documentation for RocketMQ",
+  "title": "RocketMQ",
+  "version": "2023-01-01"
+ },
+ "openapi": "3.0.0",
+ "paths": {
+  "/DescribeAvailabilityZones": {
+   "post": {
+    "description": "调用 DescribeAvailabilityZones 接口查看可用区列表。",
+    "operationId": "DescribeAvailabilityZones",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "RegionId": {
+          "description": "地域 ID，可调用 [DescribeRegions](/docs/6410/1112350) 查询。",
+          "example": "cn-shanghai",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "RegionId"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "RegionId": {
+             "description": "地域 ID。",
+             "example": "cn-shanghai",
+             "type": "string"
+            },
+            "Zones": {
+             "description": "可用区列表。",
+             "example": [
+              "/"
+             ],
+             "items": {
+              "$ref": "#/components/schemas/ZoneObject"
+             },
+             "type": "array"
+            }
+           },
+           "type": "object",
+           "x-is-success-response": true
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OK",
+             "type": "string"
+            },
+            "description": {
+             "example": "成功。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 200,
+             "type": "integer"
+            },
+            "message": {
+             "example": "OK",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied_InvalidRequest",
+             "type": "string"
+            },
+            "description": {
+             "example": "请求异常，请检查后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request that you specified is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MissingParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "缺少%s参数。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request body is missing a required parameter %s.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "UnsupportedParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "不支持%s参数。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter %s is unsupported.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数值%s无效，请检查后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter %s is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "NotModifiedParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "未变更任何配置。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The resource was not changed.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidTopicName_AlreadyExists",
+             "type": "string"
+            },
+            "description": {
+             "example": "Topic名称已存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified topic name already exists.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidGroupId_AlreadyExists",
+             "type": "string"
+            },
+            "description": {
+             "example": "Group名称已存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified group name already exists.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "QuotaExceeded_InstanceNumber",
+             "type": "string"
+            },
+            "description": {
+             "example": "实例数量超出上限。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The number of instances exceeds the limit.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "QuotaExceeded_AuthKeyNumber",
+             "type": "string"
+            },
+            "description": {
+             "example": "密钥数量超出上限。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The number of authKeys exceeds the limit.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "QuotaExceeded_TopicNumber",
+             "type": "string"
+            },
+            "description": {
+             "example": "Topic数量超出上限。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The number of topic exceeds the limit.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "QuotaExceeded_GroupNumber",
+             "type": "string"
+            },
+            "description": {
+             "example": "Group数量超出上限。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The number of group exceeds the limit.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "QuotaExceeded_QueueNumber",
+             "type": "string"
+            },
+            "description": {
+             "example": "队列数量超出上限。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The number of queue exceeds the limit.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidPara",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数值无效。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied_AccountNotAuthorized",
+             "type": "string"
+            },
+            "description": {
+             "example": "您不具备相关权限，请授权或切换账号后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "You are not authorized to perform this operation.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied_InternetAccessEnabled",
+             "type": "string"
+            },
+            "description": {
+             "example": "该实例已开启公网访问方式。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Internet access is enabled for the instance.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied_InternetAccessDisabled",
+             "type": "string"
+            },
+            "description": {
+             "example": "该实例未开启公网访问方式。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Internet access is disabled for the instance.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied_InvalidInstanceStatus",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前实例状态不允许执行该操作。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The operation is not valid for the current status of the instance.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied_InstanceNotEmpty",
+             "type": "string"
+            },
+            "description": {
+             "example": "期望删除的实例资源不为空。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The instance that you tried to delete is not empty.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied_ResourceOccupied",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源繁忙，可能由于指定资源正在被访问或回收。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The resource is busy now, please try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied_TaskIsRunning",
+             "type": "string"
+            },
+            "description": {
+             "example": "后台任务正在运行中，请稍后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "An operation is currently in progress. Try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied_VersionUnsupported",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前实例版本不支持指定操作，请升级实例后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The current instance version does not support this operation.Please upgrade the instance and try again.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidInstanceId_NotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "实例不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified Instance ID does not exist.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidTopicName_NotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "Topic不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified topic does not exist.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidGroup_NotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "Group不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified group does not exist.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidAccessKeyId_NotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "AccessKey不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified accessKey does not exist.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidMessageId_NotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "Message ID不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The message ID does not exist in the instance %s.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidEip_NotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "EIP不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified EIP does not exist.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InternalError",
+             "type": "string"
+            },
+            "description": {
+             "example": "内部错误，请稍后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request failed due to some unknown error, exception or failure.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ServerInternalError",
+             "type": "string"
+            },
+            "description": {
+             "example": "服务内部错误。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request failed due to some unknown error, exception or failure.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询可用区列表",
+    "tags": [
+     "资源检查"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "RocketMQ",
+   "x-version": "2023-01-01"
+  },
+  "/DescribeRegions": {
+   "post": {
+    "description": "调用 DescribeRegions 接口查看 Region 列表。",
+    "operationId": "DescribeRegions",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "Regions": {
+             "description": "地域列表。",
+             "example": [
+              "/"
+             ],
+             "items": {
+              "$ref": "#/components/schemas/RegionObject"
+             },
+             "type": "array"
+            }
+           },
+           "type": "object",
+           "x-is-success-response": true
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OK",
+             "type": "string"
+            },
+            "description": {
+             "example": "成功。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 200,
+             "type": "integer"
+            },
+            "message": {
+             "example": "OK",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied_InvalidRequest",
+             "type": "string"
+            },
+            "description": {
+             "example": "请求异常，请检查后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request that you specified is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MissingParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "缺少%s参数。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request body is missing a required parameter %s.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "UnsupportedParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "不支持%s参数。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter %s is unsupported.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数值%s无效，请检查后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter %s is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "NotModifiedParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "未变更任何配置。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The resource was not changed.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidTopicName_AlreadyExists",
+             "type": "string"
+            },
+            "description": {
+             "example": "Topic名称已存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified topic name already exists.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidGroupId_AlreadyExists",
+             "type": "string"
+            },
+            "description": {
+             "example": "Group名称已存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified group name already exists.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "QuotaExceeded_InstanceNumber",
+             "type": "string"
+            },
+            "description": {
+             "example": "实例数量超出上限。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The number of instances exceeds the limit.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "QuotaExceeded_AuthKeyNumber",
+             "type": "string"
+            },
+            "description": {
+             "example": "密钥数量超出上限。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The number of authKeys exceeds the limit.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "QuotaExceeded_TopicNumber",
+             "type": "string"
+            },
+            "description": {
+             "example": "Topic数量超出上限。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The number of topic exceeds the limit.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "QuotaExceeded_GroupNumber",
+             "type": "string"
+            },
+            "description": {
+             "example": "Group数量超出上限。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The number of group exceeds the limit.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "QuotaExceeded_QueueNumber",
+             "type": "string"
+            },
+            "description": {
+             "example": "队列数量超出上限。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The number of queue exceeds the limit.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied_AccountNotAuthorized",
+             "type": "string"
+            },
+            "description": {
+             "example": "您不具备相关权限，请授权或切换账号后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "You are not authorized to perform this operation.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied_InternetAccessEnabled",
+             "type": "string"
+            },
+            "description": {
+             "example": "该实例已开启公网访问方式。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Internet access is enabled for the instance.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied_InternetAccessDisabled",
+             "type": "string"
+            },
+            "description": {
+             "example": "该实例未开启公网访问方式。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "Internet access is disabled for the instance.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied_InvalidInstanceStatus",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前实例状态不允许执行该操作。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The operation is not valid for the current status of the instance.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied_InstanceNotEmpty",
+             "type": "string"
+            },
+            "description": {
+             "example": "期望删除的实例资源不为空。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The instance that you tried to delete is not empty.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied_ResourceOccupied",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源繁忙，可能由于指定资源正在被访问或回收。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The resource is busy now, please try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied_TaskIsRunning",
+             "type": "string"
+            },
+            "description": {
+             "example": "后台任务正在运行中，请稍后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "An operation is currently in progress. Try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied_VersionUnsupported",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前实例版本不支持指定操作，请升级实例后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The current instance version does not support this operation.Please upgrade the instance and try again.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidInstanceId_NotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "实例不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified Instance ID does not exist.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidTopicName_NotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "Topic不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified topic does not exist.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidGroup_NotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "Group不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified group does not exist.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidAccessKeyId_NotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "AccessKey不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified accessKey does not exist.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidMessageId_NotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "Message ID不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The message ID does not exist in the instance %s.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidEip_NotFound",
+             "type": "string"
+            },
+            "description": {
+             "example": "EIP不存在。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 404,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified EIP does not exist.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InternalError",
+             "type": "string"
+            },
+            "description": {
+             "example": "内部错误，请稍后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request failed due to some unknown error, exception or failure.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ServerInternalError",
+             "type": "string"
+            },
+            "description": {
+             "example": "服务内部错误。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request failed due to some unknown error, exception or failure.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询Region",
+    "tags": [
+     "资源检查"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "RocketMQ",
+   "x-version": "2023-01-01"
+  },
+  "/EnableInstanceInspect": {
+   "post": {
+    "description": "调用 EnableInstanceInspect 接口，开启或关闭实例的风险巡检功能。",
+    "operationId": "EnableInstanceInspect",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Enable": {
+          "description": "开启或关闭风险巡检功能。\n\n- true：开启\n- false：关闭",
+          "example": true,
+          "type": "boolean",
+          "x-split-type": 0
+         },
+         "InstanceId": {
+          "description": "需要开启或关闭风险巡检功能的实例 ID。",
+          "example": "rocketmq-cnoe12efd**",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "InstanceId",
+         "Enable"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "type": "object",
+           "x-is-success-response": true
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OK",
+             "type": "string"
+            },
+            "description": {
+             "example": "成功。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 200,
+             "type": "integer"
+            },
+            "message": {
+             "example": "OK",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidPara",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数值无效。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MissingParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "缺少%s参数。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request body is missing a required parameter %s.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "UnsupportedParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "不支持%s参数。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter %s is unsupported.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数值%s无效，请检查后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter %s is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.InvalidRequest",
+             "type": "string"
+            },
+            "description": {
+             "example": "请求异常，请检查后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request that you specified is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.VersionUnsupported",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前实例版本不支持指定操作，请升级实例后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The current instance version does not support this operation.Please upgrade the instance and try again.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.TaskIsRunning",
+             "type": "string"
+            },
+            "description": {
+             "example": "后台任务正在运行中，请稍后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "An operation is currently in progress. Try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.InvalidInstanceStatus",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前实例状态不允许执行该操作。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The operation is not valid for the current status of the instance.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.ResourceOccupied",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源繁忙，可能由于指定资源正在被访问或回收。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The resource is busy now, please try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.AccountNotAuthorized",
+             "type": "string"
+            },
+            "description": {
+             "example": "您不具备相关权限，请授权或切换账号后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "You are not authorized to perform this operation.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ServerInternalError",
+             "type": "string"
+            },
+            "description": {
+             "example": "服务内部错误。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request failed due to some unknown error, exception or failure.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ResourceIsBusy",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源繁忙，可能由于指定资源正在被访问或回收。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The resource is busy now, please try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InternalError",
+             "type": "string"
+            },
+            "description": {
+             "example": "内部错误，请稍后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request failed due to some unknown error, exception or failure.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "503": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "ServiceUnavailable",
+           "type": "string"
+          },
+          "description": {
+           "example": "当前服务暂时不可用。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 503,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The request failed due to a temporary failure of the server.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "开启或关闭实例的风险巡检功能",
+    "tags": [
+     "风险巡检"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "RocketMQ",
+   "x-version": "2023-01-01"
+  },
+  "/GetInspectConfig": {
+   "post": {
+    "description": "调用 GetInspectConfig 接口，查询巡检规则的相关配置。",
+    "operationId": "GetInspectConfig",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Filters": {
+          "$ref": "#/components/schemas/Map"
+         },
+         "InstanceId": {
+          "description": "目标实例的 ID。",
+          "example": "rocketmq-cnng33c94**",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "PageNumber": {
+          "description": "页码，最小值为 1。",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PageSize": {
+          "description": "每页支持展示的巡检规则的数量，取值范围为 1~100。",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "InstanceId",
+         "PageNumber",
+         "PageSize"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "Configs": {
+             "description": "巡检规则的配置信息。",
+             "example": [
+              "/"
+             ],
+             "items": {
+              "$ref": "#/components/schemas/InspectConfig"
+             },
+             "type": "array"
+            },
+            "InstanceId": {
+             "description": "实例 ID。",
+             "example": "rocketmq-cnng33c94**",
+             "type": "string"
+            },
+            "Total": {
+             "description": "巡检规则数量。",
+             "example": 100,
+             "format": "int32",
+             "type": "integer"
+            },
+            "TriggerLimit": {
+             "description": "手动触发巡检的间隔时间，单位秒，即 15 分钟。",
+             "example": 15,
+             "format": "int32",
+             "type": "integer"
+            }
+           },
+           "type": "object",
+           "x-is-success-response": true
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OK",
+             "type": "string"
+            },
+            "description": {
+             "example": "成功。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 200,
+             "type": "integer"
+            },
+            "message": {
+             "example": "OK",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidPara",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数值无效。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MissingParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "缺少%s参数。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request body is missing a required parameter %s.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "UnsupportedParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "不支持%s参数。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter %s is unsupported.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数值%s无效，请检查后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter %s is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.InvalidRequest",
+             "type": "string"
+            },
+            "description": {
+             "example": "请求异常，请检查后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request that you specified is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.VersionUnsupported",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前实例版本不支持指定操作，请升级实例后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The current instance version does not support this operation.Please upgrade the instance and try again.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.TaskIsRunning",
+             "type": "string"
+            },
+            "description": {
+             "example": "后台任务正在运行中，请稍后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "An operation is currently in progress. Try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.InvalidInstanceStatus",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前实例状态不允许执行该操作。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The operation is not valid for the current status of the instance.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.ResourceOccupied",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源繁忙，可能由于指定资源正在被访问或回收。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The resource is busy now, please try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.AccountNotAuthorized",
+             "type": "string"
+            },
+            "description": {
+             "example": "您不具备相关权限，请授权或切换账号后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "You are not authorized to perform this operation.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ServerInternalError",
+             "type": "string"
+            },
+            "description": {
+             "example": "服务内部错误。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request failed due to some unknown error, exception or failure.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ResourceIsBusy",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源繁忙，可能由于指定资源正在被访问或回收。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The resource is busy now, please try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InternalError",
+             "type": "string"
+            },
+            "description": {
+             "example": "内部错误，请稍后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request failed due to some unknown error, exception or failure.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "503": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "ServiceUnavailable",
+           "type": "string"
+          },
+          "description": {
+           "example": "当前服务暂时不可用。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 503,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The request failed due to a temporary failure of the server.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询巡检规则的相关配置",
+    "tags": [
+     "风险巡检"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "RocketMQ",
+   "x-version": "2023-01-01"
+  },
+  "/GetInstanceInspectResult": {
+   "post": {
+    "description": "调用 GetInstanceInspectResult 接口，查询实例巡检的异常结果。",
+    "operationId": "GetInstanceInspectResult",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "InstanceId": {
+          "description": "需要查询巡检结果的目标实例 ID。",
+          "example": "rocketmq-cnoe12ef**",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "PageNumber": {
+          "description": "页码，最小值为 1。",
+          "example": 1,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "PageSize": {
+          "description": "每页展示的巡检异常结果数量，取值范围为 1~100。",
+          "example": 10,
+          "format": "int32",
+          "type": "integer",
+          "x-split-type": 0
+         },
+         "SortBy": {
+          "description": "排序项。目前仅支持按照巡检异常结果的发生时间进行排序。",
+          "example": "TimeStamp",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "SortOrder": {
+          "description": "排序方式。\n\n- ASC：升序，默认排序方式。\n- DESC：降序。",
+          "example": "ASC",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "InstanceId",
+         "PageNumber",
+         "PageSize"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "InspectCnt": {
+             "description": "巡检数量",
+             "example": 2,
+             "format": "int32",
+             "type": "integer"
+            },
+            "InstanceId": {
+             "description": "实例 ID。",
+             "example": "rocketmq-cnoe12efdd**",
+             "type": "string"
+            },
+            "Results": {
+             "description": "巡检异常结果列表。",
+             "example": [
+              "/"
+             ],
+             "items": {
+              "$ref": "#/components/schemas/InspectResult"
+             },
+             "type": "array"
+            },
+            "Total": {
+             "description": "巡检异常结果总数。",
+             "example": 1,
+             "format": "int32",
+             "type": "integer"
+            },
+            "UnExpectedCnt": {
+             "description": "异常数量",
+             "example": 2,
+             "format": "int32",
+             "type": "integer"
+            }
+           },
+           "type": "object",
+           "x-is-success-response": true
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OK",
+             "type": "string"
+            },
+            "description": {
+             "example": "成功。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 200,
+             "type": "integer"
+            },
+            "message": {
+             "example": "OK",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidPara",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数值无效。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MissingParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "缺少%s参数。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request body is missing a required parameter %s.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "UnsupportedParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "不支持%s参数。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter %s is unsupported.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数值%s无效，请检查后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter %s is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.InvalidRequest",
+             "type": "string"
+            },
+            "description": {
+             "example": "请求异常，请检查后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request that you specified is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.VersionUnsupported",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前实例版本不支持指定操作，请升级实例后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The current instance version does not support this operation.Please upgrade the instance and try again.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.TaskIsRunning",
+             "type": "string"
+            },
+            "description": {
+             "example": "后台任务正在运行中，请稍后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "An operation is currently in progress. Try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.InvalidInstanceStatus",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前实例状态不允许执行该操作。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The operation is not valid for the current status of the instance.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.ResourceOccupied",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源繁忙，可能由于指定资源正在被访问或回收。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The resource is busy now, please try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.AccountNotAuthorized",
+             "type": "string"
+            },
+            "description": {
+             "example": "您不具备相关权限，请授权或切换账号后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "You are not authorized to perform this operation.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ServerInternalError",
+             "type": "string"
+            },
+            "description": {
+             "example": "服务内部错误。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request failed due to some unknown error, exception or failure.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ResourceIsBusy",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源繁忙，可能由于指定资源正在被访问或回收。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The resource is busy now, please try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InternalError",
+             "type": "string"
+            },
+            "description": {
+             "example": "内部错误，请稍后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request failed due to some unknown error, exception or failure.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "503": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "ServiceUnavailable",
+           "type": "string"
+          },
+          "description": {
+           "example": "当前服务暂时不可用。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 503,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The request failed due to a temporary failure of the server.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询实例巡检的异常结果",
+    "tags": [
+     "风险巡检"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "RocketMQ",
+   "x-version": "2023-01-01"
+  },
+  "/ManualProcessResult": {
+   "post": {
+    "description": "调用 ManualProcessResult 接口，手动处理实例某个巡检异常结果，即将某个异常结果的状态设置为已处理（Solved）状态。",
+    "operationId": "ManualProcessResult",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "InstanceId": {
+          "description": "目标实例的 ID。",
+          "example": "rocketmq-cnoe12ef***",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "ResultId": {
+          "description": "需要修改处理状态的巡检异常结果的唯一 ID。\n您可以调用 [GetInstanceInspectResult](/docs/6410/1335399) 接口，获取巡检异常结果的唯一 ID。",
+          "example": "45e215e9fe104c849077**",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "InstanceId",
+         "ResultId"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "type": "object",
+           "x-is-success-response": true
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OK",
+             "type": "string"
+            },
+            "description": {
+             "example": "成功。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 200,
+             "type": "integer"
+            },
+            "message": {
+             "example": "OK",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidPara",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数值无效。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MissingParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "缺少%s参数。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request body is missing a required parameter %s.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "UnsupportedParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "不支持%s参数。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter %s is unsupported.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数值%s无效，请检查后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter %s is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.InvalidRequest",
+             "type": "string"
+            },
+            "description": {
+             "example": "请求异常，请检查后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request that you specified is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.AccountNotAuthorized",
+             "type": "string"
+            },
+            "description": {
+             "example": "您不具备相关权限，请授权或切换账号后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "You are not authorized to perform this operation.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.ResourceOccupied",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源繁忙，可能由于指定资源正在被访问或回收。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The resource is busy now, please try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.InvalidInstanceStatus",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前实例状态不允许执行该操作。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The operation is not valid for the current status of the instance.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.TaskIsRunning",
+             "type": "string"
+            },
+            "description": {
+             "example": "后台任务正在运行中，请稍后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "An operation is currently in progress. Try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.VersionUnsupported",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前实例版本不支持指定操作，请升级实例后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The current instance version does not support this operation.Please upgrade the instance and try again.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ServerInternalError",
+             "type": "string"
+            },
+            "description": {
+             "example": "服务内部错误。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request failed due to some unknown error, exception or failure.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ResourceIsBusy",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源繁忙，可能由于指定资源正在被访问或回收。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The resource is busy now, please try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InternalError",
+             "type": "string"
+            },
+            "description": {
+             "example": "内部错误，请稍后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request failed due to some unknown error, exception or failure.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "503": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "ServiceUnavailable",
+           "type": "string"
+          },
+          "description": {
+           "example": "当前服务暂时不可用。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 503,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The request failed due to a temporary failure of the server.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "手动处理巡检结果",
+    "tags": [
+     "风险巡检"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "RocketMQ",
+   "x-version": "2023-01-01"
+  },
+  "/ManualTriggerInspect": {
+   "post": {
+    "description": "调用 ManualTriggerInspect 接口，手动触发实例的某个巡检规则。",
+    "operationId": "ManualTriggerInspect",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "InspectName": {
+          "description": "巡检任务名称。",
+          "example": "queueInsufficient",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "InstanceId": {
+          "description": "需要执行巡检规则的目标实例 ID。",
+          "example": "rocketmq-cnoe12ef**",
+          "type": "string",
+          "x-split-type": 0
+         },
+         "Type": {
+          "description": "巡检规则的类型。\n\n- cluster：目前支持 queueInsufficient 巡检规则，巡检实例 Queue 资源是否不足。\n- topic：目前支持 queueBalance 巡检规则，巡检实例 Queue 分布是否不均衡。\n- group：目前支持 subscribeConsistency 巡检规则，巡检实例 Group 组订阅是否不一致。\n\n5.x 版本实例不支持 subscribeConsistency 巡检规则。",
+          "example": "cluster",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "required": [
+         "InstanceId",
+         "Type",
+         "InspectName"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "type": "object",
+           "x-is-success-response": true
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OK",
+             "type": "string"
+            },
+            "description": {
+             "example": "成功。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 200,
+             "type": "integer"
+            },
+            "message": {
+             "example": "OK",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidPara",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数值无效。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "MissingParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "缺少%s参数。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request body is missing a required parameter %s.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "UnsupportedParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "不支持%s参数。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter %s is unsupported.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InvalidParameter",
+             "type": "string"
+            },
+            "description": {
+             "example": "参数值%s无效，请检查后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The specified parameter %s is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.InvalidRequest",
+             "type": "string"
+            },
+            "description": {
+             "example": "请求异常，请检查后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 400,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request that you specified is not valid.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.AccountNotAuthorized",
+             "type": "string"
+            },
+            "description": {
+             "example": "您不具备相关权限，请授权或切换账号后重试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "You are not authorized to perform this operation.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.ResourceOccupied",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源繁忙，可能由于指定资源正在被访问或回收。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The resource is busy now, please try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.InvalidInstanceStatus",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前实例状态不允许执行该操作。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The operation is not valid for the current status of the instance.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.TaskIsRunning",
+             "type": "string"
+            },
+            "description": {
+             "example": "后台任务正在运行中，请稍后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "An operation is currently in progress. Try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "OperationDenied.VersionUnsupported",
+             "type": "string"
+            },
+            "description": {
+             "example": "当前实例版本不支持指定操作，请升级实例后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 403,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The current instance version does not support this operation.Please upgrade the instance and try again.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InvalidInstanceId.NotFound",
+           "type": "string"
+          },
+          "description": {
+           "example": "实例不存在。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 404,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The specified Instance ID does not exist.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "properties": {
+            "code": {
+             "example": "ServerInternalError",
+             "type": "string"
+            },
+            "description": {
+             "example": "服务内部错误。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request failed due to some unknown error, exception or failure.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "ResourceIsBusy",
+             "type": "string"
+            },
+            "description": {
+             "example": "资源繁忙，可能由于指定资源正在被访问或回收。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The resource is busy now, please try again later.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          },
+          {
+           "properties": {
+            "code": {
+             "example": "InternalError",
+             "type": "string"
+            },
+            "description": {
+             "example": "内部错误，请稍后再试。",
+             "type": "string"
+            },
+            "http_code": {
+             "example": 500,
+             "type": "integer"
+            },
+            "message": {
+             "example": "The request failed due to some unknown error, exception or failure.",
+             "type": "string"
+            }
+           },
+           "x-is-common": 1,
+           "x-order-num": 0
+          }
+         ]
+        }
+       }
+      },
+      "description": "response"
+     },
+     "503": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "ServiceUnavailable",
+           "type": "string"
+          },
+          "description": {
+           "example": "当前服务暂时不可用。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 503,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The request failed due to a temporary failure of the server.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "手动触发巡检",
+    "tags": [
+     "风险巡检"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "RocketMQ",
+   "x-version": "2023-01-01"
+  }
+ }
+}
