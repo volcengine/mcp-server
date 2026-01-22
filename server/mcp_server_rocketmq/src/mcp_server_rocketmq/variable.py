@@ -25,3 +25,5 @@ CREDENTIAL_TYPE_ENV = 'env'
 CREDENTIAL_TYPE_TOKEN = 'token'
 
 AUTH_TYPE_OAUTH = 'oauth'
+
+VEFAAS_IAM_CRIDENTIAL_PATH = "/var/run/secrets/iam/credential"

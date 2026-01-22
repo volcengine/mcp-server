@@ -72,9 +72,11 @@ def load_config(file_name: Union[str, Path]) -> Config:
             (MCP_SERVER_AUTH, "auth", None, get_args(AuthType)),
             (MCP_SERVER_PORT, "server_prot", int, None),
         ]
-
+        vefaas_iam_credential = load_from_vefaas_iam_credential()
         for env_var, attr_name, converter, allowed_values in env_mapping:
             env_value_str = os.environ.get(env_var)
+            if (env_value_str is None or env_value_str == "") and env_var in vefaas_iam_credential:
+                env_value_str = vefaas_iam_credential.get(env_var, None)
             if env_value_str is not None and env_value_str != "":
                 # 转换类型
                 value_to_set = converter(env_value_str) if converter else env_value_str
@@ -87,6 +89,23 @@ def load_config(file_name: Union[str, Path]) -> Config:
         return cfg
     except (ValueError, TypeError) as e:
         raise ValueError(f"读取配置文件时发生错误 {e}")
+
+def load_from_vefaas_iam_credential() -> Dict:
+    if os.path.exists(VEFAAS_IAM_CRIDENTIAL_PATH):
+        try:
+            with open(VEFAAS_IAM_CRIDENTIAL_PATH, 'r') as f:
+                data = json.load(f)
+                return {
+                    VOLCENGINE_ACCESS_KEY: data['access_key_id'],
+                    VOLCENGINE_SECRET_KEY: data['secret_access_key'],
+                    VOLCENGINE_ACCESS_SESSION_TOKEN: data.get('session_token', "")
+                }
+        except FileNotFoundError:
+            return {}
+        except json.JSONDecodeError:
+            return {}
+    else:
+        return {}
 
 
 def validate_auth_header(auth_header: Optional[str], server_config: Optional[Config],
