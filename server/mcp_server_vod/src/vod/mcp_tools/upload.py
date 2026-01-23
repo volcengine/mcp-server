@@ -1,19 +1,23 @@
 import json
 from src.vod.api.api import VodAPI
 from volcengine.vod.models.request.request_vod_pb2 import VodUrlUploadRequest
-from src.vod.models.request.request_models import BatchUploadUrlItem
+# from src.vod.models.request.request_models import BatchUploadUrlItem
 from typing import List
 def create_mcp_server(mcp,  public_methods: dict, service: VodAPI,):
     get_play_url = public_methods['get_play_url']
-    @mcp.tool()
-    def video_batch_upload(space_name: str, urls: List[dict] = None, ) -> dict:
-        """ Batch retrieval and upload of URLs upload video、 audio to specified space via synchronous upload
+    @mcp.tool(
+        description="""
+            Batch retrieval and upload of URLs upload video、 audio to specified space via synchronous upload
             Note:
                 - 本接口主要适用于文件没有存储在本地服务器或终端，需要通过公网访问的 URL 地址上传的场景。源文件 URL 支持 HTTP 和 HTTPS。
                 - 本接口为异步上传接口。上传任务成功提交后，系统会生成异步执行的任务，排队执行，不保证时效性。
                 - SourceUrl 必须是可公网直接访问的文件 URL，而非包含视频的网页 URL。
+        """,
+    )
+    def video_batch_upload(space_name: str = None, urls: List[dict] = None, ) -> dict:
+        """ 
             Args:
-                - space_name:** 必选字段 ** 空间名称 
+                - space_name:** 非必选字段 ** 空间名称 
                 -  urls(list[dict[str, str]]): ** 必选字段 **  资源URL列表，每个元素是一个包含URL信息的字典
                     - SourceUrl （str）:** 必选字段 **  源文件 URL。
                     - FileExtension（str）:** 必选字段 **  文件后缀，即点播存储中文件的类型
@@ -40,9 +44,13 @@ def create_mcp_server(mcp,  public_methods: dict, service: VodAPI,):
             else:
                 raise Exception(resp.ResponseMetadata)
 
-    @mcp.tool()
+    @mcp.tool(
+        description="""
+        Obtain the query results of media processing tasks, Obtain the query results of batch upload tasks
+        """,
+    )
     def query_batch_upload_task_info(job_ids: str) -> dict:
-        """  Obtain the query results of media processing tasks Obtain the query results of batch upload tasks
+        """ 
             Args:
             - job_ids(str): ** 必选字段 ** ，每个 URL 对应的任务 ID。查询多个以 , 逗号分隔，最多 ** 20 条 **。
             Returns：

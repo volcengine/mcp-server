@@ -1,8 +1,14 @@
-from requests import get
 from mcp.server.fastmcp import FastMCP
+from mcp.shared.context import LifespanContextT, RequestT
 import logging
 from typing import Dict, Any,Optional
-from mcp.server.fastmcp import Context
+from collections.abc import (
+    Sequence,
+)
+
+from mcp.server.fastmcp.server import Context
+from mcp.server.session import ServerSessionT
+from mcp.types import ContentBlock
 from mcp.server.session import ServerSession
 from starlette.requests import Request
 from src.base.constant import (
@@ -13,6 +19,8 @@ from src.base.constant import (
     # VOLCENGINE_REGION_HEADER,
     VOLCENGINE_TOOLS_SOURCE_HEADER,
     VOLCENGINE_TOOLS_TYPE_HEADER,
+    VOLCENGINE_SPACE_NAME_HEADER,
+    VOLCENGINE_SPACE_NAME_ENV,
 
     # VOLCENGINE_ACCESS_KEY_ENV,
     # VOLCENGINE_SECRET_KEY_ENV, 
@@ -90,8 +98,7 @@ TOOL_GROUP_MAP = {
         "extract_audio",
         "mix_audios",
         "add_sub_video",
-   
-
+        "wait_for_v_creative_task_result",
     ],
     # video_play 分组
     "video_play": [
@@ -321,4 +328,47 @@ class BaseMCP(FastMCP):
             import traceback
             logger.error(traceback.format_exc())
             return []
+    async def call_tool(self,
+     name: str, 
+     arguments: dict[str, Any],
+    ) -> Sequence[ContentBlock] | dict[str, Any]:
+        """Call a tool by name with arguments."""
+        try:
+            context: Optional[Request] = self.get_request_ctx()
+            ctx: Optional[Context[ServerSession, object]] = self.get_context()
+            arguments['ctx'] = ctx
+            if self._base_mcp_store.get('apiRequestInstance'):
+                apiRequestInstance = self._base_mcp_store['apiRequestInstance']
+                if  hasattr(apiRequestInstance, 'set_headers') and name:
+                    apiRequestInstance.set_headers('x-tt-tools-name', name)
 
+            # 兼容处理 space_name, spaceName, space
+            space_name_value = None
+            for key in ['space_name', 'spaceName', 'space']:
+                if key in arguments and arguments[key] and isinstance(arguments[key], str) and arguments[key].strip():
+                    space_name_value = arguments[key].strip()
+                    break
+            
+            if space_name_value:
+                arguments['space_name'] = space_name_value
+            else:
+                space_name_env = environ.get(VOLCENGINE_SPACE_NAME_ENV)
+                if context and hasattr(context, 'headers'):
+                    headers = context.headers
+                    space_name_h = headers.get(VOLCENGINE_SPACE_NAME_HEADER)
+                    if space_name_h:
+                        arguments['space_name'] = space_name_h.strip()
+                    elif space_name_env:
+                        arguments['space_name'] = space_name_env.strip()
+                elif space_name_env:
+                    arguments['space_name'] = space_name_env.strip()
+            space_name = arguments.get('space_name') 
+            if not space_name or not isinstance(space_name, str) or not space_name.strip():
+                raise Exception('space_name is required')
+            print(f"space_name: {space_name}",arguments)
+            return await super().call_tool(name, arguments)
+        except Exception as e:
+            logger.error(f"BaseMCP.call_tool failed with error: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            raise e

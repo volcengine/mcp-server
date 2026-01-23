@@ -7,18 +7,22 @@ def create_mcp_server(mcp, public_methods: dict,service):
     _build_media_input = public_methods["_build_media_input"]
     _start_execution = public_methods["_start_execution"]
     
-    @mcp.tool()
-    def asr_speech_to_text_task(type: str, video: str, spaceName: str, language: str = None) -> Any:
-        """ASR speech-to-text captioning is supported, with two input modes available: `Vid` and  `DirectUrl`.
-            Note：
-            - `language`:  ** 可选字段 **， 不传会探测, 仅是在 语言较相似的情况下传递 来提高识别效果 
-            - `Vid`: vid 模式下不需要进行任何处理
-            - `DirectUrl`: directurl 模式下需要传递 FileName，不需要进行任何处理             
-            Args：
+    @mcp.tool(
+        description="""
+        ASR speech-to-text captioning is supported, with two input modes available: `Vid` and  `DirectUrl`.
+                Note：
+                    - `language`:  ** 可选字段 **， 不传会探测, 仅是在 语言较相似的情况下传递 来提高识别效果 
+                    - `Vid`: vid 模式下不需要进行任何处理
+                    - `DirectUrl`: directurl 模式下需要传递 FileName，不需要进行任何处理  
+        """,
+    )
+    def asr_speech_to_text_task(type: str, video: str, space_name: str = None, language: str = None) -> Any:
+        """           
+        Args：
             - type(str)：** 必选字段 **，文件类型，默认值为 `Vid` 。字段取值如下
                 - Vid
                 - DirectUrl
-            - spaceName(str)： ** 必选字段 **,  视频空间名称
+            - space_name(str)： ** 非必选字段 **,  视频空间名称
             - video： ** 必选字段 **,  视频文件信息, 当 type 为 `Vid` 时， video 为视频文件 ID；当 type 为 `DirectUrl` 时， video 为 FileName
             - language(str): ** 可选字段 **,  识别提示语言，取值如下：
                 - cmn-Hans-CN: 简体中文
@@ -47,7 +51,7 @@ def create_mcp_server(mcp, public_methods: dict,service):
             Returns
             - RunId(str):  媒体处理任务执行 ID, 可通过 `get_media_execution_task_result` 方法进行结果查询,type 为 `asr`
          """
-        media_input = _build_media_input(type, video, spaceName)
+        media_input = _build_media_input(type, video, space_name)
         ask = {
             "WithSpeakerInfo": True,
         }
@@ -60,22 +64,26 @@ def create_mcp_server(mcp, public_methods: dict,service):
         return _start_execution(params)
 
     # OCR 
-    @mcp.tool()
-    def ocr_text_to_subtitles_task(type: str, video: str, spaceName: str) -> Any:
-        """OCR text to subtitles is supported, with two input modes available: `Vid` and  `DirectUrl`.
+    @mcp.tool(
+        description="""
+        OCR text to subtitles is supported, with two input modes available: `Vid` and  `DirectUrl`.
             Note：
                 - `Vid`: vid 模式下不需要进行任何处理
-                - `DirectUrl`: directurl 模式下需要传递 FileName，不需要进行任何处理               
+                - `DirectUrl`: directurl 模式下需要传递 FileName，不需要进行任何处理                
+        """,
+    )
+    def ocr_text_to_subtitles_task(type: str, video: str, space_name: str = None) -> Any:
+        """           
             Args：
             - type(str)：** 必选字段 **，文件类型，默认值为 `Vid` 。字段取值如下
                 - Vid
                 - DirectUrl
-            - spaceName(str)： ** 必选字段 **,  视频空间名称
+            - space_name(str)： ** 非必选字段 **,  视频空间名称
             - video： ** 必选字段 **,  视频文件信息, 当 type 为 `Vid` 时， video 为视频文件 ID；当 type 为 `DirectUrl` 时， video 为 FileName
             Returns
             - RunId(str):  媒体处理任务执行 ID, 可通过 `get_media_execution_task_result` 方法进行结果查询，type 为 `ocr` 
         """
-        media_input = _build_media_input(type, video, spaceName)
+        media_input = _build_media_input(type, video, space_name)
         params = {
             "Input": media_input,
             "Operation": {"Type": "Task", "Task": {"Type": "Ocr", "Ocr": {}}},
@@ -83,22 +91,26 @@ def create_mcp_server(mcp, public_methods: dict,service):
         return _start_execution(params)
 
     # subtitle removal
-    @mcp.tool()
-    def video_subtitles_removal_task(type: str, video: str, spaceName: str) -> Any:
-        """Video subtitles removal is supported, with two input modes available: `Vid` and  `DirectUrl`.
+    @mcp.tool(
+        description="""
+        Video subtitles removal is supported, with two input modes available: `Vid` and  `DirectUrl`.
             Note：
                 - `Vid`: vid 模式下不需要进行任何处理
-                - `DirectUrl`: directurl 模式下需要传递 FileName，不需要进行任何处理               
+                - `DirectUrl`: directurl 模式下需要传递 FileName，不需要进行任何处理                  
+        """,
+    )
+    def video_subtitles_removal_task(type: str, video: str, space_name: str) -> Any:
+        """           
             Args：
             - type(str)：** 必选字段 **，文件类型，默认值为 `Vid` 。字段取值如下
                 - Vid
                 - DirectUrl
-            - spaceName(str)： ** 必选字段 **,  视频空间名称
+            - space_name(str)： ** 必选字段 **,  视频空间名称
             - video： ** 必选字段 **,  视频文件信息, 当 type 为 `Vid` 时， video 为视频文件 ID；当 type 为 `DirectUrl` 时， video 为 FileName
             Returns
             - RunId(str):  媒体处理任务执行 ID, 可通过 `get_media_execution_task_result` 方法进行结果查询,type 为 `subtitlesRemoval` 
         """
-        media_input = _build_media_input(type, video, spaceName)
+        media_input = _build_media_input(type, video, space_name)
         params = {
             "Input": media_input,
             "Operation": {
@@ -116,11 +128,15 @@ def create_mcp_server(mcp, public_methods: dict,service):
         }
         return _start_execution(params)
 
-    @mcp.tool()
-    def add_subtitle(video: dict, space_name: str, subtitle_url: str = None, text_list: list = None, subtitle_config: dict = None) -> dict:
-        """Add subtitle functionality, supporting both subtitle file (subtitle_url) and subtitle list (text_list) methods. However, subtitle_url and text_list must specify that subtitle_url has a higher priority.
+    @mcp.tool(
+        description="""
+        Add subtitle functionality, supporting both subtitle file (subtitle_url) and subtitle list (text_list) methods. However, subtitle_url and text_list must specify that subtitle_url has a higher priority.
         Note:
             - subtitle_url 和 text_list 必须指定一个，subtitle_url 优先级更高
+        """,
+    )
+    def add_subtitle(video: dict, space_name: str = None, subtitle_url: str = None, text_list: list = None, subtitle_config: dict = None) -> dict:
+        """
         Args:
             - video(dict): ** 必选字段 **，视频信息
                 - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
@@ -157,7 +173,7 @@ def create_mcp_server(mcp, public_methods: dict,service):
                     - height(str): 字幕的高度，支持设置为百分比（相对于视频高度）或具体像素值，String 类型，例如 10% 或 100。
                     - pos_x(str): 字幕在水平方向（X 轴）的位置，以视频正上方居中位置为原点，单位：像素，String 类型。例如值为 0 时，表示字幕在水平位置居中；值为 - 100 时，表示字幕向左移动 100 像素；值为 100 时，表示字幕向右移动 100 像素。
                     - pos_y(str): 水印在垂直方向（Y 轴）的位置，以视频正上方居中位置为原点，单位：像素，String 类型。例如值为 0 时，表示字幕在视频顶部；值为 100 时，表示字幕向下移动 100 像素。
-            - space_name(str): ** 必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
+            - space_name(str): ** 非必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
         Returns:
             - VCreativeId(str): AI 智剪任务 ID，用于查询任务状态。可以通过调用 `get_v_creative_task_result` 接口查询任务状态。
             - Code(int): 任务状态码。为 0 表示任务执行成功。

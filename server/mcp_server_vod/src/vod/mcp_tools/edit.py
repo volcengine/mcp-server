@@ -1,7 +1,10 @@
 import json
+import asyncio
+from venv import logger
 from src.vod.api.api import VodAPI
-from typing import List, Optional,Dict
-from src.vod.models.request.request_models import InputSource,addSubVideoOptions
+from mcp.server.fastmcp import Context
+from typing import List, Optional, Callable, Any
+
 
 
 def _format_source(type: str, source: str) -> str:
@@ -29,17 +32,21 @@ def _format_source(type: str, source: str) -> str:
 
 def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
 
-    @mcp.tool()
-    def audio_video_stitching(type: str, SpaceName: str, videos: List[str] = None, audios: List[str] = None, transitions: List[str] = None) -> dict:
-        """ Carry out video stitching, audio stitching, and support for transitions and other capabilities，需要参考 Note 中的要求。
-         Note:
-            -  **audio splicing does not support transitions. **
-            -  ** vid 模式下需要增加  vid://  前缀， 示例：vid://123456 **
-            -  ** directurl://{fileName} 格式指定资源的 FileName。示例：directurl://test.mp3**
-            -  ** http(s):// 格式指定资源的 URL。示例：http://example.com/test.mp4**
+    @mcp.tool(
+        description="""
+        Carry out video stitching, audio stitching, and support for transitions and other capabilities，需要参考 Note 中的要求。
+            Note:
+                -  **audio splicing does not support transitions. **
+                -  ** vid 模式下需要增加  vid://  前缀， 示例：vid://123456 **
+                -  ** directurl://{fileName} 格式指定资源的 FileName。示例：directurl://test.mp3**
+                -  ** http(s):// 格式指定资源的 URL。示例：http://example.com/test.mp4**    
+        """,
+    )
+    def audio_video_stitching(type: str, space_name: str = None, videos: List[str] = None, audios: List[str] = None, transitions: List[str] = None) -> dict:
+        """ 
          Args:
             - type(str): **  必选字段 ** , 拼接类型。 `audio` | `video`
-            - SpaceName(str):  **  必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
+            - space_name(str):  ** 非必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
             - videos(List[str]): **视频下必选字段，音频下不传递 **
                 - 待拼接的视频列表：支持 ** vid:// ** 、 ** http:// ** 格式，** directUrl:// ** 格式
                     *** 视频要求： *** 
@@ -72,8 +79,10 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
             - StatusCode(int):  接口请求的状态码。0表示成功，其他值表示不同的错误状态。
         
         """
+        print(f"audio_video_stitchingspace_name: {space_name}")
+        
         try:
-            params = {"type": type, "SpaceName": SpaceName, "videos": videos, "audios": audios, "transitions": transitions}
+            params = {"type": type, "SpaceName": space_name, "videos": videos, "audios": audios, "transitions": transitions}
             if "SpaceName" not in params:
                 raise ValueError("audio_video_stitching: params must contain SpaceName")
             if not isinstance(params["SpaceName"], str):
@@ -159,8 +168,17 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
         except Exception as e:
             raise Exception("audio_video_stitching: %s" % e, params)
 
-    @mcp.tool()
-    def audio_video_clipping(type: str, SpaceName: str, source: str, start_time: float, end_time: float) -> dict:
+    @mcp.tool(
+        description="""
+        Invoke the current tools to complete the cropping of audio and video，需要参考 Note 中的要求。
+            Note:
+                -  ** vid 模式下需要增加  vid://  前缀， 示例：vid://123456 **
+                -  ** directurl://{fileName} 格式指定资源的 FileName。示例：directurl://test.mp3**
+                -  ** http(s):// 格式指定资源的 URL。示例：http://example.com/test.mp4**
+                -  `start_time` 和 `end_time` 必须同时指定，且 `end_time` 必须大于 `start_time`
+        """,
+    )
+    def audio_video_clipping(type: str, source: str, start_time: float, end_time: float, space_name: str = None) -> dict:
         """ Invoke the current tools to complete the cropping of audio and video，需要参考 Note 中的要求。
          Note:
             -  ** vid 模式下需要增加  vid://  前缀， 示例：vid://123456 **
@@ -169,7 +187,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
             -  `start_time` 和 `end_time` 必须同时指定，且 `end_time` 必须大于 `start_time`
          Args:
             - type(str): **  必选字段 ** , 拼接类型。 `audio` | `video`
-            - SpaceName(str):  **  必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
+            - space_name(str):  **  非必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
             - source(str): **  必选字段 **
                 - 输入视频：支持 ** vid:// ** 、 ** http:// ** 格式，** directUrl:// ** 格式
             - end_time(float): **  必选字段 **
@@ -184,7 +202,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
         
         """
         try:
-            params = {"type": type, "SpaceName": SpaceName, "source": source, "start_time": start_time, "end_time": end_time}
+            params = {"type": type, "SpaceName": space_name, "source": source, "start_time": start_time, "end_time": end_time}
             if "SpaceName" not in params:
                 raise Exception("audio_video_clipping: params must contain SpaceName", params)
             if not isinstance(params["SpaceName"], str):
@@ -238,27 +256,8 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
         except Exception as e:
             raise Exception("audio_video_clipping: %s" % e)
     
-    @mcp.tool()
-    def get_v_creative_task_result(VCreativeId: str, SpaceName: str) -> dict:
-        """ Query the execution status and results of video stitching, audio stitching, and audio-video cropping by using the  `VCreativeId`.
-        Note:   
-            -  **audio splicing does not support transitions. **
-        Args:
-            - VCreativeId(str): `String type`, ID for AI intelligent trimming task.
-            - SpaceName(str): `String type`, space name.
-        Returns：
-            - Status(str): 任务的当前处理状态。
-                - running: 执行中
-                - success: 执行成功
-                - failed_run: 执行失败
-            - OutputJson(dict[str,Any]): 任务的输出结果
-                - vid： 输出的点播空间vid
-                - resolution： 分辨率
-                - filename： 文件名
-                - url:  产物链接，仅当任务成功时返回
-                - duration： 时长， 单位：秒(s)
-        """
-        params={"VCreativeId": VCreativeId, "SpaceName": SpaceName}
+    def _get_v_creative_task_result_impl(VCreativeId: str, space_name: str = None) -> dict:
+        params={"VCreativeId": VCreativeId, "SpaceName": space_name}
         if "VCreativeId" not in params:
             raise ValueError("get_v_creative_task_result: params must contain VCreativeId")
         if not isinstance(params["VCreativeId"], str):
@@ -319,9 +318,83 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
         else:
             return reqs
 
-    @mcp.tool()
-    def flip_video(type: str, source: str, space_name: str, flip_x: bool = False, flip_y: bool = False) -> dict:
-        """Video rotation capability is supported, allowing for `vertical and horizontal flipping of the video`. ** Default: No flipping **
+    # @mcp.tool(
+    #     description="""
+    #      Query the execution status and results of video stitching, audio stitching, and audio-video cropping by using the  `VCreativeId`.
+    #         Note:   
+    #             -  **audio splicing does not support transitions. **
+    #     """,
+    # )
+    # def get_v_creative_task_result(VCreativeId: str, space_name: str = None) -> dict:
+    #     """
+    #     Args:
+    #         - VCreativeId(str): `String type`, ID for AI intelligent trimming task.
+    #         - space_name(str): `String type`, space name. ** 非必选字段 **
+    #     Returns：
+    #         - Status(str): 任务的当前处理状态。
+    #             - running: 执行中
+    #             - success: 执行成功
+    #             - failed_run: 执行失败
+    #         - OutputJson(dict[str,Any]): 任务的输出结果
+    #             - vid： 输出的点播空间vid
+    #             - resolution： 分辨率
+    #             - filename： 文件名
+    #             - url:  产物链接，仅当任务成功时返回
+    #             - duration： 时长， 单位：秒(s)
+    #     """
+    #     return _get_v_creative_task_result_impl(VCreativeId, space_name)
+
+    @mcp.tool(
+        description="Poll the execution status and results of video stitching, audio stitching, and audio-video cropping by using the `VCreativeId` until success or timeout.",
+    )
+    async def get_v_creative_task_result(VCreativeId: str,space_name: str = None, interval: float = 2.0, max_retries: int = 10,  ctx: Context = None) -> dict:
+        """
+        Args:
+            - VCreativeId(str): `String type`, ID for AI intelligent trimming task.
+            - space_name(str): `String type`, space name. ** 非必选字段 **
+            - interval(float): Polling interval in seconds. Default is 2.0.
+            - max_retries(int): Maximum number of retries. Default is 30.
+        Returns:
+            - Status(str): 任务的当前处理状态。
+                - running: 执行中
+                - success: 执行成功
+                - failed_run: 执行失败
+            - OutputJson(dict[str,Any]): 任务的输出结果
+                - vid： 输出的点播空间vid
+                - resolution： 分辨率
+                - filename： 文件名
+                - url:  产物链接，仅当任务成功时返回
+                - duration： 时长， 单位：秒(s)
+        """
+        result_json = None
+        for i in range(max_retries):
+            try:
+                logger.info(f"wait_for_v_creative_task_result: VCreativeId={VCreativeId}, space_name={space_name}, i={i}, ctx=",ctx.report_progress)
+                result_json = _get_v_creative_task_result_impl(VCreativeId, space_name)
+                result = json.loads(result_json) if isinstance(result_json, str) else result_json
+                status = result.get("Status")
+                if status == "success" or status == "failed_run":
+                    if ctx:
+                        await ctx.report_progress(progress=100, total=100)
+                    return result_json
+                if status == "running":
+                    if ctx:
+                        await ctx.report_progress(progress=50, total=100)
+                    return result_json
+            except Exception as e:
+                raise e
+
+            await asyncio.sleep(interval)
+        
+        return result_json
+
+         
+
+    @mcp.tool(
+        description="Video rotation capability is supported, allowing for `vertical and horizontal flipping of the video`. ** Default: No flipping **",
+    )
+    def flip_video(type: str, source: str, space_name: str = None, flip_x: bool = False, flip_y: bool = False) -> dict:
+        """
         Args:
             - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
                 - directurl
@@ -330,7 +403,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
             - source(str): ** 必选字段 **, 视频文件信息
             - flip_x(bool): ** 非必选字段 **, 是否对视频进行上下翻转。Boolean 类型，默认值为 false，表示不翻转。
             - flip_y(bool): ** 非必选字段 **, 是否对视频进行左右翻转。Boolean 类型，默认值为 false，表示不翻转。
-            - space_name(str): ** 必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
+            - space_name(str): ** 非必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
         Returns:
             - VCreativeId(str): AI 智剪任务 ID，用于查询任务状态。可以通过调用 `get_v_creative_task_result` 接口查询任务状态。
             - Code(int): 任务状态码。为 0 表示任务执行成功。
@@ -382,9 +455,11 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
         except Exception as e:
             raise Exception("flip_video: %s" % e, params)
 
-    @mcp.tool()
-    def speedup_video(type: str, source: str, space_name: str, speed: float = 1.0) -> dict:
-        """Adjust the speed multiplier of the video, of type Float, with a range from 0.1 to 4.
+    @mcp.tool(
+        description="Adjust the speed multiplier of the video, of type Float, with a range from 0.1 to 4.",
+    )
+    def speedup_video(type: str, source: str, space_name: str = None, speed: float = 1.0) -> dict:
+        """
         Args:
             - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
                 - directurl
@@ -395,7 +470,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
                 - 0.1：放慢至原速的 0.1 倍。
                 - 1（默认值）：原速。
                 - 4：加速至原速的 4 倍。
-            - space_name(str): ** 必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
+            - space_name(str): ** 非必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
         Returns:
             - VCreativeId(str): AI 智剪任务 ID，用于查询任务状态。可以通过调用 `get_v_creative_task_result` 接口查询任务状态。
             - Code(int): 任务状态码。为 0 表示任务执行成功。
@@ -449,9 +524,11 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
                 raise Exception("speedup_video: %s" % e, params)
         except Exception as e:
             raise Exception("speedup_video: %s" % e, params)
-    @mcp.tool()
-    def speedup_audio(type: str, source: str, space_name: str, speed: float = 1.0) -> dict:
-        """Adjust the speed multiplier of the audio, of type Float, with a range from 0.1 to 4.
+    @mcp.tool(
+        description="Adjust the speed multiplier of the audio, of type Float, with a range from 0.1 to 4.",
+    )
+    def speedup_audio(type: str, source: str, space_name: str = None, speed: float = 1.0) -> dict:
+        """
         Args:
             - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
                 - directurl
@@ -462,7 +539,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
                 - 0.1：放慢至原速的 0.1 倍。
                 - 1（默认值）：原速。
                 - 4：加速至原速的 4 倍。
-            - space_name(str): ** 必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
+            - space_name(str): ** 非必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
         Returns:
             - VCreativeId(str): AI 智剪任务 ID，用于查询任务状态。可以通过调用 `get_v_creative_task_result` 接口查询任务状态。
             - Code(int): 任务状态码。为 0 表示任务执行成功。
@@ -517,8 +594,10 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
         except Exception as e:
             raise Exception("speedup_video: %s" % e, params)
 
-    @mcp.tool()
-    def image_to_video(images: List[dict], space_name: str, transitions: List[str] = None) -> dict:
+    @mcp.tool(
+        description="The image-to-video conversion function supports non-overlapping transition effects. When the number of videos exceeds the number of transitions by 2 or more, the system will automatically cycle through the transitions. ** Default: No transition **",
+    )
+    def image_to_video(images: List[dict], space_name: str = None, transitions: List[str] = None) -> dict:
         """The image-to-video conversion function supports non-overlapping transition effects. When the number of videos exceeds the number of transitions by 2 or more, the system will automatically cycle through the transitions. ** Default: No transition **
         Args:
             - images(list[dict]): ** 必选字段 **，待合成的图片列表，子类型取值如下
@@ -553,7 +632,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
                 - 分类：圆形交替，ID：1182378
                 - 注意：如果不提供，则没有转场
                 - 当视频数量超过转场数量 2 个及以上时，系统将自动循环使用转场。例如有 10 个视频，2 种转场效果，那么在 9 处拼接点上，这 2 种转场效果将被依次循环使用。
-            - space_name(str): ** 必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
+            - space_name(str): ** 非必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
         Returns:
             - VCreativeId(str): AI 智剪任务 ID，用于查询任务状态。可以通过调用 `get_v_creative_task_result` 接口查询任务状态。
             - Code(int): 任务状态码。为 0 表示任务执行成功。
@@ -640,9 +719,11 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
         except Exception as e:
             raise Exception("image_to_video: %s" % e, params)
 
-    @mcp.tool()
-    def compile_video_audio(video: dict, audio: dict, space_name: str, is_audio_reserve: bool = True, is_video_audio_sync: bool = False, sync_mode: str = "video", sync_method: str = "trim") -> dict:
-        """The compilation of video and audio capabilities require the transmission of both ** audio and video resources ** for processing.
+    @mcp.tool(
+        description="The compilation of video and audio capabilities require the transmission of both ** audio and video resources ** for processing.",
+    )
+    def compile_video_audio(video: dict, audio: dict, space_name: str = None, is_audio_reserve: bool = True, is_video_audio_sync: bool = False, sync_mode: str = "video", sync_method: str = "trim") -> dict:
+        """
         Args:
             - video(dict): ** 必选字段 **，视频信息
                 - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
@@ -668,7 +749,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
             - sync_method(str): ** 非必选字段 **, **设置 is_video_audio_sync 为 true 时生效**；指定对齐方式，支持通过裁剪或加速的方式，对齐音频和视频的时长。可选项：speed、trim。
                 - speed：通过加快音频或视频的速度，对齐音频和视频的时长。
                 - trim：【默认值】通过裁剪音频或视频，对齐音频和视频的时长。从头开始计算并裁剪。
-            - space_name(str): ** 必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
+            - space_name(str): ** 非必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
         Returns:
             - VCreativeId(str): AI 智剪任务 ID，用于查询任务状态。可以通过调用 `get_v_creative_task_result` 接口查询任务状态。
             - Code(int): 任务状态码。为 0 表示任务执行成功。
@@ -747,9 +828,11 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
         except Exception as e:
             raise Exception("compile_video_audio: %s" % e, params)
 
-    @mcp.tool()
-    def extract_audio(type: str, source: str, space_name: str, format: str = "m4a") -> dict:
-        """Audio extraction, outputting the audio format. Supports mp3 and m4a formats. Default is m4a.
+    @mcp.tool(
+        description="Audio extraction, outputting the audio format. Supports mp3 and m4a formats. Default is m4a.",
+    )
+    def extract_audio(type: str, source: str, space_name: str = None, format: str = "m4a") -> dict:
+        """
         Args:
             - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
                 - directurl
@@ -757,7 +840,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
                 - vid
             - source(str): ** 必选字段 **, 视频文件信息
             - format(str): ** 非必选字段 **, 输出音频的格式，支持 mp3、m4a 格式。默认 m4a
-            - space_name(str): ** 必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
+            - space_name(str): ** 非必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
         Returns:
             - VCreativeId(str): AI 智剪任务 ID，用于查询任务状态。可以通过调用 `get_v_creative_task_result` 接口查询任务状态。
             - Code(int): 任务状态码。为 0 表示任务执行成功。
@@ -812,9 +895,11 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
         except Exception as e:
             raise Exception("extract_audio: %s" % e, params)
 
-    @mcp.tool()
-    def mix_audios(audios: List[dict], space_name: str) -> dict:
-        """Mix audios
+    @mcp.tool(
+        description="Mix audios",
+    )
+    def mix_audios(audios: List[dict], space_name: str = None) -> dict:
+        """
         Args:
             - audios(list[dict]): ** 必选字段 **，叠加的音频列表
                 - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
@@ -822,7 +907,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
                     - http
                     - vid
                 - source(str): ** 必选字段 **, 音频文件信息
-            - space_name(str): ** 必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
+            - space_name(str): ** 非必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
         Returns:
             - VCreativeId(str): AI 智剪任务 ID，用于查询任务状态。可以通过调用 `get_v_creative_task_result` 接口查询任务状态。
             - Code(int): 任务状态码。为 0 表示任务执行成功。
@@ -892,11 +977,15 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
         except Exception as e:
             raise Exception("mix_audios: %s" % e, params)
 
-    @mcp.tool()
-    def add_sub_video(video: dict, sub_video: dict, space_name: str, sub_options: Optional[dict] = None) -> dict:
-        """`水印贴片`, `画中画`，Add the capability of video watermarking, support adjusting the width and height of the watermark, as well as the position in the horizontal or vertical direction, and determine the timing of the watermark's appearance in the original video by setting start_time and end_time，.
+    @mcp.tool(
+        description="""
+        `水印贴片`, `画中画`，Add the capability of video watermarking, support adjusting the width and height of the watermark, as well as the position in the horizontal or vertical direction, and determine the timing of the watermark's appearance in the original video by setting start_time and end_time，.
         Note:
             - 如果设置的水印开始时间、结束时间超出原始视频时长，那么输出视频的长度将以水印的结束时间为准，超出原始视频部分将以黑屏形式延续。例如原始视频为 20 秒，设置 end_time 为 30，那么输出时长为 30 秒
+        """
+    )
+    def add_sub_video(video: dict, sub_video: dict, space_name: str, sub_options: Optional[dict] = None) -> dict:
+        """
         Args:
             - video(dict): ** 必选字段 **，视频信息
                 - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下

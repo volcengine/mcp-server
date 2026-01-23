@@ -5,23 +5,27 @@ def create_mcp_server(mcp, public_methods: dict):
 
     """Register all VOD media MCP tools."""
     # video quality enhancement
-    @mcp.tool()
-    def video_quality_enhancement_task(type: str, video: str, spaceName: str) -> Any:
-        """ Video quality enhancement is supported, with two input modes available: `Vid` and  `DirectUrl`.。
+    @mcp.tool(
+        description="""
+        Video quality enhancement is supported, with two input modes available: `Vid` and  `DirectUrl`.
         Note：
             - `Vid`: vid 模式下不需要进行任何处理
             - `DirectUrl`: directurl 模式下需要传递 FileName，不需要进行任何处理
+        """,
+    )
+    def video_quality_enhancement_task(type: str, video: str, space_name: str = None) -> Any:
+        """ 
         Args：
           - type(str)：** 必选字段 **，文件类型，默认值为 `Vid` 。字段取值如下
             - Vid
             - DirectUrl
-          - spaceName(str)： ** 必选字段 **,  视频空间名称
+          - space_name(str)： ** 非必选字段 **,  视频空间名称
           - video： ** 必选字段 **,  视频文件信息, 当 type 为 `Vid` 时， video 为视频文件 ID；当 type 为 `DirectUrl` 时， video 为 FileName
         Returns
           - RunId(str):  媒体处理任务执行 ID, 可通过  `get_media_execution_task_result` 方法进行结果查询， 输入 type 为 `enhanceVideo`
         """
 
-        media_input = _build_media_input(type, video, spaceName)
+        media_input = _build_media_input(type, video, space_name)
         params = {
             "Input": media_input,
             "Operation": {
@@ -44,21 +48,26 @@ def create_mcp_server(mcp, public_methods: dict):
         return _start_execution(params)
 
     # video super-resolution
-    @mcp.tool()
+    @mcp.tool(
+        description=""" 
+        Video Super-Resolution is supported, with two input modes available: `Vid` and  `DirectUrl`.
+            Note：
+            - `Res` 和 `ResLimit` ** 不能同时指定，否则会返回错误  **。
+            - `Vid`: vid 模式下不需要进行任何处理
+            - `DirectUrl`: directurl 模式下需要传递 FileName，不需要进行任何处理
+        """
+        
+    )
     def video_super_resolution_task(
-        type: str, video: str, spaceName: str, Res: str = None, ResLimit: int = None
+        type: str, video: str, space_name: str, Res: str = None, ResLimit: int = None
     ) -> Any:
-        """ Video Super-Resolution is supported, with two input modes available: `Vid` and  `DirectUrl`.
-        Note：
-         - `Res` 和 `ResLimit` ** 不能同时指定，否则会返回错误  **。
-         - `Vid`: vid 模式下不需要进行任何处理
-         - `DirectUrl`: directurl 模式下需要传递 FileName，不需要进行任何处理
+        """
         Args：
         - type(str)：** 必选字段 **，文件类型，默认值为 `Vid` 。字段取值如下
             - Vid
             - DirectUrl
         - video： ** 必选字段 **,  视频文件信息, 当 type 为 `Vid` 时， video 为视频文件 ID；当 type 为 `DirectUrl` 时， video 为 FileName
-        - spaceName(str)： ** 必选字段 **,  视频空间名称
+        - space_name(str)： ** 必选字段 **,  视频空间名称
         - Res(str): ** 必选字段 ** 目标分辨率。支持的取值如下所示。
             - 240p
             - 360p
@@ -78,7 +87,7 @@ def create_mcp_server(mcp, public_methods: dict):
         if ResLimit is not None and (not isinstance(ResLimit, int) or ResLimit < 64 or ResLimit > 2160):
             raise ValueError("ResLimit must be an int in [64, 2160]")
 
-        media_input = _build_media_input(type, video, spaceName)
+        media_input = _build_media_input(type, video, space_name)
         target = {}
        
         if ResLimit is not None:
@@ -113,15 +122,19 @@ def create_mcp_server(mcp, public_methods: dict):
         return _start_execution(params)
 
     # video interlacing
-    @mcp.tool()
-    def video_interlacing_task(type: str, video: str, spaceName: str, Fps: float) -> Any:
-        """ Video Super-Resolution is supported, with two input modes available: `Vid` and  `DirectUrl`.
+    @mcp.tool(
+        description=""" 
+        Video Super-Resolution is supported, with two input modes available: `Vid` and  `DirectUrl`.
+        """
+    )
+    def video_interlacing_task(type: str, video: str, space_name: str = None, Fps: float = None) -> Any:
+        """ 
         Args：
             - type(str)：** 必选字段 **，文件类型，默认值为 `Vid` 。字段取值如下
                 - Vid
                 - DirectUrl
             - video(str)： ** 必选字段 **,  视频文件信息, 当 type 为 `Vid` 时， video 为视频文件 ID；当 type 为 `DirectUrl` 时， video 为 FileName
-            - spaceName(str)： ** 必选字段 **,  视频空间名称
+            - space_name(str)： ** 非必选字段 **,  视频空间名称
             - Fps(Float):  目标帧率，单位为 fps。取值范围为 (0, 120]。
         Returns
              - RunId(str):  媒体处理任务执行 ID, 可通过 `get_media_execution_task_result` 方法进行结果查询,输入 type 为 `videSuperResolution`
@@ -129,7 +142,7 @@ def create_mcp_server(mcp, public_methods: dict):
         if not isinstance(Fps, (int, float)) or Fps <= 0 or Fps > 120:
             raise ValueError("Fps must be > 0 and <= 120")
 
-        media_input = _build_media_input(type, video, spaceName)
+        media_input = _build_media_input(type, video, space_name)
         params = {
             "Input": media_input,
             "Operation": {

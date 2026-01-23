@@ -50,7 +50,8 @@ class BaseService(VodService):
     def set_api_info(self, api_info):
         self.api_info = {**self.api_info, **api_info}
         return
-        
+    def set_headers(self, key: str, value: str):
+        self.service_info.header[key] = value
     def mcp_get(self, action, params={}, doseq=0):
         self.update_credentials_from_mcp()
 
@@ -110,3 +111,4 @@ class BaseService(VodService):
                 logging.debug("Credentials updated from MCP context")
         except Exception as e:
             logging.warning(f"Failed to update credentials from context: {e}")
+

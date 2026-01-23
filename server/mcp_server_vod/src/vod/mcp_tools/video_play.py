@@ -311,14 +311,17 @@ def register_video_play_methods(service: VodAPI, public_methods: dict,):
 
 
 def create_mcp_server(mcp: FastMCP, public_methods: dict, service: VodAPI):
-    @mcp.tool()
-    def get_play_url( type: str, source: str,  spaceName: str, expired_minutes: int = 60) -> Any:
-        """
+    @mcp.tool(
+        description=""" 
         Obtain the video playback link through `directurl` or `vid`， 通过 directurl or vid 获取视频播放地址,
         Note:
             expired_minutes 仅在 directurl 模式下生效
+        """
+    )
+    def get_play_url( type: str, source: str,  space_name: str = None, expired_minutes: int = 60) -> Any:
+        """
         Args:
-            - spaceName: **必选字段** 空间名称
+            - space_name: **非必选字段** 空间名称
             - source: **必选字段** 文件名 or vid
                 - 文件名：直接传入文件名，例如 `test.mp4`
                 - vid：直接传入 vid
@@ -329,27 +332,32 @@ def create_mcp_server(mcp: FastMCP, public_methods: dict, service: VodAPI):
         Returns:
             - 播放地址
         """
+        print("get_play_urlget_play_urlget_play_urlget_play_url",type, source, space_name, expired_minutes)
         if type == "directurl":
-            return public_methods["get_play_url"](spaceName, source, expired_minutes)
+            return public_methods["get_play_url"](space_name, source, expired_minutes)
         elif type == "vid":
-            videoInfo = public_methods["get_play_video_info"](source, spaceName)
+            videoInfo = public_methods["get_play_video_info"](source, space_name)
             if isinstance(videoInfo, str):
                 videoInfo = json.loads(videoInfo)
             return videoInfo.get("PlayURL", "")
 
-    @mcp.tool()
-    def get_video_audio_info(type: str, source: str, space_name: str) -> dict:
-        """Obtaining audio and video metadata， 获取音视频播放信息
+    @mcp.tool(
+        description=""" 
+        Obtaining audio and video metadata， 获取音视频播放信息
         Note:
             - ** directurl 模式：仅支持点播存储 **
             - ** vid 模式：通过 get_play_video_info 获取数据 **
             - ** 不支持 http 模式**
+        """
+    )
+    def get_video_audio_info(type: str, source: str, space_name: str = None) -> dict:
+        """
         Args:
             - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
                 - directurl：仅仅支持点播存储
                 - vid
             - source(str): 文件信息
-            - space_name(str): ** 必选字段 ** , 点播空间
+            - space_name(str): ** 非必选字段 ** , 点播空间
         Returns:
             - FormatName(str): 容器名称。
             - Duration(float): 时长，单位为秒。
