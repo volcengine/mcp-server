@@ -5,16 +5,13 @@ def create_mcp_server(mcp, public_methods: dict):
 
     """Register all VOD media MCP tools."""
     # video quality enhancement
-    @mcp.tool(
-        description="""
+    @mcp.tool()
+    def video_quality_enhancement_task(type: str, video: str, space_name: str = None) -> Any:
+        """
         Video quality enhancement is supported, with two input modes available: `Vid` and  `DirectUrl`.
         Note：
             - `Vid`: vid 模式下不需要进行任何处理
             - `DirectUrl`: directurl 模式下需要传递 FileName，不需要进行任何处理
-        """,
-    )
-    def video_quality_enhancement_task(type: str, video: str, space_name: str = None) -> Any:
-        """ 
         Args：
           - type(str)：** 必选字段 **，文件类型，默认值为 `Vid` 。字段取值如下
             - Vid
@@ -48,20 +45,16 @@ def create_mcp_server(mcp, public_methods: dict):
         return _start_execution(params)
 
     # video super-resolution
-    @mcp.tool(
-        description=""" 
+    @mcp.tool()
+    def video_super_resolution_task(
+        type: str, video: str, space_name: str, Res: str = None, ResLimit: int = None
+    ) -> Any:
+        """
         Video Super-Resolution is supported, with two input modes available: `Vid` and  `DirectUrl`.
             Note：
             - `Res` 和 `ResLimit` ** 不能同时指定，否则会返回错误  **。
             - `Vid`: vid 模式下不需要进行任何处理
             - `DirectUrl`: directurl 模式下需要传递 FileName，不需要进行任何处理
-        """
-        
-    )
-    def video_super_resolution_task(
-        type: str, video: str, space_name: str, Res: str = None, ResLimit: int = None
-    ) -> Any:
-        """
         Args：
         - type(str)：** 必选字段 **，文件类型，默认值为 `Vid` 。字段取值如下
             - Vid
@@ -122,13 +115,10 @@ def create_mcp_server(mcp, public_methods: dict):
         return _start_execution(params)
 
     # video interlacing
-    @mcp.tool(
-        description=""" 
-        Video Super-Resolution is supported, with two input modes available: `Vid` and  `DirectUrl`.
-        """
-    )
+    @mcp.tool()
     def video_interlacing_task(type: str, video: str, space_name: str = None, Fps: float = None) -> Any:
-        """ 
+        """
+        Video Super-Resolution is supported, with two input modes available: `Vid` and  `DirectUrl`.
         Args：
             - type(str)：** 必选字段 **，文件类型，默认值为 `Vid` 。字段取值如下
                 - Vid

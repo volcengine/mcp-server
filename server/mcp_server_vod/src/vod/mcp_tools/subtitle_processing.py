@@ -7,17 +7,15 @@ def create_mcp_server(mcp, public_methods: dict,service):
     _build_media_input = public_methods["_build_media_input"]
     _start_execution = public_methods["_start_execution"]
     
-    @mcp.tool(
-        description="""
+    @mcp.tool()
+    def asr_speech_to_text_task(type: str, video: str, space_name: str = None, language: str = None) -> Any:
+        """
         ASR speech-to-text captioning is supported, with two input modes available: `Vid` and  `DirectUrl`.
                 Note：
                     - `language`:  ** 可选字段 **， 不传会探测, 仅是在 语言较相似的情况下传递 来提高识别效果 
                     - `Vid`: vid 模式下不需要进行任何处理
                     - `DirectUrl`: directurl 模式下需要传递 FileName，不需要进行任何处理  
-        """,
-    )
-    def asr_speech_to_text_task(type: str, video: str, space_name: str = None, language: str = None) -> Any:
-        """           
+           
         Args：
             - type(str)：** 必选字段 **，文件类型，默认值为 `Vid` 。字段取值如下
                 - Vid
@@ -64,16 +62,14 @@ def create_mcp_server(mcp, public_methods: dict,service):
         return _start_execution(params)
 
     # OCR 
-    @mcp.tool(
-        description="""
+    @mcp.tool()
+    def ocr_text_to_subtitles_task(type: str, video: str, space_name: str = None) -> Any:
+        """
         OCR text to subtitles is supported, with two input modes available: `Vid` and  `DirectUrl`.
             Note：
                 - `Vid`: vid 模式下不需要进行任何处理
                 - `DirectUrl`: directurl 模式下需要传递 FileName，不需要进行任何处理                
-        """,
-    )
-    def ocr_text_to_subtitles_task(type: str, video: str, space_name: str = None) -> Any:
-        """           
+           
             Args：
             - type(str)：** 必选字段 **，文件类型，默认值为 `Vid` 。字段取值如下
                 - Vid
@@ -91,16 +87,14 @@ def create_mcp_server(mcp, public_methods: dict,service):
         return _start_execution(params)
 
     # subtitle removal
-    @mcp.tool(
-        description="""
+    @mcp.tool()
+    def video_subtitles_removal_task(type: str, video: str, space_name: str) -> Any:
+        """
         Video subtitles removal is supported, with two input modes available: `Vid` and  `DirectUrl`.
             Note：
                 - `Vid`: vid 模式下不需要进行任何处理
                 - `DirectUrl`: directurl 模式下需要传递 FileName，不需要进行任何处理                  
-        """,
-    )
-    def video_subtitles_removal_task(type: str, video: str, space_name: str) -> Any:
-        """           
+           
             Args：
             - type(str)：** 必选字段 **，文件类型，默认值为 `Vid` 。字段取值如下
                 - Vid
@@ -128,15 +122,12 @@ def create_mcp_server(mcp, public_methods: dict,service):
         }
         return _start_execution(params)
 
-    @mcp.tool(
-        description="""
+    @mcp.tool()
+    def add_subtitle(video: dict, space_name: str = None, subtitle_url: str = None, text_list: list = None, subtitle_config: dict = None) -> dict:
+        """
         Add subtitle functionality, supporting both subtitle file (subtitle_url) and subtitle list (text_list) methods. However, subtitle_url and text_list must specify that subtitle_url has a higher priority.
         Note:
             - subtitle_url 和 text_list 必须指定一个，subtitle_url 优先级更高
-        """,
-    )
-    def add_subtitle(video: dict, space_name: str = None, subtitle_url: str = None, text_list: list = None, subtitle_config: dict = None) -> dict:
-        """
         Args:
             - video(dict): ** 必选字段 **，视频信息
                 - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下

@@ -8,16 +8,13 @@ def create_mcp_server(mcp,  public_methods: dict):
     _start_execution = public_methods["_start_execution"]
 
     # intelligent slicing
-    @mcp.tool(
-        description="""
+    @mcp.tool()
+    def intelligent_slicing_task(type: str, video: str, space_name: str = None) -> Any:
+        """
          Intelligent slicing is supported, with two input modes available: `Vid` and  `DirectUrl`.
             Note：
                 - `Vid`: vid 模式下不需要进行任何处理
                 - `DirectUrl`: directurl 模式下需要传递 FileName，不需要进行任何处理         
-        """,
-    )
-    def intelligent_slicing_task(type: str, video: str, space_name: str = None) -> Any:
-        """
             Args：
             - type(str)：** 必选字段 **，文件类型，默认值为 `Vid` 。字段取值如下
                 - Vid

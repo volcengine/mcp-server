@@ -4,16 +4,14 @@ def create_mcp_server(mcp,  public_methods: dict):
     _build_media_input = public_methods["_build_media_input"]
     _start_execution = public_methods["_start_execution"]
     # green screen
-    @mcp.tool(
-        description="""
+    @mcp.tool()
+    def green_screen_task(type: str, video: str, space_name: str = None, output_format: str = "WEBM") -> Any:
+        """
         Green Screen （绿幕抠图） is supported, with two input modes available: `Vid` and  `DirectUrl`.
             Note：
                 - `Vid`: vid 模式下不需要进行任何处理
                 - `DirectUrl`: directurl 模式下需要传递 FileName，不需要进行任何处理   
-        """,
-    )
-    def green_screen_task(type: str, video: str, space_name: str = None, output_format: str = "WEBM") -> Any:
-        """       
+       
             Args：
             - type(str)：** 必选字段 **，文件类型，默认值为 `Vid` 。字段取值如下
                 - Vid
@@ -50,18 +48,16 @@ def create_mcp_server(mcp,  public_methods: dict):
         return _start_execution(params)
 
     # portrait image retouching
-    @mcp.tool(
-        description="""
+    @mcp.tool()
+    def portrait_image_retouching_task(
+        type: str, video: str, space_name: str = None, output_format: str = "WEBM"
+    ) -> Any:
+        """
         Portrait image retouching is supported, with two input modes available: `Vid` and  `DirectUrl`.
             Note：
                 - `Vid`: vid 模式下不需要进行任何处理
                 - `DirectUrl`: directurl 模式下需要传递 FileName，不需要进行任何处理          
-        """,
-    )
-    def portrait_image_retouching_task(
-        type: str, video: str, space_name: str = None, output_format: str = "WEBM"
-    ) -> Any:
-        """   
+   
             Args：
             - type(str)：** 必选字段 **，文件类型，默认值为 `Vid` 。字段取值如下
                 - Vid

@@ -311,15 +311,12 @@ def register_video_play_methods(service: VodAPI, public_methods: dict,):
 
 
 def create_mcp_server(mcp: FastMCP, public_methods: dict, service: VodAPI):
-    @mcp.tool(
-        description=""" 
+    @mcp.tool()
+    def get_play_url( type: str, source: str,  space_name: str = None, expired_minutes: int = 60) -> Any:
+        """
         Obtain the video playback link through `directurl` or `vid`， 通过 directurl or vid 获取视频播放地址,
         Note:
             expired_minutes 仅在 directurl 模式下生效
-        """
-    )
-    def get_play_url( type: str, source: str,  space_name: str = None, expired_minutes: int = 60) -> Any:
-        """
         Args:
             - space_name: **非必选字段** 空间名称
             - source: **必选字段** 文件名 or vid
@@ -341,17 +338,14 @@ def create_mcp_server(mcp: FastMCP, public_methods: dict, service: VodAPI):
                 videoInfo = json.loads(videoInfo)
             return videoInfo.get("PlayURL", "")
 
-    @mcp.tool(
-        description=""" 
+    @mcp.tool()
+    def get_video_audio_info(type: str, source: str, space_name: str = None) -> dict:
+        """
         Obtaining audio and video metadata， 获取音视频播放信息
         Note:
             - ** directurl 模式：仅支持点播存储 **
             - ** vid 模式：通过 get_play_video_info 获取数据 **
             - ** 不支持 http 模式**
-        """
-    )
-    def get_video_audio_info(type: str, source: str, space_name: str = None) -> dict:
-        """
         Args:
             - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
                 - directurl：仅仅支持点播存储

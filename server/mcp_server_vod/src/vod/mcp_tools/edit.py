@@ -32,18 +32,15 @@ def _format_source(type: str, source: str) -> str:
 
 def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
 
-    @mcp.tool(
-        description="""
+    @mcp.tool()
+    def audio_video_stitching(type: str, space_name: str = None, videos: List[str] = None, audios: List[str] = None, transitions: List[str] = None) -> dict:
+        """ 
         Carry out video stitching, audio stitching, and support for transitions and other capabilities，需要参考 Note 中的要求。
             Note:
                 -  **audio splicing does not support transitions. **
                 -  ** vid 模式下需要增加  vid://  前缀， 示例：vid://123456 **
                 -  ** directurl://{fileName} 格式指定资源的 FileName。示例：directurl://test.mp3**
                 -  ** http(s):// 格式指定资源的 URL。示例：http://example.com/test.mp4**    
-        """,
-    )
-    def audio_video_stitching(type: str, space_name: str = None, videos: List[str] = None, audios: List[str] = None, transitions: List[str] = None) -> dict:
-        """ 
          Args:
             - type(str): **  必选字段 ** , 拼接类型。 `audio` | `video`
             - space_name(str):  ** 非必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
@@ -168,16 +165,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
         except Exception as e:
             raise Exception("audio_video_stitching: %s" % e, params)
 
-    @mcp.tool(
-        description="""
-        Invoke the current tools to complete the cropping of audio and video，需要参考 Note 中的要求。
-            Note:
-                -  ** vid 模式下需要增加  vid://  前缀， 示例：vid://123456 **
-                -  ** directurl://{fileName} 格式指定资源的 FileName。示例：directurl://test.mp3**
-                -  ** http(s):// 格式指定资源的 URL。示例：http://example.com/test.mp4**
-                -  `start_time` 和 `end_time` 必须同时指定，且 `end_time` 必须大于 `start_time`
-        """,
-    )
+    @mcp.tool()
     def audio_video_clipping(type: str, source: str, start_time: float, end_time: float, space_name: str = None) -> dict:
         """ Invoke the current tools to complete the cropping of audio and video，需要参考 Note 中的要求。
          Note:
@@ -344,11 +332,10 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
     #     """
     #     return _get_v_creative_task_result_impl(VCreativeId, space_name)
 
-    @mcp.tool(
-        description="Poll the execution status and results of video stitching, audio stitching, and audio-video cropping by using the `VCreativeId` until success or timeout.",
-    )
+    @mcp.tool()
     async def get_v_creative_task_result(VCreativeId: str,space_name: str = None, interval: float = 2.0, max_retries: int = 10,  ctx: Context = None) -> dict:
         """
+       Poll the execution status and results of video stitching, audio stitching, and audio-video cropping by using the `VCreativeId` until success or timeout.
         Args:
             - VCreativeId(str): `String type`, ID for AI intelligent trimming task.
             - space_name(str): `String type`, space name. ** 非必选字段 **
@@ -390,11 +377,10 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
 
          
 
-    @mcp.tool(
-        description="Video rotation capability is supported, allowing for `vertical and horizontal flipping of the video`. ** Default: No flipping **",
-    )
+    @mcp.tool()
     def flip_video(type: str, source: str, space_name: str = None, flip_x: bool = False, flip_y: bool = False) -> dict:
         """
+        Video rotation capability is supported, allowing for `vertical and horizontal flipping of the video`. ** Default: No flipping **
         Args:
             - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
                 - directurl
@@ -455,11 +441,10 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
         except Exception as e:
             raise Exception("flip_video: %s" % e, params)
 
-    @mcp.tool(
-        description="Adjust the speed multiplier of the video, of type Float, with a range from 0.1 to 4.",
-    )
+    @mcp.tool()
     def speedup_video(type: str, source: str, space_name: str = None, speed: float = 1.0) -> dict:
         """
+        Adjust the speed multiplier of the video, of type Float, with a range from 0.1 to 4.
         Args:
             - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
                 - directurl
@@ -524,11 +509,10 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
                 raise Exception("speedup_video: %s" % e, params)
         except Exception as e:
             raise Exception("speedup_video: %s" % e, params)
-    @mcp.tool(
-        description="Adjust the speed multiplier of the audio, of type Float, with a range from 0.1 to 4.",
-    )
+    @mcp.tool( )
     def speedup_audio(type: str, source: str, space_name: str = None, speed: float = 1.0) -> dict:
         """
+        Adjust the speed multiplier of the audio, of type Float, with a range from 0.1 to 4.
         Args:
             - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
                 - directurl
@@ -594,9 +578,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
         except Exception as e:
             raise Exception("speedup_video: %s" % e, params)
 
-    @mcp.tool(
-        description="The image-to-video conversion function supports non-overlapping transition effects. When the number of videos exceeds the number of transitions by 2 or more, the system will automatically cycle through the transitions. ** Default: No transition **",
-    )
+    @mcp.tool()
     def image_to_video(images: List[dict], space_name: str = None, transitions: List[str] = None) -> dict:
         """The image-to-video conversion function supports non-overlapping transition effects. When the number of videos exceeds the number of transitions by 2 or more, the system will automatically cycle through the transitions. ** Default: No transition **
         Args:
@@ -719,11 +701,10 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
         except Exception as e:
             raise Exception("image_to_video: %s" % e, params)
 
-    @mcp.tool(
-        description="The compilation of video and audio capabilities require the transmission of both ** audio and video resources ** for processing.",
-    )
+    @mcp.tool()
     def compile_video_audio(video: dict, audio: dict, space_name: str = None, is_audio_reserve: bool = True, is_video_audio_sync: bool = False, sync_mode: str = "video", sync_method: str = "trim") -> dict:
         """
+        The compilation of video and audio capabilities require the transmission of both ** audio and video resources ** for processing.
         Args:
             - video(dict): ** 必选字段 **，视频信息
                 - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
@@ -828,11 +809,9 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
         except Exception as e:
             raise Exception("compile_video_audio: %s" % e, params)
 
-    @mcp.tool(
-        description="Audio extraction, outputting the audio format. Supports mp3 and m4a formats. Default is m4a.",
-    )
+    @mcp.tool()
     def extract_audio(type: str, source: str, space_name: str = None, format: str = "m4a") -> dict:
-        """
+        """"Audio extraction, outputting the audio format. Supports mp3 and m4a formats. Default is m4a.
         Args:
             - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
                 - directurl
@@ -895,11 +874,9 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
         except Exception as e:
             raise Exception("extract_audio: %s" % e, params)
 
-    @mcp.tool(
-        description="Mix audios",
-    )
+    @mcp.tool()
     def mix_audios(audios: List[dict], space_name: str = None) -> dict:
-        """
+        """Mix audios, 混音
         Args:
             - audios(list[dict]): ** 必选字段 **，叠加的音频列表
                 - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下
@@ -977,15 +954,12 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
         except Exception as e:
             raise Exception("mix_audios: %s" % e, params)
 
-    @mcp.tool(
-        description="""
-        `水印贴片`, `画中画`，Add the capability of video watermarking, support adjusting the width and height of the watermark, as well as the position in the horizontal or vertical direction, and determine the timing of the watermark's appearance in the original video by setting start_time and end_time，.
-        Note:
-            - 如果设置的水印开始时间、结束时间超出原始视频时长，那么输出视频的长度将以水印的结束时间为准，超出原始视频部分将以黑屏形式延续。例如原始视频为 20 秒，设置 end_time 为 30，那么输出时长为 30 秒
-        """
-    )
+    @mcp.tool()
     def add_sub_video(video: dict, sub_video: dict, space_name: str, sub_options: Optional[dict] = None) -> dict:
         """
+         `水印贴片`, `画中画`，Add the capability of video watermarking, support adjusting the width and height of the watermark, as well as the position in the horizontal or vertical direction, and determine the timing of the watermark's appearance in the original video by setting start_time and end_time，.
+        Note:
+            - 如果设置的水印开始时间、结束时间超出原始视频时长，那么输出视频的长度将以水印的结束时间为准，超出原始视频部分将以黑屏形式延续。例如原始视频为 20 秒，设置 end_time 为 30，那么输出时长为 30 秒
         Args:
             - video(dict): ** 必选字段 **，视频信息
                 - type(str): ** 必选字段 **，文件类型，默认值为 `vid` 。字段取值如下

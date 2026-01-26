@@ -4,13 +4,10 @@ def create_transcode_result_server(mcp,  public_methods: dict,):
     """Register all VOD media MCP tools."""
     _get_media_execution_task_result = public_methods["_get_media_execution_task_result"]
     
-    @mcp.tool(
-        description="""
-        Obtain the query results of the media processing task, 场景区分, 仅仅支持单任务模式
-        """,
-    )
+    @mcp.tool()
     def get_media_execution_task_result(type: str, run_id: str) -> Any:
         """
+        Obtain the query results of the media processing task, 场景区分, 仅仅支持单任务模式
             Args：
             - run_id:  ** 必选字段 **， 执行 ID。用于唯一指示当前这次媒体处理任务。
             - type（str）： ** 必选字段 **， 场景类型 ，取值如下：
