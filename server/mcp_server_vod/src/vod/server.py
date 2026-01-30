@@ -25,6 +25,8 @@ mcp = BaseMCP(
         - `DirectUrl` 指定资源的 FileName。示例：test.mp3
         """,
     )
+
+    
 def init_mcp () -> FastMCP:
     return mcp
 

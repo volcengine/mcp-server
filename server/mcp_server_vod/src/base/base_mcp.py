@@ -364,8 +364,7 @@ class BaseMCP(FastMCP):
                     arguments['space_name'] = space_name_env.strip()
             space_name = arguments.get('space_name') 
             if not space_name or not isinstance(space_name, str) or not space_name.strip():
-                raise Exception('space_name is required')
-            print(f"space_name: {space_name}",arguments)
+                logger.error(f"space_name is required")
             return await super().call_tool(name, arguments)
         except Exception as e:
             logger.error(f"BaseMCP.call_tool failed with error: {e}")
