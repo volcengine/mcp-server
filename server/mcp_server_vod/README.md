@@ -262,7 +262,7 @@ Add subtitle `https:****.srt` to video vid1; outline color red, font size 70, ou
 
 #### Description
 
-Picture-in-picture, add image to video, and video watermarking.
+Image to video, and video watermarking.
 
 #### Trigger Example
 
@@ -326,11 +326,10 @@ Configure the MCP service in your MCP client. Example MCP JSON:
       "env": {
         "VOLCENGINE_ACCESS_KEY": "Your Volcengine AK",
         "VOLCENGINE_SECRET_KEY": "Your Volcengine SK",
-         "MCP_TOOLS_TYPE": "Your Source", // groups | tools
-         // - In groups mode, MCP_TOOLS_SOURCE is the group name
-         // - In tools mode, MCP_TOOLS_SOURCE is the tool name
-        "MCP_TOOLS_SOURCE": "Your Source",
-
+        "MCP_TOOLS_TYPE": "Your Source", // groups | tools
+        // - In groups mode, MCP_TOOLS_SOURCE is the group name
+        // - In tools mode, MCP_TOOLS_SOURCE is the tool name
+        "MCP_TOOLS_SOURCE": "Your Source"
       }
     }
   }
