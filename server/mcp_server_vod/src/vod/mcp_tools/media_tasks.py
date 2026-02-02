@@ -5,10 +5,11 @@ def create_transcode_result_server(mcp,  public_methods: dict,):
     _get_media_execution_task_result = public_methods["_get_media_execution_task_result"]
     
     @mcp.tool()
-    def get_media_execution_task_result(type: str, runId: str) -> Any:
-        """Obtain the query results of the media processing task, 场景区分， 仅仅支持单任务模式
+    def get_media_execution_task_result(type: str, run_id: str) -> Any:
+        """
+        Obtain the query results of the media processing task, 场景区分, 仅仅支持单任务模式
             Args：
-            - runId（str）:  ** 必选字段 **， 执行 ID。用于唯一指示当前这次媒体处理任务。
+            - run_id:  ** 必选字段 **， 执行 ID。用于唯一指示当前这次媒体处理任务。
             - type（str）： ** 必选字段 **， 场景类型 ，取值如下：
                 - portraitImageRetouching：人像抠图 
                 - greenScreen： 绿幕抠图 
@@ -64,11 +65,11 @@ def create_transcode_result_server(mcp,  public_methods: dict,):
             ]
         if type not in valid_types:
             raise ValueError(f"type must be one of {sorted(valid_types)}, but got {type}")  
-        if not runId or not runId.strip():
+        if not run_id or not run_id.strip():
             raise ValueError("runId must be provided")      
 
         # query result
-        response = _get_media_execution_task_result(runId, type)
+        response = _get_media_execution_task_result(run_id, type)
        
        
         return response

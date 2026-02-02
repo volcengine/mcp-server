@@ -1,20 +1,23 @@
 import json
 from src.vod.api.api import VodAPI
 from volcengine.vod.models.request.request_vod_pb2 import VodUrlUploadRequest
+# from src.vod.models.request.request_models import BatchUploadUrlItem
+from typing import List
 def create_mcp_server(mcp,  public_methods: dict, service: VodAPI,):
     get_play_url = public_methods['get_play_url']
     @mcp.tool()
-    def video_batch_upload(space_name: str, urls: list[dict[str, any]] = None, ) -> dict:
-        """ Batch retrieval and upload of URLs upload video to specified space via synchronous upload
+    def video_batch_upload(space_name: str = None, urls: List[dict] = None, ) -> dict:
+        """
+            Batch retrieval and upload of URLs upload video、 audio to specified space via synchronous upload
             Note:
                 - 本接口主要适用于文件没有存储在本地服务器或终端，需要通过公网访问的 URL 地址上传的场景。源文件 URL 支持 HTTP 和 HTTPS。
                 - 本接口为异步上传接口。上传任务成功提交后，系统会生成异步执行的任务，排队执行，不保证时效性。
                 - SourceUrl 必须是可公网直接访问的文件 URL，而非包含视频的网页 URL。
             Args:
-                - space_name:** 必选字段 ** 空间名称 
-                -  urls(list[dict[str, any]]): ** 必选字段 **  资源URL列表，每个元素是一个包含URL信息的字典
+                - space_name:** 非必选字段 ** 空间名称 
+                -  urls(list[dict[str, str]]): ** 必选字段 **  资源URL列表，每个元素是一个包含URL信息的字典
                     - SourceUrl （str）:** 必选字段 **  源文件 URL。
-                    - FileExtension（str）:** 必选字段 **  文件件后缀，即点播存储中文件的类型
+                    - FileExtension（str）:** 必选字段 **  文件后缀，即点播存储中文件的类型
                         - 文件后缀必须以 . 开头，不超过 8 位。
                         - 当您传入 FileExtension 时,视频点播将生成 32 位随机字符串，和您传入的 FileExtension 共同拼接成文件路径。
             Returns:
@@ -25,8 +28,8 @@ def create_mcp_server(mcp,  public_methods: dict, service: VodAPI,):
             req.SpaceName = space_name
             for video_info in urls:
                 url_set = req.URLSets.add()
-                url_set.SourceUrl = video_info['SourceUrl']
-                url_set.FileExtension = video_info['FileExtension']
+                url_set.SourceUrl = video_info.get('SourceUrl', '')
+                url_set.FileExtension = video_info.get('FileExtension', '')
             resp = service.upload_media_by_url(req)
         except Exception as e:
             raise Exception(f'video_batch_upload failed, space_name: {space_name}, urls: {urls}, error: {e}')
@@ -40,7 +43,8 @@ def create_mcp_server(mcp,  public_methods: dict, service: VodAPI,):
 
     @mcp.tool()
     def query_batch_upload_task_info(job_ids: str) -> dict:
-        """  Obtain the query results of media processing tasks Obtain the query results of batch upload tasks
+        """
+        Obtain the query results of media processing tasks, Obtain the query results of batch upload tasks
             Args:
             - job_ids(str): ** 必选字段 ** ，每个 URL 对应的任务 ID。查询多个以 , 逗号分隔，最多 ** 20 条 **。
             Returns：
