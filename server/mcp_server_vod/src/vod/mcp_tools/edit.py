@@ -955,7 +955,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
             raise Exception("mix_audios: %s" % e, params)
 
     @mcp.tool()
-    def add_sub_video(video: dict, sub_video: dict, space_name: str, sub_options: Optional[dict] = None) -> dict:
+    def add_sub_video(video: dict, sub_video: dict, space_name: str = None, sub_options: Optional[dict] = None) -> dict:
         """
          `水印贴片`, `画中画`，Add the capability of video watermarking, support adjusting the width and height of the watermark, as well as the position in the horizontal or vertical direction, and determine the timing of the watermark's appearance in the original video by setting start_time and end_time，.
         Note:
