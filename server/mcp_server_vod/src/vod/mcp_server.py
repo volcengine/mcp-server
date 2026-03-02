@@ -149,10 +149,11 @@ def create_mcp_server(mcp: FastMCP = None):
 
             if videoDetailInfo.get("PublishStatus") == 'Published':
                 url = playInfo.get("MainPlayURL", None) or playInfo.get("BackupPlayUrl", None)
-                if url is None:
-                    urlDta = get_play_video_info(vid, SpaceName, 'Origin')
-                    urlTmp = json.loads(urlDta)
-                    url = urlTmp.get("PlayURL", "")
+                if OutputType == 'CDN':
+                    if url is None or url == "":
+                        urlDta = get_play_video_info(vid, SpaceName, 'Origin')
+                        urlTmp = json.loads(urlDta)
+                        url = urlTmp.get("PlayURL", "")
             else:
                 publishStatus = update_media_publish_status(vid, SpaceName, 'Published')
                 if publishStatus == 'success':
