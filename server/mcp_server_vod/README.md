@@ -197,9 +197,9 @@ Open the dialogue panel in the Trae main interface, and switch the agent at the 
 You can give prompts directly, for example: Help me stitch beach.mp4 and sunset.mp4 in the test space together, add a "fade in and fade out" transition effect in the middle, and send me the playback address after completion.
 | Stage | Content |
 | --- | --- |
-| **Input Video** | <video src=https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/1814f820a644484486417c3a40ce8ac3~tplv-goo7wpa0wc-image.image></video> <br> <video src=https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/9add04fef4df4aef8ae66c1507326696~tplv-goo7wpa0wc-image.image></video> |
+| **Input Video** | <video src="https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/1814f820a644484486417c3a40ce8ac3~tplv-goo7wpa0wc-image.image" controls width="100%"></video> <br> <video src="https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/9add04fef4df4aef8ae66c1507326696~tplv-goo7wpa0wc-image.image" controls width="100%"></video> |
 | **Processing Process** | You will observe: <br> <br> * Autonomous Planning: The agent will automatically identify the need to call the `audio_video_stitching` tool. <br> * Asynchronous Tracking: Since cloud editing takes time, the agent will submit a task and return a task ID (TaskID), and automatically poll the progress in the background. If you find the dialogue interrupted, you can manually ask: "Is the task just now finished?" <br> * Result Delivery: After the task is completed, the agent will directly give the generated video information and preview link. <br> <br> ![Image](https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/255337623fcf4cdaa2fac5776b76a97c~tplv-goo7wpa0wc-image.image) |
-| **Output Video** | <video src=https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/faac6d11638841b2ab84953437c49560~tplv-goo7wpa0wc-image.image></video> |
+| **Output Video** | <video src="https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/faac6d11638841b2ab84953437c49560~tplv-goo7wpa0wc-image.image" controls width="100%"></video> |
 
 # Reference Information
 
@@ -225,14 +225,14 @@ The following table shows recommended prompts for common business scenarios. You
 Prompt: Help me flip this video horizontally and adjust it to 2x speed playback.
 | **Input Video** | **Output Video** |
 | --- | --- |
-| <br> <video src=https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/5750e89648104f9aab4ffd1421b25129~tplv-goo7wpa0wc-image.image></video> <br> | <br> <video src=https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/ee97af04ec7445ce91586cd34a03927f~tplv-goo7wpa0wc-image.image></video> <br> |
+| <br> <video src="https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/5750e89648104f9aab4ffd1421b25129~tplv-goo7wpa0wc-image.image" controls width="100%"></video> <br> | <br> <video src="https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/ee97af04ec7445ce91586cd34a03927f~tplv-goo7wpa0wc-image.image" controls width="100%"></video> <br> |
 
 ### **Subtitle Extraction and Automatic Burning**
 
 Prompt: Recognize the audio in the speech_no_subtitle.mp4 video in the test space via ASR and convert it to subtitles; then add the subtitles to the original video to generate a new video.
 | Input Video | Output Video |
 | --- | --- |
-| <br> <video src=https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/314e504b12de45a5892d7cc7a34aa1e2~tplv-goo7wpa0wc-image.image></video> <br> | <br> <video src=https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/7d05d8fab9d34ac2844170ef17a6a19a~tplv-goo7wpa0wc-image.image></video> <br> |
+| <br> <video src="https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/314e504b12de45a5892d7cc7a34aa1e2~tplv-goo7wpa0wc-image.image" controls width="100%"></video> <br> | <br> <video src="https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/7d05d8fab9d34ac2844170ef17a6a19a~tplv-goo7wpa0wc-image.image" controls width="100%"></video> <br> |
 
 ## MCP Configuration Parameter Description
 
