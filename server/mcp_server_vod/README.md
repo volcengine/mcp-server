@@ -103,10 +103,11 @@ Trae is an AI-native IDE that provides powerful agent collaboration capabilities
 ### Step 1: Select Access Mode
 
 Choose one of the following two access modes according to your needs:
-| **Mode** | **Applicable Scenario** | **Access Method** |
+
+| M⁠o⁠d⁠e⁠ | A⁠p⁠p⁠l⁠i⁠c⁠a⁠b⁠l⁠e⁠&#160;S⁠c⁠e⁠n⁠a⁠r⁠i⁠o⁠ | A⁠c⁠c⁠e⁠s⁠s⁠&#160;M⁠e⁠t⁠h⁠o⁠d⁠ |
 | --- | --- | --- |
-| **Local Mode (JSON Local)** | Personal quick debugging, processing local sensitive files, no public domain required. | Run directly via `uvx` command invoking local script. You can jump directly to [Step 2: Add MCP Configuration](#step-2-add-mcp-configuration). |
-| **Cloud Mode (JSON URL)** | Long-term stable use, cross-team collaboration, no local installation environment required. | Go to [Volcano Engine MCP Marketplace](https://www.volcengine.com/mcp-marketplace/detail?name=VeVOD%20MCP), under the Trae tab, click **Cloud Deployment** to generate an exclusive long-term URL. After copying the URL, go to [Step 2: Add MCP Configuration](#step-2-add-mcp-configuration). <br> ![Image](https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/287e233f0fbd45ff89eb44db0b1d5db5~tplv-goo7wpa0wc-image.image) <br> This method requires an account balance of not less than 100 RMB, involving [API Gateway](https://www.volcengine.com/docs/6569/185249?lang=zh) and [Function Service](https://www.volcengine.com/docs/6662/1269135?lang=zh) billing. <br> |
+| **L⁠o⁠c⁠a⁠l⁠&#160;M⁠o⁠d⁠e⁠ (⁠J⁠S⁠O⁠N⁠&#160;L⁠o⁠c⁠a⁠l⁠)** | Personal quick debugging, processing local sensitive files, no public domain required. | Run directly via `uvx` command invoking local script. You can jump directly to [Step 2: Add MCP Configuration](#step-2-add-mcp-configuration). |
+| **C⁠l⁠o⁠u⁠d⁠&#160;M⁠o⁠d⁠e⁠ (⁠J⁠S⁠O⁠N⁠&#160;U⁠R⁠L⁠)** | Long-term stable use, cross-team collaboration, no local installation environment required. | Go to [Volcano Engine MCP Marketplace](https://www.volcengine.com/mcp-marketplace/detail?name=VeVOD%20MCP), under the Trae tab, click **Cloud Deployment** to generate an exclusive long-term URL. After copying the URL, go to [Step 2: Add MCP Configuration](#step-2-add-mcp-configuration).<br>![Cloud deployment configuration](https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/287e233f0fbd45ff89eb44db0b1d5db5~tplv-goo7wpa0wc-image.image)<br>This method requires an account balance of not less than 100 RMB, involving [API Gateway](https://www.volcengine.com/docs/6569/185249?lang=zh) and [Function Service](https://www.volcengine.com/docs/6662/1269135?lang=zh) billing. |
 
 ### Step 2: Add MCP Configuration
 
@@ -114,11 +115,13 @@ Choose one of the following two access modes according to your needs:
 2. Under the MCP tab, click **Add** > **Manually Add**.
 3. According to the mode you selected in Step 1, copy the corresponding configuration JSON and replace it according to the text description below. Note that to ensure the success rate of the first call, only the core tool groups are loaded by default.
 
+According to the mode you selected in Step 1, see the section below and copy the JSON.
+
 #### Local Mode (JSON Local)
 
 Copy the following JSON and replace it according to the text description below. Trae will automatically pull the latest remote code via `uvx` and run it locally.
 
-```JSON
+```json
 {
   "mcpServers": {
     "video_process_mcp": {
@@ -150,11 +153,13 @@ Field replacement description:
 
 Complete parameter description, please see [MCP Configuration Parameter Description](#mcp-configuration-parameter-description).
 
+---
+
 #### Cloud Mode (JSON URL)
 
 Copy the following JSON and replace it according to the text description below:
 
-```JSON
+```json
 {
   "mcpServers": {
     "video_process_mcp": {
@@ -188,13 +193,16 @@ Complete parameter description, please see [MCP Configuration Parameter Descript
 ### Step 3: Enable Agent Dialogue
 
 Open the dialogue panel in the Trae main interface, and switch the agent at the bottom to **Builder with MCP** mode.
-![Image](https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/b38f1ab590d74168b898b974d7d9240f~tplv-goo7wpa0wc-image.image)
+
+![Select Builder with MCP mode](https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/b38f1ab590d74168b898b974d7d9240f~tplv-goo7wpa0wc-image.image)
+
 You can give prompts directly, for example: Help me stitch beach.mp4 and sunset.mp4 in the test space together, add a "fade in and fade out" transition effect in the middle, and send me the playback address after completion.
-| Stage | Content |
+
+| S⁠t⁠a⁠g⁠e⁠ | C⁠o⁠n⁠t⁠e⁠n⁠t⁠ |
 | --- | --- |
-| **Input Video** | <img src="https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/1814f820a644484486417c3a40ce8ac3~tplv-goo7wpa0wc-image.image" width="100%" /> <br> <img src="https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/9add04fef4df4aef8ae66c1507326696~tplv-goo7wpa0wc-image.image" width="100%" /> |
-| **Processing Process** | You will observe: <br> <br> _ Autonomous Planning: The agent will automatically identify the need to call the `audio_video_stitching` tool. <br> _ Asynchronous Tracking: Since cloud editing takes time, the agent will submit a task and return a task ID (TaskID), and automatically poll the progress in the background. If you find the dialogue interrupted, you can manually ask: "Is the task just now finished?" <br> \* Result Delivery: After the task is completed, the agent will directly give the generated video information and preview link. <br> <br> ![Image](https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/255337623fcf4cdaa2fac5776b76a97c~tplv-goo7wpa0wc-image.image) |
-| **Output Video** | <img src="https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/faac6d11638841b2ab84953437c49560~tplv-goo7wpa0wc-image.image" width="100%" /> |
+| **I⁠n⁠p⁠u⁠t⁠&#160;V⁠i⁠d⁠e⁠o⁠** | 📹 [Input video 1](https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/1814f820a644484486417c3a40ce8ac3~tplv-goo7wpa0wc-image.image) 📹 [Input video 2](https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/9add04fef4df4aef8ae66c1507326696~tplv-goo7wpa0wc-image.image) |
+| **P⁠r⁠o⁠c⁠e⁠s⁠s⁠i⁠n⁠g⁠&#160;P⁠r⁠o⁠c⁠e⁠s⁠s⁠** | You will observe:<br><br>· Autonomous Planning: The agent will automatically identify the need to call the `audio_video_stitching` tool.<br>· Asynchronous Tracking: Since cloud editing takes time, the agent will submit a task and return a task ID (TaskID), and automatically poll the progress in the background. If you find the dialogue interrupted, you can manually ask: "Is the task just now finished?"<br>· Result Delivery: After the task is completed, the agent will directly give the generated video information and preview link.<br><br>![Processing](https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/255337623fcf4cdaa2fac5776b76a97c~tplv-goo7wpa0wc-image.image) |
+| **O⁠u⁠t⁠p⁠u⁠t⁠&#160;V⁠i⁠d⁠e⁠o⁠** | 📹 [Output video](https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/faac6d11638841b2ab84953437c49560~tplv-goo7wpa0wc-image.image) |
 
 # Reference Information
 
@@ -218,23 +226,25 @@ The following table shows recommended prompts for common business scenarios. You
 ### **Visual Effect Transformation**
 
 Prompt: Help me flip this video horizontally and adjust it to 2x speed playback.
-| **Input Video** | **Output Video** |
+
+| I⁠n⁠p⁠u⁠t⁠&#160;V⁠i⁠d⁠e⁠o⁠ | O⁠u⁠t⁠p⁠u⁠t⁠&#160;V⁠i⁠d⁠e⁠o⁠ |
 | --- | --- |
-| <img src="https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/5750e89648104f9aab4ffd1421b25129~tplv-goo7wpa0wc-image.image" width="100%" /> | <img src="https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/ee97af04ec7445ce91586cd34a03927f~tplv-goo7wpa0wc-image.image" width="100%" /> |
+| 📹 [Input video](https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/5750e89648104f9aab4ffd1421b25129~tplv-goo7wpa0wc-image.image) | 📹 [Output video](https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/ee97af04ec7445ce91586cd34a03927f~tplv-goo7wpa0wc-image.image) |
 
 ### **Subtitle Extraction and Automatic Burning**
 
 Prompt: Recognize the audio in the speech_no_subtitle.mp4 video in the test space via ASR and convert it to subtitles; then add the subtitles to the original video to generate a new video.
-| Input Video | Output Video |
+
+| I⁠n⁠p⁠u⁠t⁠&#160;V⁠i⁠d⁠e⁠o⁠ | O⁠u⁠t⁠p⁠u⁠t⁠&#160;V⁠i⁠d⁠e⁠o⁠ |
 | --- | --- |
-| <img src="https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/314e504b12de45a5892d7cc7a34aa1e2~tplv-goo7wpa0wc-image.image" width="100%" /> | <img src="https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/7d05d8fab9d34ac2844170ef17a6a19a~tplv-goo7wpa0wc-image.image" width="100%" /> |
+| 📹 [Input video](https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/314e504b12de45a5892d7cc7a34aa1e2~tplv-goo7wpa0wc-image.image) | 📹 [Output video](https://p9-arcosite.byteimg.com/tos-cn-i-goo7wpa0wc/7d05d8fab9d34ac2844170ef17a6a19a~tplv-goo7wpa0wc-image.image) |
 
 ## MCP Configuration Parameter Description
 
 The following table lists the core configuration items of VeVOD MCP, distinguishing between cloud deployment and local deployment. Please select the corresponding parameters according to your actual access scenario.
 | **Cloud Header Field** | **Local Environment Variable** | **Example** | **Description** |
 | --- | --- | --- | --- |
-| x-tt-access-key | VOLCENGINE*ACCESS_KEY | AKLTMTU2M... | Volcano Engine Access Key AK |
+| x-tt-access-key | VOLCENGINE_ACCESS_KEY | AKLTMTU2M... | Volcano Engine Access Key AK |
 | x-tt-secret-key | VOLCENGINE_SECRET_KEY | TnpZek5HT... | Volcano Engine Access Key SK |
 | x-tt-tools-type | MCP_TOOLS_TYPE | groups or tools | Loading mode. Decides whether to load by "group" or "specific tool". |
 | x-tt-tools-source | MCP_TOOLS_SOURCE | all or edit,upload | Loading scope. <br> <br> * Full loading (all): Only effective when `x-tt-tools-type` is `groups`. Suitable for powerful models (such as GPT-4, Claude 3.5). Note that an error will occur if the total number of tools exceeds 10 in Trae. <br> \_ Scenario loading (edit,upload): For example, if you only need editing functions, loading only the edit group can significantly reduce Token consumption and improve AI call accuracy. |
