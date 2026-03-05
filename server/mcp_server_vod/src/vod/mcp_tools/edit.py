@@ -980,7 +980,7 @@ def create_mcp_server(mcp,public_methods: dict, service: VodAPI, ):
                 - pos_y(str): 水印在垂直方向（Y 轴）的位置，以视频左上角为原点，单位：像素，例如值为 0 时，表示水印在垂直方向的最上侧；值为 100 时，表示水印相对原点向下移动 100 像素。
                 - start_time(float): 水印的开始时间，单位：秒。
                 - end_time(float): 水印的结束时间，单位：秒。
-            - space_name(str): ** 必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
+            - space_name(str): ** 非必选字段 ** , 任务产物的上传空间。AI 处理生成的视频将被上传至此点播空间。
         Returns:
             - VCreativeId(str): AI 智剪任务 ID，用于查询任务状态。可以通过调用 `get_v_creative_task_result` 接口查询任务状态。
             - Code(int): 任务状态码。为 0 表示任务执行成功。

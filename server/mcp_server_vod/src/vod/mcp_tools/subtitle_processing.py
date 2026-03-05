@@ -125,7 +125,7 @@ def create_mcp_server(mcp, public_methods: dict,service):
     @mcp.tool()
     def add_subtitle(video: dict, space_name: str = None, subtitle_url: str = None, text_list: list = None, subtitle_config: dict = None) -> dict:
         """
-        Add subtitle functionality, supporting both subtitle file (subtitle_url) and subtitle list (text_list) methods. However, subtitle_url and text_list must specify that subtitle_url has a higher priority.
+        `添加字幕，文字水印`,Add subtitle functionality, supporting both subtitle file (subtitle_url) and subtitle list (text_list) methods. However, subtitle_url and text_list must specify that subtitle_url has a higher priority.
         Note:
             - subtitle_url 和 text_list 必须指定一个，subtitle_url 优先级更高
         Args:
