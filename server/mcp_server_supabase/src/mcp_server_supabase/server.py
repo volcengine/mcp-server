@@ -200,9 +200,9 @@ async def get_workspace_endpoints(workspace_id: str = None) -> str:
 
 
 @mcp.tool()
-async def get_workspace_api_keys(workspace_id: str = None) -> str:
+async def get_workspace_api_keys(workspace_id: str = None, reveal: bool = False) -> str:
     """Gets API keys for a workspace."""
-    return await workspace_tools.get_workspace_api_keys(workspace_id)
+    return await workspace_tools.get_workspace_api_keys(workspace_id, reveal)
 
 
 @mcp.tool()

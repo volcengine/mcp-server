@@ -21,6 +21,22 @@ class WorkspaceTools:
     def _resolve_workspace_id(self, workspace_id: Optional[str] = None) -> Optional[str]:
         return workspace_id or self.default_workspace_id
 
+    def _error_detail(self, code: str, message: str, retriable: bool = False) -> dict:
+        return {
+            "code": code,
+            "message": message,
+            "retriable": retriable,
+        }
+
+    def _mask_key(self, value: Optional[str], reveal: bool) -> Optional[str]:
+        if value is None:
+            return None
+        if reveal:
+            return value
+        if len(value) <= 12:
+            return "*" * len(value)
+        return f"{value[:6]}...{value[-4:]}"
+
     async def list_workspaces(self) -> str:
         """Lists all available workspaces.
 
@@ -176,9 +192,17 @@ class WorkspaceTools:
     async def delete_branch(self, branch_id: str, workspace_id: Optional[str] = None) -> str:
         ws_id = self._resolve_workspace_id(workspace_id)
         if not ws_id:
-            return json.dumps({"success": False, "error": "workspace_id is required"}, indent=2)
+            return json.dumps({
+                "success": False,
+                "error": "workspace_id is required",
+                "error_detail": self._error_detail("MissingWorkspaceId", "workspace_id is required", False),
+            }, indent=2)
         if not branch_id or not branch_id.strip():
-            return json.dumps({"success": False, "error": "branch_id is required"}, indent=2)
+            return json.dumps({
+                "success": False,
+                "error": "branch_id is required",
+                "error_detail": self._error_detail("MissingBranchId", "branch_id is required", False),
+            }, indent=2)
         normalized_branch_id = branch_id.strip()
 
         try:
@@ -187,26 +211,64 @@ class WorkspaceTools:
             if not exists:
                 return json.dumps({
                     "success": False,
-                    "error": f"Branch '{normalized_branch_id}' not found in workspace '{ws_id}'"
+                    "error": f"Branch '{normalized_branch_id}' not found in workspace '{ws_id}'",
+                    "error_detail": self._error_detail(
+                        "BranchNotFound",
+                        f"Branch '{normalized_branch_id}' not found in workspace '{ws_id}'",
+                        False
+                    ),
                 }, indent=2)
         except Exception as e:
             logger.error(f"Error checking branch before delete: {e}")
-            return json.dumps({"success": False, "error": str(e)}, indent=2)
+            return json.dumps({
+                "success": False,
+                "error": str(e),
+                "error_detail": self._error_detail("ListBranchesFailed", str(e), True),
+            }, indent=2)
 
         result = await self.aidap_client.delete_branch(ws_id, normalized_branch_id)
         if not result.get("success"):
-            return json.dumps(result, indent=2)
+            error_text = result.get("error", "delete branch failed")
+            return json.dumps({
+                "success": False,
+                "error": error_text,
+                "error_detail": self._error_detail(
+                    result.get("code", "DeleteBranchFailed"),
+                    error_text,
+                    bool(result.get("retriable", False))
+                ),
+            }, indent=2)
 
-        for _ in range(10):
+        max_confirm_attempts = 20
+        last_list_error: Optional[str] = None
+        for _ in range(max_confirm_attempts):
             await asyncio.sleep(1)
-            branches = await self.aidap_client.list_branches(ws_id)
-            exists = any(b.get("branch_id") == normalized_branch_id for b in branches)
-            if not exists:
-                return json.dumps({"success": True, "branch_id": normalized_branch_id}, indent=2)
+            try:
+                branches = await self.aidap_client.list_branches(ws_id)
+                exists = any(b.get("branch_id") == normalized_branch_id for b in branches)
+                if not exists:
+                    return json.dumps({"success": True, "branch_id": normalized_branch_id}, indent=2)
+            except Exception as e:
+                last_list_error = str(e)
 
+        if last_list_error:
+            return json.dumps({
+                "success": False,
+                "error": f"Delete requested for branch '{normalized_branch_id}' but verification failed: {last_list_error}",
+                "error_detail": self._error_detail(
+                    "DeleteBranchVerifyFailed",
+                    f"Delete requested for branch '{normalized_branch_id}' but verification failed: {last_list_error}",
+                    True
+                ),
+            }, indent=2)
         return json.dumps({
             "success": False,
-            "error": f"Delete requested for branch '{normalized_branch_id}' but branch still exists"
+            "error": f"Delete requested for branch '{normalized_branch_id}' but branch still exists",
+            "error_detail": self._error_detail(
+                "BranchStillExists",
+                f"Delete requested for branch '{normalized_branch_id}' but branch still exists",
+                True
+            ),
         }, indent=2)
 
     async def get_workspace_endpoints(self, workspace_id: Optional[str] = None) -> str:
@@ -228,7 +290,7 @@ class WorkspaceTools:
             "api_url": endpoint
         }, indent=2)
 
-    async def get_workspace_api_keys(self, workspace_id: Optional[str] = None) -> str:
+    async def get_workspace_api_keys(self, workspace_id: Optional[str] = None, reveal: bool = False) -> str:
         ws_id = self._resolve_workspace_id(workspace_id)
         if not ws_id:
             return json.dumps({"success": False, "error": "workspace_id is required"}, indent=2)
@@ -238,6 +300,7 @@ class WorkspaceTools:
             publishable_key = None
             anon_key = None
             service_role_key = None
+            masked_keys = []
             for key in keys:
                 key_type = (key.get("type") or "").lower()
                 value = key.get("key")
@@ -246,13 +309,18 @@ class WorkspaceTools:
                     anon_key = value
                 if key_type == "service":
                     service_role_key = value
+                masked_keys.append({
+                    **key,
+                    "key": self._mask_key(value, reveal),
+                })
             return json.dumps({
                 "success": True,
                 "workspace_id": ws_id,
-                "publishable_key": publishable_key,
-                "anon_key": anon_key,
-                "service_role_key": service_role_key,
-                "keys": keys
+                "reveal": reveal,
+                "publishable_key": self._mask_key(publishable_key, reveal),
+                "anon_key": self._mask_key(anon_key, reveal),
+                "service_role_key": self._mask_key(service_role_key, reveal),
+                "keys": masked_keys
             }, indent=2)
         except Exception as e:
             logger.error(f"Error getting api keys: {e}")

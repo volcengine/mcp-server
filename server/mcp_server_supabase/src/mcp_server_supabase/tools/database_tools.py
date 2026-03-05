@@ -9,8 +9,7 @@ logger = logging.getLogger(__name__)
 
 class DatabaseTools(BaseTools):
     """使用 REST API 方式执行 SQL"""
-    @handle_errors
-    async def execute_sql(self, query: str, workspace_id: Optional[str] = None) -> List[dict]:
+    async def _execute_sql_raw(self, query: str, workspace_id: Optional[str] = None) -> List[dict]:
         if not query or not query.strip():
             raise ValueError("SQL query cannot be empty")
 
@@ -23,8 +22,17 @@ class DatabaseTools(BaseTools):
         client = await self._get_client(ws_id)
         result = await client.call_api("/pg/query", method="POST", json_data={"query": query})
 
-        logger.debug(f"SQL query returned {len(result) if isinstance(result, list) else 'N/A'} rows")
+        if isinstance(result, dict) and isinstance(result.get("data"), list):
+            result = result["data"]
+        if not isinstance(result, list):
+            raise TypeError(f"Unexpected SQL result type: {type(result).__name__}")
+
+        logger.debug(f"SQL query returned {len(result)} rows")
         return result
+
+    @handle_errors
+    async def execute_sql(self, query: str, workspace_id: Optional[str] = None) -> List[dict]:
+        return await self._execute_sql_raw(query, workspace_id)
     
     @handle_errors
     async def list_tables(self, schemas: List[str] = None, workspace_id: Optional[str] = None) -> List[dict]:
@@ -46,7 +54,7 @@ class DatabaseTools(BaseTools):
         ORDER BY schemaname, tablename
         """
 
-        return await self.execute_sql(query, workspace_id)
+        return await self._execute_sql_raw(query, workspace_id)
     
     @handle_errors
     async def list_migrations(self, workspace_id: Optional[str] = None) -> List[dict]:
@@ -61,7 +69,7 @@ class DatabaseTools(BaseTools):
         FROM supabase_migrations.schema_migrations
         ORDER BY version DESC
         """
-        return await self.execute_sql(query, workspace_id)
+        return await self._execute_sql_raw(query, workspace_id)
 
     @handle_errors
     async def list_extensions(self, workspace_id: Optional[str] = None) -> List[dict]:
@@ -74,7 +82,7 @@ class DatabaseTools(BaseTools):
         JOIN pg_namespace n ON n.oid = e.extnamespace
         ORDER BY e.extname
         """
-        return await self.execute_sql(query, workspace_id)
+        return await self._execute_sql_raw(query, workspace_id)
     
     @handle_errors
     @read_only_check
@@ -100,7 +108,7 @@ class DatabaseTools(BaseTools):
         ON CONFLICT (version) DO UPDATE SET name = EXCLUDED.name;
         COMMIT;
         """
-        await self.execute_sql(migration_sql, workspace_id)
+        await self._execute_sql_raw(migration_sql, workspace_id)
         return {
             "success": True,
             "message": f"Migration {name} applied successfully",
@@ -167,7 +175,7 @@ class DatabaseTools(BaseTools):
         WHERE table_schema IN ('{schema_list}')
         ORDER BY table_schema, table_name, ordinal_position
         """
-        columns = await self.execute_sql(query, workspace_id)
+        columns = await self._execute_sql_raw(query, workspace_id)
 
         grouped: dict[str, dict[str, list[dict]]] = {}
         for column in columns:

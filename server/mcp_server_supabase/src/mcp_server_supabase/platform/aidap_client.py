@@ -1,6 +1,7 @@
 import logging
 import asyncio
 import os
+import random
 from typing import Optional
 from ..config import (
     VOLCENGINE_ACCESS_KEY,
@@ -46,6 +47,23 @@ class AidapClient:
 
         api_client = volcenginesdkcore.ApiClient(configuration)
         self.client = AIDAPApi(api_client)
+
+    def _branch_error_code(self, error_text: str) -> str:
+        if "OperationDenied_BranchNotReady" in error_text:
+            return "OperationDenied_BranchNotReady"
+        if "BranchNotFound" in error_text:
+            return "BranchNotFound"
+        return "AIDAPError"
+
+    async def _sleep_backoff(
+        self,
+        attempt: int,
+        base_seconds: float = 1.0,
+        max_seconds: float = 10.0,
+    ) -> None:
+        delay = min(max_seconds, base_seconds * (2 ** max(attempt - 1, 0)))
+        jitter = random.uniform(0.0, delay * 0.2)
+        await asyncio.sleep(delay + jitter)
     
     async def get_default_branch_id(self, workspace_id: str, use_cache: bool = True) -> Optional[str]:
         cache = get_branch_cache()
@@ -178,8 +196,7 @@ class AidapClient:
             return {"success": False, "error": str(e)}
 
     async def delete_branch(self, workspace_id: str, branch_id: str) -> dict:
-        max_attempts = 6
-        delay_seconds = 2
+        max_attempts = 8
         for attempt in range(1, max_attempts + 1):
             try:
                 request = DeleteBranchRequest(
@@ -190,19 +207,23 @@ class AidapClient:
                 return {"success": True}
             except Exception as e:
                 error_text = str(e)
-                if "BranchNotFound" in error_text:
-                    return {"success": False, "error": error_text}
-                if "OperationDenied_BranchNotReady" in error_text and attempt < max_attempts:
-                    await asyncio.sleep(delay_seconds)
+                code = self._branch_error_code(error_text)
+                retriable = code == "OperationDenied_BranchNotReady"
+                if retriable and attempt < max_attempts:
+                    await self._sleep_backoff(attempt)
                     continue
                 logger.error(f"Error deleting branch: {e}")
                 return {
                     "success": False,
                     "error": error_text,
+                    "code": code,
+                    "retriable": retriable,
                 }
         return {
             "success": False,
             "error": "delete_branch failed after retries",
+            "code": "OperationDenied_BranchNotReady",
+            "retriable": True,
         }
 
     async def get_endpoint(self, workspace_id: str, branch_id: Optional[str] = None, use_cache: bool = True) -> Optional[str]:
@@ -256,8 +277,7 @@ class AidapClient:
             return None
     
     async def reset_branch(self, workspace_id: str, branch_id: str) -> dict:
-        max_attempts = 6
-        delay_seconds = 2
+        max_attempts = 8
         for attempt in range(1, max_attempts + 1):
             try:
                 request = ResetBranchRequest(
@@ -268,17 +288,23 @@ class AidapClient:
                 return {"success": True}
             except Exception as e:
                 error_text = str(e)
-                if "OperationDenied_BranchNotReady" in error_text and attempt < max_attempts:
-                    await asyncio.sleep(delay_seconds)
+                code = self._branch_error_code(error_text)
+                retriable = code == "OperationDenied_BranchNotReady"
+                if retriable and attempt < max_attempts:
+                    await self._sleep_backoff(attempt)
                     continue
                 logger.error(f"Error resetting branch: {e}")
                 return {
                     "success": False,
                     "error": error_text,
+                    "code": code,
+                    "retriable": retriable,
                 }
         return {
             "success": False,
             "error": "reset_branch failed after retries",
+            "code": "OperationDenied_BranchNotReady",
+            "retriable": True,
         }
 
     async def get_api_key(self, workspace_id: str, key_type: str = "service_role",
