@@ -107,3 +107,127 @@ class DatabaseTools(BaseTools):
             "version": migration_version,
             "name": name.strip(),
         }
+
+    def _to_ts_type(self, data_type: str, udt_name: str) -> str:
+        normalized_data_type = (data_type or "").lower()
+        normalized_udt_name = (udt_name or "").lower()
+        if normalized_data_type in {"smallint", "integer", "bigint", "numeric", "decimal", "real", "double precision"}:
+            return "number"
+        if normalized_data_type in {"boolean"}:
+            return "boolean"
+        if normalized_data_type in {"json", "jsonb"}:
+            return "Json"
+        if normalized_data_type in {"date", "timestamp without time zone", "timestamp with time zone", "time without time zone", "time with time zone"}:
+            return "string"
+        if normalized_data_type in {"bytea"}:
+            return "string"
+        if normalized_data_type == "array":
+            base = normalized_udt_name[1:] if normalized_udt_name.startswith("_") else normalized_udt_name
+            item_type = self._to_ts_type(base, base)
+            return f"{item_type}[]"
+        if normalized_udt_name in {"uuid", "varchar", "text", "bpchar", "name", "citext", "inet"}:
+            return "string"
+        if normalized_udt_name in {"int2", "int4", "int8", "float4", "float8"}:
+            return "number"
+        if normalized_udt_name in {"bool"}:
+            return "boolean"
+        if normalized_udt_name in {"json", "jsonb"}:
+            return "Json"
+        return "string"
+
+    def _to_ts_key(self, key: str) -> str:
+        if key.replace("_", "").isalnum() and not key[0].isdigit():
+            return key
+        escaped = key.replace("\\", "\\\\").replace("'", "\\'")
+        return f"'{escaped}'"
+
+    @handle_errors
+    async def generate_typescript_types(
+        self,
+        schemas: List[str] = None,
+        workspace_id: Optional[str] = None
+    ) -> str:
+        if schemas is None:
+            schemas = ["public"]
+        for schema in schemas:
+            if not schema.replace('_', '').isalnum():
+                raise ValueError(f"Invalid schema name: {schema}")
+
+        schema_list = "', '".join(schemas)
+        query = f"""
+        SELECT
+            table_schema,
+            table_name,
+            column_name,
+            is_nullable,
+            data_type,
+            udt_name,
+            column_default
+        FROM information_schema.columns
+        WHERE table_schema IN ('{schema_list}')
+        ORDER BY table_schema, table_name, ordinal_position
+        """
+        columns = await self.execute_sql(query, workspace_id)
+
+        grouped: dict[str, dict[str, list[dict]]] = {}
+        for column in columns:
+            schema_name = column.get("table_schema")
+            table_name = column.get("table_name")
+            grouped.setdefault(schema_name, {})
+            grouped[schema_name].setdefault(table_name, [])
+            grouped[schema_name][table_name].append(column)
+
+        lines: list[str] = []
+        lines.append("export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]")
+        lines.append("")
+        lines.append("export type Database = {")
+
+        for schema_name in sorted(grouped.keys()):
+            tables = grouped[schema_name]
+            lines.append(f"  {self._to_ts_key(schema_name)}: {{")
+            lines.append("    Tables: {")
+
+            for table_name in sorted(tables.keys()):
+                table_columns = tables[table_name]
+                lines.append(f"      {self._to_ts_key(table_name)}: {{")
+                lines.append("        Row: {")
+                for column in table_columns:
+                    col_name = column.get("column_name")
+                    ts_key = self._to_ts_key(col_name)
+                    base_type = self._to_ts_type(column.get("data_type", ""), column.get("udt_name", ""))
+                    nullable = column.get("is_nullable") == "YES"
+                    row_type = f"{base_type} | null" if nullable else base_type
+                    lines.append(f"          {ts_key}: {row_type}")
+                lines.append("        }")
+                lines.append("        Insert: {")
+                for column in table_columns:
+                    col_name = column.get("column_name")
+                    ts_key = self._to_ts_key(col_name)
+                    base_type = self._to_ts_type(column.get("data_type", ""), column.get("udt_name", ""))
+                    nullable = column.get("is_nullable") == "YES"
+                    has_default = column.get("column_default") is not None
+                    optional = nullable or has_default
+                    insert_type = f"{base_type} | null" if nullable else base_type
+                    suffix = "?" if optional else ""
+                    lines.append(f"          {ts_key}{suffix}: {insert_type}")
+                lines.append("        }")
+                lines.append("        Update: {")
+                for column in table_columns:
+                    col_name = column.get("column_name")
+                    ts_key = self._to_ts_key(col_name)
+                    base_type = self._to_ts_type(column.get("data_type", ""), column.get("udt_name", ""))
+                    nullable = column.get("is_nullable") == "YES"
+                    update_type = f"{base_type} | null" if nullable else base_type
+                    lines.append(f"          {ts_key}?: {update_type}")
+                lines.append("        }")
+                lines.append("      }")
+
+            lines.append("    }")
+            lines.append("    Views: {}")
+            lines.append("    Functions: {}")
+            lines.append("    Enums: {}")
+            lines.append("    CompositeTypes: {}")
+            lines.append("  }")
+
+        lines.append("}")
+        return "\n".join(lines)

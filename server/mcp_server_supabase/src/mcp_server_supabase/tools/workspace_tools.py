@@ -1,5 +1,6 @@
 """Workspace management tools for Supabase MCP Server"""
 
+import asyncio
 import json
 import logging
 import inspect
@@ -16,6 +17,9 @@ class WorkspaceTools:
     def __init__(self, aidap_client, default_workspace_id: Optional[str] = None):
         self.aidap_client = aidap_client
         self.default_workspace_id = default_workspace_id
+
+    def _resolve_workspace_id(self, workspace_id: Optional[str] = None) -> Optional[str]:
+        return workspace_id or self.default_workspace_id
 
     async def list_workspaces(self) -> str:
         """Lists all available workspaces.
@@ -113,12 +117,44 @@ class WorkspaceTools:
             }, indent=2)
 
     @read_only_check
+    async def create_workspace(
+        self,
+        workspace_name: str,
+        engine_version: str = "Supabase_1_24",
+        engine_type: str = "Supabase",
+    ) -> str:
+        if not workspace_name or not workspace_name.strip():
+            return json.dumps({"success": False, "error": "workspace_name is required"}, indent=2)
+        result = await self.aidap_client.create_workspace(
+            workspace_name=workspace_name.strip(),
+            engine_type=engine_type,
+            engine_version=engine_version
+        )
+        return json.dumps(result, indent=2)
+
+    @read_only_check
+    async def start_workspace(self, workspace_id: Optional[str] = None) -> str:
+        ws_id = self._resolve_workspace_id(workspace_id)
+        if not ws_id:
+            return json.dumps({"success": False, "error": "workspace_id is required"}, indent=2)
+        result = await self.aidap_client.start_workspace(ws_id)
+        return json.dumps(result, indent=2)
+
+    @read_only_check
+    async def stop_workspace(self, workspace_id: Optional[str] = None) -> str:
+        ws_id = self._resolve_workspace_id(workspace_id)
+        if not ws_id:
+            return json.dumps({"success": False, "error": "workspace_id is required"}, indent=2)
+        result = await self.aidap_client.stop_workspace(ws_id)
+        return json.dumps(result, indent=2)
+
+    @read_only_check
     async def create_branch(
         self,
         name: str = "develop",
         workspace_id: Optional[str] = None,
     ) -> str:
-        ws_id = workspace_id or self.default_workspace_id
+        ws_id = self._resolve_workspace_id(workspace_id)
         if not ws_id:
             return json.dumps({"success": False, "error": "workspace_id is required"}, indent=2)
 
@@ -126,21 +162,101 @@ class WorkspaceTools:
         return json.dumps(result, indent=2)
 
     async def list_branches(self, workspace_id: Optional[str] = None) -> str:
-        ws_id = workspace_id or self.default_workspace_id
+        ws_id = self._resolve_workspace_id(workspace_id)
         if not ws_id:
             return json.dumps({"success": False, "error": "workspace_id is required"}, indent=2)
-
-        branches = await self.aidap_client.list_branches(ws_id)
-        return json.dumps({"branches": branches}, indent=2)
+        try:
+            branches = await self.aidap_client.list_branches(ws_id)
+            return json.dumps({"success": True, "branches": branches}, indent=2)
+        except Exception as e:
+            logger.error(f"Error listing branches: {e}")
+            return json.dumps({"success": False, "error": str(e)}, indent=2)
 
     @read_only_check
     async def delete_branch(self, branch_id: str, workspace_id: Optional[str] = None) -> str:
-        ws_id = workspace_id or self.default_workspace_id
+        ws_id = self._resolve_workspace_id(workspace_id)
+        if not ws_id:
+            return json.dumps({"success": False, "error": "workspace_id is required"}, indent=2)
+        if not branch_id or not branch_id.strip():
+            return json.dumps({"success": False, "error": "branch_id is required"}, indent=2)
+        normalized_branch_id = branch_id.strip()
+
+        try:
+            branches = await self.aidap_client.list_branches(ws_id)
+            exists = any(b.get("branch_id") == normalized_branch_id for b in branches)
+            if not exists:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Branch '{normalized_branch_id}' not found in workspace '{ws_id}'"
+                }, indent=2)
+        except Exception as e:
+            logger.error(f"Error checking branch before delete: {e}")
+            return json.dumps({"success": False, "error": str(e)}, indent=2)
+
+        result = await self.aidap_client.delete_branch(ws_id, normalized_branch_id)
+        if not result.get("success"):
+            return json.dumps(result, indent=2)
+
+        for _ in range(10):
+            await asyncio.sleep(1)
+            branches = await self.aidap_client.list_branches(ws_id)
+            exists = any(b.get("branch_id") == normalized_branch_id for b in branches)
+            if not exists:
+                return json.dumps({"success": True, "branch_id": normalized_branch_id}, indent=2)
+
+        return json.dumps({
+            "success": False,
+            "error": f"Delete requested for branch '{normalized_branch_id}' but branch still exists"
+        }, indent=2)
+
+    async def get_workspace_endpoints(self, workspace_id: Optional[str] = None) -> str:
+        ws_id = self._resolve_workspace_id(workspace_id)
         if not ws_id:
             return json.dumps({"success": False, "error": "workspace_id is required"}, indent=2)
 
-        result = await self.aidap_client.delete_branch(ws_id, branch_id)
-        return json.dumps(result, indent=2)
+        endpoint = await self.aidap_client.get_endpoint(ws_id)
+        if not endpoint:
+            return json.dumps({
+                "success": False,
+                "error": f"Could not get endpoint for workspace {ws_id}"
+            }, indent=2)
+
+        return json.dumps({
+            "success": True,
+            "workspace_id": ws_id,
+            "project_url": endpoint,
+            "api_url": endpoint
+        }, indent=2)
+
+    async def get_workspace_api_keys(self, workspace_id: Optional[str] = None) -> str:
+        ws_id = self._resolve_workspace_id(workspace_id)
+        if not ws_id:
+            return json.dumps({"success": False, "error": "workspace_id is required"}, indent=2)
+
+        try:
+            keys = await self.aidap_client.get_api_keys(ws_id)
+            publishable_key = None
+            anon_key = None
+            service_role_key = None
+            for key in keys:
+                key_type = (key.get("type") or "").lower()
+                value = key.get("key")
+                if key_type == "public":
+                    publishable_key = value
+                    anon_key = value
+                if key_type == "service":
+                    service_role_key = value
+            return json.dumps({
+                "success": True,
+                "workspace_id": ws_id,
+                "publishable_key": publishable_key,
+                "anon_key": anon_key,
+                "service_role_key": service_role_key,
+                "keys": keys
+            }, indent=2)
+        except Exception as e:
+            logger.error(f"Error getting api keys: {e}")
+            return json.dumps({"success": False, "error": str(e)}, indent=2)
 
     @read_only_check
     async def reset_branch(
@@ -159,7 +275,7 @@ class WorkspaceTools:
         Returns:
             JSON string containing operation result
         """
-        ws_id = workspace_id or self.default_workspace_id
+        ws_id = self._resolve_workspace_id(workspace_id)
         if not ws_id:
             return json.dumps({
                 "success": False,

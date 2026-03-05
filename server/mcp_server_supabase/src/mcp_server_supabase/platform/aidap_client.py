@@ -25,6 +25,12 @@ try:
         CreateBranchRequest,
         DeleteBranchRequest,
         BranchSettingsForCreateBranchInput,
+        CreateWorkspaceRequest,
+        WorkspaceSettingsForCreateWorkspaceInput,
+        BranchSettingsForCreateWorkspaceInput,
+        ComputeSettingsForCreateWorkspaceInput,
+        StartWorkspaceRequest,
+        StopWorkspaceRequest,
     )
 except ImportError:
     logger.error("volcengine-python-sdk not installed")
@@ -85,7 +91,7 @@ class AidapClient:
             return branches
         except Exception as e:
             logger.error(f"Error listing branches: {e}")
-            return []
+            raise RuntimeError(str(e))
 
     async def create_branch(self, workspace_id: str, name: str = "develop") -> dict:
         try:
@@ -111,6 +117,66 @@ class AidapClient:
                 "error": str(e),
             }
 
+    async def create_workspace(
+        self,
+        workspace_name: str,
+        engine_type: str = "Supabase",
+        engine_version: str = "Supabase_1_24",
+    ) -> dict:
+        try:
+            request = CreateWorkspaceRequest(
+                workspace_name=workspace_name,
+                engine_type=engine_type,
+                engine_version=engine_version,
+                branch_settings=BranchSettingsForCreateWorkspaceInput(branch_name="main"),
+                compute_settings=ComputeSettingsForCreateWorkspaceInput(
+                    auto_scaling_limit_min_cu=0.25,
+                    auto_scaling_limit_max_cu=1,
+                    suspend_timeout_seconds=300
+                ),
+                workspace_settings=WorkspaceSettingsForCreateWorkspaceInput(
+                    public_connection=False,
+                    deletion_protection=False
+                ),
+            )
+            response = self.client.create_workspace(request)
+
+            workspace_id = getattr(response, 'workspace_id', None)
+            if not workspace_id and hasattr(response, 'workspace'):
+                workspace_id = getattr(response.workspace, 'workspace_id', None)
+
+            return {
+                "success": True,
+                "workspace_id": workspace_id,
+                "workspace_name": workspace_name,
+                "engine_type": engine_type,
+                "engine_version": engine_version,
+            }
+        except Exception as e:
+            logger.error(f"Error creating workspace: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+            }
+
+    async def start_workspace(self, workspace_id: str) -> dict:
+        try:
+            request = StartWorkspaceRequest(workspace_id=workspace_id)
+            self.client.start_workspace(request)
+            return {"success": True, "workspace_id": workspace_id, "status": "starting"}
+        except Exception as e:
+            logger.error(f"Error starting workspace: {e}")
+            return {"success": False, "error": str(e)}
+
+    async def stop_workspace(self, workspace_id: str) -> dict:
+        try:
+            request = StopWorkspaceRequest(workspace_id=workspace_id)
+            self.client.stop_workspace(request)
+            return {"success": True, "workspace_id": workspace_id, "status": "stopping"}
+        except Exception as e:
+            logger.error(f"Error stopping workspace: {e}")
+            return {"success": False, "error": str(e)}
+
     async def delete_branch(self, workspace_id: str, branch_id: str) -> dict:
         max_attempts = 6
         delay_seconds = 2
@@ -125,7 +191,7 @@ class AidapClient:
             except Exception as e:
                 error_text = str(e)
                 if "BranchNotFound" in error_text:
-                    return {"success": True}
+                    return {"success": False, "error": error_text}
                 if "OperationDenied_BranchNotReady" in error_text and attempt < max_attempts:
                     await asyncio.sleep(delay_seconds)
                     continue
@@ -254,3 +320,25 @@ class AidapClient:
         except Exception as e:
             logger.error(f"Error getting API key: {e}")
             return None
+
+    async def get_api_keys(self, workspace_id: str, branch_id: Optional[str] = None) -> list[dict]:
+        if not branch_id:
+            branch_id = await self.get_default_branch_id(workspace_id)
+            if not branch_id:
+                raise RuntimeError(f"Could not get default branch for workspace {workspace_id}")
+
+        request = DescribeAPIKeysRequest(
+            workspace_id=workspace_id,
+            branch_id=branch_id
+        )
+        response = self.client.describe_api_keys(request)
+
+        keys = []
+        if hasattr(response, 'api_keys') and response.api_keys:
+            for key in response.api_keys:
+                keys.append({
+                    "type": getattr(key, "type", None),
+                    "key": getattr(key, "key", None),
+                    "description": getattr(key, "description", None),
+                })
+        return keys

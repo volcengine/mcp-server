@@ -76,14 +76,7 @@ class EdgeFunctionTools(BaseTools):
 
     def _validate_runtime_compatibility(self, runtime: str, source_code: str) -> None:
         """验证运行时和代码的兼容性"""
-        if runtime.startswith("native-node"):
-            # 检查是否使用了 Deno 特有的 API
-            if "Deno." in source_code:
-                raise ValueError(
-                    f"Code contains Deno-specific APIs (Deno.*) but runtime is {runtime}. "
-                    "Please use Node.js compatible code or switch to a Deno runtime."
-                )
-        elif runtime.startswith("native-python"):
+        if runtime.startswith("native-python"):
             # 基本的 Python 语法检查
             if not any(keyword in source_code for keyword in ["def ", "import ", "from "]):
                 logger.warning("Python code may be invalid - no function definitions or imports found")

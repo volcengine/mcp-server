@@ -153,6 +153,13 @@ async def apply_migration(name: str, query: str, workspace_id: str = None) -> st
 
 
 @mcp.tool()
+async def generate_typescript_types(schemas: str = "public", workspace_id: str = None) -> str:
+    """Generates TypeScript definitions from database schema."""
+    schema_list = [s.strip() for s in schemas.split(",") if s.strip()]
+    return await database_tools.generate_typescript_types(schema_list, workspace_id)
+
+
+@mcp.tool()
 async def list_workspaces() -> str:
     """Lists all available workspaces."""
     return await workspace_tools.list_workspaces()
@@ -162,6 +169,40 @@ async def list_workspaces() -> str:
 async def get_workspace(workspace_id: str) -> str:
     """Gets details for a specific workspace."""
     return await workspace_tools.get_workspace(workspace_id)
+
+
+@mcp.tool()
+async def create_workspace(
+    workspace_name: str,
+    engine_version: str = "Supabase_1_24",
+    engine_type: str = "Supabase"
+) -> str:
+    """Creates a new workspace."""
+    return await workspace_tools.create_workspace(workspace_name, engine_version, engine_type)
+
+
+@mcp.tool()
+async def start_workspace(workspace_id: str = None) -> str:
+    """Starts a workspace."""
+    return await workspace_tools.start_workspace(workspace_id)
+
+
+@mcp.tool()
+async def stop_workspace(workspace_id: str = None) -> str:
+    """Stops a workspace."""
+    return await workspace_tools.stop_workspace(workspace_id)
+
+
+@mcp.tool()
+async def get_workspace_endpoints(workspace_id: str = None) -> str:
+    """Gets API endpoint URL for a workspace."""
+    return await workspace_tools.get_workspace_endpoints(workspace_id)
+
+
+@mcp.tool()
+async def get_workspace_api_keys(workspace_id: str = None) -> str:
+    """Gets API keys for a workspace."""
+    return await workspace_tools.get_workspace_api_keys(workspace_id)
 
 
 @mcp.tool()
