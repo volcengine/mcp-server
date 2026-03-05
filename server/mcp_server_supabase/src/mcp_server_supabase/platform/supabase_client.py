@@ -1,5 +1,6 @@
 import httpx
 import logging
+import json
 from typing import Optional, Dict, Any
 
 logger = logging.getLogger(__name__)
@@ -63,15 +64,27 @@ class SupabaseClient:
             if response.status_code == 204 or not response.content:
                 return {"success": True}
 
-            return response.json()
+            content_type = response.headers.get("content-type", "")
+            if "application/json" in content_type:
+                return response.json()
+            return {"raw": response.text}
         except httpx.HTTPStatusError as e:
-            # 对于 HTTP 错误，尝试返回响应体
+            response = e.response
+            payload: Any
             try:
-                error_body = e.response.json()
-                return error_body
-            except:
-                error_details = f"{str(e)}"
-                raise Exception(f"{error_details} [endpoint: {self.endpoint}, path: {path}]") from e
+                payload = response.json()
+            except Exception:
+                payload = response.text
+            error_message = json.dumps(
+                {
+                    "status_code": response.status_code,
+                    "path": path,
+                    "endpoint": self.endpoint,
+                    "error": payload,
+                },
+                ensure_ascii=False,
+            )
+            raise Exception(error_message) from e
         except Exception as e:
             error_details = f"{str(e)}"
             if hasattr(e, '__cause__') and e.__cause__:

@@ -54,9 +54,13 @@ class StorageTools(BaseTools):
     @handle_errors
     @read_only_check
     async def delete_storage_bucket(self, bucket_name: str, workspace_id: Optional[str] = None) -> dict:
+        if not bucket_name or not bucket_name.strip():
+            raise ValueError("Bucket name cannot be empty")
         ws_id = self._get_workspace_id(workspace_id)
         client = await self._get_client(ws_id)
-        await client.call_api(f"/storage/v1/bucket/{bucket_name}", method="DELETE")
+        response = await client.call_api(f"/storage/v1/bucket/{bucket_name}", method="DELETE")
+        if isinstance(response, dict) and "error" in response:
+            raise ValueError(response["error"])
         return {"success": True, "message": "Bucket deleted successfully"}
     
     @handle_errors

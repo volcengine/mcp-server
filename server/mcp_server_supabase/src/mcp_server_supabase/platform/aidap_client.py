@@ -1,4 +1,6 @@
 import logging
+import asyncio
+import os
 from typing import Optional
 from ..config import (
     VOLCENGINE_ACCESS_KEY,
@@ -10,6 +12,7 @@ from ..config import (
 )
 
 logger = logging.getLogger(__name__)
+ENDPOINT_SCHEME = os.getenv("SUPABASE_ENDPOINT_SCHEME", "http").strip().lower() or "http"
 
 try:
     import volcenginesdkcore
@@ -109,19 +112,32 @@ class AidapClient:
             }
 
     async def delete_branch(self, workspace_id: str, branch_id: str) -> dict:
-        try:
-            request = DeleteBranchRequest(
-                workspace_id=workspace_id,
-                branch_id=branch_id,
-            )
-            self.client.delete_branch(request)
-            return {"success": True}
-        except Exception as e:
-            logger.error(f"Error deleting branch: {e}")
-            return {
-                "success": False,
-                "error": str(e),
-            }
+        max_attempts = 6
+        delay_seconds = 2
+        for attempt in range(1, max_attempts + 1):
+            try:
+                request = DeleteBranchRequest(
+                    workspace_id=workspace_id,
+                    branch_id=branch_id,
+                )
+                self.client.delete_branch(request)
+                return {"success": True}
+            except Exception as e:
+                error_text = str(e)
+                if "BranchNotFound" in error_text:
+                    return {"success": True}
+                if "OperationDenied_BranchNotReady" in error_text and attempt < max_attempts:
+                    await asyncio.sleep(delay_seconds)
+                    continue
+                logger.error(f"Error deleting branch: {e}")
+                return {
+                    "success": False,
+                    "error": error_text,
+                }
+        return {
+            "success": False,
+            "error": "delete_branch failed after retries",
+        }
 
     async def get_endpoint(self, workspace_id: str, branch_id: Optional[str] = None, use_cache: bool = True) -> Optional[str]:
         # 检查缓存
@@ -153,12 +169,18 @@ class AidapClient:
 
                 for domain in domains:
                     if 'volces.com' in domain and 'ivolces.com' not in domain:
-                        result = f"http://{domain}:80"
+                        if ENDPOINT_SCHEME == "https":
+                            result = f"https://{domain}"
+                        else:
+                            result = f"http://{domain}:80"
                         endpoint_cache[cache_key] = result
                         return result
 
                 if domains:
-                    result = f"http://{domains[0]}:80"
+                    if ENDPOINT_SCHEME == "https":
+                        result = f"https://{domains[0]}"
+                    else:
+                        result = f"http://{domains[0]}:80"
                     endpoint_cache[cache_key] = result
                     return result
 

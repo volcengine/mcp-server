@@ -2,6 +2,9 @@ from typing import Optional, List
 import logging
 import json
 import html
+import os
+import re
+from urllib.parse import quote
 from .base import BaseTools
 from ..utils import handle_errors, read_only_check
 from ..models import EdgeFunction
@@ -36,6 +39,7 @@ RUNTIME_CONFIG = {
 RESERVED_SLUGS = {"deploy", "body", "health", "metrics"}
 MAX_SLUG_LENGTH = 127
 MAX_CODE_SIZE = 10 * 1024 * 1024  # 10MB
+PROJECT_SLUG = os.getenv("SUPABASE_PROJECT_SLUG", "default").strip() or "default"
 
 
 class EdgeFunctionTools(BaseTools):
@@ -49,6 +53,9 @@ class EdgeFunctionTools(BaseTools):
 
         if function_name in RESERVED_SLUGS:
             raise ValueError(f"Function name '{function_name}' is reserved")
+
+        if not re.match(r"^[a-z0-9][a-z0-9-]*$", function_name):
+            raise ValueError("Function name must match ^[a-z0-9][a-z0-9-]*$")
 
     def _validate_runtime(self, runtime: str) -> None:
         """验证运行时"""
@@ -86,8 +93,7 @@ class EdgeFunctionTools(BaseTools):
         logger.info(f"Listing edge functions for workspace {ws_id}")
 
         client = await self._get_client(ws_id)
-        # AIDAP 使用不同的 API 路径
-        result = await client.call_api("/v1/projects/default/functions")
+        result = await client.call_api(f"/v1/projects/{PROJECT_SLUG}/functions")
 
         functions = [EdgeFunction(**func) for func in result]
         logger.info(f"Found {len(functions)} edge functions")
@@ -95,12 +101,13 @@ class EdgeFunctionTools(BaseTools):
     
     @handle_errors
     async def get_edge_function(self, function_name: str, workspace_id: Optional[str] = None) -> EdgeFunction:
+        self._validate_function_name(function_name)
         ws_id = self._get_workspace_id(workspace_id)
         logger.info(f"Getting edge function '{function_name}' from workspace {ws_id}")
 
         client = await self._get_client(ws_id)
-        # AIDAP 使用不同的 API 路径
-        result = await client.call_api(f"/v1/projects/default/functions/{function_name}")
+        encoded_name = quote(function_name, safe="")
+        result = await client.call_api(f"/v1/projects/{PROJECT_SLUG}/functions/{encoded_name}")
         return EdgeFunction(**result)
     
     @handle_errors
@@ -133,6 +140,7 @@ class EdgeFunctionTools(BaseTools):
         """
         # 验证输入
         self._validate_function_name(function_name)
+        self._validate_runtime(runtime)
 
         if not source_code or not source_code.strip():
             raise ValueError("Source code cannot be empty")
@@ -141,10 +149,10 @@ class EdgeFunctionTools(BaseTools):
         source_code = html.unescape(source_code)
 
         self._validate_code_size(source_code)
+        self._validate_runtime_compatibility(runtime, source_code)
 
         ws_id = self._get_workspace_id(workspace_id)
-        # AIDAP 默认使用 Deno 运行时，entrypoint 固定为 index.ts
-        entrypoint = "index.ts"
+        entrypoint = self._get_entrypoint(runtime)
 
         logger.info(
             "Deploying edge function",
@@ -160,10 +168,7 @@ class EdgeFunctionTools(BaseTools):
 
         client = await self._get_client(ws_id)
 
-        # AIDAP 使用不同的请求格式和 API 路径
-        # URL 编码 function_name 防止特殊字符问题
-        from urllib.parse import quote
-        encoded_name = quote(function_name)
+        encoded_name = quote(function_name, safe="")
 
         data = {
             "metadata": {
@@ -194,7 +199,7 @@ class EdgeFunctionTools(BaseTools):
 
         # AIDAP 部署 API 路径
         result = await client.call_api(
-            f"/v1/projects/default/functions/deploy?slug={encoded_name}",
+            f"/v1/projects/{PROJECT_SLUG}/functions/deploy?slug={encoded_name}",
             method="POST",
             json_data=data
         )
@@ -209,12 +214,13 @@ class EdgeFunctionTools(BaseTools):
     @handle_errors
     @read_only_check
     async def delete_edge_function(self, function_name: str, workspace_id: Optional[str] = None) -> dict:
+        self._validate_function_name(function_name)
         ws_id = self._get_workspace_id(workspace_id)
         logger.info(f"Deleting edge function '{function_name}' from workspace {ws_id}")
 
         client = await self._get_client(ws_id)
-        # AIDAP 使用不同的 API 路径
-        await client.call_api(f"/v1/projects/default/functions/{function_name}", method="DELETE")
+        encoded_name = quote(function_name, safe="")
+        await client.call_api(f"/v1/projects/{PROJECT_SLUG}/functions/{encoded_name}", method="DELETE")
 
         logger.info(f"Successfully deleted edge function '{function_name}'")
         return {"success": True, "message": "Edge function deleted successfully"}
@@ -227,6 +233,7 @@ class EdgeFunctionTools(BaseTools):
         method: str = "POST",
         workspace_id: Optional[str] = None
     ) -> dict:
+        self._validate_function_name(function_name)
         ws_id = self._get_workspace_id(workspace_id)
         logger.info(
             f"Invoking edge function '{function_name}'",
@@ -242,9 +249,9 @@ class EdgeFunctionTools(BaseTools):
             except json.JSONDecodeError as e:
                 raise ValueError(f"Invalid payload JSON: {e}")
 
-        # AIDAP 调用 edge function 使用 /functions/v1/{slug} 路径
+        encoded_name = quote(function_name, safe="")
         result = await client.call_api(
-            f"/functions/v1/{function_name}",
+            f"/functions/v1/{encoded_name}",
             method=method,
             json_data=json_data,
             timeout=60.0

@@ -30,7 +30,7 @@ class BaseTools:
             raise ValueError(f"Could not get endpoint for workspace {workspace_id}")
 
         api_key = await self.aidap.get_api_key(workspace_id, "service_role")
-        logger.info(f"[DEBUG] Got API key for {workspace_id}: {api_key[:20] if api_key else None}...")
+        logger.info(f"[DEBUG] Got API key for {workspace_id}: {'yes' if api_key else 'no'}")
         if not api_key:
             raise ValueError(f"Could not get API key for workspace {workspace_id}")
 

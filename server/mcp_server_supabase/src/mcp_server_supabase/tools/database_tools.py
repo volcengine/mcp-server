@@ -1,5 +1,6 @@
 from typing import Optional, List
 import logging
+from datetime import datetime, timezone
 from .base import BaseTools
 from ..utils import handle_errors, read_only_check
 
@@ -50,15 +51,17 @@ class DatabaseTools(BaseTools):
     @handle_errors
     async def list_migrations(self, workspace_id: Optional[str] = None) -> List[dict]:
         query = """
+        CREATE SCHEMA IF NOT EXISTS supabase_migrations;
+        CREATE TABLE IF NOT EXISTS supabase_migrations.schema_migrations (
+            version text PRIMARY KEY,
+            name text NOT NULL,
+            inserted_at timestamptz NOT NULL DEFAULT now()
+        );
         SELECT version, name
         FROM supabase_migrations.schema_migrations
         ORDER BY version DESC
         """
-        try:
-            return await self.execute_sql(query, workspace_id)
-        except Exception as e:
-            logger.warning(f"Failed to list migrations: {e}")
-            return []
+        return await self.execute_sql(query, workspace_id)
 
     @handle_errors
     async def list_extensions(self, workspace_id: Optional[str] = None) -> List[dict]:
@@ -76,5 +79,31 @@ class DatabaseTools(BaseTools):
     @handle_errors
     @read_only_check
     async def apply_migration(self, name: str, query: str, workspace_id: Optional[str] = None) -> dict:
-        await self.execute_sql(query, workspace_id)
-        return {"success": True, "message": f"Migration {name} applied successfully"}
+        if not name or not name.strip():
+            raise ValueError("Migration name cannot be empty")
+        if not query or not query.strip():
+            raise ValueError("Migration SQL cannot be empty")
+
+        migration_name = name.strip().replace("'", "''")
+        migration_version = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S%f")
+        migration_sql = f"""
+        BEGIN;
+        CREATE SCHEMA IF NOT EXISTS supabase_migrations;
+        CREATE TABLE IF NOT EXISTS supabase_migrations.schema_migrations (
+            version text PRIMARY KEY,
+            name text NOT NULL,
+            inserted_at timestamptz NOT NULL DEFAULT now()
+        );
+        {query}
+        INSERT INTO supabase_migrations.schema_migrations (version, name)
+        VALUES ('{migration_version}', '{migration_name}')
+        ON CONFLICT (version) DO UPDATE SET name = EXCLUDED.name;
+        COMMIT;
+        """
+        await self.execute_sql(migration_sql, workspace_id)
+        return {
+            "success": True,
+            "message": f"Migration {name} applied successfully",
+            "version": migration_version,
+            "name": name.strip(),
+        }
