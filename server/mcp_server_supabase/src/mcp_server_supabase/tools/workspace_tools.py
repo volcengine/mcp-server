@@ -166,17 +166,13 @@ class WorkspaceTools:
                 "error": "workspace_id is required"
             }, indent=2)
 
-        if migration_version:
-            return json.dumps({
-                "success": False,
-                "error": "migration_version is not supported by current AIDAP reset_branch API"
-            }, indent=2)
-
         try:
-            success = await self.aidap_client.reset_branch(ws_id, branch_id)
-            return json.dumps({
-                "success": success
-            }, indent=2)
+            result = await self.aidap_client.reset_branch(ws_id, branch_id)
+            if not isinstance(result, dict):
+                result = {"success": bool(result)}
+            if migration_version:
+                result["warning"] = "migration_version is ignored because current AIDAP reset_branch API does not support version-targeted reset"
+            return json.dumps(result, indent=2)
         except Exception as e:
             logger.error(f"Error resetting branch: {e}")
             return json.dumps({

@@ -189,17 +189,31 @@ class AidapClient:
             logger.error(f"Error getting endpoint: {e}")
             return None
     
-    async def reset_branch(self, workspace_id: str, branch_id: str) -> bool:
-        try:
-            request = ResetBranchRequest(
-                workspace_id=workspace_id,
-                branch_id=branch_id,
-            )
-            self.client.reset_branch(request)
-            return True
-        except Exception as e:
-            logger.error(f"Error resetting branch: {e}")
-            return False
+    async def reset_branch(self, workspace_id: str, branch_id: str) -> dict:
+        max_attempts = 6
+        delay_seconds = 2
+        for attempt in range(1, max_attempts + 1):
+            try:
+                request = ResetBranchRequest(
+                    workspace_id=workspace_id,
+                    branch_id=branch_id,
+                )
+                self.client.reset_branch(request)
+                return {"success": True}
+            except Exception as e:
+                error_text = str(e)
+                if "OperationDenied_BranchNotReady" in error_text and attempt < max_attempts:
+                    await asyncio.sleep(delay_seconds)
+                    continue
+                logger.error(f"Error resetting branch: {e}")
+                return {
+                    "success": False,
+                    "error": error_text,
+                }
+        return {
+            "success": False,
+            "error": "reset_branch failed after retries",
+        }
 
     async def get_api_key(self, workspace_id: str, key_type: str = "service_role",
                          branch_id: Optional[str] = None, use_cache: bool = True) -> Optional[str]:

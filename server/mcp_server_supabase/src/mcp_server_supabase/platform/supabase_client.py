@@ -6,6 +6,25 @@ from typing import Optional, Dict, Any
 logger = logging.getLogger(__name__)
 
 
+class SupabaseApiError(Exception):
+    def __init__(self, status_code: int, path: str, endpoint: str, payload: Any):
+        self.status_code = status_code
+        self.path = path
+        self.endpoint = endpoint
+        self.payload = payload
+        super().__init__(
+            json.dumps(
+                {
+                    "status_code": status_code,
+                    "path": path,
+                    "endpoint": endpoint,
+                    "error": payload,
+                },
+                ensure_ascii=False,
+            )
+        )
+
+
 class SupabaseClient:
     def __init__(self, endpoint: str, api_key: str):
         self.endpoint = endpoint
@@ -75,17 +94,15 @@ class SupabaseClient:
                 payload = response.json()
             except Exception:
                 payload = response.text
-            error_message = json.dumps(
-                {
-                    "status_code": response.status_code,
-                    "path": path,
-                    "endpoint": self.endpoint,
-                    "error": payload,
-                },
-                ensure_ascii=False,
-            )
-            raise Exception(error_message) from e
+            raise SupabaseApiError(
+                status_code=response.status_code,
+                path=path,
+                endpoint=self.endpoint,
+                payload=payload,
+            ) from e
         except Exception as e:
+            if isinstance(e, SupabaseApiError):
+                raise
             error_details = f"{str(e)}"
             if hasattr(e, '__cause__') and e.__cause__:
                 error_details += f" | Cause: {str(e.__cause__)}"

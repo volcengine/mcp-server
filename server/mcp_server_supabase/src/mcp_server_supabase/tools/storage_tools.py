@@ -3,6 +3,7 @@ import logging
 from .base import BaseTools
 from ..utils import handle_errors, read_only_check
 from ..models import StorageConfig
+from ..platform.supabase_client import SupabaseApiError
 
 logger = logging.getLogger(__name__)
 
@@ -82,5 +83,10 @@ class StorageTools(BaseTools):
 
         ws_id = self._get_workspace_id(workspace_id)
         client = await self._get_client(ws_id)
-        await client.call_api("/storage/v1/config", method="PUT", json_data=config)
+        try:
+            await client.call_api("/storage/v1/config", method="PUT", json_data=config)
+        except SupabaseApiError as e:
+            if e.status_code == 404 and e.path == "/storage/v1/config":
+                raise ValueError("Updating storage config is not supported by current AIDAP workspace endpoint")
+            raise
         return {"success": True}
