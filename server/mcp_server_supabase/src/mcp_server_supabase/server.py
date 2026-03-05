@@ -114,6 +114,14 @@ async def get_storage_config(workspace_id: str = None) -> str:
 
 
 @mcp.tool()
+async def update_storage_config(config: str, workspace_id: str = None) -> str:
+    """Updates the storage configuration for a workspace."""
+    import json
+    parsed_config = json.loads(config)
+    return await storage_tools.update_storage_config(parsed_config, workspace_id)
+
+
+@mcp.tool()
 async def execute_sql(query: str, workspace_id: str = None) -> str:
     """Executes raw SQL in the Postgres database."""
     return await database_tools.execute_sql(query, workspace_id)
@@ -133,6 +141,12 @@ async def list_migrations(workspace_id: str = None) -> str:
 
 
 @mcp.tool()
+async def list_extensions(workspace_id: str = None) -> str:
+    """Lists all PostgreSQL extensions in the database."""
+    return await database_tools.list_extensions(workspace_id)
+
+
+@mcp.tool()
 async def apply_migration(name: str, query: str, workspace_id: str = None) -> str:
     """Applies a migration to the database."""
     return await database_tools.apply_migration(name, query, workspace_id)
@@ -148,6 +162,30 @@ async def list_workspaces() -> str:
 async def get_workspace(workspace_id: str) -> str:
     """Gets details for a specific workspace."""
     return await workspace_tools.get_workspace(workspace_id)
+
+
+@mcp.tool()
+async def list_branches(workspace_id: str = None) -> str:
+    """Lists all development branches of a workspace."""
+    return await workspace_tools.list_branches(workspace_id)
+
+
+@mcp.tool()
+async def create_branch(name: str = "develop", workspace_id: str = None) -> str:
+    """Creates a development branch."""
+    return await workspace_tools.create_branch(name, workspace_id)
+
+
+@mcp.tool()
+async def delete_branch(branch_id: str, workspace_id: str = None) -> str:
+    """Deletes a development branch."""
+    return await workspace_tools.delete_branch(branch_id, workspace_id)
+
+
+@mcp.tool()
+async def reset_branch(branch_id: str, migration_version: str = None, workspace_id: str = None) -> str:
+    """Resets migrations of a development branch. Any untracked data or schema changes will be lost."""
+    return await workspace_tools.reset_branch(branch_id, migration_version, workspace_id)
 
 
 def main():

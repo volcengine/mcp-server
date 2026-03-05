@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Dict, Any
+from typing import Optional
 from ..config import (
     VOLCENGINE_ACCESS_KEY,
     VOLCENGINE_SECRET_KEY,
@@ -18,7 +18,10 @@ try:
         DescribeBranchesRequest,
         DescribeWorkspaceEndpointRequest,
         DescribeAPIKeysRequest,
-        DescribeComputesRequest,
+        ResetBranchRequest,
+        CreateBranchRequest,
+        DeleteBranchRequest,
+        BranchSettingsForCreateBranchInput,
     )
 except ImportError:
     logger.error("volcengine-python-sdk not installed")
@@ -61,6 +64,65 @@ class AidapClient:
             logger.error(f"Error getting default branch: {e}")
             return None
     
+    async def list_branches(self, workspace_id: str) -> list[dict]:
+        try:
+            request = DescribeBranchesRequest(workspace_id=workspace_id)
+            response = self.client.describe_branches(request)
+
+            branches = []
+            if hasattr(response, 'branches') and response.branches:
+                for branch in response.branches:
+                    branches.append({
+                        "branch_id": getattr(branch, 'branch_id', None),
+                        "name": getattr(branch, 'name', None),
+                        "status": getattr(branch, 'status', None),
+                        "default": getattr(branch, 'default', False),
+                        "parent_id": getattr(branch, 'parent_id', None),
+                    })
+            return branches
+        except Exception as e:
+            logger.error(f"Error listing branches: {e}")
+            return []
+
+    async def create_branch(self, workspace_id: str, name: str = "develop") -> dict:
+        try:
+            request = CreateBranchRequest(
+                workspace_id=workspace_id,
+                branch_settings=BranchSettingsForCreateBranchInput(name=name),
+            )
+            response = self.client.create_branch(request)
+
+            branch_id = getattr(response, 'branch_id', None)
+            if not branch_id and hasattr(response, 'branch'):
+                branch_id = getattr(response.branch, 'branch_id', None)
+
+            return {
+                "success": True,
+                "branch_id": branch_id,
+                "workspace_id": workspace_id,
+            }
+        except Exception as e:
+            logger.error(f"Error creating branch: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+            }
+
+    async def delete_branch(self, workspace_id: str, branch_id: str) -> dict:
+        try:
+            request = DeleteBranchRequest(
+                workspace_id=workspace_id,
+                branch_id=branch_id,
+            )
+            self.client.delete_branch(request)
+            return {"success": True}
+        except Exception as e:
+            logger.error(f"Error deleting branch: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+            }
+
     async def get_endpoint(self, workspace_id: str, branch_id: Optional[str] = None, use_cache: bool = True) -> Optional[str]:
         # 检查缓存
         cache_key = f"{workspace_id}:{branch_id}" if branch_id else workspace_id
@@ -105,6 +167,18 @@ class AidapClient:
             logger.error(f"Error getting endpoint: {e}")
             return None
     
+    async def reset_branch(self, workspace_id: str, branch_id: str) -> bool:
+        try:
+            request = ResetBranchRequest(
+                workspace_id=workspace_id,
+                branch_id=branch_id,
+            )
+            self.client.reset_branch(request)
+            return True
+        except Exception as e:
+            logger.error(f"Error resetting branch: {e}")
+            return False
+
     async def get_api_key(self, workspace_id: str, key_type: str = "service_role",
                          branch_id: Optional[str] = None, use_cache: bool = True) -> Optional[str]:
         # 检查缓存

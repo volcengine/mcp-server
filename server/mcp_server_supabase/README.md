@@ -143,7 +143,7 @@ mv .env_example .env   # 填写环境变量
 - `get_storage_config`
 - `update_storage_config`
 
-### 工作空间管理（12）
+### 工作空间管理（13）
 - `list_workspaces`
 - `get_workspace`
 - `create_workspace`
@@ -156,6 +156,7 @@ mv .env_example .env   # 填写环境变量
 - `modify_workspace_settings`
 - `modify_workspace_deletion_protection`
 - `reset_workspace_password`
+- `reset_branch` (official-aligned: reset migrations of a development branch)
 
 ---
 

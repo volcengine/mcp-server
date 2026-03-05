@@ -59,6 +59,19 @@ class DatabaseTools(BaseTools):
         except Exception as e:
             logger.warning(f"Failed to list migrations: {e}")
             return []
+
+    @handle_errors
+    async def list_extensions(self, workspace_id: Optional[str] = None) -> List[dict]:
+        query = """
+        SELECT
+            e.extname AS name,
+            n.nspname AS schema,
+            e.extversion AS version
+        FROM pg_extension e
+        JOIN pg_namespace n ON n.oid = e.extnamespace
+        ORDER BY e.extname
+        """
+        return await self.execute_sql(query, workspace_id)
     
     @handle_errors
     @read_only_check

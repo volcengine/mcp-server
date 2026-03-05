@@ -5,6 +5,8 @@ import logging
 import inspect
 from typing import Optional
 
+from ..utils import read_only_check
+
 logger = logging.getLogger(__name__)
 
 
@@ -105,6 +107,78 @@ class WorkspaceTools:
 
         except Exception as e:
             logger.error(f"Error getting workspace: {e}")
+            return json.dumps({
+                "success": False,
+                "error": str(e)
+            }, indent=2)
+
+    @read_only_check
+    async def create_branch(
+        self,
+        name: str = "develop",
+        workspace_id: Optional[str] = None,
+    ) -> str:
+        ws_id = workspace_id or self.default_workspace_id
+        if not ws_id:
+            return json.dumps({"success": False, "error": "workspace_id is required"}, indent=2)
+
+        result = await self.aidap_client.create_branch(ws_id, name)
+        return json.dumps(result, indent=2)
+
+    async def list_branches(self, workspace_id: Optional[str] = None) -> str:
+        ws_id = workspace_id or self.default_workspace_id
+        if not ws_id:
+            return json.dumps({"success": False, "error": "workspace_id is required"}, indent=2)
+
+        branches = await self.aidap_client.list_branches(ws_id)
+        return json.dumps({"branches": branches}, indent=2)
+
+    @read_only_check
+    async def delete_branch(self, branch_id: str, workspace_id: Optional[str] = None) -> str:
+        ws_id = workspace_id or self.default_workspace_id
+        if not ws_id:
+            return json.dumps({"success": False, "error": "workspace_id is required"}, indent=2)
+
+        result = await self.aidap_client.delete_branch(ws_id, branch_id)
+        return json.dumps(result, indent=2)
+
+    @read_only_check
+    async def reset_branch(
+        self,
+        branch_id: str,
+        migration_version: Optional[str] = None,
+        workspace_id: Optional[str] = None,
+    ) -> str:
+        """Resets migrations of a development branch.
+
+        Args:
+            branch_id: Branch ID to reset
+            migration_version: Target migration version (official schema field, not supported by current AIDAP SDK)
+            workspace_id: The workspace ID (optional)
+
+        Returns:
+            JSON string containing operation result
+        """
+        ws_id = workspace_id or self.default_workspace_id
+        if not ws_id:
+            return json.dumps({
+                "success": False,
+                "error": "workspace_id is required"
+            }, indent=2)
+
+        if migration_version:
+            return json.dumps({
+                "success": False,
+                "error": "migration_version is not supported by current AIDAP reset_branch API"
+            }, indent=2)
+
+        try:
+            success = await self.aidap_client.reset_branch(ws_id, branch_id)
+            return json.dumps({
+                "success": success
+            }, indent=2)
+        except Exception as e:
+            logger.error(f"Error resetting branch: {e}")
             return json.dumps({
                 "success": False,
                 "error": str(e)

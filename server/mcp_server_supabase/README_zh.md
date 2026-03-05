@@ -23,11 +23,11 @@
 
 ### 前置要求
 
-⚠️ **重要**: 此 MCP server 依赖内部的 volcengine-python-sdk（包含 AIDAP 模块），需要先安装：
+⚠️ **重要**: 此 MCP server 依赖 volcengine-python-sdk（包含 AIDAP 模块），需要先安装：
 
 ```bash
 # 克隆 SDK 仓库
-git clone https://code.byted.org/iaasng/volcengine-python-sdk.git -b aidap-Python-2025-10-01-online-2306-2026_02_27_11_45_12
+git clone https://github.com/sjcsjcsjc/volcengine-python-sdk.git
 
 # 安装 SDK
 cd volcengine-python-sdk
@@ -179,7 +179,7 @@ clear_default_branch_cache()
 - `get_branch_detail` - 获取分支详情
 - `create_branch` - 创建新分支
 - `delete_branch` - 删除分支
-- `reset_branch` - 重置分支
+- `reset_branch` - 重置分支（对齐官方：重置开发分支迁移；当前 AIDAP SDK 不支持 `migration_version` 参数）
 - `restart_branch` - 重启分支
 - `restore_branch` - 恢复分支
 - `set_default_branch` - 设置默认分支

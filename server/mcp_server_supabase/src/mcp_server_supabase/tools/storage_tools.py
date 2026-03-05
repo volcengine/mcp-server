@@ -1,8 +1,8 @@
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 import logging
 from .base import BaseTools
 from ..utils import handle_errors, read_only_check
-from ..models import StorageBucket, StorageConfig
+from ..models import StorageConfig
 
 logger = logging.getLogger(__name__)
 
@@ -65,3 +65,18 @@ class StorageTools(BaseTools):
         client = await self._get_client(ws_id)
         result = await client.call_api("/storage/v1/config")
         return StorageConfig(**result)
+
+    @handle_errors
+    @read_only_check
+    async def update_storage_config(
+        self,
+        config: Dict[str, Any],
+        workspace_id: Optional[str] = None,
+    ) -> dict:
+        if not isinstance(config, dict) or not config:
+            raise ValueError("config must be a non-empty object")
+
+        ws_id = self._get_workspace_id(workspace_id)
+        client = await self._get_client(ws_id)
+        await client.call_api("/storage/v1/config", method="PUT", json_data=config)
+        return {"success": True}
