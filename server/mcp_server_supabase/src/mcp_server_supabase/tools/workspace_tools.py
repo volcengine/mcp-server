@@ -2,6 +2,7 @@
 
 import json
 import logging
+import inspect
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -23,14 +24,14 @@ class WorkspaceTools:
         try:
             from volcenginesdkaidap.models import DescribeWorkspacesRequest, FilterForDescribeWorkspacesInput
 
-            # 添加过滤条件，只查询 Supabase 类型的 workspace
-            filters = [
-                FilterForDescribeWorkspacesInput(
-                    name="DBEngineVersion",
-                    value="Supabase_1_24",
-                    mode="Exact"
-                )
-            ]
+            parameters = inspect.signature(FilterForDescribeWorkspacesInput).parameters
+            filter_kwargs = {
+                "name": "DBEngineVersion",
+                "value": "Supabase_1_24",
+            }
+            if "mode" in parameters:
+                filter_kwargs["mode"] = "Exact"
+            filters = [FilterForDescribeWorkspacesInput(**filter_kwargs)]
 
             request = DescribeWorkspacesRequest(filters=filters)
             response = self.aidap_client.client.describe_workspaces(request)
