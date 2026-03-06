@@ -13,13 +13,13 @@ class DatabaseTools(BaseTools):
         if not query or not query.strip():
             raise ValueError("SQL query cannot be empty")
 
-        ws_id = self._get_workspace_id(workspace_id)
+        ws_id, branch_id = await self._resolve_target(workspace_id)
         logger.info(
             "Executing SQL query",
-            extra={"workspace_id": ws_id, "query_length": len(query)}
+            extra={"workspace_id": ws_id, "branch_id": branch_id, "query_length": len(query)}
         )
 
-        client = await self._get_client(ws_id)
+        client = await self._get_client(ws_id, branch_id)
         result = await client.call_api("/pg/query", method="POST", json_data={"query": query})
 
         if isinstance(result, dict) and isinstance(result.get("data"), list):
@@ -168,6 +168,7 @@ class DatabaseTools(BaseTools):
             table_name,
             column_name,
             is_nullable,
+            is_identity,
             data_type,
             udt_name,
             column_default
@@ -214,7 +215,8 @@ class DatabaseTools(BaseTools):
                     base_type = self._to_ts_type(column.get("data_type", ""), column.get("udt_name", ""))
                     nullable = column.get("is_nullable") == "YES"
                     has_default = column.get("column_default") is not None
-                    optional = nullable or has_default
+                    is_identity = column.get("is_identity") == "YES"
+                    optional = nullable or has_default or is_identity
                     insert_type = f"{base_type} | null" if nullable else base_type
                     suffix = "?" if optional else ""
                     lines.append(f"          {ts_key}{suffix}: {insert_type}")

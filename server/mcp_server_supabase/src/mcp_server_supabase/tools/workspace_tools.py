@@ -1,12 +1,9 @@
-"""Workspace management tools for Supabase MCP Server"""
-
 import asyncio
-import json
 import logging
 import inspect
 from typing import Any, Optional
 
-from ..utils import read_only_check
+from ..utils import compact_dict, pick_value, read_only_check, resolve_target, to_json
 
 logger = logging.getLogger(__name__)
 
@@ -18,32 +15,17 @@ class WorkspaceTools:
         self.aidap_client = aidap_client
         self.default_workspace_id = default_workspace_id
 
-    def _resolve_workspace_id(self, workspace_id: Optional[str] = None) -> Optional[str]:
-        return workspace_id or self.default_workspace_id
-
     def _to_json(self, payload: dict) -> str:
-        return json.dumps(payload, indent=2, ensure_ascii=False)
+        return to_json(payload)
 
     def _compact(self, payload: dict) -> dict:
-        return {k: v for k, v in payload.items() if v is not None}
+        return compact_dict(payload)
 
     def _pick(self, source: Any, *field_names: str) -> Any:
-        source_dict = source.to_dict() if hasattr(source, "to_dict") else source if isinstance(source, dict) else {}
-        for field_name in field_names:
-            value = None
-            if isinstance(source, dict):
-                value = source.get(field_name)
-            else:
-                value = getattr(source, field_name, None)
-            if value is None and isinstance(source_dict, dict):
-                value = source_dict.get(field_name)
-            if isinstance(value, str):
-                value = value.strip()
-                if not value:
-                    value = None
-            if value is not None:
-                return value
-        return None
+        return pick_value(source, *field_names)
+
+    async def _resolve_target(self, target_id: Optional[str]) -> tuple[Optional[str], Optional[str]]:
+        return await resolve_target(self.aidap_client, target_id, self.default_workspace_id)
 
     def _workspace_view(self, source: Any) -> dict:
         workspace_id = self._pick(source, "workspace_id")
@@ -63,14 +45,31 @@ class WorkspaceTools:
         }
         return self._compact(payload)
 
+    def _branch_view(self, branch: dict, workspace_payload: Optional[dict] = None) -> dict:
+        workspace_payload = workspace_payload or {}
+        payload = {
+            "branch_id": branch.get("branch_id"),
+            "branch_name": branch.get("name"),
+            "status": branch.get("status") or workspace_payload.get("status"),
+            "default": branch.get("default"),
+            "parent_id": branch.get("parent_id"),
+            "root_project_id": workspace_payload.get("workspace_id") or branch.get("workspace_id"),
+            "root_project_name": workspace_payload.get("workspace_name"),
+            "created_at": branch.get("created_at") or workspace_payload.get("created_at"),
+            "updated_at": branch.get("updated_at") or workspace_payload.get("updated_at"),
+            "engine_type": workspace_payload.get("engine_type"),
+            "engine_version": workspace_payload.get("engine_version"),
+            "deletion_protection_status": workspace_payload.get("deletion_protection_status"),
+            "target_type": "branch",
+        }
+        return self._compact(payload)
+
     def _project_view(self, source: Any) -> dict:
         workspace_payload = self._workspace_view(source)
         project_name = workspace_payload.get("project_name") or workspace_payload.get("workspace_name")
         payload = {
             "project_id": workspace_payload.get("workspace_id"),
             "project_name": project_name,
-            "workspace_id": workspace_payload.get("workspace_id"),
-            "workspace_name": workspace_payload.get("workspace_name"),
             "status": workspace_payload.get("status"),
             "region": workspace_payload.get("region"),
             "created_at": workspace_payload.get("created_at"),
@@ -82,15 +81,13 @@ class WorkspaceTools:
         return self._compact(payload)
 
     def _with_project_alias(self, payload: dict, project_id: Optional[str] = None, project_name: Optional[str] = None) -> dict:
-        result = dict(payload)
-        workspace_id = result.get("workspace_id") or project_id
-        workspace_name = result.get("workspace_name") or project_name
-        if workspace_id:
-            result["workspace_id"] = workspace_id
-            result["project_id"] = workspace_id
-        if workspace_name:
-            result["workspace_name"] = workspace_name
-            result["project_name"] = workspace_name
+        result = {key: value for key, value in dict(payload).items() if key not in {"workspace_id", "workspace_name"}}
+        resolved_project_id = result.get("project_id") or project_id
+        resolved_project_name = result.get("project_name") or project_name
+        if resolved_project_id:
+            result["project_id"] = resolved_project_id
+        if resolved_project_name:
+            result["project_name"] = resolved_project_name
         return result
 
     def _describe_workspaces_response(self):
@@ -107,11 +104,12 @@ class WorkspaceTools:
         request = DescribeWorkspacesRequest(filters=filters)
         return self.aidap_client.client.describe_workspaces(request)
 
-    def _describe_workspace_detail_response(self, workspace_id: str):
-        from volcenginesdkaidap.models import DescribeWorkspaceDetailRequest
-
-        request = DescribeWorkspaceDetailRequest(workspace_id=workspace_id)
-        return self.aidap_client.client.describe_workspace_detail(request)
+    def _find_workspace_source(self, workspace_id: str) -> Optional[Any]:
+        response = self._describe_workspaces_response()
+        for workspace in list(getattr(response, "workspaces", []) or []):
+            if self._pick(workspace, "workspace_id") == workspace_id:
+                return workspace
+        return None
 
     def _error_detail(self, code: str, message: str, retriable: bool = False) -> dict:
         return {
@@ -128,47 +126,6 @@ class WorkspaceTools:
         if len(value) <= 12:
             return "*" * len(value)
         return f"{value[:6]}...{value[-4:]}"
-
-    async def list_workspaces(self) -> str:
-        try:
-            response = self._describe_workspaces_response()
-            raw_workspaces = list(getattr(response, "workspaces", []) or [])
-            workspaces = [self._workspace_view(ws) for ws in raw_workspaces]
-            return self._to_json({
-                "success": True,
-                "workspaces": workspaces,
-                "count": len(workspaces)
-            })
-
-        except Exception as e:
-            logger.error(f"Error listing workspaces: {e}")
-            return self._to_json({
-                "success": False,
-                "error": str(e)
-            })
-
-    async def get_workspace(self, workspace_id: str) -> str:
-        try:
-            response = self._describe_workspace_detail_response(workspace_id)
-            ws = getattr(response, "workspace", None)
-            if ws is not None:
-                workspace_info = self._workspace_view(ws)
-                return self._to_json({
-                    "success": True,
-                    "workspace": workspace_info
-                })
-
-            return self._to_json({
-                "success": False,
-                "error": "Workspace not found"
-            })
-
-        except Exception as e:
-            logger.error(f"Error getting workspace: {e}")
-            return self._to_json({
-                "success": False,
-                "error": str(e)
-            })
 
     async def list_projects(self) -> str:
         try:
@@ -189,10 +146,24 @@ class WorkspaceTools:
 
     async def get_project(self, project_id: str) -> str:
         try:
-            response = self._describe_workspace_detail_response(project_id)
-            ws = getattr(response, "workspace", None)
+            ws_id, branch_id = await self._resolve_target(project_id)
+            if not ws_id:
+                return self._to_json({
+                    "success": False,
+                    "error": "project_id is required"
+                })
+            ws = self._find_workspace_source(ws_id)
             if ws is not None:
                 project_info = self._project_view(ws)
+                if branch_id:
+                    branch = await self.aidap_client.get_branch(ws_id, branch_id)
+                    if branch:
+                        branch_view = self._branch_view(branch, self._workspace_view(ws))
+                        project_info.update({
+                            "project_id": branch_id,
+                            "project_name": branch.get("name") or project_info.get("project_name"),
+                            **branch_view,
+                        })
                 return self._to_json({
                     "success": True,
                     "project": project_info
@@ -207,22 +178,6 @@ class WorkspaceTools:
                 "success": False,
                 "error": str(e)
             })
-
-    @read_only_check
-    async def create_workspace(
-        self,
-        workspace_name: str,
-        engine_version: str = "Supabase_1_24",
-        engine_type: str = "Supabase",
-    ) -> str:
-        if not workspace_name or not workspace_name.strip():
-            return self._to_json({"success": False, "error": "workspace_name is required"})
-        result = await self.aidap_client.create_workspace(
-            workspace_name=workspace_name.strip(),
-            engine_type=engine_type,
-            engine_version=engine_version
-        )
-        return self._to_json(result)
 
     @read_only_check
     async def create_project(
@@ -245,8 +200,6 @@ class WorkspaceTools:
                 "success": True,
                 "project_id": result.get("workspace_id"),
                 "project_name": result.get("workspace_name") or project_name.strip(),
-                "workspace_id": result.get("workspace_id"),
-                "workspace_name": result.get("workspace_name") or project_name.strip(),
                 "engine_type": result.get("engine_type"),
                 "engine_version": result.get("engine_version"),
             }
@@ -254,24 +207,8 @@ class WorkspaceTools:
         return self._to_json(result)
 
     @read_only_check
-    async def start_workspace(self, workspace_id: Optional[str] = None) -> str:
-        ws_id = self._resolve_workspace_id(workspace_id)
-        if not ws_id:
-            return self._to_json({"success": False, "error": "workspace_id is required"})
-        result = await self.aidap_client.start_workspace(ws_id)
-        return self._to_json(result)
-
-    @read_only_check
-    async def stop_workspace(self, workspace_id: Optional[str] = None) -> str:
-        ws_id = self._resolve_workspace_id(workspace_id)
-        if not ws_id:
-            return self._to_json({"success": False, "error": "workspace_id is required"})
-        result = await self.aidap_client.stop_workspace(ws_id)
-        return self._to_json(result)
-
-    @read_only_check
     async def restore_project(self, project_id: Optional[str] = None) -> str:
-        ws_id = self._resolve_workspace_id(project_id)
+        ws_id, _ = await self._resolve_target(project_id)
         if not ws_id:
             return self._to_json({"success": False, "error": "project_id is required"})
         result = await self.aidap_client.start_workspace(ws_id)
@@ -281,7 +218,7 @@ class WorkspaceTools:
 
     @read_only_check
     async def pause_project(self, project_id: Optional[str] = None) -> str:
-        ws_id = self._resolve_workspace_id(project_id)
+        ws_id, _ = await self._resolve_target(project_id)
         if not ws_id:
             return self._to_json({"success": False, "error": "project_id is required"})
         result = await self.aidap_client.stop_workspace(ws_id)
@@ -293,34 +230,60 @@ class WorkspaceTools:
     async def create_branch(
         self,
         name: str = "develop",
-        workspace_id: Optional[str] = None,
+        project_id: Optional[str] = None,
     ) -> str:
-        ws_id = self._resolve_workspace_id(workspace_id)
+        ws_id, _ = await self._resolve_target(project_id)
         if not ws_id:
-            return self._to_json({"success": False, "error": "workspace_id is required"})
+            return self._to_json({"success": False, "error": "project_id is required"})
 
         result = await self.aidap_client.create_branch(ws_id, name)
+        if result.get("success") and result.get("branch_id"):
+            branch_id = result["branch_id"]
+            result.pop("workspace_id", None)
+            result.pop("workspace_name", None)
+            result.update({
+                "project_id": branch_id,
+                "project_name": result.get("name") or name,
+                "root_project_id": ws_id,
+                "target_type": "branch",
+            })
+            endpoint = await self.aidap_client.get_endpoint(ws_id, branch_id=branch_id, use_cache=False)
+            if endpoint:
+                result["project_url"] = endpoint
+                result["api_url"] = endpoint
         return self._to_json(result)
 
-    async def list_branches(self, workspace_id: Optional[str] = None) -> str:
-        ws_id = self._resolve_workspace_id(workspace_id)
+    async def list_branches(self, project_id: Optional[str] = None) -> str:
+        ws_id, _ = await self._resolve_target(project_id)
         if not ws_id:
-            return self._to_json({"success": False, "error": "workspace_id is required"})
+            return self._to_json({"success": False, "error": "project_id is required"})
         try:
             branches = await self.aidap_client.list_branches(ws_id)
-            return self._to_json({"success": True, "branches": branches})
+            normalized_branches = []
+            for branch in branches:
+                normalized_branch = dict(branch)
+                root_project_id = normalized_branch.pop("workspace_id", None)
+                normalized_branch.pop("workspace_name", None)
+                if normalized_branch.get("branch_id"):
+                    normalized_branch["project_id"] = normalized_branch["branch_id"]
+                    normalized_branch["project_name"] = normalized_branch.get("name")
+                    normalized_branch["target_type"] = "branch"
+                if root_project_id:
+                    normalized_branch["root_project_id"] = root_project_id
+                normalized_branches.append(normalized_branch)
+            return self._to_json({"success": True, "branches": normalized_branches})
         except Exception as e:
             logger.error(f"Error listing branches: {e}")
             return self._to_json({"success": False, "error": str(e)})
 
     @read_only_check
-    async def delete_branch(self, branch_id: str, workspace_id: Optional[str] = None) -> str:
-        ws_id = self._resolve_workspace_id(workspace_id)
+    async def delete_branch(self, branch_id: str, project_id: Optional[str] = None) -> str:
+        ws_id, _ = await self._resolve_target(project_id)
         if not ws_id:
             return self._to_json({
                 "success": False,
-                "error": "workspace_id is required",
-                "error_detail": self._error_detail("MissingWorkspaceId", "workspace_id is required", False),
+                "error": "project_id is required",
+                "error_detail": self._error_detail("MissingProjectId", "project_id is required", False),
             })
         if not branch_id or not branch_id.strip():
             return self._to_json({
@@ -336,10 +299,10 @@ class WorkspaceTools:
             if not exists:
                 return self._to_json({
                     "success": False,
-                    "error": f"Branch '{normalized_branch_id}' not found in workspace '{ws_id}'",
+                    "error": f"Branch '{normalized_branch_id}' not found in project '{ws_id}'",
                     "error_detail": self._error_detail(
                         "BranchNotFound",
-                        f"Branch '{normalized_branch_id}' not found in workspace '{ws_id}'",
+                        f"Branch '{normalized_branch_id}' not found in project '{ws_id}'",
                         False
                     ),
                 })
@@ -396,47 +359,34 @@ class WorkspaceTools:
             ),
         })
 
-    async def get_workspace_endpoints(self, workspace_id: Optional[str] = None) -> str:
-        ws_id = self._resolve_workspace_id(workspace_id)
-        if not ws_id:
-            return self._to_json({"success": False, "error": "workspace_id is required"})
-
-        endpoint = await self.aidap_client.get_endpoint(ws_id)
-        if not endpoint:
-            return self._to_json({
-                "success": False,
-                "error": f"Could not get endpoint for workspace {ws_id}"
-            })
-
-        return self._to_json({
-            "success": True,
-            "workspace_id": ws_id,
-            "project_url": endpoint,
-            "api_url": endpoint
-        })
-
     async def get_project_url(self, project_id: Optional[str] = None) -> str:
-        ws_id = self._resolve_workspace_id(project_id)
+        ws_id, branch_id = await self._resolve_target(project_id)
         if not ws_id:
             return self._to_json({"success": False, "error": "project_id is required"})
 
-        endpoint = await self.aidap_client.get_endpoint(ws_id)
+        endpoint = await self.aidap_client.get_endpoint(ws_id, branch_id=branch_id)
         if not endpoint:
             return self._to_json({
                 "success": False,
-                "error": f"Could not get endpoint for project {ws_id}"
+                "error": f"Could not get endpoint for project {ws_id if not branch_id else branch_id}"
             })
 
-        return self._to_json({
+        payload = {
             "success": True,
-            "project_id": ws_id,
-            "workspace_id": ws_id,
+            "project_id": branch_id or ws_id,
             "project_url": endpoint,
             "api_url": endpoint
-        })
+        }
+        if branch_id:
+            payload.update({
+                "branch_id": branch_id,
+                "root_project_id": ws_id,
+                "target_type": "branch",
+            })
+        return self._to_json(payload)
 
-    async def _get_api_keys_payload(self, workspace_id: str, reveal: bool = False) -> dict:
-        keys = await self.aidap_client.get_api_keys(workspace_id)
+    async def _get_api_keys_payload(self, workspace_id: str, branch_id: Optional[str] = None, reveal: bool = False) -> dict:
+        keys = await self.aidap_client.get_api_keys(workspace_id, branch_id=branch_id)
         publishable_key = None
         anon_key = None
         service_role_key = None
@@ -453,36 +403,28 @@ class WorkspaceTools:
                 **key,
                 "key": self._mask_key(value, reveal),
             })
-        return {
+        payload = {
             "success": True,
-            "workspace_id": workspace_id,
+            "project_id": branch_id or workspace_id,
             "reveal": reveal,
             "publishable_key": self._mask_key(publishable_key, reveal),
             "anon_key": self._mask_key(anon_key, reveal),
             "service_role_key": self._mask_key(service_role_key, reveal),
             "keys": masked_keys
         }
-
-    async def get_workspace_api_keys(self, workspace_id: Optional[str] = None, reveal: bool = False) -> str:
-        ws_id = self._resolve_workspace_id(workspace_id)
-        if not ws_id:
-            return self._to_json({"success": False, "error": "workspace_id is required"})
-
-        try:
-            payload = await self._get_api_keys_payload(ws_id, reveal)
-            return self._to_json(payload)
-        except Exception as e:
-            logger.error(f"Error getting api keys: {e}")
-            return self._to_json({"success": False, "error": str(e)})
+        if branch_id:
+            payload["branch_id"] = branch_id
+            payload["root_project_id"] = workspace_id
+            payload["target_type"] = "branch"
+        return payload
 
     async def get_publishable_keys(self, project_id: Optional[str] = None, reveal: bool = False) -> str:
-        ws_id = self._resolve_workspace_id(project_id)
+        ws_id, branch_id = await self._resolve_target(project_id)
         if not ws_id:
             return self._to_json({"success": False, "error": "project_id is required"})
 
         try:
-            payload = await self._get_api_keys_payload(ws_id, reveal)
-            payload = self._with_project_alias(payload, ws_id)
+            payload = await self._get_api_keys_payload(ws_id, branch_id=branch_id, reveal=reveal)
             return self._to_json(payload)
         except Exception as e:
             logger.error(f"Error getting publishable keys: {e}")
@@ -493,13 +435,13 @@ class WorkspaceTools:
         self,
         branch_id: str,
         migration_version: Optional[str] = None,
-        workspace_id: Optional[str] = None,
+        project_id: Optional[str] = None,
     ) -> str:
-        ws_id = self._resolve_workspace_id(workspace_id)
+        ws_id, _ = await self._resolve_target(project_id)
         if not ws_id:
             return self._to_json({
                 "success": False,
-                "error": "workspace_id is required"
+                "error": "project_id is required"
             })
 
         try:

@@ -44,6 +44,60 @@ PROJECT_SLUG = os.getenv("SUPABASE_PROJECT_SLUG", "default").strip() or "default
 
 
 class EdgeFunctionTools(BaseTools):
+    def _needs_handler_wrapper(self, runtime: str, source_code: str) -> bool:
+        if runtime != "native-node20/v1":
+            return False
+        if "Deno.serve" in source_code:
+            return False
+        return bool(re.search(r"export\s+default\s+(async\s+)?function", source_code) or re.search(r"export\s+default\s*\(", source_code))
+
+    def _build_deployment_payload(self, runtime: str, source_code: str, verify_jwt: bool, function_name: str) -> dict:
+        entrypoint = self._get_entrypoint(runtime)
+        files = [{
+            "name": entrypoint,
+            "content": source_code
+        }]
+        if self._needs_handler_wrapper(runtime, source_code):
+            files = [
+                {
+                    "name": "handler.ts",
+                    "content": source_code
+                },
+                {
+                    "name": entrypoint,
+                    "content": "import handler from './handler.ts'\nDeno.serve((req) => handler(req))\n"
+                }
+            ]
+        return {
+            "metadata": {
+                "name": function_name,
+                "slug": function_name,
+                "entrypoint_path": entrypoint,
+                "verify_jwt": verify_jwt
+            },
+            "files": files
+        }
+
+    def _normalize_function_payload(self, payload: object) -> object:
+        if not isinstance(payload, dict):
+            return payload
+        result = dict(payload)
+        files = result.get("files")
+        entrypoint_path = result.get("entrypoint_path")
+        if isinstance(files, list):
+            source_code = None
+            for file_info in files:
+                if not isinstance(file_info, dict):
+                    continue
+                if entrypoint_path and file_info.get("name") == entrypoint_path and isinstance(file_info.get("content"), str):
+                    source_code = file_info.get("content")
+                    break
+                if source_code is None and isinstance(file_info.get("content"), str):
+                    source_code = file_info.get("content")
+            if source_code is not None:
+                result["source_code"] = source_code
+        return result
+
     def _validate_function_name(self, function_name: str) -> None:
         """验证函数名称"""
         if not function_name:
@@ -88,10 +142,10 @@ class EdgeFunctionTools(BaseTools):
 
     @handle_errors
     async def list_edge_functions(self, workspace_id: Optional[str] = None) -> List[EdgeFunction]:
-        ws_id = self._get_workspace_id(workspace_id)
+        ws_id, branch_id = await self._resolve_target(workspace_id)
         logger.info(f"Listing edge functions for workspace {ws_id}")
 
-        client = await self._get_client(ws_id)
+        client = await self._get_client(ws_id, branch_id)
         result = await client.call_api(f"/v1/projects/{PROJECT_SLUG}/functions")
 
         functions = [EdgeFunction(**func) for func in result]
@@ -99,12 +153,12 @@ class EdgeFunctionTools(BaseTools):
         return functions
     
     @handle_errors
-    async def get_edge_function(self, function_name: str, workspace_id: Optional[str] = None) -> EdgeFunction:
+    async def get_edge_function(self, function_name: str, workspace_id: Optional[str] = None) -> dict:
         self._validate_function_name(function_name)
-        ws_id = self._get_workspace_id(workspace_id)
+        ws_id, branch_id = await self._resolve_target(workspace_id)
         logger.info(f"Getting edge function '{function_name}' from workspace {ws_id}")
 
-        client = await self._get_client(ws_id)
+        client = await self._get_client(ws_id, branch_id)
         encoded_name = quote(function_name, safe="")
         try:
             result = await client.call_api(f"/v1/projects/{PROJECT_SLUG}/functions/{encoded_name}")
@@ -113,7 +167,10 @@ class EdgeFunctionTools(BaseTools):
             if "function not found" in payload_text or "not found" in payload_text:
                 raise ValueError(f"Edge function '{function_name}' not found")
             raise
-        return EdgeFunction(**result)
+        normalized_result = self._normalize_function_payload(result)
+        if isinstance(normalized_result, dict):
+            return normalized_result
+        return EdgeFunction(**result).model_dump()
     
     @handle_errors
     @read_only_check
@@ -156,7 +213,7 @@ class EdgeFunctionTools(BaseTools):
         self._validate_code_size(source_code)
         self._validate_runtime_compatibility(runtime, source_code)
 
-        ws_id = self._get_workspace_id(workspace_id)
+        ws_id, branch_id = await self._resolve_target(workspace_id)
         entrypoint = self._get_entrypoint(runtime)
 
         logger.info(
@@ -164,6 +221,7 @@ class EdgeFunctionTools(BaseTools):
             extra={
                 "function_name": function_name,
                 "workspace_id": ws_id,
+                "branch_id": branch_id,
                 "runtime": runtime,
                 "verify_jwt": verify_jwt,
                 "entrypoint": entrypoint,
@@ -171,24 +229,11 @@ class EdgeFunctionTools(BaseTools):
             }
         )
 
-        client = await self._get_client(ws_id)
+        client = await self._get_client(ws_id, branch_id)
 
         encoded_name = quote(function_name, safe="")
 
-        data = {
-            "metadata": {
-                "name": function_name,
-                "slug": function_name,
-                "entrypoint_path": entrypoint,
-                "verify_jwt": verify_jwt
-            },
-            "files": [
-                {
-                    "name": entrypoint,
-                    "content": source_code
-                }
-            ]
-        }
+        data = self._build_deployment_payload(runtime, source_code, verify_jwt, function_name)
 
         if import_map:
             try:
@@ -214,16 +259,18 @@ class EdgeFunctionTools(BaseTools):
             extra={"function_id": result.get("id"), "version": result.get("version")}
         )
 
+        if isinstance(result, dict) and not result.get("runtime"):
+            result["runtime"] = runtime
         return result
     
     @handle_errors
     @read_only_check
     async def delete_edge_function(self, function_name: str, workspace_id: Optional[str] = None) -> dict:
         self._validate_function_name(function_name)
-        ws_id = self._get_workspace_id(workspace_id)
+        ws_id, branch_id = await self._resolve_target(workspace_id)
         logger.info(f"Deleting edge function '{function_name}' from workspace {ws_id}")
 
-        client = await self._get_client(ws_id)
+        client = await self._get_client(ws_id, branch_id)
         encoded_name = quote(function_name, safe="")
         await client.call_api(f"/v1/projects/{PROJECT_SLUG}/functions/{encoded_name}", method="DELETE")
 

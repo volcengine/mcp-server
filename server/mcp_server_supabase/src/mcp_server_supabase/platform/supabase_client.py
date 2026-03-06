@@ -1,3 +1,4 @@
+import asyncio
 import httpx
 import logging
 import json
@@ -56,7 +57,6 @@ class SupabaseClient:
         timeout: float = 30.0
     ) -> Any:
         url = f"{self.endpoint}{path}"
-        
         logger.info(f"[DEBUG] Calling API: method={method}, url={url}, path={path}")
 
         default_headers = {
@@ -67,43 +67,54 @@ class SupabaseClient:
             default_headers.update(headers)
 
         client = await self._get_client()
-        try:
-            if content:
-                response = await client.request(
-                    method, url, content=content, headers=default_headers,
-                    params=params, timeout=timeout
-                )
-            else:
-                response = await client.request(
-                    method, url, json=json_data, headers=default_headers,
-                    params=params, timeout=timeout
-                )
-            response.raise_for_status()
-
-            if response.status_code == 204 or not response.content:
-                return {"success": True}
-
-            content_type = response.headers.get("content-type", "")
-            if "application/json" in content_type:
-                return response.json()
-            return {"raw": response.text}
-        except httpx.HTTPStatusError as e:
-            response = e.response
-            payload: Any
+        for attempt in range(3):
             try:
-                payload = response.json()
-            except Exception:
-                payload = response.text
-            raise SupabaseApiError(
-                status_code=response.status_code,
-                path=path,
-                endpoint=self.endpoint,
-                payload=payload,
-            ) from e
-        except Exception as e:
-            if isinstance(e, SupabaseApiError):
-                raise
-            error_details = f"{str(e)}"
-            if hasattr(e, '__cause__') and e.__cause__:
-                error_details += f" | Cause: {str(e.__cause__)}"
-            raise Exception(f"{error_details} [endpoint: {self.endpoint}, path: {path}]") from e
+                if content:
+                    response = await client.request(
+                        method, url, content=content, headers=default_headers,
+                        params=params, timeout=timeout
+                    )
+                else:
+                    response = await client.request(
+                        method, url, json=json_data, headers=default_headers,
+                        params=params, timeout=timeout
+                    )
+                response.raise_for_status()
+
+                if response.status_code == 204 or not response.content:
+                    return {"success": True}
+
+                content_type = response.headers.get("content-type", "")
+                if "application/json" in content_type:
+                    return response.json()
+                return {"raw": response.text}
+            except httpx.HTTPStatusError as e:
+                response = e.response
+                if response.status_code in {502, 503, 504} and attempt < 2:
+                    await asyncio.sleep(0.5 * (attempt + 1))
+                    continue
+                payload: Any
+                try:
+                    payload = response.json()
+                except Exception:
+                    payload = response.text
+                raise SupabaseApiError(
+                    status_code=response.status_code,
+                    path=path,
+                    endpoint=self.endpoint,
+                    payload=payload,
+                ) from e
+            except httpx.TransportError as e:
+                if attempt < 2:
+                    await asyncio.sleep(0.5 * (attempt + 1))
+                    continue
+                detail = str(e) or type(e).__name__
+                raise Exception(f"{detail} [endpoint: {self.endpoint}, path: {path}]") from e
+            except Exception as e:
+                if isinstance(e, SupabaseApiError):
+                    raise
+                detail = str(e) or type(e).__name__
+                if hasattr(e, "__cause__") and e.__cause__:
+                    cause_detail = str(e.__cause__) or type(e.__cause__).__name__
+                    detail += f" | Cause: {cause_detail}"
+                raise Exception(f"{detail} [endpoint: {self.endpoint}, path: {path}]") from e

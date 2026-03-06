@@ -3,6 +3,8 @@ import logging
 from functools import wraps
 from typing import Any, Callable
 
+from .common import to_json
+
 logger = logging.getLogger(__name__)
 
 
@@ -23,11 +25,11 @@ def handle_errors(func: Callable) -> Callable:
                     result = [item.model_dump() for item in result]
             elif hasattr(result, 'model_dump'):
                 result = result.model_dump()
-            return json.dumps(result, indent=2, ensure_ascii=False)
+            return to_json(result)
         except Exception as e:
             error_msg = format_error(e)
             logger.error(f"Error in {func.__name__}: {error_msg}")
-            return json.dumps({"error": error_msg}, ensure_ascii=False)
+            return to_json({"error": error_msg})
     return wrapper
 
 
@@ -36,6 +38,6 @@ def read_only_check(func: Callable) -> Callable:
     async def wrapper(*args, **kwargs) -> Any:
         from ..config import READ_ONLY
         if READ_ONLY:
-            return json.dumps({"error": f"Cannot execute {func.__name__} in read-only mode"})
+            return to_json({"error": f"Cannot execute {func.__name__} in read-only mode"})
         return await func(*args, **kwargs)
     return wrapper

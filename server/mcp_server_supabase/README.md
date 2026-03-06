@@ -1,6 +1,6 @@
 # Supabase MCP Server
 
-**Supabase MCP Server** 是一款基于模型上下文协议（Model Context Protocol, MCP）的服务器，实现了对 AIDAP Supabase 服务的全链路智能化管理。通过自然语言指令，用户可以对工作空间、数据库、Edge Functions、存储等资源进行创建、查询、修改、删除等操作，从而大幅提升 Supabase 开发与运维的效率。
+**Supabase MCP Server** 是一款基于模型上下文协议（Model Context Protocol, MCP）的服务器，实现了对 AIDAP Supabase 服务的全链路智能化管理。通过自然语言指令，用户可以对项目、数据库、Edge Functions、存储等资源进行创建、查询、修改、删除等操作，从而大幅提升 Supabase 开发与运维的效率。
 
 ---
 
@@ -15,8 +15,8 @@
 ---
 
 ## 关键特性
-- **自动默认分支解析**：`branch_id` 参数可选，系统会自动使用工作空间的默认分支。
-- **完整工具集合**：提供 53 个高阶工具，覆盖数据库、Edge Functions、存储、工作空间等全方位能力。
+- **自动默认分支解析**：`branch_id` 参数可选，系统会自动使用项目的默认分支。
+- **完整工具集合**：提供高阶工具，覆盖数据库、Edge Functions、存储、项目与分支等核心能力。
 - **安全与审计**：只读模式、凭证管理、细粒度日志查询与安全建议。
 - **跨语言支持**：兼容 Python、Node.js、Go 等多语言客户端。
 
@@ -142,20 +142,18 @@ mv .env_example .env   # 填写环境变量
 - `get_storage_config`
 - `update_storage_config`
 
-### 工作空间管理（13）
-- `list_workspaces`
-- `get_workspace`
-- `create_workspace`
-- `delete_workspace`
-- `start_workspace`
-- `stop_workspace`
-- `get_workspace_endpoints`
-- `get_workspace_api_keys`
-- `modify_workspace_name`
-- `modify_workspace_settings`
-- `modify_workspace_deletion_protection`
-- `reset_workspace_password`
-- `reset_branch` (official-aligned: reset migrations of a development branch)
+### 项目管理（11）
+- `list_projects`
+- `get_project`
+- `create_project`
+- `pause_project`
+- `restore_project`
+- `get_project_url`
+- `get_publishable_keys`
+- `list_branches`
+- `create_branch`
+- `delete_branch`
+- `reset_branch`
 
 ---
 
@@ -163,7 +161,7 @@ mv .env_example .env   # 填写环境变量
 - **数据库**：`"列出我的数据库表"`、`"查询 users 表的所有数据"`
 - **Edge Functions**：`"列出所有 Edge Functions"`、`"部署一个新的 Edge Function"`
 - **存储**：`"列出所有存储桶"`、`"创建一个公开存储桶"`
-- **工作空间**：`"列出我的所有工作空间"`、`"创建一个新的工作空间"`
+- **项目**：`"列出我的所有项目"`、`"创建一个新的项目"`
 
 ---
 

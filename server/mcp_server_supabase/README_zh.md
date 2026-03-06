@@ -10,7 +10,7 @@
 
 ### 支持的功能
 
-- ✅ **工作空间管理** - 列出、创建、启动/停止工作空间，管理设置
+- ✅ **项目管理** - 列出、创建、暂停/恢复项目，管理分支与访问入口
 - ✅ **数据库管理** - 列出表、执行 SQL、应用迁移、管理数据库和账户 ✨ 增强
 - ✅ **Edge Functions** - 部署、获取代码和管理 Edge Functions ✨ 增强
 - ✅ **调试工具** - 获取多服务日志和性能/安全建议 ✨ 新增
@@ -83,11 +83,11 @@ python -m mcp_server_supabase.server
 
 ## 🎯 自动默认分支解析
 
-**新功能！** 现在大部分工具的 `branch_id` 参数都是可选的。如果不提供 `branch_id`，系统会自动使用工作空间的默认分支。
+**新功能！** 现在大部分工具的 `branch_id` 参数都是可选的。如果不提供 `branch_id`，系统会自动使用项目的默认分支。
 
 ### 工作原理
 
-1. **自动获取**：首次调用时，系统自动查询工作空间的默认分支
+1. **自动获取**：首次调用时，系统自动查询项目的默认分支
 2. **智能缓存**：默认分支 ID 会被缓存，避免重复 API 调用
 3. **自动刷新**：当设置新的默认分支时，缓存会自动清除
 
@@ -139,8 +139,8 @@ clear_default_branch_cache()
 
 ### 开发工具（3 个）
 - `generate_typescript_types` - 根据数据库 schema 生成 TypeScript 类型定义 ✨ 新增
-- `get_project_url` - 获取项目 API URL（别名：get_workspace_endpoints）
-- `get_publishable_keys` - 获取可发布的 API 密钥（别名：get_workspace_api_keys）
+- `get_project_url` - 获取项目 API URL
+- `get_publishable_keys` - 获取可发布的 API 密钥
 
 ### 存储管理（8 个）
 - `list_storage_buckets` - 列出存储桶
@@ -152,20 +152,18 @@ clear_default_branch_cache()
 - `get_storage_config` - 获取存储配置 ✨ 新增
 - `update_storage_config` - 更新存储配置（需要付费计划） ✨ 新增
 
-### 工作空间管理（12 个）
-- `list_workspaces` - 列出所有工作空间
-- `get_workspace` - 获取工作空间详情
-- `create_workspace` - 创建新工作空间
-- `delete_workspace` - 删除工作空间
-- `start_workspace` - 启动工作空间
-- `stop_workspace` - 停止工作空间
-- `get_workspace_endpoints` - 获取工作空间端点
-- `get_workspace_api_keys` - 获取 API 密钥
-- `modify_workspace_name` - 修改工作空间名称
-- `modify_workspace_settings` - 修改工作空间设置
-- `modify_workspace_deletion_protection` - 修改删除保护策略
-- `reset_workspace_password` - 重置管理员密码
-- `get_workspace_usage_stats` - 获取使用统计
+### 项目管理（11 个）
+- `list_projects` - 列出所有项目
+- `get_project` - 获取项目详情
+- `create_project` - 创建新项目
+- `pause_project` - 暂停项目
+- `restore_project` - 恢复项目
+- `get_project_url` - 获取项目端点
+- `get_publishable_keys` - 获取项目 API 密钥
+- `list_branches` - 列出项目分支
+- `create_branch` - 创建项目分支
+- `delete_branch` - 删除项目分支
+- `reset_branch` - 重置项目分支
 
 ### 数据库账户管理（4 个）
 - `list_db_accounts` - 列出数据库账户
