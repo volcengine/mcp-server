@@ -109,9 +109,6 @@ class EdgeFunctionTools(BaseTools):
         if function_name in RESERVED_SLUGS:
             raise ValueError(f"Function name '{function_name}' is reserved")
 
-        if not re.match(r"^[a-z0-9][a-z0-9-]*$", function_name):
-            raise ValueError("Function name must match ^[a-z0-9][a-z0-9-]*$")
-
     def _validate_runtime(self, runtime: str) -> None:
         """验证运行时"""
         if runtime not in RUNTIME_CONFIG:
