@@ -81,12 +81,6 @@ class EdgeFunctionTools(BaseTools):
             if not any(keyword in source_code for keyword in ["def ", "import ", "from "]):
                 logger.warning("Python code may be invalid - no function definitions or imports found")
 
-    def _is_function_metadata(self, result: dict) -> bool:
-        if not isinstance(result, dict):
-            return False
-        required_keys = {"id", "slug", "name", "status", "version", "entrypoint_path"}
-        return required_keys.issubset(set(result.keys()))
-
     def _extract_error_text(self, payload: object) -> str:
         if isinstance(payload, dict):
             return json.dumps(payload, ensure_ascii=False)
@@ -235,66 +229,3 @@ class EdgeFunctionTools(BaseTools):
 
         logger.info(f"Successfully deleted edge function '{function_name}'")
         return {"success": True, "message": "Edge function deleted successfully"}
-    
-    @handle_errors
-    async def invoke_edge_function(
-        self,
-        function_name: str,
-        payload: Optional[str] = None,
-        method: str = "POST",
-        workspace_id: Optional[str] = None
-    ) -> dict:
-        self._validate_function_name(function_name)
-        ws_id = self._get_workspace_id(workspace_id)
-        logger.info(
-            f"Invoking edge function '{function_name}'",
-            extra={"method": method, "has_payload": payload is not None}
-        )
-
-        client = await self._get_client(ws_id)
-        http_method = method.upper().strip() if method else "POST"
-        if http_method not in {"GET", "POST", "PUT", "PATCH", "DELETE"}:
-            raise ValueError(f"Unsupported method '{method}'")
-
-        json_data = None
-        if payload:
-            try:
-                json_data = json.loads(payload)
-            except json.JSONDecodeError as e:
-                raise ValueError(f"Invalid payload JSON: {e}")
-
-        encoded_name = quote(function_name, safe="")
-        primary_path = f"/functions/v1/{encoded_name}"
-        fallback_path = f"/v1/projects/{PROJECT_SLUG}/functions/{encoded_name}/invoke"
-
-        try:
-            primary_result = await client.call_api(
-                primary_path,
-                method=http_method,
-                json_data=json_data,
-                timeout=60.0
-            )
-            if not self._is_function_metadata(primary_result):
-                logger.debug(f"Edge function '{function_name}' invoked successfully via {primary_path}")
-                return primary_result
-        except SupabaseApiError as e:
-            payload_text = self._extract_error_text(e.payload).lower()
-            if e.status_code not in {404, 405} and "route" not in payload_text:
-                raise
-
-        try:
-            fallback_result = await client.call_api(
-                fallback_path,
-                method=http_method,
-                json_data=json_data,
-                timeout=60.0
-            )
-            if not self._is_function_metadata(fallback_result):
-                logger.debug(f"Edge function '{function_name}' invoked successfully via {fallback_path}")
-                return fallback_result
-        except SupabaseApiError:
-            pass
-
-        raise ValueError(
-            "Edge function invocation is not supported by current AIDAP workspace endpoint"
-        )

@@ -12,7 +12,7 @@
 
 - ✅ **工作空间管理** - 列出、创建、启动/停止工作空间，管理设置
 - ✅ **数据库管理** - 列出表、执行 SQL、应用迁移、管理数据库和账户 ✨ 增强
-- ✅ **Edge Functions** - 部署、获取代码、调用和管理 Edge Functions ✨ 增强
+- ✅ **Edge Functions** - 部署、获取代码和管理 Edge Functions ✨ 增强
 - ✅ **调试工具** - 获取多服务日志和性能/安全建议 ✨ 新增
 - ✅ **开发工具** - 生成 TypeScript 类型、获取 API URL 和密钥 ✨ 新增
 - ✅ **存储管理** - 管理存储桶和对象
@@ -114,7 +114,7 @@ clear_default_branch_cache()
 ```
 
 
-## 可用工具（54 个）
+## 可用工具（53 个）
 
 ### 数据库操作（8 个）
 - `list_tables` - 列出数据库表
@@ -126,12 +126,11 @@ clear_default_branch_cache()
 - `create_database` - 创建新数据库
 - `drop_database` - 删除数据库
 
-### Edge Functions（6 个）
+### Edge Functions（5 个）
 - `list_edge_functions` - 列出 Edge Functions
 - `get_edge_function` - 获取 Edge Function 源代码 ✨ 新增
 - `deploy_edge_function` - 部署或更新 Edge Function ✨ 新增
 - `delete_edge_function` - 删除 Edge Function ✨ 新增
-- `invoke_edge_function` - 调用 Edge Function
 - `get_edge_function_logs` - 获取函数日志
 
 ### 调试工具（2 个）

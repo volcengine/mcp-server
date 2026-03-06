@@ -125,12 +125,11 @@ mv .env_example .env   # 填写环境变量
 - `create_database`
 - `drop_database`
 
-### Edge Functions（6）
+### Edge Functions（5）
 - `list_edge_functions`
 - `get_edge_function`
 - `deploy_edge_function`
 - `delete_edge_function`
-- `invoke_edge_function`
 - `get_edge_function_logs`
 
 ### 存储管理（8）

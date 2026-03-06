@@ -71,17 +71,6 @@ async def delete_edge_function(function_name: str, project_id: str = None) -> st
 
 
 @mcp.tool()
-async def invoke_edge_function(
-    function_name: str,
-    payload: str = None,
-    method: str = "POST",
-    project_id: str = None
-) -> str:
-    """Invokes an Edge Function."""
-    return await edge_tools.invoke_edge_function(function_name, payload, method, project_id)
-
-
-@mcp.tool()
 async def list_storage_buckets(project_id: str = None) -> str:
     """Lists all storage buckets in a project."""
     return await storage_tools.list_storage_buckets(project_id)
@@ -232,13 +221,13 @@ async def reset_branch(branch_id: str, migration_version: str = None, project_id
 @mcp.tool()
 async def list_projects() -> str:
     """Lists all available projects."""
-    return await workspace_tools.list_workspaces()
+    return await workspace_tools.list_projects()
 
 
 @mcp.tool()
 async def get_project(project_id: str) -> str:
     """Gets details for a specific project."""
-    return await workspace_tools.get_workspace(project_id)
+    return await workspace_tools.get_project(project_id)
 
 
 @mcp.tool()
@@ -248,31 +237,31 @@ async def create_project(
     engine_type: str = "Supabase"
 ) -> str:
     """Creates a new project."""
-    return await workspace_tools.create_workspace(project_name, engine_version, engine_type)
+    return await workspace_tools.create_project(project_name, engine_version, engine_type)
 
 
 @mcp.tool()
 async def pause_project(project_id: str = None) -> str:
     """Pauses a project."""
-    return await workspace_tools.stop_workspace(project_id)
+    return await workspace_tools.pause_project(project_id)
 
 
 @mcp.tool()
 async def restore_project(project_id: str = None) -> str:
     """Restores a project."""
-    return await workspace_tools.start_workspace(project_id)
+    return await workspace_tools.restore_project(project_id)
 
 
 @mcp.tool()
 async def get_project_url(project_id: str = None) -> str:
     """Gets API endpoint URL for a project."""
-    return await workspace_tools.get_workspace_endpoints(project_id)
+    return await workspace_tools.get_project_url(project_id)
 
 
 @mcp.tool()
 async def get_publishable_keys(project_id: str = None, reveal: bool = False) -> str:
     """Gets API keys for a project."""
-    return await workspace_tools.get_workspace_api_keys(project_id, reveal)
+    return await workspace_tools.get_publishable_keys(project_id, reveal)
 
 
 def main():
