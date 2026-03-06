@@ -40,7 +40,7 @@ RUNTIME_CONFIG = {
 RESERVED_SLUGS = {"deploy", "body", "health", "metrics"}
 MAX_SLUG_LENGTH = 127
 MAX_CODE_SIZE = 10 * 1024 * 1024  # 10MB
-PROJECT_SLUG = os.getenv("SUPABASE_PROJECT_SLUG", "default").strip() or "default"
+WORKSPACE_SLUG = os.getenv("SUPABASE_WORKSPACE_SLUG", "default").strip() or "default"
 
 
 class EdgeFunctionTools(BaseTools):
@@ -146,7 +146,7 @@ class EdgeFunctionTools(BaseTools):
         logger.info(f"Listing edge functions for workspace {ws_id}")
 
         client = await self._get_client(ws_id, branch_id)
-        result = await client.call_api(f"/v1/projects/{PROJECT_SLUG}/functions")
+        result = await client.call_api(f"/v1/projects/{WORKSPACE_SLUG}/functions")
 
         functions = [EdgeFunction(**func) for func in result]
         logger.info(f"Found {len(functions)} edge functions")
@@ -161,7 +161,7 @@ class EdgeFunctionTools(BaseTools):
         client = await self._get_client(ws_id, branch_id)
         encoded_name = quote(function_name, safe="")
         try:
-            result = await client.call_api(f"/v1/projects/{PROJECT_SLUG}/functions/{encoded_name}")
+            result = await client.call_api(f"/v1/projects/{WORKSPACE_SLUG}/functions/{encoded_name}")
         except SupabaseApiError as e:
             payload_text = self._extract_error_text(e.payload).lower()
             if "function not found" in payload_text or "not found" in payload_text:
@@ -249,7 +249,7 @@ class EdgeFunctionTools(BaseTools):
 
         # AIDAP 部署 API 路径
         result = await client.call_api(
-            f"/v1/projects/{PROJECT_SLUG}/functions/deploy?slug={encoded_name}",
+            f"/v1/projects/{WORKSPACE_SLUG}/functions/deploy?slug={encoded_name}",
             method="POST",
             json_data=data
         )
@@ -272,7 +272,7 @@ class EdgeFunctionTools(BaseTools):
 
         client = await self._get_client(ws_id, branch_id)
         encoded_name = quote(function_name, safe="")
-        await client.call_api(f"/v1/projects/{PROJECT_SLUG}/functions/{encoded_name}", method="DELETE")
+        await client.call_api(f"/v1/projects/{WORKSPACE_SLUG}/functions/{encoded_name}", method="DELETE")
 
         logger.info(f"Successfully deleted edge function '{function_name}'")
         return {"success": True, "message": "Edge function deleted successfully"}

@@ -14,14 +14,15 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
-default_project_id = os.getenv("DEFAULT_PROJECT_ID") or os.getenv("DEFAULT_WORKSPACE_ID")
+default_workspace_id = os.getenv("DEFAULT_WORKSPACE_ID")
+
 
 def create_mcp(
     port: int | None = None,
     default_target_id: str | None = None,
 ) -> FastMCP:
     resolved_port = port if port is not None else int(os.getenv("PORT", "8000"))
-    resolved_default_target_id = default_target_id if default_target_id is not None else default_project_id
+    resolved_default_target_id = default_target_id if default_target_id is not None else default_workspace_id
     runtime = create_runtime(resolved_default_target_id)
     mcp = FastMCP("Supabase MCP Server (AIDAP)", port=resolved_port)
     register_tools(mcp, runtime)
@@ -38,8 +39,8 @@ def main():
 
     logger.info(f"Starting Supabase MCP Server on port {args.port}")
     logger.info(f"Read-only mode: {READ_ONLY}")
-    if default_project_id:
-        logger.info(f"Default project ID: {default_project_id}")
+    if default_workspace_id:
+        logger.info(f"Default workspace ID: {default_workspace_id}")
 
     create_mcp(port=args.port).run()
 
