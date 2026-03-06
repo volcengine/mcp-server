@@ -1,5 +1,3 @@
-import json
-
 from mcp.server.fastmcp import FastMCP
 
 from .runtime import SupabaseRuntime
@@ -93,12 +91,6 @@ def _register_storage_tools(mcp: FastMCP, runtime: SupabaseRuntime) -> None:
     async def get_storage_config(workspace_id: str = None) -> str:
         """Gets the storage configuration for a workspace or branch."""
         return await storage_tools.get_storage_config(workspace_id)
-
-    @mcp.tool()
-    async def update_storage_config(config: str, workspace_id: str = None) -> str:
-        """Updates the storage configuration for a workspace or branch."""
-        return await storage_tools.update_storage_config(json.loads(config), workspace_id)
-
 
 def _register_database_tools(mcp: FastMCP, runtime: SupabaseRuntime) -> None:
     database_tools = runtime.database_tools

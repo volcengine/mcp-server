@@ -1,10 +1,9 @@
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 import logging
 import json
 from .base import BaseTools
 from ..utils import handle_errors, read_only_check
 from ..models import StorageConfig
-from ..platform.supabase_client import SupabaseApiError
 
 logger = logging.getLogger(__name__)
 
@@ -96,28 +95,3 @@ class StorageTools(BaseTools):
         client = await self._get_client(ws_id, branch_id)
         result = await client.call_api("/storage/v1/config")
         return StorageConfig(**result)
-
-    @handle_errors
-    @read_only_check
-    async def update_storage_config(
-        self,
-        config: Dict[str, Any],
-        workspace_id: Optional[str] = None,
-    ) -> dict:
-        if not isinstance(config, dict) or not config:
-            raise ValueError("config must be a non-empty object")
-
-        ws_id, branch_id = await self._resolve_target(workspace_id)
-        client = await self._get_client(ws_id, branch_id)
-        try:
-            await client.call_api("/storage/v1/config", method="PUT", json_data=config)
-        except SupabaseApiError as e:
-            if e.status_code == 404 and e.path == "/storage/v1/config":
-                return {
-                    "success": False,
-                    "supported": False,
-                    "code": "UnsupportedOperation",
-                    "error": "Updating storage config is not supported by current AIDAP workspace endpoint"
-                }
-            raise
-        return {"success": True}
