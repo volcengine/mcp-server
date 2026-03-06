@@ -92,6 +92,7 @@ def _register_storage_tools(mcp: FastMCP, runtime: SupabaseRuntime) -> None:
         """Gets the storage configuration for a workspace or branch."""
         return await storage_tools.get_storage_config(workspace_id)
 
+
 def _register_database_tools(mcp: FastMCP, runtime: SupabaseRuntime) -> None:
     database_tools = runtime.database_tools
 
