@@ -1,48 +1,113 @@
-# Supabase MCP Server
+# MCP Server: Supabase
+> Manage AIDAP Supabase projects, Postgres schema, Edge Functions, and Storage directly from any MCP client.
 
-**Supabase MCP Server** 是一款基于模型上下文协议（Model Context Protocol, MCP）的服务器，实现了对 AIDAP Supabase 服务的全链路智能化管理。通过自然语言指令，用户可以对项目、数据库、Edge Functions、存储等资源进行创建、查询、修改、删除等操作，从而大幅提升 Supabase 开发与运维的效率。
+English | [简体中文](./README_zh.md)
 
----
+| Item | Details |
+| ---- | ------- |
+| Version | v0.1.0 |
+| Description | An MCP server for AIDAP Supabase that exposes project, database, Edge Functions, and Storage operations to AI assistants. |
+| Category | Database |
+| Tags | Supabase, PostgreSQL, AIDAP, Edge Functions, Storage |
+| Docs | [Volcengine AIDAP Supabase](https://www.volcengine.com/docs/87275/2105900) |
 
-## 项目概览
-| 项目 | 详情 |
-| ---- | ---- |
-| **版本** | v1.0.0 |
-| **描述** | 基于 MCP 管理 AIDAP Supabase 资源，支持智能化数据库与应用开发 |
-| **分类** | 数据库与应用开发 |
-| **标签** | Supabase, PostgreSQL, Edge Functions, BaaS |
+## Core Capabilities
 
----
+### 1. Project and Branch Management
+- `list_projects`
+  List all available AIDAP Supabase projects.
+- `get_project`
+  Get details for a specific project. You can pass either a workspace ID or a branch ID.
+- `create_project`
+  Create a new Supabase project in AIDAP.
+- `pause_project`
+  Pause a project.
+- `restore_project`
+  Resume a paused project.
+- `get_project_url`
+  Get the project API endpoint resolved from the current workspace or branch.
+- `get_publishable_keys`
+  Get publishable and service role keys for a project.
+- `list_branches`
+  List development branches under a project.
+- `create_branch`
+  Create a new development branch.
+- `delete_branch`
+  Delete a development branch.
+- `reset_branch`
+  Reset a branch to the latest state supported by AIDAP.
 
-## 关键特性
-- **自动默认分支解析**：`branch_id` 参数可选，系统会自动使用项目的默认分支。
-- **完整工具集合**：提供高阶工具，覆盖数据库、Edge Functions、存储、项目与分支等核心能力。
-- **安全与审计**：只读模式、凭证管理、细粒度日志查询与安全建议。
-- **跨语言支持**：兼容 Python、Node.js、Go 等多语言客户端。
+### 2. Database Development
+- `execute_sql`
+  Execute raw SQL against the target Postgres database.
+- `list_tables`
+  List tables from one or more schemas.
+- `list_migrations`
+  List migration history stored in `supabase_migrations.schema_migrations`.
+- `list_extensions`
+  List installed PostgreSQL extensions.
+- `apply_migration`
+  Execute SQL and record the migration metadata.
+- `generate_typescript_types`
+  Generate TypeScript definitions from database schemas.
 
----
+### 3. Edge Functions
+- `list_edge_functions`
+  List all deployed Edge Functions.
+- `get_edge_function`
+  Get function source code and metadata.
+- `deploy_edge_function`
+  Deploy or update a function with Node.js or Python runtime.
+- `delete_edge_function`
+  Delete a function by name.
 
-## 快速开始
-### 系统依赖
+### 4. Storage
+- `list_storage_buckets`
+  List storage buckets in the target project.
+- `create_storage_bucket`
+  Create a storage bucket with optional public access, size limit, and MIME type restrictions.
+- `delete_storage_bucket`
+  Delete a storage bucket.
+- `get_storage_config`
+  Fetch storage service configuration from the workspace endpoint.
+- `update_storage_config`
+  Update storage configuration when the current AIDAP endpoint supports it.
+
+## Compatibility Notes
+
+- The official Supabase MCP server is built around the Supabase Management API. AIDAP does not provide the same Management API, so this server maps compatible operations onto AIDAP workspace APIs and Supabase workspace endpoints.
+- In AIDAP, `workspace` is the equivalent of a Supabase `project`. Tool parameters keep the name `project_id` for MCP compatibility.
+- For most project-scoped tools, `project_id` accepts either a workspace ID or a branch ID. If a branch ID such as `br-xxx` is passed, the server resolves the parent workspace automatically.
+- When `project_id` is omitted, the server uses `DEFAULT_PROJECT_ID` or `DEFAULT_WORKSPACE_ID` if configured.
+- `reset_branch` accepts `migration_version` for compatibility, but the current AIDAP API ignores that field.
+- `update_storage_config` may return `supported: false` if the current AIDAP workspace endpoint does not expose that capability.
+
+## Integration Guide
+
+### 1. Requirements
 - Python 3.10+
-- 推荐使用 `uv` 包管理器
+- [uv](https://github.com/astral-sh/uv)
 
-### 安装 `uv`
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
+### 2. Credentials
+Get `VOLCENGINE_ACCESS_KEY` and `VOLCENGINE_SECRET_KEY` from the [Volcengine Access Key Console](https://console.volcengine.com/iam/keymanage/).
 
-### 本地开发（推荐）
-在项目根目录执行：
-```bash
-uv sync
-source .venv/bin/activate
-mv .env_example .env   # 填写环境变量
-```
+### 3. Environment Variables
 
-### 运行方式
-#### 方式一：使用 `uvx`（推荐）
-在 MCP 客户端配置文件中添加：
+| Variable | Required | Description |
+| -------- | -------- | ----------- |
+| `VOLCENGINE_ACCESS_KEY` | Yes | Volcengine access key ID |
+| `VOLCENGINE_SECRET_KEY` | Yes | Volcengine secret access key |
+| `VOLCENGINE_REGION` | No | Region code, default `cn-beijing` |
+| `DEFAULT_PROJECT_ID` | No | Default project ID used when `project_id` is omitted |
+| `DEFAULT_WORKSPACE_ID` | No | Same purpose as `DEFAULT_PROJECT_ID` |
+| `READ_ONLY` | No | Set to `true` to block write operations |
+| `SUPABASE_ENDPOINT_SCHEME` | No | Endpoint scheme for workspace API URLs, default `http` |
+| `SUPABASE_PROJECT_SLUG` | No | Edge Functions project slug, default `default` |
+
+## Quick Deployment
+
+### Method 1: Run with `uvx`
+
 ```json
 {
   "mcpServers": {
@@ -50,50 +115,62 @@ mv .env_example .env   # 填写环境变量
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_supabase",
+        "git+https://github.com/volcengine/mcp-server.git#subdirectory=server/mcp_server_supabase",
         "mcp-server-supabase"
       ],
       "env": {
-        "VOLCENGINE_ACCESS_KEY": "your-access-key",
-        "VOLCENGINE_SECRET_KEY": "your-secret-key",
+        "VOLCENGINE_ACCESS_KEY": "your_volcengine_ak",
+        "VOLCENGINE_SECRET_KEY": "your_volcengine_sk",
         "VOLCENGINE_REGION": "cn-beijing"
       }
     }
   }
 }
 ```
-#### 方式二：本地直接运行
-```json
-{
-  "mcpServers": {
-    "supabase-dev": {
-      "command": "uv",
-      "args": [
-        "--directory",
-        "/ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase",
-        "run",
-        "mcp-server-supabase"
-      ],
-      "env": {
-        "VOLCENGINE_ACCESS_KEY": "your-access-key",
-        "VOLCENGINE_SECRET_KEY": "your-secret-key",
-        "VOLCENGINE_REGION": "cn-beijing",
-        "READ_ONLY": "true"
-      }
-    }
-  }
-}
+
+### Method 2: Run from local source with `uv`
+
+```bash
+cd /absolute/path/to/mcp-server/server/mcp_server_supabase
+uv sync
 ```
-#### 方式三：Python 直接执行
+
 ```json
 {
   "mcpServers": {
     "supabase": {
-      "command": "python",
-      "args": ["-m", "mcp_server_supabase.server"],
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/absolute/path/to/mcp-server/server/mcp_server_supabase",
+        "run",
+        "mcp-server-supabase"
+      ],
       "env": {
-        "VOLCENGINE_ACCESS_KEY": "your-access-key",
-        "VOLCENGINE_SECRET_KEY": "your-secret-key",
+        "VOLCENGINE_ACCESS_KEY": "your_volcengine_ak",
+        "VOLCENGINE_SECRET_KEY": "your_volcengine_sk",
+        "VOLCENGINE_REGION": "cn-beijing",
+        "DEFAULT_PROJECT_ID": "ws-xxxxxxxx"
+      }
+    }
+  }
+}
+```
+
+### Method 3: Run with `python3`
+
+```json
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "python3",
+      "args": [
+        "-m",
+        "mcp_server_supabase.server"
+      ],
+      "env": {
+        "VOLCENGINE_ACCESS_KEY": "your_volcengine_ak",
+        "VOLCENGINE_SECRET_KEY": "your_volcengine_sk",
         "VOLCENGINE_REGION": "cn-beijing"
       }
     }
@@ -101,78 +178,21 @@ mv .env_example .env   # 填写环境变量
 }
 ```
 
----
+## Prompt Examples
 
-## 配置说明
-主要配置文件位于 `server/mcp_server_supabase/src/mcp_server_supabase/config/config.yaml`，常用字段：
-- `transport`：`sse`、`StreamableHTTP`、`stdio`（默认 `sse`）
-- `auth`：`oauth`、`none`
-- `credential`：`env`（从环境变量读取 AK/SK）或 `token`
-- `credential.env`：`VOLCENGINE_ACCESS_KEY`、`VOLCENGINE_SECRET_KEY`、`VOLCENGINE_REGION`
+- `List all my Supabase projects`
+- `Show all branches for project ws-xxxx`
+- `Execute SQL: select * from public.users limit 10`
+- `Generate TypeScript types for schemas public,auth`
+- `Deploy an Edge Function named webhook-handler`
+- `List all storage buckets in project ws-xxxx`
 
----
+## Notes
 
-## 核心工具一览
-> **注**：以下为常用工具示例，完整列表请参见文档章节 "Tools"。
-
-### 数据库操作（8）
-- `list_tables`
-- `execute_sql`
-- `list_extensions`
-- `list_migrations`
-- `apply_migration`
-- `list_databases`
-- `create_database`
-- `drop_database`
-
-### Edge Functions（5）
-- `list_edge_functions`
-- `get_edge_function`
-- `deploy_edge_function`
-- `delete_edge_function`
-- `get_edge_function_logs`
-
-### 存储管理（8）
-- `list_storage_buckets`
-- `create_storage_bucket`
-- `delete_storage_bucket`
-- `list_storage_objects`
-- `delete_storage_object`
-- `get_storage_object_info`
-- `get_storage_config`
-- `update_storage_config`
-
-### 项目管理（11）
-- `list_projects`
-- `get_project`
-- `create_project`
-- `pause_project`
-- `restore_project`
-- `get_project_url`
-- `get_publishable_keys`
-- `list_branches`
-- `create_branch`
-- `delete_branch`
-- `reset_branch`
-
----
-
-## 常用 Prompt 示例
-- **数据库**：`"列出我的数据库表"`、`"查询 users 表的所有数据"`
-- **Edge Functions**：`"列出所有 Edge Functions"`、`"部署一个新的 Edge Function"`
-- **存储**：`"列出所有存储桶"`、`"创建一个公开存储桶"`
-- **项目**：`"列出我的所有项目"`、`"创建一个新的项目"`
-
----
-
-## 文档与资源
-- [火山引擎 AIDAP Supabase 官方文档](https://www.volcengine.com/docs/87275/2105900)
-- [Model Context Protocol 介绍](https://modelcontextprotocol.io/introduction)
-- [Supabase 官方文档](https://supabase.com/docs)
-
----
+- Most MCP desktop clients use `stdio`, so the JSON examples above are the recommended setup.
+- Write tools are disabled when `READ_ONLY=true`.
+- The server uses the default branch automatically when the target endpoint or key needs a branch and none is provided explicitly.
 
 ## License
 
-本项目遵循 MIT 许可证：
-[MIT License](https://github.com/volcengine/mcp-server/blob/main/LICENSE)
+volcengine/mcp-server is licensed under the [MIT License](https://github.com/volcengine/mcp-server/blob/main/LICENSE).
