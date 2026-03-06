@@ -333,6 +333,8 @@ class WorkspaceTools:
 
     async def _get_api_keys_payload(self, workspace_id: str, branch_id: Optional[str] = None, reveal: bool = False) -> dict:
         resolved_branch_id = branch_id or await self.aidap_client.get_default_branch_id(workspace_id)
+        if not resolved_branch_id:
+            raise RuntimeError(f"Could not resolve default branch for workspace {workspace_id}")
         keys = await self.aidap_client.get_api_keys(workspace_id, branch_id=resolved_branch_id)
         publishable_key = None
         anon_key = None
