@@ -99,15 +99,7 @@ class EdgeFunctionTools(BaseTools):
         return result
 
     def _validate_function_name(self, function_name: str) -> None:
-        """验证函数名称"""
-        if not function_name:
-            raise ValueError("Function name cannot be empty")
-
-        if len(function_name) > MAX_SLUG_LENGTH:
-            raise ValueError(f"Function name too long (max {MAX_SLUG_LENGTH} characters)")
-
-        if function_name in RESERVED_SLUGS:
-            raise ValueError(f"Function name '{function_name}' is reserved")
+        return
 
     def _validate_runtime(self, runtime: str) -> None:
         """验证运行时"""
