@@ -17,10 +17,12 @@ class HqdConfig:
 
     Environment variables:
         HQD_MCP_ENDPOINT: Remote HQD MCP server endpoint (streamable-http)
+        HQD_AUTH_TOKEN: Auth token for remote endpoint (sent as Authorization header)
         PORT: Local server port (default: 8000)
     """
 
     endpoint: str
+    auth_token: str
     port: int
 
 
@@ -35,6 +37,7 @@ def load_config() -> HqdConfig:
 
     return HqdConfig(
         endpoint=endpoint,
+        auth_token=os.getenv("HQD_AUTH_TOKEN", ""),
         port=int(os.getenv("PORT", "8000")),
     )
 

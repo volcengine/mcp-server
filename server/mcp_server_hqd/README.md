@@ -31,6 +31,7 @@ cp .env_example .env
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `HQD_MCP_ENDPOINT` | `https://sd6k08f59gqcea6qe13vg.apigateway-cn-beijing.volceapi.com/mcp` | Remote HQD MCP endpoint |
+| `HQD_AUTH_TOKEN` | (empty) | Auth token sent as `Authorization: Bearer <token>` to the remote endpoint |
 | `PORT` | `8000` | Local server port |
 
 ## Usage

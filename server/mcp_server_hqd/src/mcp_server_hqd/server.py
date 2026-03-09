@@ -23,7 +23,7 @@ _client: Optional[HqdRemoteClient] = None
 def get_client() -> HqdRemoteClient:
     global _client
     if _client is None:
-        _client = HqdRemoteClient(config.endpoint)
+        _client = HqdRemoteClient(config.endpoint, config.auth_token)
     return _client
 
 

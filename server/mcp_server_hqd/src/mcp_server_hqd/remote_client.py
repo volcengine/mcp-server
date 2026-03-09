@@ -12,14 +12,17 @@ logger = logging.getLogger(__name__)
 class HqdRemoteClient:
     """Stateful client that communicates with the remote HQD MCP server."""
 
-    def __init__(self, endpoint: str):
+    def __init__(self, endpoint: str, auth_token: str = ""):
         self._endpoint = endpoint
+        self._auth_token = auth_token
         self._session_id: Optional[str] = None
         self._http = requests.Session()
         self._http.headers.update({
             "Content-Type": "application/json",
             "Accept": "application/json, text/event-stream",
         })
+        if self._auth_token:
+            self._http.headers["Authorization"] = f"Bearer {self._auth_token}"
         self._req_id = 0
 
     def _next_id(self) -> int:
