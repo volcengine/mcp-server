@@ -1,97 +1,116 @@
 # HQD Multi-Source Search MCP Server
 
-MCP server for HQD (High-Quality Dataset) multi-source enterprise data search. This server acts as a proxy to the remote HQD MCP service, providing unified access to enterprise data sources.
+## Version Information
 
-## Features
+v0.1
 
-- Proxy to remote HQD MCP service — no local data processing
-- 2 MCP tools: `describe_datasource` (metadata discovery) + `query_datasource` (data retrieval)
-- 5 enterprise data sources: basic info, risk, operations, IP, litigation
-- YAML-driven datasource metadata, filter/aggregation/pagination support
+## Product Description
 
-## Setup
+### Short Description
 
-### Prerequisites
+Query enterprise data from HQD (High-Quality Dataset) multi-source search service, covering basic info, risk, operations, IP, and litigation data.
 
-- Python >= 3.10
+### Long Description
 
-### Installation
+HQD Multi-Source Search MCP Server is a thin proxy that connects to the remote HQD MCP service deployed on Volcengine. It provides unified access to 5 enterprise data sources through a two-phase interaction pattern: metadata discovery (`describe_datasource`) followed by data retrieval (`query_datasource`). All queries are forwarded to the remote endpoint — no local data processing is performed.
 
-```bash
-pip install -e .
-```
+## Category
 
-### Configuration
+Data Intelligence
 
-```bash
-cp .env_example .env
-# Edit .env if you need to change the remote endpoint
-```
+## Tags
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `HQD_MCP_ENDPOINT` | `https://sd6k08f59gqcea6qe13vg.apigateway-cn-beijing.volceapi.com/mcp` | Remote HQD MCP endpoint |
-| `HQD_AUTH_TOKEN` | (empty) | Auth token sent as `Authorization: Bearer <token>` to the remote endpoint |
-| `PORT` | `8000` | Local server port |
+Enterprise Data, Multi-Source Search, HQD
 
-## Usage
+## Tools
 
-### Running
+This MCP Server product provides the following Tools (capabilities):
 
-```bash
-# STDIO mode (for Claude Desktop / Cursor / Trae)
-mcp-server-hqd --transport stdio
+### Tool 1: describe_datasource
 
-# SSE mode
-mcp-server-hqd --transport sse
-```
+Get metadata for data sources including dimensions, metrics, and filters. Agents should call this first to understand available data structures before querying.
 
-### MCP Integration
+### Tool 2: query_datasource
+
+Query data from a specific datasource with filtering, aggregation, and pagination. Supports filter operators: `eq`, `like`, `in`, `not_in`, `between`, `range`, `keyword`.
+
+## Compatible Platforms
+
+- Python
+
+## Authentication Method
+
+Bearer Token
+
+### Obtaining Auth Token
+
+Contact the HQD service administrator to obtain an authentication token.
+
+### Environment Variable Configuration
+
+| Variable Name | Value |
+| ---------- | ---------- |
+| `HQD_AUTH_TOKEN` | Auth token for the remote HQD MCP endpoint |
+| `HQD_MCP_ENDPOINT` | Remote HQD MCP endpoint (optional, has default) |
+
+## Python MCP Server
+
+### Dependencies
+
+The device running MCP server needs to install the following dependencies:
+
+- [Python](https://www.python.org/downloads/) 3.10 or higher.
+- [`uv`](https://docs.astral.sh/uv/) & [`uvx`](https://docs.astral.sh/uv/guides/tools/).
+
+### Deployment and Configuration
 
 ```json
 {
   "mcpServers": {
-    "hqd": {
-      "command": "mcp-server-hqd",
-      "args": ["--transport", "stdio"]
+    "mcp-server-hqd": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_hqd",
+        "mcp-server-hqd"
+      ],
+      "env": {
+        "HQD_AUTH_TOKEN": "Your HQD Auth Token"
+      }
     }
   }
 }
 ```
 
-### Available Tools
+> Note: Please replace `Your HQD Auth Token` above with the authentication token provided by the HQD service administrator.
 
-#### `describe_datasource`
+## Using Clients
 
-Get metadata for data sources including dimensions, metrics, and filters.
+The following clients are supported for interacting with MCP Server. For specific configurations, please refer to the client documentation:
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `datasource_id` | string | `"all"` | Datasource ID, or `"all"` for summary list |
-| `locale` | string | `"zh-CN"` | Response language |
+- Cursor
+- [Trae](https://www.trae.com.cn/)
+- Claude Desktop
+- Ark
 
-#### `query_datasource`
+Supports [Cline](https://cline.bot/) plugin
 
-Query data from a specific datasource with filtering, aggregation, and pagination.
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `datasource_id` | string | required | Target datasource ID |
-| `filters` | string | `null` | Filter string: `field:op:value;...` |
-| `select_fields` | string | `null` | Fields to return, comma-separated |
-| `aggregation` | string | `null` | Aggregation: `field:func,...` |
-| `group_by` | string | `null` | Group-by fields, comma-separated |
-| `sort_field` | string | `null` | Sort field |
-| `sort_order` | string | `"desc"` | Sort direction (`asc`/`desc`) |
-| `page` | int | `1` | Page number |
-| `page_size` | int | `10` | Page size (max 50) |
-
-### Available Datasources
+## Available Datasources
 
 | ID | Name |
 |----|------|
-| `enterprise_basic_wide` | 企业基本信息宽表 |
-| `enterprise_risk_wide` | 企业风险信息宽表 |
-| `enterprise_operation_wide` | 企业经营信息宽表 |
-| `enterprise_ip_wide` | 企业知识产权宽表 |
-| `enterprise_litigation` | 企业诉讼信息 |
+| `enterprise_basic_wide` | Enterprise Basic Information |
+| `enterprise_risk_wide` | Enterprise Risk Information |
+| `enterprise_operation_wide` | Enterprise Operations Information |
+| `enterprise_ip_wide` | Enterprise Intellectual Property |
+| `enterprise_litigation` | Enterprise Litigation Information |
+
+## Conversation Initiation Example
+
+- List all available data sources.
+- Query the basic information of the enterprise named "ByteDance".
+- Search for enterprises with registered capital over 10 million in Beijing.
+
+## License
+
+[MIT](../../LICENSE)
