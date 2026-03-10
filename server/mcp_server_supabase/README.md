@@ -77,11 +77,7 @@ No tools are currently exposed.
 
 ## Authentication
 
-This server supports both local static credentials and cloud-deployment credentials.
-
 - Local deployment: use `VOLCENGINE_ACCESS_KEY`, `VOLCENGINE_SECRET_KEY`, and optional `VOLCENGINE_SESSION_TOKEN`
-- Cloud deployment: pass a base64-encoded STS JSON payload in the `authorization` header, or expose the same value through the `authorization` environment variable
-- VeFaaS deployment: if no explicit credentials are provided, the server can also read `/var/run/secrets/iam/credential`
 
 Static AK/SK can be obtained from the [Volcengine API Access Key console](https://console.volcengine.com/iam/keymanage/).
 
@@ -89,8 +85,8 @@ Static AK/SK can be obtained from the [Volcengine API Access Key console](https:
 
 | Name | Required | Default | Description |
 | ---- | ---- | ---- | ---- |
-| `VOLCENGINE_ACCESS_KEY` | No | - | Volcengine access key for local static authentication |
-| `VOLCENGINE_SECRET_KEY` | No | - | Volcengine secret key for local static authentication |
+| `VOLCENGINE_ACCESS_KEY` | Yes | - | Volcengine access key for local static authentication |
+| `VOLCENGINE_SECRET_KEY` | Yes | - | Volcengine secret key for local static authentication |
 | `VOLCENGINE_SESSION_TOKEN` | No | - | Optional session token used with temporary local credentials |
 | `VOLCENGINE_REGION` | No | `cn-beijing` | Region used for the Volcengine API |
 | `WORKSPACE_REF` | No | - | Startup-level hard scope. When set, `account` tools are hidden and workspace-scoped calls are forced to this target |
@@ -186,20 +182,6 @@ python3 -m mcp_server_supabase.server --port 8000
 python3 -m mcp_server_supabase.server --transport sse --host 0.0.0.0 --port 8000
 ```
 
-### Cloud deployment credential format
-
-When the server runs behind a remote MCP gateway or another agent platform, you can provide STS credentials through the `authorization` header. The value should be a base64-encoded JSON object such as:
-
-```json
-{
-  "AccessKeyId": "<your-sts-ak>",
-  "SecretAccessKey": "<your-sts-sk>",
-  "SessionToken": "<your-session-token>",
-  "CurrentTime": "2026-03-10T10:00:00+08:00",
-  "ExpiredTime": "2026-03-10T12:00:00+08:00"
-}
-```
-
 The package exposes `mcp-server-supabase`, `mcp-server-supabase-sse`, and `mcp-server-supabase-streamable`. The examples above use `mcp-server-supabase`.
 
 ## Usage Notes
@@ -210,7 +192,6 @@ The package exposes `mcp-server-supabase`, `mcp-server-supabase-sse`, and `mcp-s
 - If `FEATURES` is not set, the default enabled groups are `account`, `database`, `debugging`, `development`, `docs`, `functions`, and `branching`. `storage` stays disabled by default.
 - `READ_ONLY=true` hides all mutating tools for the server instance.
 - `DISABLED_TOOLS` takes tool names such as `execute_sql,deploy_edge_function` and removes them after the rest of the policy has been resolved.
-- Credential precedence is: static env AK/SK, request `authorization`, env `authorization`, then VeFaaS IAM credentials.
 - `workspace_id` and `workspace_ref` accept workspace IDs only. Branch IDs such as `br-xxxx` are rejected.
 - `get_publishable_keys` resolves the default branch automatically when needed.
 - `restore_branch` does not support `migration_version`; it maps to the current Volcengine `BranchRestore` capability.
@@ -246,7 +227,6 @@ If your agent runtime can spawn a local MCP process, you can keep using `stdio`.
 - `stdio`: have the agent spawn `mcp-server-supabase` as a child process
 - `streamable-http`: connect to `http://<host>:<port>/mcp`
 - `sse`: connect to `http://<host>:<port>/sse` and post messages to `http://<host>:<port>/messages/`
-- Remote or cloud deployments can forward STS credentials with the `authorization` header instead of baking long-lived AK/SK into the server environment
 - Tool visibility and workspace scope are fixed when the server starts through env vars or CLI flags
 
 ## License

@@ -78,11 +78,7 @@
 
 ## 鉴权方式
 
-同时支持本地静态凭证和云部署动态凭证。
-
 - 本地部署：使用 `VOLCENGINE_ACCESS_KEY`、`VOLCENGINE_SECRET_KEY` 和可选的 `VOLCENGINE_SESSION_TOKEN`
-- 云部署：通过 `authorization` header 传入 base64 编码后的 STS JSON，也可以通过 `authorization` 环境变量传入同样的内容
-- VeFaaS 部署：如果没有显式凭证，服务也会尝试读取 `/var/run/secrets/iam/credential`
 
 静态 AK/SK 可在[火山引擎 API 访问密钥控制台](https://console.volcengine.com/iam/keymanage/)获取。
 
@@ -90,8 +86,8 @@
 
 | 变量名 | 必需 | 默认值 | 说明 |
 | ---- | ---- | ---- | ---- |
-| `VOLCENGINE_ACCESS_KEY` | 否 | - | 本地静态鉴权使用的火山引擎 Access Key |
-| `VOLCENGINE_SECRET_KEY` | 否 | - | 本地静态鉴权使用的火山引擎 Secret Key |
+| `VOLCENGINE_ACCESS_KEY` | 是 | - | 本地静态鉴权使用的火山引擎 Access Key |
+| `VOLCENGINE_SECRET_KEY` | 是 | - | 本地静态鉴权使用的火山引擎 Secret Key |
 | `VOLCENGINE_SESSION_TOKEN` | 否 | - | 临时本地凭证使用的 Session Token |
 | `VOLCENGINE_REGION` | 否 | `cn-beijing` | 火山引擎 API 所在地域 |
 | `WORKSPACE_REF` | 否 | - | 服务启动级 workspace scope，设置后会隐藏 `account` 组工具，并强制所有 workspace-scoped 调用只能访问这个目标 |
@@ -187,20 +183,6 @@ python3 -m mcp_server_supabase.server --port 8000
 python3 -m mcp_server_supabase.server --transport sse --host 0.0.0.0 --port 8000
 ```
 
-### 云部署凭证格式
-
-如果服务部署在远程 MCP 网关、Agent 平台或其他服务端环境中，可以通过 `authorization` header 传入 STS 凭证。header 对应的值需要是下面这类 JSON 的 base64 编码结果：
-
-```json
-{
-  "AccessKeyId": "<your-sts-ak>",
-  "SecretAccessKey": "<your-sts-sk>",
-  "SessionToken": "<your-session-token>",
-  "CurrentTime": "2026-03-10T10:00:00+08:00",
-  "ExpiredTime": "2026-03-10T12:00:00+08:00"
-}
-```
-
 这个包同时暴露了 `mcp-server-supabase`、`mcp-server-supabase-sse` 和 `mcp-server-supabase-streamable` 三个入口，示例统一使用 `mcp-server-supabase`。
 
 ## 使用说明
@@ -211,7 +193,6 @@ python3 -m mcp_server_supabase.server --transport sse --host 0.0.0.0 --port 8000
 - 如果没有设置 `FEATURES`，默认启用 `account`、`database`、`debugging`、`development`、`docs`、`functions`、`branching`，`storage` 默认关闭。
 - `READ_ONLY=true` 会让整个服务实例进入只读模式，并隐藏所有写工具。
 - `DISABLED_TOOLS` 填工具名，例如 `execute_sql,deploy_edge_function`，会在其他策略计算完成后做最终剔除。
-- 凭证优先级是：静态环境变量 AK/SK、请求 `authorization`、环境变量 `authorization`、VeFaaS IAM 凭证。
 - `workspace_id` 和 `workspace_ref` 只接受 workspace ID，`br-xxxx` 这样的 branch ID 会被直接拒绝。
 - `get_publishable_keys` 在需要时会自动解析默认分支。
 - `restore_branch` 不支持 `migration_version`，当前实际映射到火山引擎的 `BranchRestore` 能力。
@@ -247,7 +228,6 @@ python3 -m mcp_server_supabase.server --transport sse --host 0.0.0.0 --port 8000
 - `stdio`：Agent 进程直接拉起 `mcp-server-supabase`
 - `streamable-http`：连接 `http://<host>:<port>/mcp`
 - `sse`：连接 `http://<host>:<port>/sse`，并向 `http://<host>:<port>/messages/` 投递消息
-- 远程或云部署场景可以通过 `authorization` header 透传 STS 凭证，而不是把长期 AK/SK 固化在服务环境变量里
 - 工具可见性和 workspace scope 在服务启动时通过环境变量或 CLI 参数固定下来
 
 ## License
