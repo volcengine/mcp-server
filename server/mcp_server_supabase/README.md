@@ -13,7 +13,7 @@ English | [简体中文](README_zh.md)
 
 ## Tools
 
-### Workspace and Branch
+### `account`
 
 | Tool | Description |
 | ---- | ---- |
@@ -22,14 +22,11 @@ English | [简体中文](README_zh.md)
 | `create_workspace` | Create a new Supabase workspace |
 | `pause_workspace` | Pause a workspace |
 | `restore_workspace` | Resume a paused workspace |
-| `get_workspace_url` | Get the API endpoint for a workspace or branch |
-| `get_publishable_keys` | Get publishable, anon, and service role keys |
-| `list_branches` | List branches under a workspace |
-| `create_branch` | Create a development branch |
-| `delete_branch` | Delete a development branch |
-| `reset_branch` | Reset a branch to its baseline state |
+### `docs`
 
-### Database
+No tools are currently exposed.
+
+### `database`
 
 | Tool | Description |
 | ---- | ---- |
@@ -38,9 +35,20 @@ English | [简体中文](README_zh.md)
 | `list_migrations` | List records from `supabase_migrations.schema_migrations` |
 | `list_extensions` | List installed PostgreSQL extensions |
 | `apply_migration` | Run migration SQL and record it in `supabase_migrations.schema_migrations` |
+
+### `debugging`
+
+No tools are currently exposed.
+
+### `development`
+
+| Tool | Description |
+| ---- | ---- |
+| `get_workspace_url` | Get the API endpoint for a workspace or branch |
+| `get_publishable_keys` | Get publishable, anon, and service role keys |
 | `generate_typescript_types` | Generate TypeScript definitions from schema metadata |
 
-### Edge Functions
+### `functions`
 
 | Tool | Description |
 | ---- | ---- |
@@ -49,7 +57,16 @@ English | [简体中文](README_zh.md)
 | `deploy_edge_function` | Create or update an Edge Function |
 | `delete_edge_function` | Delete an Edge Function |
 
-### Storage
+### `branching`
+
+| Tool | Description |
+| ---- | ---- |
+| `list_branches` | List branches under a workspace |
+| `create_branch` | Create a development branch |
+| `delete_branch` | Delete a development branch |
+| `reset_branch` | Reset a branch to its baseline state |
+
+### `storage`
 
 | Tool | Description |
 | ---- | ---- |
@@ -69,7 +86,10 @@ Use Volcengine AK/SK authentication. Obtain your credentials from the [Volcengin
 | `VOLCENGINE_ACCESS_KEY` | Yes | - | Volcengine access key |
 | `VOLCENGINE_SECRET_KEY` | Yes | - | Volcengine secret key |
 | `VOLCENGINE_REGION` | No | `cn-beijing` | Region used for the AIDAP API |
-| `DEFAULT_WORKSPACE_ID` | No | - | Default target used when `workspace_id` is omitted |
+| `WORKSPACE_REF` | No | - | Connection-level hard scope. When set, `account` tools are hidden and workspace-scoped calls are forced to this target |
+| `FEATURES` | No | `account,database,debugging,development,docs,functions,branching` | Official feature groups. `storage` is disabled by default |
+| `ENABLED_TOOLS` | No | - | Comma-separated allowlist applied after `features` filtering |
+| `DISABLED_TOOLS` | No | - | Comma-separated denylist that overrides `ENABLED_TOOLS` |
 | `READ_ONLY` | No | `false` | Set to `true` to block all mutating tools |
 | `SUPABASE_WORKSPACE_SLUG` | No | `default` | Project slug used by Edge Functions APIs |
 | `SUPABASE_ENDPOINT_SCHEME` | No | `http` | Endpoint scheme used when building workspace URLs |
@@ -121,7 +141,8 @@ uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-s
         "VOLCENGINE_ACCESS_KEY": "<your-access-key>",
         "VOLCENGINE_SECRET_KEY": "<your-secret-key>",
         "VOLCENGINE_REGION": "cn-beijing",
-        "DEFAULT_WORKSPACE_ID": "ws-xxxxxxxx"
+        "WORKSPACE_REF": "ws-xxxxxxxx",
+        "FEATURES": "database,functions"
       }
     }
   }
@@ -144,7 +165,8 @@ uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-s
         "VOLCENGINE_ACCESS_KEY": "<your-access-key>",
         "VOLCENGINE_SECRET_KEY": "<your-secret-key>",
         "VOLCENGINE_REGION": "cn-beijing",
-        "DEFAULT_WORKSPACE_ID": "ws-xxxxxxxx"
+        "WORKSPACE_REF": "ws-xxxxxxxx",
+        "FEATURES": "database,functions"
       }
     }
   }
@@ -162,7 +184,11 @@ The package exposes `mcp-server-supabase`, `supabase-aidap`, `mcp-server-supabas
 
 ## Usage Notes
 
-- If `workspace_id` is omitted, the server falls back to `DEFAULT_WORKSPACE_ID` when configured.
+- `WORKSPACE_REF` applies a hard workspace scope to the connection and removes `workspace_id` from visible tool schemas.
+- When `WORKSPACE_REF` is active, `account` tools are hidden and any explicit `workspace_id` outside the scope is rejected.
+- `FEATURES` accepts only the official groups: `account`, `docs`, `database`, `debugging`, `development`, `functions`, `storage`, and `branching`.
+- If `FEATURES` is not set, the default enabled groups are `account`, `database`, `debugging`, `development`, `docs`, `functions`, and `branching`. `storage` stays disabled by default.
+- `ENABLED_TOOLS` and `DISABLED_TOOLS` narrow the tool set after feature filtering. `DISABLED_TOOLS` takes precedence.
 - If a branch ID such as `br-xxxx` is provided, the server resolves the corresponding workspace automatically.
 - `get_publishable_keys` resolves the default branch automatically when needed.
 - `reset_branch` accepts `migration_version`, but the current AIDAP API ignores that value and performs a branch reset only.

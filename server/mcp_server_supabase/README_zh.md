@@ -13,7 +13,7 @@
 
 ## 工具列表
 
-### 工作区与分支
+### `account`
 
 | 工具 | 说明 |
 | ---- | ---- |
@@ -22,14 +22,12 @@
 | `create_workspace` | 创建新的 Supabase workspace |
 | `pause_workspace` | 暂停 workspace |
 | `restore_workspace` | 恢复已暂停的 workspace |
-| `get_workspace_url` | 获取 workspace 或 branch 的 API 地址 |
-| `get_publishable_keys` | 获取 publishable、anon、service_role 等密钥 |
-| `list_branches` | 列出 workspace 下的分支 |
-| `create_branch` | 创建开发分支 |
-| `delete_branch` | 删除开发分支 |
-| `reset_branch` | 将分支重置到初始状态 |
 
-### 数据库
+### `docs`
+
+当前没有暴露工具。
+
+### `database`
 
 | 工具 | 说明 |
 | ---- | ---- |
@@ -38,9 +36,20 @@
 | `list_migrations` | 查询 `supabase_migrations.schema_migrations` 中的迁移记录 |
 | `list_extensions` | 列出已安装的 PostgreSQL 扩展 |
 | `apply_migration` | 执行迁移 SQL，并写入 `supabase_migrations.schema_migrations` |
+
+### `debugging`
+
+当前没有暴露工具。
+
+### `development`
+
+| 工具 | 说明 |
+| ---- | ---- |
+| `get_workspace_url` | 获取 workspace 或 branch 的 API 地址 |
+| `get_publishable_keys` | 获取 publishable、anon、service_role 等密钥 |
 | `generate_typescript_types` | 根据 schema 元数据生成 TypeScript 类型定义 |
 
-### Edge Functions
+### `functions`
 
 | 工具 | 说明 |
 | ---- | ---- |
@@ -49,7 +58,16 @@
 | `deploy_edge_function` | 创建或更新 Edge Function |
 | `delete_edge_function` | 删除 Edge Function |
 
-### Storage
+### `branching`
+
+| 工具 | 说明 |
+| ---- | ---- |
+| `list_branches` | 列出 workspace 下的分支 |
+| `create_branch` | 创建开发分支 |
+| `delete_branch` | 删除开发分支 |
+| `reset_branch` | 将分支重置到初始状态 |
+
+### `storage`
 
 | 工具 | 说明 |
 | ---- | ---- |
@@ -69,7 +87,10 @@
 | `VOLCENGINE_ACCESS_KEY` | 是 | - | 火山引擎 Access Key |
 | `VOLCENGINE_SECRET_KEY` | 是 | - | 火山引擎 Secret Key |
 | `VOLCENGINE_REGION` | 否 | `cn-beijing` | AIDAP API 所在地域 |
-| `DEFAULT_WORKSPACE_ID` | 否 | - | 未传 `workspace_id` 时使用的默认目标 |
+| `WORKSPACE_REF` | 否 | - | 连接级 workspace scope，设置后会隐藏 `account` 组工具，并强制所有 workspace-scoped 调用只能访问这个目标 |
+| `FEATURES` | 否 | `account,database,debugging,development,docs,functions,branching` | 官方 feature groups，`storage` 默认关闭 |
+| `ENABLED_TOOLS` | 否 | - | 逗号分隔的工具白名单，作用在 `features` 过滤之后 |
+| `DISABLED_TOOLS` | 否 | - | 逗号分隔的工具黑名单，优先级高于 `ENABLED_TOOLS` |
 | `READ_ONLY` | 否 | `false` | 设为 `true` 后会禁止所有写操作工具 |
 | `SUPABASE_WORKSPACE_SLUG` | 否 | `default` | Edge Functions API 使用的项目 slug |
 | `SUPABASE_ENDPOINT_SCHEME` | 否 | `http` | 生成 workspace URL 时使用的协议 |
@@ -121,7 +142,8 @@ uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-s
         "VOLCENGINE_ACCESS_KEY": "<your-access-key>",
         "VOLCENGINE_SECRET_KEY": "<your-secret-key>",
         "VOLCENGINE_REGION": "cn-beijing",
-        "DEFAULT_WORKSPACE_ID": "ws-xxxxxxxx"
+        "WORKSPACE_REF": "ws-xxxxxxxx",
+        "FEATURES": "database,functions"
       }
     }
   }
@@ -144,7 +166,8 @@ uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-s
         "VOLCENGINE_ACCESS_KEY": "<your-access-key>",
         "VOLCENGINE_SECRET_KEY": "<your-secret-key>",
         "VOLCENGINE_REGION": "cn-beijing",
-        "DEFAULT_WORKSPACE_ID": "ws-xxxxxxxx"
+        "WORKSPACE_REF": "ws-xxxxxxxx",
+        "FEATURES": "database,functions"
       }
     }
   }
@@ -162,7 +185,11 @@ python3 -m mcp_server_supabase.server --transport sse --host 0.0.0.0 --port 8000
 
 ## 使用说明
 
-- 如果没有显式传入 `workspace_id`，且配置了 `DEFAULT_WORKSPACE_ID`，服务会自动使用这个默认目标。
+- `WORKSPACE_REF` 会把连接 hard-scope 到单个目标，并在 tool schema 中移除 `workspace_id`。
+- `WORKSPACE_REF` 生效时，`account` 组工具不会暴露，且显式传入其他 `workspace_id` 会被拒绝。
+- `FEATURES` 只接受官方 8 个分组：`account`、`docs`、`database`、`debugging`、`development`、`functions`、`storage`、`branching`。
+- 如果没有设置 `FEATURES`，默认启用 `account`、`database`、`debugging`、`development`、`docs`、`functions`、`branching`，`storage` 默认关闭。
+- `ENABLED_TOOLS` 和 `DISABLED_TOOLS` 会在 feature 过滤之后继续收窄工具集，且 `DISABLED_TOOLS` 优先。
 - 如果传入的是 `br-xxxx` 这样的 branch ID，服务会自动解析所属 workspace。
 - `get_publishable_keys` 在需要时会自动解析默认分支。
 - `reset_branch` 虽然接收 `migration_version` 参数，但当前 AIDAP API 会忽略这个值，只执行分支重置。

@@ -1,37 +1,25 @@
 from typing import Optional
 from ..platform import AidapClient, SupabaseClient
-from ..utils import resolve_target, select_target_id
+from ..utils import resolve_target
 
 
 class BaseTools:
-    """Base class for all tool classes"""
-
-    def __init__(self, aidap_client: AidapClient, workspace_id: Optional[str] = None):
+    def __init__(self, aidap_client: AidapClient):
         self.aidap = aidap_client
-        self.default_workspace_id = workspace_id
 
     def _get_workspace_id(self, workspace_id: Optional[str]) -> str:
-        """Get workspace ID from parameter or default"""
-        result = select_target_id(workspace_id, self.default_workspace_id)
-        if not result:
-            raise ValueError(
-                "workspace_id is required: not provided as parameter and no default workspace_id configured. "
-                "Please provide workspace_id or set DEFAULT_WORKSPACE_ID environment variable."
-            )
-        return result
+        if not workspace_id:
+            raise ValueError("workspace_id is required")
+        return workspace_id
 
     async def _resolve_target(self, workspace_id: Optional[str]) -> tuple[str, Optional[str]]:
         target = self._get_workspace_id(workspace_id)
-        resolved_workspace_id, branch_id = await resolve_target(self.aidap, target, None)
+        resolved_workspace_id, branch_id = await resolve_target(self.aidap, target)
         if not resolved_workspace_id:
-            raise ValueError(
-                "workspace_id is required: not provided as parameter and no default workspace_id configured. "
-                "Please provide workspace_id or set DEFAULT_WORKSPACE_ID environment variable."
-            )
+            raise ValueError("workspace_id is required")
         return resolved_workspace_id, branch_id
 
     async def _get_client(self, workspace_id: str, branch_id: Optional[str] = None) -> SupabaseClient:
-        """Get Supabase client for workspace"""
         import logging
         logger = logging.getLogger(__name__)
 

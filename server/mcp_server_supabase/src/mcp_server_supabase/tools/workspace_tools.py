@@ -9,9 +9,8 @@ logger = logging.getLogger(__name__)
 
 
 class WorkspaceTools:
-    def __init__(self, aidap_client, default_workspace_id: Optional[str] = None):
+    def __init__(self, aidap_client):
         self.aidap_client = aidap_client
-        self.default_workspace_id = default_workspace_id
 
     def _to_json(self, payload: dict) -> str:
         return to_json(payload)
@@ -23,7 +22,7 @@ class WorkspaceTools:
         return pick_value(source, *field_names)
 
     async def _resolve_target(self, target_id: Optional[str]) -> tuple[Optional[str], Optional[str]]:
-        return await resolve_target(self.aidap_client, target_id, self.default_workspace_id)
+        return await resolve_target(self.aidap_client, target_id)
 
     def _workspace_view(self, source: Any) -> dict:
         payload = {

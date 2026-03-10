@@ -2,11 +2,11 @@ import argparse
 import logging
 import os
 
-from mcp.server.fastmcp import FastMCP
-
 from .config import READ_ONLY
 from .runtime import create_runtime
 from .tool_registry import register_tools
+from .access_policy import build_partial_access_policy
+from .scoped_mcp import ScopedFastMCP
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -34,10 +34,28 @@ def _resolve_host(host: str | None = None) -> str:
     return os.getenv("MCP_SERVER_HOST", DEFAULT_HOST)
 
 
-def _resolve_default_workspace_id(default_target_id: str | None = None) -> str | None:
-    if default_target_id is not None:
-        return default_target_id
-    return os.getenv("DEFAULT_WORKSPACE_ID")
+def _resolve_workspace_ref(workspace_ref: str | None = None) -> str | None:
+    if workspace_ref is not None:
+        return workspace_ref
+    return os.getenv("WORKSPACE_REF")
+
+
+def _resolve_features(features: str | None = None) -> str | None:
+    if features is not None:
+        return features
+    return os.getenv("FEATURES")
+
+
+def _resolve_enabled_tools(enabled_tools: str | None = None) -> str | None:
+    if enabled_tools is not None:
+        return enabled_tools
+    return os.getenv("ENABLED_TOOLS")
+
+
+def _resolve_disabled_tools(disabled_tools: str | None = None) -> str | None:
+    if disabled_tools is not None:
+        return disabled_tools
+    return os.getenv("DISABLED_TOOLS")
 
 
 def _resolve_mount_path(mount_path: str | None = None) -> str:
@@ -67,18 +85,27 @@ def _resolve_streamable_http_path(streamable_http_path: str | None = None) -> st
 def create_mcp(
     port: int | None = None,
     host: str | None = None,
-    default_target_id: str | None = None,
+    workspace_ref: str | None = None,
+    features: str | None = None,
+    enabled_tools: str | None = None,
+    disabled_tools: str | None = None,
     mount_path: str | None = None,
     sse_path: str | None = None,
     message_path: str | None = None,
     streamable_http_path: str | None = None,
-) -> FastMCP:
+) -> ScopedFastMCP:
     resolved_port = _resolve_port(port)
     resolved_host = _resolve_host(host)
-    resolved_default_target_id = _resolve_default_workspace_id(default_target_id)
-    runtime = create_runtime(resolved_default_target_id)
-    mcp = FastMCP(
+    access_policy = build_partial_access_policy(
+        workspace_ref=_resolve_workspace_ref(workspace_ref),
+        features=_resolve_features(features),
+        enabled_tools=_resolve_enabled_tools(enabled_tools),
+        disabled_tools=_resolve_disabled_tools(disabled_tools),
+    )
+    runtime = create_runtime()
+    mcp = ScopedFastMCP(
         "Supabase MCP Server (AIDAP)",
+        access_policy=access_policy,
         host=resolved_host,
         port=resolved_port,
         mount_path=_resolve_mount_path(mount_path),
@@ -97,12 +124,18 @@ def run_server(
     transport: str = "stdio",
     port: int | None = None,
     host: str | None = None,
-    default_target_id: str | None = None,
+    workspace_ref: str | None = None,
+    features: str | None = None,
+    enabled_tools: str | None = None,
+    disabled_tools: str | None = None,
 ) -> None:
     create_mcp(
         port=port,
         host=host,
-        default_target_id=default_target_id,
+        workspace_ref=workspace_ref,
+        features=features,
+        enabled_tools=enabled_tools,
+        disabled_tools=disabled_tools,
     ).run(transport=transport)
 
 
@@ -117,16 +150,29 @@ def main():
     )
     parser.add_argument("--host", type=str, default=None, help="Host to bind for network transports")
     parser.add_argument("--port", type=int, default=None, help="Port to run the server on")
+    parser.add_argument("--workspace-ref", type=str, default=None, help="Hard-scope the connection to a single workspace")
+    parser.add_argument("--features", type=str, default=None, help="Comma-separated official feature groups")
+    parser.add_argument("--enabled-tools", type=str, default=None, help="Comma-separated whitelist of tool names")
+    parser.add_argument("--disabled-tools", type=str, default=None, help="Comma-separated blacklist of tool names")
     args = parser.parse_args()
 
     resolved_host = _resolve_host(args.host)
     resolved_port = _resolve_port(args.port)
-    resolved_default_workspace_id = _resolve_default_workspace_id()
+    resolved_workspace_ref = _resolve_workspace_ref(args.workspace_ref)
+    resolved_features = _resolve_features(args.features)
+    resolved_enabled_tools = _resolve_enabled_tools(args.enabled_tools)
+    resolved_disabled_tools = _resolve_disabled_tools(args.disabled_tools)
 
     logger.info("Starting Supabase MCP Server with %s transport", args.transport)
     logger.info("Read-only mode: %s", READ_ONLY)
-    if resolved_default_workspace_id:
-        logger.info("Default workspace ID: %s", resolved_default_workspace_id)
+    if resolved_workspace_ref:
+        logger.info("Workspace scope: %s", resolved_workspace_ref)
+    if resolved_features:
+        logger.info("Feature groups: %s", resolved_features)
+    if resolved_enabled_tools:
+        logger.info("Enabled tools: %s", resolved_enabled_tools)
+    if resolved_disabled_tools:
+        logger.info("Disabled tools: %s", resolved_disabled_tools)
     if args.transport != "stdio":
         logger.info(
             "Server binding: host=%s port=%s sse_path=%s message_path=%s streamable_http_path=%s",
@@ -141,6 +187,10 @@ def main():
         transport=args.transport,
         port=args.port,
         host=args.host,
+        workspace_ref=args.workspace_ref,
+        features=args.features,
+        enabled_tools=args.enabled_tools,
+        disabled_tools=args.disabled_tools,
     )
 
 
