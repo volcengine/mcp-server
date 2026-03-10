@@ -2,14 +2,14 @@
 
 English | [简体中文](README_zh.md)
 
-> Supabase MCP server for AIDAP workspaces. It exposes workspace, branch, database, Edge Functions, storage, and TypeScript type generation capabilities through MCP.
+> MCP server for Volcengine Supabase workspaces. It exposes workspace, branch, database, Edge Functions, storage, and TypeScript type generation capabilities through MCP.
 
 | Item | Details |
 | ---- | ---- |
 | Version | v0.1.0 |
-| Description | Supabase MCP server built on top of AIDAP workspaces |
+| Description | MCP server built on top of Volcengine Supabase workspaces |
 | Category | Database / Developer Tools |
-| Tags | Supabase, PostgreSQL, Edge Functions, Storage, AIDAP |
+| Tags | Supabase, PostgreSQL, Edge Functions, Storage, Volcengine |
 
 ## Tools
 
@@ -18,7 +18,7 @@ English | [简体中文](README_zh.md)
 | Tool | Description |
 | ---- | ---- |
 | `list_workspaces` | List all available Supabase workspaces in the current account |
-| `get_workspace` | Get workspace details; branch IDs are also accepted |
+| `get_workspace` | Get workspace details |
 | `create_workspace` | Create a new Supabase workspace |
 | `pause_workspace` | Pause a workspace |
 | `restore_workspace` | Resume a paused workspace |
@@ -44,7 +44,7 @@ No tools are currently exposed.
 
 | Tool | Description |
 | ---- | ---- |
-| `get_workspace_url` | Get the API endpoint for a workspace or branch |
+| `get_workspace_url` | Get the API endpoint for a workspace |
 | `get_publishable_keys` | Get publishable, anon, and service role keys |
 | `generate_typescript_types` | Generate TypeScript definitions from schema metadata |
 
@@ -52,7 +52,7 @@ No tools are currently exposed.
 
 | Tool | Description |
 | ---- | ---- |
-| `list_edge_functions` | List Edge Functions in a workspace or branch |
+| `list_edge_functions` | List Edge Functions in a workspace |
 | `get_edge_function` | Get the source code and configuration of an Edge Function |
 | `deploy_edge_function` | Create or update an Edge Function |
 | `delete_edge_function` | Delete an Edge Function |
@@ -77,20 +77,26 @@ No tools are currently exposed.
 
 ## Authentication
 
-Use Volcengine AK/SK authentication. Obtain your credentials from the [Volcengine API Access Key console](https://console.volcengine.com/iam/keymanage/).
+This server supports both local static credentials and cloud-deployment credentials.
+
+- Local deployment: use `VOLCENGINE_ACCESS_KEY`, `VOLCENGINE_SECRET_KEY`, and optional `VOLCENGINE_SESSION_TOKEN`
+- Cloud deployment: pass a base64-encoded STS JSON payload in the `authorization` header, or expose the same value through the `authorization` environment variable
+- VeFaaS deployment: if no explicit credentials are provided, the server can also read `/var/run/secrets/iam/credential`
+
+Static AK/SK can be obtained from the [Volcengine API Access Key console](https://console.volcengine.com/iam/keymanage/).
 
 ## Environment Variables
 
 | Name | Required | Default | Description |
 | ---- | ---- | ---- | ---- |
-| `VOLCENGINE_ACCESS_KEY` | Yes | - | Volcengine access key |
-| `VOLCENGINE_SECRET_KEY` | Yes | - | Volcengine secret key |
-| `VOLCENGINE_REGION` | No | `cn-beijing` | Region used for the AIDAP API |
+| `VOLCENGINE_ACCESS_KEY` | No | - | Volcengine access key for local static authentication |
+| `VOLCENGINE_SECRET_KEY` | No | - | Volcengine secret key for local static authentication |
+| `VOLCENGINE_SESSION_TOKEN` | No | - | Optional session token used with temporary local credentials |
+| `VOLCENGINE_REGION` | No | `cn-beijing` | Region used for the Volcengine API |
 | `WORKSPACE_REF` | No | - | Connection-level hard scope. When set, `account` tools are hidden and workspace-scoped calls are forced to this target |
 | `FEATURES` | No | `account,database,debugging,development,docs,functions,branching` | Official feature groups. `storage` is disabled by default |
-| `ENABLED_TOOLS` | No | - | Comma-separated allowlist applied after `features` filtering |
-| `DISABLED_TOOLS` | No | - | Comma-separated denylist that overrides `ENABLED_TOOLS` |
-| `READ_ONLY` | No | `false` | Set to `true` to block all mutating tools |
+| `DISABLED_TOOLS` | No | - | Comma-separated denylist applied after all other policy filters |
+| `READ_ONLY` | No | `false` | Server-level default for connection `read_only`; when enabled, mutating tools are hidden |
 | `SUPABASE_WORKSPACE_SLUG` | No | `default` | Project slug used by Edge Functions APIs |
 | `SUPABASE_ENDPOINT_SCHEME` | No | `http` | Endpoint scheme used when building workspace URLs |
 | `MCP_SERVER_HOST` | No | `0.0.0.0` | Host used by `sse` and `streamable-http` transports |
@@ -124,7 +130,7 @@ uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-s
 uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-server-supabase-streamable
 ```
 
-### MCP client config with local source
+### AI tool integration with local source
 
 ```json
 {
@@ -149,7 +155,7 @@ uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-s
 }
 ```
 
-### MCP client config with `uvx`
+### AI tool integration with `uvx`
 
 ```json
 {
@@ -180,7 +186,21 @@ python3 -m mcp_server_supabase.server --port 8000
 python3 -m mcp_server_supabase.server --transport sse --host 0.0.0.0 --port 8000
 ```
 
-The package exposes `mcp-server-supabase`, `supabase-aidap`, `mcp-server-supabase-sse`, and `mcp-server-supabase-streamable`. The examples above use `mcp-server-supabase`.
+### Cloud deployment credential format
+
+When the server runs behind a remote MCP gateway or another agent platform, you can provide STS credentials through the `authorization` header. The value should be a base64-encoded JSON object such as:
+
+```json
+{
+  "AccessKeyId": "<your-sts-ak>",
+  "SecretAccessKey": "<your-sts-sk>",
+  "SessionToken": "<your-session-token>",
+  "CurrentTime": "2026-03-10T10:00:00+08:00",
+  "ExpiredTime": "2026-03-10T12:00:00+08:00"
+}
+```
+
+The package exposes `mcp-server-supabase`, the compatibility alias `supabase-aidap`, `mcp-server-supabase-sse`, and `mcp-server-supabase-streamable`. The examples above use `mcp-server-supabase`.
 
 ## Usage Notes
 
@@ -188,22 +208,58 @@ The package exposes `mcp-server-supabase`, `supabase-aidap`, `mcp-server-supabas
 - When `WORKSPACE_REF` is active, `account` tools are hidden and any explicit `workspace_id` outside the scope is rejected.
 - `FEATURES` accepts only the official groups: `account`, `docs`, `database`, `debugging`, `development`, `functions`, `storage`, and `branching`.
 - If `FEATURES` is not set, the default enabled groups are `account`, `database`, `debugging`, `development`, `docs`, `functions`, and `branching`. `storage` stays disabled by default.
-- `ENABLED_TOOLS` and `DISABLED_TOOLS` narrow the tool set after feature filtering. `DISABLED_TOOLS` takes precedence.
-- If a branch ID such as `br-xxxx` is provided, the server resolves the corresponding workspace automatically.
+- `read_only=true` can be supplied as an HTTP query parameter to hide all mutating tools for that connection. `READ_ONLY=true` applies the same policy as a server default.
+- `DISABLED_TOOLS` takes tool names such as `execute_sql,deploy_edge_function` and removes them after the rest of the policy has been resolved.
+- Credential precedence is: static env AK/SK, request `authorization`, env `authorization`, then VeFaaS IAM credentials.
+- Request-scoped STS credentials disable workspace metadata cache reuse to avoid cross-connection cache leakage.
+- `workspace_id` and `workspace_ref` accept workspace IDs only. Branch IDs such as `br-xxxx` are rejected.
 - `get_publishable_keys` resolves the default branch automatically when needed.
-- `reset_branch` accepts `migration_version`, but the current AIDAP API ignores that value and performs a branch reset only.
+- `reset_branch` accepts `migration_version`, but the current Volcengine API ignores that value and performs a branch reset only.
 - `deploy_edge_function` currently supports `native-node20/v1`, `native-python3.9/v1`, `native-python3.10/v1`, and `native-python3.12/v1`.
 - `--transport sse` serves the MCP SSE endpoint at `MCP_SSE_PATH` and the message endpoint at `MCP_MESSAGE_PATH`.
 - `--transport streamable-http` serves the MCP HTTP endpoint at `STREAMABLE_HTTP_PATH`.
 - For remote deployments, `streamable-http` is usually the better default; `sse` remains available for clients that still require it.
 
-## Compatible Clients
+## Policy Precedence
 
-- Cursor
-- Claude Desktop
-- Cline
-- Trae
-- Any MCP client that supports `stdio`, `sse`, or `streamable-http`
+### Tool filtering order within one connection
+
+1. `features` selects the base tool set
+2. `workspace_ref` removes `account` tools and scopes the connection to one workspace
+3. `read_only` removes all mutating tools
+4. `disabled_tools` removes specific tool names last
+
+### Server defaults vs connection-scoped options
+
+1. `workspace_ref`
+The server setting is a hard boundary. A connection that sends a different `workspace_ref` is rejected. If the server does not set one, the connection may choose its own.
+2. `features`
+If both the server and the connection set `features`, the effective set is the intersection. A connection cannot widen the server-allowed feature range.
+3. `read_only`
+If either the server or the connection sets `read_only=true`, the effective result is `true`.
+4. `disabled_tools`
+Server-side and connection-side deny lists are unioned. If either side disables a tool, it stays unavailable.
+
+## Integration Modes
+
+### AI tools
+
+This server works with Cursor, Claude Desktop, Cline, Trae, and any other MCP client that supports `stdio`, `sse`, or `streamable-http`.
+
+- Local integrations usually use `stdio`
+- Configure `command`, `args`, and `env` in the client
+- Local source mode usually injects static AK/SK through `env`
+- The two `mcpServers` JSON examples above follow this pattern
+
+### Custom AI agents
+
+If your agent runtime can spawn a local MCP process, you can keep using `stdio`. If your agent runs on a server, in containers, or in a multi-instance environment, `streamable-http` or `sse` is usually the better integration path.
+
+- `stdio`: have the agent spawn `mcp-server-supabase` as a child process
+- `streamable-http`: connect to `http://<host>:<port>/mcp`
+- `sse`: connect to `http://<host>:<port>/sse` and post messages to `http://<host>:<port>/messages/`
+- Remote or cloud deployments can forward STS credentials with the `authorization` header instead of baking long-lived AK/SK into the server environment
+- Connection-scoped options can be passed through HTTP query parameters, including `workspace_ref`, `features`, `read_only`, and `disabled_tools`
 
 ## License
 

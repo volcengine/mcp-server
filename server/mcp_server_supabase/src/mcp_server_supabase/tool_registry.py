@@ -15,7 +15,7 @@ def _register_edge_tools(mcp: FastMCP, runtime: SupabaseRuntime) -> None:
 
     @mcp.tool()
     async def list_edge_functions(workspace_id: str = None) -> str:
-        """Lists all Edge Functions in a workspace or branch."""
+        """Lists all Edge Functions in a workspace."""
         return await edge_tools.list_edge_functions(workspace_id)
 
     @mcp.tool()
@@ -40,7 +40,7 @@ def _register_edge_tools(mcp: FastMCP, runtime: SupabaseRuntime) -> None:
             verify_jwt: Whether to verify JWT tokens
             runtime: Runtime environment
             import_map: Optional import map JSON for dependencies
-            workspace_id: The workspace ID or branch ID
+            workspace_id: The workspace ID
         """
         return await edge_tools.deploy_edge_function(
             function_name,
@@ -62,7 +62,7 @@ def _register_storage_tools(mcp: FastMCP, runtime: SupabaseRuntime) -> None:
 
     @mcp.tool()
     async def list_storage_buckets(workspace_id: str = None) -> str:
-        """Lists all storage buckets in a workspace or branch."""
+        """Lists all storage buckets in a workspace."""
         return await storage_tools.list_storage_buckets(workspace_id)
 
     @mcp.tool()
@@ -89,7 +89,7 @@ def _register_storage_tools(mcp: FastMCP, runtime: SupabaseRuntime) -> None:
 
     @mcp.tool()
     async def get_storage_config(workspace_id: str = None) -> str:
-        """Gets the storage configuration for a workspace or branch."""
+        """Gets the storage configuration for a workspace."""
         return await storage_tools.get_storage_config(workspace_id)
 
 
@@ -139,7 +139,7 @@ def _register_workspace_tools(mcp: FastMCP, runtime: SupabaseRuntime) -> None:
 
     @mcp.tool()
     async def get_workspace(workspace_id: str) -> str:
-        """Gets details for a specific workspace or branch target."""
+        """Gets details for a specific workspace."""
         return await workspace_tools.get_workspace(workspace_id)
 
     @mcp.tool()
@@ -163,12 +163,12 @@ def _register_workspace_tools(mcp: FastMCP, runtime: SupabaseRuntime) -> None:
 
     @mcp.tool()
     async def get_workspace_url(workspace_id: str = None) -> str:
-        """Gets API endpoint URL for a workspace or branch."""
+        """Gets API endpoint URL for a workspace."""
         return await workspace_tools.get_workspace_url(workspace_id)
 
     @mcp.tool()
     async def get_publishable_keys(workspace_id: str = None, reveal: bool = False) -> str:
-        """Gets API keys for a workspace or branch."""
+        """Gets API keys for a workspace."""
         return await workspace_tools.get_publishable_keys(workspace_id, reveal)
 
     @mcp.tool()

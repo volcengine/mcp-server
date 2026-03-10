@@ -131,10 +131,10 @@ class EdgeFunctionTools(BaseTools):
 
     @handle_errors
     async def list_edge_functions(self, workspace_id: Optional[str] = None) -> List[EdgeFunction]:
-        ws_id, branch_id = await self._resolve_target(workspace_id)
+        ws_id = self._resolve_workspace_id(workspace_id)
         logger.info(f"Listing edge functions for workspace {ws_id}")
 
-        client = await self._get_client(ws_id, branch_id)
+        client = await self._get_client(ws_id)
         result = await client.call_api(f"/v1/projects/{WORKSPACE_SLUG}/functions")
 
         functions = [EdgeFunction(**func) for func in result]
@@ -144,10 +144,10 @@ class EdgeFunctionTools(BaseTools):
     @handle_errors
     async def get_edge_function(self, function_name: str, workspace_id: Optional[str] = None) -> dict:
         self._validate_function_name(function_name)
-        ws_id, branch_id = await self._resolve_target(workspace_id)
+        ws_id = self._resolve_workspace_id(workspace_id)
         logger.info(f"Getting edge function '{function_name}' from workspace {ws_id}")
 
-        client = await self._get_client(ws_id, branch_id)
+        client = await self._get_client(ws_id)
         encoded_name = quote(function_name, safe="")
         try:
             result = await client.call_api(f"/v1/projects/{WORKSPACE_SLUG}/functions/{encoded_name}")
@@ -202,7 +202,7 @@ class EdgeFunctionTools(BaseTools):
         self._validate_code_size(source_code)
         self._validate_runtime_compatibility(runtime, source_code)
 
-        ws_id, branch_id = await self._resolve_target(workspace_id)
+        ws_id = self._resolve_workspace_id(workspace_id)
         entrypoint = self._get_entrypoint(runtime)
 
         logger.info(
@@ -210,7 +210,6 @@ class EdgeFunctionTools(BaseTools):
             extra={
                 "function_name": function_name,
                 "workspace_id": ws_id,
-                "branch_id": branch_id,
                 "runtime": runtime,
                 "verify_jwt": verify_jwt,
                 "entrypoint": entrypoint,
@@ -218,7 +217,7 @@ class EdgeFunctionTools(BaseTools):
             }
         )
 
-        client = await self._get_client(ws_id, branch_id)
+        client = await self._get_client(ws_id)
 
         encoded_name = quote(function_name, safe="")
 
@@ -256,10 +255,10 @@ class EdgeFunctionTools(BaseTools):
     @read_only_check
     async def delete_edge_function(self, function_name: str, workspace_id: Optional[str] = None) -> dict:
         self._validate_function_name(function_name)
-        ws_id, branch_id = await self._resolve_target(workspace_id)
+        ws_id = self._resolve_workspace_id(workspace_id)
         logger.info(f"Deleting edge function '{function_name}' from workspace {ws_id}")
 
-        client = await self._get_client(ws_id, branch_id)
+        client = await self._get_client(ws_id)
         encoded_name = quote(function_name, safe="")
         await client.call_api(f"/v1/projects/{WORKSPACE_SLUG}/functions/{encoded_name}", method="DELETE")
 

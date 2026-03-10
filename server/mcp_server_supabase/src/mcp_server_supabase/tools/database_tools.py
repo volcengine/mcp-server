@@ -13,13 +13,13 @@ class DatabaseTools(BaseTools):
         if not query or not query.strip():
             raise ValueError("SQL query cannot be empty")
 
-        ws_id, branch_id = await self._resolve_target(workspace_id)
+        ws_id = self._resolve_workspace_id(workspace_id)
         logger.info(
             "Executing SQL query",
-            extra={"workspace_id": ws_id, "branch_id": branch_id, "query_length": len(query)}
+            extra={"workspace_id": ws_id, "query_length": len(query)}
         )
 
-        client = await self._get_client(ws_id, branch_id)
+        client = await self._get_client(ws_id)
         result = await client.call_api("/pg/query", method="POST", json_data={"query": query})
 
         if isinstance(result, dict) and isinstance(result.get("data"), list):
@@ -58,18 +58,28 @@ class DatabaseTools(BaseTools):
     
     @handle_errors
     async def list_migrations(self, workspace_id: Optional[str] = None) -> List[dict]:
-        query = """
-        CREATE SCHEMA IF NOT EXISTS supabase_migrations;
-        CREATE TABLE IF NOT EXISTS supabase_migrations.schema_migrations (
-            version text PRIMARY KEY,
-            name text NOT NULL,
-            inserted_at timestamptz NOT NULL DEFAULT now()
-        );
-        SELECT version, name
-        FROM supabase_migrations.schema_migrations
-        ORDER BY version DESC
-        """
-        return await self._execute_sql_raw(query, workspace_id)
+        existence_rows = await self._execute_sql_raw(
+            """
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_schema = 'supabase_migrations'
+                  AND table_name = 'schema_migrations'
+            ) AS exists
+            """,
+            workspace_id,
+        )
+        exists = bool(existence_rows and existence_rows[0].get("exists"))
+        if not exists:
+            return []
+        return await self._execute_sql_raw(
+            """
+            SELECT version, name
+            FROM supabase_migrations.schema_migrations
+            ORDER BY version DESC
+            """,
+            workspace_id,
+        )
 
     @handle_errors
     async def list_extensions(self, workspace_id: Optional[str] = None) -> List[dict]:

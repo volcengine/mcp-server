@@ -2,7 +2,6 @@ import argparse
 import logging
 import os
 
-from .config import READ_ONLY
 from .runtime import create_runtime
 from .tool_registry import register_tools
 from .access_policy import build_partial_access_policy
@@ -46,10 +45,10 @@ def _resolve_features(features: str | None = None) -> str | None:
     return os.getenv("FEATURES")
 
 
-def _resolve_enabled_tools(enabled_tools: str | None = None) -> str | None:
-    if enabled_tools is not None:
-        return enabled_tools
-    return os.getenv("ENABLED_TOOLS")
+def _resolve_read_only(read_only: str | bool | None = None) -> str | bool | None:
+    if read_only is not None:
+        return read_only
+    return os.getenv("READ_ONLY")
 
 
 def _resolve_disabled_tools(disabled_tools: str | None = None) -> str | None:
@@ -87,7 +86,7 @@ def create_mcp(
     host: str | None = None,
     workspace_ref: str | None = None,
     features: str | None = None,
-    enabled_tools: str | None = None,
+    read_only: str | bool | None = None,
     disabled_tools: str | None = None,
     mount_path: str | None = None,
     sse_path: str | None = None,
@@ -99,12 +98,11 @@ def create_mcp(
     access_policy = build_partial_access_policy(
         workspace_ref=_resolve_workspace_ref(workspace_ref),
         features=_resolve_features(features),
-        enabled_tools=_resolve_enabled_tools(enabled_tools),
+        read_only=_resolve_read_only(read_only),
         disabled_tools=_resolve_disabled_tools(disabled_tools),
     )
-    runtime = create_runtime()
     mcp = ScopedFastMCP(
-        "Supabase MCP Server (AIDAP)",
+        "Supabase MCP Server (Volcengine)",
         access_policy=access_policy,
         host=resolved_host,
         port=resolved_port,
@@ -113,6 +111,7 @@ def create_mcp(
         message_path=_resolve_message_path(message_path),
         streamable_http_path=_resolve_streamable_http_path(streamable_http_path),
     )
+    runtime = create_runtime(context_getter=mcp.get_context)
     register_tools(mcp, runtime)
     return mcp
 
@@ -126,7 +125,7 @@ def run_server(
     host: str | None = None,
     workspace_ref: str | None = None,
     features: str | None = None,
-    enabled_tools: str | None = None,
+    read_only: str | bool | None = None,
     disabled_tools: str | None = None,
 ) -> None:
     create_mcp(
@@ -134,7 +133,7 @@ def run_server(
         host=host,
         workspace_ref=workspace_ref,
         features=features,
-        enabled_tools=enabled_tools,
+        read_only=read_only,
         disabled_tools=disabled_tools,
     ).run(transport=transport)
 
@@ -152,7 +151,7 @@ def main():
     parser.add_argument("--port", type=int, default=None, help="Port to run the server on")
     parser.add_argument("--workspace-ref", type=str, default=None, help="Hard-scope the connection to a single workspace")
     parser.add_argument("--features", type=str, default=None, help="Comma-separated official feature groups")
-    parser.add_argument("--enabled-tools", type=str, default=None, help="Comma-separated whitelist of tool names")
+    parser.add_argument("--read-only", nargs="?", const="true", default=None, help="Hide all mutating tools for this connection")
     parser.add_argument("--disabled-tools", type=str, default=None, help="Comma-separated blacklist of tool names")
     args = parser.parse_args()
 
@@ -160,17 +159,18 @@ def main():
     resolved_port = _resolve_port(args.port)
     resolved_workspace_ref = _resolve_workspace_ref(args.workspace_ref)
     resolved_features = _resolve_features(args.features)
-    resolved_enabled_tools = _resolve_enabled_tools(args.enabled_tools)
+    resolved_read_only = _resolve_read_only(args.read_only)
     resolved_disabled_tools = _resolve_disabled_tools(args.disabled_tools)
+    resolved_read_only_value = build_partial_access_policy(read_only=resolved_read_only).read_only
 
     logger.info("Starting Supabase MCP Server with %s transport", args.transport)
-    logger.info("Read-only mode: %s", READ_ONLY)
+    logger.info("Read-only mode: %s", bool(resolved_read_only_value))
     if resolved_workspace_ref:
         logger.info("Workspace scope: %s", resolved_workspace_ref)
     if resolved_features:
         logger.info("Feature groups: %s", resolved_features)
-    if resolved_enabled_tools:
-        logger.info("Enabled tools: %s", resolved_enabled_tools)
+    if resolved_read_only_value is not None:
+        logger.info("Connection read_only: %s", resolved_read_only_value)
     if resolved_disabled_tools:
         logger.info("Disabled tools: %s", resolved_disabled_tools)
     if args.transport != "stdio":
@@ -189,7 +189,7 @@ def main():
         host=args.host,
         workspace_ref=args.workspace_ref,
         features=args.features,
-        enabled_tools=args.enabled_tools,
+        read_only=args.read_only,
         disabled_tools=args.disabled_tools,
     )
 

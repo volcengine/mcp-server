@@ -3,7 +3,7 @@ import inspect
 import logging
 from typing import Any, Optional
 
-from ..utils import compact_dict, pick_value, read_only_check, resolve_target, to_json
+from ..utils import compact_dict, pick_value, read_only_check, resolve_workspace_id, to_json
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +21,8 @@ class WorkspaceTools:
     def _pick(self, source: Any, *field_names: str) -> Any:
         return pick_value(source, *field_names)
 
-    async def _resolve_target(self, target_id: Optional[str]) -> tuple[Optional[str], Optional[str]]:
-        return await resolve_target(self.aidap_client, target_id)
+    def _resolve_workspace_id(self, workspace_id: Optional[str]) -> Optional[str]:
+        return resolve_workspace_id(workspace_id)
 
     def _workspace_view(self, source: Any) -> dict:
         payload = {
@@ -113,7 +113,7 @@ class WorkspaceTools:
 
     async def get_workspace(self, workspace_id: str) -> str:
         try:
-            ws_id, branch_id = await self._resolve_target(workspace_id)
+            ws_id = self._resolve_workspace_id(workspace_id)
             if not ws_id:
                 return self._to_json({
                     "success": False,
@@ -126,10 +126,6 @@ class WorkspaceTools:
                     "error": "Workspace not found",
                 })
             workspace_info = self._workspace_view(workspace_source)
-            if branch_id:
-                branch = await self.aidap_client.get_branch(ws_id, branch_id)
-                if branch:
-                    workspace_info.update(self._branch_view(branch, workspace_info))
             return self._to_json({
                 "success": True,
                 "workspace": workspace_info,
@@ -170,7 +166,7 @@ class WorkspaceTools:
 
     @read_only_check
     async def restore_workspace(self, workspace_id: Optional[str] = None) -> str:
-        ws_id, _ = await self._resolve_target(workspace_id)
+        ws_id = self._resolve_workspace_id(workspace_id)
         if not ws_id:
             return self._to_json({"success": False, "error": "workspace_id is required"})
         result = await self.aidap_client.start_workspace(ws_id)
@@ -178,7 +174,7 @@ class WorkspaceTools:
 
     @read_only_check
     async def pause_workspace(self, workspace_id: Optional[str] = None) -> str:
-        ws_id, _ = await self._resolve_target(workspace_id)
+        ws_id = self._resolve_workspace_id(workspace_id)
         if not ws_id:
             return self._to_json({"success": False, "error": "workspace_id is required"})
         result = await self.aidap_client.stop_workspace(ws_id)
@@ -190,7 +186,7 @@ class WorkspaceTools:
         name: str = "develop",
         workspace_id: Optional[str] = None,
     ) -> str:
-        ws_id, _ = await self._resolve_target(workspace_id)
+        ws_id = self._resolve_workspace_id(workspace_id)
         if not ws_id:
             return self._to_json({"success": False, "error": "workspace_id is required"})
 
@@ -210,7 +206,7 @@ class WorkspaceTools:
         return self._to_json(result)
 
     async def list_branches(self, workspace_id: Optional[str] = None) -> str:
-        ws_id, _ = await self._resolve_target(workspace_id)
+        ws_id = self._resolve_workspace_id(workspace_id)
         if not ws_id:
             return self._to_json({"success": False, "error": "workspace_id is required"})
         try:
@@ -225,7 +221,7 @@ class WorkspaceTools:
 
     @read_only_check
     async def delete_branch(self, branch_id: str, workspace_id: Optional[str] = None) -> str:
-        ws_id, _ = await self._resolve_target(workspace_id)
+        ws_id = self._resolve_workspace_id(workspace_id)
         if not ws_id:
             return self._to_json({
                 "success": False,
@@ -307,16 +303,15 @@ class WorkspaceTools:
         })
 
     async def get_workspace_url(self, workspace_id: Optional[str] = None) -> str:
-        ws_id, branch_id = await self._resolve_target(workspace_id)
+        ws_id = self._resolve_workspace_id(workspace_id)
         if not ws_id:
             return self._to_json({"success": False, "error": "workspace_id is required"})
 
-        endpoint = await self.aidap_client.get_endpoint(ws_id, branch_id=branch_id)
+        endpoint = await self.aidap_client.get_endpoint(ws_id)
         if not endpoint:
-            target_id = branch_id or ws_id
             return self._to_json({
                 "success": False,
-                "error": f"Could not get endpoint for workspace {target_id}",
+                "error": f"Could not get endpoint for workspace {ws_id}",
             })
 
         payload = {
@@ -325,13 +320,10 @@ class WorkspaceTools:
             "workspace_url": endpoint,
             "api_url": endpoint,
         }
-        if branch_id:
-            payload["branch_id"] = branch_id
-            payload["target_type"] = "branch"
         return self._to_json(payload)
 
-    async def _get_api_keys_payload(self, workspace_id: str, branch_id: Optional[str] = None, reveal: bool = False) -> dict:
-        resolved_branch_id = branch_id or await self.aidap_client.get_default_branch_id(workspace_id)
+    async def _get_api_keys_payload(self, workspace_id: str, reveal: bool = False) -> dict:
+        resolved_branch_id = await self.aidap_client.get_default_branch_id(workspace_id)
         if not resolved_branch_id:
             raise RuntimeError(f"Could not resolve default branch for workspace {workspace_id}")
         keys = await self.aidap_client.get_api_keys(workspace_id, branch_id=resolved_branch_id)
@@ -366,12 +358,12 @@ class WorkspaceTools:
         return payload
 
     async def get_publishable_keys(self, workspace_id: Optional[str] = None, reveal: bool = False) -> str:
-        ws_id, branch_id = await self._resolve_target(workspace_id)
+        ws_id = self._resolve_workspace_id(workspace_id)
         if not ws_id:
             return self._to_json({"success": False, "error": "workspace_id is required"})
 
         try:
-            payload = await self._get_api_keys_payload(ws_id, branch_id=branch_id, reveal=reveal)
+            payload = await self._get_api_keys_payload(ws_id, reveal=reveal)
             return self._to_json(payload)
         except Exception as e:
             logger.error(f"Error getting publishable keys: {e}")
@@ -384,7 +376,7 @@ class WorkspaceTools:
         migration_version: Optional[str] = None,
         workspace_id: Optional[str] = None,
     ) -> str:
-        ws_id, _ = await self._resolve_target(workspace_id)
+        ws_id = self._resolve_workspace_id(workspace_id)
         if not ws_id:
             return self._to_json({
                 "success": False,
@@ -399,7 +391,7 @@ class WorkspaceTools:
                 result.setdefault("workspace_id", ws_id)
                 result.setdefault("branch_id", branch_id)
             if migration_version:
-                result["warning"] = "migration_version is ignored because current AIDAP reset_branch API does not support version-targeted reset"
+                result["warning"] = "migration_version is ignored because the current Volcengine reset_branch API does not support version-targeted reset"
             return self._to_json(result)
         except Exception as e:
             logger.error(f"Error resetting branch: {e}")

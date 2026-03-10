@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Any, Callable
 
 from .platform import AidapClient
 from .tools import DatabaseTools, EdgeFunctionTools, StorageTools, WorkspaceTools
@@ -13,8 +14,11 @@ class SupabaseRuntime:
     workspace_tools: WorkspaceTools
 
 
-def create_runtime(aidap_client: AidapClient | None = None) -> SupabaseRuntime:
-    client = aidap_client or AidapClient()
+def create_runtime(
+    aidap_client: AidapClient | None = None,
+    context_getter: Callable[[], Any] | None = None,
+) -> SupabaseRuntime:
+    client = aidap_client or AidapClient(context_getter=context_getter)
     return SupabaseRuntime(
         aidap_client=client,
         edge_tools=EdgeFunctionTools(client),

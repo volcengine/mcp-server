@@ -1,7 +1,12 @@
 from typing import Optional
 
 
-async def resolve_target(aidap_client, target_id: Optional[str]) -> tuple[Optional[str], Optional[str]]:
-    if not target_id:
-        return None, None
-    return await aidap_client.resolve_workspace_and_branch(target_id)
+def resolve_workspace_id(workspace_id: Optional[str]) -> Optional[str]:
+    if not workspace_id:
+        return None
+    normalized_id = workspace_id.strip()
+    if not normalized_id:
+        return None
+    if normalized_id.startswith("br-"):
+        raise ValueError("workspace_id must be a workspace ID; branch IDs are not supported")
+    return normalized_id

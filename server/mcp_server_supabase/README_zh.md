@@ -2,14 +2,14 @@
 
 [English](README.md) | 简体中文
 
-> 面向 AIDAP workspace 的 Supabase MCP Server，通过 MCP 暴露工作区、分支、数据库、Edge Functions、Storage 和 TypeScript 类型生成能力。
+> 面向火山引擎 Supabase 的 MCP Server，通过 MCP 暴露工作区、分支、数据库、Edge Functions、Storage 和 TypeScript 类型生成能力。
 
 | 项目 | 详情 |
 | ---- | ---- |
 | 版本 | v0.1.0 |
-| 描述 | 基于 AIDAP workspace 的 Supabase MCP Server |
+| 描述 | 基于火山引擎 Supabase workspace 的 MCP Server |
 | 分类 | 数据库 / 开发工具 |
-| 标签 | Supabase, PostgreSQL, Edge Functions, Storage, AIDAP |
+| 标签 | Supabase, PostgreSQL, Edge Functions, Storage, Volcengine |
 
 ## 工具列表
 
@@ -18,7 +18,7 @@
 | 工具 | 说明 |
 | ---- | ---- |
 | `list_workspaces` | 列出当前账号下可访问的 Supabase workspace |
-| `get_workspace` | 查询 workspace 详情，也支持直接传 branch ID |
+| `get_workspace` | 查询 workspace 详情 |
 | `create_workspace` | 创建新的 Supabase workspace |
 | `pause_workspace` | 暂停 workspace |
 | `restore_workspace` | 恢复已暂停的 workspace |
@@ -45,7 +45,7 @@
 
 | 工具 | 说明 |
 | ---- | ---- |
-| `get_workspace_url` | 获取 workspace 或 branch 的 API 地址 |
+| `get_workspace_url` | 获取 workspace 的 API 地址 |
 | `get_publishable_keys` | 获取 publishable、anon、service_role 等密钥 |
 | `generate_typescript_types` | 根据 schema 元数据生成 TypeScript 类型定义 |
 
@@ -53,7 +53,7 @@
 
 | 工具 | 说明 |
 | ---- | ---- |
-| `list_edge_functions` | 列出 workspace 或 branch 下的 Edge Functions |
+| `list_edge_functions` | 列出 workspace 下的 Edge Functions |
 | `get_edge_function` | 获取 Edge Function 的代码和配置 |
 | `deploy_edge_function` | 创建或更新 Edge Function |
 | `delete_edge_function` | 删除 Edge Function |
@@ -78,20 +78,26 @@
 
 ## 鉴权方式
 
-使用火山引擎 AK/SK 鉴权。可在[火山引擎 API 访问密钥控制台](https://console.volcengine.com/iam/keymanage/)获取凭证。
+同时支持本地静态凭证和云部署动态凭证。
+
+- 本地部署：使用 `VOLCENGINE_ACCESS_KEY`、`VOLCENGINE_SECRET_KEY` 和可选的 `VOLCENGINE_SESSION_TOKEN`
+- 云部署：通过 `authorization` header 传入 base64 编码后的 STS JSON，也可以通过 `authorization` 环境变量传入同样的内容
+- VeFaaS 部署：如果没有显式凭证，服务也会尝试读取 `/var/run/secrets/iam/credential`
+
+静态 AK/SK 可在[火山引擎 API 访问密钥控制台](https://console.volcengine.com/iam/keymanage/)获取。
 
 ## 环境变量
 
 | 变量名 | 必需 | 默认值 | 说明 |
 | ---- | ---- | ---- | ---- |
-| `VOLCENGINE_ACCESS_KEY` | 是 | - | 火山引擎 Access Key |
-| `VOLCENGINE_SECRET_KEY` | 是 | - | 火山引擎 Secret Key |
-| `VOLCENGINE_REGION` | 否 | `cn-beijing` | AIDAP API 所在地域 |
+| `VOLCENGINE_ACCESS_KEY` | 否 | - | 本地静态鉴权使用的火山引擎 Access Key |
+| `VOLCENGINE_SECRET_KEY` | 否 | - | 本地静态鉴权使用的火山引擎 Secret Key |
+| `VOLCENGINE_SESSION_TOKEN` | 否 | - | 临时本地凭证使用的 Session Token |
+| `VOLCENGINE_REGION` | 否 | `cn-beijing` | 火山引擎 API 所在地域 |
 | `WORKSPACE_REF` | 否 | - | 连接级 workspace scope，设置后会隐藏 `account` 组工具，并强制所有 workspace-scoped 调用只能访问这个目标 |
 | `FEATURES` | 否 | `account,database,debugging,development,docs,functions,branching` | 官方 feature groups，`storage` 默认关闭 |
-| `ENABLED_TOOLS` | 否 | - | 逗号分隔的工具白名单，作用在 `features` 过滤之后 |
-| `DISABLED_TOOLS` | 否 | - | 逗号分隔的工具黑名单，优先级高于 `ENABLED_TOOLS` |
-| `READ_ONLY` | 否 | `false` | 设为 `true` 后会禁止所有写操作工具 |
+| `DISABLED_TOOLS` | 否 | - | 逗号分隔的工具黑名单，在其他策略之后做最终剔除 |
+| `READ_ONLY` | 否 | `false` | 连接级 `read_only` 的服务端默认值；启用后会隐藏所有写工具 |
 | `SUPABASE_WORKSPACE_SLUG` | 否 | `default` | Edge Functions API 使用的项目 slug |
 | `SUPABASE_ENDPOINT_SCHEME` | 否 | `http` | 生成 workspace URL 时使用的协议 |
 | `MCP_SERVER_HOST` | 否 | `0.0.0.0` | `sse` 和 `streamable-http` 使用的监听地址 |
@@ -125,7 +131,7 @@ uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-s
 uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-server-supabase-streamable
 ```
 
-### 使用本地源码配置 MCP Client
+### AI 工具使用本地源码接入
 
 ```json
 {
@@ -150,7 +156,7 @@ uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-s
 }
 ```
 
-### 使用 `uvx` 配置 MCP Client
+### AI 工具使用 `uvx` 接入
 
 ```json
 {
@@ -181,7 +187,21 @@ python3 -m mcp_server_supabase.server --port 8000
 python3 -m mcp_server_supabase.server --transport sse --host 0.0.0.0 --port 8000
 ```
 
-这个包同时暴露了 `mcp-server-supabase`、`supabase-aidap`、`mcp-server-supabase-sse` 和 `mcp-server-supabase-streamable` 四个入口，示例统一使用 `mcp-server-supabase`。
+### 云部署凭证格式
+
+如果服务部署在远程 MCP 网关、Agent 平台或其他服务端环境中，可以通过 `authorization` header 传入 STS 凭证。header 对应的值需要是下面这类 JSON 的 base64 编码结果：
+
+```json
+{
+  "AccessKeyId": "<your-sts-ak>",
+  "SecretAccessKey": "<your-sts-sk>",
+  "SessionToken": "<your-session-token>",
+  "CurrentTime": "2026-03-10T10:00:00+08:00",
+  "ExpiredTime": "2026-03-10T12:00:00+08:00"
+}
+```
+
+这个包同时暴露了 `mcp-server-supabase`、兼容别名 `supabase-aidap`、`mcp-server-supabase-sse` 和 `mcp-server-supabase-streamable` 四个入口，示例统一使用 `mcp-server-supabase`。
 
 ## 使用说明
 
@@ -189,22 +209,58 @@ python3 -m mcp_server_supabase.server --transport sse --host 0.0.0.0 --port 8000
 - `WORKSPACE_REF` 生效时，`account` 组工具不会暴露，且显式传入其他 `workspace_id` 会被拒绝。
 - `FEATURES` 只接受官方 8 个分组：`account`、`docs`、`database`、`debugging`、`development`、`functions`、`storage`、`branching`。
 - 如果没有设置 `FEATURES`，默认启用 `account`、`database`、`debugging`、`development`、`docs`、`functions`、`branching`，`storage` 默认关闭。
-- `ENABLED_TOOLS` 和 `DISABLED_TOOLS` 会在 feature 过滤之后继续收窄工具集，且 `DISABLED_TOOLS` 优先。
-- 如果传入的是 `br-xxxx` 这样的 branch ID，服务会自动解析所属 workspace。
+- 可以通过 HTTP query 参数 `read_only=true` 把当前连接切到只读模式，并隐藏所有写工具。`READ_ONLY=true` 会把这条策略作为服务端默认值。
+- `DISABLED_TOOLS` 填工具名，例如 `execute_sql,deploy_edge_function`，会在其他策略计算完成后做最终剔除。
+- 凭证优先级是：静态环境变量 AK/SK、请求 `authorization`、环境变量 `authorization`、VeFaaS IAM 凭证。
+- 当凭证来自单次请求的 STS header 时，workspace 元数据相关缓存会自动停用，避免跨连接复用缓存。
+- `workspace_id` 和 `workspace_ref` 只接受 workspace ID，`br-xxxx` 这样的 branch ID 会被直接拒绝。
 - `get_publishable_keys` 在需要时会自动解析默认分支。
-- `reset_branch` 虽然接收 `migration_version` 参数，但当前 AIDAP API 会忽略这个值，只执行分支重置。
+- `reset_branch` 虽然接收 `migration_version` 参数，但当前火山引擎 API 会忽略这个值，只执行分支重置。
 - `deploy_edge_function` 当前支持 `native-node20/v1`、`native-python3.9/v1`、`native-python3.10/v1`、`native-python3.12/v1`。
 - `--transport sse` 会在 `MCP_SSE_PATH` 暴露 SSE 连接地址，并在 `MCP_MESSAGE_PATH` 暴露消息投递地址。
 - `--transport streamable-http` 会在 `STREAMABLE_HTTP_PATH` 暴露 MCP HTTP 地址。
 - 远程部署通常更推荐 `streamable-http`，但为了兼容仍保留 `sse`。
 
-## 可适配客户端
+## 配置优先级
 
-- Cursor
-- Claude Desktop
-- Cline
-- Trae
-- 所有支持 `stdio`、`sse` 或 `streamable-http` 的 MCP Client
+### 单条连接内的工具过滤顺序
+
+1. `features` 先决定基础工具集合
+2. `workspace_ref` 再移除 `account` 工具，并把连接限制到单个 workspace
+3. `read_only` 再移除所有写工具
+4. `disabled_tools` 最后按工具名做剔除
+
+### 服务端默认值和连接参数的合并规则
+
+1. `workspace_ref`
+服务端配置的是硬边界。连接如果传了不同的 `workspace_ref` 会被拒绝；如果服务端没配，连接可以自行指定。
+2. `features`
+如果服务端和连接都配置了，实际生效的是两者交集；连接不能扩大服务端允许的 feature 范围。
+3. `read_only`
+只要服务端或连接任意一侧是 `true`，最终就是 `true`。
+4. `disabled_tools`
+服务端和连接两边会取并集，任意一侧禁掉的工具最终都不可用。
+
+## 接入方式
+
+### AI 工具
+
+适用于 Cursor、Claude Desktop、Cline、Trae 等带 MCP 配置界面的 AI 工具，也适用于其他支持 `stdio`、`sse` 或 `streamable-http` 的 MCP Client。
+
+- 本地集成通常使用 `stdio`
+- 直接在客户端配置 `command`、`args` 和 `env`
+- 本地源码接入通常通过 `env` 传静态 AK/SK
+- 上面的两个 `mcpServers` JSON 示例就是这类接入方式
+
+### 自研 AI Agent
+
+如果你的 Agent Runtime 可以直接拉起本地 MCP 进程，可以继续使用 `stdio`。如果你的 Agent 部署在服务端、容器或多实例环境，更推荐用 `streamable-http` 或 `sse` 暴露远程地址再接入。
+
+- `stdio`：Agent 进程直接拉起 `mcp-server-supabase`
+- `streamable-http`：连接 `http://<host>:<port>/mcp`
+- `sse`：连接 `http://<host>:<port>/sse`，并向 `http://<host>:<port>/messages/` 投递消息
+- 远程或云部署场景可以通过 `authorization` header 透传 STS 凭证，而不是把长期 AK/SK 固化在服务环境变量里
+- 连接级参数可以通过 HTTP query 传入，例如 `workspace_ref`、`features`、`read_only`、`disabled_tools`
 
 ## License
 
