@@ -2,7 +2,7 @@ import asyncio
 import httpx
 import logging
 import json
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
 
