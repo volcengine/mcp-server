@@ -14,16 +14,11 @@ class BaseTools:
         return resolved_workspace_id
 
     async def _get_client(self, workspace_id: str) -> SupabaseClient:
-        import logging
-        logger = logging.getLogger(__name__)
-
         endpoint = await self.aidap.get_endpoint(workspace_id)
-        logger.info(f"[DEBUG] Got endpoint for {workspace_id}: {endpoint}")
         if not endpoint:
             raise ValueError(f"Could not get endpoint for workspace {workspace_id}")
 
         api_key = await self.aidap.get_api_key(workspace_id, "service_role")
-        logger.info(f"[DEBUG] Got API key for {workspace_id}: {'yes' if api_key else 'no'}")
         if not api_key:
             raise ValueError(f"Could not get API key for workspace {workspace_id}")
 

@@ -2,6 +2,7 @@ import json
 from dataclasses import dataclass
 from typing import Any
 
+from .tool_registry import TOOL_DEFINITIONS
 
 OFFICIAL_FEATURE_GROUPS = (
     "account",
@@ -23,65 +24,21 @@ DEFAULT_FEATURE_GROUPS = frozenset({
     "branching",
 })
 
-
-@dataclass(frozen=True)
-class ToolPolicy:
-    feature: str
-    scoped: bool
-    mutating: bool
-
-
-TOOL_POLICIES = {
-    "list_workspaces": ToolPolicy("account", False, False),
-    "get_workspace": ToolPolicy("account", True, False),
-    "create_workspace": ToolPolicy("account", False, True),
-    "pause_workspace": ToolPolicy("account", True, True),
-    "restore_workspace": ToolPolicy("account", True, True),
-    "execute_sql": ToolPolicy("database", True, True),
-    "list_tables": ToolPolicy("database", True, False),
-    "list_migrations": ToolPolicy("database", True, False),
-    "list_extensions": ToolPolicy("database", True, False),
-    "apply_migration": ToolPolicy("database", True, True),
-    "get_workspace_url": ToolPolicy("development", True, False),
-    "get_publishable_keys": ToolPolicy("development", True, False),
-    "generate_typescript_types": ToolPolicy("development", True, False),
-    "list_edge_functions": ToolPolicy("functions", True, False),
-    "get_edge_function": ToolPolicy("functions", True, False),
-    "deploy_edge_function": ToolPolicy("functions", True, True),
-    "delete_edge_function": ToolPolicy("functions", True, True),
-    "list_storage_buckets": ToolPolicy("storage", True, False),
-    "create_storage_bucket": ToolPolicy("storage", True, True),
-    "delete_storage_bucket": ToolPolicy("storage", True, True),
-    "get_storage_config": ToolPolicy("storage", True, False),
-    "list_branches": ToolPolicy("branching", True, False),
-    "create_branch": ToolPolicy("branching", True, True),
-    "delete_branch": ToolPolicy("branching", True, True),
-    "reset_branch": ToolPolicy("branching", True, True),
-}
-
-ALL_TOOL_NAMES = frozenset(TOOL_POLICIES.keys())
+ALL_TOOL_NAMES = frozenset(tool.name for tool in TOOL_DEFINITIONS)
 FEATURE_TOOLS = {
-    feature: frozenset(name for name, policy in TOOL_POLICIES.items() if policy.feature == feature)
+    feature: frozenset(tool.name for tool in TOOL_DEFINITIONS if tool.feature == feature)
     for feature in OFFICIAL_FEATURE_GROUPS
 }
-SCOPED_TOOL_NAMES = frozenset(name for name, policy in TOOL_POLICIES.items() if policy.scoped)
-MUTATING_TOOL_NAMES = frozenset(name for name, policy in TOOL_POLICIES.items() if policy.mutating)
+SCOPED_TOOL_NAMES = frozenset(tool.name for tool in TOOL_DEFINITIONS if tool.scoped)
+MUTATING_TOOL_NAMES = frozenset(tool.name for tool in TOOL_DEFINITIONS if tool.mutating)
 
 
 @dataclass(frozen=True)
-class PartialAccessPolicy:
+class AccessPolicy:
     workspace_ref: str | None = None
-    features: frozenset[str] | None = None
-    read_only: bool | None = None
-    disabled_tools: frozenset[str] | None = None
-
-
-@dataclass(frozen=True)
-class ResolvedAccessPolicy:
-    workspace_ref: str | None
-    features: frozenset[str]
-    read_only: bool
-    disabled_tools: frozenset[str]
+    features: frozenset[str] = DEFAULT_FEATURE_GROUPS
+    read_only: bool = False
+    disabled_tools: frozenset[str] = frozenset()
 
 
 def _normalize_name(value: Any) -> str:
@@ -166,31 +123,21 @@ def _validate_tools(tools: frozenset[str] | None, field_name: str) -> frozenset[
     return tools
 
 
-def build_partial_access_policy(
+def build_access_policy(
     workspace_ref: Any = None,
     features: Any = None,
     read_only: Any = None,
     disabled_tools: Any = None,
-) -> PartialAccessPolicy:
-    return PartialAccessPolicy(
+) -> AccessPolicy:
+    return AccessPolicy(
         workspace_ref=_parse_workspace_ref(workspace_ref),
-        features=_validate_features(_parse_name_set(features)),
-        read_only=_parse_read_only(read_only),
-        disabled_tools=_validate_tools(_parse_name_set(disabled_tools), "disabled_tools"),
+        features=_validate_features(_parse_name_set(features)) or DEFAULT_FEATURE_GROUPS,
+        read_only=bool(_parse_read_only(read_only)),
+        disabled_tools=_validate_tools(_parse_name_set(disabled_tools), "disabled_tools") or frozenset(),
     )
 
 
-def resolve_access_policy(policy: PartialAccessPolicy | None) -> ResolvedAccessPolicy:
-    policy = policy or PartialAccessPolicy()
-    return ResolvedAccessPolicy(
-        workspace_ref=policy.workspace_ref,
-        features=policy.features or DEFAULT_FEATURE_GROUPS,
-        read_only=bool(policy.read_only),
-        disabled_tools=policy.disabled_tools or frozenset(),
-    )
-
-
-def resolve_allowed_tools(policy: ResolvedAccessPolicy) -> frozenset[str]:
+def resolve_allowed_tools(policy: AccessPolicy) -> frozenset[str]:
     allowed = frozenset().union(*(FEATURE_TOOLS[feature] for feature in policy.features))
     if policy.workspace_ref:
         allowed -= FEATURE_TOOLS["account"]

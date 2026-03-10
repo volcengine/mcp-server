@@ -19,8 +19,6 @@ class VolcengineCredentials:
     access_key: str
     secret_key: str
     session_token: str
-    source: str
-    cacheable: bool
 
 
 def _get_env_value(*names: str) -> str:
@@ -46,7 +44,7 @@ def _validate_sts_time_window(payload: dict[str, Any]) -> None:
         raise ValueError("STS token is expired")
 
 
-def _parse_authorization_payload(raw_value: str, source: str, cacheable: bool) -> VolcengineCredentials:
+def _parse_authorization_payload(raw_value: str) -> VolcengineCredentials:
     token = raw_value.split(" ", 1)[1] if " " in raw_value else raw_value
     decoded_bytes = base64.b64decode(token)
     payload = json.loads(decoded_bytes.decode("utf-8"))
@@ -60,8 +58,6 @@ def _parse_authorization_payload(raw_value: str, source: str, cacheable: bool) -
         access_key=access_key,
         secret_key=secret_key,
         session_token=session_token,
-        source=source,
-        cacheable=cacheable,
     )
 
 
@@ -95,8 +91,6 @@ def _get_vefaas_iam_credentials() -> VolcengineCredentials | None:
         access_key=access_key,
         secret_key=secret_key,
         session_token=session_token,
-        source="vefaas_iam",
-        cacheable=True,
     )
 
 
@@ -109,25 +103,15 @@ def resolve_volcengine_credentials(context_getter: Callable[[], Any] | None = No
             access_key=static_access_key,
             secret_key=static_secret_key,
             session_token=static_session_token,
-            source="env",
-            cacheable=True,
         )
 
     request_authorization = _get_request_authorization(context_getter)
     if request_authorization:
-        return _parse_authorization_payload(
-            request_authorization,
-            source="request_authorization",
-            cacheable=False,
-        )
+        return _parse_authorization_payload(request_authorization)
 
     env_authorization = _get_env_value(*AUTHORIZATION_ENV_NAMES)
     if env_authorization:
-        return _parse_authorization_payload(
-            env_authorization,
-            source="env_authorization",
-            cacheable=True,
-        )
+        return _parse_authorization_payload(env_authorization)
 
     vefaas_credentials = _get_vefaas_iam_credentials()
     if vefaas_credentials is not None:

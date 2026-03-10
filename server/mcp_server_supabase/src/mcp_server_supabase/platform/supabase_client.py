@@ -2,7 +2,7 @@ import asyncio
 import httpx
 import logging
 import json
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 
@@ -30,21 +30,6 @@ class SupabaseClient:
     def __init__(self, endpoint: str, api_key: str):
         self.endpoint = endpoint
         self.api_key = api_key
-        self._client: Optional[httpx.AsyncClient] = None
-
-    async def _get_client(self) -> httpx.AsyncClient:
-        """Get or create HTTP client with connection pooling"""
-        if self._client is None or self._client.is_closed:
-            self._client = httpx.AsyncClient(
-                timeout=30.0,
-                limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
-            )
-        return self._client
-
-    async def close(self):
-        """Close HTTP client"""
-        if self._client and not self._client.is_closed:
-            await self._client.aclose()
 
     async def call_api(
         self,
@@ -57,7 +42,7 @@ class SupabaseClient:
         timeout: float = 30.0
     ) -> Any:
         url = f"{self.endpoint}{path}"
-        logger.info(f"[DEBUG] Calling API: method={method}, url={url}, path={path}")
+        logger.debug("Calling API method=%s url=%s path=%s", method, url, path)
 
         default_headers = {
             "apikey": self.api_key,
@@ -66,19 +51,22 @@ class SupabaseClient:
         if headers:
             default_headers.update(headers)
 
-        client = await self._get_client()
         for attempt in range(3):
             try:
-                if content:
-                    response = await client.request(
-                        method, url, content=content, headers=default_headers,
-                        params=params, timeout=timeout
-                    )
-                else:
-                    response = await client.request(
-                        method, url, json=json_data, headers=default_headers,
-                        params=params, timeout=timeout
-                    )
+                async with httpx.AsyncClient(
+                    timeout=timeout,
+                    limits=httpx.Limits(max_keepalive_connections=5, max_connections=10),
+                ) as client:
+                    if content:
+                        response = await client.request(
+                            method, url, content=content, headers=default_headers,
+                            params=params, timeout=timeout
+                        )
+                    else:
+                        response = await client.request(
+                            method, url, json=json_data, headers=default_headers,
+                            params=params, timeout=timeout
+                        )
                 response.raise_for_status()
 
                 if response.status_code == 204 or not response.content:

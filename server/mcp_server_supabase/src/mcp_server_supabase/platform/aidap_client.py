@@ -4,13 +4,7 @@ import os
 import random
 from collections.abc import Callable
 from typing import Any, Optional
-from ..config import (
-    VOLCENGINE_REGION,
-    get_branch_cache,
-    get_endpoint_cache,
-    get_api_key_cache,
-    clear_all_caches,
-)
+from ..config import VOLCENGINE_REGION
 from ..credentials import resolve_volcengine_credentials
 from ..utils import pick_value
 
@@ -22,10 +16,9 @@ try:
     from volcenginesdkaidap import AIDAPApi
     from volcenginesdkaidap.models import (
         DescribeBranchesRequest,
-        DescribeWorkspacesRequest,
         DescribeWorkspaceEndpointRequest,
         DescribeAPIKeysRequest,
-        ResetBranchRequest,
+        BranchRestoreRequest,
         CreateBranchRequest,
         DeleteBranchRequest,
         BranchSettingsForCreateBranchInput,
@@ -47,11 +40,6 @@ class AidapClient:
 
     def _get_credentials(self):
         return resolve_volcengine_credentials(self._context_getter)
-
-    def _should_use_cache(self, use_cache: bool) -> bool:
-        if not use_cache:
-            return False
-        return self._get_credentials().cacheable
 
     def _create_client(self) -> AIDAPApi:
         credentials = self._get_credentials()
@@ -97,10 +85,6 @@ class AidapClient:
         }
         return {key: value for key, value in payload.items() if value is not None}
 
-    def _describe_supabase_workspaces_response(self):
-        request = DescribeWorkspacesRequest()
-        return self.client.describe_workspaces(request)
-
     async def _find_branch(
         self,
         workspace_id: str,
@@ -132,12 +116,7 @@ class AidapClient:
         jitter = random.uniform(0.0, delay * 0.2)
         await asyncio.sleep(delay + jitter)
     
-    async def get_default_branch_id(self, workspace_id: str, use_cache: bool = True) -> Optional[str]:
-        cache = get_branch_cache()
-        cache_enabled = self._should_use_cache(use_cache)
-        if cache_enabled and workspace_id in cache:
-            return cache[workspace_id]
-        
+    async def get_default_branch_id(self, workspace_id: str) -> Optional[str]:
         try:
             request = DescribeBranchesRequest(workspace_id=workspace_id)
             response = self.client.describe_branches(request)
@@ -145,16 +124,10 @@ class AidapClient:
             if hasattr(response, 'branches') and response.branches:
                 for branch in response.branches:
                     if getattr(branch, 'default', False):
-                        branch_id = branch.branch_id
-                        if cache_enabled:
-                            cache[workspace_id] = branch_id
-                        return branch_id
+                        return branch.branch_id
                 
                 first_branch = response.branches[0]
-                branch_id = first_branch.branch_id
-                if cache_enabled:
-                    cache[workspace_id] = branch_id
-                return branch_id
+                return first_branch.branch_id
             
             return None
         except Exception as e:
@@ -279,7 +252,6 @@ class AidapClient:
                     branch_id=branch_id,
                 )
                 self.client.delete_branch(request)
-                clear_all_caches(workspace_id, branch_id)
                 return {"success": True}
             except Exception as e:
                 error_text = str(e)
@@ -302,14 +274,7 @@ class AidapClient:
             "retriable": True,
         }
 
-    async def get_endpoint(self, workspace_id: str, branch_id: Optional[str] = None, use_cache: bool = True) -> Optional[str]:
-        cache_key = f"{workspace_id}:{branch_id}" if branch_id else workspace_id
-        endpoint_cache = get_endpoint_cache()
-        cache_enabled = self._should_use_cache(use_cache)
-
-        if cache_enabled and cache_key in endpoint_cache:
-            return endpoint_cache[cache_key]
-
+    async def get_endpoint(self, workspace_id: str, branch_id: Optional[str] = None) -> Optional[str]:
         if not branch_id:
             branch_id = await self.get_default_branch_id(workspace_id)
             if not branch_id:
@@ -332,37 +297,25 @@ class AidapClient:
 
                 for domain in domains:
                     if 'volces.com' in domain and 'ivolces.com' not in domain:
-                        if ENDPOINT_SCHEME == "https":
-                            result = f"https://{domain}"
-                        else:
-                            result = f"http://{domain}:80"
-                        if cache_enabled:
-                            endpoint_cache[cache_key] = result
-                        return result
+                        return f"https://{domain}" if ENDPOINT_SCHEME == "https" else f"http://{domain}:80"
 
                 if domains:
-                    if ENDPOINT_SCHEME == "https":
-                        result = f"https://{domains[0]}"
-                    else:
-                        result = f"http://{domains[0]}:80"
-                    if cache_enabled:
-                        endpoint_cache[cache_key] = result
-                    return result
+                    return f"https://{domains[0]}" if ENDPOINT_SCHEME == "https" else f"http://{domains[0]}:80"
 
             return None
         except Exception as e:
             logger.error(f"Error getting endpoint: {e}")
             return None
     
-    async def reset_branch(self, workspace_id: str, branch_id: str) -> dict:
+    async def restore_branch(self, workspace_id: str, branch_id: str) -> dict:
         max_attempts = 8
         for attempt in range(1, max_attempts + 1):
             try:
-                request = ResetBranchRequest(
+                request = BranchRestoreRequest(
                     workspace_id=workspace_id,
                     branch_id=branch_id,
                 )
-                self.client.reset_branch(request)
+                self.client.branch_restore(request)
                 return {"success": True}
             except Exception as e:
                 error_text = str(e)
@@ -371,7 +324,7 @@ class AidapClient:
                 if retriable and attempt < max_attempts:
                     await self._sleep_backoff(attempt)
                     continue
-                logger.error(f"Error resetting branch: {e}")
+                logger.error(f"Error restoring branch: {e}")
                 return {
                     "success": False,
                     "error": error_text,
@@ -380,20 +333,13 @@ class AidapClient:
                 }
         return {
             "success": False,
-            "error": "reset_branch failed after retries",
+            "error": "restore_branch failed after retries",
             "code": "OperationDenied_BranchNotReady",
             "retriable": True,
         }
 
     async def get_api_key(self, workspace_id: str, key_type: str = "service_role",
-                         branch_id: Optional[str] = None, use_cache: bool = True) -> Optional[str]:
-        cache_key = f"{workspace_id}:{key_type}:{branch_id}" if branch_id else f"{workspace_id}:{key_type}"
-        api_key_cache = get_api_key_cache()
-        cache_enabled = self._should_use_cache(use_cache)
-
-        if cache_enabled and cache_key in api_key_cache:
-            return api_key_cache[cache_key]
-
+                         branch_id: Optional[str] = None) -> Optional[str]:
         if not branch_id:
             branch_id = await self.get_default_branch_id(workspace_id)
             if not branch_id:
@@ -415,11 +361,7 @@ class AidapClient:
 
                 for key in response.api_keys:
                     if hasattr(key, 'type') and key.type == target_type:
-                        result = key.key if hasattr(key, 'key') else None
-                        if result:
-                            if cache_enabled:
-                                api_key_cache[cache_key] = result
-                        return result
+                        return key.key if hasattr(key, 'key') else None
 
             return None
         except Exception as e:

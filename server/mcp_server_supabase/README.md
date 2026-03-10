@@ -64,7 +64,7 @@ No tools are currently exposed.
 | `list_branches` | List branches under a workspace |
 | `create_branch` | Create a development branch |
 | `delete_branch` | Delete a development branch |
-| `reset_branch` | Reset a branch to its baseline state |
+| `restore_branch` | Restore a branch to its baseline state |
 
 ### `storage`
 
@@ -200,7 +200,7 @@ When the server runs behind a remote MCP gateway or another agent platform, you 
 }
 ```
 
-The package exposes `mcp-server-supabase`, the compatibility alias `supabase-aidap`, `mcp-server-supabase-sse`, and `mcp-server-supabase-streamable`. The examples above use `mcp-server-supabase`.
+The package exposes `mcp-server-supabase`, `mcp-server-supabase-sse`, and `mcp-server-supabase-streamable`. The examples above use `mcp-server-supabase`.
 
 ## Usage Notes
 
@@ -211,10 +211,9 @@ The package exposes `mcp-server-supabase`, the compatibility alias `supabase-aid
 - `READ_ONLY=true` hides all mutating tools for the server instance.
 - `DISABLED_TOOLS` takes tool names such as `execute_sql,deploy_edge_function` and removes them after the rest of the policy has been resolved.
 - Credential precedence is: static env AK/SK, request `authorization`, env `authorization`, then VeFaaS IAM credentials.
-- Request-scoped STS credentials disable workspace metadata cache reuse to avoid cross-connection cache leakage.
 - `workspace_id` and `workspace_ref` accept workspace IDs only. Branch IDs such as `br-xxxx` are rejected.
 - `get_publishable_keys` resolves the default branch automatically when needed.
-- `reset_branch` accepts `migration_version`, but the current Volcengine API ignores that value and performs a branch reset only.
+- `restore_branch` does not support `migration_version`; it maps to the current Volcengine `BranchRestore` capability.
 - `deploy_edge_function` currently supports `native-node20/v1`, `native-python3.9/v1`, `native-python3.10/v1`, and `native-python3.12/v1`.
 - `--transport sse` serves the MCP SSE endpoint at `MCP_SSE_PATH` and the message endpoint at `MCP_MESSAGE_PATH`.
 - `--transport streamable-http` serves the MCP HTTP endpoint at `STREAMABLE_HTTP_PATH`.

@@ -2,19 +2,18 @@ from typing import Optional, List
 import logging
 from datetime import datetime, timezone
 from .base import BaseTools
-from ..utils import handle_errors, read_only_check
+from ..utils import handle_errors
 
 logger = logging.getLogger(__name__)
 
 
 class DatabaseTools(BaseTools):
-    """使用 REST API 方式执行 SQL"""
     async def _execute_sql_raw(self, query: str, workspace_id: Optional[str] = None) -> List[dict]:
         if not query or not query.strip():
             raise ValueError("SQL query cannot be empty")
 
         ws_id = self._resolve_workspace_id(workspace_id)
-        logger.info(
+        logger.debug(
             "Executing SQL query",
             extra={"workspace_id": ws_id, "query_length": len(query)}
         )
@@ -30,21 +29,22 @@ class DatabaseTools(BaseTools):
         logger.debug(f"SQL query returned {len(result)} rows")
         return result
 
+    def _normalize_schemas(self, schemas: Optional[List[str]] = None) -> List[str]:
+        normalized = [schema.strip() for schema in (schemas or ["public"]) if schema and schema.strip()]
+        if not normalized:
+            raise ValueError("At least one schema is required")
+        for schema in normalized:
+            if not schema.replace('_', '').isalnum():
+                raise ValueError(f"Invalid schema name: {schema}")
+        return normalized
+
     @handle_errors
     async def execute_sql(self, query: str, workspace_id: Optional[str] = None) -> List[dict]:
         return await self._execute_sql_raw(query, workspace_id)
     
     @handle_errors
     async def list_tables(self, schemas: List[str] = None, workspace_id: Optional[str] = None) -> List[dict]:
-        if schemas is None:
-            schemas = ["public"]
-
-        # 验证 schema 名称，防止 SQL 注入
-        for schema in schemas:
-            if not schema.replace('_', '').isalnum():
-                raise ValueError(f"Invalid schema name: {schema}")
-
-        schema_list = "', '".join(schemas)
+        schema_list = "', '".join(self._normalize_schemas(schemas))
         query = f"""
         SELECT
             schemaname as schema,
@@ -95,7 +95,6 @@ class DatabaseTools(BaseTools):
         return await self._execute_sql_raw(query, workspace_id)
     
     @handle_errors
-    @read_only_check
     async def apply_migration(self, name: str, query: str, workspace_id: Optional[str] = None) -> dict:
         if not name or not name.strip():
             raise ValueError("Migration name cannot be empty")
@@ -165,13 +164,7 @@ class DatabaseTools(BaseTools):
         schemas: List[str] = None,
         workspace_id: Optional[str] = None
     ) -> str:
-        if schemas is None:
-            schemas = ["public"]
-        for schema in schemas:
-            if not schema.replace('_', '').isalnum():
-                raise ValueError(f"Invalid schema name: {schema}")
-
-        schema_list = "', '".join(schemas)
+        schema_list = "', '".join(self._normalize_schemas(schemas))
         query = f"""
         SELECT
             table_schema,
