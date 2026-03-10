@@ -29,6 +29,8 @@ legacy = [
 [project.scripts]
 mcp-server-supabase = "mcp_server_supabase.server:main"
 supabase-aidap = "mcp_server_supabase.server:main"
+mcp-server-supabase-sse = "mcp_server_supabase.sse:main"
+mcp-server-supabase-streamable = "mcp_server_supabase.streamable_http:main"
 
 [build-system]
 requires = ["hatchling"]

@@ -73,7 +73,13 @@
 | `READ_ONLY` | 否 | `false` | 设为 `true` 后会禁止所有写操作工具 |
 | `SUPABASE_WORKSPACE_SLUG` | 否 | `default` | Edge Functions API 使用的项目 slug |
 | `SUPABASE_ENDPOINT_SCHEME` | 否 | `http` | 生成 workspace URL 时使用的协议 |
-| `PORT` | 否 | `8000` | 直接启动服务时监听的端口 |
+| `MCP_SERVER_HOST` | 否 | `0.0.0.0` | `sse` 和 `streamable-http` 使用的监听地址 |
+| `MCP_SERVER_PORT` | 否 | `8000` | 网络传输优先使用的端口变量 |
+| `PORT` | 否 | `8000` | 兼容保留的端口变量 |
+| `MCP_MOUNT_PATH` | 否 | `/` | HTTP 传输的基础挂载路径 |
+| `MCP_SSE_PATH` | 否 | `/sse` | SSE 连接路径 |
+| `MCP_MESSAGE_PATH` | 否 | `/messages/` | SSE 消息投递路径 |
+| `STREAMABLE_HTTP_PATH` | 否 | `/mcp` | Streamable HTTP 路径 |
 
 ## 部署
 
@@ -81,6 +87,21 @@
 
 ```bash
 uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-server-supabase
+```
+
+### 显式指定 transport 启动
+
+```bash
+uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-server-supabase --transport stdio
+uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-server-supabase --transport sse --host 0.0.0.0 --port 8000
+uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-server-supabase --transport streamable-http --host 0.0.0.0 --port 8000
+```
+
+### 独立网络启动入口
+
+```bash
+uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-server-supabase-sse
+uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-server-supabase-streamable
 ```
 
 ### 使用本地源码配置 MCP Client
@@ -134,9 +155,10 @@ uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-s
 
 ```bash
 python3 -m mcp_server_supabase.server --port 8000
+python3 -m mcp_server_supabase.server --transport sse --host 0.0.0.0 --port 8000
 ```
 
-这个包同时暴露了 `mcp-server-supabase` 和 `supabase-aidap` 两个入口，示例统一使用 `mcp-server-supabase`。
+这个包同时暴露了 `mcp-server-supabase`、`supabase-aidap`、`mcp-server-supabase-sse` 和 `mcp-server-supabase-streamable` 四个入口，示例统一使用 `mcp-server-supabase`。
 
 ## 使用说明
 
@@ -145,6 +167,9 @@ python3 -m mcp_server_supabase.server --port 8000
 - `get_publishable_keys` 在需要时会自动解析默认分支。
 - `reset_branch` 虽然接收 `migration_version` 参数，但当前 AIDAP API 会忽略这个值，只执行分支重置。
 - `deploy_edge_function` 当前支持 `native-node20/v1`、`native-python3.9/v1`、`native-python3.10/v1`、`native-python3.12/v1`。
+- `--transport sse` 会在 `MCP_SSE_PATH` 暴露 SSE 连接地址，并在 `MCP_MESSAGE_PATH` 暴露消息投递地址。
+- `--transport streamable-http` 会在 `STREAMABLE_HTTP_PATH` 暴露 MCP HTTP 地址。
+- 远程部署通常更推荐 `streamable-http`，但为了兼容仍保留 `sse`。
 
 ## 可适配客户端
 
@@ -152,7 +177,7 @@ python3 -m mcp_server_supabase.server --port 8000
 - Claude Desktop
 - Cline
 - Trae
-- 所有支持 `stdio` 的 MCP Client
+- 所有支持 `stdio`、`sse` 或 `streamable-http` 的 MCP Client
 
 ## License
 

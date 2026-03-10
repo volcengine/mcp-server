@@ -73,7 +73,13 @@ Use Volcengine AK/SK authentication. Obtain your credentials from the [Volcengin
 | `READ_ONLY` | No | `false` | Set to `true` to block all mutating tools |
 | `SUPABASE_WORKSPACE_SLUG` | No | `default` | Project slug used by Edge Functions APIs |
 | `SUPABASE_ENDPOINT_SCHEME` | No | `http` | Endpoint scheme used when building workspace URLs |
-| `PORT` | No | `8000` | Port used when running the server directly |
+| `MCP_SERVER_HOST` | No | `0.0.0.0` | Host used by `sse` and `streamable-http` transports |
+| `MCP_SERVER_PORT` | No | `8000` | Preferred port variable for network transports |
+| `PORT` | No | `8000` | Backward-compatible port variable |
+| `MCP_MOUNT_PATH` | No | `/` | Base mount path for HTTP transports |
+| `MCP_SSE_PATH` | No | `/sse` | SSE endpoint path |
+| `MCP_MESSAGE_PATH` | No | `/messages/` | SSE message POST path |
+| `STREAMABLE_HTTP_PATH` | No | `/mcp` | Streamable HTTP endpoint path |
 
 ## Deployment
 
@@ -81,6 +87,21 @@ Use Volcengine AK/SK authentication. Obtain your credentials from the [Volcengin
 
 ```bash
 uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-server-supabase
+```
+
+### Run with an explicit transport
+
+```bash
+uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-server-supabase --transport stdio
+uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-server-supabase --transport sse --host 0.0.0.0 --port 8000
+uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-server-supabase --transport streamable-http --host 0.0.0.0 --port 8000
+```
+
+### Dedicated network entrypoints
+
+```bash
+uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-server-supabase-sse
+uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-server-supabase-streamable
 ```
 
 ### MCP client config with local source
@@ -134,9 +155,10 @@ uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-s
 
 ```bash
 python3 -m mcp_server_supabase.server --port 8000
+python3 -m mcp_server_supabase.server --transport sse --host 0.0.0.0 --port 8000
 ```
 
-The package exposes both `mcp-server-supabase` and `supabase-aidap`. The examples above use `mcp-server-supabase`.
+The package exposes `mcp-server-supabase`, `supabase-aidap`, `mcp-server-supabase-sse`, and `mcp-server-supabase-streamable`. The examples above use `mcp-server-supabase`.
 
 ## Usage Notes
 
@@ -145,6 +167,9 @@ The package exposes both `mcp-server-supabase` and `supabase-aidap`. The example
 - `get_publishable_keys` resolves the default branch automatically when needed.
 - `reset_branch` accepts `migration_version`, but the current AIDAP API ignores that value and performs a branch reset only.
 - `deploy_edge_function` currently supports `native-node20/v1`, `native-python3.9/v1`, `native-python3.10/v1`, and `native-python3.12/v1`.
+- `--transport sse` serves the MCP SSE endpoint at `MCP_SSE_PATH` and the message endpoint at `MCP_MESSAGE_PATH`.
+- `--transport streamable-http` serves the MCP HTTP endpoint at `STREAMABLE_HTTP_PATH`.
+- For remote deployments, `streamable-http` is usually the better default; `sse` remains available for clients that still require it.
 
 ## Compatible Clients
 
@@ -152,7 +177,7 @@ The package exposes both `mcp-server-supabase` and `supabase-aidap`. The example
 - Claude Desktop
 - Cline
 - Trae
-- Any MCP client that supports `stdio`
+- Any MCP client that supports `stdio`, `sse`, or `streamable-http`
 
 ## License
 
