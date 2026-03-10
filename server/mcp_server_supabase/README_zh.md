@@ -94,10 +94,10 @@
 | `VOLCENGINE_SECRET_KEY` | 否 | - | 本地静态鉴权使用的火山引擎 Secret Key |
 | `VOLCENGINE_SESSION_TOKEN` | 否 | - | 临时本地凭证使用的 Session Token |
 | `VOLCENGINE_REGION` | 否 | `cn-beijing` | 火山引擎 API 所在地域 |
-| `WORKSPACE_REF` | 否 | - | 连接级 workspace scope，设置后会隐藏 `account` 组工具，并强制所有 workspace-scoped 调用只能访问这个目标 |
+| `WORKSPACE_REF` | 否 | - | 服务启动级 workspace scope，设置后会隐藏 `account` 组工具，并强制所有 workspace-scoped 调用只能访问这个目标 |
 | `FEATURES` | 否 | `account,database,debugging,development,docs,functions,branching` | 官方 feature groups，`storage` 默认关闭 |
 | `DISABLED_TOOLS` | 否 | - | 逗号分隔的工具黑名单，在其他策略之后做最终剔除 |
-| `READ_ONLY` | 否 | `false` | 连接级 `read_only` 的服务端默认值；启用后会隐藏所有写工具 |
+| `READ_ONLY` | 否 | `false` | 服务启动级只读开关；启用后会隐藏所有写工具 |
 | `SUPABASE_WORKSPACE_SLUG` | 否 | `default` | Edge Functions API 使用的项目 slug |
 | `SUPABASE_ENDPOINT_SCHEME` | 否 | `http` | 生成 workspace URL 时使用的协议 |
 | `MCP_SERVER_HOST` | 否 | `0.0.0.0` | `sse` 和 `streamable-http` 使用的监听地址 |
@@ -205,11 +205,11 @@ python3 -m mcp_server_supabase.server --transport sse --host 0.0.0.0 --port 8000
 
 ## 使用说明
 
-- `WORKSPACE_REF` 会把连接 hard-scope 到单个目标，并在 tool schema 中移除 `workspace_id`。
+- `WORKSPACE_REF` 会把服务实例 hard-scope 到单个目标，并在 tool schema 中移除 `workspace_id`。
 - `WORKSPACE_REF` 生效时，`account` 组工具不会暴露，且显式传入其他 `workspace_id` 会被拒绝。
 - `FEATURES` 只接受官方 8 个分组：`account`、`docs`、`database`、`debugging`、`development`、`functions`、`storage`、`branching`。
 - 如果没有设置 `FEATURES`，默认启用 `account`、`database`、`debugging`、`development`、`docs`、`functions`、`branching`，`storage` 默认关闭。
-- 可以通过 HTTP query 参数 `read_only=true` 把当前连接切到只读模式，并隐藏所有写工具。`READ_ONLY=true` 会把这条策略作为服务端默认值。
+- `READ_ONLY=true` 会让整个服务实例进入只读模式，并隐藏所有写工具。
 - `DISABLED_TOOLS` 填工具名，例如 `execute_sql,deploy_edge_function`，会在其他策略计算完成后做最终剔除。
 - 凭证优先级是：静态环境变量 AK/SK、请求 `authorization`、环境变量 `authorization`、VeFaaS IAM 凭证。
 - 当凭证来自单次请求的 STS header 时，workspace 元数据相关缓存会自动停用，避免跨连接复用缓存。
@@ -223,23 +223,12 @@ python3 -m mcp_server_supabase.server --transport sse --host 0.0.0.0 --port 8000
 
 ## 配置优先级
 
-### 单条连接内的工具过滤顺序
+### 启动时的工具过滤顺序
 
 1. `features` 先决定基础工具集合
-2. `workspace_ref` 再移除 `account` 工具，并把连接限制到单个 workspace
+2. `workspace_ref` 再移除 `account` 工具，并把服务限制到单个 workspace
 3. `read_only` 再移除所有写工具
 4. `disabled_tools` 最后按工具名做剔除
-
-### 服务端默认值和连接参数的合并规则
-
-1. `workspace_ref`
-服务端配置的是硬边界。连接如果传了不同的 `workspace_ref` 会被拒绝；如果服务端没配，连接可以自行指定。
-2. `features`
-如果服务端和连接都配置了，实际生效的是两者交集；连接不能扩大服务端允许的 feature 范围。
-3. `read_only`
-只要服务端或连接任意一侧是 `true`，最终就是 `true`。
-4. `disabled_tools`
-服务端和连接两边会取并集，任意一侧禁掉的工具最终都不可用。
 
 ## 接入方式
 
@@ -260,7 +249,7 @@ python3 -m mcp_server_supabase.server --transport sse --host 0.0.0.0 --port 8000
 - `streamable-http`：连接 `http://<host>:<port>/mcp`
 - `sse`：连接 `http://<host>:<port>/sse`，并向 `http://<host>:<port>/messages/` 投递消息
 - 远程或云部署场景可以通过 `authorization` header 透传 STS 凭证，而不是把长期 AK/SK 固化在服务环境变量里
-- 连接级参数可以通过 HTTP query 传入，例如 `workspace_ref`、`features`、`read_only`、`disabled_tools`
+- 工具可见性和 workspace scope 在服务启动时通过环境变量或 CLI 参数固定下来
 
 ## License
 

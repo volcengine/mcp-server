@@ -118,26 +118,6 @@ def _parse_name_set(value: Any) -> frozenset[str] | None:
     return frozenset(names)
 
 
-def _parse_query_name_set(params: Any, name: str) -> frozenset[str] | None:
-    if params is None:
-        return None
-    values: list[str] = []
-    if hasattr(params, "getlist"):
-        values = [value for value in params.getlist(name) if value is not None]
-    elif hasattr(params, "get"):
-        value = params.get(name)
-        if value is not None:
-            values = [value]
-    if not values:
-        return None
-    names: list[str] = []
-    for value in values:
-        names.extend(_expand_names(value))
-    if not names:
-        return frozenset()
-    return frozenset(names)
-
-
 def _parse_workspace_ref(value: Any) -> str | None:
     if value is None:
         return None
@@ -166,21 +146,6 @@ def _parse_read_only(value: Any) -> bool | None:
     if normalized in {"0", "false", "no", "off"}:
         return False
     raise ValueError("read_only must be true or false")
-
-
-def _parse_query_read_only(params: Any) -> bool | None:
-    if params is None:
-        return None
-    values: list[str] = []
-    if hasattr(params, "getlist"):
-        values = [value for value in params.getlist("read_only") if value is not None]
-    elif hasattr(params, "get"):
-        value = params.get("read_only")
-        if value is not None:
-            values = [value]
-    if not values:
-        return None
-    return _parse_read_only(values[-1])
 
 
 def _validate_features(features: frozenset[str] | None) -> frozenset[str] | None:
@@ -215,53 +180,13 @@ def build_partial_access_policy(
     )
 
 
-def build_query_access_policy(params: Any) -> PartialAccessPolicy | None:
-    if params is None:
-        return None
-    workspace_ref = _parse_workspace_ref(params.get("workspace_ref")) if hasattr(params, "get") else None
-    features = _validate_features(_parse_query_name_set(params, "features"))
-    read_only = _parse_query_read_only(params)
-    disabled_tools = _validate_tools(_parse_query_name_set(params, "disabled_tools"), "disabled_tools")
-    if workspace_ref is None and features is None and read_only is None and disabled_tools is None:
-        return None
-    return PartialAccessPolicy(
-        workspace_ref=workspace_ref,
-        features=features,
-        read_only=read_only,
-        disabled_tools=disabled_tools,
-    )
-
-
-def resolve_access_policy(
-    server_policy: PartialAccessPolicy | None,
-    request_policy: PartialAccessPolicy | None,
-) -> ResolvedAccessPolicy:
-    server_policy = server_policy or PartialAccessPolicy()
-    request_policy = request_policy or PartialAccessPolicy()
-
-    if server_policy.workspace_ref and request_policy.workspace_ref and server_policy.workspace_ref != request_policy.workspace_ref:
-        raise ValueError("workspace_ref does not match the server scope")
-    workspace_ref = server_policy.workspace_ref or request_policy.workspace_ref
-
-    features = DEFAULT_FEATURE_GROUPS
-    if server_policy.features is not None:
-        features = server_policy.features
-    if request_policy.features is not None:
-        features = request_policy.features if server_policy.features is None else features & request_policy.features
-
-    read_only = bool(server_policy.read_only) or bool(request_policy.read_only)
-
-    disabled_tools = frozenset()
-    if server_policy.disabled_tools:
-        disabled_tools |= server_policy.disabled_tools
-    if request_policy.disabled_tools:
-        disabled_tools |= request_policy.disabled_tools
-
+def resolve_access_policy(policy: PartialAccessPolicy | None) -> ResolvedAccessPolicy:
+    policy = policy or PartialAccessPolicy()
     return ResolvedAccessPolicy(
-        workspace_ref=workspace_ref,
-        features=features,
-        read_only=read_only,
-        disabled_tools=disabled_tools,
+        workspace_ref=policy.workspace_ref,
+        features=policy.features or DEFAULT_FEATURE_GROUPS,
+        read_only=bool(policy.read_only),
+        disabled_tools=policy.disabled_tools or frozenset(),
     )
 
 
@@ -276,12 +201,21 @@ def resolve_allowed_tools(policy: ResolvedAccessPolicy) -> frozenset[str]:
 
 
 def workspace_scope_schema(tool_name: str, input_schema: dict[str, Any], workspace_ref: str | None) -> dict[str, Any]:
-    if not workspace_ref or tool_name not in SCOPED_TOOL_NAMES:
+    if tool_name not in SCOPED_TOOL_NAMES:
         return input_schema
-    properties = dict(input_schema.get("properties", {}))
-    properties.pop("workspace_id", None)
     result = dict(input_schema)
+    properties = dict(input_schema.get("properties", {}))
     result["properties"] = properties
-    if "required" in result:
-        result["required"] = [name for name in result.get("required", []) if name != "workspace_id"]
+    required = [name for name in result.get("required", []) if name != "workspace_id"]
+    if workspace_ref:
+        properties.pop("workspace_id", None)
+        if required:
+            result["required"] = required
+        elif "required" in result:
+            result.pop("required", None)
+        return result
+    if "workspace_id" in properties and "workspace_id" not in required:
+        required.append("workspace_id")
+    if required:
+        result["required"] = required
     return result

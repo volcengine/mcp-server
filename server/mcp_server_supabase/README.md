@@ -93,10 +93,10 @@ Static AK/SK can be obtained from the [Volcengine API Access Key console](https:
 | `VOLCENGINE_SECRET_KEY` | No | - | Volcengine secret key for local static authentication |
 | `VOLCENGINE_SESSION_TOKEN` | No | - | Optional session token used with temporary local credentials |
 | `VOLCENGINE_REGION` | No | `cn-beijing` | Region used for the Volcengine API |
-| `WORKSPACE_REF` | No | - | Connection-level hard scope. When set, `account` tools are hidden and workspace-scoped calls are forced to this target |
+| `WORKSPACE_REF` | No | - | Startup-level hard scope. When set, `account` tools are hidden and workspace-scoped calls are forced to this target |
 | `FEATURES` | No | `account,database,debugging,development,docs,functions,branching` | Official feature groups. `storage` is disabled by default |
 | `DISABLED_TOOLS` | No | - | Comma-separated denylist applied after all other policy filters |
-| `READ_ONLY` | No | `false` | Server-level default for connection `read_only`; when enabled, mutating tools are hidden |
+| `READ_ONLY` | No | `false` | Startup-level read-only switch; when enabled, mutating tools are hidden |
 | `SUPABASE_WORKSPACE_SLUG` | No | `default` | Project slug used by Edge Functions APIs |
 | `SUPABASE_ENDPOINT_SCHEME` | No | `http` | Endpoint scheme used when building workspace URLs |
 | `MCP_SERVER_HOST` | No | `0.0.0.0` | Host used by `sse` and `streamable-http` transports |
@@ -204,11 +204,11 @@ The package exposes `mcp-server-supabase`, the compatibility alias `supabase-aid
 
 ## Usage Notes
 
-- `WORKSPACE_REF` applies a hard workspace scope to the connection and removes `workspace_id` from visible tool schemas.
+- `WORKSPACE_REF` applies a hard workspace scope for the server instance and removes `workspace_id` from visible tool schemas.
 - When `WORKSPACE_REF` is active, `account` tools are hidden and any explicit `workspace_id` outside the scope is rejected.
 - `FEATURES` accepts only the official groups: `account`, `docs`, `database`, `debugging`, `development`, `functions`, `storage`, and `branching`.
 - If `FEATURES` is not set, the default enabled groups are `account`, `database`, `debugging`, `development`, `docs`, `functions`, and `branching`. `storage` stays disabled by default.
-- `read_only=true` can be supplied as an HTTP query parameter to hide all mutating tools for that connection. `READ_ONLY=true` applies the same policy as a server default.
+- `READ_ONLY=true` hides all mutating tools for the server instance.
 - `DISABLED_TOOLS` takes tool names such as `execute_sql,deploy_edge_function` and removes them after the rest of the policy has been resolved.
 - Credential precedence is: static env AK/SK, request `authorization`, env `authorization`, then VeFaaS IAM credentials.
 - Request-scoped STS credentials disable workspace metadata cache reuse to avoid cross-connection cache leakage.
@@ -222,23 +222,12 @@ The package exposes `mcp-server-supabase`, the compatibility alias `supabase-aid
 
 ## Policy Precedence
 
-### Tool filtering order within one connection
+### Tool filtering order at startup
 
 1. `features` selects the base tool set
-2. `workspace_ref` removes `account` tools and scopes the connection to one workspace
+2. `workspace_ref` removes `account` tools and scopes the server to one workspace
 3. `read_only` removes all mutating tools
 4. `disabled_tools` removes specific tool names last
-
-### Server defaults vs connection-scoped options
-
-1. `workspace_ref`
-The server setting is a hard boundary. A connection that sends a different `workspace_ref` is rejected. If the server does not set one, the connection may choose its own.
-2. `features`
-If both the server and the connection set `features`, the effective set is the intersection. A connection cannot widen the server-allowed feature range.
-3. `read_only`
-If either the server or the connection sets `read_only=true`, the effective result is `true`.
-4. `disabled_tools`
-Server-side and connection-side deny lists are unioned. If either side disables a tool, it stays unavailable.
 
 ## Integration Modes
 
@@ -259,7 +248,7 @@ If your agent runtime can spawn a local MCP process, you can keep using `stdio`.
 - `streamable-http`: connect to `http://<host>:<port>/mcp`
 - `sse`: connect to `http://<host>:<port>/sse` and post messages to `http://<host>:<port>/messages/`
 - Remote or cloud deployments can forward STS credentials with the `authorization` header instead of baking long-lived AK/SK into the server environment
-- Connection-scoped options can be passed through HTTP query parameters, including `workspace_ref`, `features`, `read_only`, and `disabled_tools`
+- Tool visibility and workspace scope are fixed when the server starts through env vars or CLI flags
 
 ## License
 

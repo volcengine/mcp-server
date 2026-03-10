@@ -4,9 +4,7 @@ from mcp.types import Tool as MCPTool
 
 from .access_policy import (
     PartialAccessPolicy,
-    ResolvedAccessPolicy,
     SCOPED_TOOL_NAMES,
-    build_query_access_policy,
     resolve_access_policy,
     resolve_allowed_tools,
     workspace_scope_schema,
@@ -17,30 +15,9 @@ class ScopedFastMCP(FastMCP):
     def __init__(self, *args, access_policy: PartialAccessPolicy | None = None, **kwargs):
         super().__init__(*args, **kwargs)
         self._access_policy = access_policy or PartialAccessPolicy()
-        self._session_policies: dict[int, ResolvedAccessPolicy] = {}
 
     def _resolve_current_policy(self):
-        context = self.get_context()
-        request_context = getattr(context, "_request_context", None)
-        if request_context is None:
-            return resolve_access_policy(self._access_policy, None)
-
-        session_key = id(request_context.session)
-        request = request_context.request
-        if request is not None:
-            request_policy = build_query_access_policy(request.query_params)
-            if request_policy is not None:
-                resolved_policy = resolve_access_policy(self._access_policy, request_policy)
-                self._session_policies[session_key] = resolved_policy
-                return resolved_policy
-
-        cached_policy = self._session_policies.get(session_key)
-        if cached_policy is not None:
-            return cached_policy
-
-        resolved_policy = resolve_access_policy(self._access_policy, None)
-        self._session_policies[session_key] = resolved_policy
-        return resolved_policy
+        return resolve_access_policy(self._access_policy)
 
     async def list_tools(self):
         policy = self._resolve_current_policy()
