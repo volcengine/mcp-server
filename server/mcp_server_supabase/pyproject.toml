@@ -1,7 +1,7 @@
 [project]
 name = "mcp-server-supabase"
 version = "0.1.0"
-description = "MCP server for Supabase/AIDAP"
+description = "MCP server for Volcengine Supabase"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
@@ -28,7 +28,8 @@ legacy = [
 
 [project.scripts]
 mcp-server-supabase = "mcp_server_supabase.server:main"
-supabase-aidap = "mcp_server_supabase.server:main"
+mcp-server-supabase-sse = "mcp_server_supabase.sse:main"
+mcp-server-supabase-streamable = "mcp_server_supabase.streamable_http:main"
 
 [build-system]
 requires = ["hatchling"]
