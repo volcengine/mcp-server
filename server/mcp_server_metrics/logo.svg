@@ -1,0 +1,20 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<mask id="mask0" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="3" y="5" width="18" height="14">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M4 19H20V7H4V19ZM6 17H10V9H6V17ZM12 17H16V11H12V17ZM18 17H19V13H18V17Z" fill="white"/>
+</mask>
+<g mask="url(#mask0)">
+<rect x="2" y="4" width="20" height="16" fill="url(#paint0)"/>
+<ellipse cx="18" cy="6" rx="3.5" ry="3.5" fill="url(#paint1)"/>
+</g>
+<defs>
+<radialGradient id="paint0" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(3.5 20) rotate(-45) scale(22 38)">
+<stop stop-color="#4D19D3"/>
+<stop offset="0.3" stop-color="#5652FF"/>
+<stop offset="1" stop-color="#3271F3"/>
+</radialGradient>
+<radialGradient id="paint1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(18 6) rotate(90) scale(3.2 3.1)">
+<stop stop-color="#4FEEC8" stop-opacity="0.9"/>
+<stop offset="1" stop-color="#4FEEC8" stop-opacity="0"/>
+</radialGradient>
+</defs>
+</svg>
