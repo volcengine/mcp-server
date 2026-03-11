@@ -302,9 +302,14 @@ def _build_delete_branch(runtime: SupabaseRuntime):
 def _build_restore_branch(runtime: SupabaseRuntime):
     workspace_tools = runtime.workspace_tools
 
-    async def restore_branch(branch_id: str, workspace_id: str = None) -> str:
-        """Restores a development branch to its baseline state. Any untracked data or schema changes will be lost."""
-        return await workspace_tools.restore_branch(branch_id, workspace_id)
+    async def restore_branch(
+        branch_id: str,
+        source_branch_id: str = None,
+        time: str = None,
+        workspace_id: str = None,
+    ) -> str:
+        """Restores branch data to a specified point in time and returns the restored branch ID."""
+        return await workspace_tools.restore_branch(branch_id, source_branch_id, time, workspace_id)
 
     return restore_branch
 

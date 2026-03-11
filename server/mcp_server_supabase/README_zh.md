@@ -65,7 +65,7 @@
 | `list_branches` | 列出 workspace 下的分支 |
 | `create_branch` | 创建开发分支 |
 | `delete_branch` | 删除开发分支 |
-| `restore_branch` | 将分支恢复到初始状态 |
+| `restore_branch` | 将分支数据恢复到指定时间点，并返回恢复出的新分支 ID |
 
 ### `storage`
 
@@ -195,7 +195,7 @@ python3 -m mcp_server_supabase.server --transport sse --host 0.0.0.0 --port 8000
 - `DISABLED_TOOLS` 填工具名，例如 `execute_sql,deploy_edge_function`，会在其他策略计算完成后做最终剔除。
 - `workspace_id` 和 `workspace_ref` 只接受 workspace ID，`br-xxxx` 这样的 branch ID 会被直接拒绝。
 - `get_publishable_keys` 在需要时会自动解析默认分支。
-- `restore_branch` 不支持 `migration_version`，当前实际映射到火山引擎的 `BranchRestore` 能力。
+- `restore_branch` 支持可选的 `time` 和 `source_branch_id` 参数，并返回 `backup_branch_id`。
 - `deploy_edge_function` 当前支持 `native-node20/v1`、`native-python3.9/v1`、`native-python3.10/v1`、`native-python3.12/v1`。
 - `--transport sse` 会在 `MCP_SSE_PATH` 暴露 SSE 连接地址，并在 `MCP_MESSAGE_PATH` 暴露消息投递地址。
 - `--transport streamable-http` 会在 `STREAMABLE_HTTP_PATH` 暴露 MCP HTTP 地址。

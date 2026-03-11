@@ -19,6 +19,7 @@ try:
         DescribeWorkspaceEndpointRequest,
         DescribeAPIKeysRequest,
         BranchRestoreRequest,
+        RestoreSettingsForBranchRestoreInput,
         CreateBranchRequest,
         DeleteBranchRequest,
         BranchSettingsForCreateBranchInput,
@@ -307,16 +308,33 @@ class AidapClient:
             logger.error(f"Error getting endpoint: {e}")
             return None
     
-    async def restore_branch(self, workspace_id: str, branch_id: str) -> dict:
+    async def restore_branch(
+        self,
+        workspace_id: str,
+        branch_id: str,
+        source_branch_id: Optional[str] = None,
+        time: Optional[str] = None,
+    ) -> dict:
         max_attempts = 8
         for attempt in range(1, max_attempts + 1):
             try:
                 request = BranchRestoreRequest(
                     workspace_id=workspace_id,
                     branch_id=branch_id,
+                    restore_settings=RestoreSettingsForBranchRestoreInput(
+                        source_branch_id=source_branch_id or branch_id,
+                        time=time,
+                    ),
                 )
-                self.client.branch_restore(request)
-                return {"success": True}
+                response = self.client.branch_restore(request)
+                return {
+                    "success": True,
+                    "workspace_id": workspace_id,
+                    "branch_id": branch_id,
+                    "source_branch_id": source_branch_id or branch_id,
+                    "time": time,
+                    "backup_branch_id": self._pick_value(response, "backup_branch_id", "BackupBranchID"),
+                }
             except Exception as e:
                 error_text = str(e)
                 code = self._branch_error_code(error_text)

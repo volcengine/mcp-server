@@ -367,17 +367,24 @@ class WorkspaceTools(BaseTools):
     async def restore_branch(
         self,
         branch_id: str,
+        source_branch_id: Optional[str] = None,
+        time: Optional[str] = None,
         workspace_id: Optional[str] = None,
     ) -> str:
         try:
             ws_id = self._resolve_workspace_id(workspace_id)
-            result = await self.aidap.restore_branch(ws_id, branch_id)
+            result = await self.aidap.restore_branch(
+                ws_id,
+                branch_id,
+                source_branch_id=source_branch_id,
+                time=time,
+            )
             if not isinstance(result, dict):
                 result = {"success": bool(result)}
             if result.get("success"):
                 result.setdefault("workspace_id", ws_id)
                 result.setdefault("branch_id", branch_id)
-            return to_json(result)
+            return to_json(compact_dict(result))
         except Exception as e:
             logger.error(f"Error restoring branch: {e}")
             return to_json({
