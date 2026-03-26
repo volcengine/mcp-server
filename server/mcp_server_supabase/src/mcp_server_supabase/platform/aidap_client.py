@@ -31,7 +31,7 @@ try:
         StopWorkspaceRequest,
     )
 except ImportError:
-    logger.error("volcengine-python-sdk not installed")
+    logger.error("volcenginesdkaidap client dependencies not installed")
     raise
 
 

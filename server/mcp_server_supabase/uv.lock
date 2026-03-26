@@ -274,7 +274,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.3.0" },
-    { name = "volcengine-python-sdk", git = "https://github.com/sjcsjcsjc/volcengine-python-sdk.git" },
+    { name = "volcengine-python-sdk", git = "https://github.com/volcengine/volcengine-python-sdk.git?rev=master" },
 ]
 provides-extras = ["dev", "legacy"]
 
@@ -961,8 +961,8 @@ wheels = [
 
 [[package]]
 name = "volcengine-python-sdk"
-version = "5.0.14"
-source = { git = "https://github.com/sjcsjcsjc/volcengine-python-sdk.git#9905a8853a0e5fd26fdae93eefb4f201e8bef539" }
+version = "5.0.19"
+source = { git = "https://github.com/volcengine/volcengine-python-sdk.git?rev=master#b2a1b9d08e9906c60d25c25f0baaf81347f9985b" }
 dependencies = [
     { name = "certifi" },
     { name = "python-dateutil" },

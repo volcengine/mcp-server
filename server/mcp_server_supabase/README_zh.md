@@ -127,6 +127,38 @@ uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-s
 uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-server-supabase-streamable
 ```
 
+### 构建本地调试用 Docker 镜像
+
+```bash
+docker build -t volcengine/mcp-server-supabase:latest server/mcp_server_supabase
+```
+
+### 构建并发布多架构镜像
+
+```bash
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t <your-registry>/mcp-server-supabase:latest \
+  --push \
+  server/mcp_server_supabase
+```
+
+如果镜像要发给其他公司或不同机器架构的团队使用，建议使用这个多架构构建方式。
+
+### 使用 Docker 运行
+
+```bash
+docker run --rm -p 8000:8000 \
+  -e VOLCENGINE_ACCESS_KEY=<your-access-key> \
+  -e VOLCENGINE_SECRET_KEY=<your-secret-key> \
+  -e VOLCENGINE_REGION=cn-beijing \
+  -e WORKSPACE_REF=ws-xxxxxxxx \
+  -e FEATURES=database,functions \
+  volcengine/mcp-server-supabase:latest
+```
+
+容器默认使用 `streamable-http`，监听 `0.0.0.0:8000`，MCP 地址为 `http://<host>:8000/mcp`。如果要切换协议，可以在镜像名后追加参数，例如 `--transport sse`。
+
 ### AI 工具使用本地源码接入
 
 ```json
