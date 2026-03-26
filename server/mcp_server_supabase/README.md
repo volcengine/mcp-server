@@ -126,38 +126,6 @@ uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-s
 uv --directory /ABSOLUTE/PATH/TO/mcp-server/server/mcp_server_supabase run mcp-server-supabase-streamable
 ```
 
-### Build a Docker image for local testing
-
-```bash
-docker build -t volcengine/mcp-server-supabase:latest server/mcp_server_supabase
-```
-
-### Build and publish a multi-platform image
-
-```bash
-docker buildx build \
-  --platform linux/amd64,linux/arm64 \
-  -t <your-registry>/mcp-server-supabase:latest \
-  --push \
-  server/mcp_server_supabase
-```
-
-Use the multi-platform build when sharing the image with other companies or teams on different host architectures.
-
-### Run in Docker
-
-```bash
-docker run --rm -p 8000:8000 \
-  -e VOLCENGINE_ACCESS_KEY=<your-access-key> \
-  -e VOLCENGINE_SECRET_KEY=<your-secret-key> \
-  -e VOLCENGINE_REGION=cn-beijing \
-  -e WORKSPACE_REF=ws-xxxxxxxx \
-  -e FEATURES=database,functions \
-  volcengine/mcp-server-supabase:latest
-```
-
-The container defaults to `streamable-http` on `0.0.0.0:8000` and serves MCP at `http://<host>:8000/mcp`. Override the transport by appending arguments such as `--transport sse`.
-
 ### AI tool integration with local source
 
 ```json
