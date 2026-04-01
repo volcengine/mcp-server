@@ -1,7 +1,6 @@
 import datetime
 import hashlib
 import hmac
-from dataclasses import asdict
 import json
 from urllib.parse import quote
 from ..model import *
@@ -10,7 +9,7 @@ import aiohttp
 
 Service = "volc_torchlight_api"
 Version = "2025-01-01"
-Region = "cn-north-1"
+Region = "cn-beijing"
 Host = "mercury.volcengineapi.com"
 ContentType = "application/json"
 
@@ -20,19 +19,25 @@ async def web_search_volcengine_auth(ak: str, sk: str, req: WebSearchRequest, to
     headers = {
         "X-Traffic-Tag": f"ark_mcp_server_{tool_name}",
     }
-    return await volcengine_auth_request("POST", now, {}, headers, ak, sk, "WebSearch", json.dumps(asdict(req)))
+    return await volcengine_auth_request("POST", now, {}, headers, ak, sk, "WebSearch", json.dumps(req.to_payload()))
 
 
 def norm_query(params):
     query = ""
     for key in sorted(params.keys()):
-        if type(params[key]) == list:
-            for k in params[key]:
+        if isinstance(params[key], list):
+            for value in params[key]:
                 query = (
-                        query + quote(key, safe="-_.~") + "=" + quote(k, safe="-_.~") + "&"
+                        query + quote(key, safe="-_.~") + "=" + quote(value, safe="-_.~") + "&"
                 )
         else:
-            query = (query + quote(key, safe="-_.~") + "=" + quote(params[key], safe="-_.~") + "&")
+            query = (
+                query
+                + quote(key, safe="-_.~")
+                + "="
+                + quote(str(params[key]), safe="-_.~")
+                + "&"
+            )
     query = query[:-1]
     return query.replace("+", "%20")
 
@@ -72,21 +77,25 @@ async def volcengine_auth_request(method, date, query, header, ak, sk, action, b
         "X-Date": x_date,
         "Content-Type": request_param["content_type"],
     }
-    signed_headers_str = ";".join(
-        ["content-type", "host", "x-content-sha256", "x-date"]
-    )
+    signed_header_keys = ["content-type", "host", "x-content-sha256", "x-date"]
+    canonical_header_lines = [
+        "content-type:" + request_param["content_type"],
+        "host:" + request_param["host"],
+        "x-content-sha256:" + x_content_sha256,
+        "x-date:" + x_date,
+    ]
+    traffic_tag = header.get("X-Traffic-Tag")
+    if traffic_tag:
+        signed_header_keys.append("x-traffic-tag")
+        canonical_header_lines.append("x-traffic-tag:" + traffic_tag)
+    signed_header_keys.sort()
+    canonical_header_lines.sort()
+    signed_headers_str = ";".join(signed_header_keys)
     canonical_request_str = "\n".join(
         [request_param["method"].upper(),
          request_param["path"],
          norm_query(request_param["query"]),
-         "\n".join(
-             [
-                 "content-type:" + request_param["content_type"],
-                 "host:" + request_param["host"],
-                 "x-content-sha256:" + x_content_sha256,
-                 "x-date:" + x_date,
-             ]
-         ),
+         "\n".join(canonical_header_lines),
          "",
          signed_headers_str,
          x_content_sha256,

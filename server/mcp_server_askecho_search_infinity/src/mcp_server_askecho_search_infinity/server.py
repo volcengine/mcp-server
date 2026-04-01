@@ -1,10 +1,6 @@
 import logging
 import argparse
-import dataclasses
-import asyncio
 from mcp.server import FastMCP
-from mcp.server.fastmcp import Context
-from mcp import types
 from typing import Dict, Any
 
 from .model import *
@@ -18,19 +14,25 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 config = None
-mcp = FastMCP("AskEcho Search Infinity MCP Server")
+mcp = FastMCP("联网搜索API MCP Server")
 
 
 @mcp.tool()
 async def web_search(
     Query: str,
-    Count: int = 10
+    Count: int = 10,
+    SearchType: str = "web",
+    TimeRange: str = "",
+    AuthLevel: int = 0,
 ) -> Dict[str, Any]:
     """
-    联网搜索能力调用，基于用户query搜索网络结果
+    联网搜索 API 调用，支持网页和图片搜索
     Args:
-        Query (str): 用户搜索 query，1~100 个字符 (过长会截断)，不支持多词搜索
-        Count (int): 返回条数，最多50条，不传默认10条
+        Query (str): 搜索 query，1~100 个字符
+        Count (int): 返回条数，web 最多 50 条，image 最多 5 条
+        SearchType (str): 搜索类型，仅支持 web 或 image
+        TimeRange (str): web 搜索时间范围，可选 OneDay/OneWeek/OneMonth/OneYear 或日期区间
+        AuthLevel (int): 权威等级过滤，0 为默认，1 为非常权威
     Returns:
         联网搜索结果返回结构
     """
@@ -40,15 +42,12 @@ async def web_search(
         if config is None:
             raise ValueError("config not loaded")
 
-        # Validate Count parameter
-        if Count > 50:
-            Count = 50
-        elif Count < 1:
-            Count = 10
-
-        req = WebSearchRequest(
-            Query=Query,
-            Count=Count
+        req = build_web_search_request(
+            query=Query,
+            count=Count,
+            search_type=SearchType,
+            time_range=TimeRange or None,
+            auth_level=AuthLevel,
         )
 
         if config.api_key is not None and len(config.api_key) > 0:
@@ -69,7 +68,7 @@ async def web_search(
 
 def main():
     """Main entry point for the MCP server."""
-    parser = argparse.ArgumentParser(description="Run the AskEchoSearchInfinity MCP Server")
+    parser = argparse.ArgumentParser(description="Run the Web Search API MCP Server")
     parser.add_argument(
         "--transport",
         "-t",
@@ -85,10 +84,10 @@ def main():
         global config
         config = load_config()
         # Run the MCP server
-        logger.info(f"Starting AskEchoSearchInfinity MCP Server with {args.transport} transport")
+        logger.info(f"Starting Web Search API MCP Server with {args.transport} transport")
         mcp.run(transport=args.transport)
     except Exception as e:
-        logger.error(f"Error starting AskEchoSearchInfinity MCP Server: {str(e)}")
+        logger.error(f"Error starting Web Search API MCP Server: {str(e)}")
         raise
 
 
