@@ -1,0 +1,16 @@
+{
+  "name": "mcp-server",
+  "version": "0.1.0",
+  "description": "Volcengine MCP Servers",
+  "author": {
+    "name": "volcengine",
+    "url": "https://github.com/volcengine"
+  },
+  "homepage": "https://github.com/volcengine/mcp-server",
+  "repository": "https://github.com/volcengine/mcp-server",
+  "keywords": [
+    "mcp",
+    "codex"
+  ],
+  "mcpServers": "./.mcp.json"
+}

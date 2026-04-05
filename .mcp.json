@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "mcp-server": {
+      "command": "npx",
+      "args": [
+        "volcengine-mcp-server"
+      ]
+    }
+  }
+}
