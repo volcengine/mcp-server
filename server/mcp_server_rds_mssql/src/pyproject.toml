@@ -5,9 +5,9 @@ description = "MCP server for rds_mssql"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "mcp[cli],"
-    "mcp>=1.12.0,"
-    "volcengine-python-sdk>=4.0.34,"
+    "mcp[cli]",
+    "mcp>=1.12.0",
+    "volcengine-python-sdk>=4.0.34",
 ]
 
 [project.scripts]
