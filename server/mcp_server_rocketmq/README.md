@@ -9,6 +9,11 @@ RocketMQ MCP Server 是一个模型上下文协议(Model Context Protocol)服务
 | 分类 | 云基础-消息队列 |
 | 标签 | RocketMQ，消息队列，MCP |
 
+### 安全与合规提示
+
+- **操作前确认**：在执行创建、修改或删除等高风险操作前，建议先使用 `get_volcengine_session_info` 等工具确认当前的火山引擎账号和 Region 是否正确，避免误操作。
+- **变更前后结合巡检**：在每次使用 `CCAPI MCP` 对资源进行变更后，强烈建议立即使用 `RocketMQ MCP` 的 `ManualTriggerInspect` 工具进行一次或多次手动巡检，并用 `GetInstanceInspectResult` 检查结果，确保变更符合预期且未引入新的风险。
+
 ## Tools
 本 MCP Server 产品提供以下 Tools (工具/能力):
 
@@ -335,8 +340,71 @@ git clone git@github.com:volcengine/mcp-server.git
 uv --directory /ABSOLUTE/PATH/TO/PARENT/FOLDER run mcp-server-rocketmq
 ```
 
+## CCAPI MCP 对 RocketMQ 资源操作的使用引导
+
+### 概览与协同关系
+
+`RocketMQ MCP` 专注于 RocketMQ 服务的 **健康巡检与运维**，而 RocketMQ 实例、Topic、消费组等资源的创建、查询、修改、删除等生命周期管理操作，则由更通用的 `CCAPI MCP` 提供支持，`CCAPI MCP` 具体请参考：[CCAPI MCP](https://www.volcengine.com/ats/mcp_detail?name=CCAPI%20MCP%20Server)
+
+两者协同工作的模式如下：
+
+- **`CCAPI MCP` (管资源)**：通过自然语言对话，实现对包括 RocketMQ 在内的数百种火山引擎云资源的生命周期管理。您可以像与运维专家对话一样，完成资源的创建、配置调整、删除等操作，甚至生成标准的基础设施即代码（IaC）模板。
+- **`RocketMQ MCP` (管巡检)**：在资源创建或变更后，提供针对性的健康检查。例如，检查队列资源是否充足、订阅关系是否一致，或手动触发巡检以验证变更的正确性。
+
+通过组合使用这两个 MCP，您可以获得“资源管理 + 健康巡检”的完整闭环体验。
+
+### 在 MCP 客户端中的操作步骤
+
+在 MCP 客户端（如火山方舟、HiAgent、豆包 IDE 插件等）中，您可以按照以下步骤同时启用并使用这两个 MCP：
+
+1.  **查找并了解 MCP**：在火山引擎大模型生态广场的 MCP Servers 市场中，分别找到 `CCAPI MCP Server` 和 `RocketMQ MCP`，大致浏览它们提供的工具（Tools）和功能说明。
+2.  **选择运行平台**：在两个 MCP 的详情页中，确认它们共同支持的客户端平台，例如“火山方舟”或“HiAgent”。
+3.  **生成配置信息**：分别为 `CCAPI MCP` 和 `RocketMQ MCP` 生成专属的 URL 或 JSON 配置。请确保您的火山引擎账号已登录并有相应服务的权限。
+4.  **粘贴配置到客户端**：将生成的两份配置信息，分别粘贴到您选择的 MCP 客户端的配置界面中。通常客户端支持同时接入多个 MCP Server。
+5.  **开始对话**：完成配置后，即可在一个对话窗口中同时与两个 MCP 进行交互。模型会自动根据您的意图（例如“创建实例”或“检查健康状况”）选择合适的 MCP 和工具来执行任务。
+
+### CCAPI MCP 常用能力与 RocketMQ 任务映射
+
+当您需要管理 RocketMQ 资源时，可以向接入了 `CCAPI MCP` 的客户端发出以下自然语言指令，模型会将其映射到对应的 `CCAPI MCP` 工具：
+
+| 您的自然语言任务 | 对应的 CCAPI MCP 工具 | 说明 |
+| :--- | :--- | :--- |
+| “这个 RocketMQ 实例有哪些配置项？” | `get_resource_schema_information` | 获取 RocketMQ 实例、Topic 等资源的详细规格定义。 |
+| “帮我列出所有 RocketMQ 实例。” | `list_resources` | 筛选并列出您账户下指定类型的资源。 |
+| “查看某个 RocketMQ 实例的详细信息。” | `get_resource` | 获取特定资源的当前配置快照。 |
+| “创建一个新的 RocketMQ 实例。” | `create_resource` | 根据您的描述创建新资源，模型会引导您补充必要信息。 |
+| “把这个实例的规格调高一点。” | `update_resource` | 修改现有资源的配置。 |
+| “删除测试环境的那个实例。” | `delete_resource` | 在确认您的意图后，安全地删除资源。 |
+| “为这个实例生成 IaC 代码。” | `generate_infrastructure_code` | 将现有资源配置转换为 Terraform 或其他 IaC 代码，便于版本控制。|
+| “解释一下这段 JSON 配置。” | `explain` | 解释任意配置片段或 API 返回的 JSON 数据。 |
+| “创建操作的进度怎么样了？” | `get_resource_request_status` | 跟踪长时间运行任务（如创建实例）的执行状态。 |
+| “检查我的火山引擎配置。” | `check_environment_variables` | 确认执行操作所需的 AK/SK、Region 等环境变量是否设置正确。 |
+| “我当前登录的账号和 Region 是什么？”| `get_volcengine_session_info` / `get_volcengine_account_info` | 查询当前的会话与账户信息。 |
+
+### 典型对话示例
+
+以下示例展示了如何通过自然语言结合使用 `CCAPI MCP` 和 `RocketMQ MCP`：
+
+**场景一：创建新实例并进行上线检查**
+
+> **您**：你好，请帮我在“华北2区”创建一个用于生产环境的 RocketMQ 5.x 实例，需要高可用部署。
+> 
+> **模型 (调用 CCAPI MCP)**：好的，正在为您规划并创建 RocketMQ 实例... 实例 `rocketmq-xxxx` 已创建成功。现在，建议您使用 `RocketMQ MCP` 对其进行一次健康巡检。
+>
+> **您**：好的，请为这个新实例开启风险巡检，并手动触发一次队列资源检查。
+>
+> **模型 (调用 RocketMQ MCP)**：已为实例 `rocketmq-xxxx` 开启风险巡检，并成功触发队列资源巡检任务。您可以稍后查询巡检结果。
+
+**场景二：变更后验证**
+
+> **您**：请将 RocketMQ 实例 `rocketmq-yyyy` 的存储空间扩大一倍。
+>
+> **模型 (调用 CCAPI MCP)**：操作已执行，实例 `rocketmq-yyyy` 的存储空间已成功扩容。
+>
+> **您**：很好，现在请立即对它进行一次全面的健康检查，看看有没有异常。
+>
+> **模型 (调用 RocketMQ MCP)**：好的，正在触发相关巡检... 巡检完成，未发现异常结果。
+
 ## License
 
 volcengine/mcp-server is licensed under the [MIT License](https://github.com/volcengine/mcp-server/blob/main/LICENSE).
-
-
