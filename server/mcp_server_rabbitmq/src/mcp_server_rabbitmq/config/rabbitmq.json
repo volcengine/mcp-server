@@ -1,0 +1,1221 @@
+{
+ "components": {
+  "schemas": {
+   "AllowListObject": {
+    "description": "白名单详情",
+    "properties": {
+     "AllowListDesc": {
+      "description": "白名单描述。",
+      "example": "for-test",
+      "type": "string"
+     },
+     "AllowListIPNum": {
+      "description": "白名单中的 IP 数量。",
+      "example": 2,
+      "format": "int64",
+      "type": "integer"
+     },
+     "AllowListId": {
+      "description": "白名单 ID。",
+      "example": "acl-90c721ca3f1648e7b9803xxxxxxx",
+      "type": "string"
+     },
+     "AllowListName": {
+      "description": "白名单名称。",
+      "example": "testlist",
+      "type": "string"
+     },
+     "AllowListType": {
+      "description": "白名单类型。默认为 IPv4，表示允许白名单中的 IPv4 地址访问。",
+      "example": "IPv4",
+      "type": "string"
+     },
+     "AssociatedInstanceNum": {
+      "description": "该白名单已绑定的实例个数。",
+      "example": 1,
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "AllowListId",
+     "AllowListDesc",
+     "AllowListName",
+     "AllowListType",
+     "AllowListIPNum",
+     "AssociatedInstanceNum"
+    ],
+    "type": "object"
+   },
+   "AssociatedInstanceInfo": {
+    "description": "白名单绑定的完整的实例列表",
+    "properties": {
+     "InstanceId": {
+      "description": "实例 ID。",
+      "example": "rabbitmq-cnoexxxxx",
+      "type": "string"
+     },
+     "InstanceName": {
+      "description": "实例名称。",
+      "example": "test",
+      "type": "string"
+     },
+     "VPC": {
+      "description": "实例所属 VPC 的 ID。",
+      "example": "vpc-3ret6bva9k54wxxxxx",
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceId",
+     "InstanceName",
+     "VPC"
+    ],
+    "type": "object"
+   },
+   "BasicInstanceInfoObject": {
+    "description": "实例的基本信息，包括实例名称、ID 等信息。",
+    "properties": {
+     "AccountId": {
+      "description": "创建实例的火山引擎主账号 ID。",
+      "example": "20000",
+      "type": "string"
+     },
+     "ApplyPrivateDNSToPublic": {
+      "description": "是否已开启公网解析功能。\n- true：已开启\n- false：已关闭",
+      "example": true,
+      "type": "boolean"
+     },
+     "ArchType": {
+      "description": "实例的类型，即集群版或单机版。\n- SingleNode：单机版\n- Cluster：集群版",
+      "example": "Cluster",
+      "type": "string"
+     },
+     "ChargeDetail": {
+      "$ref": "#/components/schemas/ChargeDetailObject"
+     },
+     "ComputeSpec": {
+      "description": "RabbitMQ 实例的计算规格。\n可以通过 DescribeComputeSpecsInfo 接口查询指定可用区售卖中的计算规格。",
+      "example": "rabbitmq.n3.x2.medium",
+      "type": "string"
+     },
+     "CreateTime": {
+      "description": "实例的创建时间。时间显示格式为 YYYY-MM-DD'T'HH:MM:SS'Z'。",
+      "example": "1654485759",
+      "type": "string"
+     },
+     "EipId": {
+      "description": "EIP 的 ID。如果实例未开启公网访问方式，则不返回此参数。",
+      "example": "eip-mjhulvqza6805smt1bnc****",
+      "type": "string"
+     },
+     "InitUserName": {
+      "description": "RabbitMQ WebUI 管理员账号名。",
+      "example": "Admin",
+      "type": "string"
+     },
+     "InstanceDescription": {
+      "description": "实例的简单描述。",
+      "example": "这是一个测试实例",
+      "type": "string"
+     },
+     "InstanceId": {
+      "description": "RabbitMQ 实例 ID。",
+      "example": "rabbitmq-cnngqkfgdudt****",
+      "type": "string"
+     },
+     "InstanceName": {
+      "description": "RabbitMQ 实例名称。",
+      "example": "RabbitMQinstance",
+      "type": "string"
+     },
+     "InstanceStatus": {
+      "description": "实例状态。",
+      "example": "Running",
+      "type": "string"
+     },
+     "IsEncrypted": {
+      "description": "是否开启了云盘加密。\n- 云盘加密为邀测功能，如需使用，请联系技术支持申请白名单。\n- 仅 DescribeInstanceDetail 接口返回此字段。",
+      "example": false,
+      "type": "boolean"
+     },
+     "ProjectName": {
+      "description": "实例所属的 IAM 项目。如果实例不属于任何 IAM 项目，则不返回此参数。",
+      "example": "newproject",
+      "type": "string"
+     },
+     "RegionDescription": {
+      "description": "地域的描述信息。",
+      "example": "华南1（广州）",
+      "type": "string"
+     },
+     "RegionId": {
+      "description": "实例所在的地域 ID。",
+      "example": "cn-guangzhou",
+      "type": "string"
+     },
+     "StorageSpace": {
+      "description": "实例总存储空间，单位为 GiB。",
+      "example": 200,
+      "format": "int32",
+      "type": "integer"
+     },
+     "SubnetId": {
+      "description": "VPC 的子网 ID。",
+      "example": "subnet-min6uy01kuf45smt1a2i****",
+      "type": "string"
+     },
+     "TagMap": {
+      "$ref": "#/components/schemas/Tags"
+     },
+     "Tags": {
+      "description": "实例绑定的标签。",
+      "example": [
+       "/"
+      ],
+      "items": {
+       "$ref": "#/components/schemas/TagObject"
+      },
+      "type": "array"
+     },
+     "UsedStorageSpace": {
+      "description": "实例已用储空间。单位为 GiB。",
+      "example": 100,
+      "format": "int32",
+      "type": "integer"
+     },
+     "Version": {
+      "description": "支持的 RabbitMQ 版本。当前支持的版本包括：\n- 3.8.18：RabbitMQ 3.8.18 版本。",
+      "example": "3.8.18",
+      "type": "string"
+     },
+     "VpcId": {
+      "description": "私有网络（VPC） ID。",
+      "example": "vpc-13fo9gkz6j6683n6nu5ec****",
+      "type": "string"
+     },
+     "ZoneDescription": {
+      "description": "可用区的描述信息",
+      "example": "华南1（广州）-可用区B",
+      "type": "string"
+     },
+     "ZoneId": {
+      "description": "实例所在的可用区 ID。对于跨 AZ 的高可用实例，此处会返回多个可用区 ID。",
+      "example": "cn-guangzhou-a",
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceDescription",
+     "InstanceStatus",
+     "InstanceName",
+     "UsedStorageSpace",
+     "StorageSpace",
+     "InstanceId",
+     "RegionId",
+     "Version",
+     "ZoneId",
+     "RegionDescription",
+     "ChargeDetail",
+     "ArchType",
+     "ComputeSpec",
+     "CreateTime"
+    ],
+    "type": "object"
+   },
+   "BasicPluginInfoObject": {
+    "description": "该实例的插件信息，包括支持的插件列表、每个插件的开启状态等。",
+    "properties": {
+     "Description": {
+      "description": "插件的描述信息。",
+      "example": "支持 MQTT 协议（TCP方式）",
+      "type": "string"
+     },
+     "DisablePrompt": {
+      "description": "关闭此插件的注意事项说明。",
+      "example": "禁用该插件将触发RabbitMQ集群滚动重启",
+      "type": "string"
+     },
+     "EnablePrompt": {
+      "description": "开启此插件的注意事项说明。",
+      "example": "启用该插件将触发RabbitMQ集群滚动重启",
+      "type": "string"
+     },
+     "Enabled": {
+      "description": "是否已开启插件。\n- true：插件已开启。\n- false：插件已关闭。",
+      "example": true,
+      "type": "boolean"
+     },
+     "NeedRebootOnChange": {
+      "description": "开启或关闭插件是否会引发 RabbitMQ 实例重启。\n- true：会重启实例。\n- false：不会重启实例。",
+      "example": true,
+      "type": "boolean"
+     },
+     "PluginName": {
+      "description": "插件名称。",
+      "example": "rabbitmq_mqtt",
+      "type": "string"
+     },
+     "Port": {
+      "description": "插件的服务端口。",
+      "example": 8883,
+      "format": "int32",
+      "type": "integer"
+     },
+     "Version": {
+      "description": "插件版本。",
+      "example": "3.8.18",
+      "type": "string"
+     }
+    },
+    "required": [
+     "PluginName",
+     "Version",
+     "NeedRebootOnChange",
+     "Enabled",
+     "Port",
+     "Description"
+    ],
+    "type": "object"
+   },
+   "ChargeDetailObject": {
+    "description": "实例的计费信息，包括计费方式等信息。",
+    "properties": {
+     "AutoRenew": {
+      "description": "包年包月实例到期后是否自动续费。\n- true：自动续费。\n- false：不自动续费。到期后需要手动续费，否则实例将被关停。",
+      "example": true,
+      "type": "boolean"
+     },
+     "ChargeEndTime": {
+      "description": "实例的结束计费时间，时间显示格式为 YYYY-MM-DD'T'HH:MM:SS'Z'。",
+      "example": "2022-01-02T15:04:05Z07:00",
+      "type": "string"
+     },
+     "ChargeExpireTime": {
+      "description": "包年包月实例的到期时间。时间显示格式为 YYYY-MM-DD'T'HH:MM:SS'Z'。\n仅包年包月实例返回此参数。",
+      "example": "2022-01-02T15:04:05Z07:00",
+      "type": "string"
+     },
+     "ChargeStartTime": {
+      "description": "实例的开始计费时间，时间显示格式为 YYYY-MM-DD'T'HH:MM:SS'Z'。",
+      "example": "2022-01-02T15:04:05Z07:00",
+      "type": "string"
+     },
+     "ChargeStatus": {
+      "description": "实例的计费状态。包括：\n- Normal：正常\n- Overdue：按量计费欠费\n- Expired：包年包月到期",
+      "example": "Normal",
+      "type": "string"
+     },
+     "ChargeType": {
+      "description": "实例的计费类型。支持的类型包括：\n- PostPaid ：按量付费\n- PrePaid：包年包月",
+      "example": "PostPaid",
+      "type": "string"
+     },
+     "OverdueReclaimTime": {
+      "description": "实例欠费关停后的预计释放时间。时间显示格式为 YYYY-MM-DD'T'HH:MM:SS'Z'。",
+      "example": "2022-01-02T15:04:05Z07:00",
+      "type": "string"
+     },
+     "OverdueTime": {
+      "description": "实例的欠费关停时间。时间显示格式为 YYYY-MM-DD'T'HH:MM:SS'Z'。",
+      "example": "2022-01-02T15:04:05Z07:00",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ChargeType",
+     "ChargeStatus"
+    ],
+    "type": "object"
+   },
+   "ChargeInfoObject": {
+    "description": "RabbitMQ实例的计费类型等计费信息。",
+    "properties": {
+     "AutoRenew": {
+      "description": "包年包月实例到期后是否自动续费。\n- true：自动续费。\n- false：不自动续费。到期后需要手动续费，否则实例将被关停。\n仅包年包月类型的实例需要指定，即 ChargeType 指定为 PrePaid 时必选。",
+      "example": false,
+      "type": "boolean"
+     },
+     "ChargeType": {
+      "description": "实例的计费类型。支持的类型包括：\n- PostPaid ：按量付费\n- PrePaid：包年包月\n指定为 PrePaid 时，应同时指定 AutoRenew、PeriodUnit 和 Period 参数。",
+      "example": "PostPaid",
+      "type": "string"
+     },
+     "Period": {
+      "description": "包年包月类型实例的购买时长。\n- PeriodUnit 指定为 Month 时，取值范围为 1~9。\n- PeriodUnit 指定为 Year 时，取值范围为 1~3。\n仅包年包月类型的实例需要指定，即 ChargeType 指定为 PrePaid 时必选。",
+      "example": 1,
+      "format": "int32",
+      "type": "integer"
+     },
+     "PeriodUnit": {
+      "description": "包年包月类型实例的生命周期单位，即指定以月或以年为单位购买。支持设置为：\n- Month：包月\n- Year：包年\n仅包年包月类型的实例需要指定，即 ChargeType 指定为 PrePaid 时必选。",
+      "example": "Month",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ChargeType"
+    ],
+    "type": "object"
+   },
+   "ChargeItemPriceObject": {
+    "description": "计费单元",
+    "properties": {
+     "ChargeItemCode": {
+      "description": "计费项编码",
+      "type": "string"
+     },
+     "DiscountPrice": {
+      "description": "折扣价",
+      "format": "double",
+      "type": "number"
+     },
+     "OriginalPrice": {
+      "description": "原价",
+      "format": "double",
+      "type": "number"
+     },
+     "PayablePrice": {
+      "description": "支付价",
+      "format": "double",
+      "type": "number"
+     },
+     "Quantity": {
+      "description": "数量",
+      "format": "int32",
+      "type": "integer"
+     },
+     "UnitPrice": {
+      "description": "UnitPrice",
+      "format": "double",
+      "type": "number"
+     }
+    },
+    "required": [
+     "ChargeItemCode",
+     "OriginalPrice",
+     "DiscountPrice",
+     "PayablePrice",
+     "UnitPrice",
+     "Quantity"
+    ],
+    "type": "object"
+   },
+   "CloudMonitorValue": {
+    "description": "CloudMonitorValue",
+    "properties": {
+     "DescriptionCN": {
+      "description": "DescriptionCN",
+      "type": "string"
+     },
+     "DescriptionEN": {
+      "description": "DescriptionEN",
+      "type": "string"
+     },
+     "Value": {
+      "description": "Value",
+      "type": "string"
+     }
+    },
+    "required": [
+     "DescriptionCN",
+     "DescriptionEN",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "ComputeSpecsInfoObject": {
+    "description": "规格信息",
+    "properties": {
+     "ArchType": {
+      "description": "部署模式",
+      "example": "1:Cluster",
+      "format": "int32",
+      "type": "integer"
+     },
+     "ComputeSpec": {
+      "description": "规格",
+      "type": "string"
+     },
+     "ConnectionNumber": {
+      "description": "连接数量",
+      "format": "int32",
+      "type": "integer"
+     },
+     "Cpu": {
+      "description": "cpu",
+      "format": "double",
+      "type": "number"
+     },
+     "MaxChannelNumber": {
+      "description": "最大channel数量",
+      "format": "int32",
+      "type": "integer"
+     },
+     "Memory": {
+      "description": "内存",
+      "format": "float",
+      "type": "number"
+     },
+     "NodeNumber": {
+      "description": "节点数量",
+      "format": "int32",
+      "type": "integer"
+     },
+     "QueueNumber": {
+      "description": "队列数量",
+      "format": "int32",
+      "type": "integer"
+     },
+     "SpecStatus": {
+      "description": "售卖状态",
+      "example": 2,
+      "format": "int32",
+      "type": "integer"
+     },
+     "StorageSpaceMax": {
+      "description": "最大存储",
+      "format": "int32",
+      "type": "integer"
+     },
+     "StorageSpaceMin": {
+      "description": "最小存储",
+      "format": "int32",
+      "type": "integer"
+     },
+     "Tps": {
+      "description": "tps",
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "ComputeSpec",
+     "StorageSpaceMin",
+     "StorageSpaceMax",
+     "SpecStatus",
+     "ArchType"
+    ],
+    "type": "object"
+   },
+   "EndpointObject": {
+    "description": "实例的接入点列表。\n被以下接口引用：\n- DescribeInstanceDetail",
+    "properties": {
+     "EndpointType": {
+      "description": "实例的接入点类型。关于接入点的详细说明请参考[查看接入点](https://www.volcengine.com/docs/6439/122806)。\nRabbitMQ实例提供的接入点类型包括：\n- WEB：Web UI 接入点\n- AMQP0_9_1：AMQP 接入点\n- MQTT：MQTT接入点\n- WEB_MQTT：WEB MQTT 接入点\n- STOMP：STOMP 接入点",
+      "example": "WEB",
+      "type": "string"
+     },
+     "InternalEndpoint": {
+      "description": "实例的私网访问域名。",
+      "example": "<INTERNAL_ENDPOINT>:5672",
+      "type": "string"
+     },
+     "InternalIpEndpoint": {
+      "description": "公共服务区 IP 接入点。",
+      "example": "<INTERNAL_IP_ENDPOINT>:5672",
+      "type": "string"
+     },
+     "NetworkType": {
+      "description": "接入点的网络类型。PrivateNetwork 表示私有网络 VPC。",
+      "example": "PrivateNetwork",
+      "type": "string"
+     },
+     "PublicEndpoint": {
+      "description": "实例公网访问域名。仅在开启公网访问之后显示。",
+      "example": "rbtmq-322db6ab****.rabbitmq.volces.com:5671",
+      "type": "string"
+     }
+    },
+    "required": [
+     "EndpointType",
+     "NetworkType"
+    ],
+    "type": "object"
+   },
+   "EventFilter": {
+    "description": "EventFilter",
+    "properties": {
+     "Key": {
+      "description": "Key：筛选项。支持设置为：\n- Source。其 Value 可设置为 OpenAPI 或 WebConsole。\n- Type。其 Value 可设置为 ModifyPlugin（插件变更）、ScaleInstance：（变更配置）或 RebootInstance（实例重启）。",
+      "example": "Type",
+      "type": "string"
+     },
+     "Value": {
+      "description": "筛选项的值",
+      "example": "WebConsole",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "Filter": {
+    "description": "云监控filter",
+    "properties": {
+     "Name": {
+      "description": "name",
+      "type": "string"
+     },
+     "Values": {
+      "description": "Values",
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Values"
+    ],
+    "type": "object"
+   },
+   "InfcsRegionObject": {
+    "description": "地域列表。 被以下接口引用： - DescribeRegions",
+    "properties": {
+     "Description": {
+      "description": "地域名称（中文）。",
+      "example": "华东2（上海）",
+      "type": "string"
+     },
+     "RegionId": {
+      "description": "地域 ID。",
+      "example": "cn-shanghai",
+      "type": "string"
+     },
+     "RegionName": {
+      "description": "地域名称。",
+      "example": "cn-shanghai",
+      "type": "string"
+     },
+     "Status": {
+      "description": "地域状态。\n- Available：启用。您可在此地域下进行查看、新建资源等动作。\n- Unavailable：停用。\n您不可在停用的地域新开通服务，也不可新购此地域下的商品。已开通的服务依然提供支持，直至服务到期。",
+      "example": "Available",
+      "type": "string"
+     }
+    },
+    "required": [
+     "RegionId",
+     "RegionName",
+     "Description",
+     "Status"
+    ],
+    "type": "object"
+   },
+   "InstanceConfigObject": {
+    "description": "实例配置结构体。",
+    "properties": {
+     "Description": {
+      "description": "参数描述。",
+      "example": "ACK超时时间,单位ms",
+      "type": "string"
+     },
+     "Name": {
+      "description": "参数名称。",
+      "example": "consumer_timeout",
+      "type": "string"
+     },
+     "Value": {
+      "description": "参数当前值。",
+      "example": "300000",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Description",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "InstanceForCloudMonitor": {
+    "description": "InstanceForCloudMonitor",
+    "properties": {
+     "ConnectAddr": {
+      "description": "ConnectAddr",
+      "type": "string"
+     },
+     "InstanceID": {
+      "description": "InstanceID",
+      "type": "string"
+     },
+     "InstanceName": {
+      "description": "InstanceName",
+      "type": "string"
+     },
+     "Port": {
+      "description": "Port",
+      "type": "string"
+     },
+     "ProjectName": {
+      "description": "ProjectName",
+      "type": "string"
+     },
+     "QueueCount": {
+      "description": "QueueCount",
+      "format": "int32",
+      "type": "integer"
+     },
+     "Status": {
+      "description": "Status",
+      "type": "string"
+     },
+     "Tags": {
+      "description": "tags",
+      "items": {
+       "$ref": "#/components/schemas/TagObjectForCloudMonitor"
+      },
+      "type": "array"
+     },
+     "Version": {
+      "description": "Version",
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceName",
+     "InstanceID",
+     "Status",
+     "QueueCount",
+     "ProjectName",
+     "ConnectAddr",
+     "Port",
+     "Version",
+     "Tags"
+    ],
+    "type": "object"
+   },
+   "OperationEvent": {
+    "description": "OperationEvent",
+    "properties": {
+     "Duration": {
+      "description": "后台任务的总耗时，单位为秒。",
+      "example": 10,
+      "format": "int32",
+      "type": "integer"
+     },
+     "EndTime": {
+      "description": "后台任务的结束时间，Unix 时间戳格式。",
+      "example": 1645523742,
+      "format": "int32",
+      "type": "integer"
+     },
+     "EventID": {
+      "description": "任务 ID。",
+      "example": 0,
+      "format": "int32",
+      "type": "integer"
+     },
+     "EventSource": {
+      "description": "后台任务来源。\n\n- WebConsole：通过控制台发起的任务。\n- OpenAPI：通过 OpenAPI 发起的任务。",
+      "example": "WebConsole",
+      "type": "string"
+     },
+     "InstanceId": {
+      "description": "实例 ID。",
+      "example": "rbtmq-******",
+      "type": "string"
+     },
+     "OperationDetail": {
+      "description": "后台任务操作详情。",
+      "example": "开启rabbitmq_delayed_message_exchange, rabbitmq_tracing",
+      "type": "string"
+     },
+     "OperationName": {
+      "description": "后台任务名称。",
+      "example": "ModifyPlugin",
+      "type": "string"
+     },
+     "OperationType": {
+      "description": "任务类型。\n\n- ModifyPlugin：插件变更。\n- ScaleInstance：变更配置\n- RebootInstance：实例重启",
+      "example": "ModifyPlugin",
+      "type": "string"
+     },
+     "StartTime": {
+      "description": "后台任务的开始时间，Unix 时间戳格式。",
+      "example": 1645523741,
+      "format": "int32",
+      "type": "integer"
+     },
+     "Status": {
+      "description": "任务状态。\n\n- Success：执行成功\n- Failed：执行失败\n- Executing：执行中\n- Waiting：等待执行\n- Timeout：已超时",
+      "example": "Success",
+      "type": "string"
+     }
+    },
+    "required": [
+     "StartTime",
+     "OperationName",
+     "EventSource",
+     "Status",
+     "Duration"
+    ],
+    "type": "object"
+   },
+   "PluginObject": {
+    "description": "待修改启用状态的插件列表。 被以下接口引用： - ModifyPlugin",
+    "properties": {
+     "Enabled": {
+      "description": "是否开启插件。默认值：false\n- true：开启插件。\n- false：关闭插件。",
+      "example": true,
+      "type": "boolean"
+     },
+     "PluginName": {
+      "description": "插件名称。支持设置为：\n- rabbitmq_mqtt：实例是否支持 MQTT 协议（TCP方式）。\n- rabbitmq_web_mqtt：实例是否支持 MQTT 协议（WebSocket方式）。\n- rabbitmq_delayed_message_exchange：实例是否开启消息延迟功能。插件延迟时间存在 1% 左右的误差，可能提前或者推迟发送消息给消费者。\n- rabbitmq_stomp：实例是否支持 STOMP 协议。\n- rabbitmq_tracing：是否开启 tracing 插件。\n- rabbitmq_consistent_hash_exchange：是否开启一致性哈希交换机。\n- rabbitmq_shovel：实例是否开启 shovel 插件。shovel 插件支持在不同的 RabbitMQ 服务器之间自动可靠地传输消息。\n- rabbitmq_shovel_management：实例是否开启 shovel 管理插件。插件支持管理和监控 shovel 的配置和状态，开启后，请前往WebUI控制台使用\n- rabbitmq_federation：\t实例是否开启 RabbitMQ Federation 插件。Federation 插件用于在 Broker 或集群之间传输消息。\n- rabbitmq_federation_management：实例是否开启 RabbitMQ Federation 管理插件。插件提供 Federation 功能的图形化管理界面。",
+      "example": "rabbitmq_mqtt",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Enabled",
+     "PluginName"
+    ],
+    "type": "object"
+   },
+   "RabbitMQVersion": {
+    "description": "版本",
+    "properties": {
+     "MajorVersion": {
+      "description": "MajorVersion",
+      "format": "int32",
+      "type": "integer"
+     },
+     "MinorVersion": {
+      "description": "MinorVersion",
+      "format": "int32",
+      "type": "integer"
+     },
+     "PatchVersion": {
+      "description": "PatchVersion",
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "MajorVersion",
+     "MinorVersion",
+     "PatchVersion"
+    ],
+    "type": "object"
+   },
+   "RegionObject": {
+    "description": "地域列表。\n被以下接口引用：\n- DescribeRegions",
+    "properties": {
+     "Description": {
+      "description": "地域名称（中文）。",
+      "example": "华北-1",
+      "type": "string"
+     },
+     "RegionId": {
+      "description": "地域 ID。",
+      "example": "cn-beijing",
+      "type": "string"
+     },
+     "RegionName": {
+      "description": "地域名称。",
+      "example": "North China",
+      "type": "string"
+     },
+     "RegionStatus": {
+      "description": "地域状态。\n- Available：启用。用户可在此地域下进行查看、新建资源等动作\n- Unavailable：停用。\n您不可在停用的地域新开通服务，但不可新购此地域下的商品。已开通的服务依然提供支持，直至服务到期。",
+      "example": "Available",
+      "type": "string"
+     }
+    },
+    "required": [
+     "RegionId",
+     "RegionName",
+     "Description",
+     "RegionStatus"
+    ],
+    "type": "object"
+   },
+   "TagFilterObject": {
+    "description": "标签详情，用于筛选含有此标签的实例。\n被以下接口引用：\n- DescribeTagsByResource",
+    "properties": {
+     "Key": {
+      "description": "标签的键。",
+      "example": "owner",
+      "type": "string"
+     },
+     "Value": {
+      "description": "标签的值。",
+      "example": "zhangsan",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key"
+    ],
+    "type": "object"
+   },
+   "TagFiltersObject": {
+    "description": "标签详情",
+    "properties": {
+     "Key": {
+      "description": "标签key",
+      "type": "string"
+     },
+     "Values": {
+      "description": "标签值",
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Key"
+    ],
+    "type": "object"
+   },
+   "TagObject": {
+    "description": "标签详情。\n被以下接口引用：\n- AddTagsToResource",
+    "properties": {
+     "Key": {
+      "description": "标签的键。",
+      "example": "owner",
+      "type": "string"
+     },
+     "Value": {
+      "description": "标签的值。",
+      "example": "zhangsan",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key"
+    ],
+    "type": "object"
+   },
+   "TagObjectForCloudMonitor": {
+    "description": "TagObjectForCloudMonitor",
+    "properties": {
+     "Key": {
+      "description": "Key",
+      "type": "string"
+     },
+     "Value": {
+      "description": "Value",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "TagResource": {
+    "description": "Tag详情",
+    "properties": {
+     "InstanceId": {
+      "description": "实例 ID。",
+      "example": "rbtmq-xxx",
+      "type": "string"
+     },
+     "Key": {
+      "description": "标签的键。",
+      "example": "owner",
+      "type": "string"
+     },
+     "Value": {
+      "description": "标签的值。",
+      "example": "zhangsan",
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceId",
+     "Value",
+     "Key"
+    ],
+    "type": "object"
+   },
+   "Tags": {
+    "additionalProperties": true,
+    "description": "云资源标签。可以将实例通过标签进行归类，便于实例的搜索和资源聚合。详细说明请参考标签管理。",
+    "type": "object"
+   },
+   "VpcInfo": {
+    "description": "Vpc详情",
+    "properties": {
+     "Id": {
+      "description": "VpcId",
+      "example": "vpc-0dfdxxxxx",
+      "type": "string"
+     },
+     "Name": {
+      "description": "Vpc名字",
+      "example": "test-xxx",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Id",
+     "Name"
+    ],
+    "type": "object"
+   },
+   "ZoneObject": {
+    "description": "可用区信息\n被以下接口引用：\n- DescribeAvailabilityZones",
+    "properties": {
+     "Description": {
+      "description": "地域可用区中文名称。",
+      "example": "可用区A",
+      "type": "string"
+     },
+     "Status": {
+      "description": "可用区的状态，包含以下状态：\n- Normal：在售。\n- Soldout：售罄。\n- Unavailable：停用。\n您不可在停用的可用区新开通服务，但不可新购此可用区下的商品。已开通的服务依然提供支持，直至服务到期。",
+      "example": "Normal",
+      "type": "string"
+     },
+     "ZoneId": {
+      "description": "可用区 ID。",
+      "example": "cn-beijing-a",
+      "type": "string"
+     },
+     "ZoneName": {
+      "description": "可用区名称。",
+      "example": "可用区 A",
+      "type": "string"
+     },
+     "ZoneStatus": {
+      "description": "可用区的状态，包含以下状态： - Normal：在售。 - Soldout：售罄。 - Unavailable：停用。 您不可在停用的可用区新开通服务，但不可新购此可用区下的商品。已开通的服务依然提供支持，直至服务到期。",
+      "example": "Normal",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ZoneId",
+     "ZoneName",
+     "Status",
+     "Description",
+     "ZoneStatus"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "API documentation for RabbitMQ",
+  "title": "RabbitMQ",
+  "version": "2022-01-01"
+ },
+ "openapi": "3.0.0",
+ "paths": {
+  "/DescribeAvailabilityZones": {
+   "post": {
+    "description": "调用 DescribeAvailabilityZones 接口查看可用区列表。\n",
+    "operationId": "DescribeAvailabilityZones",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "RegionId": {
+          "description": "地域 ID，可调用 [DescribeRegions](/docs/6451/672824) 查询。",
+          "example": "cn-beijing",
+          "type": "string",
+          "x-split-type": 0
+         }
+        },
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "RegionId": {
+           "description": "地域 ID。",
+           "example": "cn-beijing",
+           "type": "string"
+          },
+          "Zones": {
+           "description": "可用区列表。",
+           "example": [
+            "/"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/ZoneObject"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "调用 DescribeAvailabilityZones 接口查看可用区列表。\n"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "OperationDenied.AccountNotAuthorized",
+           "type": "string"
+          },
+          "description": {
+           "example": "您不具备相关权限 ，请授权或切换账号后重试。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 403,
+           "type": "integer"
+          },
+          "message": {
+           "example": "You are not authorized to perform this operation.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "内部错误，请稍后重试。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The request failed due to some unknown error, exception or failure.\n",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查看可用区列表",
+    "tags": [
+     "资源检查"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "RabbitMQ",
+   "x-version": "2022-01-01"
+  },
+  "/DescribeRegions": {
+   "post": {
+    "description": "调用 DescribeRegions 接口查看 Region 列表。",
+    "operationId": "DescribeRegions",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Regions": {
+           "description": "地域列表。",
+           "example": [
+            "/"
+           ],
+           "items": {
+            "$ref": "#/components/schemas/InfcsRegionObject"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object",
+         "x-is-success-response": true
+        }
+       }
+      },
+      "description": "调用 DescribeRegions 接口查看 Region 列表。"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "OperationDenied.AccountNotAuthorized",
+           "type": "string"
+          },
+          "description": {
+           "example": "您不具备相关权限 ，请授权或切换账号后重试。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 403,
+           "type": "integer"
+          },
+          "message": {
+           "example": "You are not authorized to perform this operation.",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "code": {
+           "example": "InternalError",
+           "type": "string"
+          },
+          "description": {
+           "example": "内部错误，请稍后重试。",
+           "type": "string"
+          },
+          "http_code": {
+           "example": 500,
+           "type": "integer"
+          },
+          "message": {
+           "example": "The request failed due to some unknown error, exception or failure.\n",
+           "type": "string"
+          }
+         }
+        }
+       }
+      },
+      "description": "response"
+     }
+    },
+    "summary": "查询可用Region列表",
+    "tags": [
+     "资源检查"
+    ]
+   },
+   "x-content-type": "application/json",
+   "x-method": "POST",
+   "x-service-code": "RabbitMQ",
+   "x-version": "2022-01-01"
+  }
+ }
+}

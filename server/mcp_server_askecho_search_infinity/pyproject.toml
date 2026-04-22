@@ -1,9 +1,9 @@
 [project]
 name = "mcp-server-askecho-search-infinity"
 version = "0.1.0"
-description = "Search Infinity MCP Server"
+description = "Web Search API MCP Server"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.14"
 dependencies = [
     "mcp>=1.9.4",
     "aiohttp>=3.9.0",
