@@ -19,7 +19,7 @@ class DatabaseTools(BaseTools):
         )
 
         client = await self._get_client(ws_id)
-        result = await client.call_api("/pg/query", method="POST", json_data={"query": query})
+        result = await client.call_api("/postgres/query", method="POST", json_data={"query": query})
 
         if isinstance(result, dict) and isinstance(result.get("data"), list):
             result = result["data"]
