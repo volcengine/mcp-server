@@ -77,7 +77,7 @@ class AidapClient:
             logger.warning("Invalid endpoint port from AIDAP: %s", port)
             return None
 
-    def _scheme_from_port(self, port: Optional[int]) -> str:
+    def _scheme_from_port(self, port: int) -> str:
         return "https" if port == 443 else "http"
 
     def _host_has_port(self, host: str) -> bool:
@@ -86,16 +86,22 @@ class AidapClient:
         except ValueError:
             return ":" in host.rsplit("]", 1)[-1]
 
-    def _endpoint_url(self, address: dict[str, Any]) -> str:
-        domain = address["domain"]
+    def _endpoint_url(self, address: dict[str, Any]) -> Optional[str]:
+        domain = address.get("domain")
+        if not domain:
+            return None
+
+        port = self._normalize_port(address.get("port"))
+        if port is None:
+            return None
+
         host = domain.strip().rstrip("/")
         if "://" in host:
             parsed = urlsplit(host)
             host = parsed.netloc or parsed.path
 
-        port = self._normalize_port(address.get("port"))
         scheme = self._scheme_from_port(port)
-        if port is not None and not self._host_has_port(host):
+        if not self._host_has_port(host):
             host = f"{host}:{port}"
         return f"{scheme}://{host}"
 
@@ -355,9 +361,12 @@ class AidapClient:
                             address = self._endpoint_address_payload(addr)
                             if not address:
                                 continue
+                            endpoint_url = self._endpoint_url(address)
+                            if not endpoint_url:
+                                continue
                             candidates.append((
                                 self._endpoint_priority(endpoint, address),
-                                self._endpoint_url(address),
+                                endpoint_url,
                             ))
 
                 if candidates:
