@@ -1,15 +1,14 @@
 import logging
 import asyncio
-import os
 import random
 from collections.abc import Callable
 from typing import Any, Optional
+from urllib.parse import urlsplit
 from ..config import VOLCENGINE_REGION
 from ..credentials import resolve_volcengine_credentials
 from ..utils import pick_value
 
 logger = logging.getLogger(__name__)
-ENDPOINT_SCHEME = os.getenv("SUPABASE_ENDPOINT_SCHEME", "http").strip().lower() or "http"
 
 try:
     import volcenginesdkcore
@@ -68,6 +67,75 @@ class AidapClient:
 
     def _pick_value(self, source: Any, *field_names: str) -> Any:
         return pick_value(source, *field_names)
+
+    def _normalize_port(self, port: Any) -> Optional[int]:
+        if port is None:
+            return None
+        try:
+            return int(port)
+        except (TypeError, ValueError):
+            logger.warning("Invalid endpoint port from AIDAP: %s", port)
+            return None
+
+    def _normalize_scheme(self, scheme: Any) -> Optional[str]:
+        if not isinstance(scheme, str):
+            return None
+        normalized = scheme.strip().lower()
+        if normalized in {"http", "https"}:
+            return normalized
+        return None
+
+    def _scheme_from_port(self, port: Optional[int]) -> str:
+        return "https" if port == 443 else "http"
+
+    def _host_has_port(self, host: str) -> bool:
+        try:
+            return urlsplit(f"//{host}").port is not None
+        except ValueError:
+            return ":" in host.rsplit("]", 1)[-1]
+
+    def _endpoint_url(self, address: dict[str, Any]) -> str:
+        domain = address["domain"]
+        parsed_scheme = None
+        host = domain.strip().rstrip("/")
+        if "://" in host:
+            parsed = urlsplit(host)
+            parsed_scheme = self._normalize_scheme(parsed.scheme)
+            host = parsed.netloc or parsed.path
+
+        port = self._normalize_port(address.get("port"))
+        scheme = address.get("scheme") or parsed_scheme or self._scheme_from_port(port)
+        if port is not None and not self._host_has_port(host):
+            host = f"{host}:{port}"
+        return f"{scheme}://{host}"
+
+    def _endpoint_address_payload(self, addr: Any) -> Optional[dict[str, Any]]:
+        domain = self._pick_value(addr, "address_domain", "AddressDomain", "domain", "Domain")
+        if not domain:
+            return None
+        return {
+            "domain": domain,
+            "port": self._pick_value(addr, "address_port", "AddressPort", "port", "Port"),
+            "scheme": self._normalize_scheme(
+                self._pick_value(
+                    addr,
+                    "address_scheme",
+                    "AddressScheme",
+                    "scheme",
+                    "Scheme",
+                    "protocol",
+                    "Protocol",
+                )
+            ),
+            "address_type": self._pick_value(addr, "address_type", "AddressType"),
+        }
+
+    def _is_public_address(self, address: dict[str, Any]) -> bool:
+        address_type = address.get("address_type")
+        if isinstance(address_type, str) and address_type.lower() == "public":
+            return True
+        domain = address["domain"]
+        return "volces.com" in domain and "ivolces.com" not in domain
 
     def _branch_payload(self, branch: Any, fallback_name: Optional[str] = None) -> dict:
         parent_branch = self._pick_value(branch, "parent_branch")
@@ -289,19 +357,20 @@ class AidapClient:
             response = self.client.describe_workspace_endpoint(request)
 
             if hasattr(response, 'endpoints') and response.endpoints:
-                domains = []
+                addresses = []
                 for endpoint in response.endpoints:
                     if hasattr(endpoint, 'addresses') and endpoint.addresses:
                         for addr in endpoint.addresses:
-                            if hasattr(addr, 'address_domain'):
-                                domains.append(addr.address_domain)
+                            address = self._endpoint_address_payload(addr)
+                            if address:
+                                addresses.append(address)
 
-                for domain in domains:
-                    if 'volces.com' in domain and 'ivolces.com' not in domain:
-                        return f"https://{domain}" if ENDPOINT_SCHEME == "https" else f"http://{domain}:80"
+                for address in addresses:
+                    if self._is_public_address(address):
+                        return self._endpoint_url(address)
 
-                if domains:
-                    return f"https://{domains[0]}" if ENDPOINT_SCHEME == "https" else f"http://{domains[0]}:80"
+                if addresses:
+                    return self._endpoint_url(addresses[0])
 
             return None
         except Exception as e:

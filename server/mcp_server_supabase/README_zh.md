@@ -95,7 +95,6 @@
 | `DISABLED_TOOLS` | 否 | - | 逗号分隔的工具黑名单，在其他策略之后做最终剔除 |
 | `READ_ONLY` | 否 | `false` | 服务启动级只读开关；启用后会隐藏所有写工具 |
 | `SUPABASE_WORKSPACE_SLUG` | 否 | `default` | Edge Functions API 使用的项目 slug |
-| `SUPABASE_ENDPOINT_SCHEME` | 否 | `http` | 生成 workspace URL 时使用的协议 |
 | `MCP_SERVER_HOST` | 否 | `0.0.0.0` | `sse` 和 `streamable-http` 使用的监听地址 |
 | `MCP_SERVER_PORT` | 否 | `8000` | 网络传输优先使用的端口变量 |
 | `PORT` | 否 | `8000` | 兼容保留的端口变量 |
