@@ -9,6 +9,10 @@ from ..credentials import resolve_volcengine_credentials
 from ..utils import pick_value
 
 logger = logging.getLogger(__name__)
+<<<<<<< main
+=======
+ENDPOINT_SCHEME_FALLBACK = os.getenv("SUPABASE_ENDPOINT_SCHEME", "http").strip().lower() or "http"
+>>>>>>> main
 
 try:
     import volcenginesdkcore
@@ -68,6 +72,7 @@ class AidapClient:
     def _pick_value(self, source: Any, *field_names: str) -> Any:
         return pick_value(source, *field_names)
 
+<<<<<<< main
     def _normalize_port(self, port: Any) -> Optional[int]:
         if port is None:
             return None
@@ -136,6 +141,44 @@ class AidapClient:
             return True
         domain = address["domain"]
         return "volces.com" in domain and "ivolces.com" not in domain
+=======
+    def _build_endpoint_from_address(self, address: Any) -> Optional[str]:
+        domain = self._pick_value(address, "address_domain", "AddressDomain")
+        if not domain:
+            return None
+
+        raw_port = self._pick_value(address, "address_port", "AddressPort")
+        try:
+            port = int(raw_port) if raw_port is not None else None
+        except (TypeError, ValueError):
+            port = None
+
+        if port == 80:
+            scheme = "http"
+        elif port == 443:
+            scheme = "https"
+        else:
+            scheme = ENDPOINT_SCHEME_FALLBACK
+
+        if port is None:
+            return f"{scheme}://{domain}"
+        return f"{scheme}://{domain}:{port}"
+
+    def _endpoint_priority(self, endpoint: Any, address: Any) -> tuple[int, int, int]:
+        endpoint_type = str(self._pick_value(endpoint, "endpoint_type", "EndpointType") or "").lower()
+        address_type = str(self._pick_value(address, "address_type", "AddressType") or "").lower()
+        domain = str(self._pick_value(address, "address_domain", "AddressDomain") or "").lower()
+
+        is_public = address_type == "public" or ("volces.com" in domain and "ivolces.com" not in domain)
+        is_dashboard = endpoint_type == "dashboard"
+        has_domain = bool(domain)
+
+        return (
+            0 if is_public else 1,
+            0 if is_dashboard else 1,
+            0 if has_domain else 1,
+        )
+>>>>>>> main
 
     def _branch_payload(self, branch: Any, fallback_name: Optional[str] = None) -> dict:
         parent_branch = self._pick_value(branch, "parent_branch")
@@ -357,6 +400,7 @@ class AidapClient:
             response = self.client.describe_workspace_endpoint(request)
 
             if hasattr(response, 'endpoints') and response.endpoints:
+<<<<<<< main
                 addresses = []
                 for endpoint in response.endpoints:
                     if hasattr(endpoint, 'addresses') and endpoint.addresses:
@@ -371,6 +415,20 @@ class AidapClient:
 
                 if addresses:
                     return self._endpoint_url(addresses[0])
+=======
+                candidates: list[tuple[tuple[int, int, int], str]] = []
+                for endpoint in response.endpoints:
+                    if hasattr(endpoint, 'addresses') and endpoint.addresses:
+                        for addr in endpoint.addresses:
+                            resolved_endpoint = self._build_endpoint_from_address(addr)
+                            if not resolved_endpoint:
+                                continue
+                            candidates.append((self._endpoint_priority(endpoint, addr), resolved_endpoint))
+
+                if candidates:
+                    candidates.sort(key=lambda item: item[0])
+                    return candidates[0][1]
+>>>>>>> main
 
             return None
         except Exception as e:
