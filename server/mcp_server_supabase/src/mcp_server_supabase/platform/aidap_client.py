@@ -1,15 +1,14 @@
 import logging
 import asyncio
-import os
 import random
 from collections.abc import Callable
 from typing import Any, Optional
+from urllib.parse import urlsplit
 from ..config import VOLCENGINE_REGION
 from ..credentials import resolve_volcengine_credentials
 from ..utils import pick_value
 
 logger = logging.getLogger(__name__)
-ENDPOINT_SCHEME_FALLBACK = os.getenv("SUPABASE_ENDPOINT_SCHEME", "http").strip().lower() or "http"
 
 try:
     import volcenginesdkcore
@@ -69,39 +68,68 @@ class AidapClient:
     def _pick_value(self, source: Any, *field_names: str) -> Any:
         return pick_value(source, *field_names)
 
-    def _build_endpoint_from_address(self, address: Any) -> Optional[str]:
-        domain = self._pick_value(address, "address_domain", "AddressDomain")
+    def _normalize_port(self, port: Any) -> Optional[int]:
+        if port is None:
+            return None
+        try:
+            return int(port)
+        except (TypeError, ValueError):
+            logger.warning("Invalid endpoint port from AIDAP: %s", port)
+            return None
+
+    def _scheme_from_port(self, port: int) -> str:
+        return "https" if port == 443 else "http"
+
+    def _host_has_port(self, host: str) -> bool:
+        try:
+            return urlsplit(f"//{host}").port is not None
+        except ValueError:
+            return ":" in host.rsplit("]", 1)[-1]
+
+    def _endpoint_url(self, address: dict[str, Any]) -> Optional[str]:
+        domain = address.get("domain")
         if not domain:
             return None
 
-        raw_port = self._pick_value(address, "address_port", "AddressPort")
-        try:
-            port = int(raw_port) if raw_port is not None else None
-        except (TypeError, ValueError):
-            port = None
-
-        if port == 80:
-            scheme = "http"
-        elif port == 443:
-            scheme = "https"
-        else:
-            scheme = ENDPOINT_SCHEME_FALLBACK
-
+        port = self._normalize_port(address.get("port"))
         if port is None:
-            return f"{scheme}://{domain}"
-        return f"{scheme}://{domain}:{port}"
+            return None
 
-    def _endpoint_priority(self, endpoint: Any, address: Any) -> tuple[int, int, int]:
+        host = domain.strip().rstrip("/")
+        if "://" in host:
+            parsed = urlsplit(host)
+            host = parsed.netloc or parsed.path
+
+        scheme = self._scheme_from_port(port)
+        if not self._host_has_port(host):
+            host = f"{host}:{port}"
+        return f"{scheme}://{host}"
+
+    def _endpoint_address_payload(self, addr: Any) -> Optional[dict[str, Any]]:
+        domain = self._pick_value(addr, "address_domain", "AddressDomain", "domain", "Domain")
+        if not domain:
+            return None
+        return {
+            "domain": domain,
+            "port": self._pick_value(addr, "address_port", "AddressPort", "port", "Port"),
+            "address_type": self._pick_value(addr, "address_type", "AddressType"),
+        }
+
+    def _address_type_priority(self, address: dict[str, Any]) -> int:
+        address_type = address.get("address_type")
+        if isinstance(address_type, str) and address_type.lower() == "public":
+            return 0
+        if isinstance(address_type, str) and address_type.lower() == "private":
+            return 1
+        return 2
+
+    def _endpoint_priority(self, endpoint: Any, address: dict[str, Any]) -> tuple[int, int, int]:
         endpoint_type = str(self._pick_value(endpoint, "endpoint_type", "EndpointType") or "").lower()
-        address_type = str(self._pick_value(address, "address_type", "AddressType") or "").lower()
-        domain = str(self._pick_value(address, "address_domain", "AddressDomain") or "").lower()
-
-        is_public = address_type == "public" or ("volces.com" in domain and "ivolces.com" not in domain)
         is_dashboard = endpoint_type == "dashboard"
-        has_domain = bool(domain)
+        has_domain = bool(address.get("domain"))
 
         return (
-            0 if is_public else 1,
+            self._address_type_priority(address),
             0 if is_dashboard else 1,
             0 if has_domain else 1,
         )
@@ -330,10 +358,16 @@ class AidapClient:
                 for endpoint in response.endpoints:
                     if hasattr(endpoint, 'addresses') and endpoint.addresses:
                         for addr in endpoint.addresses:
-                            resolved_endpoint = self._build_endpoint_from_address(addr)
-                            if not resolved_endpoint:
+                            address = self._endpoint_address_payload(addr)
+                            if not address:
                                 continue
-                            candidates.append((self._endpoint_priority(endpoint, addr), resolved_endpoint))
+                            endpoint_url = self._endpoint_url(address)
+                            if not endpoint_url:
+                                continue
+                            candidates.append((
+                                self._endpoint_priority(endpoint, address),
+                                endpoint_url,
+                            ))
 
                 if candidates:
                     candidates.sort(key=lambda item: item[0])

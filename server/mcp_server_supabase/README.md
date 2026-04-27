@@ -94,7 +94,6 @@ Static AK/SK can be obtained from the [Volcengine API Access Key console](https:
 | `DISABLED_TOOLS` | No | - | Comma-separated denylist applied after all other policy filters |
 | `READ_ONLY` | No | `false` | Startup-level read-only switch; when enabled, mutating tools are hidden |
 | `SUPABASE_WORKSPACE_SLUG` | No | `default` | Project slug used by Edge Functions APIs |
-| `SUPABASE_ENDPOINT_SCHEME` | No | `http` | Endpoint scheme used when building workspace URLs |
 | `MCP_SERVER_HOST` | No | `0.0.0.0` | Host used by `sse` and `streamable-http` transports |
 | `MCP_SERVER_PORT` | No | `8000` | Preferred port variable for network transports |
 | `PORT` | No | `8000` | Backward-compatible port variable |
