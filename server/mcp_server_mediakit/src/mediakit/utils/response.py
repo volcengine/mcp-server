@@ -71,23 +71,14 @@ def error_response(
 ) -> dict[str, Any]:
     """报错响应结构。
 
-    支持两种输入：
-    - API 错误响应（dict）：提取 error.message 或 error.error 字段
-    - 程序异常（str）：直接使用异常信息
-
-    任何兜底场景均会回退为 "unknown error"，确保 error 字段非空。
+    直接透传原始 error 内容，不做字段提取。
 
     Returns:
-        { "task_id": "xxx", "request_id": "xxx", "error": "message字段的内容" }
+        { "task_id": "xxx", "request_id": "xxx", "error": <原始error> }
     """
-    message = ""
-    if isinstance(error, dict):
-        message = error.get("message") or error.get("error", "") or error.get("msg", "")
-    elif isinstance(error, str):
-        message = error
-    if not message:
-        message = "unknown error"
-    result: dict[str, Any] = {"error": message}
+    if not error:
+        error = "unknown error"
+    result: dict[str, Any] = {"error": error}
     if task_id is not None:
         result["task_id"] = task_id
     if request_id is not None:
