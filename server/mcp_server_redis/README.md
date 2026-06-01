@@ -202,7 +202,7 @@ This mode is suitable for local `stdio` runs or any client that injects credenti
 
 ### 3. STS temporary credentials via `Authorization` header
 
-For `streamable-http` calls, Redis MCP also supports passing temporary credentials in the request header:
+For HTTP-based MCP calls such as `streamable-http`, Redis MCP supports passing temporary credentials in the request header:
 
 ```http
 Authorization: Bearer <base64(json)>
@@ -227,6 +227,8 @@ Notes:
 - `Region` can be provided either in the payload or through `VOLCENGINE_REGION` / request parameters.
 - If both header credentials and environment credentials are provided, request header credentials take precedence.
 - If `CurrentTime` and `ExpiredTime` are present, the server will validate whether the STS token is expired.
+- The `Authorization` header is mainly intended for HTTP transports such as `streamable-http`.
+- For non-HTTP transports such as `stdio`, prefer setting `VOLCENGINE_ACCESS_KEY`, `VOLCENGINE_SECRET_KEY`, and `VOLCENGINE_SESSION_TOKEN` through environment variables.
 
 ---
 
@@ -278,7 +280,7 @@ Volcengine Redis service access address: https://www.volcengine.com/docs/6293/65
 }
 ```
 
-### Example 3: STS credentials through `Authorization` header (streamable-http)
+### Example 3: STS credentials through `Authorization` header (HTTP transports such as `streamable-http`)
 
 If your MCP client calls Redis MCP through HTTP, you can pass a Bearer token whose content is the Base64-encoded JSON shown above. The server will extract:
 

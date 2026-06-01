@@ -203,7 +203,7 @@ Redis MCP 现已支持以下几种火山引擎凭证方式：
 
 ### 3. 通过 `Authorization` Header 传递 STS 临时凭证
 
-对于 `streamable-http` 调用方式，Redis MCP 支持通过请求头传递临时凭证：
+对于基于 HTTP 的 MCP 调用方式（例如 `streamable-http`），Redis MCP 支持通过请求头传递临时凭证：
 
 ```http
 Authorization: Bearer <base64(json)>
@@ -228,6 +228,8 @@ Authorization: Bearer <base64(json)>
 - `Region` 可以放在 Header 对应的 JSON 中，也可以继续通过 `VOLCENGINE_REGION` 或请求参数传入。
 - 如果同时提供 Header 凭证和环境变量凭证，请求头中的凭证优先级更高。
 - 如果 JSON 中带有 `CurrentTime` 和 `ExpiredTime`，服务端会校验 STS 是否已过期。
+- `Authorization` Header 主要面向 `streamable-http` 这类 HTTP 传输方式。
+- 对于 `stdio` 这类非 HTTP 传输方式，更推荐通过环境变量传递 `VOLCENGINE_ACCESS_KEY`、`VOLCENGINE_SECRET_KEY` 和 `VOLCENGINE_SESSION_TOKEN`。
 
 ---
 
@@ -279,7 +281,7 @@ Authorization: Bearer <base64(json)>
 }
 ```
 
-### 示例 3：通过 `Authorization` Header 传递 STS（streamable-http）
+### 示例 3：通过 `Authorization` Header 传递 STS（适用于 `streamable-http` 等 HTTP 传输方式）
 
 如果你的 MCP Client 是通过 HTTP 调用 Redis MCP，可以把上面的 JSON 先做 Base64 编码，再按以下格式放入请求头：
 
