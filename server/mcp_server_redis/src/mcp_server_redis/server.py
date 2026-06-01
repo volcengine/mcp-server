@@ -1,6 +1,9 @@
 import os
+import json
+import base64
 import logging
 import argparse
+from datetime import datetime
 from typing import Any
 from mcp.server.fastmcp import FastMCP
 
@@ -10,15 +13,188 @@ from mcp_server_redis.params import func_available_params_map
 
 # Initialize the MCP service
 mcp_server = FastMCP("redis_mcp_server", port=int(os.getenv("MCP_SERVER_PORT", "8000")))
-redis_resource = RedisSDK(
-    region=os.getenv('VOLCENGINE_REGION'), host=os.getenv('VOLCENGINE_ENDPOINT'),
-    ak=os.getenv('VOLCENGINE_ACCESS_KEY'), sk=os.getenv('VOLCENGINE_SECRET_KEY')
-)
-vpc_resource = VpcSDK(
-    region=os.getenv('VOLCENGINE_REGION'), host=None,
-    ak=os.getenv('VOLCENGINE_ACCESS_KEY'), sk=os.getenv('VOLCENGINE_SECRET_KEY')
-)
 logger = logging.getLogger("mcp_server_redis")
+
+VOLCENGINE_ACCESS_KEY_ENV_NAMES = ("VOLCENGINE_ACCESS_KEY",)
+VOLCENGINE_SECRET_KEY_ENV_NAMES = ("VOLCENGINE_SECRET_KEY",)
+VOLCENGINE_SESSION_TOKEN_ENV_NAMES = ("VOLCENGINE_SESSION_TOKEN",)
+AUTHORIZATION_ENV_NAMES = ("authorization", "AUTHORIZATION")
+
+_REDIS_CLIENT_CACHE: dict[tuple[str, str, str, str, str], RedisSDK] = {}
+_VPC_CLIENT_CACHE: dict[tuple[str, str, str, str], VpcSDK] = {}
+
+
+def _get_env_value(*names: str) -> str:
+    for name in names:
+        value = os.getenv(name)
+        if value:
+            return value
+    return ""
+
+
+def _normalize_iso8601(value: str) -> str:
+    return value.replace("Z", "+00:00") if value.endswith("Z") else value
+
+
+def _validate_sts_time_window(payload: dict[str, Any]) -> None:
+    current_time = payload.get("CurrentTime")
+    expired_time = payload.get("ExpiredTime")
+    if not current_time or not expired_time:
+        return
+    current_dt = datetime.fromisoformat(_normalize_iso8601(str(current_time)))
+    expired_dt = datetime.fromisoformat(_normalize_iso8601(str(expired_time)))
+    if current_dt > expired_dt:
+        raise ValueError("STS token is expired")
+
+
+def _parse_authorization_payload(raw_value: str) -> dict[str, str]:
+    token = raw_value.split(" ", 1)[1] if " " in raw_value else raw_value
+    payload = json.loads(base64.b64decode(token).decode("utf-8"))
+    _validate_sts_time_window(payload)
+    access_key = str(payload.get("AccessKeyId") or "").strip()
+    secret_key = str(payload.get("SecretAccessKey") or "").strip()
+    session_token = str(payload.get("SessionToken") or "").strip()
+    region = str(payload.get("Region") or "").strip()
+    if not access_key or not secret_key:
+        raise ValueError("AccessKeyId or SecretAccessKey missing in authorization payload")
+    return {
+        "access_key": access_key,
+        "secret_key": secret_key,
+        "session_token": session_token,
+        "region": region,
+    }
+
+
+def _get_request_authorization() -> str:
+    try:
+        ctx = mcp_server.get_context()
+    except Exception:
+        return ""
+    request_context = getattr(ctx, "request_context", None)
+    if request_context is None:
+        request_context = getattr(ctx, "_request_context", None)
+    request = getattr(request_context, "request", None)
+    if request is None:
+        return ""
+    return str(request.headers.get("authorization") or "").strip()
+
+
+def _resolve_volcengine_credentials(region: str | None = None) -> dict[str, str]:
+    request_authorization = _get_request_authorization()
+    if request_authorization:
+        credentials = _parse_authorization_payload(request_authorization)
+        credentials["region"] = region or credentials["region"] or os.getenv("VOLCENGINE_REGION", "")
+        return credentials
+
+    env_authorization = _get_env_value(*AUTHORIZATION_ENV_NAMES)
+    if env_authorization:
+        credentials = _parse_authorization_payload(env_authorization)
+        credentials["region"] = region or credentials["region"] or os.getenv("VOLCENGINE_REGION", "")
+        return credentials
+
+    access_key = _get_env_value(*VOLCENGINE_ACCESS_KEY_ENV_NAMES)
+    secret_key = _get_env_value(*VOLCENGINE_SECRET_KEY_ENV_NAMES)
+    session_token = _get_env_value(*VOLCENGINE_SESSION_TOKEN_ENV_NAMES)
+    resolved_region = region or os.getenv("VOLCENGINE_REGION", "")
+    if access_key and secret_key:
+        return {
+            "access_key": access_key,
+            "secret_key": secret_key,
+            "session_token": session_token,
+            "region": resolved_region,
+        }
+
+    missing = []
+    if not access_key:
+        missing.append("VOLCENGINE_ACCESS_KEY")
+    if not secret_key:
+        missing.append("VOLCENGINE_SECRET_KEY")
+    if not resolved_region:
+        missing.append("VOLCENGINE_REGION or request region_id")
+    raise ValueError(
+        "Redis MCP credentials are not configured. Missing: " + ", ".join(missing)
+    )
+
+
+def _extract_region_from_args(args: tuple[Any, ...], kwargs: dict[str, Any]) -> str | None:
+    if args and isinstance(args[0], dict):
+        request = args[0]
+        return request.get("region_id") or request.get("RegionId") or request.get("region")
+    request = kwargs.get("args")
+    if isinstance(request, dict):
+        return request.get("region_id") or request.get("RegionId") or request.get("region")
+    return kwargs.get("region")
+
+
+def _get_redis_client(region: str | None = None) -> RedisSDK:
+    credentials = _resolve_volcengine_credentials(region)
+    resolved_region = credentials["region"]
+    if not resolved_region:
+        raise ValueError("VOLCENGINE_REGION or request region_id is required for Redis client")
+    host = os.getenv("VOLCENGINE_ENDPOINT", "")
+    cache_key = (
+        resolved_region,
+        host,
+        credentials["access_key"],
+        credentials["secret_key"],
+        credentials["session_token"],
+    )
+    client = _REDIS_CLIENT_CACHE.get(cache_key)
+    if client is None:
+        client = RedisSDK(
+            region=resolved_region,
+            host=host or None,
+            ak=credentials["access_key"],
+            sk=credentials["secret_key"],
+            session_token=credentials["session_token"] or None,
+        )
+        _REDIS_CLIENT_CACHE[cache_key] = client
+    return client
+
+
+def _get_vpc_client(region: str | None = None) -> VpcSDK:
+    credentials = _resolve_volcengine_credentials(region)
+    resolved_region = credentials["region"]
+    if not resolved_region:
+        raise ValueError("VOLCENGINE_REGION or request region_id is required for VPC client")
+    cache_key = (
+        resolved_region,
+        credentials["access_key"],
+        credentials["secret_key"],
+        credentials["session_token"],
+    )
+    client = _VPC_CLIENT_CACHE.get(cache_key)
+    if client is None:
+        client = VpcSDK(
+            region=resolved_region,
+            host=None,
+            ak=credentials["access_key"],
+            sk=credentials["secret_key"],
+            session_token=credentials["session_token"] or None,
+        )
+        _VPC_CLIENT_CACHE[cache_key] = client
+    return client
+
+
+class _SDKProxy:
+    def __init__(self, service_type: str):
+        self.service_type = service_type
+
+    def __getattr__(self, method_name: str):
+        def _call(*args, **kwargs):
+            region = _extract_region_from_args(args, kwargs)
+            if self.service_type == "redis":
+                client = _get_redis_client(region)
+            else:
+                client = _get_vpc_client(region)
+            method = getattr(client, method_name)
+            return method(*args, **kwargs)
+
+        return _call
+
+
+redis_resource = _SDKProxy("redis")
+vpc_resource = _SDKProxy("vpc")
 
 
 @mcp_server.tool(
