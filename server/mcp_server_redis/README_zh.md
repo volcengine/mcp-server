@@ -183,13 +183,61 @@
 ---
 
 ## 鉴权方式
-在火山引擎管理控制台获取访问密钥 ID、秘密访问密钥和区域，采用 API Key 鉴权。
-需要在配置文件中设置 `VOLCENGINE_ACCESS_KEY` 和 `VOLCENGINE_SECRET_KEY`。
+Redis MCP 现已支持以下几种火山引擎凭证方式：
+
+### 1. 静态 AK/SK
+
+在火山引擎管理控制台获取访问密钥 ID、秘密访问密钥和区域后，配置：
+
+- `VOLCENGINE_REGION`
+- `VOLCENGINE_ACCESS_KEY`
+- `VOLCENGINE_SECRET_KEY`
+
+### 2. AK/SK + SessionToken
+
+如果你使用的是临时凭证，还需要额外设置以下环境变量：
+
+- `VOLCENGINE_SESSION_TOKEN`
+
+该方式适用于本地 `stdio` 模式，或通过环境变量注入临时凭证的场景。
+
+### 3. 通过 `Authorization` Header 传递 STS 临时凭证
+
+对于基于 HTTP 的 MCP 调用方式（例如 `streamable-http`），Redis MCP 支持通过请求头传递临时凭证：
+
+```http
+Authorization: Bearer <base64(json)>
+```
+
+解码后的 JSON 内容应包含：
+
+```json
+{
+  "AccessKeyId": "",
+  "SecretAccessKey": "",
+  "SessionToken": "",
+  "CurrentTime": "2026-05-28T10:00:00+08:00",
+  "ExpiredTime": "2026-05-28T11:00:00+08:00",
+  "Region": "cn-beijing"
+}
+```
+
+说明：
+
+- 使用 STS 时需要提供 `SessionToken`。
+- `Region` 可以放在 Header 对应的 JSON 中，也可以继续通过 `VOLCENGINE_REGION` 或请求参数传入。
+- 如果同时提供 Header 凭证和环境变量凭证，请求头中的凭证优先级更高。
+- 如果 JSON 中带有 `CurrentTime` 和 `ExpiredTime`，服务端会校验 STS 是否已过期。
+- `Authorization` Header 主要面向 `streamable-http` 这类 HTTP 传输方式。
+- 对于 `stdio` 这类非 HTTP 传输方式，更推荐通过环境变量传递 `VOLCENGINE_ACCESS_KEY`、`VOLCENGINE_SECRET_KEY` 和 `VOLCENGINE_SESSION_TOKEN`。
 
 ---
 
 ## 部署
 火山引擎Redis 服务接入地址：https://www.volcengine.com/docs/6293/65743
+
+### 示例 1：静态 AK/SK（stdio）
+
 ```json
 {
   "mcpServers": {
@@ -209,10 +257,59 @@
   }
 }
 ```
+
+### 示例 2：通过环境变量传递临时凭证（stdio）
+
+```json
+{
+  "mcpServers": {
+    "redis": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/volcengine/mcp-server.git#subdirectory=server/mcp_server_redis",
+        "mcp-server-redis"
+      ],
+      "env": {
+        "VOLCENGINE_REGION": "cn-beijing",
+        "VOLCENGINE_ACCESS_KEY": "",
+        "VOLCENGINE_SECRET_KEY": "",
+        "VOLCENGINE_SESSION_TOKEN": ""
+      }
+    }
+  }
+}
+```
+
+### 示例 3：通过 `Authorization` Header 传递 STS（适用于 `streamable-http` 等 HTTP 传输方式）
+
+如果你的 MCP Client 是通过 HTTP 调用 Redis MCP，可以把上面的 JSON 先做 Base64 编码，再按以下格式放入请求头：
+
+```http
+Authorization: Bearer <base64(json)>
+```
+
+服务端会在当前请求内动态提取并使用：
+
+- `AccessKeyId`
+- `SecretAccessKey`
+- `SessionToken`
+- 可选的 `Region`
+
+然后基于这些临时凭证初始化底层 Redis 与 VPC SDK Client。
+
+## 验证方式
+
+仓库中提供了端到端验证脚本：`server/mcp_server_redis/tests/verify_sts_flow.py`。
+
+运行方式：
+
+```bash
+uv run --project server/mcp_server_redis python server/mcp_server_redis/tests/verify_sts_flow.py --region cn-beijing
+```
+
 当前支持的Region: ["cn-beijing", "cn-guangzhou", "cn-shanghai", "cn-hongkong", "ap-southeast-1", "ap-southeast-3"]
 
 ## License
 
 volcengine/mcp-server is licensed under the [MIT License](https://github.com/volcengine/mcp-server/blob/main/LICENSE).
-
-
