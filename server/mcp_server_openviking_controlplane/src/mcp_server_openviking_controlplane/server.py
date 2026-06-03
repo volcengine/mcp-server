@@ -86,9 +86,10 @@ def get_usage(resource_id: str) -> Dict[str, Any]:
 def get_collection_api_key(resource_id: str) -> Dict[str, Any]:
     """Get the plaintext data-plane API Key of one collection by ResourceID.
 
-    This is the library-level default credential (AccountID=default). You can only
-    query libraries under your own account; there is no cross-account / sudo lookup.
-    NOTE: the returned ApiKey is plaintext — handle and surface it with care.
+    Backed by the console action AccessOpenVikingApiKey. Returns the library's
+    default-user credential. You can only query libraries under your own account;
+    there is no cross-account / sudo lookup. NOTE: the ApiKey is plaintext — handle
+    and surface it with care.
 
     Args:
         resource_id: target library ResourceID.

@@ -64,8 +64,11 @@ def _model_cfg(
 @app.callback()
 def main_callback(
     ctx: typer.Context,
-    host: Optional[str] = typer.Option(None, "--host", help="Gateway host (overrides VIKING_HOST)."),
+    host: Optional[str] = typer.Option(None, "--host", help="Console host (overrides VIKING_HOST)."),
     schema: Optional[str] = typer.Option(None, "--schema", help="http or https (overrides VIKING_SCHEMA)."),
+    region: Optional[str] = typer.Option(None, "--region", help="Region segment in the path (overrides VIKING_REGION)."),
+    service: Optional[str] = typer.Option(None, "--service", help="Service segment in the path (overrides VIKING_API_SERVICE)."),
+    api_version: Optional[str] = typer.Option(None, "--api-version", help="API version segment in the path (overrides VIKING_API_VERSION)."),
     project: Optional[str] = typer.Option(None, "--project", help="Default project (overrides OPENVIKING_PROJECT)."),
     headers_file: Optional[str] = typer.Option(
         None, "--headers-file", "-H",
@@ -90,6 +93,9 @@ def main_callback(
         config = build_config(
             host=host,
             schema=schema,
+            region=region,
+            service=service,
+            api_version=api_version,
             project=project,
             headers=inline_headers,
             headers_file=headers_file,
@@ -134,7 +140,7 @@ def usage_cmd(ctx: typer.Context, resource_id: str = typer.Argument(..., help="T
 
 @app.command("api-key")
 def api_key_cmd(ctx: typer.Context, resource_id: str = typer.Argument(..., help="Target library ResourceID.")):
-    """Get the plaintext data-plane API Key of a collection."""
+    """Get the plaintext data-plane API Key of a collection (default user)."""
     client = _client(ctx)
     try:
         _print(client.get_user_access(resource_id))

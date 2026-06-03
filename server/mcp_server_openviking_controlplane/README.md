@@ -13,36 +13,57 @@ Covers the 6 core control-plane Actions:
 | `GetOpenVikingCollection` | `get_collection` | `ov-cp get <rid>` |
 | `DeleteOpenVikingCollection` | `delete_collection` ⚠️ | `ov-cp delete <rid>` |
 | `GetOpenVikingUsage` | `get_usage` | `ov-cp usage <rid>` |
-| `GetOpenVikingCollectionUserAccess` | `get_collection_api_key` | `ov-cp api-key <rid>` |
+| `AccessOpenVikingApiKey` | `get_collection_api_key` | `ov-cp api-key <rid>` |
+
+> Action names are verified against the live console; they differ slightly from the
+> `feature/openviking` source doc (e.g. the doc's `GetOpenVikingCollectionUserAccess`
+> does not exist — the real action is `AccessOpenVikingApiKey`).
+
+## Endpoint
+
+This targets the **console proxy** the browser uses, not the direct topapi gateway:
+
+```text
+{schema}://{host}/api/top/{service}/{region}/{api_version}/{Action}
+# default: https://console.volcengine.com/api/top/vikingdb/cn-beijing/2025-06-09/<Action>
+```
+
+Action and version live in the **path** (no `?Action=&Version=` query). The request
+body is the Action's params (e.g. `{"ResourceID": "..."}`).
 
 ## Authentication (development phase)
 
 Signing is **not** implemented yet. During development you supply the request headers
-yourself (copy them from the browser DevTools — "Copy request headers"). The tool
-replays them on every request. Auth is pluggable (`common/auth.py` → `ManualHeadersAuth`);
-a dedicated API key / AK-SK signer can be swapped in later without touching the rest.
+yourself — copy them from the browser DevTools ("Copy request headers", or paste a
+`curl` and keep the `-H`/`-b` lines). The tool replays them on every request, so the
+console's cookie/JWT + `x-csrf-token` authenticate the call. Auth is pluggable
+(`common/auth.py` → `ManualHeadersAuth`); a dedicated API key / AK-SK signer can be
+swapped in later without touching the rest.
 
 ### Configuration
 
 | Setting | Env var | CLI flag | Default |
 |---|---|---|---|
-| Gateway host | `VIKING_HOST` | `--host` | (or `Host` header) |
+| Console host | `VIKING_HOST` | `--host` | `console.volcengine.com` |
 | Scheme | `VIKING_SCHEMA` | `--schema` | `https` |
+| Region (path segment) | `VIKING_REGION` | `--region` | `cn-beijing` |
+| Service (path segment) | `VIKING_API_SERVICE` | `--service` | `vikingdb` |
+| API version (path segment) | `VIKING_API_VERSION` | `--api-version` | `2025-06-09` |
 | Default project | `OPENVIKING_PROJECT` | `--project` | `default` |
 | Auth headers (file) | `VIKING_HEADERS_FILE` | `--headers-file` / `-H` | — |
 | Auth headers (inline) | `VIKING_HEADERS` | `--header 'K: V'` (repeatable) | — |
 
 The headers file may be a JSON object **or** a raw `Key: Value` block (HTTP/2
-pseudo-headers like `:authority` are skipped). If `Host` is among the headers, you may
-omit `VIKING_HOST`.
+pseudo-headers like `:authority` are skipped; the `Cookie` line is kept whole). The
+defaults already point at the console, so usually you only need to supply the headers.
 
 ## CLI usage
 
 ```bash
 uv sync                      # or: pip install -e .
 
-# read-only
-uv run ov-cp --headers-file headers.txt --host vikingdb-stg.cn-beijing.volcengineapi.com list
+# read-only (console defaults; just supply the headers)
+uv run ov-cp --headers-file headers.txt list
 uv run ov-cp -H headers.txt get   <ResourceID>
 uv run ov-cp -H headers.txt usage <ResourceID>
 uv run ov-cp -H headers.txt api-key <ResourceID>
@@ -75,7 +96,6 @@ any MCP client. Add to `.mcp.json`:
         "mcp-server-openviking-controlplane"
       ],
       "env": {
-        "VIKING_HOST": "vikingdb-stg.cn-beijing.volcengineapi.com",
         "VIKING_HEADERS_FILE": "/absolute/path/to/headers.txt"
       }
     }
@@ -92,7 +112,7 @@ For local development point it at your checkout instead:
       "command": "uv",
       "args": ["run", "--directory", "/abs/path/server/mcp_server_openviking_controlplane",
                "mcp-server-openviking-controlplane"],
-      "env": { "VIKING_HOST": "...", "VIKING_HEADERS_FILE": "/abs/path/headers.txt" }
+      "env": { "VIKING_HEADERS_FILE": "/abs/path/headers.txt" }
     }
   }
 }

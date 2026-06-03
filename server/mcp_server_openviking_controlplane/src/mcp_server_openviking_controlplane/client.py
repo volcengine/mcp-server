@@ -5,11 +5,7 @@ from typing import Any, Dict, Optional
 import requests
 
 from mcp_server_openviking_controlplane.common.auth import AuthProvider, ManualHeadersAuth
-from mcp_server_openviking_controlplane.config import (
-    API_VERSION,
-    ControlPlaneConfig,
-    get_config,
-)
+from mcp_server_openviking_controlplane.config import ControlPlaneConfig, get_config
 
 logger = logging.getLogger(__name__)
 
@@ -47,18 +43,18 @@ class ControlPlaneClient:
         self.timeout = timeout
 
     def _request(self, action: str, body: Dict[str, Any]) -> Dict[str, Any]:
-        path = f"/api/openviking/{action}"
-        query = {"Action": action, "Version": API_VERSION}
+        # Console proxy: Action/Version are in the path, not the query string.
+        path = self.config.action_path(action)
         body_str = json.dumps(body)
 
         headers = {"Content-Type": "application/json"}
-        headers.update(self.auth.auth_headers("POST", path, query, body_str))
+        headers.update(self.auth.auth_headers("POST", path, {}, body_str))
         headers = {k: v for k, v in headers.items() if k.lower() not in _DROP_HEADERS}
 
         url = f"{self.config.base_url}{path}"
         logger.debug("POST %s body=%s", url, body_str)
         rsp = requests.request(
-            "POST", url, params=query, data=body_str, headers=headers, timeout=self.timeout
+            "POST", url, data=body_str, headers=headers, timeout=self.timeout
         )
         return self._unwrap(action, rsp)
 
@@ -137,7 +133,11 @@ class ControlPlaneClient:
         return self._request("GetOpenVikingUsage", {"ResourceID": resource_id})
 
     def get_user_access(self, resource_id: str) -> Dict[str, Any]:
-        return self._request("GetOpenVikingCollectionUserAccess", {"ResourceID": resource_id})
+        # Console action AccessOpenVikingApiKey returns the default user's PLAINTEXT
+        # data-plane key: {"UserID", "Role", "ApiKey"}. (The doc's
+        # GetOpenVikingCollectionUserAccess does not exist here; ListOpenVikingUser
+        # only returns a masked key.)
+        return self._request("AccessOpenVikingApiKey", {"ResourceID": resource_id})
 
 
 _client: Optional[ControlPlaneClient] = None
