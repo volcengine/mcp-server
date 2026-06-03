@@ -40,6 +40,7 @@ class WorkspaceTools(BaseTools):
         return to_json(payload)
 
     def _workspace_view(self, source: Any) -> dict:
+        agent_plan = pick_value(source, "agent_plan_info")
         payload = {
             "workspace_id": pick_value(source, "workspace_id"),
             "workspace_name": pick_value(source, "workspace_name"),
@@ -50,6 +51,9 @@ class WorkspaceTools(BaseTools):
             "engine_type": pick_value(source, "engine_type"),
             "engine_version": pick_value(source, "engine_version"),
             "deletion_protection_status": pick_value(source, "deletion_protection_status"),
+            "is_agent_plan_instance": pick_value(source, "is_agent_plan_instance"),
+            "agent_plan_api_key_id": pick_value(agent_plan, "api_key_id"),
+            "agent_plan_api_key": pick_value(agent_plan, "api_key"),
         }
         return compact_dict(payload)
 
@@ -151,6 +155,7 @@ class WorkspaceTools(BaseTools):
         workspace_name: str,
         engine_version: str = "Supabase_1_24",
         engine_type: str = "Supabase",
+        agent_plan_api_key: Optional[str] = None,
     ) -> str:
         if not workspace_name or not workspace_name.strip():
             return to_json({"success": False, "error": "workspace_name is required"})
@@ -158,6 +163,7 @@ class WorkspaceTools(BaseTools):
             workspace_name=workspace_name.strip(),
             engine_type=engine_type,
             engine_version=engine_version,
+            agent_plan_api_key=agent_plan_api_key,
         )
         if not isinstance(result, dict):
             return to_json({"success": False, "error": "Unexpected create workspace response"})

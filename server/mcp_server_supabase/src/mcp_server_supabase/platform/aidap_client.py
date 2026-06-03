@@ -254,6 +254,7 @@ class AidapClient:
         workspace_name: str,
         engine_type: str = "Supabase",
         engine_version: str = "Supabase_1_24",
+        agent_plan_api_key: Optional[str] = None,
     ) -> dict:
         try:
             request = CreateWorkspaceRequest(
@@ -271,6 +272,8 @@ class AidapClient:
                     deletion_protection="Disabled"
                 ),
             )
+            if agent_plan_api_key:
+                request.agent_plan_api_key = agent_plan_api_key
             response = self.client.create_workspace(request)
 
             workspace_id = getattr(response, 'workspace_id', None)

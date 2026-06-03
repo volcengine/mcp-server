@@ -209,7 +209,7 @@ def _build_get_workspace(runtime: SupabaseRuntime):
     workspace_tools = runtime.workspace_tools
 
     async def get_workspace(workspace_id: str) -> str:
-        """Gets details for a specific workspace."""
+        """Gets details for a specific workspace, including agent-plan info (is_agent_plan_instance, agent_plan_api_key_id) when present."""
         return await workspace_tools.get_workspace(workspace_id)
 
     return get_workspace
@@ -222,9 +222,19 @@ def _build_create_workspace(runtime: SupabaseRuntime):
         workspace_name: str,
         engine_version: str = "Supabase_1_24",
         engine_type: str = "Supabase",
+        agent_plan_api_key: str = None,
     ) -> str:
-        """Creates a new workspace."""
-        return await workspace_tools.create_workspace(workspace_name, engine_version, engine_type)
+        """Creates a new workspace.
+
+        Args:
+            workspace_name: Name of the workspace to create
+            engine_version: Engine version (default Supabase_1_24)
+            engine_type: Engine type (default Supabase)
+            agent_plan_api_key: Optional Agent Plan API key; binds the new workspace as an agent-plan instance
+        """
+        return await workspace_tools.create_workspace(
+            workspace_name, engine_version, engine_type, agent_plan_api_key
+        )
 
     return create_workspace
 
