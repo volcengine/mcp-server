@@ -223,6 +223,9 @@ def _build_create_workspace(runtime: SupabaseRuntime):
         engine_version: str = "Supabase_1_24",
         engine_type: str = "Supabase",
         agent_plan_api_key: str = None,
+        min_cu: float = 0.25,
+        max_cu: float = 1,
+        suspend_timeout_seconds: int = 300,
     ) -> str:
         """Creates a new workspace.
 
@@ -231,9 +234,18 @@ def _build_create_workspace(runtime: SupabaseRuntime):
             engine_version: Engine version (default Supabase_1_24)
             engine_type: Engine type (default Supabase)
             agent_plan_api_key: Optional Agent Plan API key; binds the new workspace as an agent-plan instance. Defaults to the ARK_AGENT_PLAN_API_KEY environment variable when omitted.
+            min_cu: Serverless auto-scaling lower bound in compute units (default 0.25)
+            max_cu: Serverless auto-scaling upper bound in compute units (default 1)
+            suspend_timeout_seconds: Idle seconds before the compute suspends (default 300)
         """
         return await workspace_tools.create_workspace(
-            workspace_name, engine_version, engine_type, agent_plan_api_key
+            workspace_name,
+            engine_version,
+            engine_type,
+            agent_plan_api_key,
+            min_cu,
+            max_cu,
+            suspend_timeout_seconds,
         )
 
     return create_workspace
@@ -324,6 +336,52 @@ def _build_restore_branch(runtime: SupabaseRuntime):
     return restore_branch
 
 
+def _build_get_compute_settings(runtime: SupabaseRuntime):
+    compute_tools = runtime.compute_tools
+
+    async def get_compute_settings(
+        workspace_id: str = None,
+        branch_id: str = None,
+        service_type: str = None,
+    ) -> str:
+        """Gets serverless compute settings for a workspace branch (auto-scaling CU limits, status, role).
+
+        Args:
+            workspace_id: The workspace ID
+            branch_id: Optional branch ID; defaults to the workspace's default branch
+            service_type: Optional service type filter, "Supabase" or "Database"
+        """
+        return await compute_tools.get_compute_settings(workspace_id, branch_id, service_type)
+
+    return get_compute_settings
+
+
+def _build_modify_compute_settings(runtime: SupabaseRuntime):
+    compute_tools = runtime.compute_tools
+
+    async def modify_compute_settings(
+        min_cu: float,
+        max_cu: float,
+        suspend_timeout_seconds: int = None,
+        service_type: str = None,
+        workspace_id: str = None,
+    ) -> str:
+        """Adjusts serverless compute settings for a workspace: auto-scaling CU limits and suspend timeout.
+
+        Args:
+            min_cu: Auto-scaling lower bound in compute units (e.g. 0.25)
+            max_cu: Auto-scaling upper bound in compute units (e.g. 1)
+            suspend_timeout_seconds: Idle seconds before the compute suspends (optional)
+            service_type: Optional service type, "Supabase" or "Database"
+            workspace_id: The workspace ID
+        """
+        return await compute_tools.modify_compute_settings(
+            min_cu, max_cu, suspend_timeout_seconds, service_type, workspace_id
+        )
+
+    return modify_compute_settings
+
+
 TOOL_DEFINITIONS = (
     ToolDefinition("list_workspaces", "account", False, False, _build_list_workspaces),
     ToolDefinition("get_workspace", "account", True, False, _build_get_workspace),
@@ -350,6 +408,8 @@ TOOL_DEFINITIONS = (
     ToolDefinition("create_branch", "branching", True, True, _build_create_branch),
     ToolDefinition("delete_branch", "branching", True, True, _build_delete_branch),
     ToolDefinition("restore_branch", "branching", True, True, _build_restore_branch),
+    ToolDefinition("get_compute_settings", "compute", True, False, _build_get_compute_settings),
+    ToolDefinition("modify_compute_settings", "compute", True, True, _build_modify_compute_settings),
 )
 
 

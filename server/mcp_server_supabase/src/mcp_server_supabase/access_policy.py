@@ -13,6 +13,7 @@ OFFICIAL_FEATURE_GROUPS = (
     "functions",
     "storage",
     "branching",
+    "compute",
 )
 DEFAULT_FEATURE_GROUPS = frozenset({
     "account",
@@ -22,6 +23,7 @@ DEFAULT_FEATURE_GROUPS = frozenset({
     "docs",
     "functions",
     "branching",
+    "compute",
 })
 
 ALL_TOOL_NAMES = frozenset(tool.name for tool in TOOL_DEFINITIONS)

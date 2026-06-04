@@ -156,6 +156,9 @@ class WorkspaceTools(BaseTools):
         engine_version: str = "Supabase_1_24",
         engine_type: str = "Supabase",
         agent_plan_api_key: Optional[str] = None,
+        min_cu: float = 0.25,
+        max_cu: float = 1,
+        suspend_timeout_seconds: int = 300,
     ) -> str:
         if not workspace_name or not workspace_name.strip():
             return to_json({"success": False, "error": "workspace_name is required"})
@@ -164,6 +167,9 @@ class WorkspaceTools(BaseTools):
             engine_type=engine_type,
             engine_version=engine_version,
             agent_plan_api_key=agent_plan_api_key,
+            min_cu=min_cu,
+            max_cu=max_cu,
+            suspend_timeout_seconds=suspend_timeout_seconds,
         )
         if not isinstance(result, dict):
             return to_json({"success": False, "error": "Unexpected create workspace response"})

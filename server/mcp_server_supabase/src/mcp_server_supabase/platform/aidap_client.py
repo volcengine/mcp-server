@@ -30,6 +30,8 @@ try:
         StartWorkspaceRequest,
         StopWorkspaceRequest,
         DescribeWorkspaceDetailRequest,
+        DescribeComputesRequest,
+        ModifyComputeSettingsRequest,
     )
 except ImportError:
     logger.error("volcenginesdkaidap client dependencies not installed")
@@ -257,6 +259,9 @@ class AidapClient:
         engine_type: str = "Supabase",
         engine_version: str = "Supabase_1_24",
         agent_plan_api_key: Optional[str] = None,
+        min_cu: float = 0.25,
+        max_cu: float = 1,
+        suspend_timeout_seconds: int = 300,
     ) -> dict:
         try:
             request = CreateWorkspaceRequest(
@@ -265,9 +270,9 @@ class AidapClient:
                 engine_version=engine_version,
                 branch_settings=BranchSettingsForCreateWorkspaceInput(branch_name="main"),
                 compute_settings=ComputeSettingsForCreateWorkspaceInput(
-                    auto_scaling_limit_min_cu=0.25,
-                    auto_scaling_limit_max_cu=1,
-                    suspend_timeout_seconds=300
+                    auto_scaling_limit_min_cu=min_cu,
+                    auto_scaling_limit_max_cu=max_cu,
+                    suspend_timeout_seconds=suspend_timeout_seconds
                 ),
                 workspace_settings=WorkspaceSettingsForCreateWorkspaceInput(
                     public_connection="Disabled",
@@ -305,6 +310,51 @@ class AidapClient:
         except Exception as e:
             logger.error(f"Error getting workspace detail: {e}")
             raise RuntimeError(str(e))
+
+    async def describe_computes(
+        self,
+        workspace_id: str,
+        branch_id: Optional[str] = None,
+        service_type: Optional[str] = None,
+    ) -> list[dict]:
+        if not branch_id:
+            branch_id = await self.get_default_branch_id(workspace_id)
+            if not branch_id:
+                raise RuntimeError(f"Could not resolve default branch for workspace {workspace_id}")
+        request_kwargs = {"workspace_id": workspace_id, "branch_id": branch_id}
+        if service_type:
+            request_kwargs["service_type"] = service_type
+        request = DescribeComputesRequest(**request_kwargs)
+        response = self.client.describe_computes(request)
+        computes = []
+        for compute in getattr(response, "computes", []) or []:
+            computes.append(compute.to_dict() if hasattr(compute, "to_dict") else compute)
+        return computes
+
+    async def modify_compute_settings(
+        self,
+        workspace_id: str,
+        min_cu: float,
+        max_cu: float,
+        suspend_timeout_seconds: Optional[int] = None,
+        service_type: Optional[str] = None,
+    ) -> dict:
+        try:
+            request_kwargs = {
+                "workspace_id": workspace_id,
+                "auto_scaling_limit_min_cu": min_cu,
+                "auto_scaling_limit_max_cu": max_cu,
+            }
+            if suspend_timeout_seconds is not None:
+                request_kwargs["suspend_timeout_seconds"] = suspend_timeout_seconds
+            if service_type:
+                request_kwargs["service_type"] = service_type
+            request = ModifyComputeSettingsRequest(**request_kwargs)
+            self.client.modify_compute_settings(request)
+            return {"success": True, "workspace_id": workspace_id}
+        except Exception as e:
+            logger.error(f"Error modifying compute settings: {e}")
+            return {"success": False, "error": str(e)}
 
     async def start_workspace(self, workspace_id: str) -> dict:
         try:
