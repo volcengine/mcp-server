@@ -2,7 +2,14 @@ from dataclasses import dataclass
 from typing import Any, Callable
 
 from .platform import AidapClient
-from .tools import DatabaseTools, EdgeFunctionTools, StorageTools, WorkspaceTools
+from .tools import (
+    ComputeTools,
+    DatabaseAdminTools,
+    DatabaseTools,
+    EdgeFunctionTools,
+    StorageTools,
+    WorkspaceTools,
+)
 
 
 @dataclass(slots=True)
@@ -11,7 +18,9 @@ class SupabaseRuntime:
     edge_tools: EdgeFunctionTools
     storage_tools: StorageTools
     database_tools: DatabaseTools
+    database_admin_tools: DatabaseAdminTools
     workspace_tools: WorkspaceTools
+    compute_tools: ComputeTools
 
 
 def create_runtime(
@@ -24,5 +33,7 @@ def create_runtime(
         edge_tools=EdgeFunctionTools(client),
         storage_tools=StorageTools(client),
         database_tools=DatabaseTools(client),
+        database_admin_tools=DatabaseAdminTools(client),
         workspace_tools=WorkspaceTools(client),
+        compute_tools=ComputeTools(client),
     )
