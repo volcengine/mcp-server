@@ -382,6 +382,110 @@ def _build_modify_compute_settings(runtime: SupabaseRuntime):
     return modify_compute_settings
 
 
+def _build_list_databases(runtime: SupabaseRuntime):
+    database_admin_tools = runtime.database_admin_tools
+
+    async def list_databases(workspace_id: str = None, branch_id: str = None, search: str = None) -> str:
+        """Lists logical databases in a workspace branch.
+
+        Args:
+            workspace_id: The workspace ID
+            branch_id: Optional branch ID; defaults to the workspace's default branch
+            search: Optional name filter
+        """
+        return await database_admin_tools.list_databases(workspace_id, branch_id, search)
+
+    return list_databases
+
+
+def _build_create_database(runtime: SupabaseRuntime):
+    database_admin_tools = runtime.database_admin_tools
+
+    async def create_database(
+        database_name: str,
+        owner: str = None,
+        description: str = None,
+        branch_id: str = None,
+        workspace_id: str = None,
+    ) -> str:
+        """Creates a new logical database in a workspace branch.
+
+        Args:
+            database_name: Name of the database to create
+            owner: Optional database owner (a DB account/role name)
+            description: Optional description
+            branch_id: Optional branch ID; defaults to the workspace's default branch
+            workspace_id: The workspace ID
+        """
+        return await database_admin_tools.create_database(database_name, owner, description, branch_id, workspace_id)
+
+    return create_database
+
+
+def _build_list_db_accounts(runtime: SupabaseRuntime):
+    database_admin_tools = runtime.database_admin_tools
+
+    async def list_db_accounts(workspace_id: str = None, branch_id: str = None, search: str = None) -> str:
+        """Lists database accounts (Postgres roles) in a workspace branch.
+
+        Args:
+            workspace_id: The workspace ID
+            branch_id: Optional branch ID; defaults to the workspace's default branch
+            search: Optional name filter
+        """
+        return await database_admin_tools.list_db_accounts(workspace_id, branch_id, search)
+
+    return list_db_accounts
+
+
+def _build_create_db_account(runtime: SupabaseRuntime):
+    database_admin_tools = runtime.database_admin_tools
+
+    async def create_db_account(
+        account_name: str,
+        account_password: str,
+        description: str = None,
+        branch_id: str = None,
+        workspace_id: str = None,
+    ) -> str:
+        """Creates a new database account (Postgres role) in a workspace branch.
+
+        Args:
+            account_name: Name of the account/role to create
+            account_password: Password for the new account
+            description: Optional description
+            branch_id: Optional branch ID; defaults to the workspace's default branch
+            workspace_id: The workspace ID
+        """
+        return await database_admin_tools.create_db_account(account_name, account_password, description, branch_id, workspace_id)
+
+    return create_db_account
+
+
+def _build_get_db_account_connection(runtime: SupabaseRuntime):
+    database_admin_tools = runtime.database_admin_tools
+
+    async def get_db_account_connection(
+        account_name: str,
+        database_name: str,
+        compute_id: str = None,
+        branch_id: str = None,
+        workspace_id: str = None,
+    ) -> str:
+        """Gets connection details (URL and examples) for a database account against a database.
+
+        Args:
+            account_name: The database account/role name
+            database_name: The target database name
+            compute_id: Optional compute ID; defaults to the branch's primary compute
+            branch_id: Optional branch ID; defaults to the workspace's default branch
+            workspace_id: The workspace ID
+        """
+        return await database_admin_tools.get_db_account_connection(account_name, database_name, compute_id, branch_id, workspace_id)
+
+    return get_db_account_connection
+
+
 TOOL_DEFINITIONS = (
     ToolDefinition("list_workspaces", "account", False, False, _build_list_workspaces),
     ToolDefinition("get_workspace", "account", True, False, _build_get_workspace),
@@ -393,6 +497,11 @@ TOOL_DEFINITIONS = (
     ToolDefinition("list_migrations", "database", True, False, _build_list_migrations),
     ToolDefinition("list_extensions", "database", True, False, _build_list_extensions),
     ToolDefinition("apply_migration", "database", True, True, _build_apply_migration),
+    ToolDefinition("list_databases", "database", True, False, _build_list_databases),
+    ToolDefinition("create_database", "database", True, True, _build_create_database),
+    ToolDefinition("list_db_accounts", "database", True, False, _build_list_db_accounts),
+    ToolDefinition("create_db_account", "database", True, True, _build_create_db_account),
+    ToolDefinition("get_db_account_connection", "database", True, False, _build_get_db_account_connection),
     ToolDefinition("get_workspace_url", "development", True, False, _build_get_workspace_url),
     ToolDefinition("get_publishable_keys", "development", True, False, _build_get_publishable_keys),
     ToolDefinition("generate_typescript_types", "development", True, False, _build_generate_typescript_types),
