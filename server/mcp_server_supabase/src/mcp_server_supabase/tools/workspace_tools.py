@@ -132,7 +132,7 @@ class WorkspaceTools(BaseTools):
     async def get_workspace(self, workspace_id: str) -> str:
         try:
             ws_id = self._resolve_workspace_id(workspace_id)
-            workspace_source = self._find_workspace_source(ws_id)
+            workspace_source = await self.aidap.get_workspace_detail(ws_id)
             if workspace_source is None:
                 return to_json({
                     "success": False,

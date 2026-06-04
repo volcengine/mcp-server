@@ -28,6 +28,7 @@ try:
         ComputeSettingsForCreateWorkspaceInput,
         StartWorkspaceRequest,
         StopWorkspaceRequest,
+        DescribeWorkspaceDetailRequest,
     )
 except ImportError:
     logger.error("volcenginesdkaidap client dependencies not installed")
@@ -293,6 +294,15 @@ class AidapClient:
                 "success": False,
                 "error": str(e),
             }
+
+    async def get_workspace_detail(self, workspace_id: str) -> Optional[Any]:
+        try:
+            request = DescribeWorkspaceDetailRequest(workspace_id=workspace_id)
+            response = self.client.describe_workspace_detail(request)
+            return getattr(response, "workspace", None)
+        except Exception as e:
+            logger.error(f"Error getting workspace detail: {e}")
+            raise RuntimeError(str(e))
 
     async def start_workspace(self, workspace_id: str) -> dict:
         try:
