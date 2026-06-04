@@ -1,4 +1,5 @@
 import logging
+import os
 import asyncio
 import random
 from collections.abc import Callable
@@ -273,6 +274,7 @@ class AidapClient:
                     deletion_protection="Disabled"
                 ),
             )
+            agent_plan_api_key = agent_plan_api_key or os.getenv("ARK_AGENT_PLAN_API_KEY")
             if agent_plan_api_key:
                 request.agent_plan_api_key = agent_plan_api_key
             response = self.client.create_workspace(request)

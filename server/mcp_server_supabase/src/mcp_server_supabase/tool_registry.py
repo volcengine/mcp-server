@@ -230,7 +230,7 @@ def _build_create_workspace(runtime: SupabaseRuntime):
             workspace_name: Name of the workspace to create
             engine_version: Engine version (default Supabase_1_24)
             engine_type: Engine type (default Supabase)
-            agent_plan_api_key: Optional Agent Plan API key; binds the new workspace as an agent-plan instance
+            agent_plan_api_key: Optional Agent Plan API key; binds the new workspace as an agent-plan instance. Defaults to the ARK_AGENT_PLAN_API_KEY environment variable when omitted.
         """
         return await workspace_tools.create_workspace(
             workspace_name, engine_version, engine_type, agent_plan_api_key
