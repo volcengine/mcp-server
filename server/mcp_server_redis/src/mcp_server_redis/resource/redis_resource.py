@@ -42,10 +42,13 @@ from volcenginesdkredis.models import DescribeRegionsRequest, DescribeRegionsRes
 class RedisSDK:
     """初始化 Volcano Redis SDK Client"""
 
-    def __init__(self, region: str = None, ak: str = None, sk: str = None, host: str = None):
+    def __init__(self, region: str = None, ak: str = None, sk: str = None, host: str = None,
+                 session_token: str = None):
         configuration = volcenginesdkcore.Configuration()
         configuration.ak = ak
         configuration.sk = sk
+        if session_token:
+            configuration.session_token = session_token
         configuration.region = region
         if region not in redis_supported_regions:
             raise Exception(f"Redis is not supported in region {region}.")
