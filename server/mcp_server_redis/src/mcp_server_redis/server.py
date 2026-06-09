@@ -11,8 +11,23 @@ from mcp_server_redis.resource.vpc_resource import VpcSDK
 from mcp_server_redis.resource.redis_resource import RedisSDK
 from mcp_server_redis.params import func_available_params_map
 
+def _get_server_host() -> str:
+    return os.getenv("MCP_SERVER_HOST") or os.getenv("FASTMCP_HOST") or "0.0.0.0"
+
+
+def _get_default_transport() -> str:
+    transport = os.getenv("MCP_SERVER_TRANSPORT")
+    if transport:
+        return transport
+    return "stdio"
+
+
 # Initialize the MCP service
-mcp_server = FastMCP("redis_mcp_server", port=int(os.getenv("MCP_SERVER_PORT", "8000")))
+mcp_server = FastMCP(
+    "redis_mcp_server",
+    host=_get_server_host(),
+    port=int(os.getenv("MCP_SERVER_PORT", "8000")),
+)
 logger = logging.getLogger("mcp_server_redis")
 
 VOLCENGINE_ACCESS_KEY_ENV_NAMES = ("VOLCENGINE_ACCESS_KEY",)
@@ -1832,7 +1847,7 @@ def main():
         "--transport",
         "-t",
         choices=["streamable-http", "stdio"],
-        default="stdio",
+        default=_get_default_transport(),
         help="Transport protocol to use (streamable-http or stdio)",
     )
 
