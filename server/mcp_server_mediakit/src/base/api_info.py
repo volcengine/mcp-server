@@ -1,0 +1,16 @@
+api_info = {
+    "add_image_to_video": {"path": "/api/v1/tools/add-image-to-video", "method": "POST"},
+    "add_subtitle_to_video": {"path": "/api/v1/tools/add-subtitle-to-video", "method": "POST"},
+    "adjust_video_speed": {"path": "/api/v1/tools/adjust-video-speed", "method": "POST"},
+    "concat_audio": {"path": "/api/v1/tools/concat-audio", "method": "POST"},
+    "concat_video": {"path": "/api/v1/tools/concat-video", "method": "POST"},
+    "enhance_video": {"path": "/api/v1/tools/enhance-video", "method": "POST"},
+    "erase_video_subtitle_pro": {"path": "/api/v1/tools/erase-video-subtitle-pro", "method": "POST"},
+    "extract_audio": {"path": "/api/v1/tools/extract-audio", "method": "POST"},
+    "flip_video": {"path": "/api/v1/tools/flip-video", "method": "POST"},
+    "image_to_video": {"path": "/api/v1/tools/image-to-video", "method": "POST"},
+    "mux_audio_video": {"path": "/api/v1/tools/mux-audio-video", "method": "POST"},
+    "query_task": {"path": "/api/v1/tasks/{task_id}", "method": "GET"},
+    "trim_audio": {"path": "/api/v1/tools/trim-audio", "method": "POST"},
+    "trim_video": {"path": "/api/v1/tools/trim-video", "method": "POST"},
+}
