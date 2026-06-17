@@ -47,10 +47,10 @@ def build_config(
 ) -> ControlPlaneConfig:
     """Build a config from explicit args first, then environment fallbacks, then
     package defaults."""
-    resolved_key = api_key or os.environ.get("VIKING_API_KEY")
+    resolved_key = api_key or os.environ.get("AGENTPLAN_API_KEY")
     if not resolved_key:
         raise ValueError(
-            "missing AgentPlan API key: set --api-key or the VIKING_API_KEY env var "
+            "missing AgentPlan API key: set --api-key or the AGENTPLAN_API_KEY env var "
             "(the Ark AgentPlan ApiKey sent as 'Authorization: Bearer <key>')"
         )
     return ControlPlaneConfig(

@@ -76,7 +76,7 @@ def main_callback(
     ),
     api_key: Optional[str] = typer.Option(
         None, "--api-key", "-k",
-        help="Ark AgentPlan ApiKey, sent as 'Authorization: Bearer' (overrides VIKING_API_KEY).",
+        help="Ark AgentPlan ApiKey, sent as 'Authorization: Bearer' (overrides AGENTPLAN_API_KEY).",
     ),
     project: Optional[str] = typer.Option(
         None, "--project", help="Default project (overrides OPENVIKING_PROJECT)."
@@ -155,7 +155,7 @@ def create_cmd(
     """Create a new collection (consumes paid quota; max 20 per account).
 
     For source=agentplan you can pass just --name: the model names default to the
-    AgentPlan models and the model ApiKey falls back to --api-key / VIKING_API_KEY.
+    AgentPlan models and the model ApiKey falls back to --api-key / AGENTPLAN_API_KEY.
     """
     client = _client(ctx)
     vlm = _model_cfg(vlm_model, vlm_api_key_id, vlm_api_key, vlm_endpoint_id)

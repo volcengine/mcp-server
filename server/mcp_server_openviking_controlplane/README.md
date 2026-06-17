@@ -50,7 +50,7 @@ later without touching the rest.
 | Setting | Env var | CLI flag | Default |
 |---|---|---|---|
 | Control-plane endpoint (base URL) | `VIKING_ENDPOINT` | `--endpoint` / `-e` | `https://api.vikingdb.cn-beijing.volces.com/openviking` |
-| AgentPlan ApiKey | `VIKING_API_KEY` | `--api-key` / `-k` | — (required) |
+| AgentPlan ApiKey | `AGENTPLAN_API_KEY` | `--api-key` / `-k` | — (required) |
 | Default project | `OPENVIKING_PROJECT` | `--project` | `default` |
 
 ## CLI usage
@@ -90,7 +90,7 @@ any MCP client. Add to `.mcp.json`:
         "mcp-server-openviking-controlplane"
       ],
       "env": {
-        "VIKING_API_KEY": "ark-xxxxxxxx",
+        "AGENTPLAN_API_KEY": "ark-xxxxxxxx",
         "VIKING_ENDPOINT": "https://api.vikingdb.cn-beijing.volces.com/openviking"
       }
     }
@@ -108,7 +108,7 @@ For local development point it at your checkout instead:
       "args": ["run", "--directory", "/abs/path/server/mcp_server_openviking_controlplane",
                "mcp-server-openviking-controlplane"],
       "env": {
-        "VIKING_API_KEY": "ark-xxxxxxxx",
+        "AGENTPLAN_API_KEY": "ark-xxxxxxxx",
         "VIKING_ENDPOINT": "http://localhost:18080"
       }
     }

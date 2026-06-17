@@ -46,7 +46,7 @@ Action 在 **path** 里（不走 `?Action=&Version=` query）。请求体是该 
 | 项 | 环境变量 | CLI 参数 | 默认 |
 |---|---|---|---|
 | 控制面 endpoint（base URL） | `VIKING_ENDPOINT` | `--endpoint` / `-e` | `https://api.vikingdb.cn-beijing.volces.com/openviking` |
-| AgentPlan ApiKey | `VIKING_API_KEY` | `--api-key` / `-k` | —（必填） |
+| AgentPlan ApiKey | `AGENTPLAN_API_KEY` | `--api-key` / `-k` | —（必填） |
 | 默认 project | `OPENVIKING_PROJECT` | `--project` | `default` |
 
 ## CLI 用法
@@ -85,7 +85,7 @@ Server 默认 **stdio** 传输，可被任意 MCP 客户端作为子进程拉起
         "mcp-server-openviking-controlplane"
       ],
       "env": {
-        "VIKING_API_KEY": "ark-xxxxxxxx",
+        "AGENTPLAN_API_KEY": "ark-xxxxxxxx",
         "VIKING_ENDPOINT": "https://api.vikingdb.cn-beijing.volces.com/openviking"
       }
     }
@@ -103,7 +103,7 @@ Server 默认 **stdio** 传输，可被任意 MCP 客户端作为子进程拉起
       "args": ["run", "--directory", "/abs/path/server/mcp_server_openviking_controlplane",
                "mcp-server-openviking-controlplane"],
       "env": {
-        "VIKING_API_KEY": "ark-xxxxxxxx",
+        "AGENTPLAN_API_KEY": "ark-xxxxxxxx",
         "VIKING_ENDPOINT": "http://localhost:18080"
       }
     }
