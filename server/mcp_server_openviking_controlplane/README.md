@@ -1,8 +1,8 @@
 # OpenViking Control Plane — MCP Server + CLI
 
-MCP server **and** CLI for the OpenViking control plane (topapi · `top` cluster) —
-manage OV libraries (`Collection`). Both front-ends share one core (`client.py`), so
-a tool added once is available from MCP and the CLI alike.
+MCP server **and** CLI for the OpenViking control plane (topapi) — manage OV
+libraries (`Collection`). Both front-ends share one core (`client.py`), so a tool
+added once is available from MCP and the CLI alike.
 
 Covers the 6 core control-plane Actions:
 
@@ -13,69 +13,63 @@ Covers the 6 core control-plane Actions:
 | `GetOpenVikingCollection` | `get_collection` | `ov-cp get <rid>` |
 | `DeleteOpenVikingCollection` | `delete_collection` ⚠️ | `ov-cp delete <rid>` |
 | `GetOpenVikingUsage` | `get_usage` | `ov-cp usage <rid>` |
-| `AccessOpenVikingApiKey` | `get_collection_api_key` | `ov-cp api-key <rid>` |
-
-> Action names are verified against the live console; they differ slightly from the
-> `feature/openviking` source doc (e.g. the doc's `GetOpenVikingCollectionUserAccess`
-> does not exist — the real action is `AccessOpenVikingApiKey`).
+| `GetOpenVikingCollectionUserAccess` | `get_collection_api_key` | `ov-cp api-key <rid>` |
 
 ## Endpoint
 
-This targets the **console proxy** the browser uses, not the direct topapi gateway:
+The control-plane TopAPI is compiled into the OpenViking **data-plane cluster**;
+each Action is served by the data-plane gateway at:
 
 ```text
-{schema}://{host}/api/top/{service}/{region}/{api_version}/{Action}
-# default: https://console.volcengine.com/api/top/vikingdb/cn-beijing/2025-06-09/<Action>
+{endpoint}/api/openviking/{Action}
+# default endpoint: https://api.vikingdb.cn-beijing.volces.com/openviking
+# full URL e.g.: https://api.vikingdb.cn-beijing.volces.com/openviking/api/openviking/ListOpenVikingCollections
 ```
 
-Action and version live in the **path** (no `?Action=&Version=` query). The request
-body is the Action's params (e.g. `{"ResourceID": "..."}`).
+The Action lives in the **path** (no `?Action=&Version=` query). The request body
+is the Action's params (e.g. `{"ResourceID": "..."}`).
 
-## Authentication (development phase)
+> The default endpoint points at the **reserved** public data-plane gateway (not
+> open to traffic yet). For local testing set `--endpoint` / `VIKING_ENDPOINT` to a
+> `kubectl port-forward`, e.g. `http://localhost:18080`.
 
-Signing is **not** implemented yet. During development you supply the request headers
-yourself — copy them from the browser DevTools ("Copy request headers", or paste a
-`curl` and keep the `-H`/`-b` lines). The tool replays them on every request, so the
-console's cookie/JWT + `x-csrf-token` authenticate the call. Auth is pluggable
-(`common/auth.py` → `ManualHeadersAuth`); a dedicated API key / AK-SK signer can be
-swapped in later without touching the rest.
+## Authentication
+
+The only method: an **Ark AgentPlan ApiKey**, sent as an `Authorization: Bearer
+<key>` header on every request (the backend's `authorizeControlPlaneByArk` reads
+the key only from this header — it does **not** accept `X-API-Key`). Auth is
+pluggable (`common/auth.py` → `BearerTokenAuth`); an AK/SK signer can be swapped in
+later without touching the rest.
+
+> ⚠️ Write actions like `create` require the account to have **AgentPlan deduction
+> activated**, otherwise they return `ProductUnordered`. Read-only actions
+> (list/get/usage/delete) are not gated.
 
 ### Configuration
 
 | Setting | Env var | CLI flag | Default |
 |---|---|---|---|
-| Console host | `VIKING_HOST` | `--host` | `console.volcengine.com` |
-| Scheme | `VIKING_SCHEMA` | `--schema` | `https` |
-| Region (path segment) | `VIKING_REGION` | `--region` | `cn-beijing` |
-| Service (path segment) | `VIKING_API_SERVICE` | `--service` | `vikingdb` |
-| API version (path segment) | `VIKING_API_VERSION` | `--api-version` | `2025-06-09` |
+| Control-plane endpoint (base URL) | `VIKING_ENDPOINT` | `--endpoint` / `-e` | `https://api.vikingdb.cn-beijing.volces.com/openviking` |
+| AgentPlan ApiKey | `VIKING_API_KEY` | `--api-key` / `-k` | — (required) |
 | Default project | `OPENVIKING_PROJECT` | `--project` | `default` |
-| Auth headers (file) | `VIKING_HEADERS_FILE` | `--headers-file` / `-H` | — |
-| Auth headers (inline) | `VIKING_HEADERS` | `--header 'K: V'` (repeatable) | — |
-
-The headers file may be a JSON object **or** a raw `Key: Value` block (HTTP/2
-pseudo-headers like `:authority` are skipped; the `Cookie` line is kept whole). The
-defaults already point at the console, so usually you only need to supply the headers.
 
 ## CLI usage
 
 ```bash
 uv sync                      # or: pip install -e .
 
-# read-only (console defaults; just supply the headers)
-uv run ov-cp --headers-file headers.txt list
-uv run ov-cp -H headers.txt get   <ResourceID>
-uv run ov-cp -H headers.txt usage <ResourceID>
-uv run ov-cp -H headers.txt api-key <ResourceID>
+# read-only (point endpoint at a port-forward while testing)
+uv run ov-cp -k <ARK_KEY> -e http://localhost:18080 list
+uv run ov-cp -k <ARK_KEY> -e http://localhost:18080 get   <ResourceID>
+uv run ov-cp -k <ARK_KEY> -e http://localhost:18080 usage <ResourceID>
+uv run ov-cp -k <ARK_KEY> -e http://localhost:18080 api-key <ResourceID>
 
-# create (consumes paid quota; max 20 libraries/account)
-uv run ov-cp -H headers.txt create \
-  --name my_kb --source volcengine \
-  --vlm-model doubao-vision-... --vlm-api-key-id <id> \
-  --emb-model doubao-embedding-... --emb-api-key-id <id>
+# create (consumes paid quota; with source=agentplan only --name is needed —
+#         model names default, and the model ApiKey falls back to --api-key)
+uv run ov-cp -k <ARK_KEY> -e http://localhost:18080 create --name my_kb
 
 # delete (irreversible)
-uv run ov-cp -H headers.txt delete <ResourceID> --yes
+uv run ov-cp -k <ARK_KEY> -e http://localhost:18080 delete <ResourceID> --yes
 ```
 
 `ov-cp --help` works without any config.
@@ -96,7 +90,8 @@ any MCP client. Add to `.mcp.json`:
         "mcp-server-openviking-controlplane"
       ],
       "env": {
-        "VIKING_HEADERS_FILE": "/absolute/path/to/headers.txt"
+        "VIKING_API_KEY": "ark-xxxxxxxx",
+        "VIKING_ENDPOINT": "https://api.vikingdb.cn-beijing.volces.com/openviking"
       }
     }
   }
@@ -112,7 +107,10 @@ For local development point it at your checkout instead:
       "command": "uv",
       "args": ["run", "--directory", "/abs/path/server/mcp_server_openviking_controlplane",
                "mcp-server-openviking-controlplane"],
-      "env": { "VIKING_HEADERS_FILE": "/abs/path/headers.txt" }
+      "env": {
+        "VIKING_API_KEY": "ark-xxxxxxxx",
+        "VIKING_ENDPOINT": "http://localhost:18080"
+      }
     }
   }
 }

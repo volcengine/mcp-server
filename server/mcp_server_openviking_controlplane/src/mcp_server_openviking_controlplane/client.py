@@ -4,8 +4,13 @@ from typing import Any, Dict, Optional
 
 import requests
 
-from mcp_server_openviking_controlplane.common.auth import AuthProvider, ManualHeadersAuth
-from mcp_server_openviking_controlplane.config import ControlPlaneConfig, get_config
+from mcp_server_openviking_controlplane.common.auth import AuthProvider, BearerTokenAuth
+from mcp_server_openviking_controlplane.config import (
+    DEFAULT_EMBEDDING_MODEL,
+    DEFAULT_VLM_MODEL,
+    ControlPlaneConfig,
+    get_config,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +44,7 @@ class ControlPlaneClient:
         timeout: int = 30,
     ):
         self.config = config
-        self.auth = auth or ManualHeadersAuth(config.headers)
+        self.auth = auth or BearerTokenAuth(config.api_key)
         self.timeout = timeout
 
     def _request(self, action: str, body: Dict[str, Any]) -> Dict[str, Any]:
@@ -93,24 +98,57 @@ class ControlPlaneClient:
             body["Project"] = proj
         return self._request("ListOpenVikingCollections", body)
 
+    def _model_block(
+        self, cfg: Optional[Dict[str, Any]], source: str, default_model: str
+    ) -> Dict[str, Any]:
+        """Build a VLM/Embedding block in the multi-credential (Credentials[]) form.
+
+        The new control-plane create format carries credentials per-model as an
+        ordered failover list. We emit one credential built from ``source`` plus
+        the supplied key fields; for ``source == "agentplan"`` the model credential
+        is the AgentPlan ApiKey itself, so it falls back to the configured key.
+        An advanced caller may instead pass a ready-made ``Credentials`` list
+        (e.g. for multi-source failover), which is passed through verbatim."""
+        cfg = dict(cfg or {})
+        model_name = cfg.get("ModelName") or default_model
+
+        creds = cfg.get("Credentials")
+        if creds:  # caller already supplied the failover list — pass through
+            return {"ModelName": model_name, "Credentials": creds}
+
+        api_key = cfg.get("ApiKey")
+        api_key_id = cfg.get("ApiKeyID")
+        if not api_key and not api_key_id and source == "agentplan":
+            api_key = self.config.api_key
+
+        cred: Dict[str, Any] = {"Source": source}
+        if api_key_id:
+            cred["ApiKeyID"] = api_key_id
+        if api_key:
+            cred["ApiKey"] = api_key
+        if cfg.get("EndpointID"):  # volcengine source only
+            cred["EndpointID"] = cfg["EndpointID"]
+        return {"ModelName": model_name, "Credentials": [cred]}
+
     def create_collection(
         self,
         name: str,
-        source: str,
-        vlm: Dict[str, Any],
-        embedding: Dict[str, Any],
+        source: str = "agentplan",
+        vlm: Optional[Dict[str, Any]] = None,
+        embedding: Optional[Dict[str, Any]] = None,
         version: str = "developer",
         project: Optional[str] = None,
         description: Optional[str] = None,
         openviking_version: Optional[str] = None,
         extra: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
+        # Multi-credential create format: top-level Source is omitted (each model
+        # carries its source inside Credentials[]).
         body: Dict[str, Any] = {
             "Name": name,
             "Version": version,
-            "Source": source,
-            "VLM": vlm,
-            "Embedding": embedding,
+            "VLM": self._model_block(vlm, source, DEFAULT_VLM_MODEL),
+            "Embedding": self._model_block(embedding, source, DEFAULT_EMBEDDING_MODEL),
         }
         proj = project if project is not None else self.config.project
         if proj:
@@ -133,11 +171,14 @@ class ControlPlaneClient:
         return self._request("GetOpenVikingUsage", {"ResourceID": resource_id})
 
     def get_user_access(self, resource_id: str) -> Dict[str, Any]:
-        # Console action AccessOpenVikingApiKey returns the default user's PLAINTEXT
-        # data-plane key: {"UserID", "Role", "ApiKey"}. (The doc's
-        # GetOpenVikingCollectionUserAccess does not exist here; ListOpenVikingUser
-        # only returns a masked key.)
-        return self._request("AccessOpenVikingApiKey", {"ResourceID": resource_id})
+        # On the data-plane cluster the api-key action is registered as
+        # GetOpenVikingCollectionUserAccess (the console proxy's
+        # AccessOpenVikingApiKey is NOT routed here — it 404s). Returns the
+        # default user's PLAINTEXT key: {"UserID", "Role", "ApiKey"}.
+        # (ListOpenVikingCollectionUser only returns a masked key.)
+        return self._request(
+            "GetOpenVikingCollectionUserAccess", {"ResourceID": resource_id}
+        )
 
 
 _client: Optional[ControlPlaneClient] = None

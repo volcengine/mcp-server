@@ -86,7 +86,7 @@ def get_usage(resource_id: str) -> Dict[str, Any]:
 def get_collection_api_key(resource_id: str) -> Dict[str, Any]:
     """Get the plaintext data-plane API Key of one collection by ResourceID.
 
-    Backed by the console action AccessOpenVikingApiKey. Returns the library's
+    Backed by the action GetOpenVikingCollectionUserAccess. Returns the library's
     default-user credential. You can only query libraries under your own account;
     there is no cross-account / sudo lookup. NOTE: the ApiKey is plaintext — handle
     and surface it with care.
@@ -109,7 +109,7 @@ def create_collection(
     name: str,
     vlm: Optional[Dict[str, Any]] = None,
     embedding: Optional[Dict[str, Any]] = None,
-    source: str = "volcengine",
+    source: str = "agentplan",
     version: str = "developer",
     project: Optional[str] = None,
     description: Optional[str] = None,
@@ -118,16 +118,18 @@ def create_collection(
     """⚠️ Creates a NEW, BILLABLE OpenViking collection (provisions a Helm release).
 
     CONFIRM WITH THE USER before calling — this consumes paid quota (max 20 libraries
-    per account, returns QuotaExceeded beyond that). Do NOT call speculatively.
+    per account, returns QuotaExceeded beyond that). Requires the account to have
+    AgentPlan deduction activated (otherwise ProductUnordered). Do NOT call
+    speculatively.
 
     Args:
         name: library name, regex ^[a-zA-Z][a-zA-Z0-9_]*$, length <= 64.
-        vlm: VLM model config, e.g. {"ModelName": "doubao-...", "ApiKeyID": "..."}.
-             ModelName MUST start with "doubao"; ApiKeyID and ApiKey are mutually
-             exclusive and exactly one is required. EndpointID/ModelVersion optional.
-        embedding: embedding model config, same shape as vlm (Input/Dimension are
-             fixed server-side, do not pass).
-        source: model source, "volcengine" or "codeplan".
+        vlm: optional VLM model config, e.g. {"ModelName": "...", "ApiKeyID": "..."}.
+             For source="agentplan" this can be omitted — the model name defaults
+             to the AgentPlan VLM and the ApiKey falls back to the configured
+             AgentPlan key. ApiKeyID and ApiKey are mutually exclusive.
+        embedding: optional embedding model config, same shape/defaults as vlm.
+        source: model source — "agentplan" (default), "volcengine", or "codeplan".
         version: library version, currently only "developer".
         project: project name; defaults to the configured project.
         description: optional, length <= 65535.
@@ -137,11 +139,6 @@ def create_collection(
         {"ResourceID": "...", "Success": true}
     """
     try:
-        if not vlm or not embedding:
-            raise ValueError(
-                "both 'vlm' and 'embedding' configs are required; each needs ModelName "
-                "(doubao* prefix) plus ApiKeyID or ApiKey"
-            )
         return get_client().create_collection(
             name=name,
             source=source,

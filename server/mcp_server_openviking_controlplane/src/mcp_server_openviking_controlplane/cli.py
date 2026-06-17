@@ -1,11 +1,15 @@
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import typer
 
 from mcp_server_openviking_controlplane.client import ControlPlaneClient, ControlPlaneError
-from mcp_server_openviking_controlplane.config import build_config
+from mcp_server_openviking_controlplane.config import (
+    DEFAULT_EMBEDDING_MODEL,
+    DEFAULT_VLM_MODEL,
+    build_config,
+)
 
 logging.basicConfig(
     level=logging.WARNING, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -47,10 +51,11 @@ def _model_cfg(
     api_key_id: Optional[str],
     api_key: Optional[str],
     endpoint_id: Optional[str],
-    label: str,
 ) -> Dict[str, Any]:
-    if not api_key_id and not api_key:
-        raise typer.BadParameter(f"{label} needs --{label}-api-key-id or --{label}-api-key")
+    """Assemble a VLM/Embedding model config from whatever the caller supplied.
+
+    No key is required here: for the ``agentplan`` source the client fills in the
+    configured AgentPlan ApiKey; other sources are validated server-side."""
     cfg: Dict[str, Any] = {"ModelName": model_name}
     if api_key_id:
         cfg["ApiKeyID"] = api_key_id
@@ -64,42 +69,23 @@ def _model_cfg(
 @app.callback()
 def main_callback(
     ctx: typer.Context,
-    host: Optional[str] = typer.Option(None, "--host", help="Console host (overrides VIKING_HOST)."),
-    schema: Optional[str] = typer.Option(None, "--schema", help="http or https (overrides VIKING_SCHEMA)."),
-    region: Optional[str] = typer.Option(None, "--region", help="Region segment in the path (overrides VIKING_REGION)."),
-    service: Optional[str] = typer.Option(None, "--service", help="Service segment in the path (overrides VIKING_API_SERVICE)."),
-    api_version: Optional[str] = typer.Option(None, "--api-version", help="API version segment in the path (overrides VIKING_API_VERSION)."),
-    project: Optional[str] = typer.Option(None, "--project", help="Default project (overrides OPENVIKING_PROJECT)."),
-    headers_file: Optional[str] = typer.Option(
-        None, "--headers-file", "-H",
-        help="Path to a headers file: JSON object, or raw 'Key: Value' lines copied from the browser.",
+    endpoint: Optional[str] = typer.Option(
+        None, "--endpoint", "-e",
+        help="Control-plane base URL (overrides VIKING_ENDPOINT). "
+             "For local testing point at a port-forward, e.g. http://localhost:18080",
     ),
-    header: Optional[List[str]] = typer.Option(
-        None, "--header",
-        help="Inline header 'Key: Value' (repeatable). Overrides --headers-file.",
+    api_key: Optional[str] = typer.Option(
+        None, "--api-key", "-k",
+        help="Ark AgentPlan ApiKey, sent as 'Authorization: Bearer' (overrides VIKING_API_KEY).",
+    ),
+    project: Optional[str] = typer.Option(
+        None, "--project", help="Default project (overrides OPENVIKING_PROJECT)."
     ),
 ):
     """Stash a client factory on the context; commands build it on demand."""
-    inline_headers: Optional[Dict[str, str]] = None
-    if header:
-        inline_headers = {}
-        for h in header:
-            key, sep, value = h.partition(":")
-            if not sep:
-                raise typer.BadParameter(f"--header must be 'Key: Value', got: {h}")
-            inline_headers[key.strip()] = value.strip()
 
     def _factory() -> ControlPlaneClient:
-        config = build_config(
-            host=host,
-            schema=schema,
-            region=region,
-            service=service,
-            api_version=api_version,
-            project=project,
-            headers=inline_headers,
-            headers_file=headers_file,
-        )
+        config = build_config(endpoint=endpoint, project=project, api_key=api_key)
         return ControlPlaneClient(config)
 
     ctx.obj = _factory
@@ -152,24 +138,28 @@ def api_key_cmd(ctx: typer.Context, resource_id: str = typer.Argument(..., help=
 def create_cmd(
     ctx: typer.Context,
     name: str = typer.Option(..., help="Library name ^[a-zA-Z][a-zA-Z0-9_]*$, <=64."),
-    source: str = typer.Option("volcengine", help="Model source: volcengine | codeplan."),
+    source: str = typer.Option("agentplan", help="Model source: agentplan | volcengine | codeplan."),
     version: str = typer.Option("developer", help="Library version (currently only 'developer')."),
-    vlm_model: str = typer.Option(..., help="VLM ModelName (must start with 'doubao')."),
+    vlm_model: str = typer.Option(DEFAULT_VLM_MODEL, help="VLM ModelName."),
     vlm_api_key_id: Optional[str] = typer.Option(None, help="VLM ApiKeyID (exclusive with --vlm-api-key)."),
-    vlm_api_key: Optional[str] = typer.Option(None, help="VLM ApiKey (exclusive with --vlm-api-key-id)."),
-    vlm_endpoint_id: Optional[str] = typer.Option(None, help="VLM EndpointID (optional)."),
-    emb_model: str = typer.Option(..., help="Embedding ModelName (must start with 'doubao')."),
+    vlm_api_key: Optional[str] = typer.Option(None, help="VLM ApiKey (defaults to --api-key when source=agentplan)."),
+    vlm_endpoint_id: Optional[str] = typer.Option(None, help="VLM EndpointID (volcengine source only)."),
+    emb_model: str = typer.Option(DEFAULT_EMBEDDING_MODEL, help="Embedding ModelName."),
     emb_api_key_id: Optional[str] = typer.Option(None, help="Embedding ApiKeyID (exclusive with --emb-api-key)."),
-    emb_api_key: Optional[str] = typer.Option(None, help="Embedding ApiKey (exclusive with --emb-api-key-id)."),
-    emb_endpoint_id: Optional[str] = typer.Option(None, help="Embedding EndpointID (optional)."),
+    emb_api_key: Optional[str] = typer.Option(None, help="Embedding ApiKey (defaults to --api-key when source=agentplan)."),
+    emb_endpoint_id: Optional[str] = typer.Option(None, help="Embedding EndpointID (volcengine source only)."),
     project: Optional[str] = typer.Option(None, help="Project name (defaults to configured)."),
     description: Optional[str] = typer.Option(None, help="Description, <=65535 chars."),
     openviking_version: Optional[str] = typer.Option(None, help="Image version (optional)."),
 ):
-    """Create a new collection (consumes paid quota; max 20 per account)."""
+    """Create a new collection (consumes paid quota; max 20 per account).
+
+    For source=agentplan you can pass just --name: the model names default to the
+    AgentPlan models and the model ApiKey falls back to --api-key / VIKING_API_KEY.
+    """
     client = _client(ctx)
-    vlm = _model_cfg(vlm_model, vlm_api_key_id, vlm_api_key, vlm_endpoint_id, "vlm")
-    embedding = _model_cfg(emb_model, emb_api_key_id, emb_api_key, emb_endpoint_id, "emb")
+    vlm = _model_cfg(vlm_model, vlm_api_key_id, vlm_api_key, vlm_endpoint_id)
+    embedding = _model_cfg(emb_model, emb_api_key_id, emb_api_key, emb_endpoint_id)
     try:
         _print(
             client.create_collection(

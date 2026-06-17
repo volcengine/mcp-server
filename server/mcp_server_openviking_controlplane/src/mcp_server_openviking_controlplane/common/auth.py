@@ -1,9 +1,10 @@
 """Pluggable authentication for the OpenViking control plane.
 
-During the development phase we simply replay request headers captured from the
-browser (``ManualHeadersAuth``). The ``AuthProvider`` protocol leaves room to plug
-in a dedicated API-key or AK/SK signature provider later without touching
-``client.py`` or the tool/CLI layers.
+The control-plane TopAPI is served by the OpenViking data-plane cluster and
+authenticated with an Ark AgentPlan ApiKey, replayed as an
+``Authorization: Bearer <key>`` header on every request (``BearerTokenAuth``).
+The ``AuthProvider`` protocol leaves room to plug in a different provider later
+(e.g. AK/SK signing) without touching ``client.py`` or the tool/CLI layers.
 """
 
 from typing import Dict, Protocol
@@ -18,41 +19,23 @@ class AuthProvider(Protocol):
         ...
 
 
-class ManualHeadersAuth:
-    """Replay a static set of headers supplied manually (e.g. copied from the browser).
+class BearerTokenAuth:
+    """Authenticate with an Ark AgentPlan ApiKey via ``Authorization: Bearer``.
 
-    Ignores the per-request method/path/body: the captured headers already carry
-    whatever cookie / token the gateway needs during development. This works as long
-    as the console uses session/cookie/token auth (independent of the request body);
-    once we move to per-request AK/SK signing, swap in ``SignatureAuth`` below.
+    The backend's control-plane auth (``authorizeControlPlaneByArk``) reads the
+    key only from the ``Authorization: Bearer`` header — it does not accept
+    ``X-API-Key``. The token is replayed verbatim on every request, independent
+    of method/path/body. A token passed with or without the ``Bearer `` prefix
+    is tolerated.
     """
 
-    def __init__(self, headers: Dict[str, str]):
-        self._headers = dict(headers)
+    def __init__(self, token: str):
+        token = (token or "").strip()
+        if token.lower().startswith("bearer "):
+            token = token[len("bearer "):].strip()
+        self._token = token
 
     def auth_headers(
         self, method: str, path: str, query: Dict[str, str], body_str: str
     ) -> Dict[str, str]:
-        return dict(self._headers)
-
-
-# --- Future: signature-based auth (intentionally NOT implemented yet) ----------
-#
-# class SignatureAuth:
-#     """AK/SK HMAC-SHA256 (volcengine V4 style) signer for the control plane.
-#
-#     Port the reference implementation from
-#     OpenViking_kb_volc/test/openviking/create_collection_01.py (ClientForConsole):
-#       - SignedHeaders = content-type;host;x-content-sha256;x-date
-#       - CredentialScope = {yyyyMMdd}/{region}/{service}/request
-#       - derive: kDate -> kRegion -> kService -> kSigning -> Signature
-#       - plus identity headers: X-Top-Service / X-Top-Region / X-Top-Account-Id /
-#         V-Account-Id, and query params Action + Version.
-#     Implemented with stdlib hmac/hashlib only (no volcengine SDK dependency).
-#     """
-#
-#     def __init__(self, ak, sk, region, service, account):
-#         ...
-#
-#     def auth_headers(self, method, path, query, body_str):
-#         ...
+        return {"Authorization": f"Bearer {self._token}"}
