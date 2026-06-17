@@ -54,20 +54,25 @@ Action 在 **path** 里（不走 `?Action=&Version=` query）。请求体是该 
 ```bash
 uv sync                      # 或：pip install -e .
 
-# 只读（联调时 endpoint 指向 port-forward）
-uv run ov-cp -k <ARK_KEY> -e http://localhost:18080 list
-uv run ov-cp -k <ARK_KEY> -e http://localhost:18080 get   <ResourceID>
-uv run ov-cp -k <ARK_KEY> -e http://localhost:18080 usage <ResourceID>
-uv run ov-cp -k <ARK_KEY> -e http://localhost:18080 api-key <ResourceID>
+# 把 key 用环境变量配一次，之后免传参
+export AGENTPLAN_API_KEY=ark-xxxxxxxx
+
+# 只读
+uv run ov-cp list
+uv run ov-cp get   <ResourceID>
+uv run ov-cp usage <ResourceID>
+uv run ov-cp api-key <ResourceID>
 
 # 建库（消耗付费配额；source=agentplan 时只需 --name，
-#       模型名取默认、模型 ApiKey 回落到 --api-key）
-uv run ov-cp -k <ARK_KEY> -e http://localhost:18080 create --name my_kb
+#       模型名取默认、模型 ApiKey 回落到配置的 key）
+uv run ov-cp create --name my_kb
 
 # 删库（不可逆）
-uv run ov-cp -k <ARK_KEY> -e http://localhost:18080 delete <ResourceID> --yes
+uv run ov-cp delete <ResourceID> --yes
 ```
 
+命令行参数优先于环境变量。端点默认指向公网网关；仅在测试时（如指向 port-forward）才用
+`-e` / `VIKING_ENDPOINT` 覆盖：`uv run ov-cp -e http://localhost:18080 list`。
 `ov-cp --help` 不需要任何配置即可运行。
 
 ## MCP 用法（stdio / uvx）
@@ -85,8 +90,7 @@ Server 默认 **stdio** 传输，可被任意 MCP 客户端作为子进程拉起
         "mcp-server-openviking-controlplane"
       ],
       "env": {
-        "AGENTPLAN_API_KEY": "ark-xxxxxxxx",
-        "VIKING_ENDPOINT": "https://api.vikingdb.cn-beijing.volces.com/openviking"
+        "AGENTPLAN_API_KEY": "ark-xxxxxxxx"
       }
     }
   }
@@ -103,8 +107,7 @@ Server 默认 **stdio** 传输，可被任意 MCP 客户端作为子进程拉起
       "args": ["run", "--directory", "/abs/path/server/mcp_server_openviking_controlplane",
                "mcp-server-openviking-controlplane"],
       "env": {
-        "AGENTPLAN_API_KEY": "ark-xxxxxxxx",
-        "VIKING_ENDPOINT": "http://localhost:18080"
+        "AGENTPLAN_API_KEY": "ark-xxxxxxxx"
       }
     }
   }

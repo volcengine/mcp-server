@@ -58,20 +58,26 @@ later without touching the rest.
 ```bash
 uv sync                      # or: pip install -e .
 
-# read-only (point endpoint at a port-forward while testing)
-uv run ov-cp -k <ARK_KEY> -e http://localhost:18080 list
-uv run ov-cp -k <ARK_KEY> -e http://localhost:18080 get   <ResourceID>
-uv run ov-cp -k <ARK_KEY> -e http://localhost:18080 usage <ResourceID>
-uv run ov-cp -k <ARK_KEY> -e http://localhost:18080 api-key <ResourceID>
+# set the key once via env, then drop the per-command flag
+export AGENTPLAN_API_KEY=ark-xxxxxxxx
+
+# read-only
+uv run ov-cp list
+uv run ov-cp get   <ResourceID>
+uv run ov-cp usage <ResourceID>
+uv run ov-cp api-key <ResourceID>
 
 # create (consumes paid quota; with source=agentplan only --name is needed —
-#         model names default, and the model ApiKey falls back to --api-key)
-uv run ov-cp -k <ARK_KEY> -e http://localhost:18080 create --name my_kb
+#         model names default, and the model ApiKey falls back to the configured key)
+uv run ov-cp create --name my_kb
 
 # delete (irreversible)
-uv run ov-cp -k <ARK_KEY> -e http://localhost:18080 delete <ResourceID> --yes
+uv run ov-cp delete <ResourceID> --yes
 ```
 
+Flags override env. The endpoint defaults to the public gateway; override it only
+for testing (e.g. against a port-forward) with `-e` / `VIKING_ENDPOINT` —
+`uv run ov-cp -e http://localhost:18080 list`.
 `ov-cp --help` works without any config.
 
 ## MCP usage (stdio / uvx)
@@ -90,8 +96,7 @@ any MCP client. Add to `.mcp.json`:
         "mcp-server-openviking-controlplane"
       ],
       "env": {
-        "AGENTPLAN_API_KEY": "ark-xxxxxxxx",
-        "VIKING_ENDPOINT": "https://api.vikingdb.cn-beijing.volces.com/openviking"
+        "AGENTPLAN_API_KEY": "ark-xxxxxxxx"
       }
     }
   }
@@ -108,8 +113,7 @@ For local development point it at your checkout instead:
       "args": ["run", "--directory", "/abs/path/server/mcp_server_openviking_controlplane",
                "mcp-server-openviking-controlplane"],
       "env": {
-        "AGENTPLAN_API_KEY": "ark-xxxxxxxx",
-        "VIKING_ENDPOINT": "http://localhost:18080"
+        "AGENTPLAN_API_KEY": "ark-xxxxxxxx"
       }
     }
   }
@@ -117,6 +121,13 @@ For local development point it at your checkout instead:
 ```
 
 Run with SSE instead via `mcp-server-openviking-controlplane --transport sse`.
+
+## Agent skill
+
+A Claude Code / agent skill that documents the `ov-cp` workflow lives at
+[`skills/openviking-controlplane/SKILL.md`](skills/openviking-controlplane/SKILL.md).
+Symlink or copy it into your agent's skills directory (e.g. `~/.claude/skills/`) to
+let an agent drive the control plane.
 
 > ⚠️ `create_collection` / `delete_collection` create/destroy **billable** resources and
 > are exposed as MCP tools; their descriptions instruct the model to confirm with you
