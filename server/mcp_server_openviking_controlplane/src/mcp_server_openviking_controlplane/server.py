@@ -71,7 +71,7 @@ def get_usage(resource_id: str) -> Dict[str, Any]:
         resource_id: target library ResourceID.
 
     Returns:
-        {"CurContextFileNum", "ResourcesFileNum", "UserFileNum", "AgentFileNum",
+        {"CurContextFileNum", "ResourcesFileNum", "UserFileNum",
          "FreshTime" (Unix seconds), "EstimatedCosts"}. Counts are whole-library +
          the three top-level dirs only; per-uri breakdown is not supported.
     """

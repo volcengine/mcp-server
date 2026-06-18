@@ -168,7 +168,10 @@ class ControlPlaneClient:
         return self._request("DeleteOpenVikingCollection", {"ResourceID": resource_id})
 
     def get_usage(self, resource_id: str) -> Dict[str, Any]:
-        return self._request("GetOpenVikingUsage", {"ResourceID": resource_id})
+        result = self._request("GetOpenVikingUsage", {"ResourceID": resource_id})
+        # AgentFileNum is not meaningful here; drop it from the returned usage.
+        result.pop("AgentFileNum", None)
+        return result
 
     def get_user_access(self, resource_id: str) -> Dict[str, Any]:
         # On the data-plane cluster the api-key action is registered as
