@@ -63,6 +63,43 @@ def query_task_response(result: dict[str, Any]) -> dict[str, Any]:
     return output
 
 
+def sync_result_response(result: dict[str, Any]) -> dict[str, Any]:
+    """同步处理任务 — API 网关返回 {success, task_id, request_id, result: {...}}。
+
+    与 query_task_response 处理方式一致：保留 task_id/request_id/status，将 result 中的字段解构平铺到外层。
+
+    业务级失败（HTTP 2xx 但 success=false）会被识别并转为 error 字段输出。
+
+    Returns:
+        正向: { task_id, request_id, status?, ...业务字段 }
+        失败: { task_id, request_id, error: "<message>" }
+    """
+    if not isinstance(result, dict):
+        return {}
+
+    if result.get("success") is False:
+        return error_response(
+            result.get("error"),
+            task_id=result.get("task_id"),
+            request_id=result.get("request_id"),
+        )
+
+    output: dict[str, Any] = {}
+    task_id = result.get("task_id")
+    request_id = result.get("request_id")
+    status = result.get("status")
+    if task_id is not None:
+        output["task_id"] = task_id
+    if request_id is not None:
+        output["request_id"] = request_id
+    if status is not None:
+        output["status"] = status
+    inner = result.get("result")
+    if isinstance(inner, dict):
+        output.update(inner)
+    return output
+
+
 def error_response(
     error: dict[str, Any] | str | None = None,
     *,
