@@ -182,13 +182,61 @@
 ---
 
 ## Authentication Method
-Obtain the access key ID, secret access key, and region from the Volcengine Management Console, and use API Key authentication. 
-You need to set `VOLCENGINE_ACCESS_KEY` and `VOLCENGINE_SECRET_KEY` in the configuration file.
+Redis MCP now supports the following Volcengine credential modes:
+
+### 1. Static AK/SK
+
+Obtain the access key ID, secret access key, and region from the Volcengine Management Console, then set:
+
+- `VOLCENGINE_REGION`
+- `VOLCENGINE_ACCESS_KEY`
+- `VOLCENGINE_SECRET_KEY`
+
+### 2. AK/SK + SessionToken
+
+If you are using temporary credentials, additionally set this environment variable:
+
+- `VOLCENGINE_SESSION_TOKEN`
+
+This mode is suitable for local `stdio` runs or any client that injects credentials through environment variables.
+
+### 3. STS temporary credentials via `Authorization` header
+
+For HTTP-based MCP calls such as `streamable-http`, Redis MCP supports passing temporary credentials in the request header:
+
+```http
+Authorization: Bearer <base64(json)>
+```
+
+The decoded JSON payload should contain:
+
+```json
+{
+  "AccessKeyId": "",
+  "SecretAccessKey": "",
+  "SessionToken": "",
+  "CurrentTime": "2026-05-28T10:00:00+08:00",
+  "ExpiredTime": "2026-05-28T11:00:00+08:00",
+  "Region": "cn-beijing"
+}
+```
+
+Notes:
+
+- `SessionToken` is required when using STS credentials.
+- `Region` can be provided either in the payload or through `VOLCENGINE_REGION` / request parameters.
+- If both header credentials and environment credentials are provided, request header credentials take precedence.
+- If `CurrentTime` and `ExpiredTime` are present, the server will validate whether the STS token is expired.
+- The `Authorization` header is mainly intended for HTTP transports such as `streamable-http`.
+- For non-HTTP transports such as `stdio`, prefer setting `VOLCENGINE_ACCESS_KEY`, `VOLCENGINE_SECRET_KEY`, and `VOLCENGINE_SESSION_TOKEN` through environment variables.
 
 ---
 
 ## Deployment
 Volcengine Redis service access address: https://www.volcengine.com/docs/6293/65743
+
+### Example 1: static AK/SK (stdio)
+
 ```json
 {
   "mcpServers": {
@@ -208,6 +256,51 @@ Volcengine Redis service access address: https://www.volcengine.com/docs/6293/65
   }
 }
 ```
+
+### Example 2: temporary credentials through environment variables (stdio)
+
+```json
+{
+  "mcpServers": {
+    "redis": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/volcengine/mcp-server.git#subdirectory=server/mcp_server_redis",
+        "mcp-server-redis"
+      ],
+      "env": {
+        "VOLCENGINE_REGION": "cn-beijing",
+        "VOLCENGINE_ACCESS_KEY": "",
+        "VOLCENGINE_SECRET_KEY": "",
+        "VOLCENGINE_SESSION_TOKEN": ""
+      }
+    }
+  }
+}
+```
+
+### Example 3: STS credentials through `Authorization` header (HTTP transports such as `streamable-http`)
+
+If your MCP client calls Redis MCP through HTTP, you can pass a Bearer token whose content is the Base64-encoded JSON shown above. The server will extract:
+
+- `AccessKeyId`
+- `SecretAccessKey`
+- `SessionToken`
+- optional `Region`
+
+and use them to initialize the underlying Redis and VPC SDK clients dynamically for the current request.
+
+## Verification
+
+An end-to-end verification script is provided at `server/mcp_server_redis/tests/verify_sts_flow.py`.
+
+Run it with:
+
+```bash
+uv run --project server/mcp_server_redis python server/mcp_server_redis/tests/verify_sts_flow.py --region cn-beijing
+```
+
 Currently, the supported regions: ["cn-beijing", "cn-guangzhou", "cn-shanghai", "cn-hongkong", "ap-southeast-1", "ap-southeast-3"]
 
 ## License

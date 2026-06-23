@@ -209,7 +209,7 @@ def _build_get_workspace(runtime: SupabaseRuntime):
     workspace_tools = runtime.workspace_tools
 
     async def get_workspace(workspace_id: str) -> str:
-        """Gets details for a specific workspace."""
+        """Gets details for a specific workspace, including agent-plan info (is_agent_plan_instance, agent_plan_api_key_id) when present."""
         return await workspace_tools.get_workspace(workspace_id)
 
     return get_workspace
@@ -222,9 +222,31 @@ def _build_create_workspace(runtime: SupabaseRuntime):
         workspace_name: str,
         engine_version: str = "Supabase_1_24",
         engine_type: str = "Supabase",
+        agent_plan_api_key: str = None,
+        min_cu: float = 0.25,
+        max_cu: float = 1,
+        suspend_timeout_seconds: int = 300,
     ) -> str:
-        """Creates a new workspace."""
-        return await workspace_tools.create_workspace(workspace_name, engine_version, engine_type)
+        """Creates a new workspace.
+
+        Args:
+            workspace_name: Name of the workspace to create
+            engine_version: Engine version (default Supabase_1_24)
+            engine_type: Engine type (default Supabase)
+            agent_plan_api_key: Optional Agent Plan API key; binds the new workspace as an agent-plan instance. Defaults to the ARK_AGENT_PLAN_API_KEY environment variable when omitted.
+            min_cu: Serverless auto-scaling lower bound in compute units (default 0.25)
+            max_cu: Serverless auto-scaling upper bound in compute units (default 1)
+            suspend_timeout_seconds: Idle seconds before the compute suspends (default 300)
+        """
+        return await workspace_tools.create_workspace(
+            workspace_name,
+            engine_version,
+            engine_type,
+            agent_plan_api_key,
+            min_cu,
+            max_cu,
+            suspend_timeout_seconds,
+        )
 
     return create_workspace
 
@@ -314,6 +336,156 @@ def _build_restore_branch(runtime: SupabaseRuntime):
     return restore_branch
 
 
+def _build_get_compute_settings(runtime: SupabaseRuntime):
+    compute_tools = runtime.compute_tools
+
+    async def get_compute_settings(
+        workspace_id: str = None,
+        branch_id: str = None,
+        service_type: str = None,
+    ) -> str:
+        """Gets serverless compute settings for a workspace branch (auto-scaling CU limits, status, role).
+
+        Args:
+            workspace_id: The workspace ID
+            branch_id: Optional branch ID; defaults to the workspace's default branch
+            service_type: Optional service type filter, "Supabase" or "Database"
+        """
+        return await compute_tools.get_compute_settings(workspace_id, branch_id, service_type)
+
+    return get_compute_settings
+
+
+def _build_modify_compute_settings(runtime: SupabaseRuntime):
+    compute_tools = runtime.compute_tools
+
+    async def modify_compute_settings(
+        min_cu: float,
+        max_cu: float,
+        suspend_timeout_seconds: int = None,
+        service_type: str = None,
+        workspace_id: str = None,
+    ) -> str:
+        """Adjusts serverless compute settings for a workspace: auto-scaling CU limits and suspend timeout.
+
+        Args:
+            min_cu: Auto-scaling lower bound in compute units (e.g. 0.25)
+            max_cu: Auto-scaling upper bound in compute units (e.g. 1)
+            suspend_timeout_seconds: Idle seconds before the compute suspends (optional)
+            service_type: Optional service type, "Supabase" or "Database"
+            workspace_id: The workspace ID
+        """
+        return await compute_tools.modify_compute_settings(
+            min_cu, max_cu, suspend_timeout_seconds, service_type, workspace_id
+        )
+
+    return modify_compute_settings
+
+
+def _build_list_databases(runtime: SupabaseRuntime):
+    database_admin_tools = runtime.database_admin_tools
+
+    async def list_databases(workspace_id: str = None, branch_id: str = None, search: str = None) -> str:
+        """Lists logical databases in a workspace branch.
+
+        Args:
+            workspace_id: The workspace ID
+            branch_id: Optional branch ID; defaults to the workspace's default branch
+            search: Optional name filter
+        """
+        return await database_admin_tools.list_databases(workspace_id, branch_id, search)
+
+    return list_databases
+
+
+def _build_create_database(runtime: SupabaseRuntime):
+    database_admin_tools = runtime.database_admin_tools
+
+    async def create_database(
+        database_name: str,
+        owner: str = None,
+        description: str = None,
+        branch_id: str = None,
+        workspace_id: str = None,
+    ) -> str:
+        """Creates a new logical database in a workspace branch.
+
+        Args:
+            database_name: Name of the database to create
+            owner: Optional database owner (a DB account/role name)
+            description: Optional description
+            branch_id: Optional branch ID; defaults to the workspace's default branch
+            workspace_id: The workspace ID
+        """
+        return await database_admin_tools.create_database(database_name, owner, description, branch_id, workspace_id)
+
+    return create_database
+
+
+def _build_list_db_accounts(runtime: SupabaseRuntime):
+    database_admin_tools = runtime.database_admin_tools
+
+    async def list_db_accounts(workspace_id: str = None, branch_id: str = None, search: str = None) -> str:
+        """Lists database accounts (Postgres roles) in a workspace branch.
+
+        Args:
+            workspace_id: The workspace ID
+            branch_id: Optional branch ID; defaults to the workspace's default branch
+            search: Optional name filter
+        """
+        return await database_admin_tools.list_db_accounts(workspace_id, branch_id, search)
+
+    return list_db_accounts
+
+
+def _build_create_db_account(runtime: SupabaseRuntime):
+    database_admin_tools = runtime.database_admin_tools
+
+    async def create_db_account(
+        account_name: str,
+        account_password: str,
+        description: str = None,
+        branch_id: str = None,
+        workspace_id: str = None,
+    ) -> str:
+        """Creates a new database account (Postgres role) in a workspace branch.
+
+        Args:
+            account_name: Name of the account/role to create
+            account_password: Password for the new account
+            description: Optional description
+            branch_id: Optional branch ID; defaults to the workspace's default branch
+            workspace_id: The workspace ID
+        """
+        return await database_admin_tools.create_db_account(account_name, account_password, description, branch_id, workspace_id)
+
+    return create_db_account
+
+
+def _build_get_db_account_connection(runtime: SupabaseRuntime):
+    database_admin_tools = runtime.database_admin_tools
+
+    async def get_db_account_connection(
+        account_name: str,
+        database_name: str,
+        compute_id: str = None,
+        branch_id: str = None,
+        workspace_id: str = None,
+    ) -> str:
+        """Gets connection details (URL and examples) for a database account against a database.
+
+        Args:
+            account_name: The database account/role name
+            database_name: The target database name
+            compute_id: Optional compute ID; defaults to the branch's primary compute
+            branch_id: Optional branch ID; defaults to the workspace's default branch
+            workspace_id: The workspace ID
+        """
+        return await database_admin_tools.get_db_account_connection(account_name, database_name, compute_id, branch_id, workspace_id)
+
+    return get_db_account_connection
+
+
 TOOL_DEFINITIONS = (
     ToolDefinition("list_workspaces", "account", False, False, _build_list_workspaces),
     ToolDefinition("get_workspace", "account", True, False, _build_get_workspace),
@@ -325,6 +497,11 @@ TOOL_DEFINITIONS = (
     ToolDefinition("list_migrations", "database", True, False, _build_list_migrations),
     ToolDefinition("list_extensions", "database", True, False, _build_list_extensions),
     ToolDefinition("apply_migration", "database", True, True, _build_apply_migration),
+    ToolDefinition("list_databases", "database", True, False, _build_list_databases),
+    ToolDefinition("create_database", "database", True, True, _build_create_database),
+    ToolDefinition("list_db_accounts", "database", True, False, _build_list_db_accounts),
+    ToolDefinition("create_db_account", "database", True, True, _build_create_db_account),
+    ToolDefinition("get_db_account_connection", "database", True, False, _build_get_db_account_connection),
     ToolDefinition("get_workspace_url", "development", True, False, _build_get_workspace_url),
     ToolDefinition("get_publishable_keys", "development", True, False, _build_get_publishable_keys),
     ToolDefinition("generate_typescript_types", "development", True, False, _build_generate_typescript_types),
@@ -340,6 +517,8 @@ TOOL_DEFINITIONS = (
     ToolDefinition("create_branch", "branching", True, True, _build_create_branch),
     ToolDefinition("delete_branch", "branching", True, True, _build_delete_branch),
     ToolDefinition("restore_branch", "branching", True, True, _build_restore_branch),
+    ToolDefinition("get_compute_settings", "compute", True, False, _build_get_compute_settings),
+    ToolDefinition("modify_compute_settings", "compute", True, True, _build_modify_compute_settings),
 )
 
 

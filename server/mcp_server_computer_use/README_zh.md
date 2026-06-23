@@ -87,13 +87,17 @@ uv run mcp-server-computer-use -t sse
 | 环境变量 | 描述 | 默认值 |
 |----------|------|--------|
 | `MCP_SERVER_PORT` | MCP Server 端口 | `8000` |
-| `TOOL_SERVER_ENDPOINT` | Tool server 端口 | - |
+| `TOOL_SERVER_ENDPOINT` | Tool server 地址。启用 HTTPS 时填 `https://...` | - |
+| `AUTH_API_KEY` | 调用 Tool Server 时随 `X-API-Key` 请求头携带的鉴权 Key，需与 Tool Server `config.toml` 的 `auth_key` 一致；为空则不鉴权 | `""` |
+| `TOOL_SERVER_ENABLE_HTTPS` | Tool Server 启用 HTTPS 时设为 `true`，SDK 将校验 TLS 服务端证书 | `false` |
+| `TOOL_SERVER_CLIENT_CA` | 签发 Tool Server 服务端证书的 CA 证书绝对路径，`TOOL_SERVER_ENABLE_HTTPS=true` 时必填 | `""` |
 
 例如，在启动服务器前设置这些环境变量:
 
 ```bash
 export MCP_SERVER_PORT=8000
 export TOOL_SERVER_ENDPOINT={endpoint}
+export AUTH_API_KEY={your-secret-api-key}        # 可选
 cd mcp_server_computer_use
 uv run mcp-server-computer-use
 ```
@@ -111,13 +115,22 @@ uv run mcp-server-computer-use
           ],
             "env": {
                 "MCP_SERVER_PORT": 8000,
-                "TOOL_SERVER_ENDPOINT": "{endpoint}"
+                "TOOL_SERVER_ENDPOINT": "{endpoint}",
+                "AUTH_API_KEY": "{your-secret-api-key}"
             }
         }
     }
 }
 
 ```
+
+### 鉴权与 HTTPS
+
+默认情况下 MCP Server 与 Tool Server 之间走 HTTP 明文通信、且不做鉴权，只适合本地调试。一旦 Tool Server 暴露在受信任网络之外，建议至少启用 API Key 鉴权，最好同时启用 HTTPS，避免 `X-API-Key` 明文传输。
+
+1. **API Key 鉴权（最低安全基线）**：在 Tool Server `config.toml` 中配置 `auth_key`，并在本 MCP Server 的环境变量 `AUTH_API_KEY` 中填入相同值。Tool Server 配置了 `auth_key` 后，未携带匹配 `X-API-Key` 的请求会返回 `401 Permission denied`。
+
+2. **HTTPS（公网/跨机房推荐）**：在 Tool Server 启用 HTTPS（`plugins.enable_https = true`，`ssl.server_cert/server_key` 指向证书文件）；本 MCP Server 设置 `TOOL_SERVER_ENABLE_HTTPS=true` 和 `TOOL_SERVER_CLIENT_CA=/abs/path/ca.crt`，并把 `TOOL_SERVER_ENDPOINT` 协议改为 `https://`。两端 HTTPS 状态必须一致，否则 TLS 握手失败。
 
 
 # 证书

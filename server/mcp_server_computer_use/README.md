@@ -78,7 +78,10 @@ The following environment variables are available for configuring the MCP server
 | Environment Variable | Description | Default Value |
 |----------|------|--------|
 | `MCP_SERVER_PORT` | MCP server listening port | `8000` |
-| `TOOL_SERVER_ENDPOINT` | Tool server endpoint | - |
+| `TOOL_SERVER_ENDPOINT` | Tool server endpoint. Use `https://...` when HTTPS is enabled. | - |
+| `AUTH_API_KEY` | API key sent to tool server via the `X-API-Key` header. Must match `auth_key` configured on the tool server. Leave empty to disable authentication. | `""` |
+| `TOOL_SERVER_ENABLE_HTTPS` | Set to `true` when the tool server is served over HTTPS so that the SDK validates the TLS server certificate. | `false` |
+| `TOOL_SERVER_CLIENT_CA` | Absolute path to the CA certificate that signed the tool server's server certificate. Required when `TOOL_SERVER_ENABLE_HTTPS=true`. | `""` |
 
 For example, set these environment variables before starting the server:
 
@@ -86,6 +89,7 @@ For example, set these environment variables before starting the server:
 # Set fastmcp port and [tool server]() endpoint here
 export MCP_SERVER_PORT=8000
 export TOOL_SERVER_ENDPOINT={endpoint}
+export AUTH_API_KEY={your-secret-api-key}        # optional
 cd mcp_server_computer_use
 uv run mcp-server-computer-use
 ```
@@ -103,13 +107,34 @@ uv run mcp-server-computer-use
           ],
             "env": {
                 "MCP_SERVER_PORT": 8000,
-                "TOOL_SERVER_ENDPOINT": "{endpoint}"
+                "TOOL_SERVER_ENDPOINT": "{endpoint}",
+                "AUTH_API_KEY": "{your-secret-api-key}"
             }
         }
     }
 }
 
 ```
+
+### Authentication & HTTPS
+
+By default the MCP server talks to the tool server over plain HTTP without authentication, which is fine for local development. For any deployment that exposes the tool server outside a fully trusted network, you should turn on at least the API-key authentication, and ideally HTTPS as well, so that the `X-API-Key` header is not transmitted in plain text.
+
+1. **API-key authentication (recommended baseline)**
+
+   Configure the **same** secret value on both sides:
+
+   - On the **tool server**, set `auth_key` in its `config.toml`.
+   - On the **MCP server**, set `AUTH_API_KEY` via the environment variable above.
+
+   When `auth_key` is set on the tool server, requests without a matching `X-API-Key` header will be rejected with `401 Permission denied`.
+
+2. **HTTPS (recommended for any non-trusted network)**
+
+   - On the **tool server**, enable HTTPS (`plugins.enable_https = true`) with `ssl.server_cert` and `ssl.server_key`.
+   - On the **MCP server**, set `TOOL_SERVER_ENABLE_HTTPS=true` and `TOOL_SERVER_CLIENT_CA=/abs/path/ca.crt` (the CA that signed the tool server certificate). Make sure `TOOL_SERVER_ENDPOINT` uses `https://`.
+
+   Both ends must agree on whether HTTPS is enabled, otherwise the TLS handshake will fail.
 
 
 # License

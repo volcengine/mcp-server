@@ -1,4 +1,5 @@
 import logging
+import os
 import asyncio
 import random
 from collections.abc import Callable
@@ -28,6 +29,14 @@ try:
         ComputeSettingsForCreateWorkspaceInput,
         StartWorkspaceRequest,
         StopWorkspaceRequest,
+        DescribeWorkspaceDetailRequest,
+        DescribeComputesRequest,
+        ModifyComputeSettingsRequest,
+        CreateDatabaseRequest,
+        DescribeDatabasesRequest,
+        CreateDBAccountRequest,
+        DescribeDBAccountsRequest,
+        DescribeDBAccountConnectionRequest,
     )
 except ImportError:
     logger.error("volcenginesdkaidap client dependencies not installed")
@@ -254,6 +263,10 @@ class AidapClient:
         workspace_name: str,
         engine_type: str = "Supabase",
         engine_version: str = "Supabase_1_24",
+        agent_plan_api_key: Optional[str] = None,
+        min_cu: float = 0.25,
+        max_cu: float = 1,
+        suspend_timeout_seconds: int = 300,
     ) -> dict:
         try:
             request = CreateWorkspaceRequest(
@@ -262,15 +275,18 @@ class AidapClient:
                 engine_version=engine_version,
                 branch_settings=BranchSettingsForCreateWorkspaceInput(branch_name="main"),
                 compute_settings=ComputeSettingsForCreateWorkspaceInput(
-                    auto_scaling_limit_min_cu=0.25,
-                    auto_scaling_limit_max_cu=1,
-                    suspend_timeout_seconds=300
+                    auto_scaling_limit_min_cu=min_cu,
+                    auto_scaling_limit_max_cu=max_cu,
+                    suspend_timeout_seconds=suspend_timeout_seconds
                 ),
                 workspace_settings=WorkspaceSettingsForCreateWorkspaceInput(
                     public_connection="Disabled",
                     deletion_protection="Disabled"
                 ),
             )
+            agent_plan_api_key = agent_plan_api_key or os.getenv("ARK_AGENT_PLAN_API_KEY")
+            if agent_plan_api_key:
+                request.agent_plan_api_key = agent_plan_api_key
             response = self.client.create_workspace(request)
 
             workspace_id = getattr(response, 'workspace_id', None)
@@ -290,6 +306,207 @@ class AidapClient:
                 "success": False,
                 "error": str(e),
             }
+
+    async def get_workspace_detail(self, workspace_id: str) -> Optional[Any]:
+        try:
+            request = DescribeWorkspaceDetailRequest(workspace_id=workspace_id)
+            response = self.client.describe_workspace_detail(request)
+            return getattr(response, "workspace", None)
+        except Exception as e:
+            logger.error(f"Error getting workspace detail: {e}")
+            raise RuntimeError(str(e))
+
+    async def describe_computes(
+        self,
+        workspace_id: str,
+        branch_id: Optional[str] = None,
+        service_type: Optional[str] = None,
+    ) -> list[dict]:
+        if not branch_id:
+            branch_id = await self.get_default_branch_id(workspace_id)
+            if not branch_id:
+                raise RuntimeError(f"Could not resolve default branch for workspace {workspace_id}")
+        request_kwargs = {"workspace_id": workspace_id, "branch_id": branch_id}
+        if service_type:
+            request_kwargs["service_type"] = service_type
+        request = DescribeComputesRequest(**request_kwargs)
+        response = self.client.describe_computes(request)
+        computes = []
+        for compute in getattr(response, "computes", []) or []:
+            computes.append(compute.to_dict() if hasattr(compute, "to_dict") else compute)
+        return computes
+
+    async def modify_compute_settings(
+        self,
+        workspace_id: str,
+        min_cu: float,
+        max_cu: float,
+        suspend_timeout_seconds: Optional[int] = None,
+        service_type: Optional[str] = None,
+    ) -> dict:
+        try:
+            request_kwargs = {
+                "workspace_id": workspace_id,
+                "auto_scaling_limit_min_cu": min_cu,
+                "auto_scaling_limit_max_cu": max_cu,
+            }
+            if suspend_timeout_seconds is not None:
+                request_kwargs["suspend_timeout_seconds"] = suspend_timeout_seconds
+            if service_type:
+                request_kwargs["service_type"] = service_type
+            request = ModifyComputeSettingsRequest(**request_kwargs)
+            self.client.modify_compute_settings(request)
+            return {"success": True, "workspace_id": workspace_id}
+        except Exception as e:
+            logger.error(f"Error modifying compute settings: {e}")
+            return {"success": False, "error": str(e)}
+
+    async def _ensure_branch_id(self, workspace_id: str, branch_id: Optional[str] = None) -> str:
+        if branch_id:
+            return branch_id
+        resolved = await self.get_default_branch_id(workspace_id)
+        if not resolved:
+            raise RuntimeError(f"Could not resolve default branch for workspace {workspace_id}")
+        return resolved
+
+    async def _resolve_primary_compute_id(self, workspace_id: str, branch_id: str) -> Optional[str]:
+        computes = await self.describe_computes(workspace_id, branch_id=branch_id)
+        for compute in computes:
+            if str(compute.get("compute_role") or "").lower() == "primary":
+                return compute.get("compute_id")
+        return computes[0].get("compute_id") if computes else None
+
+    async def describe_databases(
+        self,
+        workspace_id: str,
+        branch_id: Optional[str] = None,
+        search: Optional[str] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+    ) -> list[dict]:
+        branch_id = await self._ensure_branch_id(workspace_id, branch_id)
+        request_kwargs = {"workspace_id": workspace_id, "branch_id": branch_id}
+        if search:
+            request_kwargs["search"] = search
+        if limit is not None:
+            request_kwargs["limit"] = limit
+        if offset is not None:
+            request_kwargs["offset"] = offset
+        request = DescribeDatabasesRequest(**request_kwargs)
+        response = self.client.describe_databases(request)
+        databases = []
+        for database in getattr(response, "databases", []) or []:
+            databases.append(database.to_dict() if hasattr(database, "to_dict") else database)
+        return databases
+
+    async def create_database(
+        self,
+        workspace_id: str,
+        database_name: str,
+        branch_id: Optional[str] = None,
+        database_owner: Optional[str] = None,
+        database_desc: Optional[str] = None,
+    ) -> dict:
+        try:
+            branch_id = await self._ensure_branch_id(workspace_id, branch_id)
+            request_kwargs = {
+                "workspace_id": workspace_id,
+                "branch_id": branch_id,
+                "database_name": database_name,
+            }
+            if database_owner:
+                request_kwargs["database_owner"] = database_owner
+            if database_desc:
+                request_kwargs["database_desc"] = database_desc
+            request = CreateDatabaseRequest(**request_kwargs)
+            response = self.client.create_database(request)
+            database = getattr(response, "database", None)
+            return {
+                "success": True,
+                "database": database.to_dict() if hasattr(database, "to_dict") else database,
+            }
+        except Exception as e:
+            logger.error(f"Error creating database: {e}")
+            return {"success": False, "error": str(e)}
+
+    async def describe_db_accounts(
+        self,
+        workspace_id: str,
+        branch_id: Optional[str] = None,
+        search: Optional[str] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+    ) -> list[dict]:
+        branch_id = await self._ensure_branch_id(workspace_id, branch_id)
+        request_kwargs = {"workspace_id": workspace_id, "branch_id": branch_id}
+        if search:
+            request_kwargs["search"] = search
+        if limit is not None:
+            request_kwargs["limit"] = limit
+        if offset is not None:
+            request_kwargs["offset"] = offset
+        request = DescribeDBAccountsRequest(**request_kwargs)
+        response = self.client.describe_db_accounts(request)
+        accounts = []
+        for account in getattr(response, "accounts", []) or []:
+            accounts.append(account.to_dict() if hasattr(account, "to_dict") else account)
+        return accounts
+
+    async def create_db_account(
+        self,
+        workspace_id: str,
+        account_name: str,
+        account_password: str,
+        branch_id: Optional[str] = None,
+        account_desc: Optional[str] = None,
+    ) -> dict:
+        try:
+            branch_id = await self._ensure_branch_id(workspace_id, branch_id)
+            request_kwargs = {
+                "workspace_id": workspace_id,
+                "branch_id": branch_id,
+                "account_name": account_name,
+                "account_password": account_password,
+            }
+            if account_desc:
+                request_kwargs["account_desc"] = account_desc
+            request = CreateDBAccountRequest(**request_kwargs)
+            response = self.client.create_db_account(request)
+            account = getattr(response, "account", None)
+            return {
+                "success": True,
+                "account": account.to_dict() if hasattr(account, "to_dict") else account,
+            }
+        except Exception as e:
+            logger.error(f"Error creating db account: {e}")
+            return {"success": False, "error": str(e)}
+
+    async def describe_db_account_connection(
+        self,
+        workspace_id: str,
+        account_name: str,
+        database_name: str,
+        branch_id: Optional[str] = None,
+        compute_id: Optional[str] = None,
+        address_id: Optional[str] = None,
+    ) -> dict:
+        branch_id = await self._ensure_branch_id(workspace_id, branch_id)
+        if not compute_id:
+            compute_id = await self._resolve_primary_compute_id(workspace_id, branch_id)
+            if not compute_id:
+                raise RuntimeError(f"Could not resolve compute for workspace {workspace_id}")
+        request_kwargs = {
+            "workspace_id": workspace_id,
+            "branch_id": branch_id,
+            "account_name": account_name,
+            "database_name": database_name,
+            "compute_id": compute_id,
+        }
+        if address_id:
+            request_kwargs["address_id"] = address_id
+        request = DescribeDBAccountConnectionRequest(**request_kwargs)
+        response = self.client.describe_db_account_connection(request)
+        return response.to_dict() if hasattr(response, "to_dict") else response
 
     async def start_workspace(self, workspace_id: str) -> dict:
         try:
