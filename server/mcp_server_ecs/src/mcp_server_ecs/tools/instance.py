@@ -2,7 +2,7 @@
 Instance related tool functions
 """
 
-from typing import List
+from typing import Any, List
 
 import volcenginesdkecs
 from mcp import types
@@ -12,6 +12,24 @@ from volcenginesdkecs.models import *
 from mcp_server_ecs.common.client import get_volc_ecs_client
 from mcp_server_ecs.common.errors import handle_error
 from mcp_server_ecs.tools import mcp
+
+
+def _sdk_model_to_api_dict(value: Any) -> Any:
+    """Convert Volcengine SDK models to API response field names."""
+    if isinstance(value, list):
+        return [_sdk_model_to_api_dict(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _sdk_model_to_api_dict(item) for key, item in value.items()}
+
+    attribute_map = getattr(value, "attribute_map", None)
+    swagger_types = getattr(value, "swagger_types", None)
+    if attribute_map and swagger_types:
+        return {
+            api_key: _sdk_model_to_api_dict(getattr(value, sdk_key, None))
+            for sdk_key, api_key in attribute_map.items()
+        }
+
+    return value
 
 
 @mcp.tool(
@@ -110,6 +128,9 @@ async def describe_instances(
                     "StoppedMode": instance.stopped_mode,
                     "ZoneId": instance.zone_id,
                     "LocalVolumes": instance.local_volumes,
+                    "NetworkInterfaces": _sdk_model_to_api_dict(
+                        getattr(instance, "network_interfaces", None) or []
+                    ),
                 }
                 total_results.append(filtered_instance)
 
