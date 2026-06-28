@@ -244,6 +244,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 
 ### **其他**  
 
+- **[mcp-divoom-lan](https://github.com/DivoomDevelop/mcp-divoom-lan)**：基于 MCP 的 Divoom 局域网表盘定制（读写本地表盘配置、替换底图、亮度与切盘、multipart 上传等）；stdio，需在局域网访问实体设备并配置环境变量 DIVOOM_DEVICE_HOST（及可选端口/超时）。MIT；推荐通过 npx -y mcp-divoom-lan（npm 0.1.2 及以上）或 node dist/index.js 启动。  
 - **[Time](https://github.com/modelcontextprotocol/servers/tree/main/src/time)**：Time and timezone conversion capabilities.  
 - **[Spotify](https://github.com/varunneal/spotify-mcp)**：This MCP allows an LLM to play and use Spotify.  
 - **[cognee-mcp](https://github.com/topoteretes/cognee/tree/main/cognee-mcp)**：GraphRAG memory server with customizable ingestion, data processing and search.  
