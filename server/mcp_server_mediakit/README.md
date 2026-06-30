@@ -2,12 +2,12 @@
 
 MediaKit MCP Server is a standard AI capability plugin for Volcano Engine AI MediaKit. It is built on the MCP (Model Context Protocol) protocol and exposes cloud media capabilities such as video editing, audio processing, subtitle processing, and video enhancement as tools that can be called by AI agents. With MediaKit MCP, developers can use natural language to drive intelligent media production workflows.
 
-| Field | Value |
-| --- | --- |
-| Version | v1.0.0 |
-| Description | MediaKit MCP intelligent media assistant |
-| Categories | Media cloud, audio/video editing, video enhancement |
-| Tags | MCP, MediaKit, video editing, audio processing, video enhancement |
+| Field       | Value                                                             |
+| ----------- | ----------------------------------------------------------------- |
+| Version     | v1.0.0                                                            |
+| Description | MediaKit MCP intelligent media assistant                          |
+| Categories  | Media cloud, audio/video editing, video enhancement               |
+| Tags        | MCP, MediaKit, video editing, audio processing, video enhancement |
 
 ## Tool Overview
 
@@ -133,10 +133,10 @@ Trae is an AI-native IDE with strong agent collaboration capabilities. By connec
 
 Choose one of the following modes based on your usage scenario:
 
-| Mode | Best for | Access method |
-| --- | --- | --- |
-| **Local Mode (JSON Local)** | Personal debugging, quick trials, no self-hosted service required. | Use `uvx` to launch MediaKit MCP directly from the `mcp-server` repository subdirectory. |
-| **Cloud Mode (JSON URL)** | Team sharing, long-term usage, centralized operations. | Deploy MediaKit MCP Server yourself, then connect using the deployed Streamable HTTP endpoint. |
+| Mode                        | Best for                                                           | Access method                                                                                  |
+| --------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| **Local Mode (JSON Local)** | Personal debugging, quick trials, no self-hosted service required. | Use `uvx` to launch MediaKit MCP directly from the `mcp-server` repository subdirectory.       |
+| **Cloud Mode (JSON URL)**   | Team sharing, long-term usage, centralized operations.             | Deploy MediaKit MCP Server yourself, then connect using the deployed Streamable HTTP endpoint. |
 
 ### Step 2: Add MCP Configuration
 
@@ -317,11 +317,11 @@ The table below lists the core MediaKit MCP configuration fields for cloud mode 
 
 For self-hosted cloud mode, you can also configure the following startup parameters:
 
-| Environment variable | Default value | Description |
-| --- | --- | --- |
-| `MCP_SERVER_HOST` | `0.0.0.0` | MCP service bind address. |
-| `MCP_SERVER_PORT` | `8000` | MCP service listening port. |
-| `STREAMABLE_HTTP_PATH` | `/mcp` | Streamable HTTP path. |
+| Environment variable   | Default value | Description                 |
+| ---------------------- | ------------- | --------------------------- |
+| `MCP_SERVER_HOST`      | `0.0.0.0`     | MCP service bind address.   |
+| `MCP_SERVER_PORT`      | `8000`        | MCP service listening port. |
+| `STREAMABLE_HTTP_PATH` | `/mcp`        | Streamable HTTP path.       |
 
 ## Tool Details
 

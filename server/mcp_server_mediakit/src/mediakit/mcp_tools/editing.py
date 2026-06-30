@@ -36,7 +36,7 @@ class ImageToVideoImagesItem(TypedDict):
     animation_in: NotRequired[float]
     animation_out: NotRequired[float]
 
-TOOL_NAMES = ['add_image_to_video', 'add_subtitle_to_video', 'adjust_video_speed', 'concat_audio', 'concat_video', 'extract_audio', 'flip_video', 'image_to_video', 'mux_audio_video', 'trim_audio', 'trim_video']
+TOOL_NAMES = ['add_image_to_video', 'add_subtitle_to_video', 'adjust_audio_speed', 'adjust_video_speed', 'adjust_video_volume', 'apply_video_filter', 'concat_audio', 'concat_video', 'extract_audio', 'fade_audio', 'fade_video_audio', 'flip_video', 'image_to_video', 'mix_audio', 'mux_audio_video', 'trim_audio', 'trim_video']
 
 
 def register_tools(mcp, client: MediKitClient) -> None:
@@ -229,6 +229,107 @@ def register_tools(mcp, client: MediKitClient) -> None:
         """按起止时间点裁剪视频，生成新片段。"""
         try:
             result = client.call(api_name="trim_video", video_url=video_url, start_time=start_time, end_time=end_time, callback_args=callback_args, client_token=client_token)
+            return async_task_response(result)
+        except Exception as exc:
+            return error_response(str(exc))
+
+    @mcp.tool(name="adjust_audio_speed", description="调整音频的播放倍速，实现快放或慢放效果。 使用 task_id, 调用 query_task 方法获取结果")
+    async def adjust_audio_speed(
+        audio_url: str = Field(..., description="输入音频。支持http://xxx或https://xxx格式 Url，支持 mp3、m4a、wav 等格式"),
+        speed: Optional[float] = Field(1, description="调整速度的倍数，Float类型，取值范围为0.1～4。0.1=放慢至原速的 0.1 倍，1=原速，4=加速至原速的 4 倍。"),
+        callback_args: Optional[str] = Field(None, description="可选，回调参数"),
+        client_token: Optional[str] = Field(None, description="可选，用于幂等，默认幂等，用户可根据需求进行调整"),
+        *,
+        ctx: Context,
+    ) -> dict:
+        """调整音频的播放倍速，实现快放或慢放效果。"""
+        try:
+            result = client.call(api_name="adjust_audio_speed", audio_url=audio_url, speed=speed, callback_args=callback_args, client_token=client_token)
+            return async_task_response(result)
+        except Exception as exc:
+            return error_response(str(exc))
+
+    @mcp.tool(name="adjust_video_volume", description="调整视频音量大小，支持静音；输出 mp4，分辨率与原片一致。 使用 task_id, 调用 query_task 方法获取结果")
+    async def adjust_video_volume(
+        video_url: str = Field(..., description="输入视频。支持http://xxx或https://xxx格式 URL，支持 mp4、mov、flv、ts、avi、wmv、mkv 等格式，最高 4K"),
+        volume: Optional[float] = Field(1, description="音量倍数。Float 类型，取值范围 0~4。0=静音，1=原音量，4=放大 4 倍。"),
+        callback_args: Optional[str] = Field(None, description="可选，回调参数"),
+        client_token: Optional[str] = Field(None, description="可选，用于幂等，默认幂等，用户可根据需求进行调整"),
+        *,
+        ctx: Context,
+    ) -> dict:
+        """调整视频音量大小，支持静音；输出 mp4，分辨率与原片一致。"""
+        try:
+            result = client.call(api_name="adjust_video_volume", video_url=video_url, volume=volume, callback_args=callback_args, client_token=client_token)
+            return async_task_response(result)
+        except Exception as exc:
+            return error_response(str(exc))
+
+    @mcp.tool(name="apply_video_filter", description="为视频添加指定滤镜效果，输出mp4，分辨率与原片一致。 使用 task_id, 调用 query_task 方法获取结果")
+    async def apply_video_filter(
+        video_url: str = Field(..., description="输入视频。支持http://xxx或https://xxx格式 URL，支持 mp4、mov、flv、ts、avi、wmv、mkv 等格式，最高 4K"),
+        filter_style: Optional[str] = Field('spring', description="滤镜风格。根据用户想要的视频画面效果选择：\n- spring：春日滤镜\n- sunset：晚霞滤镜\n- vivid：鲜亮滤镜\n- fair_skin：白皙滤镜\n- food：食物滤镜\n"),
+        callback_args: Optional[str] = Field(None, description="可选，回调参数"),
+        client_token: Optional[str] = Field(None, description="可选，用于幂等，默认幂等，用户可根据需求进行调整"),
+        *,
+        ctx: Context,
+    ) -> dict:
+        """为视频添加指定滤镜效果，输出mp4，分辨率与原片一致。"""
+        try:
+            result = client.call(api_name="apply_video_filter", video_url=video_url, filter_style=filter_style, callback_args=callback_args, client_token=client_token)
+            return async_task_response(result)
+        except Exception as exc:
+            return error_response(str(exc))
+
+    @mcp.tool(name="fade_audio", description="对输入音频实现淡入淡出效果，输出 mp3。 使用 task_id, 调用 query_task 方法获取结果")
+    async def fade_audio(
+        audio_url: str = Field(..., description="输入音频。支持http://xxx或https://xxx格式 URL，支持 mp3、m4a、wav、flac 等格式"),
+        fade_in_duration: Optional[float] = Field(1, description="声音淡入时长。单位：秒，可传小数（最多3位小数）。0 表示不淡入。"),
+        fade_out_duration: Optional[float] = Field(1, description="声音淡出时长。单位：秒，可传小数（最多3位小数）。0 表示不淡出。"),
+        callback_args: Optional[str] = Field(None, description="可选，回调参数"),
+        client_token: Optional[str] = Field(None, description="可选，用于幂等，默认幂等，用户可根据需求进行调整"),
+        *,
+        ctx: Context,
+    ) -> dict:
+        """对输入音频实现淡入淡出效果，输出 mp3。"""
+        try:
+            result = client.call(api_name="fade_audio", audio_url=audio_url, fade_in_duration=fade_in_duration, fade_out_duration=fade_out_duration, callback_args=callback_args, client_token=client_token)
+            return async_task_response(result)
+        except Exception as exc:
+            return error_response(str(exc))
+
+    @mcp.tool(name="fade_video_audio", description="对输入视频的声轨实现淡入淡出效果。\n输出 mp4，分辨率与原片一致。 使用 task_id, 调用 query_task 方法获取结果")
+    async def fade_video_audio(
+        video_url: str = Field(..., description="输入视频。支持http://xxx或https://xxx格式 URL，支持 mp4、mov、flv、ts、avi、wmv、mkv 等格式，最高 4K"),
+        fade_in_duration: Optional[float] = Field(1, description="声音淡入时长。单位：秒，可传小数（最多3位小数）。0 表示不淡入。"),
+        fade_out_duration: Optional[float] = Field(1, description="声音淡出时长。单位：秒，可传小数（最多3位小数）。0 表示不淡出。"),
+        callback_args: Optional[str] = Field(None, description="可选，回调参数"),
+        client_token: Optional[str] = Field(None, description="可选，用于幂等，默认幂等，用户可根据需求进行调整"),
+        *,
+        ctx: Context,
+    ) -> dict:
+        """对输入视频的声轨实现淡入淡出效果。
+输出 mp4，分辨率与原片一致。"""
+        try:
+            result = client.call(api_name="fade_video_audio", video_url=video_url, fade_in_duration=fade_in_duration, fade_out_duration=fade_out_duration, callback_args=callback_args, client_token=client_token)
+            return async_task_response(result)
+        except Exception as exc:
+            return error_response(str(exc))
+
+    @mcp.tool(name="mix_audio", description="将多个音频文件（如背景音乐、音效、人声）进行混音，生成一个新的音频文件。\n处理耗时：处理耗时与视频时长正相关。视频时长越长，处理耗时越长。平均 RTF（处理耗时/原片时长）为 1。\n输出音频的时长以最长的音频为准。\n输出视频格式：mp3 使用 task_id, 调用 query_task 方法获取结果")
+    async def mix_audio(
+        audio_urls: List[str] = Field(..., description="待混合的音频列表，Array<string>类型。最少传入1个，最多传入100个。\n子项说明：待混合的输入音频。支持http://xxx或https://xxx格式 URL，支持 mp3、wav、flac 等格式"),
+        callback_args: Optional[str] = Field(None, description="可选，回调参数"),
+        client_token: Optional[str] = Field(None, description="可选，用于幂等，默认幂等，用户可根据需求进行调整"),
+        *,
+        ctx: Context,
+    ) -> dict:
+        """将多个音频文件（如背景音乐、音效、人声）进行混音，生成一个新的音频文件。
+处理耗时：处理耗时与视频时长正相关。视频时长越长，处理耗时越长。平均 RTF（处理耗时/原片时长）为 1。
+输出音频的时长以最长的音频为准。
+输出视频格式：mp3"""
+        try:
+            result = client.call(api_name="mix_audio", audio_urls=audio_urls, callback_args=callback_args, client_token=client_token)
             return async_task_response(result)
         except Exception as exc:
             return error_response(str(exc))
