@@ -232,6 +232,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 - **[ChatSum](https://github.com/mcpso/mcp-server-chatsum)**：Query and Summarize chat messages with LLM.  
 - **[Notion](https://github.com/v-3/notion-server)**：Notion MCP integration. Search, Read, Update, and Create pages through Claude chat.  
 - **[ChatMCP](https://github.com/AI-QL/chat-mcp)**：An Open Source Cross-platform GUI Desktop application compatible with Linux, macOS, and Windows, enabling seamless interaction with MCP servers across dynamically selectable LLMs.  
+- **[Pairoa](https://github.com/pairoa/docs)**：Privacy-first matching for needs, offers, and opportunities over MCP. Remote endpoint: `https://mcp.pairoa.com`.  
 - **[Google Calendar](https://github.com/v-3/google-calendar)**：Integration with Google Calendar to check schedules, find time, and add/delete events.  
 - **[Slack](https://github.com/modelcontextprotocol/servers/tree/main/src/slack)**：Channel management and messaging capabilities.  
 - **[Google Tasks](https://github.com/zcaceres/gtasks-mcp)**：Google Tasks API Model Context Protocol Server.  
