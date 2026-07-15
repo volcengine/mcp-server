@@ -132,6 +132,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 - **[Memory](https://github.com/modelcontextprotocol/servers/tree/main/src/memory)**：Knowledge graph-based persistent memory system.  
 - **[Puppeteer](https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer)**：Browser automation and web scraping.  
 - **[Browserbase](https://github.com/browserbase/mcp-server-browserbase)**：Automate browser interactions in the cloud (e.g. web navigation, data extraction, form filling, and more).  
+- **[Tap](https://github.com/LeonTing1010/taprun)**：在你本机已登录的浏览器中运行浏览器自动化——录制一次，之后作为确定性程序以零 LLM token 重放；凭证永不离开本机（本地优先）。  
 - **[JetBrains](https://github.com/JetBrains/mcp-jetbrains)**：Work on your code with JetBrains IDEs.  
 - **[Raygun](https://github.com/MindscapeHQ/mcp-server-raygun)**：Interact with your crash reporting and real using monitoring data on your Raygun account.  
 - **[Dify](https://github.com/YanxingLiu/dify-mcp-server)**：A simple implementation of an MCP server for dify workflows.  
