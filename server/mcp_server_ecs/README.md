@@ -112,6 +112,27 @@ export MCP_SERVER_PORT=8000
 ```
 
 ### Run with uvx
+#### Specify version from PyPI or mirror source
+```json
+{
+    "mcpServers": {
+        "mcp-server-ecs": {
+            "command": "uvx",
+            "args": [
+            "--from",
+            "mcp_server_ecs>=0.2.0",
+            "mcp-server-ecs"
+          ],
+            "env": {
+                "VOLCENGINE_ACCESS_KEY": "",
+                "VOLCENGINE_SECRET_KEY": "",
+                "VOLCENGINE_REGION": ""
+            }
+        }
+    }
+}
+```
+
 ```json
 {
     "mcpServers": {
