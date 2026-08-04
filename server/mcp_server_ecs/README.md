@@ -120,7 +120,7 @@ export MCP_SERVER_PORT=8000
             "command": "uvx",
             "args": [
             "--from",
-            "mcp_server_ecs>=0.2.0",
+            "mcp-server-ecs>=0.2.0",
             "mcp-server-ecs"
           ],
             "env": {
