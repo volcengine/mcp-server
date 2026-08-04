@@ -1,6 +1,6 @@
 [project]
 name = "mcp-server-ccapi"
-version = "1.0.0"
+version = "1.0.1"
 description = "An Volcengine Labs Model Context Protocol (MCP) server for managing Volcengine resources via Cloud Control API"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -13,7 +13,7 @@ dependencies = [
     "checkov>=3.0.0",
     "volcengine-python-sdk>=3.0.1",
 ]
-license = {text = "Apache-2.0"}
+license = {text="Apache-2.0"}
 license-files = ["LICENSE", "NOTICE" ]
 authors = [
     {name = "volcengine-sdk-team"},

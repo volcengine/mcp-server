@@ -244,6 +244,28 @@ git clone git@github.com:volcengine/mcp-server.git
             "command": "uvx",
             "args": [
                 "--from",
+                "mcp-server-ccapi>=1.0.1",
+                "mcp-server-ccapi"
+            ],
+            "env": {
+                "VOLCENGINE_ACCESS_KEY": "your ak",
+                "VOLCENGINE_SECRET_KEY": "your sk",
+                "VOLCENGINE_SESSION_TOKEN": "your session token",
+                "VOLCENGINE_ENDPOINT":"cloudcontrol.cn-beijing.volcengineapi.com",
+                "VOLCENGINE_REGION":"cn-beijing"
+            }
+        }
+    }
+}
+```
+
+```json
+{
+    "mcpServers": {
+        "mcp-server-ccapi": {
+            "command": "uvx",
+            "args": [
+                "--from",
                 "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_ccapi",
                 "mcp-server-ccapi"
             ],

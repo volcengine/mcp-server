@@ -1,6 +1,6 @@
 [project]
 name = "mcp-server-cloudmonitor"
-version = "0.0.1"
+version = "0.1.0"
 description = "MCP server for Cloud Monitor"
 readme = "README.md"
 requires-python = ">=3.10"
