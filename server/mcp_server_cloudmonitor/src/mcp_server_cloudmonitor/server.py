@@ -8,7 +8,7 @@ import traceback
 import volcenginesdkcloudmonitor
 
 from mcp_server_cloudmonitor import client
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 from pydantic import Field
 from mcp_server_cloudmonitor.models.request import GetMetricsDataRequest, GetMetricsDataFilter
 

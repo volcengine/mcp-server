@@ -3,7 +3,7 @@ import base64
 import json
 import volcenginesdkcore
 import volcenginesdkcloudmonitor
-from mcp.server.fastmcp import Context
+from fastmcp import Context
 from mcp.server.session import ServerSession
 from starlette.requests import Request
 
