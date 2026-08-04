@@ -252,6 +252,27 @@ LAS中，数据集中关于 RAY 相关的内容有哪些
             "command": "uvx",
             "args": [
             "--from",
+            "mcp-server-las>=0.1.1",
+            "mcp-server-las"
+          ],
+            "env": {
+                "VOLCENGINE_ACCESS_KEY": "your-access-key-id",
+                "VOLCENGINE_SECRET_KEY": "your-access-key-secret",
+                "LAS_DATASET_ID": "your-dataset-id"
+            }
+        }
+    }
+}
+```
+
+
+```json
+{
+    "mcpServers": {
+        "las-dataset-mcp": {
+            "command": "uvx",
+            "args": [
+            "--from",
             "git+https://github.com/volcengine/mcp-server#subdirectory=server/mcp_server_las",
             "mcp-server-las"
           ],

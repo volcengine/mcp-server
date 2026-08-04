@@ -244,6 +244,26 @@ Volcengine Redis service access address: https://www.volcengine.com/docs/6293/65
       "command": "uvx",
       "args": [
         "--from",
+        "mcp-server-redis>=1.0.1",
+        "mcp-server-redis"
+      ],
+      "env": {
+        "VOLCENGINE_REGION": "Volcengine resource region",
+        "VOLCENGINE_ACCESS_KEY": "Volcengine account ACCESS_KEY",
+        "VOLCENGINE_SECRET_KEY": "Volcengine account SECRET_KEY"
+      }
+    }
+  }
+}
+```
+
+```json
+{
+  "mcpServers": {
+    "redis": {
+      "command": "uvx",
+      "args": [
+        "--from",
         "git+https://github.com/volcengine/mcp-server.git#subdirectory=server/mcp_server_redis",
         "mcp-server-redis"
       ],
@@ -258,6 +278,27 @@ Volcengine Redis service access address: https://www.volcengine.com/docs/6293/65
 ```
 
 ### Example 2: temporary credentials through environment variables (stdio)
+
+```json
+{
+  "mcpServers": {
+    "redis": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "mcp-server-redis>=1.0.1",
+        "mcp-server-redis"
+      ],
+      "env": {
+        "VOLCENGINE_REGION": "cn-beijing",
+        "VOLCENGINE_ACCESS_KEY": "",
+        "VOLCENGINE_SECRET_KEY": "",
+        "VOLCENGINE_SESSION_TOKEN": ""
+      }
+    }
+  }
+}
+```
 
 ```json
 {

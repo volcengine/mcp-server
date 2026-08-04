@@ -97,6 +97,30 @@
 
 ## 部署
 火山引擎RDS MySQL 服务接入地址：https://www.volcengine.com/docs/6313/170639
+
+```json
+{
+  "mcpServers": {
+    "rds_mysql": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "mcp-server-rds-mysql>=0.1.1",
+        "mcp-server-rds-mysql"
+      ],
+      "transportType": "stdio",
+      "env": {
+        "VOLCENGINE_ENDPOINT": "火山引擎endpoint",
+        "VOLCENGINE_REGION": "火山引擎资源region",
+        "VOLCENGINE_ACCESS_KEY": "火山引擎账号ACCESSKEY",
+        "VOLCENGINE_SECRET_KEY": "火山引擎账号SECRETKEY",
+        "MCP_SERVER_PORT": "MCP server监听端口"
+      }
+    }
+  }
+}
+```
+
 ```json
 {
   "mcpServers": {

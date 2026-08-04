@@ -247,6 +247,30 @@ Obtain the access key ID, secret access key, and region from the Volcengine Mana
 
 ## Deployment
 Volcengine RDS PostgreSQL service access address: https://www.volcengine.com/docs/6438/69237
+
+```json
+{
+  "mcpServers": {
+    "rds_postgresql": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "mcp-server-rds-postgresql>=1.1.1",
+        "mcp-server-rds-postgresql"
+      ],
+      "transportType": "stdio",
+      "env": {
+        "VOLCENGINE_ENDPOINT": "Volcengine endpoint",
+        "VOLCENGINE_REGION": "Volcengine resource region",
+        "VOLCENGINE_ACCESS_KEY": "Volcengine account ACCESSKEY",
+        "VOLCENGINE_SECRET_KEY": "Volcengine account SECRETKEY",
+        "MCP_SERVER_PORT": "MCP server listening port"
+      }
+    }
+  }
+}
+```
+
 ```json
 {
   "mcpServers": {
