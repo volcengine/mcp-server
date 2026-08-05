@@ -27,6 +27,7 @@ import volcenginesdkcloudmonitor
 
 from mcp_server_cloudmonitor import client
 from fastmcp import FastMCP
+from fastmcp.server.dependencies import get_context
 from pydantic import Field
 from mcp_server_cloudmonitor.models.request import GetMetricsDataRequest, GetMetricsDataFilter
 
@@ -57,7 +58,7 @@ def get_metric_data(
     logger.info("enter server process")
 
     try:
-        api_instance = client.init_client(region=region, ctx=mcp.get_context())
+        api_instance = client.init_client(region=region, ctx=get_context())
         if request.Instances is None:
             request.Instances = []
         response = api_instance.get_metric_data(
@@ -121,7 +122,7 @@ def list_o11y_agent_vpc_endpoints(
             description="地域code,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
         ),
 ) -> str:
-    api_instance = client.init_client(region=region, ctx=mcp.get_context())
+    api_instance = client.init_client(region=region, ctx=get_context())
     response = api_instance.list_o11y_agent_vpc_endpoints(volcenginesdkcloudmonitor.ListO11yAgentVpcEndpointsRequest(
         page_number=1,
         page_size=100,
@@ -142,7 +143,7 @@ def update_o11y_agent_ecs_process_config(
             description="监控进程列表,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
         ),
 ) -> str:
-    api_instance = client.init_client(region=region, ctx=mcp.get_context())
+    api_instance = client.init_client(region=region, ctx=get_context())
     response = api_instance.update_o11y_agent_ecs_process_config(volcenginesdkcloudmonitor.UpdateO11yAgentECSProcessConfigRequest(
         instance_ids=[instance_id],
         processes=[volcenginesdkcloudmonitor.ProcessForUpdateO11yAgentECSProcessConfigInput(
@@ -163,7 +164,7 @@ def list_o11y_agent_ecs_process_configs(
             description="ECS实例ID,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
         ),
 ) -> str:
-    api_instance = client.init_client(region=region, ctx=mcp.get_context())
+    api_instance = client.init_client(region=region, ctx=get_context())
     response = api_instance.list_o11y_agent_ecs_process_configs(volcenginesdkcloudmonitor.ListO11yAgentECSProcessConfigsRequest(
         instance_id=instance_id,
     ))
@@ -178,7 +179,7 @@ def get_o11y_agent_ecs_auto_install(
             description="地域code,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
         ),
 ) -> str:
-    api_instance = client.init_client(region=region, ctx=mcp.get_context())
+    api_instance = client.init_client(region=region, ctx=get_context())
     response = api_instance.get_o11y_agent_ecs_auto_install(volcenginesdkcloudmonitor.GetO11yAgentECSAutoInstallRequest())
     if not isinstance(response, volcenginesdkcloudmonitor.GetO11yAgentECSAutoInstallResponse):
         raise Exception("InternalError: unexpected response")
@@ -193,7 +194,7 @@ def update_o11y_agent_ecs_auto_install(
             description="是否开启自动安装采集插件,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
         ),
 ) -> str:
-    api_instance = client.init_client(region=region, ctx=mcp.get_context())
+    api_instance = client.init_client(region=region, ctx=get_context())
     api_instance.update_o11y_agent_ecs_auto_install(volcenginesdkcloudmonitor.UpdateO11yAgentECSAutoInstallRequest(
         enable=enable,
     ))
@@ -214,7 +215,7 @@ def create_o11y_agent_ecs_deploy_task(
             description="指定ECS实例ID,不全选时有效,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
         ),
 ) -> str:
-    api_instance = client.init_client(region=region, ctx=mcp.get_context())
+    api_instance = client.init_client(region=region, ctx=get_context())
     api_instance.create_o11y_agent_ecs_deploy_task(volcenginesdkcloudmonitor.CreateO11yAgentECSDeployTaskRequest(
         task_type=task_type,
         filter=volcenginesdkcloudmonitor.FilterForCreateO11yAgentECSDeployTaskInput(
@@ -236,7 +237,7 @@ def perform_o11y_agent_ecs_deploy_task(
             description="操作类型,支持结束(finish)任务,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
         ),
 ) -> str:
-    api_instance = client.init_client(region=region, ctx=mcp.get_context())
+    api_instance = client.init_client(region=region, ctx=get_context())
     api_instance.perform_o11y_agent_ecs_deploy_task(volcenginesdkcloudmonitor.PerformO11yAgentECSDeployTaskRequest(
         task_type=task_type,
         action=action,
@@ -252,7 +253,7 @@ def list_o11y_agent_ecs_instances(
             description="ECS实例Id集合,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
         ),
 ) -> str:
-    api_instance = client.init_client(region=region, ctx=mcp.get_context())
+    api_instance = client.init_client(region=region, ctx=get_context())
     response = api_instance.list_o11y_agent_ecs_instances(volcenginesdkcloudmonitor.ListO11yAgentECSInstancesRequest(
         instance_ids=instance_ids,
     ))
@@ -269,7 +270,7 @@ def list_o11y_agent_ecs_instance_metadata(
             description="ECS实例Id集合,不要自行猜测region的取值,如果无法从上下文中获取到这个值,需要询问用户让用户进行明确"
         ),
 ) -> str:
-    api_instance = client.init_client(region=region, ctx=mcp.get_context())
+    api_instance = client.init_client(region=region, ctx=get_context())
     response = api_instance.list_o11y_agent_ecs_instance_metadata(volcenginesdkcloudmonitor.ListO11yAgentECSInstanceMetadataRequest(
         instance_ids=instance_ids,
     ))
