@@ -5,6 +5,24 @@ import os
 import time
 import traceback
 
+MCP_SERVER_NAME = "CloudMonitor"
+ENV_MCP_SERVER_HOST = "MCP_SERVER_HOST"
+ENV_MCP_SERVER_PORT = "MCP_SERVER_PORT"
+
+# FastMCP 3.x reads host/port/path/log_level from FASTMCP_* settings at import
+# time (they are no longer accepted by the FastMCP() constructor), so map the
+# legacy env vars before importing fastmcp.
+os.environ["FASTMCP_LOG_LEVEL"] = os.getenv("FASTMCP_LOG_LEVEL", "DEBUG")
+os.environ["FASTMCP_HOST"] = os.getenv(
+    ENV_MCP_SERVER_HOST, os.getenv("FASTMCP_HOST", "0.0.0.0")
+)
+os.environ["FASTMCP_PORT"] = os.getenv(
+    ENV_MCP_SERVER_PORT, os.getenv("FASTMCP_PORT", "8000")
+)
+os.environ["FASTMCP_STREAMABLE_HTTP_PATH"] = os.getenv(
+    "STREAMABLE_HTTP_PATH", os.getenv("FASTMCP_STREAMABLE_HTTP_PATH", "/mcp")
+)
+
 import volcenginesdkcloudmonitor
 
 from mcp_server_cloudmonitor import client
@@ -12,14 +30,7 @@ from fastmcp import FastMCP
 from pydantic import Field
 from mcp_server_cloudmonitor.models.request import GetMetricsDataRequest, GetMetricsDataFilter
 
-MCP_SERVER_NAME = "CloudMonitor"
-ENV_MCP_SERVER_PORT = "MCP_SERVER_PORT"
-ENV_MCP_SERVER_HOST = "MCP_SERVER_HOST"
-
-mcp = FastMCP(MCP_SERVER_NAME, log_level="DEBUG",
-              host=os.getenv(ENV_MCP_SERVER_HOST,"0.0.0.0"),
-              port=int(os.getenv(ENV_MCP_SERVER_PORT, "8000")),
-              streamable_http_path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"))
+mcp = FastMCP(MCP_SERVER_NAME)
 
 # Configure logging
 logging.basicConfig(
