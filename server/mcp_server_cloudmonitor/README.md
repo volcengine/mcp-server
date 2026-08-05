@@ -4,7 +4,7 @@ CloudMonitor MCP Server Provide capabilities such as query metric data。
 
 |             |                                                                               |
 |-------------|-------------------------------------------------------------------------------|
-| Version     | v0.1.2                                                                        |
+| Version     | v0.1.3                                                                        |
 | Description | CloudMonitor MCP Server Help you query and manage monitoring data more easily |
 | Category    | CloudNative-Observability                                                     |
 | Label       | Observability、Query Metric                                                    |
