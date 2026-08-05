@@ -1,7 +1,7 @@
 import logging
 import argparse
 from mcp.server import FastMCP
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 from .model import *
 from .config import *
@@ -20,19 +20,33 @@ mcp = FastMCP("联网搜索API MCP Server")
 @mcp.tool()
 async def web_search(
     Query: str,
-    Count: int = 10,
+    Count: Optional[int] = None,
     SearchType: str = "web",
     TimeRange: str = "",
     AuthLevel: int = 0,
+    NeedContent: Optional[bool] = None,
+    NeedUrl: Optional[bool] = None,
+    Sites: Optional[str] = None,
+    BlockHosts: Optional[str] = None,
+    Industry: Optional[str] = None,
+    QueryRewrite: Optional[bool] = None,
+    ContentFormats: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     联网搜索 API 调用，支持网页和图片搜索
     Args:
         Query (str): 搜索 query，1~100 个字符
-        Count (int): 返回条数，web 最多 50 条，image 最多 5 条
+        Count (int): 返回条数；默认 web 为 10 条，image 为 5 条；web 最多 50 条，image 最多 5 条
         SearchType (str): 搜索类型，仅支持 web 或 image
         TimeRange (str): web 搜索时间范围，可选 OneDay/OneWeek/OneMonth/OneYear 或日期区间
         AuthLevel (int): 权威等级过滤，0 为默认，1 为非常权威
+        NeedContent (bool): 是否返回网页正文，仅支持 web
+        NeedUrl (bool): 是否返回网页 URL，仅支持 web
+        Sites (str): 仅搜索指定站点，以 | 分隔，最多 20 个，仅支持 web
+        BlockHosts (str): 排除指定站点，以 | 分隔，最多 5 个，仅支持 web
+        Industry (str): 行业搜索，可选 finance、game 或 gov，仅支持 web
+        QueryRewrite (bool): 是否启用查询改写
+        ContentFormats (str): 网页正文格式，可选 text 或 markdown，仅支持 web
     Returns:
         联网搜索结果返回结构
     """
@@ -48,22 +62,22 @@ async def web_search(
             search_type=SearchType,
             time_range=TimeRange or None,
             auth_level=AuthLevel,
+            need_content=NeedContent,
+            need_url=NeedUrl,
+            sites=Sites,
+            block_hosts=BlockHosts,
+            industry=Industry,
+            query_rewrite=QueryRewrite,
+            content_formats=ContentFormats,
         )
 
         if config.api_key is not None and len(config.api_key) > 0:
             return await web_search_api_key_auth(config.api_key, req, "web_search")
         else:
             return await web_search_volcengine_auth(config.volcengine_ak, config.volcengine_sk, req, "web_search")
-    except Exception as e:
-        logger.error(f"Error in web_search tool: {e}")
-        resp_error = ResponseError(
-            error=Error(
-                message=str(e),
-                type="mcp_server_ask_echo_search_infinity_error",
-                code="mcp_server_ask_echo_search_infinity_error",
-            )
-        )
-        return resp_error.to_dict()
+    except Exception:
+        logger.exception("web_search tool failed")
+        raise
 
 
 def main():

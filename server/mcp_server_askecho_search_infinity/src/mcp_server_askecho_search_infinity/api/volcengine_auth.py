@@ -12,6 +12,7 @@ Version = "2025-01-01"
 Region = "cn-beijing"
 Host = "mercury.volcengineapi.com"
 ContentType = "application/json"
+REQUEST_TIMEOUT_SECONDS = 30
 
 
 async def web_search_volcengine_auth(ak: str, sk: str, req: WebSearchRequest, tool_name: str):
@@ -122,7 +123,7 @@ async def volcengine_auth_request(method, date, query, header, ak, sk, action, b
             method=method,
             url=f"https://{request_param['host']}{request_param['path']}",
             headers=header,
-            timeout=aiohttp.ClientTimeout(total=600),
+            timeout=aiohttp.ClientTimeout(total=REQUEST_TIMEOUT_SECONDS),
             params=request_param["query"],
             data=request_param["body"]
         ) as response:
@@ -130,5 +131,3 @@ async def volcengine_auth_request(method, date, query, header, ak, sk, action, b
             response.raise_for_status()  # 手动调用
             data = await response.json()
             return data
-        return None
-    return None
