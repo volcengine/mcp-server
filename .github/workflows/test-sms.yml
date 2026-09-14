@@ -1,0 +1,52 @@
+name: Test SMS MCP server
+
+on:
+  pull_request:
+    paths:
+      - "server/mcp_server_sms/**"
+      - ".github/workflows/test-sms.yml"
+  push:
+    branches: [main]
+    paths:
+      - "server/mcp_server_sms/**"
+      - ".github/workflows/test-sms.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.11", "3.12"]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: sms_test
+          POSTGRES_PASSWORD: sms-mcp-test-only
+          POSTGRES_DB: sms_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sms_test -d sms_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install
+        run: python -m pip install -e './server/mcp_server_sms[test]'
+      - name: Check and test
+        working-directory: server/mcp_server_sms
+        env:
+          SMS_MCP_TEST_DATABASE_URL: postgresql+psycopg://sms_test:sms-mcp-test-only@localhost:5432/sms_test
+        run: |
+          ruff check src tests --select F,E9
+          pytest -q
+          python -m build
+          python -m twine check dist/*

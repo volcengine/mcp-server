@@ -101,6 +101,8 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 
 ### **企业服务与云通信**  
 
+- **[短信 SMS MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_sms)**：通过独立工具完成国内短信资质、签名、模板申请、发送、普通群发与回执查询，支持受控文件输入和 Stateless MCP。
+
 - **[证书中心 MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_certificate_center)**：通过自然语言驱动管理证书服务。  
 - **[域名服务 MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_domain_service)**：通过自然语言高效查询并注册域名。  
 - **[TrafficRoute MCP](https://github.com/volcengine/mcp-server/tree/main/server/mcp_server_traffic_route)**：各种类型的 DNS 节点链路配置。
