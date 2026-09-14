@@ -1,0 +1,38 @@
+[project]
+name = "mcp-server-sms"
+version = "0.1.0"
+description = "Stateless MCP tools for Volcengine SMS APIs"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "Apache-2.0"}
+dependencies = [
+    "mcp[cli]>=2.2,<3",
+    "pydantic>=2.11,<3",
+    "httpx>=0.28,<1",
+    "starlette>=0.47,<2",
+    "uvicorn>=0.35,<1",
+    "volcengine>=1.0.191,<2",
+]
+
+[project.scripts]
+mcp-server-sms = "mcp_server_sms.server:main"
+
+[project.optional-dependencies]
+test = ["pytest>=8", "pytest-asyncio>=1", "build>=1", "twine>=6", "ruff>=0.16,<1"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_server_sms"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
