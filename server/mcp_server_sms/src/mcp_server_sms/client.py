@@ -2,6 +2,7 @@
 
 import json
 from dataclasses import dataclass
+from http.cookiejar import CookieJar, DefaultCookiePolicy
 from typing import Any, Literal
 
 import httpx
@@ -24,6 +25,7 @@ class Action:
     result_format: Literal["json", "csv", "id"] = "json"
     required_any: tuple[str, ...] = ()
     required_all: tuple[str, ...] = ()
+    opaque_result_fields: tuple[str, ...] = ()
 
 
 # Only named tools can select an action; callers cannot supply arbitrary APIs.
@@ -47,7 +49,9 @@ ACTIONS = {
     "SendSmsForAgent": Action("POST", True, required_any=("MessageId", "MessageIds")),
     "ListSmsSendLogForAgent": Action("POST"),
     "ListTotalSendCountStatForAgent": Action("POST"),
-    "GetUploadTosURL": Action("GET", True, required_all=("file", "url")),
+    "GetUploadTosURL": Action(
+        "GET", True, required_all=("file", "url"), opaque_result_fields=("url",)
+    ),
     "TemplateUploadDemo": Action("POST", result_format="csv"),
     "SetBatchTask": Action("POST", True, required_any=("taskId",)),
     "GetBatchTaskDetail": Action("GET"),
@@ -70,12 +74,25 @@ _CREDENTIAL_FIELDS = frozenset(
     }
 )
 
+# These status codes explicitly reject the request. Unstructured timeout,
+# conflict and gateway-specific responses remain uncertain for mutations.
+_REJECTED_HTTP_STATUSES = frozenset({400, 401, 403, 404, 405, 413, 415, 422, 429})
 
-def safe_result(value: Any, credentials: Credentials) -> Any:
-    """Remove authentication material without rewriting business content or IDs."""
+
+class _RejectCookies(DefaultCookiePolicy):
+    """Connection pooling must not introduce cross-caller cookie state."""
+
+    def set_ok(self, cookie, request):
+        return False
+
+
+def safe_result(
+    value: Any, credentials: Credentials, *, opaque_fields: tuple[str, ...] = ()
+) -> Any:
+    """Redact credentials while preserving declared top-level API references."""
     if isinstance(value, dict):
         return {
-            key: safe_result(item, credentials)
+            key: item if key in opaque_fields else safe_result(item, credentials)
             for key, item in value.items()
             if key.lower() not in _CREDENTIAL_FIELDS
         }
@@ -88,20 +105,34 @@ def safe_result(value: Any, credentials: Credentials) -> Any:
     return value
 
 
-def failure(action, code, message, request_id=None, *, outcome_unknown=False):
+def failure(action, code, message, request_id=None, *, outcome_unknown=False, http_status=None):
+    error = {"code": code, "message": message, "outcome_unknown": outcome_unknown}
+    if http_status is not None:
+        error["http_status"] = http_status
     return {
         "success": False,
         "action": action,
         "request_id": request_id,
         "result": None,
-        "error": {"code": code, "message": message, "outcome_unknown": outcome_unknown},
+        "error": error,
     }
 
 
 class SmsClient:
     def __init__(self, *, transport: httpx.AsyncBaseTransport | None = None, timeout: float = 15):
-        self.transport = transport
-        self.timeout = timeout
+        self._http = httpx.AsyncClient(
+            transport=transport,
+            timeout=timeout,
+            follow_redirects=False,
+            cookies=CookieJar(policy=_RejectCookies()),
+        )
+
+    async def __aenter__(self):
+        await self._http.__aenter__()
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        await self._http.__aexit__(exc_type, exc_value, traceback)
 
     async def call(self, action: str, params: dict, credentials: Credentials) -> dict:
         spec = ACTIONS[action]
@@ -134,15 +165,12 @@ class SmsClient:
             ),
         )
         try:
-            async with httpx.AsyncClient(
-                transport=self.transport, timeout=self.timeout, follow_redirects=False
-            ) as http:
-                response = await http.request(
-                    spec.method,
-                    request.build(),
-                    headers=request.headers,
-                    content=request.body.encode("utf-8") if request.body else None,
-                )
+            response = await self._http.request(
+                spec.method,
+                request.build(),
+                headers=request.headers,
+                content=request.body.encode("utf-8") if request.body else None,
+            )
         except (httpx.ConnectError, httpx.ConnectTimeout, httpx.PoolTimeout):
             return failure(action, "connection_failed", "未建立 API 连接，请检查网络")
         except httpx.HTTPError:
@@ -158,6 +186,7 @@ class SmsClient:
     def decode(action: str, response: httpx.Response, credentials: Credentials) -> dict:
         spec = ACTIONS[action]
         request_id = response.headers.get("x-tt-logid") or response.headers.get("x-request-id")
+        request_id = safe_result(request_id, credentials)
         try:
             payload = response.json()
         except ValueError:
@@ -180,7 +209,13 @@ class SmsClient:
                         "contentType": "text/csv",
                     }
                 except UnicodeError:
-                    return failure(action, "invalid_response", "CSV 响应不是 UTF-8", request_id)
+                    return failure(
+                        action,
+                        "invalid_response",
+                        "CSV 响应不是 UTF-8",
+                        request_id,
+                        http_status=response.status_code,
+                    )
                 return {
                     "success": True,
                     "action": action,
@@ -202,6 +237,7 @@ class SmsClient:
                 "服务端异常，不能确认写入结果",
                 request_id,
                 outcome_unknown=True,
+                http_status=response.status_code,
             )
         api_error = metadata.get("Error")
         if isinstance(api_error, dict):
@@ -209,7 +245,19 @@ class SmsClient:
             # Preserve the public error code and RequestId, never echo raw input.
             code = safe_result(str(api_error.get("Code") or "api_error"), credentials)
             return failure(
-                action, code, "短信 API 返回错误，请结合错误码和 RequestId 排查", request_id
+                action,
+                code,
+                "短信 API 返回错误，请结合错误码和 RequestId 排查",
+                request_id,
+                http_status=response.status_code,
+            )
+        if response.status_code in _REJECTED_HTTP_STATUSES:
+            return failure(
+                action,
+                f"http_{response.status_code}",
+                "短信 API 拒绝了请求",
+                request_id,
+                http_status=response.status_code,
             )
         if not response.is_success or not isinstance(payload, dict) or "Result" not in payload:
             return failure(
@@ -218,6 +266,7 @@ class SmsClient:
                 "未收到可确认的短信 API 响应",
                 request_id,
                 outcome_unknown=spec.write,
+                http_status=response.status_code,
             )
         result = payload["Result"]
         valid = True
@@ -247,11 +296,14 @@ class SmsClient:
                 "接口响应缺少必要结果，不能确认操作完成",
                 request_id,
                 outcome_unknown=spec.write,
+                http_status=response.status_code,
             )
         return {
             "success": True,
             "action": action,
             "request_id": request_id,
-            "result": safe_result(result, credentials),
+            # A signed upload URL is an operational capability, not a display
+            # string. Editing its query parameters would invalidate the signature.
+            "result": safe_result(result, credentials, opaque_fields=spec.opaque_result_fields),
             "error": None,
         }

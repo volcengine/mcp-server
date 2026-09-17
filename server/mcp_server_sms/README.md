@@ -59,12 +59,16 @@ This follows the repository's credential-passing convention; it is **not an OAut
 
 `--public-url` adds the deployment's HTTPS origin to DNS-rebinding protection. Without it, only local HTTP hosts are accepted. Requests do not require a protocol session or shared process state. Replicas can serve requests independently.
 
+The HTTP connection pool is owned by the MCP server lifespan and closed at shutdown. Credentials and signed headers remain per-request, and response cookies are not retained between callers. Connection reuse does not introduce business state or a database.
+
 ## Outcomes and confirmation
 
 - The client must obtain user authorization before calling tools with side effects. Tool annotations describe behavior; they do not prove user consent.
 - SMS API acceptance and delivery are separate. Use the returned Message ID with `list_send_logs`; an empty result does not prove failure.
 - Application creation is not audit approval. Query qualification, signature or template state separately.
 - No API calls are automatically retried. A timeout or unconfirmed write returns `outcome_unknown`; do not blindly repeat it. This adapter does not provide durable request deduplication or an exactly-once guarantee.
+- Unstructured HTTP 400/401/403/404/405/413/415/422/429 responses are explicit rejections. Other unstructured statuses, server errors, and malformed or incomplete successful write responses remain uncertain. API-response errors include `http_status` without echoing the response body.
+- The upload API's top-level `url` is returned byte-for-byte, including its signed credential parameters. Other fields still undergo credential redaction. Treat the complete URL as a temporary capability; do not redact it before upload or expose it in logs.
 - A successful API call can contain a failed business check, such as an invalid verification code. Inspect the upstream `status` value.
 - The API adapter does not log request bodies or credentials. Upstream error text is not echoed, and authentication fields are removed from results; ordinary business content is preserved. Clients and deployment platforms must also configure their own logging and private-data handling.
 

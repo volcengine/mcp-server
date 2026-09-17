@@ -1,8 +1,10 @@
+import httpx
 import pytest
 from conftest import auth_header, rpc
 from starlette.testclient import TestClient
 
 from mcp_server_sms.auth import AuthenticationError, Credentials
+from mcp_server_sms.client import SmsClient
 from mcp_server_sms.server import build_server, create_http_app
 
 
@@ -64,3 +66,40 @@ def test_http_has_no_file_routes_and_rejects_untrusted_host(api_calls):
         )
         assert response.status_code == 421
     assert api_calls[0] == []
+
+
+def test_http_client_lives_until_mcp_shutdown_and_keeps_callers_isolated():
+    class CountingTransport(httpx.AsyncBaseTransport):
+        def __init__(self):
+            self.requests = []
+            self.close_count = 0
+
+        async def handle_async_request(self, request):
+            self.requests.append(request)
+            return httpx.Response(
+                200,
+                json={"Result": {"List": [], "Total": 0}},
+                headers={"set-cookie": "identity=caller-a; Path=/; Secure"},
+            )
+
+        async def aclose(self):
+            self.close_count += 1
+
+    transport = CountingTransport()
+    app = create_http_app(build_server(SmsClient(transport=transport)), "https://testserver")
+    with TestClient(app, base_url="https://testserver") as client:
+        for caller in ("a", "b"):
+            response = rpc(
+                client,
+                "tools/call",
+                token=auth_header(caller),
+                params={"name": "list_message_groups", "arguments": {}},
+            )
+            assert response.status_code == 200
+            assert response.json()["result"]["isError"] is False
+        assert transport.close_count == 0
+        for caller, request in zip(("a", "b"), transport.requests, strict=True):
+            assert f"Credential=fixture-access-key-{caller}/" in request.headers["authorization"]
+            assert request.headers["x-security-token"] == f"fixture-token-{caller}"
+            assert "cookie" not in request.headers
+    assert transport.close_count == 1

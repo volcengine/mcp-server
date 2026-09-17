@@ -2,6 +2,7 @@
 
 import argparse
 import json
+from contextlib import asynccontextmanager
 from typing import Annotated, Any, Literal
 from urllib.parse import urlsplit
 
@@ -43,9 +44,16 @@ PositiveInt = Annotated[int, Field(gt=0)]
 
 def build_server(client: SmsClient | None = None) -> MCPServer:
     api = client if client is not None else SmsClient()
+
+    @asynccontextmanager
+    async def lifespan(server: MCPServer):
+        async with api:
+            yield
+
     mcp = MCPServer(
         "Volcengine SMS",
         version=__version__,
+        lifespan=lifespan,
         instructions=(
             "国内短信 API 工具。调用凭据来自宿主配置，不在工具参数中传递。"
             "有写入或费用的操作由客户端取得用户授权后调用；工具注解不能代替授权。"
