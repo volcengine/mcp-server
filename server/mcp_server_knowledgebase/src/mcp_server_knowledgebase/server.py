@@ -281,7 +281,7 @@ async def search_knowledge(
     limit: Annotated[int, Field(ge=1, le=100, description="Maximum chunks to return (1–100); defaults to 10.")] = 10,
     doc_filter: Optional[DocFilter] = Field(default=None, description="Optional document filter to include or exclude matching field values."),
     resource_id: Optional[str] = Field(default=None, description="Knowledge base ID. Takes precedence over collection_name when both are provided."),
-) -> Annotated[CallToolResult, SearchKnowledgeResult]:
+) -> CallToolResult:
     """Search for relevant chunks in a knowledge base by collection name or resource ID.
 
     Provide collection_name or resource_id; the ID takes precedence. Name-based
@@ -334,10 +334,7 @@ async def search_knowledge(
                 ))
             except ValidationError:
                 raise ToolError("Invalid upstream response structure: invalid image resource link") from None
-    return CallToolResult(
-        content=content,
-        structured_content=result.model_dump(mode="json"),
-    )
+    return CallToolResult(content=content)
 
 
 def main():

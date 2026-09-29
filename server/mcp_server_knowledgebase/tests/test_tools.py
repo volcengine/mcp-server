@@ -272,8 +272,8 @@ def test_search_returns_image_resource_links(monkeypatch: pytest.MonkeyPatch) ->
         attachment["link"] for attachment in attachments[:3]
     ]
     assert all(block.mime_type == "image/*" for block in result.content[1:])
-    assert json.loads(result.content[0].text) == result.structured_content
-    chunk = result.structured_content["result_list"][0]
+    assert result.structured_content is None
+    chunk = json.loads(result.content[0].text)["result_list"][0]
     assert chunk["doc_id"] == "doc-1" and chunk["doc_name"] == "Guide"
     assert "doc_info" not in chunk
     assert all("link" not in attachment for attachment in chunk["chunk_attachment"])
