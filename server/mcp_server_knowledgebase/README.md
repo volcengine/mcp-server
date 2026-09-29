@@ -157,7 +157,8 @@ Example result:
 ```json
 {
   "collection_name": "product_docs",
-  "doc_id": "product_guide_2026"
+  "doc_id": "product_guide_2026",
+  "resource_id": "kb-example"
 }
 ```
 
@@ -168,13 +169,16 @@ Get a document's metadata and processing status.
 ```python
 get_doc(
     collection_name="product_docs",
+    resource_id="kb-example",
     doc_id="product_guide_2026",
 )
 ```
 
 Parameters:
 
-- `collection_name` (required): Collection containing the document.
+- `collection_name` (optional): Collection containing the document.
+- `resource_id` (optional): Collection ID. Provide this or `collection_name`;
+  `resource_id` takes precedence when both are provided.
 - `doc_id` (required): Document ID.
 
 Example result:
@@ -185,7 +189,6 @@ Example result:
   "doc_id": "product_guide_2026",
   "doc_name": "Product Guide",
   "doc_type": "pdf",
-  "url": "https://example.com/product-guide.pdf",
   "add_type": "url",
   "create_time": 1788220800,
   "update_time": 1788220860,
@@ -193,13 +196,54 @@ Example result:
   "status": {
     "process_status": 0,
     "failed_code": null
+  },
+  "title": "Product Guide",
+  "doc_summary": "Product setup and account management instructions.",
+  "brief_summary": "An introduction to the product.",
+  "meta": {
+    "category": "product",
+    "version": "2026"
+  },
+  "video_outline": {
+    "title": "Product walkthrough",
+    "summary": "A walkthrough of the product.",
+    "chapters": [
+      {
+        "title": "Account settings",
+        "content": "Open Account Settings.",
+        "start_time": "00:00:10",
+        "end_time": "00:00:30",
+        "element_content": {
+          "text": "Account Settings"
+        }
+      }
+    ]
+  },
+  "audio_outline": {
+    "title": "Product introduction",
+    "summary": "An introduction to account management.",
+    "chapters": [
+      {
+        "title": "Resetting your password",
+        "content": "Select Reset Password.",
+        "start_time": 10.0,
+        "end_time": 30.0,
+        "element_content": {
+          "text": "Reset Password"
+        }
+      }
+    ]
   }
 }
 ```
 
 `process_status` values: `0` completed, `1` failed, `2` or `3` queued, `5`
-deleting, and `6` processing. Fields not returned by Viking are `null`;
-additional upstream document fields are preserved.
+deleting, and `6` processing. Fields not returned by Viking are `null`.
+
+Additional result fields include `title` (document title), `doc_summary` (document
+summary), `brief_summary` (short summary), `meta` (metadata), `video_outline`, and
+`audio_outline`. Outlines contain `title`, `summary`, and `chapters`; chapters
+contain `title`, `content`, `start_time`, `end_time`, and `element_content`.
 
 ### `list_docs`
 
@@ -208,6 +252,7 @@ List documents in a collection using cursor pagination.
 ```python
 list_docs(
     collection_name="product_docs",
+    resource_id="kb-example",
     limit=2,
     next_token=None,
 )
@@ -215,9 +260,11 @@ list_docs(
 
 Parameters:
 
-- `collection_name` (required): Collection whose documents will be listed.
+- `collection_name` (optional): Collection whose documents will be listed.
+- `resource_id` (optional): Collection ID. Provide this or `collection_name`;
+  `resource_id` takes precedence when both are provided.
 - `limit` (optional): Number of documents to return, from 1 to 100. Defaults
-  to `100`.
+  to `50`.
 - `next_token` (optional): Opaque cursor returned by the previous call. Omit
   it for the first page. An empty cursor in the result means all documents
   have been returned.
@@ -228,23 +275,21 @@ Example result:
 {
   "collection_name": "product_docs",
   "total_num": 3,
-  "count": 2,
+  "count": 1,
   "doc_list": [
     {
-      "collection_name": "product_docs",
       "doc_id": "product_guide_2026",
       "doc_name": "Product Guide",
       "doc_type": "pdf",
-      "url": "https://example.com/product-guide.pdf",
-      "add_type": "url",
       "create_time": 1788220800,
       "update_time": 1788220860,
       "point_num": 53,
       "status": {
-        "process_status": 0
+        "process_status": 0,
+        "failed_code": null
       },
       "brief_summary": "An introduction to the product.",
-      "total_tokens": 345
+      "title": "Product Guide"
     }
   ],
   "has_more": true,
@@ -252,20 +297,24 @@ Example result:
 }
 ```
 
-`total_num` is `null` when Viking does not provide it. Document entries
-preserve additional upstream fields such as summaries and token counts.
+`total_num` is `null` when Viking does not provide it.
 
 ### `get_collection`
 
 Get information and build status for a collection.
 
 ```python
-get_collection(collection_name="product_docs")
+get_collection(
+    collection_name="product_docs",
+    resource_id="kb-example",
+)
 ```
 
 Parameters:
 
-- `collection_name` (required): Collection name.
+- `collection_name` (optional): Collection name.
+- `resource_id` (optional): Collection ID. Provide this or `collection_name`;
+  `resource_id` takes precedence when both are provided.
 
 Example result:
 
@@ -273,7 +322,11 @@ Example result:
 {
   "collection_name": "product_docs",
   "description": "Product manuals and release notes",
-  "status": 1
+  "status": 1,
+  "resource_id": "kb-example",
+  "doc_num": 3,
+  "create_time": 1788220800,
+  "update_time": 1788220860
 }
 ```
 
@@ -297,13 +350,20 @@ Example result:
   "collection_list": [
     {
       "collection_name": "product_docs",
-      "description": "Product manuals and release notes"
+      "description": "Product manuals and release notes",
+      "resource_id": "kb-example-1",
+      "create_time": 1788220800,
+      "update_time": 1788220860
     },
     {
       "collection_name": "support_faq",
-      "description": "Frequently asked support questions"
+      "description": "Frequently asked support questions",
+      "resource_id": "kb-example-2",
+      "create_time": 1788220800,
+      "update_time": 1788220860
     }
-  ]
+  ],
+  "total_num": 2
 }
 ```
 
@@ -316,7 +376,8 @@ include or exclude matching document field values.
 search_knowledge(
     query="How do I reset my password?",
     collection_name="support_faq",
-    limit=3,
+    resource_id="kb-example",
+    limit=10,
     doc_filter={
         "op": "must",
         "field": "doc_id",
@@ -327,10 +388,12 @@ search_knowledge(
 
 Parameters:
 
-- `query` (required): Search query.
-- `collection_name` (required): Collection to search.
+- `query` (required): Search query, from 1 to 8000 characters.
+- `collection_name` (optional): Collection to search.
+- `resource_id` (optional): Collection ID. Provide this or `collection_name`;
+  `resource_id` takes precedence when both are provided.
 - `limit` (optional): Maximum number of chunks to return, from 1 to 100.
-  Defaults to `3`.
+  Defaults to `10`.
 - `doc_filter` (optional): Object with the following fields:
   - `op`: `"must"` to include matches or `"must_not"` to exclude them.
   - `field`: Document field to filter, such as `"doc_id"`.
@@ -345,7 +408,23 @@ Example result:
       "id": "chunk_001",
       "content": "Open Account Settings and select Reset Password.",
       "doc_id": "account_guide",
-      "doc_name": "Account Guide"
+      "doc_name": "Account Guide",
+      "title": "Account Guide",
+      "doc_type": "pdf",
+      "score": 0.85,
+      "rerank_score": 0.92,
+      "chunk_title": "Resetting your password",
+      "audio_start_time": null,
+      "audio_end_time": null,
+      "video_start_time": null,
+      "video_end_time": null,
+      "chunk_attachment": [
+        {
+          "uuid": "image_1",
+          "caption": "Account Settings",
+          "type": "image"
+        }
+      ]
     }
   ]
 }
@@ -353,6 +432,27 @@ Example result:
 
 `doc_id` and `doc_name` are `null` when Viking does not provide document
 metadata. A non-null `doc_id` can be passed directly to `get_doc`.
+
+Chunks also include `title` (document title), `doc_type` (document type), `score`
+(search score), `rerank_score`, `chunk_title`, `audio_start_time`, `audio_end_time`,
+`video_start_time`, `video_end_time`, and `chunk_attachment` (attachments). Each
+attachment contains `uuid`, `caption`, and `type`.
+
+Image links for `image`, `doc-image`, and `table` attachments are returned as MCP
+`ResourceLink` blocks with `uri`, `name`, `description`, and `mimeType` (`image/*`),
+and URL is not included in `chunk_attachment`.
+
+Example image link content block:
+
+```json
+{
+  "type": "resource_link",
+  "uri": "https://example.com/account-settings.png",
+  "name": "image_1",
+  "description": "Account Settings",
+  "mimeType": "image/*"
+}
+```
 
 ## MCP client configuration
 
@@ -365,7 +465,7 @@ Example stdio configuration using `uvx` and a Viking API key:
       "command": "uvx",
       "args": [
         "--from",
-        "mcp-server-knowledgebase>=0.2.1",
+        "mcp-server-knowledgebase>=0.2.2",
         "mcp-server-knowledgebase"
       ],
       "env": {

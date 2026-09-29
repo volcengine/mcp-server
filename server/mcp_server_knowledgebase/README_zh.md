@@ -153,7 +153,8 @@ add_doc(
 ```json
 {
   "collection_name": "product_docs",
-  "doc_id": "product_guide_2026"
+  "doc_id": "product_guide_2026",
+  "resource_id": "kb-example"
 }
 ```
 
@@ -164,13 +165,15 @@ add_doc(
 ```python
 get_doc(
     collection_name="product_docs",
+    resource_id="kb-example",
     doc_id="product_guide_2026",
 )
 ```
 
 参数：
 
-- `collection_name`（必填）：文档所属的知识库。
+- `collection_name`（可选）：文档所属的知识库。
+- `resource_id`（可选）：知识库 ID。与 `collection_name` 至少提供一个；同时提供时优先使用 `resource_id`。
 - `doc_id`（必填）：文档 ID。
 
 返回示例：
@@ -181,7 +184,6 @@ get_doc(
   "doc_id": "product_guide_2026",
   "doc_name": "Product Guide",
   "doc_type": "pdf",
-  "url": "https://example.com/product-guide.pdf",
   "add_type": "url",
   "create_time": 1788220800,
   "update_time": 1788220860,
@@ -189,13 +191,54 @@ get_doc(
   "status": {
     "process_status": 0,
     "failed_code": null
+  },
+  "title": "Product Guide",
+  "doc_summary": "Product setup and account management instructions.",
+  "brief_summary": "An introduction to the product.",
+  "meta": {
+    "category": "product",
+    "version": "2026"
+  },
+  "video_outline": {
+    "title": "Product walkthrough",
+    "summary": "A walkthrough of the product.",
+    "chapters": [
+      {
+        "title": "Account settings",
+        "content": "Open Account Settings.",
+        "start_time": "00:00:10",
+        "end_time": "00:00:30",
+        "element_content": {
+          "text": "Account Settings"
+        }
+      }
+    ]
+  },
+  "audio_outline": {
+    "title": "Product introduction",
+    "summary": "An introduction to account management.",
+    "chapters": [
+      {
+        "title": "Resetting your password",
+        "content": "Select Reset Password.",
+        "start_time": 10.0,
+        "end_time": 30.0,
+        "element_content": {
+          "text": "Reset Password"
+        }
+      }
+    ]
   }
 }
 ```
 
 `process_status` 状态值：`0` 表示处理完成，`1` 表示处理失败，`2` 或 `3`
-表示排队中，`5` 表示删除中，`6` 表示处理中。Viking 未返回的字段为 `null`；
-上游返回的其他文档字段也会保留。
+表示排队中，`5` 表示删除中，`6` 表示处理中。Viking 未返回的字段为 `null`。
+
+返回字段还包括 `title`（文档标题）、`doc_summary`（文档摘要）、
+`brief_summary`（简短摘要）、`meta`（元数据）、`video_outline`（视频大纲）和
+`audio_outline`（音频大纲）。大纲包含 `title`、`summary` 和 `chapters`；章节包含
+`title`、`content`、`start_time`、`end_time` 和 `element_content`。
 
 ### `list_docs`
 
@@ -204,6 +247,7 @@ get_doc(
 ```python
 list_docs(
     collection_name="product_docs",
+    resource_id="kb-example",
     limit=2,
     next_token=None,
 )
@@ -211,8 +255,9 @@ list_docs(
 
 参数：
 
-- `collection_name`（必填）：要获取文档列表的知识库。
-- `limit`（可选）：单次返回的文档数量，范围为 1–100，默认值为 `100`。
+- `collection_name`（可选）：要获取文档列表的知识库。
+- `resource_id`（可选）：知识库 ID。与 `collection_name` 至少提供一个；同时提供时优先使用 `resource_id`。
+- `limit`（可选）：单次返回的文档数量，范围为 1–100，默认值为 `50`。
 - `next_token`（可选）：上一次调用返回的不透明游标。首次请求不传；返回值中的
   游标为空表示文档已全部返回。
 
@@ -222,23 +267,21 @@ list_docs(
 {
   "collection_name": "product_docs",
   "total_num": 3,
-  "count": 2,
+  "count": 1,
   "doc_list": [
     {
-      "collection_name": "product_docs",
       "doc_id": "product_guide_2026",
       "doc_name": "Product Guide",
       "doc_type": "pdf",
-      "url": "https://example.com/product-guide.pdf",
-      "add_type": "url",
       "create_time": 1788220800,
       "update_time": 1788220860,
       "point_num": 53,
       "status": {
-        "process_status": 0
+        "process_status": 0,
+        "failed_code": null
       },
       "brief_summary": "An introduction to the product.",
-      "total_tokens": 345
+      "title": "Product Guide"
     }
   ],
   "has_more": true,
@@ -246,20 +289,23 @@ list_docs(
 }
 ```
 
-Viking 未提供 `total_num` 时，该字段为 `null`。文档条目会保留摘要、token 数
-等上游扩展字段。
+Viking 未提供 `total_num` 时，该字段为 `null`。
 
 ### `get_collection`
 
 获取知识库信息和构建状态。
 
 ```python
-get_collection(collection_name="product_docs")
+get_collection(
+    collection_name="product_docs",
+    resource_id="kb-example",
+)
 ```
 
 参数：
 
-- `collection_name`（必填）：知识库名称。
+- `collection_name`（可选）：知识库名称。
+- `resource_id`（可选）：知识库 ID。与 `collection_name` 至少提供一个；同时提供时优先使用 `resource_id`。
 
 返回示例：
 
@@ -267,7 +313,11 @@ get_collection(collection_name="product_docs")
 {
   "collection_name": "product_docs",
   "description": "Product manuals and release notes",
-  "status": 1
+  "status": 1,
+  "resource_id": "kb-example",
+  "doc_num": 3,
+  "create_time": 1788220800,
+  "update_time": 1788220860
 }
 ```
 
@@ -291,13 +341,20 @@ list_collections()
   "collection_list": [
     {
       "collection_name": "product_docs",
-      "description": "Product manuals and release notes"
+      "description": "Product manuals and release notes",
+      "resource_id": "kb-example-1",
+      "create_time": 1788220800,
+      "update_time": 1788220860
     },
     {
       "collection_name": "support_faq",
-      "description": "Frequently asked support questions"
+      "description": "Frequently asked support questions",
+      "resource_id": "kb-example-2",
+      "create_time": 1788220800,
+      "update_time": 1788220860
     }
-  ]
+  ],
+  "total_num": 2
 }
 ```
 
@@ -309,7 +366,8 @@ list_collections()
 search_knowledge(
     query="How do I reset my password?",
     collection_name="support_faq",
-    limit=3,
+    resource_id="kb-example",
+    limit=10,
     doc_filter={
         "op": "must",
         "field": "doc_id",
@@ -320,9 +378,10 @@ search_knowledge(
 
 参数：
 
-- `query`（必填）：检索问题。
-- `collection_name`（必填）：要检索的知识库。
-- `limit`（可选）：返回的最大切片数量，范围为 1–100，默认值为 `3`。
+- `query`（必填）：检索问题，长度为 1–8000 个字符。
+- `collection_name`（可选）：要检索的知识库。
+- `resource_id`（可选）：知识库 ID。与 `collection_name` 至少提供一个；同时提供时优先使用 `resource_id`。
+- `limit`（可选）：返回的最大切片数量，范围为 1–100，默认值为 `10`。
 - `doc_filter`（可选）：包含以下字段的对象：
   - `op`：`"must"` 表示包含匹配结果，`"must_not"` 表示排除匹配结果。
   - `field`：要过滤的文档字段，例如 `"doc_id"`。
@@ -337,7 +396,23 @@ search_knowledge(
       "id": "chunk_001",
       "content": "Open Account Settings and select Reset Password.",
       "doc_id": "account_guide",
-      "doc_name": "Account Guide"
+      "doc_name": "Account Guide",
+      "title": "Account Guide",
+      "doc_type": "pdf",
+      "score": 0.85,
+      "rerank_score": 0.92,
+      "chunk_title": "Resetting your password",
+      "audio_start_time": null,
+      "audio_end_time": null,
+      "video_start_time": null,
+      "video_end_time": null,
+      "chunk_attachment": [
+        {
+          "uuid": "image_1",
+          "caption": "Account Settings",
+          "type": "image"
+        }
+      ]
     }
   ]
 }
@@ -345,6 +420,27 @@ search_knowledge(
 
 Viking 未提供文档元数据时，`doc_id` 和 `doc_name` 为 `null`。非空的
 `doc_id` 可以直接传给 `get_doc`。
+
+切片还包括 `title`（文档标题）、`doc_type`（文档类型）、`score`（检索得分）、
+`rerank_score`（重排得分）、`chunk_title`（切片标题）、`audio_start_time`、
+`audio_end_time`、`video_start_time`、`video_end_time`（音视频起止时间）和
+`chunk_attachment`（附件列表）。附件包含 `uuid`、`caption` 和 `type`。
+
+`image`、`doc-image` 和 `table` 类型附件的图片链接通过 MCP `ResourceLink`
+返回，包含 `uri`、`name`、`description` 和 `mimeType`（`image/*`），
+URL 不包含在 `chunk_attachment` 中。
+
+图片链接内容块示例：
+
+```json
+{
+  "type": "resource_link",
+  "uri": "https://example.com/account-settings.png",
+  "name": "image_1",
+  "description": "Account Settings",
+  "mimeType": "image/*"
+}
+```
 
 ## MCP 客户端配置
 
@@ -357,7 +453,7 @@ Viking 未提供文档元数据时，`doc_id` 和 `doc_name` 为 `null`。非空
       "command": "uvx",
       "args": [
         "--from",
-        "mcp-server-knowledgebase>=0.2.1",
+        "mcp-server-knowledgebase>=0.2.2",
         "mcp-server-knowledgebase"
       ],
       "env": {
