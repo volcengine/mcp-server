@@ -49,7 +49,7 @@ def load_config() -> KnowledgeBaseConfig:
         ak=ak,
         sk=sk,
         api_key=api_key,
-        project=os.environ.get("KNOWLEDGE_BASE_PROJECT", "default"),
+        project=os.getenv("KNOWLEDGE_BASE_PROJECT", "").strip() or "default",
         region=os.environ.get("KNOWLEDGE_BASE_REGION", "cn-north-1"),
     )
 
