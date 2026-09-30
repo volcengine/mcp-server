@@ -1,5 +1,4 @@
 import os
-import importlib
 import logging
 from typing import Sequence
 import concurrent.futures
@@ -168,7 +167,6 @@ def run_select_query(query: str):
 def run_dml_ddl_query(query: str):
     """Run a DML/DDL query in a ByteHouse database
     Note: 建表前先询问用户使用的是ByteHouse云数仓还是ByteHouse企业版，推荐优先使用ByteHouse自研的表引擎
-    Note: 表引擎优先使用ByteHouse自研的表引擎，可通过get_bytehouse_table_engine_doc获取表引擎的文档，其中doc_name：ha_unique_merge_tree, ha_merge_tree, distributed是企业版的， cnch_merge_tree, cnch_unique_merge_tree是云数仓的
     Note: 调用前转义SQL包含的双引号，确保符合JSON格式
     Note: 企业版默认是用ON CLUSTER使得DDL在全部节点上执行，使用ON CLUSTER子句前，请确认集群名正常，可以查询system.clusters获得
     """
@@ -181,21 +179,6 @@ def run_dml_ddl_query(query: str):
         logger.warning(f"Query timed out after {SELECT_QUERY_TIMEOUT_SECS} seconds: {query}")
         future.cancel()
         return f"Queries taking longer than {SELECT_QUERY_TIMEOUT_SECS} seconds are currently not supported."
-
-@mcp.tool()
-def get_bytehouse_table_engine_doc(doc_name: str):
-    """Get the documentation for a ByteHouse table engine
-    Node: 有以下几种文档名doc_name ha_unique_merge_tree, ha_merge_tree, distributed, cnch_merge_tree, cnch_unique_merge_tree
-    输入对应的表引擎名，返回对应的文档，请参考文档描述，按照用户需求选择对应的表引擎
-    """
-    try:
-        with importlib.resources.open_text('mcp_bytehouse.knowledge', f'{doc_name}.md') as f:
-            content = f.read()
-            return content
-    except FileNotFoundError:
-        return f"No documentation found for table engine {doc_name}"
-    except Exception as e:
-        return f"An error occurred while reading the documentation: {str(e)}"
 
 def create_clickhouse_client():
     client_config = config.get_client_config()
