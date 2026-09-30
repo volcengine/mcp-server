@@ -22,10 +22,6 @@ An MCP server for ByteHouse. ByteHouse MCP Server serves as a communication brid
   - Execute DML or DDL queries on your ByteHouse cluster.
   - Input: `sql` (string): The SQL query to execute.
 
-* `get_bytehouse_table_engine_doc`
-  - Get ByteHouse Engine Manual.
-  - Input: `doc_name` (string): The name of the doc.
-
 ## Configuration
 
 ### Running the Server
