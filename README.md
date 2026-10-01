@@ -153,6 +153,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 - **[汉得-精准营销](https://github.com/koudaiDemon/mcp-server-hand)**：通过分析用户对话，精准提取多维度标签，与行业数据库中的商品标签智能匹配，从而为用户精准推荐契合需求的商品，提升购物体验与转化率。  
 - **[水滴信用-企业大数据](https://github.com/shuididata/mcp-server)**：用好数据服务好企业， 企业信用信息服务商。  
 - **[飞常准-Aviation](https://github.com/variflight/variflight-mcp)**：Aviation MCP Server 提供了7个核心API接口，涵盖航班实时动态、OD对航班查询、航班中转方案、乘机舒适度（包括机上座舱设施和餐食）、飞机实时定位、机场未来天气、以及机票运价等服务。  
+- **[OpenHire-求职](https://github.com/gzchenhao/openhire)**：让 AI 助手直接从雇主自己的招聘系统里替你找工作，简历不出你的电脑。岗位读自 Greenhouse / Lever / Ashby / 北森 / Moka 的公开接口和雇主官网，每条带雇主自己的发布日期、在架天数和直达投递链接；覆盖 AI 基础设施、智驾、具身智能领域的雇主。stdio，`uvx openhire@latest serve`。  
 - **[Brave Search](https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search)**：Web and local search using Brave's Search API.  
 - **[Fetch](https://github.com/modelcontextprotocol/servers/tree/main/src/fetch)**：Web content fetching and conversion for efficient LLM usage.  
 - **[Tavily search](https://github.com/RamXX/mcp-tavily)**：An MCP server for Tavily's search & news API, with explicit site inclusions/exclusions.  
