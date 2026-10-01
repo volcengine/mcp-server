@@ -2,7 +2,6 @@
 name = "mcp-server-traffic-route"
 version = "0.1.0"
 description = "Apply, configure, and query for edge computing nodes, including virtual machines, images, bare metal, and corresponding network configurations."
-readme = "../README.md"
 requires-python = ">=3.11"
 dependencies = [
     "mcp>=1.12.0",
