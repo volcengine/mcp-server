@@ -1,17 +1,19 @@
 [project]
 name = "mcp-server-apmplus"
-version = "0.1.0"
+version = "0.2.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "mcp==1.10.0",
+    "black>=26.1.0",
+    "click==8.2.0",
+    "mcp==1.12.4",
     "requests>=2.32.3",
-    "volcengine-python-sdk>=3.0.1",
+    "volcengine-python-sdk==5.0.14",
 ]
 
 [project.scripts]
-mcp-server-apmplus = "mcp_server_apmplus.main:main"
+mcp-server-apmplus = "mcp_server_apmplus.server:main"
 
 [build-system]
 requires = ["hatchling"]
