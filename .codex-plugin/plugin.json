@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "name": "volcengine-mcp-server",
+  "version": "1.0.0",
+  "registry": { "visibility": "public" },
+  "manifest": {
+    "homepage": "https://github.com/volcengine/mcp-server",
+    "repository": "https://github.com/volcengine/mcp-server",
+    "license": "Apache-2.0"
+  },
+  "tools": [
+    { "id": "ve_clone", "name": "clone", "description": "Clone a Git repository from Volcengine" },
+    { "id": "ve_deploy", "name": "deploy", "description": "Deploy to Volcengine" }
+  ]
+}
