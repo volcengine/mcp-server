@@ -155,7 +155,7 @@ export MCP_SERVER_PORT=8000
 }
 ```
 
-## Examples
+## Examples 
 ### Cursor
 ![Image](https://lf3-beecdn.bytetos.com/obj/ies-fe-bee-upload/bee_prod/biz_950/tos_333f0ad0f93c311bae4259ce2ab9022c.jpg)
 ![Image](https://lf3-beecdn.bytetos.com/obj/ies-fe-bee-upload/bee_prod/biz_950/tos_49abb4af5fb42f55052558867daff3d6.jpg)
