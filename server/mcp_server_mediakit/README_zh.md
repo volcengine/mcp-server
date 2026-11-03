@@ -39,13 +39,13 @@ MediaKit MCP Server 基于独立 **FastMCP** 实现，核心能力由两层 Midd
       <td rowspan="1"><b>通用能力</b></td>
       <td rowspan="1">shared</td>
       <td>query_task</td>
-      <td><b>任务查询</b>：查询异步任务状态。提交异步任务后使用此工具获取结果。推荐使用 poll_interval_seconds + max_poll_attempts 控制轮询，例如 poll_interval_seconds=2、max_poll_attempts=10。传递这两个参数时，不需要再传 poll_complete【不推荐】。可选 max_poll_timeout_seconds 限制单次轮询总时长，默认 0 表示不限制；poll_interval_seconds × max_poll_attempts 不得超过该上限。详细输入和输出参数请见
+      <td><b>任务查询</b>：查询异步任务状态。提交异步任务后使用此工具获取结果。推荐使用 poll_interval_seconds + max_poll_attempts 控制轮询，例如 poll_interval_seconds=10、max_poll_attempts=10。传递这两个参数时，不需要再传 poll_complete【不推荐】。可选 max_poll_timeout_seconds 限制单次轮询总时长，默认 0 表示不限制；poll_interval_seconds × max_poll_attempts 不得超过该上限。详细输入和输出参数请见
         <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/shared.py#L36">query_task</a>。
       </td>
     </tr>
     <tr>
-      <td rowspan="23"><b>视频剪辑</b></td>
-      <td rowspan="23">editing</td>
+      <td rowspan="24"><b>视频剪辑</b></td>
+      <td rowspan="24">editing</td>
       <td>add_image_to_video</td>
       <td><b>视频加图片</b>：支持将指定图片（如 Logo、水印等）叠加到视频画面上。详细输入和输出参数请见
         <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/editing.py#L26">add_image_to_video</a>。
@@ -136,9 +136,15 @@ MediaKit MCP Server 基于独立 **FastMCP** 实现，核心能力由两层 Midd
       </td>
     </tr>
     <tr>
+      <td>gaussian_blur_video</td>
+      <td><b>视频高斯模糊</b>：用于视频高斯模糊，可以对输入视频在指定时间段内的指定矩形区域叠加高斯模糊，常用于打码隐私信息、遮挡水印、角标或路人脸。详细输入和输出参数请见
+        <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/editing.py#L333">gaussian_blur_video</a>。
+      </td>
+    </tr>
+    <tr>
       <td>image_to_video</td>
       <td><b>图片转视频</b>：将多张图片按顺序组合成动态视频，可配置转场动画和镜头内动画；仅把现有图片做成带动效的视频，不支持根据参考图生成新的画面内容。详细输入和输出参数请见
-        <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/editing.py#L333">image_to_video</a>。
+        <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/editing.py#L352">image_to_video</a>。
       </td>
     </tr>
     <tr>
@@ -147,43 +153,43 @@ MediaKit MCP Server 基于独立 **FastMCP** 实现，核心能力由两层 Midd
 处理耗时：处理耗时与视频时长正相关。视频时长越长，处理耗时越长。平均 RTF（处理耗时/原片时长）为 1。
 输出音频的时长以最长的音频为准。
 输出视频格式：mp3。详细输入和输出参数请见
-        <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/editing.py#L352">mix_audio</a>。
+        <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/editing.py#L371">mix_audio</a>。
       </td>
     </tr>
     <tr>
       <td>mux_audio_video</td>
       <td><b>视频加音频</b>：可将输入的音频流与视频流合并成一个新的视频文件，并可选择保留或替换视频的原有音轨；当音视频时长不一致时，可进行对齐处理。详细输入和输出参数请见
-        <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/editing.py#L371">mux_audio_video</a>。
+        <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/editing.py#L390">mux_audio_video</a>。
       </td>
     </tr>
     <tr>
       <td>rotate_video</td>
       <td><b>视频画面旋转</b>：用于视频画面旋转，对指定视频进行整体旋转。详细输入和输出参数请见
-        <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/editing.py#L394">rotate_video</a>。
+        <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/editing.py#L413">rotate_video</a>。
       </td>
     </tr>
     <tr>
       <td>stitch_video</td>
       <td><b>视频画面拼接</b>：将多个视频在空间上按水平或垂直方向拼接成一个完整画面，适用于多视角对比、画面组合等场景。详细输入和输出参数请见
-        <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/editing.py#L413">stitch_video</a>。
+        <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/editing.py#L432">stitch_video</a>。
       </td>
     </tr>
     <tr>
       <td>text_to_scrolling_video</td>
       <td><b>文字生成滚屏视频</b>：将指定文本内容转换为文字滚屏视频，输出视频为固定 9:16 竖版，常用于小说推文、内容讲解和歌词视频等场景。详细输入和输出参数请见
-        <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/editing.py#L432">text_to_scrolling_video</a>。
+        <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/editing.py#L451">text_to_scrolling_video</a>。
       </td>
     </tr>
     <tr>
       <td>trim_audio</td>
       <td><b>音频裁剪</b>：用于音频裁剪，按指定的开始时间和结束时间从输入音频中截取片段。详细输入和输出参数请见
-        <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/editing.py#L458">trim_audio</a>。
+        <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/editing.py#L477">trim_audio</a>。
       </td>
     </tr>
     <tr>
       <td>trim_video</td>
       <td><b>视频裁剪</b>：用于视频裁剪，可按指定的开始和结束时间从输入视频截取片段。详细输入和输出参数请见
-        <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/editing.py#L479">trim_video</a>。
+        <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/editing.py#L498">trim_video</a>。
       </td>
     </tr>
     <tr>
@@ -374,15 +380,13 @@ MediaKit MCP Server 基于独立 **FastMCP** 实现，核心能力由两层 Midd
     </tr>
     <tr>
       <td>drama_recap</td>
-      <td><b>解说视频生成</b>：将原始短剧/长剧/电影视频自动转化为带 AI 配音与解说字幕的全新视频。
-自定义解说词或 AI 自动生成解说词、可选原字幕擦除。
-。详细输入和输出参数请见
+      <td><b>解说视频生成</b>：基于已完成的剧本还原任务，可使用自定义解说词或由 AI 自动生成解说词，生成带 AI 配音与解说字幕的营销或解说视频；可配置音色、字幕样式与原文字幕擦除。详细输入和输出参数请见
         <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/video.py#L123">drama_recap</a>。
       </td>
     </tr>
     <tr>
       <td>drama_recap_vertical</td>
-      <td><b>解说视频生成（短剧行业模型）</b>：支持基于输入短剧剧集的角色和剧情故事线理解（剧本还原），自动提取高光片段并生成全新的解说视频。详细输入和输出参数请见
+      <td><b>解说视频生成（短剧行业模型）</b>：基于输入短剧剧集的角色与剧情故事线理解，自动提取高光片段并生成全新解说视频；支持文字解说（原片高光混剪 + 屏幕文字）与旁白解说（原片高光混剪 + AI 语音 + BGM），并可套用短剧三要素视觉模板。详细输入和输出参数请见
         <a href="https://github.com/volcengine/mcp-server/blob/main/server/mcp_server_mediakit/src/mediakit/mcp_tools/video.py#L149">drama_recap_vertical</a>。
       </td>
     </tr>
@@ -752,7 +756,7 @@ uv run mcp-server-mediakit --transport streamable-http
 
 #### query_task
 
-查询异步任务状态。提交异步任务后使用此工具获取结果。推荐使用 poll_interval_seconds + max_poll_attempts 控制轮询，例如 poll_interval_seconds=2、max_poll_attempts=10。传递这两个参数时，不需要再传 poll_complete【不推荐】。可选 max_poll_timeout_seconds 限制单次轮询总时长，默认 0 表示不限制；poll_interval_seconds × max_poll_attempts 不得超过该上限。
+查询异步任务状态。提交异步任务后使用此工具获取结果。推荐使用 poll_interval_seconds + max_poll_attempts 控制轮询，例如 poll_interval_seconds=10、max_poll_attempts=10。传递这两个参数时，不需要再传 poll_complete【不推荐】。可选 max_poll_timeout_seconds 限制单次轮询总时长，默认 0 表示不限制；poll_interval_seconds × max_poll_attempts 不得超过该上限。
 
 ### 视频剪辑 (`editing`)
 
@@ -815,6 +819,10 @@ uv run mcp-server-mediakit --transport streamable-http
 #### flip_video
 
 用于视频画面翻转，对指定视频进行上下或左右镜像翻转。
+
+#### gaussian_blur_video
+
+用于视频高斯模糊，可以对输入视频在指定时间段内的指定矩形区域叠加高斯模糊，常用于打码隐私信息、遮挡水印、角标或路人脸。
 
 #### image_to_video
 
@@ -979,13 +987,11 @@ uv run mcp-server-mediakit --transport streamable-http
 
 #### drama_recap
 
-将原始短剧/长剧/电影视频自动转化为带 AI 配音与解说字幕的全新视频。
-自定义解说词或 AI 自动生成解说词、可选原字幕擦除。
-
+基于已完成的剧本还原任务，可使用自定义解说词或由 AI 自动生成解说词，生成带 AI 配音与解说字幕的营销或解说视频；可配置音色、字幕样式与原文字幕擦除。
 
 #### drama_recap_vertical
 
-支持基于输入短剧剧集的角色和剧情故事线理解（剧本还原），自动提取高光片段并生成全新的解说视频。
+基于输入短剧剧集的角色与剧情故事线理解，自动提取高光片段并生成全新解说视频；支持文字解说（原片高光混剪 + 屏幕文字）与旁白解说（原片高光混剪 + AI 语音 + BGM），并可套用短剧三要素视觉模板。
 
 #### drama_script
 

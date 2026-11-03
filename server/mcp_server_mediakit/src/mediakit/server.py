@@ -86,7 +86,7 @@ def main() -> None:
             host=os.getenv("MCP_SERVER_HOST", "0.0.0.0"),
             port=int(os.getenv("MCP_SERVER_PORT", "8000")),
             path=os.getenv("STREAMABLE_HTTP_PATH", "/mcp"),
-            stateless_http=os.getenv("STATLESS_HTTP", "true").lower() == "true",
+            stateless_http=os.getenv("STATELESS_HTTP", "true").lower() == "true",
         )
     except Exception as e:
         print(f"Error occurred while starting the server: {e}", file=sys.stderr)

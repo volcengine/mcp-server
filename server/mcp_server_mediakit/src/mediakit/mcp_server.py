@@ -27,7 +27,8 @@ def register_categories(mcp) -> None:
             if hasattr(module, "register_tools"):
                 module.register_tools(mcp)
                 if hasattr(module, "TOOL_NAMES"):
-                    register_domain_tools(mod_name, module.TOOL_NAMES)
+                    domain = getattr(module, "DOMAIN", mod_name)
+                    register_domain_tools(domain, module.TOOL_NAMES)
         except Exception as exc:
             logger.exception(
                 "Failed to register MCP tools from module %s: %s", mod_name, exc

@@ -12,10 +12,12 @@ import logging
 import os
 from dataclasses import dataclass
 from typing import Any
+from urllib.parse import urlparse
 
 import httpx
 
 from .api_info import api_info
+from .schema_relations import validate_field_relations
 from .header_utils import header_value
 from .constant import (
     DEFAULT_ENDPOINT,
@@ -37,13 +39,33 @@ from .constant import (
 logger = logging.getLogger(__name__)
 
 
+def _reject_header_controls(name: str, value: str) -> None:
+    if any(character in value for character in "\r\n\x00"):
+        raise ValueError(f"{name} 包含不允许的控制字符")
+
+
+def _validate_request_endpoint(value: str, *, source: str = ENDPOINT_HEADER) -> str:
+    parsed = urlparse(value)
+    if parsed.scheme != "https" or parsed.hostname != "mediakit.cn-beijing.volces.com":
+        raise ValueError(f"{source} 仅支持官方 MediaKit HTTPS endpoint")
+    return value.rstrip("/")
+
+
 def resolve_client_config(headers: dict[str, str] | None = None) -> ClientConfig:
     """解析 client 配置。
 
     各字段优先级：HTTP Header > 环境变量 > 默认值（如适用）。
     """
     inbound = headers or {}
-    api_key = header_value(inbound, MEDIAKIT_API_KEY_HEADER) or os.environ.get(
+    request_key = header_value(inbound, MEDIAKIT_API_KEY_HEADER)
+    request_endpoint = header_value(inbound, ENDPOINT_HEADER)
+    if request_endpoint and not request_key:
+        raise ValueError(
+            f"Header {ENDPOINT_HEADER} requires request-scoped "
+            f"Header {MEDIAKIT_API_KEY_HEADER}"
+        )
+    api_key_source = MEDIAKIT_API_KEY_HEADER if request_key else MEDIAKIT_API_KEY_ENV
+    api_key = request_key or os.environ.get(
         MEDIAKIT_API_KEY_ENV, ""
     ).strip()
     if not api_key:
@@ -51,11 +73,18 @@ def resolve_client_config(headers: dict[str, str] | None = None) -> ClientConfig
             f"缺少 API Key，请设置 Header {MEDIAKIT_API_KEY_HEADER} "
             f"或环境变量 {MEDIAKIT_API_KEY_ENV}"
         )
+    _reject_header_controls(api_key_source, api_key)
     endpoint = header_value(inbound, ENDPOINT_HEADER) or os.environ.get(
         ENDPOINT_ENV, ""
     ).strip() or DEFAULT_ENDPOINT
+    if request_endpoint:
+        endpoint = _validate_request_endpoint(request_endpoint, source=ENDPOINT_HEADER)
+    else:
+        endpoint = _validate_request_endpoint(endpoint, source=ENDPOINT_ENV)
     runtime = os.environ.get(RUNTIME_ENV, "").strip() or DEFAULT_RUNTIME
     task_source = os.environ.get(TASK_SOURCE_ENV, "").strip() or DEFAULT_TASK_SOURCE
+    for label, value in ((RUNTIME_ENV, runtime), (TASK_SOURCE_ENV, task_source)):
+        _reject_header_controls(label, value)
     logid = header_value(inbound, LOGID_HEADER) or os.environ.get(LOGID_ENV, "").strip()
     return ClientConfig(
         api_key=api_key,
@@ -86,21 +115,7 @@ class MediakitClient:
 
     @classmethod
     def from_env(cls, timeout: float | None = None) -> "MediakitClient":
-        api_key = os.environ.get(MEDIAKIT_API_KEY_ENV, "")
-        if not api_key:
-            raise ValueError(
-                f"缺少 API Key，请通过环境变量 {MEDIAKIT_API_KEY_ENV} 设置"
-            )
-        return cls(
-            ClientConfig(
-                api_key=api_key,
-                endpoint=os.environ.get(ENDPOINT_ENV, "") or DEFAULT_ENDPOINT,
-                runtime=os.environ.get(RUNTIME_ENV, "") or DEFAULT_RUNTIME,
-                task_source=os.environ.get(TASK_SOURCE_ENV, "") or DEFAULT_TASK_SOURCE,
-                logid=os.environ.get(LOGID_ENV, "").strip() or None,
-            ),
-            timeout=timeout,
-        )
+        return cls(resolve_client_config(), timeout=timeout)
 
     @classmethod
     def from_request_headers(
@@ -112,6 +127,14 @@ class MediakitClient:
         return cls(resolve_client_config(headers), timeout=timeout)
 
     def _build_request_headers(self, *, tool_name: str) -> dict[str, str]:
+        _reject_header_controls("Authorization", self._config.api_key)
+        for name, value in (
+            (RUNTIME_HEADER, self._config.runtime),
+            (TASK_SOURCE_HEADER, self._config.task_source),
+            (TOOL_NAME_HEADER, tool_name),
+            (LOGID_HEADER, self._config.logid or ""),
+        ):
+            _reject_header_controls(name, value)
         headers: dict[str, str] = {
             "Content-Type": "application/json",
             RUNTIME_HEADER: self._config.runtime,
@@ -213,6 +236,7 @@ class MediakitClient:
         route = api_info[api_name]
         method = route["method"].upper()
         path = route["path"]
+        input_schema = route.get("input_schema")
 
         path_params = {}
         remaining_kwargs = dict(kwargs)
@@ -224,6 +248,8 @@ class MediakitClient:
         remaining_kwargs = {
             key: value for key, value in remaining_kwargs.items() if value is not None
         }
+        if isinstance(input_schema, dict):
+            validate_field_relations(input_schema, remaining_kwargs)
 
         resolved_tool = tool_name or api_name
         if method in {"GET", "DELETE"}:
