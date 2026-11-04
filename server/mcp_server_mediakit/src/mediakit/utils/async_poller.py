@@ -34,15 +34,17 @@ async def poll_until_complete(
     Args:
         callback: 同步查询函数，返回包含 status 字段的 dict
         poll_interval_seconds: 轮询间隔（秒）
-        max_poll_attempts: 最大轮询次数，0 表示仅查一次
+        max_poll_attempts: 首次查询后的最大追加查询次数，0 表示仅查一次
         poll_complete: 是否阻塞直到任务完成
         max_poll_timeout_seconds: 轮询总时长上限（秒），0 表示不限制
 
     Returns:
         最终查询结果 dict
     """
-    attempts = 1 if initial_result is not None else 0
+    attempts = 0
     result = initial_result
+    if result is None:
+        result = callback()
     poll_started = time.monotonic()
     has_deadline = max_poll_timeout_seconds > 0
     deadline = poll_started + max_poll_timeout_seconds
@@ -56,19 +58,17 @@ async def poll_until_complete(
         return has_deadline and time.monotonic() >= deadline
 
     while True:
-        if result is None:
-            result = callback()
-            attempts += 1
         status = result.get("status")
         if status in _TERMINAL_STATUSES:
             return result
-        if not poll_complete and attempt_limit and attempts >= attempt_limit:
-            return result
         if not poll_complete and max_poll_attempts == 0:
+            return result
+        if max_poll_attempts > 0 and attempts >= attempt_limit:
             return result
         if timed_out():
             return result
         await asyncio.sleep(max(poll_interval_seconds, 0))
         if timed_out():
             return result
-        result = None
+        result = callback()
+        attempts += 1

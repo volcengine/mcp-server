@@ -40,14 +40,14 @@ def register_tools(mcp) -> None:
     ) -> dict:
         """查询异步任务状态。"""
         try:
-            async def _do_query() -> dict:
+            def _do_query() -> dict:
                 return get_client().call(
                     api_name="query_task",
                     tool_name="query_task",
                     task_id=task_id,
                 )
 
-            result = await _do_query()
+            result = _do_query()
 
             status = result.get("status")
             interval = 10 if poll_interval_seconds is None else poll_interval_seconds
