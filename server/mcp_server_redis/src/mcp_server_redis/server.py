@@ -255,7 +255,7 @@ def get_available_params(func_name: str) -> str:
     name="describe_regions",
     description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query available regions for Redis instances"
 )
-def describe_regions(region_id: str = None) -> dict[str, Any]:
+def describe_regions(region_id: str | None = None) -> dict[str, Any]:
     """Query available regions for Redis instances
        Args:
            region_id (str, optional): The region ID. If not specified, returns information about all available regions
@@ -291,13 +291,13 @@ def describe_zones(region_id: str) -> dict[str, Any]:
     description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query VPC information"
 )
 def describe_vpcs(
-    vpc_name: str = None,
-    project_name: str = None,
-    is_default: bool = None,
-    vpc_owner_id: int = None,
+    vpc_name: str | None = None,
+    project_name: str | None = None,
+    is_default: bool | None = None,
+    vpc_owner_id: int | None = None,
     page_number: int = 1,
     page_size: int = 20,
-    next_token: str = None,
+    next_token: str | None = None,
     max_results: int = 10
 ) -> dict[str, Any]:
     """Query VPC information
@@ -341,16 +341,16 @@ def describe_vpcs(
     description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query subnet information"
 )
 def describe_subnets(
-    zone_id: str = None,
-    vpc_id: str = None,
-    subnet_name: str = None,
-    subnet_owner_id: str = None,
-    route_table_id: str = None,
-    project_name: str = None,
-    is_default: bool = None,
+    zone_id: str | None = None,
+    vpc_id: str | None = None,
+    subnet_name: str | None = None,
+    subnet_owner_id: str | None = None,
+    route_table_id: str | None = None,
+    project_name: str | None = None,
+    is_default: bool | None = None,
     page_number: int = 1,
     page_size: int = 20,
-    next_token: str = None,
+    next_token: str | None = None,
     max_results: int = 10
 ) -> dict[str, Any]:
     """Query subnet information
@@ -402,21 +402,21 @@ def describe_subnets(
     description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query basic information of Redis instances"
 )
 def describe_db_instances(
-    region_id: str = None,
+    region_id: str | None = None,
     page_number: int = 1,
     page_size: int = 10,
-    zone_id: str = None,
-    instance_id: str = None,
-    instance_name: str = None,
-    sharded_cluster: int = None,
-    status: str = None,
-    engine_version: str = None,
-    vpc_id: str = None,
-    charge_type: str = None,
-    tag_filters: list[dict[str, str]] = None,
-    project_name: str = None,
+    zone_id: str | None = None,
+    instance_id: str | None = None,
+    instance_name: str | None = None,
+    sharded_cluster: int | None = None,
+    status: str | None = None,
+    engine_version: str | None = None,
+    vpc_id: str | None = None,
+    charge_type: str | None = None,
+    tag_filters: list[dict[str, str]] | None = None,
+    project_name: str | None = None,
     service_type: str = "Basic",
-    data_layout: str = None
+    data_layout: str | None = None
 ) -> dict[str, Any]:
     """Query basic information of Redis instances
        Args:
@@ -495,7 +495,7 @@ def describe_db_instance_detail(instance_id: str) -> dict[str, Any]:
     name="describe_db_instance_specs",
     description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query the list of instance specifications supported by Redis"
 )
-def describe_db_instance_specs(arch_type: str = None, instance_class: str = None) -> dict[str, Any]:
+def describe_db_instance_specs(arch_type: str | None = None, instance_class: str | None = None) -> dict[str, Any]:
     """Query the list of instance specifications supported by Redis
        Args:
            arch_type (str, optional): The architecture type of Redis instance.
@@ -519,12 +519,12 @@ def describe_db_instance_specs(arch_type: str = None, instance_class: str = None
 def describe_slow_logs(
     instance_id: str,
     page_size: int,
-    node_ids: list[str] = None,
-    slow_log_type: str = None,
-    query_start_time: str = None,
-    query_end_time: str = None,
-    db_name: str = None,
-    context: str = None
+    node_ids: list[str] | None = None,
+    slow_log_type: str | None = None,
+    query_start_time: str | None = None,
+    query_end_time: str | None = None,
+    db_name: str | None = None,
+    context: str | None = None
 ) -> dict[str, Any]:
     """Query slow log details of the target Redis instance within specified time period
        Args:
@@ -571,10 +571,10 @@ def describe_slow_logs(
 def describe_hot_keys(
     instance_id: str,
     page_size: int,
-    query_start_time: str = None,
-    query_end_time: str = None,
-    key_type: str = None,
-    shard_ids: list[str] = None
+    query_start_time: str | None = None,
+    query_end_time: str | None = None,
+    key_type: str | None = None,
+    shard_ids: list[str] | None = None
 ) -> dict[str, Any]:
     """Query hot key details of the target Redis instance within specified time period
        Args:
@@ -616,10 +616,10 @@ def describe_hot_keys(
 def describe_big_keys(
     instance_id: str,
     page_size: int,
-    query_start_time: str = None,
-    query_end_time: str = None,
-    key_type: str = None,
-    order_by: str = None
+    query_start_time: str | None = None,
+    query_end_time: str | None = None,
+    key_type: str | None = None,
+    order_by: str | None = None
 ) -> dict[str, Any]:
     """Query big key details of the target Redis instance within specified time period
        Args:
@@ -660,15 +660,15 @@ def describe_big_keys(
 )
 def describe_backups(
     scope: str = "OneInstance",
-    instance_id: str = None,
-    start_time: str = None,
-    end_time: str = None,
-    backup_strategy_list: list[str] = None,
-    backup_point_name: str = None,
-    project_name: str = None,
-    page_size: int = None,
-    page_number: int = None,
-    backup_point_id: str = None
+    instance_id: str | None = None,
+    start_time: str | None = None,
+    end_time: str | None = None,
+    backup_strategy_list: list[str] | None = None,
+    backup_point_name: str | None = None,
+    project_name: str | None = None,
+    page_size: int | None = None,
+    page_number: int | None = None,
+    backup_point_id: str | None = None
 ) -> dict[str, Any]:
     """Query the backup set list of Redis instances
        Args:
@@ -748,8 +748,8 @@ def describe_db_instance_params(
 def describe_parameter_groups(
     page_number: int,
     page_size: int,
-    engine_version: str = None,
-    source: str = None
+    engine_version: str | None = None,
+    source: str | None = None
 ) -> dict[str, Any]:
     """Query the basic information of parameter templates under the current account and region
        Args:
@@ -798,11 +798,11 @@ def describe_parameter_group_detail(parameter_group_id: str) -> dict[str, Any]:
 )
 def describe_allow_lists(
     region_id: str,
-    instance_id: str = None,
-    query_default: bool = None,
-    ip_address: list[str] = None,
-    ip_segment: list[str] = None,
-    project_name: str = None
+    instance_id: str | None = None,
+    query_default: bool | None = None,
+    ip_address: list[str] | None = None,
+    ip_segment: list[str] | None = None,
+    project_name: str | None = None
 ) -> dict[str, Any]:
     """Query the IP whitelist list in the specified region
        Args:
@@ -858,7 +858,7 @@ def describe_allow_list_detail(allow_list_id: str) -> dict[str, Any]:
     name="list_db_account",
     description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query account information in Redis instance"
 )
-def list_db_account(instance_id: str, account_name: str = None) -> dict[str, Any]:
+def list_db_account(instance_id: str, account_name: str | None = None) -> dict[str, Any]:
     """Query account information in Redis instance
        Args:
            instance_id (str): The instance ID.
@@ -890,20 +890,20 @@ def create_db_instance(
     configure_nodes: list[dict],
     vpc_id: str,
     subnet_id: str,
-    shard_number: int = None,
-    instance_name: str = None,
-    password: str = None,
+    shard_number: int | None = None,
+    instance_name: str | None = None,
+    password: str | None = None,
     port: int = 6379,
     project_name: str = "default",
-    allow_list_ids: list[str] = None,
-    tags: list[dict[str, str]] = None,
+    allow_list_ids: list[str] | None = None,
+    tags: list[dict[str, str]] | None = None,
     charge_type: str = "PostPaid",
-    purchase_months: int = None,
+    purchase_months: int | None = None,
     auto_renew: bool = False,
     deletion_protection: str = "disabled",
     no_auth_mode: str = "close",
-    parameter_group_id: str = None,
-    client_token: str = None
+    parameter_group_id: str | None = None,
+    client_token: str | None = None
 ) -> dict[str, Any]:
     """Create a Redis instance
        Args:
@@ -1092,7 +1092,7 @@ def create_db_instance(
 def modify_db_instance_params(
     instance_id: str,
     param_values: list[dict[str, str]],
-    client_token: str = None
+    client_token: str | None = None
 ) -> dict[str, Any]:
     """Modify parameter configurations of the target Redis instance
        Args:
@@ -1131,8 +1131,8 @@ def create_db_account(
     account_name: str,
     role_name: str,
     password: str,
-    description: str = None,
-    client_token: str = None
+    description: str | None = None,
+    client_token: str | None = None
 ) -> dict[str, Any]:
     """Create an account for the target Redis instance
        Args:
@@ -1185,12 +1185,12 @@ def create_db_account(
 )
 def create_allow_list(
     allow_list_name: str,
-    allow_list: str = None,
-    allow_list_desc: str = None,
+    allow_list: str | None = None,
+    allow_list_desc: str | None = None,
     allow_list_category: str = "Ordinary",
-    security_group_bind_infos: list[dict[str, str]] = None,
-    project_name: str = None,
-    client_token: str = None
+    security_group_bind_infos: list[dict[str, str]] | None = None,
+    project_name: str | None = None,
+    client_token: str | None = None
 ) -> dict[str, Any]:
     """Create a new IP whitelist
        Args:
@@ -1242,7 +1242,7 @@ def create_allow_list(
 def associate_allow_list(
     instance_ids: list[str],
     allow_list_ids: list[str],
-    client_token: str = None
+    client_token: str | None = None
 ) -> dict[str, Any]:
     """Bind Redis instances to specified IP whitelists
        Args:
@@ -1284,7 +1284,7 @@ def associate_allow_list(
 def disassociate_allow_list(
     instance_ids: list[str],
     allow_list_ids: list[str],
-    client_token: str = None
+    client_token: str | None = None
 ) -> dict[str, Any]:
     """Unbind Redis instances from specified IP whitelists
        Args:
@@ -1372,7 +1372,7 @@ def describe_node_ids(
 def modify_db_instance_name(
     instance_id: str,
     instance_name: str,
-    client_token: str = None
+    client_token: str | None = None
 ) -> dict[str, Any]:
     """Modify the name of the target Redis instance
        Args:
@@ -1408,7 +1408,7 @@ def modify_db_instance_name(
 )
 def describe_tags_by_resource(
     instance_ids: list[str],
-    tag_filters: list[dict[str, str]] = None,
+    tag_filters: list[dict[str, str]] | None = None,
     page_number: int = 1,
     page_size: int = 10
 ) -> dict[str, Any]:
@@ -1508,17 +1508,17 @@ def describe_cross_region_backup_policy(instance_id: str) -> dict[str, Any]:
     description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query cross-region backups"
 )
 def describe_cross_region_backups(
-    scope: str = None,
-    instance_id: str = None,
-    status: str = None,
-    start_time: str = None,
-    end_time: str = None,
-    backup_strategy_list: list = None,
-    backup_point_name: str = None,
-    backup_point_id: str = None,
-    project_name: str = None,
-    page_size: int = None,
-    page_number: int = None
+    scope: str | None = None,
+    instance_id: str | None = None,
+    status: str | None = None,
+    start_time: str | None = None,
+    end_time: str | None = None,
+    backup_strategy_list: list | None = None,
+    backup_point_name: str | None = None,
+    backup_point_id: str | None = None,
+    project_name: str | None = None,
+    page_size: int | None = None,
+    page_number: int | None = None
 ) -> dict[str, Any]:
     """Query cross-region backups
        Args:
@@ -1561,7 +1561,7 @@ def create_parameter_group(
     engine_version: str,
     description: str,
     param_values: list[dict[str, str]],
-    client_token: str = None
+    client_token: str | None = None
 ) -> dict[str, Any]:
     """Create a parameter template
        Args:
@@ -1608,12 +1608,12 @@ def create_parameter_group(
     description="1.Invoke `get_available_params` to retrieve available parameters before utilizing any tool. 2.Query EIP (Elastic IP) addresses"
 )
 def describe_eip_addresses(
-    max_results: int = None,
-    name: str = None,
-    next_token: str = None,
+    max_results: int | None = None,
+    name: str | None = None,
+    next_token: str | None = None,
     page_number: int = 1,
     page_size: int = 10,
-    status: str = None
+    status: str | None = None
 ) -> dict[str, Any]:
     """Query EIP (Elastic IP) addresses
        Args:
@@ -1650,8 +1650,8 @@ def describe_eip_addresses(
 def create_db_endpoint_public_address(
     instance_id: str,
     eip_id: str,
-    port: int = None,
-    client_token: str = None
+    port: int | None = None,
+    client_token: str | None = None
 ) -> dict[str, Any]:
     """Create a public endpoint address for Redis instance
        Args:
@@ -1768,9 +1768,9 @@ def describe_db_instance_acl_categories(
 def describe_planned_events(
     page_number: int = 1,
     page_size: int = 10,
-    instance_id: str = None,
-    min_start_time: str = None,
-    max_start_time: str = None
+    instance_id: str | None = None,
+    min_start_time: str | None = None,
+    max_start_time: str | None = None
 ) -> dict[str, Any]:
     """Query the planned events of Redis instances
        Args:
@@ -1813,8 +1813,8 @@ def describe_key_scan_jobs(
     instance_id: str,
     page_size: int = 10,
     page_number: int = 1,
-    query_start_time: str = None,
-    query_end_time: str = None
+    query_start_time: str | None = None,
+    query_end_time: str | None = None
 ) -> dict[str, Any]:
     """Query the key scan jobs of Redis instances
        Args:
