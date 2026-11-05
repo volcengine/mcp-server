@@ -242,6 +242,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 ### **金融财务**  
 
 - **[coin_api_mcp](https://github.com/longmans/coin_api_mcp)**：Provides access to coinmarketcap cryptocurrency data.  
+- **[PandaStock](https://github.com/D-Asce/pandastocksdk)**：A 股实时数据 MCP Server，NATS 推送行情 / Level2 / DDX 大单 / 资金流 / AI 选股，服务端 176 个接口，22 个开放接口提供免注册公共测试账号，`pip install pandastock-mcp` 即用。  
 
 
 ### **其他**  
