@@ -4,6 +4,7 @@ import logging
 import os
 from dataclasses import dataclass
 
+import volcenginesdkcore
 from volcenginesdkcore.signv4 import SignerV4
 
 logger = logging.getLogger(__name__)
@@ -19,7 +20,9 @@ ENV_MCP_SERVER_MODE = "MCP_SERVER_MODE"
 ENV_MCP_SERVER_PORT = "MCP_SERVER_PORT"
 ENV_MCP_SERVER_HOST = "MCP_SERVER_HOST"
 
-DEFAULT_ENDPOINT = "https://open.volcengineapi.com"
+ENV_POOL_CONCURRENCY = "POOL_CONCURRENCY"
+
+ENV_MCP_DEV_MODE = "MCP_DEV_MODE"
 
 
 @dataclass
@@ -35,6 +38,8 @@ class ApmplusConfig:
     access_key: str
     secret_key: str
     session_token: str
+    region: str
+    pool_concurrency: int
 
     def is_valid(self) -> bool:
         """Check if the configuration is valid."""
@@ -58,6 +63,17 @@ class ApmplusConfig:
             service,
             self.session_token,
         )
+
+    def to_volc_configuration(self) -> volcenginesdkcore.Configuration:
+        """Convert to volcengine configuration."""
+        volc_conf = volcenginesdkcore.Configuration()
+        volc_conf.host = self.endpoint
+        volc_conf.region = self.region
+        volc_conf.ak = self.access_key
+        volc_conf.sk = self.secret_key
+        volc_conf.session_token = self.session_token
+        volc_conf.connection_pool_maxsize = self.pool_concurrency
+        return volc_conf
 
 
 def validate_required_vars():
@@ -84,7 +100,13 @@ def load_config() -> ApmplusConfig:
         access_key=os.getenv(ENV_VOLCENGINE_ACCESS_KEY, ""),
         secret_key=os.getenv(ENV_VOLCENGINE_SECRET_KEY, ""),
         session_token=os.getenv(ENV_VOLCENGINE_SESSION_TOKEN, ""),
-        endpoint=os.getenv(ENV_VOLCENGINE_ENDPOINT, DEFAULT_ENDPOINT),
+        endpoint=os.getenv(
+            ENV_VOLCENGINE_ENDPOINT,
+            "apmplus-server.cn-beijing.volcengineapi.com",
+        ),
+        region=os.getenv(ENV_VOLCENGINE_REGION, "cn-beijing"),
+        pool_concurrency=int(os.getenv(ENV_POOL_CONCURRENCY, "0"))
+        or os.cpu_count() * 32 + 1,
     )
     logger.info(f"Loaded configuration")
 
@@ -98,5 +120,5 @@ def parse_authorization(authorization: str) -> ApmplusConfig:
         access_key=auth_obj["AccessKeyId"],
         secret_key=auth_obj["SecretAccessKey"],
         session_token=auth_obj["SessionToken"],
-        endpoint=os.getenv(ENV_VOLCENGINE_ENDPOINT, DEFAULT_ENDPOINT),
+        endpoint=os.getenv(ENV_VOLCENGINE_ENDPOINT, ""),
     )
