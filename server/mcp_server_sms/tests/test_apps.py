@@ -15,7 +15,7 @@ from mcp_server_sms.client import SmsClient
 from mcp_server_sms.forms import FORM_URI
 from mcp_server_sms.server import build_server, create_http_app
 from mcp_server_sms.upload_models import MaterialUpload, RecipientsUpload, SmsRequestError
-from mcp_server_sms.uploads import FileUploader
+from mcp_server_sms.uploads import IMAGEX, FileUploader
 
 
 @pytest.mark.parametrize(
@@ -79,7 +79,8 @@ def test_ui_resource_is_self_contained_and_uses_standard_apps_metadata(api_calls
     assert api_calls[0] == []
 
 
-def test_private_ocr_values_do_not_enter_model_content_or_structured_output():
+@pytest.mark.parametrize("private", [None, True])
+def test_private_ocr_values_do_not_enter_model_content_or_structured_output(private):
     record = {"personName": "fixture-private-name", "personIDCard": "fixture-private-document"}
     api = SmsClient(
         transport=httpx.MockTransport(lambda request: httpx.Response(200, json={"Result": record}))
@@ -87,18 +88,16 @@ def test_private_ocr_values_do_not_enter_model_content_or_structured_output():
     with TestClient(
         create_http_app(build_server(api), "https://testserver"), base_url="https://testserver"
     ) as http:
+        tools = rpc(http, "tools/list", token=auth_header("one")).json()["result"]["tools"]
+        tool = next(item for item in tools if item["name"] == "recognize_qualification_document")
+        assert tool["inputSchema"]["properties"]["private"]["default"] is True
+        assert "private=False" in tool["description"] and "structuredContent" in tool["description"]
+        arguments = {"id_card_front_image": "fixture/front", "id_card_back_image": "fixture/back"}
+        if private is not None:
+            arguments["private"] = private
         response = rpc(
-            http,
-            "tools/call",
-            token=auth_header("one"),
-            params={
-                "name": "recognize_qualification_document",
-                "arguments": {
-                    "id_card_front_image": "fixture/front",
-                    "id_card_back_image": "fixture/back",
-                    "private": True,
-                },
-            },
+            http, "tools/call", token=auth_header("one"),
+            params={"name": "recognize_qualification_document", "arguments": arguments},
         )
     result = response.json()["result"]
     assert result["_meta"]["sms/form"]["result"] == record
@@ -122,7 +121,7 @@ def material_api(request):
     )
 
 
-def image_responder(request, calls):
+def image_responder(request, calls, upload_host=None):
     calls.append(request)
     action = request.url.params.get("Action")
     if action == "ApplyImageUpload":
@@ -131,7 +130,7 @@ def image_responder(request, calls):
             json={
                 "Result": {
                     "UploadAddress": {
-                        "UploadHosts": ["upload.example.invalid"],
+                        "UploadHosts": [upload_host or f"{IMAGEX['serviceId']}.up.imagex-accelerate.volces.com"],
                         "SessionKey": "fixture-session",
                         "StoreInfos": [
                             {"StoreUri": "bucket/material.png", "Auth": "fixture-upload-auth"}
@@ -368,3 +367,59 @@ def test_bundled_html_matches_the_reviewed_frontend_sources():
         hashlib.sha256(static.joinpath("forms.html").read_bytes()).hexdigest()
         == manifest["htmlSha256"]
     )
+
+
+def test_explicit_public_ocr_keeps_original_fields_for_authorized_callers():
+    record = {"personName": "fixture-name", "personIDCard": "fixture-document"}
+    api = SmsClient(transport=httpx.MockTransport(
+        lambda request: httpx.Response(200, json={"Result": record})
+    ))
+    with TestClient(create_http_app(build_server(api), "https://testserver"), base_url="https://testserver") as http:
+        response = rpc(http, "tools/call", token=auth_header("one"), params={
+            "name": "recognize_qualification_document",
+            "arguments": {"id_card_front_image": "fixture/front", "id_card_back_image": "fixture/back", "private": False},
+        })
+    result = response.json()["result"]
+    assert result["structuredContent"]["result"] == record
+    assert json.loads(result["content"][0]["text"])["result"] == record
+    assert "sms/form" not in result.get("_meta", {})
+
+
+@pytest.mark.parametrize("host", [
+    f"{IMAGEX['serviceId']}.up.imagex-{IMAGEX['region']}.volces.com",
+    f"{IMAGEX['serviceId']}.up.imagex-accelerate.volces.com",
+    "tos-lf-x.snssdk.com", "tos-hl-x.snssdk.com",
+    "tos-nc2-slb2.bytecdn.cn", "tos-nc2-slb1.bytecdn.cn",
+    "tos-lf-x-tob.bytecdn.cn", "tos-lq-x-tob.bytecdn.cn", "tos-hl-x-tob.bytecdn.cn",
+])
+async def test_material_upload_allows_documented_service_and_legacy_hosts(host):
+    calls = []
+    request = MaterialUpload(kind="material", category="identity", name="image.png", data=base64.b64encode(b"fixture-image").decode())
+    async with (
+        SmsClient(transport=httpx.MockTransport(material_api)) as api,
+        FileUploader(api, transport=httpx.MockTransport(lambda r: image_responder(r, calls, host))) as uploader,
+    ):
+        result = await uploader.upload(request, Credentials("fixture-ak", "fixture-sk"))
+    assert result["fileContent"] == "bucket/material.png"
+    assert len(calls) == 3 and calls[1].url.host == host
+
+
+@pytest.mark.parametrize("host", [
+    "upload.example.invalid", "localhost", "127.0.0.1", "169.254.169.254",
+    "other-service.up.imagex-cn-north-1.volces.com", "evil.volces.com",
+    "tos-lf-x.snssdk.com.evil.invalid", "sub.tos-lf-x.snssdk.com",
+    "unrelated.bytecdn.cn", "tos-lf-x-tob.bytecdn.cn:443",
+])
+async def test_untrusted_material_hosts_stop_before_file_and_authorization_are_sent(host):
+    calls = []
+    request = MaterialUpload(kind="material", category="identity", name="image.png", data=base64.b64encode(b"fixture-private-image").decode())
+    async with (
+        SmsClient(transport=httpx.MockTransport(material_api)) as api,
+        FileUploader(api, transport=httpx.MockTransport(lambda r: image_responder(r, calls, host))) as uploader,
+    ):
+        with pytest.raises(SmsRequestError) as caught:
+            await uploader.upload(request, Credentials("fixture-ak", "fixture-sk"))
+    assert caught.value.result["error"]["code"] == "invalid_upload_address"
+    assert caught.value.result["error"]["outcome_unknown"] is False
+    assert len(calls) == 1 and calls[0].url.params["Action"] == "ApplyImageUpload"
+    assert "fixture-private-image" not in str(caught.value)

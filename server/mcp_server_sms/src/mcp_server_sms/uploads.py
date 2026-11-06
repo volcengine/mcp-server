@@ -36,6 +36,20 @@ from .upload_models import (
 
 # 来自短信生产材料上传契约，与客户或部署账号无关；不是浏览器可覆盖的地址。
 IMAGEX = FORM_CONFIG["materialUpload"]
+# 当前服务的区域/加速域名及官方历史上传主机，避免向任意地址发送材料和上传授权。
+# 来源：https://www.volcengine.com/docs/508/1537728
+# 历史主机：https://docs.volcengine.com/docs/veimagex/mini-programs-version-upload-sdk-access-documentation-old-version
+_MATERIAL_UPLOAD_HOSTS = frozenset({
+    f"{IMAGEX['serviceId']}.up.imagex-{IMAGEX['region']}.volces.com",
+    f"{IMAGEX['serviceId']}.up.imagex-accelerate.volces.com",
+    "tos-lf-x.snssdk.com",
+    "tos-hl-x.snssdk.com",
+    "tos-nc2-slb2.bytecdn.cn",
+    "tos-nc2-slb1.bytecdn.cn",
+    "tos-lf-x-tob.bytecdn.cn",
+    "tos-lq-x-tob.bytecdn.cn",
+    "tos-hl-x-tob.bytecdn.cn",
+})
 _MIME = {
     "png": "image/png",
     "jpg": "image/jpeg",
@@ -299,6 +313,7 @@ class FileUploader:
             parsed = urlsplit("https://" + host)
             if (
                 parsed.hostname != host
+                or host not in _MATERIAL_UPLOAD_HOSTS
                 or parsed.port is not None
                 or parsed.path
                 or parsed.query
@@ -317,7 +332,7 @@ class FileUploader:
                 raise ValueError("headers")
         except (KeyError, IndexError, TypeError, ValueError, AttributeError):
             raise upload_error(
-                "ApplyImageUpload", "invalid_upload_address", "材料上传地址不完整"
+                "ApplyImageUpload", "invalid_upload_address", "材料上传地址无效或不在受信主机范围内"
             ) from None
         url = (
             "https://" + host + "/upload/v1/" + quote(bucket, safe="") + "/" + quote(key, safe="/")

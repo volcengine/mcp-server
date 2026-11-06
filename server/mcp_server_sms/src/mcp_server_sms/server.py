@@ -191,12 +191,16 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
         certificate: str | None = None,
         id_card_front_image: str | None = None,
         id_card_back_image: str | None = None,
-        private: bool = False,
+        private: bool = True,
     ) -> CallToolResult:
         """OCR 识别短信材料服务中的营业证件或身份证图片。
 
         营业证件传 business_certificate_type 和 certificate；身份证传正反面引用。
-        图片引用由调用方通过现有材料渠道取得。返回原始识别字段供客户核对，不缓存或提交。
+        图片引用由调用方通过现有材料渠道取得，识别字段供客户核对，不缓存或提交。
+        默认 private=True：完整字段仅放入私密元数据 _meta["sms/form"]，
+        普通 content 和 structuredContent 只含操作状态，避免姓名、身份证号进入模型上下文。
+        仅在客户明确同意识别结果进入模型上下文时设置 private=False；
+        此时完整识别字段会出现在 content 和 structuredContent 中。
         """
         business = business_certificate_type is not None and bool(certificate)
         person = bool(id_card_front_image) and bool(id_card_back_image)
