@@ -242,6 +242,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 ### **金融财务**  
 
 - **[coin_api_mcp](https://github.com/longmans/coin_api_mcp)**：Provides access to coinmarketcap cryptocurrency data.  
+- **[熔岩 Lava](https://github.com/dustinliang666-blip/lava-mcp)**：A 股股票与概念板块的消息面热度监测；结构化只读 MCP/REST（匿名机构/大V ID，不含多空与原文）。远程 Streamable HTTP：https://lava.ai-dolphin.com/subscribe/v1/mcp ；文档：https://lava.ai-dolphin.com/subscribe/docs 。  
 
 
 ### **其他**  
