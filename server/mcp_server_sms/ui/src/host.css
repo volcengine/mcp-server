@@ -1,0 +1,45 @@
+/* 宿主适配只覆盖容器和主题；各业务样式保留 Skill 原文件。 */
+html, body, #root { margin: 0; min-height: 0; min-width: 280px; background: transparent; }
+body { font-family: var(--font-sans, Inter, "PingFang SC", system-ui, sans-serif); }
+.sms-app { max-width: 1000px; max-height: 530px; overflow: auto; color: #1d2129; background: #f5f6f8; }
+.sms-app .wizard-page, .sms-app .batch-page { min-height: 0; }
+.sms-app .wizard-workspace { min-height: 0; grid-template-columns: 220px minmax(0, 1fr); }
+.sms-app .wizard-sidebar .arco-steps-item-title { white-space: normal; }
+.sms-mobile-step { display: none; }
+.sms-app .wizard-content { padding: 22px; }
+.sms-app .wizard-body, .sms-app .batch-body { padding: 16px 0; }
+.sms-app .signature-shell { min-height: 0; padding: 16px; }
+.sms-app .signature-page { padding: 0 22px 22px; }
+.sms-app .signature-header { margin: 0 -22px; padding: 22px; }
+.sms-app .signature-panel { padding: 20px; }
+.sms-app .traffic-page { margin: 0 auto; padding: 20px; }
+.sms-app .traffic-card { margin-top: 16px; padding: 20px; }
+.sms-app .batch-section { padding: 22px; }
+.sms-app .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 22px; }
+.sms-app .span-2 { grid-column: 1 / -1; }
+.sms-app .upload-zone { min-height: 90px; padding: 14px; border: 1px dashed #c9cdd4; border-radius: 6px; text-align: center; }
+.sms-file { display: flex; align-items: center; justify-content: space-between; gap: 8px; overflow-wrap: anywhere; }
+.sms-catalog-count { margin: 6px 0 12px; font-size: 12px; color: #86909c; }
+.sms-feedback { margin: 12px 0; }
+.sms-check { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.sms-boot { padding: 24px; }
+.sms-app .arco-input, .sms-app .arco-select { width: 100%; }
+.sms-app pre { overflow: auto; max-height: 180px; padding: 12px; background: #f7f8fa; }
+.sms-app .traffic-actions { padding-bottom: 6px; }
+body[arco-theme='dark'] .sms-app { color: #f2f3f5; background: #17171a; }
+body[arco-theme='dark'] .sms-app :is(.wizard-header,.wizard-workspace,.wizard-sidebar,.signature-shell,.signature-page,.signature-panel,.traffic-card,.batch-header,.batch-sheet,.batch-section,.review-section) { color: #f2f3f5; background: #232324; border-color: #484849; }
+body[arco-theme='dark'] .sms-app :is(h1,h2,h3,.wizard-title,.step-heading h2,.traffic-field label) { color: #f2f3f5; }
+body[arco-theme='dark'] .sms-app :is(p,.step-description,.wizard-subtitle,.signature-header p,.batch-title-row p) { color: #c9cdd4; }
+body[arco-theme='dark'] .sms-app pre { background: #17171a; color: #f2f3f5; }
+body[arco-theme='dark'] .sms-app .upload-zone { border-color: #6b6b71; }
+@media (max-width: 620px) {
+  .sms-app .wizard-workspace { display: block; }
+  .sms-app .wizard-sidebar { display: none; }
+  .sms-mobile-step { display: block; color: #165dff; margin-bottom: 12px; font-size: 13px; }
+  .sms-app .wizard-content, .sms-app .batch-section { padding: 16px; }
+  .sms-app .form-grid, .sms-app .traffic-fields { grid-template-columns: 1fr; }
+  .sms-app .signature-page { padding: 0 16px 16px; }
+  .sms-app .signature-header { margin: 0 -16px; padding: 18px 16px; }
+  .sms-app .signature-shell { padding: 8px; }
+  .sms-app .traffic-page { padding: 12px; }
+}

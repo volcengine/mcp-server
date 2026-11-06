@@ -6,11 +6,21 @@ from http.cookiejar import CookieJar, DefaultCookiePolicy
 from typing import Any, Literal
 
 import httpx
+from pydantic import BaseModel, ValidationError
 from volcengine.auth.SignerV4 import SignerV4
 from volcengine.base.Request import Request
 from volcengine.Credentials import Credentials as SigningCredentials
 
 from .auth import Credentials
+from .observability import observe_call
+from .responses import (
+    ActivationResult,
+    BatchContentChecked,
+    BatchTaskCreated,
+    BatchTemplateDemo,
+    ConfirmedProtocols,
+)
+from .upload_models import MaterialAuthorization, MaterialToken, SmsRequestError
 
 API_HOST = "sms.volcengineapi.com"
 API_VERSION = "2026-01-01"
@@ -26,38 +36,92 @@ class Action:
     required_any: tuple[str, ...] = ()
     required_all: tuple[str, ...] = ()
     opaque_result_fields: tuple[str, ...] = ()
+    private_result_fields: frozenset[str] = frozenset()
+    result_model: type[BaseModel] | None = None
+    uncertain_error_codes: frozenset[str] = frozenset()
+    timeout: float | None = None
+    expose_result: bool = True
+
+
+_RESOURCE_PRIVATE_FIELDS = frozenset({
+    "operatorperson", "responsiblepersoninfo", "legalperson", "powerofattorney",
+    "othermaterials", "businesscertificate", "legalpersonname", "authfilelist",
+    "appicpfilelist", "trademarkfilelist", "fileurl", "filecontent",
+    "numberperson", "persontype", "personid",
+})
+_UNCERTAIN_WRITE_ERRORS = frozenset({"1999", "SY:0500"})
 
 
 # Only named tools can select an action; callers cannot supply arbitrary APIs.
 ACTIONS = {
-    "ListSubAccountForAgent": Action("POST"),
-    "GetSubAccountDetail": Action("GET"),
+    "ListSubAccountForAgent": Action("POST", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
+    "GetSubAccountListForAgent": Action("POST", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
+    "GetSubAccountDetail": Action("GET", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
     "ListAllSmsProduct": Action("GET"),
     "GetAccountIdentRankForAgent": Action("GET"),
-    "GetSignatureIdentificationList": Action("POST"),
+    "GetSignatureIdentificationList": Action("POST", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
     "GetOCRLicenseForAgent": Action("POST"),
     "ThreeElementEnterpriseCheckForAgent": Action("POST"),
     "ThreeElementPersonCheckForAgent": Action("POST"),
     "SendSmsVerifyCodeByMobile": Action("POST", True, required_any=("messageId",)),
     "CheckSmsVerifyCodeByMobile": Action("POST", True, required_any=("status",)),
     "ApplySignatureIdentificationForAgent": Action("POST", True, "id"),
-    "ListSignatureForAgent": Action("POST"),
-    "ApplySmsSignatureV2": Action("POST", True, required_any=("applyId", "status")),
-    "ListSmsTemplateForAgent": Action("POST"),
-    "ListSecondTemplate": Action("GET"),
-    "ApplySmsTemplateV2": Action("POST", True, required_any=("templateId", "status")),
+    "ListSignatureForAgent": Action("POST", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
+    "ListSignaturesForAgent": Action("POST", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
+    "ApplySmsSignatureV2": Action(
+        "POST", True, required_any=("applyId", "status"),
+        uncertain_error_codes=_UNCERTAIN_WRITE_ERRORS,
+    ),
+    "ListSmsTemplateForAgent": Action("POST", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
+    "ListBatchTemplatesForAgent": Action("POST", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
+    "ListSecondTemplate": Action("GET", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
+    "ApplySmsTemplateV2ForAgent": Action(
+        "POST", True, required_any=("templateId", "status"),
+        uncertain_error_codes=_UNCERTAIN_WRITE_ERRORS,
+    ),
     "SendSmsForAgent": Action("POST", True, required_any=("MessageId", "MessageIds")),
-    "ListSmsSendLogForAgent": Action("POST"),
-    "ListTotalSendCountStatForAgent": Action("POST"),
+    "ListSmsSendLogForAgent": Action("POST", private_result_fields=frozenset({"mobile", "content"})),
+    "GetTotalSendCountStatV4ForAgent": Action("POST"),
     "GetUploadTosURL": Action(
         "GET", True, required_all=("file", "url"), opaque_result_fields=("url",)
     ),
-    "TemplateUploadDemo": Action("POST", result_format="csv"),
-    "SetBatchTask": Action("POST", True, required_any=("taskId",)),
+    # 仅上传组件消费原始凭据；没有任何公开业务工具允许选择这个 Action。
+    "GetMUploadParam": Action("GET", result_model=MaterialAuthorization, expose_result=False),
+    "TemplateUploadDemoForAgent": Action(
+        "POST", result_format="csv", result_model=BatchTemplateDemo
+    ),
+    "SetBatchTaskForAgent": Action(
+        "POST", True, result_model=BatchTaskCreated, timeout=60,
+        uncertain_error_codes=_UNCERTAIN_WRITE_ERRORS,
+    ),
     "GetBatchTaskDetail": Action("GET"),
     "GetBatchTaskList": Action("GET"),
     "ConsentBatchTask": Action("POST", True),
     "DeleteBatchTask": Action("POST", True),
+    "ValidateBatchTaskContentForAgent": Action("POST", result_model=BatchContentChecked),
+    "CheckTrafficDrivingExist": Action("GET", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
+    "ListThirdTemplate": Action("GET", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
+    "AgentGetSignatureTemplateReportStatus": Action(
+        "GET", private_result_fields=_RESOURCE_PRIVATE_FIELDS | {"content"}
+    ),
+    "GetTobTrafficDrivingLinkListForAgent": Action("GET"),
+    "GetTobTrafficDrivingPhoneListForAgent": Action("GET", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
+    "ListRelationTemplateForAgent": Action("GET", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
+    "BulkCreateTobTrafficDrivingLinkForAgent": Action(
+        "POST", True, uncertain_error_codes=_UNCERTAIN_WRITE_ERRORS
+    ),
+    "BulkCreateTobTrafficDrivingPhoneForAgent": Action(
+        "POST", True, private_result_fields=_RESOURCE_PRIVATE_FIELDS,
+        uncertain_error_codes=_UNCERTAIN_WRITE_ERRORS,
+    ),
+    "ConfirmProtocolDocument": Action(
+        "POST", True, result_model=ConfirmedProtocols,
+        uncertain_error_codes=_UNCERTAIN_WRITE_ERRORS | {"RE:0000"},
+    ),
+    "ActivateSmsProductInOneStep": Action(
+        "POST", True, result_model=ActivationResult,
+        uncertain_error_codes=_UNCERTAIN_WRITE_ERRORS | {"RE:0000"},
+    ),
 }
 
 _CREDENTIAL_FIELDS = frozenset(
@@ -87,17 +151,20 @@ class _RejectCookies(DefaultCookiePolicy):
 
 
 def safe_result(
-    value: Any, credentials: Credentials, *, opaque_fields: tuple[str, ...] = ()
+    value: Any, credentials: Credentials, *, opaque_fields: tuple[str, ...] = (),
+    private_fields: frozenset[str] = frozenset(),
 ) -> Any:
     """Redact credentials while preserving declared top-level API references."""
     if isinstance(value, dict):
         return {
-            key: item if key in opaque_fields else safe_result(item, credentials)
+            key: item if key in opaque_fields else safe_result(
+                item, credentials, private_fields=private_fields
+            )
             for key, item in value.items()
-            if key.lower() not in _CREDENTIAL_FIELDS
+            if key.lower() not in _CREDENTIAL_FIELDS | private_fields
         }
     if isinstance(value, list):
-        return [safe_result(item, credentials) for item in value]
+        return [safe_result(item, credentials, private_fields=private_fields) for item in value]
     if isinstance(value, str):
         for secret in (credentials.access_key, credentials.secret_key, credentials.session_token):
             if secret:
@@ -135,6 +202,32 @@ class SmsClient:
         await self._http.__aexit__(exc_type, exc_value, traceback)
 
     async def call(self, action: str, params: dict, credentials: Credentials) -> dict:
+        with observe_call("api", action) as observation:
+            result = await self._call(action, params, credentials)
+            observation.record(result)
+            return result
+
+    async def _call(self, action: str, params: dict, credentials: Credentials) -> dict:
+        response = await self._request(action, params, credentials)
+        if isinstance(response, dict):
+            return response
+        return self.decode(action, response, credentials, params=params)
+
+    async def material_credentials(self, credentials: Credentials) -> MaterialToken:
+        """material_credentials 在服务端提取材料上传 STS，普通 call 始终脱敏。"""
+        action = "GetMUploadParam"
+        with observe_call("api", action) as observation:
+            response = await self._request(action, {}, credentials)
+            result = response if isinstance(response, dict) else self.decode(action, response, credentials)
+            observation.record(result)
+            if not result["success"]:
+                raise SmsRequestError(result)
+            return MaterialAuthorization.model_validate(response.json()["Result"]).token
+
+    async def _request(
+        self, action: str, params: dict, credentials: Credentials,
+    ) -> httpx.Response | dict:
+        """复用官方短信签名及请求隔离；原始响应仅在包内解码边界消费。"""
         spec = ACTIONS[action]
         wire = {key: value for key, value in params.items() if value is not None}
         request = Request()
@@ -145,12 +238,11 @@ class SmsClient:
         request.set_headers({"Accept": "application/json", "Content-Type": "application/json"})
         query = {"Action": action, "Version": API_VERSION}
         if spec.method == "GET":
-            query.update(
-                {
-                    key: str(value).lower() if isinstance(value, bool) else str(value)
-                    for key, value in wire.items()
-                }
-            )
+            for key, value in wire.items():
+                if isinstance(value, list):
+                    query[key] = [str(item).lower() if isinstance(item, bool) else str(item) for item in value]
+                else:
+                    query[key] = str(value).lower() if isinstance(value, bool) else str(value)
         else:
             request.set_body(json.dumps(wire, ensure_ascii=False, separators=(",", ":")))
         request.set_query(query)
@@ -167,9 +259,10 @@ class SmsClient:
         try:
             response = await self._http.request(
                 spec.method,
-                request.build(),
+                request.build(doseq=True),
                 headers=request.headers,
                 content=request.body.encode("utf-8") if request.body else None,
+                **({"timeout": spec.timeout} if spec.timeout is not None else {}),
             )
         except (httpx.ConnectError, httpx.ConnectTimeout, httpx.PoolTimeout):
             return failure(action, "connection_failed", "未建立 API 连接，请检查网络")
@@ -180,10 +273,13 @@ class SmsClient:
                 "请求结果暂时无法确认；写操作不要自动重试",
                 outcome_unknown=spec.write,
             )
-        return self.decode(action, response, credentials)
+        return response
 
     @staticmethod
-    def decode(action: str, response: httpx.Response, credentials: Credentials) -> dict:
+    def decode(
+        action: str, response: httpx.Response, credentials: Credentials,
+        *, params: dict | None = None,
+    ) -> dict:
         spec = ACTIONS[action]
         request_id = response.headers.get("x-tt-logid") or response.headers.get("x-request-id")
         request_id = safe_result(request_id, credentials)
@@ -205,8 +301,9 @@ class SmsClient:
             ):
                 try:
                     result = {
-                        "content": response.content.decode("utf-8-sig"),
+                        "value": response.content.decode("utf-8-sig"),
                         "contentType": "text/csv",
+                        "size": len(response.content),
                     }
                 except UnicodeError:
                     return failure(
@@ -216,14 +313,9 @@ class SmsClient:
                         request_id,
                         http_status=response.status_code,
                     )
-                return {
-                    "success": True,
-                    "action": action,
-                    "request_id": request_id,
-                    "result": safe_result(result, credentials),
-                    "error": None,
-                }
-            payload = None
+                payload = {"Result": result}
+            else:
+                payload = None
         metadata = payload.get("ResponseMetadata", {}) if isinstance(payload, dict) else {}
         if isinstance(metadata, dict):
             request_id = metadata.get("RequestId") or request_id
@@ -249,6 +341,7 @@ class SmsClient:
                 code,
                 "短信 API 返回错误，请结合错误码和 RequestId 排查",
                 request_id,
+                outcome_unknown=spec.write and code in spec.uncertain_error_codes,
                 http_status=response.status_code,
             )
         if response.status_code in _REJECTED_HTTP_STATUSES:
@@ -289,6 +382,11 @@ class SmsClient:
                     for key in spec.required_all
                 )
             )
+        if spec.result_model is not None:
+            try:
+                spec.result_model.model_validate(result, context=params)
+            except ValidationError:
+                valid = False
         if not valid:
             return failure(
                 action,
@@ -304,6 +402,9 @@ class SmsClient:
             "request_id": request_id,
             # A signed upload URL is an operational capability, not a display
             # string. Editing its query parameters would invalidate the signature.
-            "result": safe_result(result, credentials, opaque_fields=spec.opaque_result_fields),
+            "result": safe_result(
+                result, credentials, opaque_fields=spec.opaque_result_fields,
+                private_fields=spec.private_result_fields,
+            ) if spec.expose_result else None,
             "error": None,
         }

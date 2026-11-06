@@ -1,0 +1,33 @@
+* { box-sizing: border-box; }
+body { margin: 0; color: #1d2129; background: #f7f8fa; font: 14px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+.traffic-page { max-width: 960px; margin: 36px auto; padding: 0 24px 36px; }
+.traffic-page h1 { font-size: 25px; line-height: 1.4; margin: 4px 0 8px; }
+.traffic-page h2 { font-size: 17px; margin: 0 0 18px; }
+.traffic-page p { color: #4e5969; }
+.traffic-eyebrow { color: #165dff; font-weight: 600; letter-spacing: 1px; font-size: 12px; }
+.traffic-card { padding: 24px; margin-top: 20px; background: #fff; border: 1px solid #e5e6eb; border-radius: 10px; }
+.traffic-row-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.traffic-row-title h2 { margin: 0; }
+.traffic-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; }
+.traffic-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.traffic-field.wide { grid-column: 1 / -1; }
+.traffic-field label { font-weight: 500; }
+.traffic-required { color: #f53f3f; margin-right: 4px; }
+.traffic-field .arco-input, .traffic-field .arco-select { width: 100%; }
+.traffic-field .arco-input[readonly] { color: #86909c; background: #f2f3f5; }
+.traffic-field-error { color: #f53f3f; font-size: 12px; line-height: 18px; }
+.traffic-hint { color: #86909c; font-size: 12px; margin-top: 5px; }
+.traffic-actions { display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+.traffic-preview { margin: 0 0 20px; display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 9px 16px; }
+.traffic-preview dt { color: #86909c; }
+.traffic-preview dd { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.traffic-status { margin-top: 20px; }
+.traffic-result { padding: 28px 0 12px; text-align: center; }
+.traffic-result p { max-width: 620px; margin: 10px auto; }
+@media (max-width: 620px) {
+  .traffic-page { margin-top: 20px; padding: 0 14px 24px; }
+  .traffic-card { padding: 18px; }
+  .traffic-fields { grid-template-columns: 1fr; }
+  .traffic-preview { grid-template-columns: 1fr; gap: 2px; }
+  .traffic-preview dd { margin-bottom: 10px; }
+}

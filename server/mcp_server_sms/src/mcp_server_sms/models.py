@@ -2,10 +2,9 @@
 
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 Channel = Literal["CN_OTP", "CN_NTC", "CN_MKT"]
-BatchChannel = Literal["CN_NTC", "CN_MKT"]
 Mobile = Annotated[str, Field(pattern=r"^1[3-9][0-9]{9}$")]
 Text = Annotated[str, Field(min_length=1)]
 
@@ -67,13 +66,15 @@ class QualificationApplication(ApiModel):
 
 
 class AppIcp(ApiModel):
-    app_icp_filling: str = Field(alias="appIcpFilling")
+    app_icp_filling: str | None = Field(None, alias="appIcpFilling")
+    app_icp_file_list: list[MaterialFile] | None = Field(None, alias="appIcpFileList")
 
 
 class Trademark(ApiModel):
     trademark_cn: str | None = Field(None, alias="trademarkCn")
     trademark_en: str | None = Field(None, alias="trademarkEn")
     trademark_number: str | None = Field(None, alias="trademarkNumber")
+    trademark_file_list: list[MaterialFile] | None = Field(None, alias="trademarkFileList")
 
 
 class SignatureApplication(ApiModel):
@@ -89,10 +90,27 @@ class SignatureApplication(ApiModel):
     project_name: str | None = Field(None, alias="projectName")
     app_icp: AppIcp | None = Field(None, alias="appIcp")
     trademark: Trademark | None = None
+    upload_file_list: list[MaterialFile] | None = Field(None, alias="uploadFileList")
+    is_limit_sub_account: Literal[0, 1] | None = Field(None, alias="isLimitSubAccount")
+    origin: Literal["vconsole"] | None = Field(None, alias="from")
 
 
 class TemplateParameter(ApiModel):
     name: Text
+    param_type: Literal[1, 2, 3, 4, 5] = Field(alias="paramType")
+
+
+class TemplateTrafficBinding(ApiModel):
+    name: Text
+    param_type: Literal[2, 3] = Field(alias="paramType")
+    id: int | None = Field(None, gt=0)
+    content: str | None = Field(None, repr=False)
+
+    @model_validator(mode="after")
+    def require_resource(self):
+        if self.id is None and not self.content:
+            raise ValueError("引流变量需要资源 id 或完整 content")
+        return self
 
 
 class ShortUrlConfig(ApiModel):
@@ -113,6 +131,9 @@ class TemplateApplication(ApiModel):
     description: str | None = Field(None, alias="desc")
     project: str | None = None
     short_url_config: ShortUrlConfig | None = Field(None, alias="shortUrlConfig")
+    template_traffic_driving: list[list[TemplateTrafficBinding]] | None = Field(
+        None, alias="templateTrafficDriving"
+    )
 
 
 class BatchTask(ApiModel):
@@ -120,8 +141,6 @@ class BatchTask(ApiModel):
     name: Text
     signature: Text
     template_id: Text = Field(alias="templateId")
-    template_name: str = Field(alias="templateName")
-    channel_type: BatchChannel = Field(alias="channelType")
     file_url: Text = Field(alias="fileUrl", description="GetUploadTosURL 返回的 file 对象 Key")
     scheduled: bool
     send_time: int = Field(
@@ -129,4 +148,15 @@ class BatchTask(ApiModel):
         ge=0,
         description="短信 API 的发送时间；立即发送传 0，定时发送使用 Unix 秒",
     )
-    extra: dict | None = None
+    content: str | None = Field(None, repr=False, description="模板声明 TaskFields 时的任务级正文")
+    idempotency_key: Text = Field(
+        alias="idempotencyKey", description="由客户端为同一确认后的任务保留稳定标识，未知结果勿换键重建"
+    )
+
+    @model_validator(mode="after")
+    def validate_schedule(self):
+        if self.scheduled and self.send_time == 0:
+            raise ValueError("定时任务必须提供发送时间")
+        if not self.scheduled and self.send_time != 0:
+            raise ValueError("立即发送任务的 sendTime 必须为 0")
+        return self

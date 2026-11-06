@@ -18,9 +18,35 @@ def test_stateless_discovery_needs_no_database_or_initialize(api_calls, monkeypa
             assert "error" not in response.json()
             assert "mcp-session-id" not in response.headers
             assert response.headers["cache-control"] == "no-store"
-        assert len(response.json()["result"]["tools"]) == 26
+        assert len(response.json()["result"]["tools"]) == 30
     assert list(tmp_path.iterdir()) == []
     assert api_calls[0] == []
+
+
+@pytest.mark.parametrize("version", ["2025-03-26", "2025-06-18", "2025-11-25"])
+def test_standard_http_initialize_and_tool_call_for_earlier_clients(api_calls, version):
+    app = create_http_app(build_server(api_calls[1]), "https://testserver")
+    headers = {"Accept": "application/json, text/event-stream", "Authorization": auth_header("a")}
+    with TestClient(app, base_url="https://testserver", headers=headers) as client:
+        initialized = client.post("/mcp", json={
+            "jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
+                "protocolVersion": version, "capabilities": {},
+                "clientInfo": {"name": "standard-client", "version": "1"},
+            },
+        })
+        assert initialized.status_code == 200, initialized.text
+        assert initialized.json()["result"]["protocolVersion"] == version
+        headers = {"MCP-Protocol-Version": version}
+        listed = client.post("/mcp", headers=headers, json={
+            "jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {},
+        })
+        assert len(listed.json()["result"]["tools"]) == 30
+        called = client.post("/mcp", headers=headers, json={
+            "jsonrpc": "2.0", "id": 3, "method": "tools/call",
+            "params": {"name": "list_message_groups", "arguments": {}},
+        })
+        assert called.json()["result"]["isError"] is False
+    assert len(api_calls[0]) == 1
 
 
 def test_http_credentials_are_per_request_without_environment_fallback(api_calls, credentials_env):
