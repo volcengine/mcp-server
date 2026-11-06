@@ -6,3 +6,6 @@ __pycache__/
 dist/
 build/
 *.egg-info/
+ui/node_modules/
+ui/.vite/
+ui/coverage/

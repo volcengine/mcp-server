@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>短信 MCP Apps 本地预览</title>
+<style>body{font:14px system-ui;margin:24px;background:#eef1f5;color:#1d2129}header{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:18px}select,button{padding:8px 12px;border:1px solid #c9cdd4;border-radius:6px;background:white}iframe{border:1px solid #d8dde5;border-radius:10px;background:white;max-width:100%}#status{font-size:12px;color:#4e5969;margin-top:12px}.note{padding:10px 14px;background:#e8f3ff;border-radius:8px;margin-bottom:18px}</style>
+</head><body>
+<div class="note">本地预览 · 使用模拟数据，不会上传真实材料或提交线上操作</div>
+<header><label>表单 <select id="form"><option value="qualification">资质</option><option value="signature">签名</option><option value="traffic">引流</option><option value="batch">群发</option></select></label>
+<button id="wide">宽屏</button><button id="narrow">窄屏</button><label><input id="dark" type="checkbox">深色模式</label></header>
+<div id="mount"></div><div id="status">正在建立标准 AppBridge 连接…</div>
+<script type="module" src="/dev/preview.js"></script></body></html>

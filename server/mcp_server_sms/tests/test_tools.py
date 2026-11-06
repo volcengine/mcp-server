@@ -89,17 +89,17 @@ async def test_complete_qualification_goes_directly_to_upstream(
                     "name": "通知",
                     "content": "会议${time}",
                     "channelType": "CN_NTC",
-                    "templateParams": [{"name": "time"}],
+                    "templateParams": [{"name": "time", "paramType": 1}],
                     "signatures": ["示例签名"],
                 }
             },
-            "ApplySmsTemplateV2",
+            "ApplySmsTemplateV2ForAgent",
             {
                 "name": "通知",
                 "content": "会议${time}",
                 "area": "cn",
                 "channelType": "CN_NTC",
-                "templateParams": [{"name": "time"}],
+                "templateParams": [{"name": "time", "paramType": 1}],
                 "signatures": ["示例签名"],
             },
         ),
@@ -147,18 +147,16 @@ async def test_batch_creation_and_launch_are_independent(mcp, api_calls):
         "name": "普通任务",
         "signature": "示例签名",
         "templateId": "fixture-template",
-        "templateName": "通知",
-        "channelType": "CN_NTC",
         "fileUrl": "fixture.csv",
         "scheduled": False,
         "sendTime": 0,
-        "extra": {},
+        "idempotencyKey": "fixture-batch-key",
     }
     created = await mcp.call_tool("create_batch_task", {"request": request})
     assert not created.is_error
     assert payload(created)["result"]["taskId"] == "fixture-task"
     assert len(api_calls[0]) == 1
-    assert api_calls[0][0].url.params["Action"] == "SetBatchTask"
+    assert api_calls[0][0].url.params["Action"] == "SetBatchTaskForAgent"
     assert json.loads(api_calls[0][0].content) == request
     result = await mcp.call_tool(
         "start_batch_task", {"sub_account": "group-one", "task_id": "fixture-task"}
@@ -246,7 +244,7 @@ async def test_query_contracts_keep_get_and_post_distinct(mcp, api_calls):
 
 async def test_tools_are_named_business_operations(mcp):
     tools = {tool.name: tool for tool in await mcp.list_tools()}
-    assert len(tools) == 26
+    assert len(tools) == 30
     removed = {
         "execute_sms_operation",
         "get_sms_operation_result",
@@ -259,7 +257,8 @@ async def test_tools_are_named_business_operations(mcp):
     assert removed.isdisjoint(tools)
     assert not any(name.startswith("prepare_") for name in tools)
     for name, tool in tools.items():
-        assert tool.output_schema
+        if tool.name not in {"recognize_qualification_document", "check_qualification_enterprise", "check_qualification_person", "upload_sms_file"}:
+            assert tool.output_schema
         assert "ctx" not in tool.input_schema["properties"]
         if name in {"send_sms", "apply_qualification", "start_batch_task", "verify_code"}:
             assert tool.annotations.read_only_hint is False

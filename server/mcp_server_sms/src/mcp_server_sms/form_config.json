@@ -1,0 +1,17 @@
+{
+  "maxUploadBytes": 10485760,
+  "maxConcurrentUploads": 2,
+  "qualificationVerification": {
+    "appId": 482875,
+    "scene": 3,
+    "channelId": 2430,
+    "templates": { "operator": 59030, "responsible": 59029 }
+  },
+  "materialUpload": {
+    "endpoint": "https://imagex.bytedanceapi.com/",
+    "serviceId": "2rcdq6eupd",
+    "region": "cn-north-1",
+    "appId": "5997",
+    "userId": "sms"
+  }
+}
