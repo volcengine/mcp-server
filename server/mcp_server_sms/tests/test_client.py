@@ -90,6 +90,7 @@ async def test_official_signer_carries_sts_without_logging(capsys, caplog):
         ("application/octet-stream", b"phone,name\n", True),
         ("text/html", b"<html>gateway login</html>", False),
         ("text/csv", b"\xff", False),
+        ("text/csv", b"", False),
     ],
 )
 async def test_csv_response_contract(content_type, content, success):
@@ -102,10 +103,10 @@ async def test_csv_response_contract(content_type, content, success):
             )
         )
     ) as client:
-        result = await client.call("TemplateUploadDemo", {}, CREDENTIALS)
+        result = await client.call("TemplateUploadDemoForAgent", {}, CREDENTIALS)
     assert result["success"] is success
     if success:
-        assert result["result"]["content"] == content.decode()
+        assert result["result"]["value"] == content.decode()
 
 
 async def test_business_values_and_upstream_references_are_preserved():

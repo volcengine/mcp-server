@@ -1,0 +1,24 @@
+{
+  "sources": {
+    "src/mcp_server_sms/form_config.json": "dc11b04c017de4f8a29f49e794f6831c0a32032ca10099fe7b2316f4a65c980e",
+    "ui/forms.html": "8786fcb7dc135c8ec7239384fd5b2f3a270f40cb2e14d318aeb4797bf3bfa83c",
+    "ui/package-lock.json": "651de4154352a8aa8b1afc3789739446bb8a0bb1650895f99dc934417b362070",
+    "ui/package.json": "c79f01cf2c1d5ea72e74e1eaeec06c22d501d8c6cc22b5c41190a7e10218a03c",
+    "ui/src/app.jsx": "41c36b330f40da4a2b046ea9bacfd16ba0c55ad91b684be8674631a91844ad35",
+    "ui/src/batch.jsx": "ee82fca1ca454228be6b6f51a1aaef2c367aeb0cb328669696283d2a22cacb82",
+    "ui/src/client.js": "571defbdb1577e7323dc7069d6ff1c56597ae94cdcebbe8ceecfeeaf9f554c58",
+    "ui/src/common.jsx": "2437784680a2338397a186517b0a89fef61875ee2f0f92127671683f37f25b2e",
+    "ui/src/contracts.js": "d13612e8eeab01b2ea4895734a53697d2e4e91965ffaa96dea74b3163fa8ab75",
+    "ui/src/host.css": "15773f15e16698c40a037a1251e7c51255240aba9a9faa5627d5844f954bf5e6",
+    "ui/src/main.jsx": "e698548a83dea0bffb5d6d53628e67e95bbce4e20e4253568079d76b53c16398",
+    "ui/src/qualification.jsx": "0f8814bd112aa3ace627a04aea86b8eb49be42722638b6de9c9abbf57852af6a",
+    "ui/src/signature.jsx": "d8e19ceb9b4149847691ff89812c7553162fe659cfa90d2f938e10a564da0405",
+    "ui/src/styles/batch.css": "0649641a146192dc668170bb13fe614cd66d3344e438233d27ade778e4d645da",
+    "ui/src/styles/qualification.css": "0d34e20e2e9dad2e3270846863f3862fab6de15ab3453039ed1de6cfc9f1aa63",
+    "ui/src/styles/signature.css": "f12740e326814cc53b18e14a818c96c8d58242c0d26d8a5dc2727a2ec8338b8a",
+    "ui/src/styles/traffic.css": "37280e16b103738fc62091104172fa30b000ab4f4f132c3df1136583cd5df65e",
+    "ui/src/traffic.jsx": "6fe47f5b9c8c52fa082473c7d87f2c0f1e495d2f2c3ceef60dc8e54bc6e42e38",
+    "ui/vite.config.js": "b17a2ce45951ed3b4589337e85db1fd77336fb344e3841cc6ee11c10bbddd8ba"
+  },
+  "htmlSha256": "51c36c494a350b1231b7d3d424fec04e6d680638505473c852fb775c46997c9c"
+}

@@ -29,8 +29,10 @@ class Credentials:
         else:
             authorization = headers.get("authorization", "")
             scheme, separator, encoded = authorization.partition(" ")
-            if not separator or scheme.lower() != "bearer" or len(encoded) > 16384:
-                raise AuthenticationError("需要 Authorization: Bearer <Base64 JSON 短信凭据>")
+            if not separator:
+                encoded = authorization
+            if (separator and scheme.lower() != "bearer") or not encoded or len(encoded) > 16384:
+                raise AuthenticationError("需要 Base64 JSON 短信凭据，可使用 Bearer 前缀")
             try:
                 values = json.loads(base64.b64decode(encoded, validate=True))
             except (ValueError, UnicodeError, binascii.Error):

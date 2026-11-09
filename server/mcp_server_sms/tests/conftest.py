@@ -27,7 +27,7 @@ def api_calls():
         results = {
             "SendSmsForAgent": {"MessageIds": ["fixture-message"]},
             "ApplySmsSignatureV2": {"applyId": "fixture-signature", "status": 1},
-            "ApplySmsTemplateV2": {"templateId": "fixture-template", "status": 1},
+            "ApplySmsTemplateV2ForAgent": {"templateId": "fixture-template", "status": 1},
             "ApplySignatureIdentificationForAgent": 123,
             "ThreeElementEnterpriseCheckForAgent": {
                 "status": 0,
@@ -36,7 +36,13 @@ def api_calls():
             "ThreeElementPersonCheckForAgent": {"status": 0, "ticket": "upstream-person-ticket"},
             "SendSmsVerifyCodeByMobile": {"messageId": "fixture-verification-message"},
             "CheckSmsVerifyCodeByMobile": {"status": 2},
-            "SetBatchTask": {"taskId": "fixture-task", "totalCount": 1, "dupCount": 0},
+            "SetBatchTaskForAgent": {"taskId": "fixture-task", "totalCount": 1, "dupCount": 0},
+            "TemplateUploadDemoForAgent": {"value": "phone,name\n13800000000,示例\n"},
+            "ValidateBatchTaskContentForAgent": {"Approved": False, "Reason": "请补充任务正文"},
+            "ConfirmProtocolDocument": {"success": [1, 2], "fail": []},
+            "ActivateSmsProductInOneStep": {
+                "list": [{"product": "sms", "orderStatus": 1, "orderDetail": "受理"}]
+            },
             "GetUploadTosURL": {
                 "file": "fixture.csv",
                 "url": "https://upload.example/fixture.csv?signature=opaque",
@@ -82,6 +88,8 @@ def rpc(client, method, *, token=None, params=None):
         headers["Authorization"] = token
     if params and "name" in params:
         headers["Mcp-Name"] = params["name"]
+    elif params and "uri" in params:
+        headers["Mcp-Name"] = params["uri"]
     return client.post(
         "/mcp",
         headers=headers,
