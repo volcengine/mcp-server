@@ -102,7 +102,7 @@ def mcp(api_calls):
     # Exercise the actual protocol boundary: direct MCPServer.call_tool calls
     # have no request Context and do not convert ToolError into wire results.
     with TestClient(
-        create_http_app(build_server(api_calls[1]), "https://testserver"),
+        create_http_app(build_server(api_calls[1]), public_url="https://testserver", host="0.0.0.0"),
         base_url="https://testserver",
     ) as http:
 

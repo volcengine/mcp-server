@@ -1,3 +1,6 @@
+import sys
+from unittest.mock import Mock
+
 import httpx
 import pytest
 from conftest import auth_header, rpc
@@ -5,12 +8,12 @@ from starlette.testclient import TestClient
 
 from mcp_server_sms.auth import AuthenticationError, Credentials
 from mcp_server_sms.client import SmsClient
-from mcp_server_sms.server import build_server, create_http_app
+from mcp_server_sms.server import build_server, create_http_app, main
 
 
 def test_stateless_discovery_needs_no_database_or_initialize(api_calls, monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)
-    app = create_http_app(build_server(api_calls[1]), "https://testserver")
+    app = create_http_app(build_server(api_calls[1]), public_url="https://testserver", host="0.0.0.0")
     with TestClient(app, base_url="https://testserver") as client:
         for method in ("server/discover", "tools/list"):
             response = rpc(client, method, token=auth_header("a"))
@@ -18,14 +21,14 @@ def test_stateless_discovery_needs_no_database_or_initialize(api_calls, monkeypa
             assert "error" not in response.json()
             assert "mcp-session-id" not in response.headers
             assert response.headers["cache-control"] == "no-store"
-        assert len(response.json()["result"]["tools"]) == 30
+        assert len(response.json()["result"]["tools"]) == 36
     assert list(tmp_path.iterdir()) == []
     assert api_calls[0] == []
 
 
 @pytest.mark.parametrize("version", ["2025-03-26", "2025-06-18", "2025-11-25"])
 def test_standard_http_initialize_and_tool_call_for_earlier_clients(api_calls, version):
-    app = create_http_app(build_server(api_calls[1]), "https://testserver")
+    app = create_http_app(build_server(api_calls[1]), public_url="https://testserver", host="0.0.0.0")
     headers = {"Accept": "application/json, text/event-stream", "Authorization": auth_header("a")}
     with TestClient(app, base_url="https://testserver", headers=headers) as client:
         initialized = client.post("/mcp", json={
@@ -40,7 +43,7 @@ def test_standard_http_initialize_and_tool_call_for_earlier_clients(api_calls, v
         listed = client.post("/mcp", headers=headers, json={
             "jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {},
         })
-        assert len(listed.json()["result"]["tools"]) == 30
+        assert len(listed.json()["result"]["tools"]) == 36
         called = client.post("/mcp", headers=headers, json={
             "jsonrpc": "2.0", "id": 3, "method": "tools/call",
             "params": {"name": "list_message_groups", "arguments": {}},
@@ -50,7 +53,7 @@ def test_standard_http_initialize_and_tool_call_for_earlier_clients(api_calls, v
 
 
 def test_http_credentials_are_per_request_without_environment_fallback(api_calls, credentials_env):
-    app = create_http_app(build_server(api_calls[1]), "https://testserver")
+    app = create_http_app(build_server(api_calls[1]), public_url="https://testserver", host="0.0.0.0")
     with TestClient(app, base_url="https://testserver") as client:
         assert rpc(client, "tools/list").status_code == 401
         for suffix in ("a", "b"):
@@ -80,9 +83,9 @@ def test_bad_http_auth_is_rejected_without_exposing_input(value, credentials_env
     assert "fixture-secret" not in str(caught.value)
 
 
-def test_http_has_no_file_routes_and_rejects_untrusted_host(api_calls):
-    app = create_http_app(build_server(api_calls[1]), "https://testserver")
-    with TestClient(app, base_url="https://testserver") as client:
+def test_loopback_http_has_no_file_routes_and_rejects_untrusted_host(api_calls):
+    app = create_http_app(build_server(api_calls[1]))
+    with TestClient(app, base_url="http://127.0.0.1:8000") as client:
         response = client.post(
             "/files", content=b"private", headers={"authorization": auth_header("a")}
         )
@@ -112,7 +115,9 @@ def test_http_client_lives_until_mcp_shutdown_and_keeps_callers_isolated():
             self.close_count += 1
 
     transport = CountingTransport()
-    app = create_http_app(build_server(SmsClient(transport=transport)), "https://testserver")
+    app = create_http_app(
+        build_server(SmsClient(transport=transport)), public_url="https://testserver", host="0.0.0.0"
+    )
     with TestClient(app, base_url="https://testserver") as client:
         for caller in ("a", "b"):
             response = rpc(
@@ -129,3 +134,65 @@ def test_http_client_lives_until_mcp_shutdown_and_keeps_callers_isolated():
             assert request.headers["x-security-token"] == f"fixture-token-{caller}"
             assert "cookie" not in request.headers
     assert transport.close_count == 1
+
+
+def test_remote_cli_checks_host_and_allows_configured_or_missing_origin(api_calls, monkeypatch):
+    public_url = "https://sms.mcp.volcbiz.com"
+    browser_origin = "https://www.volcengine.com"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mcp-server-sms",
+            "--transport",
+            "streamable-http",
+            "--host",
+            "0.0.0.0",
+            "--public-url",
+            "HTTPS://SMS.mcp.volcbiz.com:443",
+            "--allowed-origin",
+            "https://WWW.volcengine.com:443",
+        ],
+    )
+    monkeypatch.setattr("mcp_server_sms.server.build_server", lambda: build_server(api_calls[1]))
+    run = Mock()
+    monkeypatch.setattr("uvicorn.run", run)
+
+    main()
+
+    run.assert_called_once()
+    app = run.call_args.args[0]
+    headers = {
+        "authorization": auth_header("a"),
+        "accept": "application/json, text/event-stream",
+    }
+    body = {"jsonrpc": "2.0", "id": 1, "method": "tools/list"}
+    with TestClient(app, base_url=public_url) as client:
+        for accepted in (
+            headers,
+            {**headers, "origin": public_url},
+            {**headers, "origin": browser_origin},
+            {**headers, "host": "sms.mcp.volcbiz.com:443"},
+        ):
+            response = client.post("/mcp", headers=accepted, json=body)
+            assert response.status_code == 200, response.text
+            assert len(response.json()["result"]["tools"]) == 36
+
+        invalid_host = client.post(
+            "/mcp", headers={**headers, "host": "www.volcengine.com", "origin": browser_origin}, json=body
+        )
+        assert invalid_host.status_code == 421
+        invalid_origin = client.post(
+            "/mcp", headers={**headers, "origin": "https://untrusted.example"}, json=body
+        )
+        assert invalid_origin.status_code == 403
+    assert api_calls[0] == []
+
+
+@pytest.mark.parametrize(
+    "origin",
+    ["https://*", "https://app.example.com:*", "https://app.example.com/mcp", "https://[v1.app.example.com]"],
+)
+def test_remote_app_rejects_non_exact_browser_origin_config(api_calls, origin):
+    with pytest.raises(ValueError, match="allowed-origin"):
+        create_http_app(build_server(api_calls[1]), allowed_origins=[origin])

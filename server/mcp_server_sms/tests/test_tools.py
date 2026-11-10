@@ -244,7 +244,7 @@ async def test_query_contracts_keep_get_and_post_distinct(mcp, api_calls):
 
 async def test_tools_are_named_business_operations(mcp):
     tools = {tool.name: tool for tool in await mcp.list_tools()}
-    assert len(tools) == 30
+    assert len(tools) == 36
     removed = {
         "execute_sms_operation",
         "get_sms_operation_result",
@@ -257,13 +257,21 @@ async def test_tools_are_named_business_operations(mcp):
     assert removed.isdisjoint(tools)
     assert not any(name.startswith("prepare_") for name in tools)
     for name, tool in tools.items():
-        if tool.name not in {"recognize_qualification_document", "check_qualification_enterprise", "check_qualification_person", "upload_sms_file"}:
+        if tool.name not in {
+            "recognize_qualification_document", "check_qualification_enterprise",
+            "check_qualification_person", "upload_sms_file", "get_sms_service_onboarding",
+            "submit_sms_service_onboarding", "send_batch_test_sms",
+        }:
             assert tool.output_schema
         assert "ctx" not in tool.input_schema["properties"]
         if name in {"send_sms", "apply_qualification", "start_batch_task", "verify_code"}:
             assert tool.annotations.read_only_hint is False
             assert tool.annotations.idempotent_hint is False
     assert tools["cancel_batch_task"].annotations.destructive_hint is True
+    assert tools["open_sms_service_onboarding"].annotations.read_only_hint is True
+    for name in ("submit_sms_service_onboarding", "send_batch_test_sms"):
+        assert tools[name].meta["ui"]["visibility"] == ["app"]
+        assert tools[name].annotations.read_only_hint is False
 
 
 async def test_qualification_service_decides_when_check_tickets_are_required(

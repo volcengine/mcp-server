@@ -44,12 +44,7 @@ export class SmsFormClient {
   }
 
   async upload(file, request) {
-    if (!file || file.size === 0 || file.size > MAX_UPLOAD_BYTES) {
-      throw new OperationError('请选择不超过 10 MB 的非空文件。');
-    }
-    return this.call('upload_sms_file', { request: {
-      ...request, name: file.name, data: fromByteArray(new Uint8Array(await file.arrayBuffer())),
-    } }, { write: true });
+    return this.call('upload_sms_file', { request: { ...request, ...await fileInput(file) } }, { write: true });
   }
 
   async downloadCsv(value) {
@@ -59,6 +54,13 @@ export class SmsFormClient {
     await this.app.downloadFile({ contents: [{ type: 'resource', resource: {
       uri: 'file:///sms-recipients.csv', mimeType: 'text/csv', text: value,
     } }] });
+  }
+
+  canOpenLinks() { return Boolean(this.app.getHostCapabilities()?.openLinks); }
+
+  async openLink(url) {
+    const result = await this.app.openLink({ url }, { signal: this.controller.signal });
+    if (result?.isError) throw new OperationError('无法打开链接，请到火山引擎官网查看。');
   }
 
   async report(summary) {
@@ -72,6 +74,14 @@ export class SmsFormClient {
   dispose() { this.controller.abort(); }
 }
 
+export async function fileInput(file) {
+  if (!file || (file.data === undefined && (file.size === 0 || file.size > MAX_UPLOAD_BYTES))) {
+    throw new OperationError('请选择不超过 10 MB 的非空文件。');
+  }
+  const data = file.data ?? fromByteArray(new Uint8Array(await file.arrayBuffer()));
+  return { name: file.name, data };
+}
+
 export function page(result, rowSchema) {
   const rows = result?.list ?? result?.List ?? result?.items ?? result?.Items;
   const total = result?.total ?? result?.Total;
@@ -82,6 +92,22 @@ export function page(result, rowSchema) {
     throw new OperationError('资源字段返回不完整，请重新查询，不能用缺失的信息提交。');
   }
   return { rows, total };
+}
+
+export function withPrefilledOptions(rows, records, key) {
+  // 预填补到的选项不改变常规列表的分页计数。
+  const listed = new Set(rows.map(row => row[key]));
+  return [...rows, ...records.filter(row => !listed.has(row[key]))];
+}
+
+export function materialPreview(buildRequest) {
+  const included = new Set();
+  const request = buildRequest((file, type) => {
+    const fileContent = required(file.fileContent, '请先上传或移除待上传的材料。');
+    included.add(file);
+    return { fileType: type, fileContent, fileSuffix: file.fileSuffix };
+  });
+  return { request, attachmentNames: Array.from(included, file => file.name) };
 }
 
 export function checkedTicket(result) {

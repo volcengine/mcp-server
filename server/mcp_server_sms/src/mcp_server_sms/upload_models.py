@@ -9,12 +9,13 @@ from .models import ApiModel, Text
 from .responses import ApiResult
 
 MAX_UPLOAD_BYTES = FORM_CONFIG["maxUploadBytes"]
+MAX_UPLOAD_ENCODED_LENGTH = ((MAX_UPLOAD_BYTES + 2) // 3) * 4
 
 
 class FileContent(ApiModel):
     name: Annotated[str, Field(min_length=1, max_length=255)]
-    data: Annotated[str, Field(min_length=1, max_length=((MAX_UPLOAD_BYTES + 2) // 3) * 4)] = Field(
-        repr=False
+    data: Annotated[str, Field(min_length=1, max_length=MAX_UPLOAD_ENCODED_LENGTH)] = Field(
+        repr=False, description="原始文件字节的 Base64 编码；不接受本地路径或 URL"
     )
 
 

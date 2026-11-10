@@ -50,11 +50,13 @@ def _emit(event, fields, span=None):
 
 
 @contextmanager
-def observe_call(kind: str, action: str):
+def observe_call(kind: str, action: str, *, path: str | None = None):
     """为调用生命周期记录成对事件，并沿当前异步上下文传递关联标识。"""
     correlation = _CORRELATION.get() or uuid4().hex
     token = _CORRELATION.set(correlation)
     fields = {"kind": kind, "action": action, "correlation_id": correlation}
+    if path is not None:
+        fields["path"] = path
     stack, span = ExitStack(), None
     try:
         span = stack.enter_context(

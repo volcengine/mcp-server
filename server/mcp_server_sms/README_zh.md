@@ -4,7 +4,7 @@
 
 独立的短信 API 适配服务，支持 **MCP 2026-07-28**、stdio、**Stateless Streamable HTTP** 和标准 **MCP Apps**。业务工具接收完整参数并调用对应接口；打开表单不执行写入，文件上传在服务端完成授权、上传及确认。
 
-不依赖 Skill，不在服务端保存业务草稿或预览，不提供本机文件路径服务及通用 `prepare/execute` 流程；不需要 SQLite、PostgreSQL 或 Redis。四类表单在宿主沙箱内保存当前填写内容，客户端负责用户确认，现有短信服务负责业务校验、申请、任务与发送记录。
+不依赖 Skill，不在服务端保存业务草稿或预览，不提供本机文件路径服务及通用 `prepare/execute` 流程；不需要 SQLite、PostgreSQL 或 Redis。五类表单在宿主沙箱内保存当前填写内容，客户端负责用户确认，现有短信服务负责业务校验、申请、任务与发送记录。
 
 ## 工具与接口
 
@@ -38,10 +38,12 @@
 | `cancel_batch_task` | `DeleteBatchTask` |
 | `query_sms_resources` | 下表中的 10 项补充查询 |
 | `manage_sms_service` | `ConfirmProtocolDocument`、`ActivateSmsProductInOneStep` |
-| `register_traffic_resource` | `BulkCreateTobTrafficDrivingLinkForAgent`、`BulkCreateTobTrafficDrivingPhoneForAgent` |
+| `open_sms_service_onboarding`、`get_sms_service_onboarding`、`submit_sms_service_onboarding` | 开通表单、`ListAllSmsProduct`、按确认执行协议签署或开通 |
+| `register_traffic_resource`、`preview_traffic_resource` | 引流格式校验、录入及可选回查 |
+| `send_batch_test_sms`、`check_batch_traffic_resources`（仅 App 可见） | 校验群发模板后单条试发、按实际正文核对引流 |
 | `upload_sms_file`（仅 App 可见） | 内部材料授权及上传，或 CSV 模板校验与上传 |
 
-共 **30 个工具、40 项业务 Action**，上传组件另在内部调用 `GetMUploadParam`。群发目录和 CSV 示例接口支持普通模板及特殊通知模板。验证码群发和国际短信不在范围内。三个聚合工具使用 `request.action` 和对应类型的 `request.params`，不是任意 API 透传。
+共 **36 个工具、40 项业务 Action**，上传组件另在内部调用 `GetMUploadParam`。群发目录和 CSV 示例接口支持普通模板及特殊通知模板。验证码群发和国际短信不在范围内。三个聚合工具使用 `request.action` 和对应类型的 `request.params`。
 
 | `query_sms_resources` 的 action | 用途 |
 | --- | --- |
@@ -67,13 +69,13 @@
 }
 ```
 
-`RE:0001` 表示未开通。先通过 `get_account_information` 获取当前协议和商品状态，客户阅读协议并同意后调用 `manage_sms_service`，传 `ConfirmProtocolDocument` 和 `{"product":"sms","documents":[1,2]}`。协议 ID 必须来自查询结果，示例数字不能直接使用。确认返回的 `fail` 为空后，客户授权开通，另行调用 `ActivateSmsProductInOneStep`，参数为 `{"product":["sms"]}`，再回查账号状态。MCP 不自动串联签署与开通，也不把接口受理当作开通完成。
+`RE:0001` 表示未开通。支持 MCP Apps 时，用 `open_sms_service_onboarding` 让客户核对协议及计费后确认。直接调用 `manage_sms_service` 时，先通过 `get_account_information` 核实协议和商品状态，获授权后按实际协议 ID 调用 `ConfirmProtocolDocument`。签署结果的 `fail` 为空后，首次开通或重新开通再调用 `ActivateSmsProductInOneStep`，参数为 `{"product":["sms"]}`，最后回查账号状态。
 
 `register_traffic_resource` 的参数为 `{"request":{"action":"<上述两种录入 Action 之一>","params":{"data":[...]}}}`。每次最多 10 个链接或 100 个号码；完整字段和必填约束见 `tools/list`。链接、路径、查询参数、号码均按原文传递，个人证件信息通过客户端私密渠道输入。
 
 服务端会核对协议签署结果完整覆盖本次协议且成功、失败清单不重叠，开通结果恰好对应本次商品。缺失或不匹配返回 `outcome_unknown`；合法的部分签署失败或开通业务失败保留原值，供客户端核对。
 
-工具不替换签名、不匹配或改写模板、不去重号码，也不生成跳过校验票据。已有模板 ID 直接交给发送接口校验，不因查询列表缺少某类模板就自行禁止发送。
+直接发送沿用调用方提供的签名、模板和号码。已有模板 ID 交给发送接口校验。
 
 ## 资质与文件
 
@@ -93,12 +95,29 @@ MCP Apps 表单可以选择并上传材料，服务端通过当前客户的凭�
 
 | 工具 | 表单能力 |
 | --- | --- |
-| `apply_qualification` | 读取账号要求，填写企业/人员信息，上传证件、OCR、信息校验、手机号验证、预览确认及审核查询 |
-| `apply_signature` | 选择可用资质、签名来源和消息组范围，上传 APP/商标/其他材料，预览确认及审核查询 |
-| `register_traffic_resource` | 录入链接或号码、预览并确认提交，保留原始链接和号码 |
-| `create_batch_task` | 选择消息组/签名/模板、下载真实 CSV 示例、上传校验名单、特殊通知正文预检、创建后单独确认启动或取消 |
+| `apply_qualification` | 企业、人员和材料校验，企业信息未通过自动核验时由客户确认转人工审核 |
+| `apply_signature` | 唯一可用资质和消息组自动预选，公司名回填，项目和证明材料，名称风险单独确认 |
+| `register_traffic_resource` | 预览时校验格式、协议和重复项，确认录入后回查资源 ID |
+| `create_batch_task` | 单条试发及回执、按 CSV 逐行检查引流、创建后单独确认启动或取消 |
+| `open_sms_service_onboarding` | 查看国内短信商品、协议与计费，确认开通或更新协议，刷新实际状态 |
 
-例如 `tools/call` 的参数为 `{"name":"apply_signature","arguments":{}}`。四个工具均通过 `_meta.ui.resourceUri` 绑定 `ui://sms/forms.html`；`resources/read` 返回 MIME `text/html;profile=mcp-app` 的自包含 HTML。Python 使用官方 `Apps` 扩展，页面使用官方 `@modelcontextprotocol/ext-apps`，没有豆包专属协议。
+例如 `tools/call` 的参数为 `{"name":"apply_signature","arguments":{}}`。五个开表工具均通过 `_meta.ui.resourceUri` 绑定 `ui://sms/forms.html`，`resources/read` 返回 MIME 为 `text/html;profile=mcp-app` 的自包含 HTML。Python 使用官方 `Apps` 扩展，页面使用官方 `@modelcontextprotocol/ext-apps`。
+
+宿主 Agent 把已核实的字段传给 `prefill`，未知字段可以省略。打开后客户可修改或补齐，再核对提交。
+`prefill` 与 `request` 互斥；准确的字段和类型见 `tools/list`。例如
+`{"name":"create_batch_task","arguments":{"prefill":{"name":"双十一活动通知","subAccount":"group-id","signature":"示例签名","templateId":"template-id"}}}`。
+
+| 表单 | 可预填内容 |
+| --- | --- |
+| 资质 | 用途、名称、`businessInfo`、经办人、责任人、法人信息、人员关系和营业证件、人员证件、委托书、其他材料。证件图片在 `personCertificate` 中按 `front`、`back` 或法人其他证件的 `document` 提供。 |
+| 签名 | 签名内容、来源、资质 ID、消息组范围和组 ID、项目名称、说明、APP 备案、商标信息和各类证明附件。 |
+| 引流 | `kind` 为 `link` 或 `phone`；`data` 中填写对应行的链接、协议、备案或号码、类型、归属信息。 |
+| 群发 | 任务名称 `name`、消息组、签名、模板、任务级正文、`checkTraffic`、`scheduled`、`sendTime`（Unix 秒，页面显示北京时间）及 `recipientsFile`。模板声明了正文输入项时才使用任务级正文。 |
+
+签名和群发的下拉项按当前账号资源核对。群发可只预填签名或模板，补齐上游选项后再核对和选中。
+个人信息和文件须由宿主通过获授权的私密渠道传递；预填值只在工具结果的 `_meta["sms/form"].prefill` 中交给视图，普通结果不回显。
+附件形如 `{"name":"proof.png","data":"<原文件的 Base64>"}`，同一次开表的附件合计最多 10 MB；宿主不具备私密文件传递能力时由客户在表单内选择。
+页面先显示待上传文件，用户点击上传后才走原材料或 CSV 校验上传流程。预填不接受验证码、校验票据、已上传文件 Key、勾选确认或任务幂等键。
 
 表单配色、布局和样式文件复用 byted-sms-sender 1.4.6 的 React/Arco 页面；源码复制在本包 `ui/` 中，Skill 不做修改，构建及运行不依赖 Skill 路径。宿主宽窄尺寸、深色模式在独立样式中适配。JS/CSS 已内联，CSP 不声明外部连接或静态源，页面不直接请求业务 API。
 
@@ -107,8 +126,10 @@ MCP Apps 表单可以选择并上传材料，服务端通过当前客户的凭�
 - 单文件最大 **10 MiB**，每实例同时处理最多 **2** 个上传，满载时明确拒绝且不排队解码。资质图片支持 JPG/JPEG/PNG；签名材料按类别支持图片、PDF、ZIP、DOC/DOCX。CSV 按对应模板的表头校验，保留原文件，重复号码只计数不改写。更大的文件继续走现有上传渠道；宿主及网关实际请求体上限需联调确认。
 - `form_config.json` 是前后端共同的上传限制和短信材料/验证场景配置；其中是既有短信业务标识，不能填写客户 AK/SK 或 Token。
 - 用户核对并勾选后才提交；重复点击受控，未知写结果锁定重试。群发创建后重新查询任务；启动前核对任务身份、状态和正文，另行确认实际发送及费用。历史恢复只展示返回结果，不重放写操作。
-- 业务受理和当前账号规则来自后端；表单不生成跳过校验票据。页面关闭后不持久保存材料、票据或未提交草稿；不提供跨窗口/重启去重保证。企业校验无法完成时可通过控制台办理人工审核。
-- 不支持 MCP Apps 的客户端仍可使用原业务工具和完整参数；缺少私密交互能力时通过短信控制台办理。原 Skill 的本机 CLI、心跳、草稿文件和独立试发区没有迁移进页面，`send_sms` 等原工具仍保留。
+- 客户确认转人工审核后，服务端重新核验企业信息，并在符合条件时使用上游人工审核票据。人员、材料和手机号核验仍以账号要求为准。
+- CSV 引流检查逐行渲染短信正文，向查询接口提交去重后的正文，在限定时间内最多检查 100 种不同正文。确认页显示覆盖数量、缺失资源和待核对的行。
+- 开通表单在提交前重新核对当前账号及协议清单。协议更新只签待更新项，首次开通或重新开通需完整签署后再发起开通，最终以账号状态为准。同一 MCP 实例会锁定同一访问凭据的未决提交，直到查到明确结果。
+- 原有工具继续接受完整参数。表单填写内容和确认状态保留在当前宿主视图内。
 
 开发及预览见 [ui/README.md](ui/README.md)。标准接口参考 [MCP Apps](https://modelcontextprotocol.io/extensions/apps/overview)。
 
@@ -159,7 +180,7 @@ mcp-server-sms --transport streamable-http --host 0.0.0.0 --port 8000 \
 
 这沿用仓库已有的凭据传递方式，**不是 OAuth access token，Base64 也不是加密**。由客户端或可信网关在模型之外构造请求头，不得写入访问日志。每次短信请求独立执行官方 V4 签名，由短信/IAM 校验权限；HTTP 缺少凭据时不会使用进程默认账号。
 
-不创建 OAuth 登录应用，不保存用户身份。`--public-url` 用于配置 HTTP 域名校验；未提供时仅允许本机域名。无需协议会话或共享存储，多副本可以独立处理请求。云端平台的实际请求头、上传链路及表单宿主仍需联调确认。
+不创建 OAuth 登录应用，不保存用户身份。MCP SDK 校验 `Host` 以及请求中提供的 `Origin`。将 `--public-url` 设为服务的 HTTPS 来源，可以放行其域名和同源请求。每个额外的可信网页来源可单独传入一次 `--allowed-origin https://app.example.com`。浏览器跨域接入时，部署入口还需处理 CORS 预检和响应头。不带 `Origin` 的客户端可凭有效凭据和允许的 `Host` 接入。无需协议会话或共享存储，多副本可以独立处理请求。云端平台的实际请求头、上传链路及表单宿主仍需联调确认。
 
 通过统一 MCP 网关接入时，OAuth 登录和授权在网关完成，网关向本服务转发该客户的 STS 凭据。普通 OAuth access token 不能直接发给本服务，也不能用部署账号的 AK/SK 代替不同客户的凭据。
 

@@ -1,6 +1,17 @@
 {
   "maxUploadBytes": 10485760,
   "maxConcurrentUploads": 2,
+  "smsOnboarding": {
+    "consoleUrl": "https://console.volcengine.com/sms",
+    "pricingUrl": "https://www.volcengine.com/docs/6361/67320",
+    "protocols": [
+      { "id": 68938, "title": "产品和服务协议", "url": "https://www.volcengine.com/docs/6256/68938" },
+      { "id": 67343, "title": "短信服务专用条款", "url": "https://www.volcengine.com/docs/6361/67343" },
+      { "id": 67416, "title": "短信信息管理规范", "url": "https://www.volcengine.com/docs/6361/67416" },
+      { "id": 66708, "title": "短信服务等级协议（国内短信）", "url": "https://www.volcengine.com/docs/6361/66708" }
+    ],
+    "otherProductProtocolIds": [136520, 1359409]
+  },
   "qualificationVerification": {
     "appId": 482875,
     "scene": 3,

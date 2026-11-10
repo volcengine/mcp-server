@@ -25,15 +25,15 @@ export function Choice({ label, value, onChange, options, ...props }) {
     options={options.map(([value, label]) => ({ value, label }))} {...props} /></Field>;
 }
 
-export function Files({ label, accept, value = [], onSelect, onRemove, multiple = false, disabled = false }) {
+export function Files({ label, accept, value = [], onSelect, onRemove, multiple = false, disabled = false, uploadDisabled = disabled }) {
   const input = useRef(null);
   return <div className="upload-block">
     <div className="upload-label">{label}</div>
     <div className="upload-zone">
       <IconUpload className="upload-icon" />
-      <Button disabled={disabled} onClick={() => input.current?.click()}>选择并上传</Button>
+      <Button disabled={uploadDisabled} onClick={() => input.current?.click()}>选择并上传</Button>
       <input ref={input} hidden type="file" aria-label={label} accept={accept} multiple={multiple}
-        disabled={disabled} onChange={event => {
+        disabled={uploadDisabled} onChange={event => {
           const selected = Array.from(event.target.files ?? []);
           event.target.value = '';
           if (selected.length) onSelect(selected);
@@ -41,7 +41,10 @@ export function Files({ label, accept, value = [], onSelect, onRemove, multiple 
       <div className="upload-tip">单个文件最大 10 MB</div>
     </div>
     {value.map((file, index) => <div className="sms-file" key={index}>
-      <span>{file.name}</span><Button type="text" disabled={disabled} onClick={() => onRemove(index)}>移除</Button>
+      <span>{file.name}{file.data !== undefined && '（待上传）'}</span>
+      {file.data !== undefined && <Button type="text" disabled={uploadDisabled} aria-label={`上传 ${file.name}`}
+        onClick={() => onSelect([file], index)}>上传</Button>}
+      <Button type="text" disabled={disabled} onClick={() => onRemove(index)}>移除</Button>
     </div>)}
   </div>;
 }
@@ -82,14 +85,17 @@ export function maskedIdentifier(value) {
   return value.length > 7 ? value.slice(0, 3) + '…' + value.slice(-4) : '已填写';
 }
 
-export function Confirm({ title, children, onBack, onSubmit, busy, disabled, submitLabel = '确认提交', backLabel = '返回修改' }) {
+export function Confirm({ title, children, onBack, onSubmit, busy, disabled, additionalConsent, consentLabel = '我已核对以上信息，同意提交本次操作', submitLabel = '确认提交', backLabel = '返回修改' }) {
   const [agreed, setAgreed] = useState(false);
+  const [acceptedAdditional, setAcceptedAdditional] = useState(false);
   return <section className="review-section">
     <h2>{title}</h2>{children}
-    <Checkbox checked={agreed} onChange={setAgreed}>我已核对以上信息，同意提交本次操作</Checkbox>
+    <Checkbox checked={agreed} disabled={busy || disabled} onChange={setAgreed}>{consentLabel}</Checkbox>
+    {additionalConsent && <Checkbox checked={acceptedAdditional} disabled={busy || disabled}
+      onChange={setAcceptedAdditional}>{additionalConsent}</Checkbox>}
     <div className="traffic-actions">
-      <Button disabled={busy || disabled} onClick={onBack}>{backLabel}</Button>
-      <Button type="primary" loading={busy} disabled={!agreed || disabled} onClick={onSubmit}>{submitLabel}</Button>
+      {onBack && <Button disabled={busy || disabled} onClick={onBack}>{backLabel}</Button>}
+      <Button type="primary" loading={busy} disabled={!agreed || disabled || Boolean(additionalConsent && !acceptedAdditional)} onClick={onSubmit}>{submitLabel}</Button>
     </div>
   </section>;
 }

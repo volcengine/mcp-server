@@ -4,10 +4,13 @@ import argparse
 import json
 import logging
 import sys
+from collections.abc import Sequence
 from contextlib import asynccontextmanager
+from time import time
 from typing import Annotated, Any, Literal
 from urllib.parse import urlsplit
 
+import httpx
 from mcp.server import MCPServer
 from mcp.server.mcpserver.context import Context
 from mcp.server.mcpserver.exceptions import ToolError
@@ -19,8 +22,23 @@ from starlette.responses import JSONResponse
 
 from . import __version__
 from .auth import AuthenticationError, Credentials
-from .client import SmsClient
-from .forms import APP_ONLY_META, FORM_META, form_extension, open_form, private_result, tool_result
+from .batch_checks import (
+    BatchTestSend,
+    BatchTrafficCheck,
+    batch_test_receipt,
+    check_batch_traffic,
+    validate_batch_test,
+)
+from .client import _UNCERTAIN_WRITE_ERRORS, SmsClient, failure
+from .forms import (
+    APP_ONLY_META,
+    FORM_META,
+    FormToolResult,
+    form_extension,
+    open_form,
+    private_result,
+    tool_result,
+)
 from .models import (
     BatchTask,
     Channel,
@@ -31,10 +49,20 @@ from .models import (
     Text,
 )
 from .operations import ServiceOperation, TrafficRegistration
+from .prefill import (
+    BatchFormPrefill,
+    QualificationFormPrefill,
+    SignatureFormPrefill,
+    TrafficFormPrefill,
+)
 from .protocol import SmsAPIError, SmsMCPServer
+from .qualification_checks import check_enterprise, enterprise_ticket
 from .queries import ResourceQuery
+from .service_onboarding import ServiceConfirmation, ServiceOnboarding
+from .signature_checks import SignatureFormConfirmation, check_signature_confirmation
+from .traffic_checks import read_back_traffic, validate_traffic_form
 from .upload_models import FileUpload, SmsRequestError
-from .uploads import FileUploader
+from .uploads import FileUploader, recipient_columns
 
 READ = ToolAnnotations(
     readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=True
@@ -53,6 +81,7 @@ PositiveInt = Annotated[int, Field(gt=0)]
 def build_server(client: SmsClient | None = None, uploader: FileUploader | None = None) -> MCPServer:
     api = client if client is not None else SmsClient()
     uploads = uploader if uploader is not None else FileUploader(api)
+    onboarding = ServiceOnboarding()
     logging.getLogger("mcp_server_sms.calls").setLevel(logging.INFO)
     # 上传地址和签名材料不能随宿主的 INFO/DEBUG 设置进入第三方请求日志。
     for logger in ("httpx", "botocore.auth"):
@@ -75,23 +104,29 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
             "有写入或费用的操作由客户端取得用户授权后调用；工具注解不能代替授权。"
             "接口受理成功不等于短信送达；结果未知的写请求不要自动重试。"
             "服务未开通（RE:0001）时先查询账号和协议，客户明确同意后分别签署协议、开通短信商品。"
+            "支持表单时用 open_sms_service_onboarding 交由客户核对协议、计费及开通状态。"
             "query_sms_resources 提供按行业的签名、群发目录、运营商报备和引流查询。"
             "创建群发使用稳定 idempotencyKey，创建不自动启动，特殊通知正文按模板 TaskFields 提供。"
             "材料、验证码和个人信息应通过客户端私密渠道传入，不放进普通聊天。"
-            "用户要填写资质、签名、引流或群发表单时，调用对应申请/创建工具且不传 request，"
-            "只打开表单；打开和恢复页面不等于授权提交。"
+            "用户要填写资质、签名、引流或群发表单时，宿主 Agent 可把已确认的字段放入 prefill，"
+            "未知项留空，不传 request。打开和恢复页面不等于授权提交。"
         ),
     )
 
-    async def invoke(ctx: Context, action: str, params: dict) -> dict[str, Any]:
+    def credentials_for(ctx: Context) -> Credentials:
         try:
-            credentials = Credentials.from_headers(ctx.headers)
+            return Credentials.from_headers(ctx.headers)
         except AuthenticationError as exc:
             raise ToolError(str(exc)) from None
+
+    async def invoke_as(credentials: Credentials, action: str, params: dict) -> dict[str, Any]:
         result = await api.call(action, params, credentials)
         if result["success"] is False:
             raise SmsAPIError(result)
         return result
+
+    async def invoke(ctx: Context, action: str, params: dict) -> dict[str, Any]:
+        return await invoke_as(credentials_for(ctx), action, params)
 
     @mcp.tool(annotations=WRITE, structured_output=False, meta=APP_ONLY_META)
     async def upload_sms_file(ctx: Context, request: FileUpload) -> CallToolResult:
@@ -143,19 +178,73 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
         """
         return await invoke(ctx, request.action, request.params.payload())
 
+    @mcp.tool(annotations=READ, structured_output=True, meta=FORM_META)
+    async def open_sms_service_onboarding() -> FormToolResult:
+        """打开国内短信开通与协议更新表单，客户在表单内阅读并确认。"""
+        return open_form("service", None, None)
+
+    @mcp.tool(annotations=READ, structured_output=False, meta=APP_ONLY_META)
+    async def get_sms_service_onboarding(ctx: Context) -> CallToolResult:
+        """读取本账号的国内短信状态、待确认协议和计费说明。"""
+        credentials = credentials_for(ctx)
+        view = await onboarding.read(
+            lambda action, params: invoke_as(credentials, action, params), credentials
+        )
+        return private_result({"success": True, "action": "get_sms_service_onboarding", "result": view})
+
+    @mcp.tool(annotations=WRITE, structured_output=False, meta=APP_ONLY_META)
+    async def submit_sms_service_onboarding(
+        ctx: Context, confirmation: ServiceConfirmation
+    ) -> CallToolResult:
+        """提交客户在当前账号上明确确认的协议更新或开通申请，提交后回查状态。"""
+        credentials = credentials_for(ctx)
+        view = await onboarding.submit(
+            lambda action, params: invoke_as(credentials, action, params), credentials, confirmation
+        )
+        return private_result({
+            "success": True, "action": "submit_sms_service_onboarding",
+            "request_id": view.get("requestId"), "result": view,
+        })
+
     @mcp.tool(annotations=WRITE, structured_output=True, meta=FORM_META)
     async def register_traffic_resource(
-        ctx: Context, request: TrafficRegistration | None = None
-    ) -> dict[str, Any]:
+        ctx: Context,
+        request: TrafficRegistration | None = None,
+        prefill: TrafficFormPrefill | None = None,
+        read_back: bool = False,
+    ) -> FormToolResult:
         """按客户已确认的原始信息录入引流链接或联系号码，录入后回查资源。
 
         链接每次最多 10 条，号码最多 100 条。个人姓名、证件需客户端私密输入。
         保留 URL 路径、参数和号码原文；资源录入、模板审核、报备和实际发送分别确认。
-        不传 request 只打开表单；完整 request 会直接录入，必须已经获得用户授权。
+        不传 request 只打开表单。用 prefill.kind 选择 link 或 phone，data 填已知字段。
+        prefill 与 request 互斥；完整 request 会直接录入，必须已经获得用户授权。
+        表单传 read_back 时重新校验，并在受理后查询精确匹配的资源 ID。
         """
-        if request is None:
-            return open_form("traffic")
-        return {**await invoke(ctx, request.action, request.params.payload()), "form": "traffic"}
+        if read_back and request is None:
+            raise ToolError("录入后核对需要完整的引流请求。")
+        draft = open_form("traffic", request, prefill)
+        if draft is not None:
+            return draft
+        if read_back:
+            validate_traffic_form(request)
+        result = await invoke(ctx, request.action, request.params.payload())
+        if read_back:
+            if result["result"] != "":
+                raise SmsAPIError(failure(
+                    request.action, "outcome_unknown", "未收到明确的引流录入结果，请查询原资源",
+                    result["request_id"], outcome_unknown=True,
+                ))
+            result = {**result, "result": await read_back_traffic(
+                lambda action, params: invoke(ctx, action, params), request
+            )}
+        return tool_result({**result, "form": "traffic"}, private=False)
+
+    @mcp.tool(annotations=READ, structured_output=True, meta=APP_ONLY_META)
+    async def preview_traffic_resource(request: TrafficRegistration) -> dict[str, Any]:
+        """校验表单的链接、号码、协议和重复项，只返回可预览的记录数量。"""
+        validate_traffic_form(request)
+        return {"success": True, "result": {"count": len(request.params.data)}}
 
     @mcp.tool(annotations=READ, structured_output=True)
     async def get_qualification_requirements(ctx: Context) -> dict[str, Any]:
@@ -228,16 +317,19 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
         unified_social_credit_identifier: Text,
         legal_person_name: Text,
         private: bool = False,
+        offer_manual_review: bool = False,
     ) -> CallToolResult:
-        """调用企业信息校验接口，返回上游 status/ticket。票据由调用方保管，不生成跳过校验票据。"""
-        result = await invoke(
-            ctx,
-            "ThreeElementEnterpriseCheckForAgent",
+        """校验企业信息。私密表单可请求人工审核选项，操作由客户单独确认。"""
+        if offer_manual_review and not private:
+            raise ToolError("人工审核选项仅供私密表单使用。")
+        result = await check_enterprise(
+            lambda action, params: invoke(ctx, action, params),
             {
                 "businessCertificateName": business_certificate_name,
                 "unifiedSocialCreditIdentifier": unified_social_credit_identifier,
                 "legalPersonName": legal_person_name,
             },
+            offer_manual_review=offer_manual_review,
         )
         return tool_result(result, private)
 
@@ -315,17 +407,40 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
 
     @mcp.tool(annotations=WRITE, structured_output=True, meta=FORM_META)
     async def apply_qualification(
-        ctx: Context, request: QualificationApplication | None = None
-    ) -> dict[str, Any]:
+        ctx: Context,
+        request: QualificationApplication | None = None,
+        prefill: QualificationFormPrefill | None = None,
+        confirm_manual_review: bool = False,
+    ) -> FormToolResult:
         """直接提交客户已授权的资质申请，返回上游资质 ID。
 
         输入为完整申请参数和上游校验票据，不使用 MCP 草稿或 operationId。
         材料要求、票据有效性及审核规则由短信服务校验。结果未知时禁止自动重试。
-        不传 request 只打开表单；完整 request 会直接提交申请，必须已获得用户授权。
+        不传 request 只打开表单，可用 prefill 填已确认的企业、用途、人员和材料字段。
+        个人信息和附件仅由宿主的私密渠道传入；校验和验证码仍在页面完成。
+        客户在表单确认转人工审核时才传 confirm_manual_review，不传企业校验票据。
+        prefill 与 request 互斥；完整 request 会直接提交申请，必须已获得用户授权。
         """
-        if request is None:
-            return open_form("qualification")
-        return {**await invoke(ctx, "ApplySignatureIdentificationForAgent", request.payload()), "form": "qualification"}
+        if confirm_manual_review and (request is None or request.business_check_ticket is not None):
+            raise ToolError("转人工审核需要完整申请，并由服务端重新核验企业信息。")
+        draft = open_form("qualification", request, prefill)
+        if draft is not None:
+            return draft
+        body = request.payload()
+        if confirm_manual_review:
+            business = request.business_info
+            checked = await check_enterprise(
+                lambda action, params: invoke(ctx, action, params),
+                {
+                    "businessCertificateName": business.business_certificate_name,
+                    "unifiedSocialCreditIdentifier": business.unified_social_credit_identifier,
+                    "legalPersonName": business.legal_person_name,
+                },
+                offer_manual_review=True,
+            )
+            body["businessCheckTicket"] = enterprise_ticket(checked)
+        result = await invoke(ctx, "ApplySignatureIdentificationForAgent", body)
+        return tool_result({**result, "form": "qualification"}, private=False)
 
     @mcp.tool(annotations=READ, structured_output=True)
     async def list_signatures(
@@ -348,14 +463,28 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
         )
 
     @mcp.tool(annotations=WRITE, structured_output=True, meta=FORM_META)
-    async def apply_signature(ctx: Context, request: SignatureApplication | None = None) -> dict[str, Any]:
+    async def apply_signature(
+        ctx: Context,
+        request: SignatureApplication | None = None,
+        prefill: SignatureFormPrefill | None = None,
+        confirmation: SignatureFormConfirmation | None = None,
+    ) -> FormToolResult:
         """不传 request 打开签名表单；完整 request 直接提交已获授权的申请。
 
-        资质、绑定关系与审核由短信服务校验，打开表单不会提交申请。
+        用 prefill 填已知的签名、来源、资质 ID、消息组范围、证明资料和说明；
+        prefill 与 request 互斥。私密表单提交时，confirmation 绑定已核对的主体与名称风险。
         """
-        if request is None:
-            return open_form("signature")
-        return {**await invoke(ctx, "ApplySmsSignatureV2", request.payload()), "form": "signature"}
+        if confirmation is not None and request is None:
+            raise ToolError("确认签名风险需要完整申请。")
+        draft = open_form("signature", request, prefill)
+        if draft is not None:
+            return draft
+        if confirmation is not None:
+            await check_signature_confirmation(
+                lambda action, params: invoke(ctx, action, params), request, confirmation
+            )
+        result = await invoke(ctx, "ApplySmsSignatureV2", request.payload())
+        return tool_result({**result, "form": "signature"}, private=False)
 
     @mcp.tool(annotations=READ, structured_output=True)
     async def list_templates(
@@ -435,6 +564,31 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
                 ),
             },
         )
+
+    @mcp.tool(annotations=WRITE, structured_output=False, meta=APP_ONLY_META)
+    async def send_batch_test_sms(ctx: Context, request: BatchTestSend) -> CallToolResult:
+        """向表单中单独确认的一个号码试发，产生短信及费用，返回回执查询用的 Message ID。"""
+        await validate_batch_test(lambda action, params: invoke(ctx, action, params), request)
+        requested_at = int(time())
+        try:
+            envelope = await send_sms(
+                ctx, request.sub_account, request.signature, request.template_id, [request.mobile],
+                request.template_params or None,
+            )
+        except SmsAPIError as exc:
+            error = exc.result["error"]
+            if error["code"] not in _UNCERTAIN_WRITE_ERRORS or error["outcome_unknown"]:
+                raise
+            raise SmsAPIError({
+                **exc.result, "error": {**error, "outcome_unknown": True},
+            }) from None
+        return private_result({**envelope, "result": batch_test_receipt(envelope, requested_at)})
+
+    @mcp.tool(annotations=READ, structured_output=True, meta=APP_ONLY_META)
+    async def check_batch_traffic_resources(ctx: Context, request: BatchTrafficCheck) -> dict[str, Any]:
+        """用当前模板逐行渲染 CSV 的实际短信正文，返回引流检查覆盖数量与缺失行号。"""
+        result = await check_batch_traffic(lambda action, params: invoke(ctx, action, params), request)
+        return {"success": True, "result": result}
 
     @mcp.tool(annotations=READ, structured_output=True)
     async def list_send_logs(
@@ -533,12 +687,13 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
         ctx: Context,
         sub_account: Text,
         template_id: Text,
+        include_variables: bool = False,
     ) -> dict[str, Any]:
         """获取当前群发模板的原生 CSV 表头与示例，适用于普通及特殊通知模板。
 
-        返回 value 中的实际 CSV 内容；不要自造 phone 之外的列名。
+        返回 value 中的实际 CSV 内容。include_variables 返回首列 phone 之外的变量名。
         """
-        return await invoke(
+        envelope = await invoke(
             ctx,
             "TemplateUploadDemoForAgent",
             {
@@ -546,19 +701,34 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
                 "templateId": template_id,
             },
         )
+        if include_variables:
+            try:
+                variables = recipient_columns(envelope["result"]["value"])[1:]
+            except SmsRequestError as exc:
+                raise SmsAPIError(exc.result) from None
+            envelope = {**envelope, "result": {**envelope["result"], "variables": variables}}
+        return envelope
 
     @mcp.tool(annotations=WRITE, structured_output=True, meta=FORM_META)
-    async def create_batch_task(ctx: Context, request: BatchTask | None = None) -> dict[str, Any]:
+    async def create_batch_task(
+        ctx: Context,
+        request: BatchTask | None = None,
+        prefill: BatchFormPrefill | None = None,
+    ) -> FormToolResult:
         """创建国内群发任务，不自动启动；使用已上传 CSV 的 file 对象 Key。
 
         普通/特殊通知模板均从群发目录选择，类型、示例和 TaskFields 由服务器提供。
         特殊通知需要的任务正文先用 ValidateBatchTaskContentForAgent 检查。
         同一确认的请求保留 idempotencyKey；时间窗口、文件和状态由短信服务校验。
-        不传 request 只打开群发表单，不创建任务；完整 request 必须已经获得用户授权。
+        不传 request 只打开群发表单。prefill 可包含任意已知的消息组、签名、模板、任务名、
+        任务正文、发送时间及待上传 CSV。未确定的字段省略，定时时间使用 Unix 秒。
+        prefill 与 request 不可同时传入。完整 request 才创建任务，必须已经获得用户授权。
         """
-        if request is None:
-            return open_form("batch")
-        return {**await invoke(ctx, "SetBatchTaskForAgent", request.payload()), "form": "batch"}
+        draft = open_form("batch", request, prefill)
+        if draft is not None:
+            return draft
+        result = await invoke(ctx, "SetBatchTaskForAgent", request.payload())
+        return tool_result({**result, "form": "batch"}, private=False)
 
     @mcp.tool(annotations=READ, structured_output=True)
     async def get_batch_task(ctx: Context, sub_account: Text, task_id: Text) -> dict[str, Any]:
@@ -604,24 +774,48 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
     return mcp
 
 
-def create_http_app(mcp: MCPServer, public_url: str | None = None):
+def _parse_https_origin(value: str, option: str) -> httpx.URL:
+    message = f"{option} 必须是无路径、凭据、查询参数或通配符的 HTTPS origin"
+    try:
+        parsed = urlsplit(value)
+        origin = httpx.URL(parsed.geturl())
+    except (ValueError, httpx.InvalidURL):
+        raise ValueError(message) from None
+    if (
+        parsed.scheme != "https"
+        or not parsed.hostname
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.query
+        or parsed.fragment
+        or parsed.path not in ("", "/")
+        or "*" in parsed.netloc
+    ):
+        raise ValueError(message)
+    return origin
+
+
+def create_http_app(
+    mcp: MCPServer,
+    public_url: str | None = None,
+    *,
+    host: str = "127.0.0.1",
+    allowed_origins: Sequence[str] = (),
+):
     hosts = ["127.0.0.1:*", "localhost:*", "[::1]:*"]
     origins = ["http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*"]
     if public_url is not None:
-        parsed = urlsplit(public_url)
-        if (
-            parsed.scheme != "https"
-            or not parsed.hostname
-            or parsed.username
-            or parsed.password
-            or parsed.query
-            or parsed.fragment
-            or parsed.path not in ("", "/")
-        ):
-            raise ValueError("public-url 必须是无路径、凭据或查询参数的 HTTPS origin")
-        hosts.append(parsed.netloc)
-        origins.append("https://" + parsed.netloc)
+        parsed = _parse_https_origin(public_url, "public-url")
+        authority = parsed.netloc.decode("ascii")
+        hosts.append(authority)
+        if parsed.port is None:
+            hosts.append(f"{authority}:443")
+        origins.append(f"https://{authority}")
+    for origin in allowed_origins:
+        parsed = _parse_https_origin(origin, "allowed-origin")
+        origins.append(f"https://{parsed.netloc.decode('ascii')}")
     app = mcp.streamable_http_app(
+        host=host,
         stateless_http=True,
         json_response=True,
         transport_security=TransportSecuritySettings(
@@ -662,7 +856,13 @@ def main():
     parser.add_argument("--transport", choices=["stdio", "streamable-http"], default="stdio")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8000)
-    parser.add_argument("--public-url", help="远程 HTTP 服务的外部 HTTPS origin")
+    parser.add_argument("--public-url", help="短信 MCP 服务的外部 HTTPS origin")
+    parser.add_argument(
+        "--allowed-origin",
+        action="append",
+        default=[],
+        help="额外允许的浏览器 HTTPS origin，可重复指定",
+    )
     args = parser.parse_args()
     mcp = build_server()
     if args.transport == "stdio":
@@ -670,7 +870,11 @@ def main():
     else:
         import uvicorn
 
-        uvicorn.run(create_http_app(mcp, args.public_url), host=args.host, port=args.port)
+        uvicorn.run(
+            create_http_app(mcp, args.public_url, host=args.host, allowed_origins=args.allowed_origin),
+            host=args.host,
+            port=args.port,
+        )
 
 
 if __name__ == "__main__":

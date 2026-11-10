@@ -27,31 +27,60 @@ export function trafficPayload(kind, rows) {
   });
 }
 
-export function TrafficForm({ client }) {
-  const [kind, setKind] = useState('link');
-  const [rows, setRows] = useState([{ useVolcLink: false, protocol: 'https' }]);
+function emptyRow(kind) {
+  return kind === 'link' ? { useVolcLink: false, protocol: 'https' } : {};
+}
+
+function draftRow(kind, row) {
+  if (Object.keys(row).length === 0) return emptyRow(kind);
+  if (kind === 'link') {
+    // 跳转信息只出现在火山短链分支；未知协议由客户核对，不套用空表默认值。
+    const hasJump = [row.jumpLink, row.jumpLinkDomainIcp, row.jumpLinkDomainIcpBody]
+      .some(value => value !== undefined);
+    return { ...row, useVolcLink: row.useVolcLink ?? hasJump };
+  }
+  // 私密证件字段只属于手机号码；有其他已确认的号码类型时保留宿主选择。
+  const hasPerson = [row.numberPerson, row.personType, row.personId].some(value => value !== undefined);
+  return hasPerson && row.numberType === undefined ? { ...row, numberType: 1 } : row;
+}
+
+export function TrafficForm({ client, prefill }) {
+  const [kind, setKind] = useState(prefill?.kind ?? 'link');
+  const [rows, setRows] = useState(() => prefill?.data?.map(row => draftRow(kind, row)) ?? [emptyRow(kind)]);
   const [preview, setPreview] = useState(null);
-  const [receipt, setReceipt] = useState(false);
+  const [receipt, setReceipt] = useState(null);
   const operation = useOperation();
   const edit = (index, field, value) => setRows(current => current.map((row, i) => i === index ? { ...row, [field]: value } : row));
-  const submit = () => operation.run(async () => {
-    const count = preview.length;
-    await client.call('register_traffic_resource', { request: {
+  const prepare = () => operation.run(async () => {
+    const request = {
       action: kind === 'link' ? 'BulkCreateTobTrafficDrivingLinkForAgent' : 'BulkCreateTobTrafficDrivingPhoneForAgent',
-      params: { data: preview },
-    } }, { write: true });
-    setReceipt(true); setRows([]); setPreview(null);
-    await client.report({ form: 'traffic', state: 'accepted', kind, count });
+      params: { data: trafficPayload(kind, rows) },
+    };
+    await client.call('preview_traffic_resource', { request });
+    setPreview(request);
+  });
+  const submit = () => operation.run(async () => {
+    const count = preview.params.data.length;
+    const result = await client.call('register_traffic_resource', { request: preview, read_back: true }, { write: true });
+    const resourceIds = Array.isArray(result?.resourceIds)
+      ? result.resourceIds.filter(id => Number.isSafeInteger(id) && id > 0) : [];
+    const verified = result?.verified === true && resourceIds.length === count;
+    setReceipt({ resourceIds, verified, count }); setRows([]); setPreview(null);
+    await client.report({ form: 'traffic', state: verified ? 'verified' : 'accepted', kind, count, resourceIds });
   }, { mutation: true });
 
   return <main className="traffic-page">
     <span className="traffic-eyebrow">火山引擎 · 短信服务</span>
     <h1>录入短信引流信息</h1><p>填写真实的链接备案或号码归属信息，核对后再提交。</p>
     <Feedback operation={operation} />
-    {receipt ? <Receipt title="录入请求已受理"><p>资源录入不代表模板审核、运营商报备或短信送达。</p></Receipt>
+    {receipt ? <Receipt title={receipt.verified ? '引流资源已录入并核对' : '录入已受理，部分资源待核对'}>
+      <p>已查到 {receipt.resourceIds.length} / {receipt.count} 条资源。</p>
+      {receipt.resourceIds.length > 0 && <p>资源 ID {receipt.resourceIds.join('、')}</p>}
+      {!receipt.verified && <p>请通过引流资源查询继续核对，避免重复录入。</p>}
+    </Receipt>
       : preview ? <div className="traffic-card"><Confirm title="确认本次引流信息" busy={operation.busy} disabled={operation.uncertain}
         onBack={() => setPreview(null)} onSubmit={submit}>
-        {preview.map((row, index) => <Summary key={index} items={[
+        {preview.params.data.map((row, index) => <Summary key={index} items={[
           ['序号', index + 1], ...Object.entries(row).map(([key, value]) => [labels[key],
             key === 'useVolcLink' ? value ? '是' : '否'
               : key === 'numberType' ? numberTypes.find(([id]) => id === value)?.[1]
@@ -60,7 +89,7 @@ export function TrafficForm({ client }) {
         ]} />)}
       </Confirm></div> : <>
         <Radio.Group value={kind} disabled={operation.busy || operation.uncertain} onChange={value => {
-          setKind(value); setRows([value === 'link' ? { useVolcLink: false, protocol: 'https' } : {}]);
+          setKind(value); setRows([emptyRow(value)]);
         }} options={[{ label: '引流链接', value: 'link' }, { label: '联系号码', value: 'phone' }]} />
         <fieldset disabled={operation.busy || operation.uncertain} className="sms-fieldset">
           {rows.map((row, index) => <section className="traffic-card" key={index}>
@@ -85,8 +114,8 @@ export function TrafficForm({ client }) {
           </section>)}
         </fieldset>
         <div className="traffic-actions">
-          <Button disabled={operation.busy || operation.uncertain || rows.length >= (kind === 'link' ? 10 : 100)} onClick={() => setRows([...rows, kind === 'link' ? { useVolcLink: false, protocol: 'https' } : {}])}>继续添加</Button>
-          <Button type="primary" loading={operation.busy} disabled={operation.uncertain} onClick={() => operation.run(() => setPreview(trafficPayload(kind, rows)))}>核对信息</Button>
+          <Button disabled={operation.busy || operation.uncertain || rows.length >= (kind === 'link' ? 10 : 100)} onClick={() => setRows([...rows, emptyRow(kind)])}>继续添加</Button>
+          <Button type="primary" loading={operation.busy} disabled={operation.uncertain} onClick={prepare}>核对信息</Button>
         </div>
       </>}
   </main>;
