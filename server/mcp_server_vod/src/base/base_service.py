@@ -7,6 +7,9 @@ from src.base.credential import get_volcengine_credentials_base, get_volcengine_
 from mcp.server.fastmcp import Context
 from mcp.server.session import ServerSession
 
+api_info = {}
+
+
 class BaseService(VodService):
 
     def __init__(self):
