@@ -42,7 +42,7 @@ class ResponseMetaData:
 
 @dataclass
 class ApmplusServerListAlertRuleRequest:
-    region_id: str
+    region: str
     keyword: str
     page_number: int
     page_size: int
@@ -57,7 +57,7 @@ class ApmplusServerListAlertRuleRequest:
 
 @dataclass
 class ApmplusServerListNotifyGroupRequest:
-    region_id: str
+    region: str
     keyword: str
     page_number: int
     page_size: int
@@ -72,7 +72,7 @@ class ApmplusServerListNotifyGroupRequest:
 
 @dataclass
 class ApmplusServerQueryMetricsRequest:
-    region_id: str
+    region: str
     start_time: int
     end_time: int
     query: str
