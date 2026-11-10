@@ -58,7 +58,7 @@ async def test_invalid_upload_is_definite_and_does_not_echo_file_bytes(mcp, api_
 
 def test_ui_resource_is_self_contained_and_uses_standard_apps_metadata(api_calls):
     with TestClient(
-        create_http_app(build_server(api_calls[1]), "https://testserver"),
+        create_http_app(build_server(api_calls[1]), host="0.0.0.0"),
         base_url="https://testserver",
     ) as http:
         listed = rpc(http, "resources/list", token=auth_header("one"))
@@ -86,7 +86,7 @@ def test_private_ocr_values_do_not_enter_model_content_or_structured_output(priv
         transport=httpx.MockTransport(lambda request: httpx.Response(200, json={"Result": record}))
     )
     with TestClient(
-        create_http_app(build_server(api), "https://testserver"), base_url="https://testserver"
+        create_http_app(build_server(api), host="0.0.0.0"), base_url="https://testserver"
     ) as http:
         tools = rpc(http, "tools/list", token=auth_header("one")).json()["result"]["tools"]
         tool = next(item for item in tools if item["name"] == "recognize_qualification_document")
@@ -155,7 +155,7 @@ def test_upload_credentials_never_leave_server_and_material_bytes_are_unchanged(
     )
     data = b"\x89PNG\r\n\x1a\nfixture-image"
     with TestClient(
-        create_http_app(build_server(api, uploader), "https://testserver"),
+        create_http_app(build_server(api, uploader), host="0.0.0.0"),
         base_url="https://testserver",
     ) as http:
         tools = rpc(http, "tools/list", token=auth_header("one")).json()["result"]["tools"]
@@ -374,7 +374,9 @@ def test_explicit_public_ocr_keeps_original_fields_for_authorized_callers():
     api = SmsClient(transport=httpx.MockTransport(
         lambda request: httpx.Response(200, json={"Result": record})
     ))
-    with TestClient(create_http_app(build_server(api), "https://testserver"), base_url="https://testserver") as http:
+    with TestClient(
+        create_http_app(build_server(api), host="0.0.0.0"), base_url="https://testserver"
+    ) as http:
         response = rpc(http, "tools/call", token=auth_header("one"), params={
             "name": "recognize_qualification_document",
             "arguments": {"id_card_front_image": "fixture/front", "id_card_back_image": "fixture/back", "private": False},

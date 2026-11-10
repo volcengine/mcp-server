@@ -10,7 +10,11 @@ import './host.css';
 import { SmsApp } from './app.jsx';
 import { SmsFormClient } from './client.js';
 
-const app = new App({ name: '火山引擎短信表单', version: '0.2.0' }, { availableDisplayModes: ['inline', 'fullscreen'] }, { strict: true, webMcpBridge: false });
+const app = new App(
+  { name: '火山引擎短信表单', version: '0.2.0' },
+  { availableDisplayModes: ['inline', 'fullscreen'] },
+  { autoResize: true, strict: true, webMcpBridge: false },
+);
 const client = new SmsFormClient(app);
 const root = createRoot(document.getElementById('root'));
 let state = { ready: false, supported: false, initial: null };

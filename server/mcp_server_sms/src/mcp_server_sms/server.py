@@ -11,7 +11,6 @@ from urllib.parse import urlsplit
 from mcp.server import MCPServer
 from mcp.server.mcpserver.context import Context
 from mcp.server.mcpserver.exceptions import ToolError
-from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import CallToolResult, ToolAnnotations
 from pydantic import Field
 from starlette.requests import Request
@@ -604,9 +603,9 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
     return mcp
 
 
-def create_http_app(mcp: MCPServer, public_url: str | None = None):
-    hosts = ["127.0.0.1:*", "localhost:*", "[::1]:*"]
-    origins = ["http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*"]
+def create_http_app(
+    mcp: MCPServer, public_url: str | None = None, *, host: str = "127.0.0.1"
+):
     if public_url is not None:
         parsed = urlsplit(public_url)
         if (
@@ -619,17 +618,7 @@ def create_http_app(mcp: MCPServer, public_url: str | None = None):
             or parsed.path not in ("", "/")
         ):
             raise ValueError("public-url 必须是无路径、凭据或查询参数的 HTTPS origin")
-        hosts.append(parsed.netloc)
-        origins.append("https://" + parsed.netloc)
-    app = mcp.streamable_http_app(
-        stateless_http=True,
-        json_response=True,
-        transport_security=TransportSecuritySettings(
-            enable_dns_rebinding_protection=True,
-            allowed_hosts=hosts,
-            allowed_origins=origins,
-        ),
-    )
+    app = mcp.streamable_http_app(host=host, stateless_http=True, json_response=True)
 
     class CredentialBoundary:
         async def __call__(self, scope, receive, send):
@@ -662,7 +651,7 @@ def main():
     parser.add_argument("--transport", choices=["stdio", "streamable-http"], default="stdio")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8000)
-    parser.add_argument("--public-url", help="远程 HTTP 服务的外部 HTTPS origin")
+    parser.add_argument("--public-url", help="兼容旧版启动命令的外部 HTTPS origin")
     args = parser.parse_args()
     mcp = build_server()
     if args.transport == "stdio":
@@ -670,7 +659,9 @@ def main():
     else:
         import uvicorn
 
-        uvicorn.run(create_http_app(mcp, args.public_url), host=args.host, port=args.port)
+        uvicorn.run(
+            create_http_app(mcp, args.public_url, host=args.host), host=args.host, port=args.port
+        )
 
 
 if __name__ == "__main__":

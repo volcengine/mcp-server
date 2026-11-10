@@ -333,7 +333,7 @@ def test_schema_keeps_reference_siblings_and_rejects_external_loading():
 
 def test_gateway_bare_sts_is_accepted_but_oauth_tokens_are_not(api_calls, credentials_env):
     with TestClient(
-        create_http_app(build_server(api_calls[1]), "https://testserver"),
+        create_http_app(build_server(api_calls[1]), host="0.0.0.0"),
         base_url="https://testserver",
     ) as http:
         assert rpc(http, "tools/list", token=auth_header("two").split(" ", 1)[1]).status_code == 200
@@ -455,7 +455,7 @@ def test_uncertain_api_error_has_same_outcome_at_tool_and_api_boundaries(caplog)
     api = SmsClient(transport=httpx.MockTransport(respond))
     caplog.set_level(logging.INFO, logger="mcp_server_sms.calls")
     with TestClient(
-        create_http_app(build_server(api), "https://testserver"), base_url="https://testserver"
+        create_http_app(build_server(api), host="0.0.0.0"), base_url="https://testserver"
     ) as http:
         response = rpc(
             http,
@@ -547,7 +547,7 @@ def test_partial_protocol_confirmation_is_preserved_without_activation():
 
     api = SmsClient(transport=httpx.MockTransport(respond))
     with TestClient(
-        create_http_app(build_server(api), "https://testserver"), base_url="https://testserver"
+        create_http_app(build_server(api), host="0.0.0.0"), base_url="https://testserver"
     ) as http:
         response = rpc(
             http,
@@ -612,7 +612,7 @@ def test_service_results_must_match_the_submitted_targets(action, params, result
 
     api = SmsClient(transport=httpx.MockTransport(respond))
     with TestClient(
-        create_http_app(build_server(api), "https://testserver"), base_url="https://testserver"
+        create_http_app(build_server(api), host="0.0.0.0"), base_url="https://testserver"
     ) as http:
         response = rpc(
             http,

@@ -9,9 +9,9 @@
     "ui/src/client.js": "571defbdb1577e7323dc7069d6ff1c56597ae94cdcebbe8ceecfeeaf9f554c58",
     "ui/src/common.jsx": "2437784680a2338397a186517b0a89fef61875ee2f0f92127671683f37f25b2e",
     "ui/src/contracts.js": "d13612e8eeab01b2ea4895734a53697d2e4e91965ffaa96dea74b3163fa8ab75",
-    "ui/src/host.css": "15773f15e16698c40a037a1251e7c51255240aba9a9faa5627d5844f954bf5e6",
-    "ui/src/main.jsx": "e698548a83dea0bffb5d6d53628e67e95bbce4e20e4253568079d76b53c16398",
-    "ui/src/qualification.jsx": "0f8814bd112aa3ace627a04aea86b8eb49be42722638b6de9c9abbf57852af6a",
+    "ui/src/host.css": "e8a1d3afce88b4ea67a80ce475a0b5e8857e2060d0c14d489e46098c10532c80",
+    "ui/src/main.jsx": "d348cdb14b13378a2e8c6673f659f34d2b9dcafd4e7d2199b251ab4e7af3c33a",
+    "ui/src/qualification.jsx": "c39d4b5196e5a1320740a2d8403839abad19686d2308f4c7ff62b675b8d76ebb",
     "ui/src/signature.jsx": "d8e19ceb9b4149847691ff89812c7553162fe659cfa90d2f938e10a564da0405",
     "ui/src/styles/batch.css": "0649641a146192dc668170bb13fe614cd66d3344e438233d27ade778e4d645da",
     "ui/src/styles/qualification.css": "0d34e20e2e9dad2e3270846863f3862fab6de15ab3453039ed1de6cfc9f1aa63",
@@ -20,5 +20,5 @@
     "ui/src/traffic.jsx": "6fe47f5b9c8c52fa082473c7d87f2c0f1e495d2f2c3ceef60dc8e54bc6e42e38",
     "ui/vite.config.js": "b17a2ce45951ed3b4589337e85db1fd77336fb344e3841cc6ee11c10bbddd8ba"
   },
-  "htmlSha256": "51c36c494a350b1231b7d3d424fec04e6d680638505473c852fb775c46997c9c"
+  "htmlSha256": "00a3dbc7048872a115c79daed6a78c8b38f21cccfaf285f734363f2d5a774b67"
 }

@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Alert, Button, Checkbox, Steps } from '@arco-design/web-react';
 import { Choice, Confirm, Feedback, Field, Files, LockedFields, Receipt, Summary, maskedIdentifier, useOperation } from './common.jsx';
 import { OperationError, checkedTicket, page, required } from './client.js';
 import { materialFile } from './signature.jsx';
 import config from '../../src/mcp_server_sms/form_config.json';
 
+const stepTitles = ['基础与企业信息', '人员信息', '授权与补充材料', '确认提交'];
 const rankFields = ['isOnlyTwoElement', 'isSkipOtherUse', 'needOtherUseCheck', 'operatorThreeElement', 'needOperatorImage', 'needOperatorMobile', 'responsibleThreeElement', 'needResponsibleImage', 'needResponsibleMobile', 'needBusinessCertificateImage'];
 const roleLabels = { operator: '经办人', responsible: '责任人', legal: '法人' };
 const personFiles = { operator: [8, 9], responsible: [10, 11], legal: [18, 19] };
@@ -84,6 +85,16 @@ export function QualificationForm({ client }) {
   const [receipt, setReceipt] = useState(null);
   const [status, setStatus] = useState(null);
   const operation = useOperation();
+  const stepHeading = useRef(null);
+  const previousStep = useRef(step);
+  useLayoutEffect(() => {
+    const advanced = step > previousStep.current;
+    previousStep.current = step;
+    const heading = stepHeading.current;
+    if (!advanced || !heading) return;
+    heading.focus({ preventScroll: true });
+    heading.scrollIntoView({ block: 'start', inline: 'nearest' });
+  }, [step]);
   useEffect(() => { operation.run(async () => {
     const requirements = await client.call('get_qualification_requirements');
     if (rankFields.some(key => typeof requirements?.[key] !== 'boolean')) throw new OperationError('材料要求返回不完整，暂不能提交。');
@@ -200,7 +211,7 @@ export function QualificationForm({ client }) {
       onClick={() => operation.run(async () => setStatus(page(await client.call('list_qualifications', { qualification_id: receipt })).rows))}>刷新审核状态</Button>
       {status?.map(row => <Summary key={row.id} items={[[row.materialName ?? '资质', ({ 1: '审核中', 2: '审核未通过', 3: '审核通过' })[row.auditStatus] ?? '待核对'], ['审核意见', row.reason ?? row.auditOpinion ?? '未提供']]} />)}
     </Receipt></div> : <div className="wizard-workspace"><aside className="wizard-sidebar"><div className="wizard-sidebar-title">办理步骤</div>
-      <Steps direction="vertical" current={step + 1} size="small">{['基础与企业信息', '人员信息', '授权与补充材料', '确认提交'].map(title => <Steps.Step key={title} title={title} />)}</Steps>
+      <Steps direction="vertical" current={step + 1} size="small">{stepTitles.map(title => <Steps.Step key={title} title={title} />)}</Steps>
     </aside><div className="wizard-content">
       <div className="sms-mobile-step">第 {step + 1} / 4 步</div>
       {!rank || !account ? <p>正在读取当前账号的材料要求…</p> : snapshot ? <Confirm title="确认本次资质申请" onBack={() => { setSnapshot(null); setStep(2); }} onSubmit={submit} busy={operation.busy} disabled={operation.uncertain}>
@@ -215,7 +226,8 @@ export function QualificationForm({ client }) {
           ...(snapshot.legalPerson ? [['法人补充证件', maskedIdentifier(snapshot.legalPerson.personIDCard)]] : []),
         ]} />
       </Confirm> : <>
-        {step === 0 && <><div className="step-heading"><h2>基础与企业信息</h2></div><div className="form-grid">
+        <div className="step-heading"><h2 ref={stepHeading} tabIndex={-1}>{stepTitles[step]}</h2></div>
+        {step === 0 && <><div className="form-grid">
           <Field label="资质名称（选填，最多 20 字）" value={values.materialName} onChange={value => updateBase('materialName', value)} maxLength={20} placeholder="留空时使用企业名称" />
           <Choice label="资质用途" value={values.purpose} onChange={value => updateBase('purpose', value)} options={[[1, '自用'], [2, '他用']]} />
           <Choice label="营业证件类型" value={values.business.businessCertificateType} onChange={value => updateSection('business', 'businessCertificateType', value)} options={[[1, '企业营业执照'], [4, '社会信用代码证书'], [7, '事业单位法人证书'], [6, '其他']]} />
@@ -224,13 +236,13 @@ export function QualificationForm({ client }) {
           <div className="form-grid">{businessFields.map(([key, label]) => <Field key={key} label={label} value={values.business[key]} onChange={value => updateSection('business', key, value)} required />)}</div>
           <div className="sms-check"><Button disabled={operation.busy || operation.uncertain} onClick={() => check('business')}>校验企业信息</Button>{tickets.business && <span>校验已通过</span>}</div>
         </>}
-        {step === 1 && <><div className="step-heading"><h2>人员信息</h2></div>
+        {step === 1 && <>
           <Alert content={`经办人照片${rank.needOperatorImage ? '必填' : '选填'}、手机号${rank.needOperatorMobile || rank.operatorThreeElement ? '必填' : '选填'}；独立责任人照片${rank.needResponsibleImage ? '必填' : '选填'}、手机号${rank.needResponsibleMobile || rank.responsibleThreeElement ? '必填' : '选填'}。`} />
           {personSection('operator')}<Checkbox disabled={operation.busy || operation.uncertain} checked={values.sameOperator} onChange={value => { updateBase('sameOperator', value); setTickets(current => ({ ...current, operator: undefined, responsible: undefined })); }}>责任人与经办人相同</Checkbox>
           {!values.sameOperator && personSection('responsible')}
           <div className="step-section"><Checkbox disabled={operation.busy || operation.uncertain} checked={values.includeLegal} onChange={value => updateBase('includeLegal', value)}>补充法人证件信息（选填）</Checkbox>{values.includeLegal && personSection('legal')}</div>
         </>}
-        {step === 2 && <><div className="step-heading"><h2>授权与补充材料</h2></div>
+        {step === 2 && <>
           {values.purpose === 2 && <><Summary items={[["授权方", values.business.businessCertificateName], ["被授权方", account.businessName]]} />
             {rank.needOtherUseCheck && fileArea('授权委托书（必填）', 'authorization', { category: 'authorization' })}</>}
           {fileArea('其他材料（选填，最多 5 张）', 'other', { category: 'business', many: true })}

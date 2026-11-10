@@ -90,10 +90,16 @@ it('资质表单通过校验后仍需用户确认，模型上下文只收到申�
   await user.click(screen.getByRole('button', { name: '校验企业信息' }));
   await screen.findByText('校验已通过');
   await user.click(screen.getByRole('button', { name: '下一步' }));
+  expect(document.activeElement).toBe(screen.getByRole('heading', { name: '人员信息', exact: true }));
+  await user.click(screen.getByRole('button', { name: '上一步' }));
+  expect(screen.getByLabelText('企业名称').value).toBe('测试企业');
+  expect(screen.getByText('校验已通过')).toBeTruthy();
+  await user.click(screen.getByRole('button', { name: '下一步' }));
   await type(user, '经办人姓名', '测试人员'); await type(user, '经办人证件号码', 'fixture-identity');
   await user.click(screen.getByRole('button', { name: '校验经办人信息' }));
   await screen.findByText('校验已通过');
   await user.click(screen.getByRole('button', { name: '下一步' }));
+  expect(document.activeElement).toBe(screen.getByRole('heading', { name: '授权与补充材料', exact: true }));
   await user.click(screen.getByRole('button', { name: '核对申请信息' }));
   expect(api.call.mock.calls.filter(([name]) => name === 'apply_qualification')).toHaveLength(0);
   await user.click(screen.getByText('我已核对以上信息，同意提交本次操作'));
