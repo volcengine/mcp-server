@@ -4,7 +4,7 @@
 
 An independent adapter for Volcengine SMS APIs. Business tools receive complete API input and call the corresponding upstream API. It supports MCP **2026-07-28**, stdio, **stateless Streamable HTTP** and standard **MCP Apps**. Opening a form performs no mutation; file upload performs its authorization, transfer and confirmation on the server.
 
-There is no database, business cache, server-side draft, stored preview, generic execution ticket or local filesystem service. It does not load or depend on a Skill. Four forms keep current input in the host sandbox; the client owns confirmation, and the SMS service owns business validation, applications, tasks and delivery records.
+There is no database, business cache, server-side draft, stored preview, generic execution ticket or local filesystem service. It does not load or depend on a Skill. Five forms keep current input in the host sandbox. The client owns confirmation, and the SMS service owns business validation, applications, tasks and delivery records.
 
 ## Tools
 
@@ -17,11 +17,11 @@ There is no database, business cache, server-side draft, stored preview, generic
 | Sending and reports | `send_sms`, `list_send_logs`, `get_send_statistics` |
 | Batches | `get_batch_upload_url`, `get_batch_csv_template`, `create_batch_task`, `get_batch_task`, `list_batch_tasks`, `start_batch_task`, `cancel_batch_task` |
 | Supplemental queries | `query_sms_resources` |
-| Service activation | `manage_sms_service` |
+| Service activation | `manage_sms_service`, `open_sms_service_onboarding` |
 | Traffic resources | `register_traffic_resource` |
-| App-only file upload | `upload_sms_file` |
+| App-only actions | `upload_sms_file`, `preview_traffic_resource`, `send_batch_test_sms`, `check_batch_traffic_resources`, `get_sms_service_onboarding`, `submit_sms_service_onboarding` |
 
-There are **30 tools covering 40 business Actions**; the upload component additionally calls `GetMUploadParam` internally. Batch discovery and CSV templates support ordinary templates and special notifications. OTP batches and international SMS are outside this server's scope.
+There are **36 tools covering 40 business Actions**. The upload component additionally calls `GetMUploadParam` internally. Batch discovery and CSV templates support ordinary templates and special notifications. OTP batches and international SMS are outside this server's scope.
 
 The three grouped tools accept a typed `request` with `action` and its corresponding `params`. They do not expose arbitrary API execution:
 
@@ -60,12 +60,29 @@ Calling the following existing tools without `request` opens a form. A complete 
 
 | Tool | Form |
 | --- | --- |
-| `apply_qualification` | Account requirements, company/people/materials, OCR, information and mobile checks, confirmation and review status |
-| `apply_signature` | Qualification/source/group selection, APP/trademark/other attachments, confirmation and review status |
-| `register_traffic_resource` | Links or phone numbers, preview and explicit registration |
-| `create_batch_task` | Group/signature/template selection, native CSV sample, recipient validation/upload, content precheck, creation and separately confirmed launch/cancel |
+| `apply_qualification` | Account requirements, materials and OCR, company/person/mobile checks, explicit manual review after eligible company-check failure |
+| `apply_signature` | Automatic selection of unique available options, company-name default, project and proof materials, explicit acknowledgement of a name mismatch |
+| `register_traffic_resource` | Link protocol and phone format checks, duplicate detection, confirmed registration and verified resource IDs when available |
+| `create_batch_task` | CSV validation and optional rendered-content checks, separately confirmed single-recipient test SMS with receipt lookup, task creation and launch/cancel |
+| `open_sms_service_onboarding` | Account state, current agreements and pricing, confirmed activation or agreement update, and status readback |
 
-Example `tools/call` params: `{"name":"apply_signature","arguments":{}}`. All four tools declare `_meta.ui.resourceUri: "ui://sms/forms.html"`. `resources/read` returns self-contained HTML with MIME `text/html;profile=mcp-app`, using Python's official `Apps` extension and the official `@modelcontextprotocol/ext-apps` browser SDK.
+For example, `{"name":"apply_signature","arguments":{}}` opens the signature form. All five opening tools declare `_meta.ui.resourceUri: "ui://sms/forms.html"`. `resources/read` returns self-contained HTML with MIME `text/html;profile=mcp-app`, using Python's official `Apps` extension and the official `@modelcontextprotocol/ext-apps` browser SDK.
+
+The host agent can pass any known form inputs under `prefill` and omit unknown inputs.
+See the input schemas in `tools/list`. Pass either `prefill` or `request`.
+For example, `{"name":"create_batch_task","arguments":{"prefill":{"name":"November campaign","subAccount":"group-id","signature":"Example","templateId":"template-id"}}}` opens an editable draft.
+
+| Form | Prefill inputs |
+| --- | --- |
+| Qualification | Purpose, name, company, operator, responsible and legal person details, relationship selections and proof files. Use `personCertificate.front` and `back` for ID cards, or `document` for a legal person's other certificate. |
+| Signature | Content, source, qualification ID, message group scope and IDs, description, project name, app filing or trademark details and proof files. |
+| Traffic | `kind` (`link` or `phone`) and the corresponding link/filing or number/ownership fields in each `data` row. |
+| Batch | `name`, group, signature, template, supported task-level `content`, optional `checkTraffic`, `scheduled`, `sendTime` (Unix seconds, displayed in Beijing time) and `recipientsFile`. |
+
+Signature and batch choices are checked against current account resources. A partial batch selection is kept until the user selects any missing parent option.
+Hosts should only pass private details and files through an authorized private channel. Prefill values are delivered to the View in `_meta["sms/form"].prefill`, and are not echoed in the ordinary result.
+Provide attachments as `{"name":"proof.png","data":"<base64 file bytes>"}`, up to 10 MB combined per open call. Where the host cannot provide private file data, the user can select it in the form.
+The View stages attachments for explicit user upload through the existing validation flow. Verification codes, tickets, uploaded object keys, confirmation and idempotency keys are not draft inputs.
 
 Styles are copied from the byted-sms-sender 1.4.6 React/Arco forms and maintained within this package's `ui/` directory. The Skill is unchanged and is not a build/runtime dependency. Dedicated overrides handle card widths and dark mode. Scripts/styles are inlined; no external connections or resource domains are declared, and the View does not fetch business APIs directly.
 
@@ -75,8 +92,10 @@ Styles are copied from the byted-sms-sender 1.4.6 React/Arco forms and maintaine
 - Files are limited to **10 MiB** each, with at most **2** uploads per server instance. Busy requests are rejected before decoding rather than queued. Qualification images support JPG/JPEG/PNG; signature attachments support the corresponding image/PDF/ZIP/DOC/DOCX categories. CSV headers come from the selected template; original bytes are uploaded unchanged and duplicates are counted, not removed. Larger files can use existing upload channels. Actual host/gateway body limits require verification.
 - `form_config.json` is the shared frontend/backend source for upload limits and existing SMS upload/verification identifiers. It must never contain customer keys or tokens.
 - Preview and checked confirmation precede submission. Duplicate clicks are blocked; uncertain writes stay locked. Batch launch separately queries task identity/state/content and requires another confirmation of real sending and fees. History restoration displays results without replaying writes.
-- Backend requirements remain authoritative. The form does not synthesize bypass tickets. Unsubmitted input, material references and check tickets are not persisted across closing the View; there is no cross-window/restart deduplication guarantee. Use the SMS console for manual review when company verification cannot complete.
-- Non-Apps clients retain the business tools with complete arguments; use the SMS console when private interaction is unavailable. Local Skill CLI/draft/heartbeat behavior and its separate test-send panel are not copied into the View; existing tools such as `send_sms` remain available.
+- For a confirmed manual review, the server rechecks the company and supplies the native manual-review ticket when applicable. Person, material and mobile verification requirements still apply.
+- The CSV traffic check renders the actual SMS body for each row, groups identical bodies and sends only those bodies to the traffic query. It checks up to 100 distinct bodies within the query deadline and reports checked, failed, missing and uncovered rows.
+- The onboarding form rechecks the current account and agreement list before signing. An agreement update only signs pending agreements. Activation requires complete signing and is verified against the latest account state. Pending submissions block repeats for the same access key within the current MCP instance.
+- Non-Apps clients retain the business tools with complete arguments. Form input and confirmations live in the host View.
 
 See [UI development and preview](ui/README.md) and the [MCP Apps standard](https://modelcontextprotocol.io/extensions/apps/overview).
 

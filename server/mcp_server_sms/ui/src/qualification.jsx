@@ -1,8 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Alert, Button, Checkbox, Steps } from '@arco-design/web-react';
 import { Choice, Confirm, Feedback, Field, Files, LockedFields, Receipt, Summary, maskedIdentifier, useOperation } from './common.jsx';
-import { OperationError, checkedTicket, page, required } from './client.js';
-import { materialFile } from './signature.jsx';
+import { OperationError, checkedTicket, materialPreview, page, required } from './client.js';
 import config from '../../src/mcp_server_sms/form_config.json';
 
 const stepTitles = ['基础与企业信息', '人员信息', '授权与补充材料', '确认提交'];
@@ -11,10 +10,26 @@ const roleLabels = { operator: '经办人', responsible: '责任人', legal: '�
 const personFiles = { operator: [8, 9], responsible: [10, 11], legal: [18, 19] };
 const legalFiles = { 1: 12, 2: 13, 3: 14, 4: 15, 9: 6 };
 const certificateTypes = [[0, '居民身份证'], [1, '护照'], [2, '港澳居民来往内地通行证'], [3, '台湾居民来往大陆通行证'], [4, '港澳台居民居住证'], [9, '其他']];
-const initialValues = () => ({ purpose: 1, sameOperator: true, includeLegal: false, business: { businessCertificateType: 1 }, operator: { certificateType: 0 }, responsible: { certificateType: 0 }, legal: { certificateType: 0 } });
 const businessFields = [['businessCertificateName', '企业名称'], ['unifiedSocialCreditIdentifier', '统一社会信用代码'], ['legalPersonName', '法人姓名'], ['businessCertificateValidityPeriodStart', '证件有效期开始'], ['businessCertificateValidityPeriodEnd', '证件有效期结束（长期请填写“长期”）']];
 
-function personPayload(person, role, files) {
+function initialValues(prefill = {}) {
+  const { businessCertificate, ...business } = prefill.businessInfo ?? {};
+  const { personCertificate: operatorFiles, ...operator } = prefill.operatorPerson ?? {};
+  const { personCertificate: responsibleFiles, ...responsible } = prefill.responsiblePersonInfo ?? {};
+  const { personCertificate: legalFiles, ...legal } = prefill.legalPerson ?? {};
+  return {
+    purpose: prefill.purpose ?? 1,
+    materialName: prefill.materialName,
+    sameOperator: prefill.sameOperator ?? !prefill.responsiblePersonInfo,
+    includeLegal: prefill.includeLegal ?? Boolean(prefill.legalPerson),
+    business: { businessCertificateType: 1, ...business },
+    operator: { certificateType: 0, ...operator },
+    responsible: { certificateType: 0, ...responsible },
+    legal: { certificateType: 0, ...legal },
+  };
+}
+
+function personPayload(person, role, files, materialFile) {
   const value = { certificateType: person.certificateType, personName: person.personName ?? '', personIDCard: person.personIDCard ?? '',
     ...(person.personMobile !== undefined ? { personMobile: person.personMobile } : {}) };
   if (person.certificateType === 0 && files.front && files.back) value.personCertificate = [materialFile(files.front, personFiles[role][0]), materialFile(files.back, personFiles[role][1])];
@@ -22,11 +37,12 @@ function personPayload(person, role, files) {
   return value;
 }
 
-export function qualificationPayload(values, files, tickets, verified, rank, account) {
+export function qualificationPreview(values, files, tickets, verified, rank, account) {
   if (!rank || rankFields.some(key => typeof rank[key] !== 'boolean')) throw new OperationError('尚未取得完整的材料要求，请刷新表单。');
   businessFields.forEach(([key, label]) => required(values.business[key], `请填写${label}。`));
   const materialName = values.materialName || values.business.businessCertificateName;
   if (materialName.length > 20) throw new OperationError('资质名称最多 20 字，请单独填写一个简短名称。');
+  const manualReview = tickets.business?.manualReview === true;
   required(tickets.business, '请先完成企业信息校验。');
   if (rank.needBusinessCertificateImage && !files.business) throw new OperationError('当前账号需要上传营业证件。');
   for (const role of ['operator', 'responsible']) {
@@ -50,38 +66,51 @@ export function qualificationPayload(values, files, tickets, verified, rank, acc
       if (values.legal.personIDCard) required(tickets.legal, '请完成法人信息校验。');
     }
   }
-  const businessInfo = { ...values.business };
-  if (files.business) businessInfo.businessCertificate = materialFile(files.business, values.business.businessCertificateType);
-  const body = {
-    purpose: values.purpose, materialName, sameOperator: values.sameOperator, businessInfo,
-    operatorPerson: personPayload(values.operator, 'operator', files.operator ?? {}),
-    responsiblePersonInfo: personPayload(values[values.sameOperator ? 'operator' : 'responsible'], 'responsible', files[values.sameOperator ? 'operator' : 'responsible'] ?? {}),
-    businessCheckTicket: tickets.business, operatorCheckTicket: tickets.operator, responsibleCheckTicket: tickets[values.sameOperator ? 'operator' : 'responsible'],
-    otherMaterials: (files.other ?? []).map(file => materialFile(file, 6)),
-  };
-  if (values.purpose === 2) {
-    body.authorizer = values.business.businessCertificateName;
-    body.authorizee = required(account.businessName, '当前账号主体信息缺失。');
-    if (files.authorization) body.powerOfAttorney = [materialFile(files.authorization, 5)];
-  }
-  if (legalEntered) {
-    body.legalPerson = personPayload(values.legal, 'legal', files.legal ?? {});
-    if (tickets.legal) body.legalCheckTicket = tickets.legal;
-  }
-  return body;
+  const preview = materialPreview(materialFile => {
+    const businessInfo = { ...values.business };
+    if (files.business) businessInfo.businessCertificate = materialFile(files.business, values.business.businessCertificateType);
+    const responsible = values.sameOperator ? 'operator' : 'responsible';
+    const body = {
+      purpose: values.purpose, materialName, sameOperator: values.sameOperator, businessInfo,
+      operatorPerson: personPayload(values.operator, 'operator', files.operator ?? {}, materialFile),
+      responsiblePersonInfo: personPayload(values[responsible], 'responsible', files[responsible] ?? {}, materialFile),
+      ...(manualReview ? {} : { businessCheckTicket: tickets.business }),
+      operatorCheckTicket: tickets.operator, responsibleCheckTicket: tickets[responsible],
+      otherMaterials: (files.other ?? []).map(file => materialFile(file, 6)),
+    };
+    if (values.purpose === 2) {
+      body.authorizer = values.business.businessCertificateName;
+      body.authorizee = required(account.businessName, '当前账号主体信息缺失。');
+      if (files.authorization) body.powerOfAttorney = [materialFile(files.authorization, 5)];
+    }
+    if (legalEntered) {
+      body.legalPerson = personPayload(values.legal, 'legal', files.legal ?? {}, materialFile);
+      if (tickets.legal) body.legalCheckTicket = tickets.legal;
+    }
+    return body;
+  });
+  return { ...preview, manualReview };
 }
 
-export function QualificationForm({ client }) {
-  const [values, setValues] = useState(initialValues);
+export function QualificationForm({ client, prefill }) {
+  const [values, setValues] = useState(() => initialValues(prefill));
   const [rank, setRank] = useState(null);
   const [account, setAccount] = useState(null);
-  const [files, setFiles] = useState({ other: [] });
+  const [files, setFiles] = useState(() => ({
+    business: prefill?.businessInfo?.businessCertificate,
+    operator: prefill?.operatorPerson?.personCertificate,
+    responsible: prefill?.responsiblePersonInfo?.personCertificate,
+    legal: prefill?.legalPerson?.personCertificate,
+    authorization: prefill?.powerOfAttorney?.[0],
+    other: prefill?.otherMaterials ?? [],
+  }));
   const [tickets, setTickets] = useState({});
   const [codes, setCodes] = useState({});
   const [verified, setVerified] = useState({});
   const [sentAt, setSentAt] = useState({});
   const [step, setStep] = useState(0);
-  const [snapshot, setSnapshot] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const snapshot = preview?.request;
   const [receipt, setReceipt] = useState(null);
   const [status, setStatus] = useState(null);
   const operation = useOperation();
@@ -107,14 +136,18 @@ export function QualificationForm({ client }) {
     setValues(current => ({ ...current, [section]: { ...current[section], [key]: value } }));
     setTickets(current => ({ ...current, [section]: undefined }));
     if (key === 'personMobile') setVerified(current => ({ ...current, [section]: undefined }));
-    if (key === 'certificateType') setFiles(current => ({ ...current, [section]: {} }));
+    if (key === 'certificateType') setFiles(current => ({ ...current, [section]: Object.fromEntries(
+      Object.entries(current[section] ?? {}).filter(([, file]) => file?.data !== undefined),
+    ) }));
   };
-  const upload = (slot, selected, { role, side, category = 'identity', many = false } = {}) => operation.run(async () => {
-    if (many && (files.other.length + selected.length > 5)) throw new OperationError('其他材料最多 5 张。');
+  const upload = (slot, selected, { role, side, category = 'identity', many = false }, draftIndex) => operation.run(async () => {
+    if (many && draftIndex === undefined && files.other.length + selected.length > 5) throw new OperationError('其他材料最多 5 张。');
     for (const file of selected) {
       const result = await client.upload(file, { kind: 'material', category });
       setFiles(current => role ? { ...current, [role]: { ...current[role], [side]: result } }
-        : { ...current, [slot]: many ? [...current.other, result] : result });
+        : { ...current, [slot]: many
+          ? draftIndex === undefined ? [...current.other, result] : current.other.map((file, index) => index === draftIndex ? result : file)
+          : result });
     }
     setTickets(current => ({ ...current, [role ?? slot]: undefined }));
   }, { mutation: true });
@@ -126,19 +159,21 @@ export function QualificationForm({ client }) {
   const fileArea = (label, slot, options = {}) => {
     const selected = options.role ? files[options.role]?.[options.side] : files[slot];
     return <Files label={label} accept=".jpg,.jpeg,.png" value={Array.isArray(selected) ? selected : selected ? [selected] : []}
-      multiple={options.many} disabled={operation.busy || operation.uncertain} onSelect={selected => upload(slot, selected, options)}
+      multiple={options.many} disabled={operation.busy || operation.uncertain} onSelect={(selected, draftIndex) => upload(slot, selected, options, draftIndex)}
       onRemove={index => removeFile(slot, options.role, options.side, index)} />;
   };
   const businessOcr = () => operation.run(async () => {
-    required(files.business, '请先上传营业证件。');
-    const result = await client.call('recognize_qualification_document', { business_certificate_type: values.business.businessCertificateType, certificate: files.business.fileContent, private: true });
+    const certificate = required(files.business?.fileContent, '请先上传营业证件。');
+    const result = await client.call('recognize_qualification_document', { business_certificate_type: values.business.businessCertificateType, certificate, private: true });
     const extracted = Object.fromEntries(businessFields.filter(([key]) => typeof result?.[key] === 'string').map(([key]) => [key, result[key]]));
     setValues(current => ({ ...current, business: { ...current.business, ...extracted } }));
     setTickets(current => ({ ...current, business: undefined }));
   });
   const personOcr = role => operation.run(async () => {
-    const material = files[role]; required(material?.front, '请上传身份证人像面。'); required(material?.back, '请上传身份证国徽面。');
-    const result = await client.call('recognize_qualification_document', { id_card_front_image: material.front.fileContent, id_card_back_image: material.back.fileContent, private: true });
+    const material = files[role];
+    const front = required(material?.front?.fileContent, '请上传身份证人像面。');
+    const back = required(material?.back?.fileContent, '请上传身份证国徽面。');
+    const result = await client.call('recognize_qualification_document', { id_card_front_image: front, id_card_back_image: back, private: true });
     const extracted = Object.fromEntries(['personName', 'personIDCard'].filter(key => typeof result?.[key] === 'string').map(key => [key, result[key]]));
     setValues(current => ({ ...current, [role]: { ...current[role], ...extracted } }));
     setTickets(current => ({ ...current, [role]: undefined }));
@@ -151,7 +186,8 @@ export function QualificationForm({ client }) {
       result = await client.call('check_qualification_enterprise', {
         business_certificate_name: required(business.businessCertificateName, '请输入企业名称。'),
         unified_social_credit_identifier: required(business.unifiedSocialCreditIdentifier, '请输入社会信用代码。'),
-        legal_person_name: required(business.legalPersonName, '请输入法人姓名。'), private: true,
+        legal_person_name: required(business.legalPersonName, '请输入法人姓名。'),
+        private: true, offer_manual_review: true,
       });
     } else {
       const needsPhone = role !== 'legal' && (rank?.[role + 'ThreeElement'] || role === 'operator' && values.sameOperator && rank?.responsibleThreeElement);
@@ -160,7 +196,8 @@ export function QualificationForm({ client }) {
         ...(needsPhone ? { person_mobile: required(person.personMobile, '当前校验需要手机号。') } : {}), private: true,
       });
     }
-    setTickets(current => ({ ...current, [role]: checkedTicket(result) }));
+    const checkResult = role === 'business' && result?.manualReview === true ? result : checkedTicket(result);
+    setTickets(current => ({ ...current, [role]: checkResult }));
   });
   const verifyMobile = (role, send) => operation.run(async () => {
     const mobile = required(values[role].personMobile, '请输入手机号。');
@@ -176,10 +213,12 @@ export function QualificationForm({ client }) {
       setVerified(current => ({ ...current, [role]: mobile }));
     }
   }, { mutation: true });
-  const prepare = () => operation.run(() => { setSnapshot(qualificationPayload(values, files, tickets, verified, rank, account)); setStep(3); });
+  const prepare = () => operation.run(() => { setPreview(qualificationPreview(values, files, tickets, verified, rank, account)); setStep(3); });
   const submit = () => operation.run(async () => {
-    const id = await client.call('apply_qualification', { request: snapshot }, { write: true });
-    setReceipt(id); setSnapshot(null); setValues(initialValues()); setTickets({}); setCodes({}); setVerified({}); setFiles({ other: [] });
+    const id = await client.call('apply_qualification', {
+      request: snapshot, ...(preview.manualReview ? { confirm_manual_review: true } : {}),
+    }, { write: true });
+    setReceipt(id); setPreview(null); setValues(initialValues()); setTickets({}); setCodes({}); setVerified({}); setFiles({ other: [] });
     await client.report({ form: 'qualification', state: 'submitted', qualificationId: id });
   }, { mutation: true });
   const personSection = role => <section className="step-section" key={role}>
@@ -214,7 +253,10 @@ export function QualificationForm({ client }) {
       <Steps direction="vertical" current={step + 1} size="small">{stepTitles.map(title => <Steps.Step key={title} title={title} />)}</Steps>
     </aside><div className="wizard-content">
       <div className="sms-mobile-step">第 {step + 1} / 4 步</div>
-      {!rank || !account ? <p>正在读取当前账号的材料要求…</p> : snapshot ? <Confirm title="确认本次资质申请" onBack={() => { setSnapshot(null); setStep(2); }} onSubmit={submit} busy={operation.busy} disabled={operation.uncertain}>
+      {!rank || !account ? <p>正在读取当前账号的材料要求…</p> : snapshot ? <Confirm title="确认本次资质申请" onBack={() => { setPreview(null); setStep(2); }} onSubmit={submit} busy={operation.busy} disabled={operation.uncertain}
+        additionalConsent={preview.manualReview ? '我已核对企业信息，同意转人工审核' : undefined}
+        submitLabel={preview.manualReview ? '确认转人工审核' : undefined}>
+        {preview.manualReview && <Alert type="warning" content="企业信息未通过自动校验，本次申请将提交人工审核。" />}
         <Summary items={[
           ['资质名称', snapshot.materialName], ['用途', snapshot.purpose === 1 ? '自用' : '他用'],
           ['企业名称', snapshot.businessInfo.businessCertificateName], ['统一社会信用代码', snapshot.businessInfo.unifiedSocialCreditIdentifier],
@@ -222,7 +264,7 @@ export function QualificationForm({ client }) {
           ['经办人证件', maskedIdentifier(snapshot.operatorPerson.personIDCard)], ['经办人手机', maskedIdentifier(snapshot.operatorPerson.personMobile)],
           ['责任人', snapshot.responsiblePersonInfo.personName], ['责任人证件', maskedIdentifier(snapshot.responsiblePersonInfo.personIDCard)],
           ['责任人手机', maskedIdentifier(snapshot.responsiblePersonInfo.personMobile)],
-          ['证件与授权材料', [files.business, files.authorization, ...Object.values(files.operator ?? {}), ...Object.values(files.responsible ?? {}), ...Object.values(files.legal ?? {}), ...files.other].filter(Boolean).map(file => file.name).join('、') || '未添加'],
+          ['证件与授权材料', preview.attachmentNames.join('、') || '未添加'],
           ...(snapshot.legalPerson ? [['法人补充证件', maskedIdentifier(snapshot.legalPerson.personIDCard)]] : []),
         ]} />
       </Confirm> : <>
@@ -234,7 +276,13 @@ export function QualificationForm({ client }) {
         </div><p>当前账号主体：{account.businessName}。营业证件照片{rank.needBusinessCertificateImage ? '必填' : '选填'}。</p>
           {fileArea('营业证件', 'business', { category: 'business' })}<Button disabled={operation.busy || operation.uncertain} onClick={businessOcr}>识别营业证件并回填</Button>
           <div className="form-grid">{businessFields.map(([key, label]) => <Field key={key} label={label} value={values.business[key]} onChange={value => updateSection('business', key, value)} required />)}</div>
-          <div className="sms-check"><Button disabled={operation.busy || operation.uncertain} onClick={() => check('business')}>校验企业信息</Button>{tickets.business && <span>校验已通过</span>}</div>
+          <div className="sms-check"><Button disabled={operation.busy || operation.uncertain} onClick={() => check('business')}>校验企业信息</Button>
+            {tickets.business?.manualReview === true ? <Alert type="warning" content={<>
+              企业信息未通过自动校验。核对无误后，可以继续并确认转人工审核。
+              {tickets.business.code && <div>错误码 {tickets.business.code}</div>}
+              {tickets.business.requestId && <div>排障编号 {tickets.business.requestId}</div>}
+            </>} /> : tickets.business && <span>校验已通过</span>}
+          </div>
         </>}
         {step === 1 && <>
           <Alert content={`经办人照片${rank.needOperatorImage ? '必填' : '选填'}、手机号${rank.needOperatorMobile || rank.operatorThreeElement ? '必填' : '选填'}；独立责任人照片${rank.needResponsibleImage ? '必填' : '选填'}、手机号${rank.needResponsibleMobile || rank.responsibleThreeElement ? '必填' : '选填'}。`} />
@@ -244,7 +292,7 @@ export function QualificationForm({ client }) {
         </>}
         {step === 2 && <>
           {values.purpose === 2 && <><Summary items={[["授权方", values.business.businessCertificateName], ["被授权方", account.businessName]]} />
-            {rank.needOtherUseCheck && fileArea('授权委托书（必填）', 'authorization', { category: 'authorization' })}</>}
+            {(rank.needOtherUseCheck || files.authorization) && fileArea(rank.needOtherUseCheck ? '授权委托书（必填）' : '授权委托书（选填）', 'authorization', { category: 'authorization' })}</>}
           {fileArea('其他材料（选填，最多 5 张）', 'other', { category: 'business', many: true })}
         </>}
         <div className="step-actions">{step > 0 && <Button disabled={operation.busy} onClick={() => setStep(step - 1)}>上一步</Button>}

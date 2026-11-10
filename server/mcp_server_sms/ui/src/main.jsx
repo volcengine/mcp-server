@@ -17,7 +17,7 @@ const app = new App(
 );
 const client = new SmsFormClient(app);
 const root = createRoot(document.getElementById('root'));
-let state = { ready: false, supported: false, initial: null };
+let state = { ready: false, supported: false, toolResult: null };
 let disposed = false;
 function render(update) {
   if (disposed) return;
@@ -37,7 +37,7 @@ function hostContext(context) {
 }
 
 // 监听先于 connect，避免遗漏宿主投递的初始结果；不读取父页面或浏览器存储。
-app.ontoolresult = result => render({ initial: result.structuredContent });
+app.ontoolresult = result => render({ toolResult: result });
 app.onhostcontextchanged = hostContext;
 app.ontoolcancelled = () => render({ error: '本次表单已取消。若有操作已经提交，请先查询其状态。' });
 app.onerror = () => render({ error: '表单连接中断。已提交操作的结果需要查询核对，请勿重复提交。' });

@@ -301,7 +301,7 @@ async def test_template_traffic_types_and_signature_material_references(mcp, api
 
 async def test_wire_schemas_are_inline_and_keep_nested_constraints(mcp, qualification_request):
     tools = await mcp.list_tools()
-    assert len(tools) == 30
+    assert len(tools) == 36
     for tool in tools:
         for schema in (tool.input_schema, tool.output_schema):
             if schema is None:

@@ -80,9 +80,15 @@ class SmsMCPServer(MCPServer):
                 if isinstance(exc.__cause__, ValidationError):
                     observation.result_class = "failed"
                     observation.error_code = "invalid_arguments"
-                    # SDK 的外层参数模型会回显输入；只交接字段位置和错误类型。
+                    # 未知字段的最后一段是调用方提供的键，也可能是误填的私密数据。
                     errors = [
-                        {"field": list(error["loc"]), "type": error["type"]}
+                        {
+                            "field": list(
+                                error["loc"][:-1]
+                                if error["type"] == "extra_forbidden" else error["loc"]
+                            ),
+                            "type": error["type"],
+                        }
                         for error in exc.__cause__.errors(
                             include_input=False, include_context=False
                         )

@@ -8,6 +8,7 @@ from pathlib import Path
 import httpx
 import pytest
 from conftest import auth_header, payload, rpc
+from jsonschema import Draft202012Validator
 from starlette.testclient import TestClient
 
 from mcp_server_sms.auth import Credentials
@@ -25,6 +26,7 @@ from mcp_server_sms.uploads import IMAGEX, FileUploader
         ("apply_signature", "signature"),
         ("register_traffic_resource", "traffic"),
         ("create_batch_task", "batch"),
+        ("open_sms_service_onboarding", "service"),
     ],
 )
 async def test_open_form_never_writes_or_replays(name, form, mcp, api_calls):
@@ -35,6 +37,134 @@ async def test_open_form_never_writes_or_replays(name, form, mcp, api_calls):
     assert api_calls[0] == []
     tool = next(tool for tool in await mcp.list_tools() if tool.name == name)
     assert tool.meta["ui"]["resourceUri"] == FORM_URI
+
+
+_DRAFT_FILE = {"name": "fixture-private.png", "data": "Zml4dHVyZS1wcml2YXRl"}
+
+
+@pytest.mark.parametrize(
+    "name,form,draft",
+    [
+        ("apply_qualification", "qualification", {
+            "purpose": 2, "materialName": "测试资质", "sameOperator": False, "includeLegal": True,
+            "businessInfo": {
+                "businessCertificateType": 4, "businessCertificateName": "测试企业",
+                "unifiedSocialCreditIdentifier": "fixture-credit", "legalPersonName": "测试法人",
+                "businessCertificateValidityPeriodStart": "2020-01-01",
+                "businessCertificateValidityPeriodEnd": "长期", "businessCertificate": _DRAFT_FILE,
+            },
+            "operatorPerson": {
+                "personName": "测试经办人", "personIDCard": "fixture-private-identity",
+                "personMobile": "13800000000",
+                "personCertificate": {"front": _DRAFT_FILE, "back": _DRAFT_FILE},
+            },
+            "responsiblePersonInfo": {"personName": "测试责任人"},
+            "legalPerson": {"certificateType": 1, "personCertificate": {"document": _DRAFT_FILE}},
+            "powerOfAttorney": [_DRAFT_FILE], "otherMaterials": [_DRAFT_FILE],
+        }),
+        ("apply_signature", "signature", {
+            "content": "测试签名", "source": 3, "signatureIdentificationID": 12,
+            "subAccounts": ["group"], "isLimitSubAccount": 1, "desc": " 测试说明 ",
+            "trademark": {
+                "trademarkCn": "测试商标", "trademarkEn": "Example", "trademarkNumber": "001",
+                "trademarkFileList": [_DRAFT_FILE],
+            },
+            "uploadFileList": [_DRAFT_FILE],
+        }),
+        ("apply_signature", "signature", {"appIcp": {"appIcpFilling": "fixture-icp"}}),
+        ("register_traffic_resource", "traffic", {
+            "kind": "link", "data": [
+                {"useVolcLink": True, "jumpLink": "https://example.com/Path?Q=A"},
+                {"useVolcLink": False, "protocol": "缺省", "linkDomainIcpBody": "示例企业"},
+            ],
+        }),
+        ("register_traffic_resource", "traffic", {
+            "kind": "phone", "data": [
+                {"numberType": 1, "number": "13800000000", "numberPerson": "测试人员",
+                 "personType": 1, "personId": "fixture-private-id"},
+                {"numberType": 2, "company": "示例企业", "numberProvince": "北京", "numberCity": "北京"},
+            ],
+        }),
+        ("create_batch_task", "batch", {
+            "name": "测试任务", "signature": "测试签名", "templateId": "template",
+            "content": " 原文 ", "scheduled": True, "sendTime": 1800000001,
+            "recipientsFile": {"name": "list.csv", "data": "cGhvbmUKMTM4MDAwMDAwMDAK"},
+        }),
+    ],
+)
+async def test_host_prefill_is_partial_private_and_never_writes(
+    name, form, draft, mcp, api_calls, caplog
+):
+    arguments = {"prefill": draft}
+    tool = next(tool for tool in await mcp.list_tools() if tool.name == name)
+    Draft202012Validator(tool.input_schema).validate(arguments)
+    result = await mcp.call_tool(name, arguments)
+    assert not result.is_error
+    assert payload(result)["form"] == form
+    assert payload(result)["mode"] == "input"
+    assert payload(result)["result"] is None
+    assert result.meta["sms/form"]["prefill"] == draft
+    assert "prefill" not in payload(result)
+    assert "prefill" not in json.loads(result.content[0].text)
+    events = [
+        json.loads(record.getMessage().removeprefix("sms_call "))
+        for record in caplog.records if record.name == "mcp_server_sms.calls"
+    ]
+    form_events = [event for event in events if event["kind"] == "form"]
+    assert [event["event"] for event in form_events] == ["start", "end"]
+    assert form_events[-1]["path"] == "prefilled"
+    assert form_events[-1]["result_class"] == "success"
+    assert "fixture-private" not in caplog.text
+    assert api_calls[0] == []
+
+
+async def test_prefill_and_request_are_mutually_exclusive_for_every_form(
+    mcp, api_calls, qualification_request
+):
+    requests = {
+        "apply_qualification": qualification_request,
+        "apply_signature": {
+            "content": "测试签名", "purpose": 1, "source": 1, "signatureIdentificationID": 12,
+        },
+        "register_traffic_resource": {
+            "action": "BulkCreateTobTrafficDrivingPhoneForAgent",
+            "params": {"data": [{"numberType": 2, "number": "4008000000"}]},
+        },
+        "create_batch_task": {
+            "subAccount": "group", "signature": "测试签名", "templateId": "template",
+            "name": "测试任务", "fileUrl": "private/list.csv", "scheduled": False,
+            "sendTime": 0, "idempotencyKey": "fixture-key",
+        },
+    }
+    for name, request in requests.items():
+        prefill = {"kind": "phone"} if name == "register_traffic_resource" else {}
+        result = await mcp.call_tool(name, {"prefill": prefill, "request": request})
+        assert result.is_error
+        assert "不可同时传入" in result.content[0].text
+    assert api_calls[0] == []
+
+
+@pytest.mark.parametrize(
+    "name,draft",
+    [
+        ("apply_qualification", {"businessCheckTicket": "fixture-private-ticket"}),
+        ("apply_qualification", {"operatorPerson": {"code": "fixture-private-code"}}),
+        ("apply_qualification", {"businessInfo": {"fixture-private-value-as-key": "value"}}),
+        ("apply_signature", {"uploadFileList": [{"fileContent": "fixture-private-reference"}]}),
+        ("create_batch_task", {"fileUrl": "fixture-private-key"}),
+        ("create_batch_task", {"scheduled": False, "sendTime": 1800000000}),
+    ],
+)
+async def test_prefill_rejects_forged_verification_or_upload_results(name, draft, mcp, api_calls):
+    result = await mcp.call_tool(name, {"prefill": draft})
+    assert result.is_error
+    assert result.structured_content["error"]["code"] == "invalid_arguments"
+    assert "fixture-private" not in result.model_dump_json()
+    if "businessInfo" in draft:
+        assert result.structured_content["error"]["fields"] == [
+            {"field": ["prefill", "businessInfo"], "type": "extra_forbidden"},
+        ]
+    assert api_calls[0] == []
 
 
 async def test_invalid_upload_is_definite_and_does_not_echo_file_bytes(mcp, api_calls):
@@ -160,7 +290,7 @@ def test_upload_credentials_never_leave_server_and_material_bytes_are_unchanged(
     ) as http:
         tools = rpc(http, "tools/list", token=auth_header("one")).json()["result"]["tools"]
         upload_tool = next(tool for tool in tools if tool["name"] == "upload_sms_file")
-        assert len(tools) == 30 and upload_tool["_meta"]["ui"]["visibility"] == ["app"]
+        assert upload_tool["_meta"]["ui"]["visibility"] == ["app"]
         response = rpc(
             http,
             "tools/call",

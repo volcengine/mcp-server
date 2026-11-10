@@ -91,27 +91,28 @@ def decode_file(request: FileUpload) -> tuple[bytes, str]:
     return data, suffix
 
 
-def validate_recipients(data: bytes, demo: str) -> dict:
-    """按照上游 CSV 表头校验原文件，只统计重复号码，不修改或去重文件。"""
+def recipient_columns(demo: str) -> list[str]:
+    """recipient_columns 读取实际名单模板，要求首列为 phone 且变量列唯一。"""
     try:
-        expected = next(csv.reader(io.StringIO(demo), strict=True))
-        rows = csv.reader(io.StringIO(data.decode("utf-8-sig"), newline=""), strict=True)
-        columns = next(rows)
-        if not expected or expected[0] != "phone" or columns != expected:
+        columns = next(csv.reader(io.StringIO(demo.removeprefix("\ufeff")), strict=True))
+        if not columns or columns[0] != "phone" or not all(columns) or len(set(columns)) != len(columns):
             raise ValueError("headers")
-        count, phones, samples = 0, set(), []
-        for row in rows:
-            if len(row) != len(columns) or re.fullmatch(r"1[3-9][0-9]{9}", row[0]) is None:
+        return columns
+    except (ValueError, csv.Error, StopIteration):
+        raise upload_error("upload_sms_file", "invalid_csv_template", "短信 API 返回的名单模板表头不完整") from None
+
+
+def recipient_rows(data: bytes, expected: list[str]):
+    """recipient_rows 按模板逐行读取，不改写原始号码或变量。"""
+    try:
+        rows = csv.reader(io.StringIO(data.decode("utf-8-sig"), newline=""), strict=True)
+        if next(rows) != expected:
+            raise ValueError("headers")
+        count = 0
+        for count, row in enumerate(rows, 1):
+            if len(row) != len(expected) or re.fullmatch(r"1[3-9][0-9]{9}", row[0]) is None:
                 raise ValueError("row")
-            count += 1
-            phones.add(row[0])
-            if len(samples) < 3:
-                samples.append(
-                    {
-                        "phone": row[0][:3] + "****" + row[0][-4:],
-                        "params": dict(zip(columns[1:], row[1:], strict=True)),
-                    }
-                )
+            yield count + 1, row[0], dict(zip(expected[1:], row[1:], strict=True))
         if count == 0:
             raise ValueError("empty")
     except (ValueError, UnicodeError, csv.Error, StopIteration):
@@ -120,6 +121,17 @@ def validate_recipients(data: bytes, demo: str) -> dict:
             "invalid_csv",
             "名单格式不符合模板，请使用下载的 UTF-8 CSV 示例并检查号码和列数",
         ) from None
+
+
+def validate_recipients(data: bytes, demo: str) -> dict:
+    """按照上游 CSV 表头校验原文件，只统计重复号码，不修改或去重文件。"""
+    columns = recipient_columns(demo)
+    count, phones, samples = 0, set(), []
+    for _, phone, params in recipient_rows(data, columns):
+        count += 1
+        phones.add(phone)
+        if len(samples) < 3:
+            samples.append({"phone": phone[:3] + "****" + phone[-4:], "params": params})
     return {
         "columns": columns,
         "totalCount": count,
