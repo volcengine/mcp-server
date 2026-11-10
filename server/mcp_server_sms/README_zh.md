@@ -168,7 +168,8 @@ uvx --from ./dist/mcp_server_sms-0.2.0-py3-none-any.whl mcp-server-sms --transpo
 ## 云端运行
 
 ```bash
-mcp-server-sms --transport streamable-http --host 0.0.0.0 --port 8000
+mcp-server-sms --transport streamable-http --host 0.0.0.0 --port 8000 \
+  --public-url https://sms-mcp.example.com
 ```
 
 客户端连接 `/mcp`。部署平台提供 HTTPS 和访问策略，每个请求通过 `Authorization: <Base64 JSON>` 或 `Authorization: Bearer <Base64 JSON>` 传递短信凭据：
@@ -179,7 +180,7 @@ mcp-server-sms --transport streamable-http --host 0.0.0.0 --port 8000
 
 这沿用仓库已有的凭据传递方式，**不是 OAuth access token，Base64 也不是加密**。由客户端或可信网关在模型之外构造请求头，不得写入访问日志。每次短信请求独立执行官方 V4 签名，由短信/IAM 校验权限；HTTP 缺少凭据时不会使用进程默认账号。
 
-不创建 OAuth 登录应用，不保存用户身份。MCP SDK 根据 `--host` 应用默认传输校验。旧命令可继续传入 `--public-url` 以兼容启动参数。无需协议会话或共享存储，多副本可以独立处理请求。云端平台的实际请求头、上传链路及表单宿主仍需联调确认。
+不创建 OAuth 登录应用，不保存用户身份。MCP SDK 校验 `Host` 以及请求中提供的 `Origin`。将 `--public-url` 设为服务的 HTTPS 来源，可以放行其域名和同源请求。每个额外的可信网页来源可单独传入一次 `--allowed-origin https://app.example.com`。浏览器跨域接入时，部署入口还需处理 CORS 预检和响应头。不带 `Origin` 的客户端可凭有效凭据和允许的 `Host` 接入。无需协议会话或共享存储，多副本可以独立处理请求。云端平台的实际请求头、上传链路及表单宿主仍需联调确认。
 
 通过统一 MCP 网关接入时，OAuth 登录和授权在网关完成，网关向本服务转发该客户的 STS 凭据。普通 OAuth access token 不能直接发给本服务，也不能用部署账号的 AK/SK 代替不同客户的凭据。
 

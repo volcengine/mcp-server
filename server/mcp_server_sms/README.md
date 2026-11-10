@@ -139,7 +139,8 @@ Features depend on the installed version. Updating repository code does not upda
 ## Streamable HTTP
 
 ```bash
-mcp-server-sms --transport streamable-http --host 0.0.0.0 --port 8000
+mcp-server-sms --transport streamable-http --host 0.0.0.0 --port 8000 \
+  --public-url https://sms-mcp.example.com
 ```
 
 Connect to `/mcp`. The deployment supplies HTTPS and access policy. Every HTTP request carries either `Authorization: <Base64 JSON>` or `Authorization: Bearer <Base64 JSON>` with the following credential fields:
@@ -152,7 +153,7 @@ This follows the repository's credential-passing convention; it is **not an OAut
 
 When using the shared MCP gateway, the gateway owns OAuth login and authorization and forwards each customer's STS credentials. Do not pass ordinary OAuth tokens directly to this service or substitute the deployment account's credentials for customer credentials.
 
-The MCP SDK applies its default transport security for `--host`. The legacy `--public-url` flag is accepted for startup compatibility. Requests do not require a protocol session or shared process state. Replicas can serve requests independently.
+The MCP SDK checks `Host` and any supplied `Origin` header. Set `--public-url` to the service's HTTPS origin to allow its host and same-origin requests. Pass `--allowed-origin https://app.example.com` once for each additional trusted browser origin. For cross-origin browser access, the deployment entry point must also handle CORS preflights and response headers. Clients that omit `Origin` can connect with valid credentials and an allowed `Host`. Requests do not require a protocol session or shared process state. Replicas can serve requests independently.
 
 The HTTP connection pool is owned by the MCP server lifespan and closed at shutdown. Credentials and signed headers remain per-request, and response cookies are not retained between callers. Connection reuse does not introduce business state or a database.
 

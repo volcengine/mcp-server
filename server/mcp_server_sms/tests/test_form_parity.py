@@ -34,7 +34,7 @@ def form_api(respond):
         })
 
     server = build_server(SmsClient(transport=httpx.MockTransport(transport)))
-    with TestClient(create_http_app(server, host="0.0.0.0"), base_url="https://testserver") as http:
+    with TestClient(create_http_app(server, public_url="https://testserver", host="0.0.0.0"), base_url="https://testserver") as http:
         def call(name, args=None, *, identity="one"):
             response = rpc(http, "tools/call", token=auth_header(identity), params={
                 "name": name, "arguments": args or {},
