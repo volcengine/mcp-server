@@ -268,11 +268,15 @@ async def test_template_traffic_types_and_signature_material_references(mcp, api
         "templateParams": [{"name": "url", "paramType": 2}],
         "templateTrafficDriving": [[{"name": "url", "paramType": 2, "id": 12}]],
     }
-    assert not (await mcp.call_tool("submit_template", {"request": template})).is_error
+    preview = await mcp.call_tool("preview_template", {"request": template})
+    assert not preview.is_error
+    view = preview.meta["sms/form"]["result"]
+    assert not (await mcp.call_tool("submit_template", {"request": template, "confirmation": view["confirmation"]})).is_error
     assert (
         json.loads(api_calls[0][-1].content)["templateTrafficDriving"]
         == template["templateTrafficDriving"]
     )
+    assert json.loads(api_calls[0][-1].content)["fixTrafficDriving"] == []
     assert api_calls[0][-1].url.params["Action"] == "ApplySmsTemplateV2ForAgent"
     signature = {
         "content": "示例",
@@ -290,7 +294,7 @@ async def test_template_traffic_types_and_signature_material_references(mcp, api
 
 async def test_wire_schemas_are_inline_and_keep_nested_constraints(mcp, qualification_request):
     tools = await mcp.list_tools()
-    assert len(tools) == 38
+    assert len(tools) == 39
     for tool in tools:
         for schema in (tool.input_schema, tool.output_schema):
             if schema is None:

@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 Channel = Literal["CN_OTP", "CN_NTC", "CN_MKT"]
 Mobile = Annotated[str, Field(pattern=r"^1[3-9][0-9]{9}$")]
@@ -99,25 +99,32 @@ class TemplateParameter(ApiModel):
     name: Text
     param_type: Literal[1, 2, 3, 4, 5] = Field(alias="paramType")
 
+    @field_validator("param_type", mode="before")
+    @classmethod
+    def integer_type(cls, value):
+        if type(value) is not int:
+            raise ValueError("paramType 必须是整数")
+        return value
+
 
 class TemplateTrafficBinding(ApiModel):
     name: Text
     param_type: Literal[2, 3] = Field(alias="paramType")
-    id: int | None = Field(None, gt=0)
+    id: int = Field(gt=0, strict=True)
     content: str | None = Field(None, repr=False)
 
-    @model_validator(mode="after")
-    def require_resource(self):
-        if self.id is None and not self.content:
-            raise ValueError("引流变量需要资源 id 或完整 content")
-        return self
-
+    @field_validator("param_type", mode="before")
+    @classmethod
+    def integer_type(cls, value):
+        if type(value) is not int:
+            raise ValueError("paramType 必须是整数")
+        return value
 
 class ShortUrlConfig(ApiModel):
-    is_enabled: str | None = Field(None, alias="isEnabled")
+    is_enabled: Literal["0", "1"] | None = Field(None, alias="isEnabled")
     belong: str | None = None
-    is_need_click_details: str | None = Field(None, alias="isNeedClickDetails")
-    ua_check_strategy: int | None = Field(None, alias="uaCheckStrategy")
+    is_need_click_details: Literal["0", "1"] | None = Field(None, alias="isNeedClickDetails")
+    ua_check_strategy: int | None = Field(None, alias="uaCheckStrategy", strict=True)
 
 
 class TemplateApplication(ApiModel):

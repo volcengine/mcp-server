@@ -1,6 +1,7 @@
 """Named SMS API tools over stdio and stateless Streamable HTTP."""
 
 import argparse
+import hmac
 import json
 import logging
 import sys
@@ -60,7 +61,11 @@ from .protocol import SmsAPIError, SmsMCPServer
 from .qualification_checks import check_enterprise, enterprise_ticket
 from .queries import BatchTaskQuery, BatchTaskReference, ResourceQuery
 from .service_onboarding import ServiceConfirmation, ServiceOnboarding
-from .template_checks import validate_template_application
+from .template_checks import (
+    TemplateConfirmation,
+    prepare_template_application,
+    template_apply_payload,
+)
 from .traffic_checks import validate_traffic_form
 from .upload_models import (
     MaterialUploadConfirmation,
@@ -534,11 +539,32 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
             },
         )
 
+    @mcp.tool(annotations=READ, structured_output=False, meta=APP_ONLY_META)
+    async def preview_template(ctx: Context, request: TemplateApplication) -> CallToolResult:
+        """核对当前账号、变量绑定与固定引流，返回仅给页面的模板预览；不会申请。"""
+        credentials = credentials_for(ctx)
+        view = await prepare_template_application(
+            lambda action, params: invoke_as(credentials, action, params), request, credentials
+        )
+        return private_result({"success": True, "action": "preview_template", "result": view})
+
     @mcp.tool(annotations=WRITE, structured_output=True, meta=APP_ONLY_META)
-    async def submit_template(ctx: Context, request: TemplateApplication) -> dict[str, Any]:
-        """直接提交已获用户授权的国内短信模板申请，返回申请结果。"""
-        validate_template_application(request)
-        return await invoke(ctx, "ApplySmsTemplateV2ForAgent", request.payload())
+    async def submit_template(
+        ctx: Context, request: TemplateApplication, confirmation: TemplateConfirmation
+    ) -> dict[str, Any]:
+        """再次前检后提交当前预览的申请；参数、账号或引流变化须重新核对。"""
+        credentials = credentials_for(ctx)
+
+        async def call(action, params):
+            return await invoke_as(credentials, action, params)
+
+        view = await prepare_template_application(call, request, credentials)
+        if not hmac.compare_digest(confirmation, view["confirmation"]):
+            raise SmsAPIError(failure(
+                "ApplySmsTemplateV2ForAgent", "template_confirmation_changed",
+                "模板参数、账号或引流核对结果已变化，请重新核对模板申请",
+            ))
+        return await call("ApplySmsTemplateV2ForAgent", template_apply_payload(view))
 
     @mcp.tool(annotations=WRITE, structured_output=True, meta=APP_ONLY_META)
     async def send_sms(ctx: Context, request: SmsSendRequest) -> dict[str, Any]:

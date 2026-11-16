@@ -197,16 +197,16 @@ it('群发创建、启动和启动后取消分别要求确认', async () => {
   await choose(user, '消息组', '通知组');
   await choose(user, '短信签名', '测试签名');
   await choose(user, '群发模板', '通知模板');
-  await screen.findByRole('button', { name: '下载名单模板' });
+  await screen.findByRole('button', { name: '点击下载模板' });
   fireEvent.change(screen.getByLabelText('群发 CSV 名单'), { target: { files: [new File(['phone\n13800000000\n'], 'list.csv', { type: 'text/csv' })] } });
-  await screen.findByText('名单已上传，核对群发任务时将检查文件内容。');
+  await screen.findByText('文件已就绪。');
   await user.click(screen.getByRole('button', { name: '核对群发任务' }));
-  await screen.findByRole('button', { name: '确认创建任务' });
+  await screen.findByText('我已核对任务信息、文件校验结果和发送时间，确认创建该群发任务');
   await user.click(screen.getByRole('button', { name: '返回修改' }));
   await user.click(screen.getByRole('button', { name: '核对群发任务' }));
-  await screen.findByRole('button', { name: '确认创建任务' });
+  await screen.findByText('我已核对任务信息、文件校验结果和发送时间，确认创建该群发任务');
   expect(api.call.mock.calls.filter(([name]) => name === 'complete_recipients_upload')).toHaveLength(1);
-  await user.click(screen.getByText('我已核对以上信息，同意提交本次操作'));
+  await user.click(screen.getByText('我已核对任务信息、文件校验结果和发送时间，确认创建该群发任务'));
   await user.click(screen.getByRole('button', { name: '确认创建任务' }));
   await screen.findByText('群发任务已创建');
   expect(started).toBe(false);
@@ -329,7 +329,8 @@ it('引流部分预填识别文案协议，火山短链缺少备案时在字段�
 
 it('群发表单保留部分预填，选消息组后再核对签名、模板和待上传名单', async () => {
   const user = userEvent.setup();
-  const sendTime = Date.parse('2027-11-11T10:15:13+08:00') / 1000;
+  const date = new Date(Date.now() + 86400000 + 8 * 3600000).toISOString().slice(0, 10);
+  const sendTime = Date.parse(date + 'T10:15:13+08:00') / 1000;
   const list = { name: '宿主名单.csv', data: 'cGhvbmUKMTM4MDAwMDAwMDAK' };
   const template = { TemplateId: 't', TemplateName: '特殊通知', ChannelType: 'CN_NTC',
     TaskFields: [{ Name: 'content', Label: '任务正文', Required: true }] };
@@ -348,18 +349,19 @@ it('群发表单保留部分预填，选消息组后再核对签名、模板和�
     scheduled: true, sendTime, recipientsFile: list,
   })} />);
   expect(screen.getByLabelText('任务名称').value).toBe('双十一通知');
-  expect(Date.parse(screen.getByLabelText('发送时间（北京时间）').value + '+08:00') / 1000).toBe(sendTime);
+  expect(Date.parse(screen.getByLabelText('定时时间').value.replace(' ', 'T') + '+08:00') / 1000).toBe(Math.floor(sendTime / 60) * 60);
   expect(screen.getByText('宿主名单.csv（待上传）')).toBeTruthy();
   expect(screen.getByRole('button', { name: '上传 宿主名单.csv' }).disabled).toBe(true);
   await choose(user, '消息组', '测试消息组');
   expect(await screen.findByText('已知签名')).toBeTruthy();
-  expect(await screen.findByText('特殊通知')).toBeTruthy();
+  expect(await screen.findAllByText('特殊通知')).toHaveLength(2);
   expect(screen.getByLabelText('任务正文').value).toBe(' 保留原文 ');
   expect(api.upload).not.toHaveBeenCalled();
   await user.click(screen.getByRole('button', { name: '上传 宿主名单.csv' }));
-  expect(await screen.findByText('名单已上传，核对群发任务时将检查文件内容。')).toBeTruthy();
+  expect(await screen.findByText('文件已就绪。')).toBeTruthy();
   expect(api.upload).toHaveBeenCalledWith(list, { kind: 'recipients', sub_account: 'g', template_id: 't' });
   await user.click(screen.getByRole('button', { name: '核对群发任务' }));
+  await screen.findByText('我已核对任务信息、文件校验结果和发送时间，确认创建该群发任务');
   expect((await screen.findByRole('button', { name: '确认创建任务' })).disabled).toBe(true);
   expect(screen.getByText(/10:15:13（北京时间）/)).toBeTruthy();
   expect(api.call.mock.calls.map(([name]) => name)).toEqual(['get_batch_csv_template', 'complete_recipients_upload']);
@@ -390,10 +392,10 @@ it('群发表单预选首屏以外的已核实资源，并允许用户重新选�
   render(<SmsApp client={api} ready supported toolResult={openDraft('batch', {
     subAccount: 'chosen-group', signature: '预填签名', templateId: 'chosen-template',
   })} />);
-  await screen.findByRole('button', { name: '下载名单模板' });
+  await screen.findByRole('button', { name: '点击下载模板' });
   expect(screen.getByText('预填消息组')).toBeTruthy();
   expect(screen.getByText('预填签名')).toBeTruthy();
-  expect(screen.getByText('预填群发模板')).toBeTruthy();
+  expect(screen.getAllByText('预填群发模板')).toHaveLength(2);
   expect(screen.getByText('预填模板正文')).toBeTruthy();
   expect(api.call.mock.calls).toEqual([['get_batch_csv_template', {
     sub_account: 'chosen-group', template_id: 'chosen-template', include_variables: true,
@@ -403,7 +405,7 @@ it('群发表单预选首屏以外的已核实资源，并允许用户重新选�
   await choose(user, '消息组', '手动消息组');
   expect(screen.queryByText('预填签名')).toBeNull();
   expect(screen.queryByText('预填模板正文')).toBeNull();
-  expect(screen.queryByRole('button', { name: '下载名单模板' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '点击下载模板' })).toBeNull();
 });
 
 it('预填模板不可用时保留已核实的消息组和签名，让用户重选', async () => {
@@ -422,7 +424,7 @@ it('预填模板不可用时保留已核实的消息组和签名，让用户重�
   await screen.findByText(/模板配置缺失/);
   expect(screen.getByText('可用消息组')).toBeTruthy();
   expect(screen.getByText('可用签名')).toBeTruthy();
-  expect(screen.queryByRole('button', { name: '下载名单模板' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '点击下载模板' })).toBeNull();
   expect(api.call).not.toHaveBeenCalled();
 });
 
@@ -440,9 +442,9 @@ it('名单示例首次查询失败后，可重选精查到的同一个模板', a
   });
   render(<BatchForm client={api} prefill={{ subAccount: 'g', signature: '可用签名', templateId: 't' }} />);
   await screen.findByText('名单示例暂未取得');
-  expect(screen.queryByRole('button', { name: '下载名单模板' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '点击下载模板' })).toBeNull();
   await choose(user, '群发模板', '可重试模板');
-  await screen.findByRole('button', { name: '下载名单模板' });
+  await screen.findByRole('button', { name: '点击下载模板' });
   expect(api.call.mock.calls).toEqual([
     ['get_batch_csv_template', { sub_account: 'g', template_id: 't', include_variables: true }],
     ['get_batch_csv_template', { sub_account: 'g', template_id: 't', include_variables: true }],
@@ -471,7 +473,7 @@ it('开通表单展示协议，单独确认后提交，刷新未生效时不再�
   expect(screen.queryByRole('button', { name: '同意协议并开通' })).toBeNull();
 });
 
-it('群发试发须单独确认，查询对应回执，名单引流检查与正式创建分开', async () => {
+it('引流检查随名单上传自动执行，试发仍须单独确认并查询对应回执', async () => {
   const user = userEvent.setup();
   const template = { TemplateId: 't', ChannelType: 'CN_NTC', TemplateContent: '查看 ${url}' };
   const api = client({
@@ -483,7 +485,8 @@ it('群发试发须单独确认，查询对应回执，名单引流检查与正�
     call: vi.fn(async (name, args) => {
       if (name === 'get_batch_csv_template') return { value: 'phone,url\n', variables: ['url'] };
       if (name === 'send_batch_test_sms') return { messageId: 'test-sms-id', requestedAt: 1000 };
-      if (name === 'list_send_logs') return { List: [{ messageId: 'test-sms-id', status: 3 }], Total: 1 };
+      if (name === 'list_send_logs') return { List: [{ messageId: 'test-sms-id', status: 3,
+        SendTime: Date.parse('2026-11-13T10:15:13+08:00'), ReceiptTime: Date.parse('2026-11-13T10:15:20+08:00') }], Total: 1 };
       if (name === 'complete_recipients_upload') {
         return { ...checkedRecipients(args, 2), trafficReport: { checkedRows: 1, totalRows: 2, failedRows: 0, uncheckedRows: 1, missingResourceRows: 1, missingRowNumbers: [2] } };
       }
@@ -498,18 +501,21 @@ it('群发试发须单独确认，查询对应回执，名单引流检查与正�
   }} />);
   await screen.findByLabelText('测试手机号');
   await type(user, '测试手机号', '13800000000');
-  await type(user, '试发变量 url', 'https://example.com/test');
-  await user.click(screen.getByRole('button', { name: '核对测试短信' }));
+  await type(user, 'url', 'https://example.com/test');
+  await user.click(screen.getByRole('button', { name: '发送测试短信' }));
   const send = screen.getByRole('button', { name: '确认发送测试短信' });
   expect(send.disabled).toBe(true);
   expect(api.call.mock.calls.filter(([name]) => name === 'send_batch_test_sms')).toHaveLength(0);
   await user.click(screen.getByText('我已核对以上信息，同意提交本次操作'));
   await user.click(send);
   await screen.findByText('已收到成功回执');
+  expect(screen.getByText('测试短信已提交，请在测试手机上确认触达效果。')).toBeTruthy();
+  expect(screen.getByText('2026年11月13日 10:15:13（北京时间）')).toBeTruthy();
+  expect(screen.getByText('2026年11月13日 10:15:20（北京时间）')).toBeTruthy();
   expect(api.call).toHaveBeenCalledWith('list_send_logs', expect.objectContaining({ message_id: 'test-sms-id' }));
   await user.click(screen.getByRole('button', { name: '上传 预填名单.csv' }));
-  await user.click(screen.getByRole('button', { name: '核对群发任务' }));
   await screen.findByText('缺少资源的 CSV 行号 2');
+  expect(api.call.mock.calls.filter(([name]) => name === 'complete_recipients_upload')).toHaveLength(1);
   expect(api.call).toHaveBeenCalledWith('complete_recipients_upload', { request: expect.objectContaining({ signature: 'fixture-private-file' }), columns: ['phone', 'url'], traffic: expect.objectContaining({ template_id: 't', content: '查看 ${url}' }) });
   expect(screen.getByRole('button', { name: '确认创建任务' }).disabled).toBe(true);
   await user.click(screen.getByRole('button', { name: '返回修改' }));
@@ -518,7 +524,7 @@ it('群发试发须单独确认，查询对应回执，名单引流检查与正�
   expect(api.call.mock.calls.filter(([name]) => name === 'complete_recipients_upload')).toHaveLength(2);
   await user.click(screen.getByRole('button', { name: '返回修改' }));
   expect(screen.getByText('已收到成功回执')).toBeTruthy();
-  await user.click(screen.getByRole('button', { name: '刷新试发回执' }));
+  await user.click(screen.getByRole('button', { name: '刷新发送结果' }));
   expect(api.call.mock.calls.filter(([name]) => name === 'list_send_logs')).toHaveLength(2);
   expect(api.query.mock.calls.filter(([action]) => action === 'ListBatchTemplatesForAgent')).toHaveLength(1);
   expect(api.call.mock.calls.filter(([name]) => name === 'get_batch_csv_template')).toHaveLength(1);
@@ -551,14 +557,14 @@ it('群发核对复用已加载定义和检查结果，更换文件后重新检�
     upload: vi.fn(async file => uploadedRecipients(file.name, file.name)),
   });
   render(<BatchForm client={api} prefill={{ name: '测试任务', subAccount: 'g', signature: '签名', templateId: 't' }} />);
-  await screen.findByRole('button', { name: '下载名单模板' });
+  await screen.findByRole('button', { name: '点击下载模板' });
   const upload = async name => {
     fireEvent.change(screen.getByLabelText('群发 CSV 名单'), { target: { files: [new File(['phone\n13800000000\n'], name)] } });
-    await screen.findByText('名单已上传，核对群发任务时将检查文件内容。');
+    await screen.findByText('文件已就绪。');
   };
   const prepare = async () => {
     await user.click(screen.getByRole('button', { name: '核对群发任务' }));
-    await screen.findByRole('button', { name: '确认创建任务' });
+    await screen.findByText('我已核对任务信息、文件校验结果和发送时间，确认创建该群发任务');
     await user.click(screen.getByRole('button', { name: '返回修改' }));
   };
   await upload('first.csv');

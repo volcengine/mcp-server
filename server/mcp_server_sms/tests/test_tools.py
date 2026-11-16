@@ -110,6 +110,8 @@ async def test_complete_qualification_goes_directly_to_upstream(
                 "channelType": "CN_NTC",
                 "templateParams": [{"name": "time", "paramType": 1}],
                 "signatures": ["示例签名"],
+                    "templateTrafficDriving": [],
+                    "fixTrafficDriving": [],
             },
         ),
         (
@@ -139,9 +141,13 @@ async def test_complete_qualification_goes_directly_to_upstream(
     ],
 )
 async def test_api_parameter_contracts(mcp, api_calls, tool, arguments, action, body):
+    if tool == "submit_template":
+        preview = await mcp.call_tool("preview_template", arguments)
+        assert not preview.is_error
+        arguments = {**arguments, "confirmation": preview.meta["sms/form"]["result"]["confirmation"]}
     result = await mcp.call_tool(tool, arguments)
     assert not result.is_error
-    assert len(api_calls[0]) == 1
+    assert len(api_calls[0]) == (5 if tool == "submit_template" else 1)
     request = api_calls[0][-1]
     assert request.url.params["Action"] == action
     assert request.url.params["Version"] == "2026-01-01"
@@ -253,7 +259,7 @@ async def test_query_contracts_keep_get_and_post_distinct(mcp, api_calls):
 
 async def test_tools_are_named_business_operations(mcp):
     tools = {tool.name: tool for tool in await mcp.list_tools()}
-    assert len(tools) == 38
+    assert len(tools) == 39
     removed = {
         "execute_sms_operation",
         "get_sms_operation_result",
@@ -275,6 +281,7 @@ async def test_tools_are_named_business_operations(mcp):
             "submit_sms_service_onboarding", "send_batch_test_sms",
             "prepare_material_upload", "complete_material_upload",
             "prepare_recipients_upload", "complete_recipients_upload",
+            "preview_template",
         }:
             assert tool.output_schema
         assert "ctx" not in tool.input_schema["properties"]

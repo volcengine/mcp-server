@@ -6,9 +6,9 @@ import { failureSchema, materialUploadPlanSchema, recipientsUploadPlanSchema } f
 export const MAX_UPLOAD_BYTES = config.maxUploadBytes;
 
 export class OperationError extends Error {
-  constructor(message, { code, unknown = false, requestId, backendResponse, httpStatus } = {}) {
+  constructor(message, { code, unknown = false, requestId, backendResponse, httpStatus, field } = {}) {
     super(message);
-    Object.assign(this, { code, unknown, requestId, backendResponse, httpStatus });
+    Object.assign(this, { code, unknown, requestId, backendResponse, httpStatus, field });
   }
 }
 

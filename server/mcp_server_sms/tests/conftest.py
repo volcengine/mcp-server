@@ -25,6 +25,9 @@ def api_calls():
         calls.append(request)
         action = request.url.params["Action"]
         results = {
+            "ListAllSmsProduct": {"businessName": "示例企业", "userType": "enterprise", "mktParam": 1},
+            "CheckTrafficDrivingExist": {"list": []},
+            "GetTobTrafficDrivingLinkListForAgent": {"list": [{"id": 12, "useVolcLink": False, "link": "https://example.com/Path?Q=A"}]},
             "ListSmsTemplateForAgent": {"List": [{"TemplateId": "SPT_fixture", "TemplateContent": "内容${text}", "ChannelType": "CN_NTC"}], "Total": 1},
             "GetSignatureIdentificationList": {"list": [{"id": 12, "purpose": 1, "auditStatus": 3, "usable": True, "businessCertificateName": "示例企业"}], "total": 1},
             "GetApplySignatureBind": [{"id": 12, "purpose": 1, "materialName": "示例资质", "businessCertificateName": "示例企业"}],

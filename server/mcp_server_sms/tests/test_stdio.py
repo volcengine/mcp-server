@@ -20,7 +20,7 @@ async def test_standard_stdio_client_without_business_state(monkeypatch, tmp_pat
             await session.discover()
             assert session.protocol_version == "2026-07-28"
             tools = await session.list_tools()
-            assert len(tools.tools) == 38
+            assert len(tools.tools) == 39
             result = await session.call_tool("get_account_information", {})
             assert result.is_error
             message = " ".join(item.text for item in result.content if item.type == "text")

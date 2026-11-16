@@ -14,6 +14,15 @@ body { font-family: var(--font-sans, Inter, "PingFang SC", system-ui, sans-serif
 .sms-app .traffic-page { margin: 0 auto; padding: 20px; }
 .sms-app .traffic-card { margin-top: 16px; padding: 20px; }
 .sms-app .batch-section { padding: 22px; }
+.sms-app .batch-file-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.sms-app .batch-details, .sms-app .batch-confirm-details { overflow-wrap: anywhere; }
+.sms-app .batch-input-field { min-width: 0; margin-bottom: 0; }
+.sms-app .batch-field-label { color: var(--color-text-2); font-size: 14px; font-weight: 400; line-height: 1.5715; }
+.sms-app .batch-content-block > .batch-field-label { margin-top: 18px; }
+.sms-app .batch-inline-control { align-items: end; }
+.sms-app .batch-actions { flex-wrap: wrap; }
+.sms-app .batch-actions > div { flex-wrap: wrap; }
+.sms-app .batch-upload-button .arco-upload-list-item-name-text { overflow-wrap: anywhere; }
 .sms-app:not(:has(.qualification-wizard)) .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 22px; }
 .sms-app .span-2 { grid-column: 1 / -1; }
 .sms-app:not(:has(.qualification-wizard)) .upload-zone { min-height: 90px; padding: 14px; border: 1px dashed #c9cdd4; border-radius: 6px; text-align: center; }
@@ -23,6 +32,56 @@ body { font-family: var(--font-sans, Inter, "PingFang SC", system-ui, sans-serif
 .sms-file-preview .arco-image-img { object-fit: contain; }
 .sms-catalog-count { margin: 6px 0 12px; font-size: 12px; color: #86909c; }
 .sms-feedback { margin: 12px 0; }
+.sms-app .template-page .traffic-preview dd { white-space: pre-wrap; overflow-wrap: anywhere; }
+.sms-app .template-form { width: 100%; max-width: 852px; }
+.sms-app .template-form-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 412px));
+  justify-content: space-between; column-gap: 28px;
+}
+.sms-app .template-form .traffic-field { gap: 8px; margin-bottom: 20px; }
+.sms-app .template-form .traffic-field > label {
+  color: var(--color-text-2); font-size: 14px; font-weight: 400; line-height: 22px;
+}
+.sms-app .template-form .traffic-required { font-size: 12px; line-height: 1; }
+.sms-app .template-form .arco-radio-group { min-height: 32px; display: flex; align-items: center; gap: 16px; }
+.sms-app .template-content-field { width: 100%; }
+.sms-app .template-content-field .arco-textarea { min-height: 96px; }
+.sms-app .template-variable-manager { margin-top: 0; margin-bottom: 40px; }
+.sms-app .template-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.sms-app .template-subtitle {
+  margin-bottom: 16px; color: var(--color-text-2); font-size: 13px;
+  font-weight: 500; line-height: 22px;
+}
+.sms-app .template-param-validation { margin-bottom: 40px; }
+.sms-app .template-param-table { margin-bottom: 0; }
+.sms-app .template-param-validation > .traffic-field-error { margin-top: 4px; }
+.sms-app .template-param-table .arco-table-th { color: var(--color-text-2); font-weight: 500; }
+.sms-app .template-param-table .arco-radio-group { flex-wrap: wrap; }
+.sms-app .template-empty { color: var(--color-text-3); font-size: 13px; }
+.sms-app .template-traffic-manager { margin-top: 0; }
+.sms-app .template-drive-table .arco-table-cell { overflow-wrap: anywhere; }
+.sms-app .template-add-traffic {
+  width: 100%; height: 48px; border: 1px solid var(--color-border-2); border-top: 0; border-radius: 0;
+}
+.template-traffic-modal-wrap {
+  box-sizing: border-box; padding-right: 16px; padding-left: 16px; overflow-x: hidden !important;
+}
+.arco-modal.template-traffic-modal {
+  width: 480px !important; max-width: 100% !important;
+}
+.template-traffic-modal .template-modal-subtitle {
+  margin: 0 0 16px; color: var(--color-text-2); font-size: 13px; font-weight: 500; line-height: 22px;
+}
+.template-traffic-modal .template-modal-description {
+  display: grid; grid-template-columns: 96px minmax(0, 1fr); min-width: 0; margin: 0 0 20px;
+}
+.template-traffic-modal .template-modal-description dt { color: var(--color-text-3); }
+.template-traffic-modal .template-modal-description dd { margin: 0; overflow-wrap: anywhere; }
+.template-traffic-modal .arco-modal-content { min-width: 0; overflow-x: hidden; }
+.template-traffic-modal .traffic-field { min-width: 0; gap: 8px; margin-bottom: 20px; }
+.template-traffic-modal .arco-select, .template-traffic-modal .arco-select-view { min-width: 0; max-width: 100%; }
+.template-traffic-modal .traffic-field > label { color: var(--color-text-2); font-size: 14px; font-weight: 400; }
+.sms-app .template-form > .arco-alert { margin-bottom: 20px; }
 .sms-check { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .sms-boot { padding: 24px; }
 .sms-app:not(:has(.qualification-wizard)) .arco-input, .sms-app .arco-select { width: 100%; }
@@ -73,17 +132,29 @@ body[arco-theme='dark'] .sms-app .upload-zone { border-color: #6b6b71; }
 body[arco-theme='dark'] .sms-app .traffic-field .arco-input[readonly] {
   color: var(--color-text-3); background: var(--color-fill-2);
 }
+body[arco-theme='dark'] .sms-app .template-form .traffic-field > label,
+body[arco-theme='dark'] .sms-app .template-subtitle,
+body[arco-theme='dark'] .sms-app .template-param-table .arco-table-th { color: var(--color-text-2); }
 body[arco-theme='dark'] .sms-app .traffic-eyebrow { color: rgb(var(--primary-6)); }
 body[arco-theme='dark'] .sms-app :is(.service-product,.service-protocols,.service-protocols li) { border-color: var(--color-border-2); }
 body[arco-theme='dark'] .sms-app .service-product-icon { color: rgb(var(--primary-6)); background: var(--color-primary-light-1); }
 body[arco-theme='dark'] .sms-app .service-protocols-index { color: var(--color-text-2); background: var(--color-fill-2); }
 body[arco-theme='dark'] .sms-app .service-brand { color: rgb(var(--primary-6)); }
 body[arco-theme='dark'] .sms-app .service-hint { color: var(--color-text-3); }
+body[arco-theme='dark'] .sms-app .batch-page {
+  --batch-border: var(--color-border-2); --batch-muted: var(--color-text-2); --batch-soft: var(--color-fill-2);
+}
+body[arco-theme='dark'] .sms-app .batch-counts strong { color: var(--color-text-1); }
+body[arco-theme='dark'] .sms-app .batch-confirm {
+  color: var(--color-text-1); background: var(--color-primary-light-1); border-color: var(--color-primary-light-3);
+}
 @media (max-width: 620px) {
   .sms-app .wizard-workspace { display: block; }
   .sms-app:not(:has(.qualification-wizard)) .wizard-sidebar { display: none; }
   .sms-mobile-step { display: block; color: #165dff; margin-bottom: 12px; font-size: 13px; }
   .sms-app:not(:has(.qualification-wizard)) .wizard-content, .sms-app .batch-section { padding: 16px; }
   .sms-app:not(:has(.qualification-wizard)) .form-grid, .sms-app .traffic-fields { grid-template-columns: 1fr; }
+  .sms-app .template-form-grid { grid-template-columns: 1fr; }
+  .template-traffic-modal .template-modal-description { grid-template-columns: 1fr; gap: 8px; }
   .sms-app .traffic-page { padding: 12px; }
 }

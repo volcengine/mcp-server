@@ -8,21 +8,28 @@ export function LockedFields({ locked, children }) {
   return <LockContext.Provider value={locked}>{children}</LockContext.Provider>;
 }
 
-export function Field({ label, value, onChange, required = false, type = 'text', multiline = false, children, ...props }) {
+export function Field({ label, value, onChange, required = false, type = 'text', multiline = false,
+  children, wrapperClassName = '', validationName, error, ...props }) {
   const id = useId();
+  const errorId = `${id}-error`;
   const locked = useContext(LockContext);
   const Component = multiline ? Input.TextArea : Input;
-  return <div className="traffic-field">
+  return <div className={`traffic-field ${wrapperClassName}`.trim()} data-validation-field={validationName}>
     <label htmlFor={id}>{required && <span className="traffic-required">*</span>}{label}</label>
-    {React.isValidElement(children) ? React.cloneElement(children, { disabled: locked || children.props.disabled })
-      : <Component id={id} aria-label={label} value={value ?? ''} type={type} onChange={onChange} {...props} disabled={locked || props.disabled} />}
+    {React.isValidElement(children) ? React.cloneElement(children, {
+      disabled: locked || children.props.disabled, error: Boolean(error),
+      'aria-invalid': Boolean(error), 'aria-describedby': error ? errorId : undefined,
+    }) : <Component id={id} aria-label={label} value={value ?? ''} type={type} onChange={onChange}
+      error={Boolean(error)} aria-invalid={Boolean(error)} aria-describedby={error ? errorId : undefined}
+      {...props} disabled={locked || props.disabled} />}
+    {error && <div id={errorId} className="traffic-field-error" role="alert">{error}</div>}
   </div>;
 }
 
-export function Choice({ label, value, onChange, options, ...props }) {
+export function Choice({ label, value, onChange, options, validationName, error, ...props }) {
   const id = useId();
-  return <Field label={label}><Select id={id} aria-label={label} value={value} onChange={onChange}
-    options={options.map(([value, label]) => ({ value, label }))} {...props} /></Field>;
+  return <Field label={label} validationName={validationName} error={error}><Select id={id} aria-label={label}
+    value={value} onChange={onChange} options={options.map(([value, label]) => ({ value, label }))} {...props} /></Field>;
 }
 
 export function useOperation() {
@@ -41,7 +48,7 @@ export function useOperation() {
       if (problem.unknown) setUncertain(true);
     } finally { lock.current = false; setBusy(false); }
   };
-  return { run, busy, error, uncertain };
+  return { run, busy, error, uncertain, clearError: () => setError(null) };
 }
 
 export function Feedback({ operation }) {

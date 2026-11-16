@@ -25,6 +25,18 @@ export const batchTemplateSchema = z.object({
 
 
 const confirmationSignature = z.string().regex(/^[0-9a-f]{64}$/);
+export const templatePreviewSchema = z.object({
+  request: z.object({
+    name: z.string().min(1), content: z.string().min(1),
+    channelType: z.enum(['CN_OTP', 'CN_NTC', 'CN_MKT']), area: z.literal('cn'),
+    signatures: z.array(z.string().min(1)).min(1),
+    templateParams: z.array(z.object({ name: z.string(), paramType: z.number().int().min(1).max(5) })),
+  }).passthrough(),
+  account: z.object({ userType: z.string(), businessName: z.string().nullish() }).passthrough(),
+  fixedTraffic: z.array(z.object({ paramType: z.union([z.literal(2), z.literal(3)]),
+    isExist: z.literal(true), content: z.string().optional() }).passthrough()),
+  warnings: z.array(z.string()), confirmation: confirmationSignature,
+});
 const fileMetadata = {
   name: z.string().min(1).max(255), size: z.number().int().positive(),
 };

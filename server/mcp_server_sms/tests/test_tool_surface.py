@@ -43,7 +43,8 @@ async def test_model_tools_are_readonly_and_do_not_accept_submission_requests(mc
         "signatures": ["签名"], "subAccounts": ["group"], "project": "项目", "desc": " 原文 ",
         "templateParams": [{"name": "url", "paramType": 2}],
         "shortUrlConfig": {"isEnabled": "1", "belong": "VMS", "isNeedClickDetails": "1", "uaCheckStrategy": 3},
-        "templateTrafficDriving": [[{"name": "url", "paramType": 2, "content": "https://example.com/A?Case=Keep"}]]}),
+        "templateTrafficDriving": [[{"name": "url", "paramType": 2, "id": 12,
+            "content": "https://example.com/A?Case=Keep"}]]}),
     ("open_sms_send_form", {"subAccount": "group", "signature": "签名", "templateId": "t",
         "mobiles": ["13800000000"], "templateParams": {"text": " 私密变量 "}}),
 ])

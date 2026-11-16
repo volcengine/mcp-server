@@ -40,7 +40,7 @@ The signature form uses `query_sms_resources` with `GetApplySignatureBind` to re
 | File upload | `prepare_material_upload`, `complete_material_upload`, `prepare_recipients_upload`, `complete_recipients_upload` |
 | Service activation | `get_sms_service_onboarding`, `submit_sms_service_onboarding` |
 | Qualification checks | `recognize_qualification_document`, `check_qualification_enterprise`, `check_qualification_person`, `send_verification_code`, `verify_code` |
-| Business applications | `submit_qualification`, `submit_signature`, `submit_template`, `preview_traffic_resource`, `submit_traffic_resources` |
+| Business applications | `submit_qualification`, `submit_signature`, `preview_template`, `submit_template`, `preview_traffic_resource`, `submit_traffic_resources` |
 | Sending and batch management | `send_sms`, `send_batch_test_sms`, `create_batch_task`, `start_batch_task`, `cancel_batch_task` |
 
 These tools declare `visibility=["app"]` and must not be offered to the model by a compliant host. Qualification OCR and identity checks always return details through `_meta["sms/form"]`; there is no model-visible override. Metadata still passes through the host and is not end-to-end encrypted.

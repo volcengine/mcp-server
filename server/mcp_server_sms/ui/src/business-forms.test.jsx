@@ -14,6 +14,7 @@ it('模板提交展示后端 1007 原文与编号，不把错误改成未知结�
   const message = '营销模板末尾必须为拒收请回复R且退订关键词必须在模版末尾';
   const backend = { ResponseMetadata: { RequestId: 'template-request', Error: { Code: '1007', Message: message } } };
   const app = { callServerTool: vi.fn(async ({ name, arguments: args }) => {
+    if (name === 'preview_template') return { _meta: { 'sms/form': { success: true, result: preview(args.request) } } };
     if (name === 'submit_template') return { isError: true, structuredContent: {
       success: false, request_id: 'template-request', error: { code: '1007', message, http_status: 400, backend_response: backend },
     } };
@@ -24,7 +25,7 @@ it('模板提交展示后端 1007 原文与编号，不把错误改成未知结�
     return { structuredContent: { success: true, result } };
   }) };
   const user = userEvent.setup();
-  render(<TemplateForm client={new SmsFormClient(app)} prefill={{ name: '活动通知', content: '活动优惠 回T退订',
+  render(<TemplateForm client={new SmsFormClient(app)} prefill={{ name: '活动通知', content: '活动优惠 拒收请回复R',
     channelType: 'CN_MKT', signatures: ['测试签名'], subAccounts: ['g'], templateParams: [] }} />);
   await waitFor(() => expect(screen.getByRole('button', { name: '核对模板申请' }).disabled).toBe(false));
   await user.click(screen.getByRole('button', { name: '核对模板申请' }));
@@ -35,16 +36,21 @@ it('模板提交展示后端 1007 原文与编号，不把错误改成未知结�
   expect(screen.getByText('错误码：1007')).toBeTruthy();
   expect(screen.getByText('HTTP 状态：400')).toBeTruthy();
   expect(screen.getByText('排障编号：template-request')).toBeTruthy();
-  expect(screen.getByRole('button', { name: '返回修改' }).disabled).toBe(false);
+  expect(screen.getByLabelText('模版内容').value).toBe('活动优惠 拒收请回复R');
   expect(app.callServerTool.mock.calls.filter(([call]) => call.name === 'submit_template')).toHaveLength(1);
 });
 const template = { TemplateId: 't', TemplateName: '测试通知', ChannelType: 'CN_NTC', TemplateContent: '预约时间 ${time}' };
+function preview(request) {
+  return { request: { ...request, area: 'cn' }, account: { userType: 'enterprise', mktParam: 1 },
+    fixedTraffic: [], warnings: [], confirmation: 'a'.repeat(64) };
+}
 function client() {
   return { report: vi.fn().mockResolvedValue(undefined), query: vi.fn(async action => {
     if (action === 'GetSubAccountListForAgent') return { list: [{ subAccountId: 'g', subAccountName: '测试消息组' }], total: 1 };
     if (action === 'ListSignaturesForAgent') return { List: [{ Signature: '测试签名' }], Total: 1 };
     return { list: [], total: 0 };
-  }), call: vi.fn(async name => {
+  }), call: vi.fn(async (name, args) => {
+    if (name === 'preview_template') return preview(args.request);
     if (name === 'list_templates') return { List: [template], Total: 1 };
     if (name === 'send_sms') return { MessageIds: ['message'] };
     if (name === 'submit_template') return { templateId: 't', status: 1 };
@@ -103,32 +109,32 @@ it('发送按原样保留手机号与变量，拒绝空行和缺变量', () => {
 
 it('模板表单预填完整字段，返回修改保留内容，页面确认后才提交', async () => {
   const api = client(); const user = userEvent.setup();
-  const draft = { name: '双十一', content: '优惠 ${url}', channelType: 'CN_MKT', signatures: ['测试签名'], subAccounts: ['g'],
+  const draft = { name: '双十一', content: '优惠 ${url} 拒收请回复R', channelType: 'CN_MKT', signatures: ['测试签名'], subAccounts: ['g'],
     desc: ' 原用途 ', project: '项目', templateParams: [{ name: 'url', paramType: 2 }],
     shortUrlConfig: { isEnabled: '1', belong: 'VMS', isNeedClickDetails: '1', uaCheckStrategy: 3 },
-    templateTrafficDriving: [[{ name: 'url', paramType: 2, content: 'https://example.com/Path?Q=A' }]] };
+    templateTrafficDriving: [[{ name: 'url', paramType: 2, id: 12, content: 'https://example.com/Path?Q=A' }]] };
   render(<TemplateForm client={api} prefill={draft} />);
   await waitFor(() => expect(api.query.mock.calls.some(([action]) => action === 'ListSignaturesForAgent')).toBe(true));
   await waitFor(() => expect(screen.getByRole('button', { name: '核对模板申请' }).disabled).toBe(false));
   await user.click(screen.getByRole('button', { name: '核对模板申请' }));
   await screen.findByRole('button', { name: '确认提交模板' });
-  expect(api.call).not.toHaveBeenCalled();
+  expect(api.call.mock.calls.map(([name]) => name)).toEqual(['preview_template']);
   await user.click(screen.getByRole('button', { name: '返回修改' }));
-  expect(screen.getByLabelText('模板正文').value).toBe(draft.content);
-  expect(screen.getByLabelText('用途说明').value).toBe(draft.desc);
+  expect(screen.getByLabelText('模版内容').value).toBe(draft.content);
+  expect(screen.getByLabelText('模版用途').value).toBe(draft.desc);
   await user.click(screen.getByRole('button', { name: '核对模板申请' }));
   await user.click(screen.getByText('我已核对以上信息，同意提交本次操作'));
   await user.click(screen.getByRole('button', { name: '确认提交模板' }));
   await screen.findByText('模板申请已受理');
-  expect(api.call).toHaveBeenCalledWith('submit_template', { request: draft }, { write: true });
+  expect(api.call).toHaveBeenCalledWith('submit_template', { request: { ...draft, area: 'cn' }, confirmation: 'a'.repeat(64) }, { write: true });
 });
 
 it('模板变量、组合绑定和验证码占位符校验不会自动改写用户内容', () => {
   const draft = { name: 'n', content: '验证码 ${code}', channelType: 'CN_OTP', signatures: ['s'], subAccounts: ['g'], templateParams: [{ name: 'code', paramType: 1 }] };
-  expect(templatePayload(draft, false).content).toBe(draft.content);
-  expect(() => templatePayload({ ...draft, content: '${code}${code}' }, false)).toThrow('一个普通变量');
-  expect(() => templatePayload({ ...draft, templateParams: [] }, false)).toThrow('一一对应');
-  expect(() => templatePayload({ ...draft, shortUrlConfig: { isEnabled: '1' } }, false)).toThrow('营销短信');
+  expect(templatePayload(draft).content).toBe(draft.content);
+  expect(() => templatePayload({ ...draft, content: '${code}${code}' })).toThrow('一个普通变量');
+  expect(() => templatePayload({ ...draft, templateParams: [] })).toThrow('一一对应');
+  expect(() => templatePayload({ ...draft, shortUrlConfig: { isEnabled: '1' } })).toThrow('营销短信');
 });
 
 it('已有任务开表只查询，页面内确认后才启动，不重新创建', async () => {
@@ -208,7 +214,7 @@ it('历史任务首次读取失败，刷新补齐身份详情后可以核对启�
   expect(api.call.mock.calls.every(([name]) => name === 'query_batch_tasks')).toBe(true);
 });
 
-it.each([{ channelType: 'CN_NTC' }, { subAccounts: ['g'] }])('模板补齐未知类型或消息组后按预填名称核对签名 %j', async partial => {
+it.each([{ channelType: 'CN_NTC' }, { subAccounts: ['g'] }])('模板缺少消息组或待补类型时仍按预填名称核对签名 %j', async partial => {
   const api = client(); const normal = api.query.getMockImplementation();
   api.query.mockImplementation((action, params) => action === 'ListSignaturesForAgent'
     ? Promise.resolve({ List: params.Signature === '测试签名' ? [{ Signature: '测试签名' }] : [], Total: params.Signature ? 1 : 0 })
@@ -216,20 +222,19 @@ it.each([{ channelType: 'CN_NTC' }, { subAccounts: ['g'] }])('模板补齐未知
   const user = userEvent.setup();
   render(<TemplateForm client={api} prefill={{ ...partial, name: '测试模板', content: '预约 ${time}',
     signatures: ['测试签名'], templateParams: [{ name: 'time', paramType: 1 }] }} />);
-  await waitFor(() => expect(api.query.mock.calls.some(([action]) => action === 'GetSubAccountListForAgent')).toBe(true));
-  if (!partial.subAccounts) {
-    await choose(user, '适用消息组', '测试消息组');
-    await user.keyboard('{Escape}');
-  } else {
+  if (!partial.channelType) {
     await waitFor(() => expect(screen.getByRole('button', { name: '核对模板申请' }).disabled).toBe(false));
-    await choose(user, '短信类型', '通知');
+    await choose(user, '模版类型', '通知');
   }
   await waitFor(() => expect(api.query.mock.calls.filter(([action]) => action === 'ListSignaturesForAgent').map(([, params]) => params))
-    .toContainEqual(expect.objectContaining({ Signature: '测试签名', ChannelTypes: ['CN_NTC'], SubAccounts: ['g'] })));
+    .toContainEqual(expect.objectContaining({ Signature: '测试签名', ChannelTypes: ['CN_NTC'],
+      ...(partial.subAccounts ? { SubAccounts: ['g'] } : {}) })));
+  expect(api.query.mock.calls.some(([action]) => action === 'GetSubAccountListForAgent')).toBe(false);
+  if (!partial.subAccounts) expect(api.query.mock.calls.every(([, params]) => !Object.hasOwn(params, 'SubAccounts'))).toBe(true);
   await waitFor(() => expect(screen.getByRole('button', { name: '核对模板申请' }).disabled).toBe(false));
   await user.click(screen.getByRole('button', { name: '核对模板申请' }));
   await screen.findByRole('button', { name: '确认提交模板' });
-  expect(api.call).not.toHaveBeenCalled();
+  expect(api.call.mock.calls.map(([name]) => name)).toEqual(['preview_template']);
 });
 
 it('模板明确更换已确定的短信类型时清除原签名，要求重新选择', async () => {
@@ -238,7 +243,7 @@ it('模板明确更换已确定的短信类型时清除原签名，要求重新�
     content: '原文', signatures: ['测试签名'] }} />);
   await waitFor(() => expect(api.query.mock.calls.some(([action]) => action === 'ListSignaturesForAgent')).toBe(true));
   await waitFor(() => expect(screen.getByRole('button', { name: '核对模板申请' }).disabled).toBe(false));
-  await choose(user, '短信类型', '营销');
+  await choose(user, '模版类型', '营销');
   await waitFor(() => expect(screen.getByRole('button', { name: '核对模板申请' }).disabled).toBe(false));
   await user.click(screen.getByRole('button', { name: '核对模板申请' }));
   await screen.findByText('请至少选择一个签名。');

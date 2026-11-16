@@ -21,7 +21,7 @@ def test_stateless_discovery_needs_no_database_or_initialize(api_calls, monkeypa
             assert "error" not in response.json()
             assert "mcp-session-id" not in response.headers
             assert response.headers["cache-control"] == "no-store"
-        assert len(response.json()["result"]["tools"]) == 38
+        assert len(response.json()["result"]["tools"]) == 39
     assert list(tmp_path.iterdir()) == []
     assert api_calls[0] == []
 
@@ -43,7 +43,7 @@ def test_standard_http_initialize_and_tool_call_for_earlier_clients(api_calls, v
         listed = client.post("/mcp", headers=headers, json={
             "jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {},
         })
-        assert len(listed.json()["result"]["tools"]) == 38
+        assert len(listed.json()["result"]["tools"]) == 39
         called = client.post("/mcp", headers=headers, json={
             "jsonrpc": "2.0", "id": 3, "method": "tools/call",
             "params": {"name": "get_account_information", "arguments": {}},
@@ -176,7 +176,7 @@ def test_remote_cli_checks_host_and_allows_configured_or_missing_origin(api_call
         ):
             response = client.post("/mcp", headers=accepted, json=body)
             assert response.status_code == 200, response.text
-            assert len(response.json()["result"]["tools"]) == 38
+            assert len(response.json()["result"]["tools"]) == 39
 
         invalid_host = client.post(
             "/mcp", headers={**headers, "host": "www.volcengine.com", "origin": browser_origin}, json=body

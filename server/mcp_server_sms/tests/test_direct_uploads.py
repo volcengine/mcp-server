@@ -102,7 +102,9 @@ def recipients_stack(data, *, download_url="https://bucket.tos-cn-beijing.volces
             "GetUploadTosURL": {"file": "fixture.csv", "url": "https://bucket.tos-cn-beijing.volces.com/fixture.csv?signature=put"},
             "GetFilePublicTosURL": {"fileName": "fixture.csv", "url": download_url},
             "ListSecondTemplate": {"List": [{"TemplateId": "template", "useVolcLink": False}]},
-            "CheckTrafficDrivingExist": {"list": [{"isExist": True, "paramType": 2}]},
+            "CheckTrafficDrivingExist": {"list": [
+                {"isExist": True, "paramType": 2, "id": 12, "content": "https://example.com"},
+            ]},
         }
         assert action in results, action
         return httpx.Response(200, json={"Result": results[action]})
