@@ -442,12 +442,24 @@ def test_virtual_template_without_short_link_detail_reports_uncovered_rows():
 @pytest.mark.parametrize("code", ["1001", "1999", "SY:0500"])
 def test_backend_errors_are_not_classified_across_both_send_forms(code):
     def respond(action, _params):
+        if action == "ListSecondTemplate":
+            return {"List": [{
+                "TemplateId": "t", "TemplateContent": "测试内容",
+                "TemplateParams": [], "ChannelType": "CN_NTC",
+                "Signatures": ["签名"], "SubAccounts": ["g"],
+                "BatchOnly": False, "TaskFields": [],
+            }]}
         assert action == "SendSmsForAgent"
         return httpx.Response(200, json={"ResponseMetadata": {"Error": {"Code": code}}})
 
     selection = {"sub_account": "g", "signature": "签名", "template_id": "t"}
     with form_api(respond) as (call, calls):
-        direct = call("send_sms", {"request": {"subAccount": "g", "signature": "签名", "templateId": "t", "mobiles": ["13800000000"]}})
+        request = {"subAccount": "g", "signature": "签名", "templateId": "t", "mobiles": ["13800000000"]}
+        preview = call("preview_sms_send", {"request": request})
+        direct = call("send_sms", {
+            "request": request,
+            "confirmation": preview["structuredContent"]["result"]["confirmation"],
+        })
         trial = call("send_batch_test_sms", {"request": {
             **selection, "mobile": "13800000000",
         }})
@@ -457,4 +469,69 @@ def test_backend_errors_are_not_classified_across_both_send_forms(code):
             assert result["structuredContent"]["error"]["backend_response"] == {
                 "ResponseMetadata": {"Error": {"Code": code}},
             }
-        assert [action for action, _ in calls] == ["SendSmsForAgent", "SendSmsForAgent"]
+        assert [action for action, _ in calls] == [
+            "ListSecondTemplate", "ListSecondTemplate",
+            "SendSmsForAgent", "SendSmsForAgent",
+        ]
+
+
+def test_send_rechecks_template_resource_after_confirmation():
+    query_count = 0
+
+    def respond(action, _params):
+        nonlocal query_count
+        assert action == "ListSecondTemplate"
+        query_count += 1
+        return {"List": [{
+            "TemplateId": "t",
+            "TemplateContent": "通知${text}" if query_count == 1 else "变更${text}",
+            "TemplateParams": [{"Name": "text"}],
+            "ChannelType": "CN_NTC",
+            "Signatures": ["签名"],
+            "SubAccounts": ["g"],
+            "BatchOnly": False,
+            "TaskFields": [],
+        }]}
+
+    request = {
+        "subAccount": "g", "signature": "签名", "templateId": "t",
+        "mobiles": ["13800000000"], "templateParams": {"text": "内容"},
+    }
+    with form_api(respond) as (call, calls):
+        preview = call("preview_sms_send", {"request": request})
+        result = call("send_sms", {
+            "request": request,
+            "confirmation": preview["structuredContent"]["result"]["confirmation"],
+        })
+        assert result["isError"] is True
+        assert result["structuredContent"]["error"]["code"] == "send_confirmation_changed"
+        assert [action for action, _ in calls] == [
+            "ListSecondTemplate", "ListSecondTemplate",
+        ]
+
+
+def test_send_confirmation_cannot_cross_authorized_accounts():
+    def respond(action, _params):
+        assert action == "ListSecondTemplate"
+        return {"List": [{
+            "TemplateId": "t", "TemplateContent": "通知${text}",
+            "TemplateParams": [{"Name": "text"}], "ChannelType": "CN_NTC",
+            "Signatures": ["签名"], "SubAccounts": ["g"],
+            "BatchOnly": False, "TaskFields": [],
+        }]}
+
+    request = {
+        "subAccount": "g", "signature": "签名", "templateId": "t",
+        "mobiles": ["13800000000"], "templateParams": {"text": "内容"},
+    }
+    with form_api(respond) as (call, calls):
+        preview = call("preview_sms_send", {"request": request}, identity="one")
+        result = call("send_sms", {
+            "request": request,
+            "confirmation": preview["structuredContent"]["result"]["confirmation"],
+        }, identity="two")
+        assert result["isError"] is True
+        assert result["structuredContent"]["error"]["code"] == "send_confirmation_changed"
+        assert [action for action, _ in calls] == [
+            "ListSecondTemplate", "ListSecondTemplate",
+        ]

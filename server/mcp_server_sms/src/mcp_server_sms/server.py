@@ -53,13 +53,13 @@ from .prefill import (
     BatchFormPrefill,
     QualificationFormPrefill,
     SignatureFormPrefill,
-    SmsSendPrefill,
     TemplateFormPrefill,
     TrafficFormPrefill,
 )
 from .protocol import SmsAPIError, SmsMCPServer
 from .qualification_checks import check_enterprise, enterprise_ticket
 from .queries import BatchTaskQuery, BatchTaskReference, ResourceQuery
+from .send_checks import SendConfirmation, prepare_sms_send
 from .service_onboarding import ServiceConfirmation, ServiceOnboarding
 from .template_checks import (
     TemplateConfirmation,
@@ -112,7 +112,7 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
         # SDK 默认 INFO 会启用 HTTPX 的完整 GET URL 日志，可能包含短信正文。
         log_level="WARNING",
         instructions=(
-            "国内短信表单应用。模型工具只查询资源和打开页面；业务写入由客户在页面确认后执行。"
+            "国内短信工具与表单应用。除单条短信外，业务写入由客户在页面确认后执行。"
             "有写入或费用的操作由客户端取得用户授权后调用；工具注解不能代替授权。"
             "接口受理成功不等于短信送达；结果未知的写请求不要自动重试。"
             "服务未开通（RE:0001）时使用开通页面核对协议与商品状态。"
@@ -120,7 +120,10 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
             "query_sms_resources 提供按行业的签名、群发目录、运营商报备和引流查询。"
             "创建群发使用稳定 idempotencyKey，创建不自动启动，特殊通知正文按模板 TaskFields 提供。"
             "材料、验证码和个人信息应通过客户端私密渠道传入，不放进普通聊天。"
-            "用户要办理资质、签名、引流、模板、发送或群发时，调用对应 open_* 工具并用 prefill 填已知字段。"
+            "用户要办理资质、签名、引流、模板或群发时，调用对应 open_* 工具并用 prefill 填已知字段。"
+            "单条短信不打开页面；对话中补齐消息组、签名、模板、收件号码和变量值，"
+            "先调用 preview_sms_send 展示掩码号码和渲染正文，用户明确确认该预览后，"
+            "再把原请求与 confirmation 交给 send_sms；确认后参数或资源变化须重新预览。"
             "未知项留空，打开和恢复页面不等于授权提交。"
         ),
     )
@@ -239,11 +242,6 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
     async def open_template_form(prefill: TemplateFormPrefill | None = None) -> FormToolResult:
         """打开国内短信模板申请页面，预填正文、用途、变量、签名和适用消息组。"""
         return open_form("template", prefill)
-
-    @mcp.tool(annotations=READ, structured_output=True, meta=FORM_META)
-    async def open_sms_send_form(prefill: SmsSendPrefill | None = None) -> FormToolResult:
-        """打开普通短信或业务验证码发送页面；客户核对号码和实际正文后才发送。"""
-        return open_form("send", prefill)
 
     @mcp.tool(annotations=READ, structured_output=True)
     async def query_batch_tasks(ctx: Context, request: BatchTaskQuery) -> dict[str, Any]:
@@ -566,10 +564,35 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
             ))
         return await call("ApplySmsTemplateV2ForAgent", template_apply_payload(view))
 
-    @mcp.tool(annotations=WRITE, structured_output=True, meta=APP_ONLY_META)
-    async def send_sms(ctx: Context, request: SmsSendRequest) -> dict[str, Any]:
-        """发送客户在页面核对过的短信，产生真实短信和费用；结果未知时不自动重试。"""
-        return await invoke(ctx, "SendSmsForAgent", {
+    @mcp.tool(annotations=READ, structured_output=True)
+    async def preview_sms_send(ctx: Context, request: SmsSendRequest) -> dict[str, Any]:
+        """核对单条短信的当前模板、消息组和变量，返回掩码号码与渲染正文；不会发送。"""
+        credentials = credentials_for(ctx)
+        view = await prepare_sms_send(
+            lambda action, params: invoke_as(credentials, action, params),
+            request,
+            credentials,
+        )
+        return {"success": True, "action": "preview_sms_send", "result": view, "error": None}
+
+    @mcp.tool(annotations=WRITE, structured_output=True)
+    async def send_sms(
+        ctx: Context, request: SmsSendRequest, confirmation: SendConfirmation
+    ) -> dict[str, Any]:
+        """复核已确认的单条短信预览后发送；产生费用，结果未知时不自动重试。"""
+        credentials = credentials_for(ctx)
+
+        async def call(action, params):
+            return await invoke_as(credentials, action, params)
+
+        view = await prepare_sms_send(call, request, credentials)
+        if not hmac.compare_digest(confirmation, view["confirmation"]):
+            raise SmsAPIError(failure(
+                "SendSmsForAgent",
+                "send_confirmation_changed",
+                "短信参数、账号或模板资源已变化，请重新预览并确认",
+            ))
+        return await call("SendSmsForAgent", {
             "SubAccount": request.sub_account, "Signature": request.signature,
             "TemplateId": request.template_id, "Mobiles": ",".join(request.mobiles),
             "TemplateParam": json.dumps(request.template_params, ensure_ascii=False, separators=(",", ":")),

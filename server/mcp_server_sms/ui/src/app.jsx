@@ -6,12 +6,11 @@ import { TrafficForm } from './traffic.jsx';
 import { BatchForm } from './batch.jsx';
 import { ServiceForm } from './service.jsx';
 import { TemplateForm } from './template.jsx';
-import { SmsSendForm } from './send.jsx';
 import { Receipt } from './common.jsx';
 
 const forms = {
   qualification: QualificationForm, signature: SignatureForm, traffic: TrafficForm,
-  batch: BatchForm, service: ServiceForm, template: TemplateForm, send: SmsSendForm,
+  batch: BatchForm, service: ServiceForm, template: TemplateForm,
 };
 
 export function SmsApp({ client, toolResult, ready, supported, error }) {

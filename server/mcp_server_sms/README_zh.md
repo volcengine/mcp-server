@@ -13,9 +13,9 @@
 | 普通模板及二级绑定详情 | `list_templates`、`list_second_templates` |
 | 发送记录和统计 | `list_send_logs`、`get_send_statistics` |
 | 群发任务查询和 CSV 示例 | `query_batch_tasks`、`get_batch_csv_template` |
-| 打开业务页面 | `open_sms_service_onboarding`、`open_qualification_form`、`open_signature_form`、`open_traffic_form`、`open_template_form`、`open_sms_send_form`、`open_batch_task_form` |
+| 打开业务页面 | `open_sms_service_onboarding`、`open_qualification_form`、`open_signature_form`、`open_traffic_form`、`open_template_form`、`open_batch_task_form` |
 
-全部声明 `readOnlyHint=true`。开表不会申请、发码、发送短信或启动群发。`prefill` 只接受可编辑草稿，不接受业务提交 `request`、校验票据、确认标记或幂等键。用户已经提供的信息可预填，未知项留空。
+全部查询和开表工具都声明 `readOnlyHint=true`。开表不会申请、发码、发送短信或启动群发。自然语言单发先调用 `preview_sms_send`，向客户展示掩码号码和渲染正文；客户明确确认后，把未变化的请求和返回的 `confirmation` 交给 `send_sms`。提交前会重新核对模板和账号范围，参数或资源变化后必须重新预览。多个号码、定时发送和逐号码变量统一使用群发页面。`prefill` 只接受可编辑草稿，不接受业务提交 `request`、校验票据、确认标记或幂等键。用户已经提供的信息可预填，未知项留空。
 
 已有群发任务通过 `open_batch_task_form({"task":{"subAccount":"消息组 ID","taskId":"任务 ID"}})` 打开管理页；`task` 与新建用的 `prefill` 互斥。查询和打开旧任务不会重建一条任务。
 
@@ -39,7 +39,7 @@
 | 服务开通 | `get_sms_service_onboarding`、`submit_sms_service_onboarding` |
 | 资质核验 | `recognize_qualification_document`、`check_qualification_enterprise`、`check_qualification_person`、`send_verification_code`、`verify_code` |
 | 申请与引流录入 | `submit_qualification`、`submit_signature`、`submit_template`、`preview_traffic_resource`、`submit_traffic_resources` |
-| 发送和群发管理 | `send_sms`、`send_batch_test_sms`、`create_batch_task`、`start_batch_task`、`cancel_batch_task` |
+| 发送和群发管理 | `preview_sms_send`、`send_sms`、`send_batch_test_sms`、`create_batch_task`、`start_batch_task`、`cancel_batch_task` |
 
 这些工具声明 `visibility=["app"]`，由遵循规范的宿主从模型工具列表中排除。可见性不是鉴权：每次调用仍校验客户凭据，最终资源权限由短信/IAM 执行。
 

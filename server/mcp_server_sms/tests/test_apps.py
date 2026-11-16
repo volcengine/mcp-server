@@ -30,7 +30,7 @@ from mcp_server_sms.uploads import IMAGEX, FileUploader
         ("open_traffic_form", "traffic"),
         ("open_batch_task_form", "batch"),
         ("open_sms_service_onboarding", "service"),
-        ("open_template_form", "template"), ("open_sms_send_form", "send"),
+        ("open_template_form", "template"),
     ],
 )
 async def test_open_form_never_writes_or_replays(name, form, mcp, api_calls):

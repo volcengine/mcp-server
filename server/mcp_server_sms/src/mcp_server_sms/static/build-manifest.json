@@ -4,11 +4,10 @@
     "ui/forms.html": "8786fcb7dc135c8ec7239384fd5b2f3a270f40cb2e14d318aeb4797bf3bfa83c",
     "ui/package-lock.json": "24f39b8aab1f03d001e12e5a3a6484f439042a47804c3552bc2f53b88edcc697",
     "ui/package.json": "50389679a22acc9db527157a8a955145dbec8e136404f8c720f5a3ecb92bcccb",
-    "ui/src/app.jsx": "0f8a12dd4880ef754d4b82b446f9e3b2f2a9c5082e2d3d3de4f328afb387eaea",
+    "ui/src/app.jsx": "c3ccb2828474d8af51301b0fc649fddb0dc622bd8fdf5d8d6ec7c9bd17f0d102",
     "ui/src/batch-controls.jsx": "b7c28cd54f84336880a94e4fc31966edc7fb73b9901f85051c7b3792c943ba4b",
     "ui/src/batch-test-sms.jsx": "327e2fea3c18d0085e7dbb20055d09c9bd96bf882ed4a6474a8d5da720bc62f8",
     "ui/src/batch.jsx": "6be54d60b48f1f5a86dc10608675cb009d9aec1a83087586fef1c81da0e24026",
-    "ui/src/catalog.js": "c98f063cbab22ba2d50824418f34bceebdd251351d34cc9e54d7a2e04f06d600",
     "ui/src/client.js": "645444cbf4c8ffceb283697e5eaf75bb6bebb51deb131f5ee6108bb3d72c19e7",
     "ui/src/common.jsx": "b66bef5df864bc0089f8b4679985c0f8d3628f05b5ad37f0330c939c7554770a",
     "ui/src/contracts.js": "198b6ededa6decf6a30098110b89000a01eb720560061b64b2ddbd1fc9ecae8c",
@@ -19,7 +18,6 @@
     "ui/src/qualification-controller.js": "72b4c6de8cd574b3ae10240002c1331954e6bc39fc6d8a54bd89c31c1e42f73f",
     "ui/src/qualification-wizard.jsx": "5fe7b68bc32f5ba46f9fae4dd3460ba99d668a91c43b3cb2a63b844788548191",
     "ui/src/qualification.jsx": "d21207a0617c202690a879a96a8f69f8fec1b9f3f6de32bca4e7acb52c50f2d2",
-    "ui/src/send.jsx": "5552a9bb16c2f81b67b43ea2ed98e3fd29b057c2ec4327d9145997b79951072e",
     "ui/src/service.jsx": "8cbc7f98e56ee8946b5232fe80bd2781075d2e58652b5c3c89ebea010adfddd5",
     "ui/src/signature-controller.js": "4a286aac8451f51d1f4b5ef68ffd1c16ab95bf2f8172839e7c5cb157984130c3",
     "ui/src/signature-upload.jsx": "14098d6192751666c4f9731ac5e7a5b60026793bded276f3de6ad859907f2afb",
@@ -35,5 +33,5 @@
     "ui/src/traffic.jsx": "be623f2d93d86401349559aebe196c04524f65d391585e63e73ee1a1cce11348",
     "ui/vite.config.js": "8528c3ae9e50f93872b58562ba2cbb4b4b7c1d2d78e2d9e0b88073579eb69765"
   },
-  "htmlSha256": "c49d2b31afc846b56414c824b1de587e80abcda0a912506fc30c903b4d7db306"
+  "htmlSha256": "5f39cbe1ad63c9bf6dc1c413ceb89b750dacfb36053484fe2a1c62196419e4a8"
 }

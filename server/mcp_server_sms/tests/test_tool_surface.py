@@ -5,20 +5,22 @@ import json
 import pytest
 from conftest import payload
 
-from mcp_server_sms.models import TemplateApplication
+from mcp_server_sms.auth import Credentials
+from mcp_server_sms.models import SmsSendRequest, TemplateApplication
 from mcp_server_sms.protocol import SmsAPIError
+from mcp_server_sms.send_checks import prepare_sms_send
 from mcp_server_sms.template_checks import validate_template_application
 
 MODEL_TOOLS = {
     "open_qualification_form", "open_signature_form", "open_traffic_form", "open_batch_task_form",
-    "open_template_form", "open_sms_send_form", "open_sms_service_onboarding",
+    "open_template_form", "open_sms_service_onboarding", "preview_sms_send", "send_sms",
     "query_batch_tasks", "query_sms_resources", "get_account_information",
     "get_qualification_requirements", "list_qualifications", "list_templates",
     "list_second_templates", "list_send_logs", "get_send_statistics", "get_batch_csv_template",
 }
 
 
-async def test_model_tools_are_readonly_and_do_not_accept_submission_requests(mcp):
+async def test_model_tools_expose_only_read_operations_and_confirmable_single_send(mcp):
     tools = await mcp.list_tools()
     visible = {t.name for t in tools if "model" in (t.meta or {}).get("ui", {}).get("visibility", ["model", "app"])}
     assert visible == MODEL_TOOLS
@@ -27,10 +29,13 @@ async def test_model_tools_are_readonly_and_do_not_accept_submission_requests(mc
                "list_batch_tasks", "get_batch_upload_url", "manage_sms_service", "upload_sms_file"}
     assert removed.isdisjoint(t.name for t in tools)
     for tool in tools:
-        if tool.name in visible:
+        if tool.name in visible and tool.name != "send_sms":
             assert tool.annotations.read_only_hint is True
             if tool.name.startswith("open_"):
                 assert "request" not in tool.input_schema["properties"]
+        elif tool.name == "send_sms":
+            assert tool.annotations.read_only_hint is False
+            assert tool.annotations.idempotent_hint is False
         else:
             assert tool.meta["ui"]["visibility"] == ["app"]
     for name in ["recognize_qualification_document", "check_qualification_enterprise", "check_qualification_person"]:
@@ -45,8 +50,6 @@ async def test_model_tools_are_readonly_and_do_not_accept_submission_requests(mc
         "shortUrlConfig": {"isEnabled": "1", "belong": "VMS", "isNeedClickDetails": "1", "uaCheckStrategy": 3},
         "templateTrafficDriving": [[{"name": "url", "paramType": 2, "id": 12,
             "content": "https://example.com/A?Case=Keep"}]]}),
-    ("open_sms_send_form", {"subAccount": "group", "signature": "签名", "templateId": "t",
-        "mobiles": ["13800000000"], "templateParams": {"text": " 私密变量 "}}),
 ])
 async def test_new_forms_preserve_all_prefill_fields_without_business_calls(name, draft, mcp, api_calls):
     result = await mcp.call_tool(name, {"prefill": draft})
@@ -96,14 +99,88 @@ def test_template_submission_validates_structure_without_rewriting(changes, code
     assert error.value.result["error"]["code"] == code
 
 
-@pytest.mark.parametrize("params", [{}, {"text": "原文"}, {"text": "原文", "extra": "原样传递"}])
-async def test_send_leaves_template_validation_to_sms(params, mcp, api_calls):
+async def test_send_requires_preview_and_preserves_confirmed_values(mcp, api_calls):
+    request = {
+        "subAccount": "g", "signature": "签名", "templateId": "SPT_fixture",
+        "mobiles": ["13800000000"], "templateParams": {"text": " 原文 "},
+    }
+    missing = await mcp.call_tool("send_sms", {"request": request})
+    assert missing.is_error and api_calls[0] == []
+
+    preview = await mcp.call_tool("preview_sms_send", {"request": request})
+    assert not preview.is_error
+    view = payload(preview)["result"]
+    assert view["maskedRecipient"] == "138****0000"
+    assert view["renderedContent"] == "内容 原文 "
+    assert "13800000000" not in json.dumps(view, ensure_ascii=False)
+
+    result = await mcp.call_tool("send_sms", {
+        "request": request,
+        "confirmation": view["confirmation"],
+    })
+    assert not result.is_error
+    assert [item.url.params["Action"] for item in api_calls[0]] == [
+        "ListSecondTemplate", "ListSecondTemplate", "SendSmsForAgent",
+    ]
+    assert json.loads(api_calls[0][-1].content)["TemplateParam"] == '{"text":" 原文 "}'
+
+
+async def test_natural_language_send_accepts_only_one_recipient(mcp, api_calls):
     result = await mcp.call_tool("send_sms", {"request": {
         "subAccount": "g", "signature": "签名", "templateId": "SPT_fixture",
-        "mobiles": ["13800000000"], "templateParams": params,
+        "mobiles": ["13800000000", "13900000000"], "templateParams": {},
     }})
-    assert not result.is_error
-    assert [request.url.params["Action"] for request in api_calls[0]] == ["SendSmsForAgent"]
-    assert json.loads(api_calls[0][0].content)["TemplateParam"] == json.dumps(
-        params, ensure_ascii=False, separators=(",", ":")
-    )
+    assert result.is_error
+    assert api_calls[0] == []
+
+
+async def test_send_rejects_changed_request_after_preview(mcp, api_calls):
+    request = {
+        "subAccount": "g", "signature": "签名", "templateId": "SPT_fixture",
+        "mobiles": ["13800000000"], "templateParams": {"text": "原文"},
+    }
+    preview = await mcp.call_tool("preview_sms_send", {"request": request})
+    confirmation = payload(preview)["result"]["confirmation"]
+    changed = {**request, "templateParams": {"text": "变化"}}
+    result = await mcp.call_tool("send_sms", {
+        "request": changed, "confirmation": confirmation,
+    })
+    assert result.is_error
+    assert [item.url.params["Action"] for item in api_calls[0]] == [
+        "ListSecondTemplate", "ListSecondTemplate",
+    ]
+
+
+@pytest.mark.parametrize(
+    "template_changes,params,code",
+    [
+        ({"BatchOnly": True}, {"text": "内容"}, "batch_only_template"),
+        ({"TaskFields": [{"Name": "content"}]}, {"text": "内容"}, "unsupported_task_fields"),
+        ({}, {}, "template_variables_mismatch"),
+        ({"TemplateParams": [{"Name": "other"}]}, {"other": "内容"}, "template_metadata_mismatch"),
+    ],
+)
+async def test_preview_blocks_templates_not_valid_for_single_send(
+    template_changes, params, code
+):
+    async def call(action, _request):
+        assert action == "ListSecondTemplate"
+        record = {
+            "TemplateId": "SPT_fixture", "TemplateContent": "内容${text}",
+            "TemplateParams": [{"Name": "text"}], "ChannelType": "CN_NTC",
+            "Signatures": ["签名"], "SubAccounts": ["g"],
+            "BatchOnly": False, "TaskFields": [], **template_changes,
+        }
+        return {"success": True, "result": {"List": [record]}}
+
+    request = {
+        "subAccount": "g", "signature": "签名", "templateId": "SPT_fixture",
+        "mobiles": ["13800000000"], "templateParams": params,
+    }
+    with pytest.raises(SmsAPIError) as error:
+        await prepare_sms_send(
+            call,
+            SmsSendRequest.model_validate(request),
+            Credentials("access", "secret", "token"),
+        )
+    assert error.value.result["error"]["code"] == code

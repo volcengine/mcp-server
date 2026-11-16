@@ -16,27 +16,30 @@ async def test_qualification_query_uses_small_default_and_preserves_override(
     assert json.loads(request.content) == {"pageIndex": 1, "pageSize": expected_size}
 
 
-async def test_send_is_direct_and_does_not_rewrite_or_deduplicate(
+async def test_send_preview_confirmation_does_not_rewrite(
     mcp, api_calls, monkeypatch, tmp_path
 ):
     monkeypatch.chdir(tmp_path)
-    result = await mcp.call_tool(
-        "send_sms",
-        {"request": {
+    request = {
             "subAccount": "group-one", "signature": "示例签名", "templateId": "SPT_fixture",
-            "mobiles": ["13800000000", "13800000000"], "templateParams": {"text": " 原始 内容 "},
-        }},
-    )
+            "mobiles": ["13800000000"], "templateParams": {"text": " 原始 内容 "},
+    }
+    preview = await mcp.call_tool("preview_sms_send", {"request": request})
+    confirmation = payload(preview)["result"]["confirmation"]
+    result = await mcp.call_tool("send_sms", {
+        "request": request, "confirmation": confirmation,
+    })
     assert not result.is_error
     assert payload(result)["result"] == {"MessageIds": ["fixture-message"]}
     calls = api_calls[0]
-    assert len(calls) == 1
-    assert calls[0].url.params["Action"] == "SendSmsForAgent"
-    assert json.loads(calls[0].content) == {
+    assert [item.url.params["Action"] for item in calls] == [
+        "ListSecondTemplate", "ListSecondTemplate", "SendSmsForAgent",
+    ]
+    assert json.loads(calls[-1].content) == {
         "SubAccount": "group-one",
         "Signature": "示例签名",
         "TemplateId": "SPT_fixture",
-        "Mobiles": "13800000000,13800000000",
+        "Mobiles": "13800000000",
         "TemplateParam": '{"text":" 原始 内容 "}',
     }
     assert list(tmp_path.iterdir()) == []

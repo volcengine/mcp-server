@@ -8,8 +8,6 @@ const previewParams = new URLSearchParams(window.location.search);
 const previewWidth = previewParams.get('width') === 'narrow' ? '390px' : '960px';
 const rank = Object.fromEntries(['isOnlyTwoElement', 'isSkipOtherUse', 'needOtherUseCheck', 'operatorThreeElement', 'needOperatorImage', 'needOperatorMobile', 'responsibleThreeElement', 'needResponsibleImage', 'needResponsibleMobile', 'needBusinessCertificateImage'].map(key => [key, false]));
 const group = { subAccountId: 'demo-group', subAccountName: '客户通知' };
-const sendPrefill = { signature: '演示科技', templateId: 'demo-template', mobiles: ['13800000000'],
-  templateParams: { time: '明天下午三点' } };
 const templatePrefill = { name: '预约通知草稿', content: '您预约的服务时间为 ${time}，请准时到店。',
   signatures: ['演示科技'], templateParams: [{ name: 'time', paramType: 1 }] };
 const task = { subAccount: 'demo-group', taskId: 'demo-task' };
@@ -48,11 +46,6 @@ const scenarios = {
     { id: 'unknown', label: '提交结果待核实', serviceStatus: 'submission_outcome_unknown' },
     { id: 'closed', label: '服务欠费关闭', serviceStatus: 'arrears_closed' },
     { id: 'available', label: '已开通', serviceStatus: 'available' },
-  ],
-  send: [
-    { id: 'missing_group', label: '预填：待补消息组', prefill: sendPrefill },
-    { id: 'missing_signature', label: '预填：待补签名', prefill: { ...sendPrefill, subAccount: 'demo-group', signature: undefined } },
-    { id: 'unknown_send', label: '提交：结果未知', prefill: { ...sendPrefill, subAccount: 'demo-group' }, sendUnknown: true },
   ],
   template: [
     { id: 'ready', label: '通知模板核对', prefill: { ...templatePrefill, channelType: 'CN_NTC', subAccounts: ['demo-group'] } },
@@ -146,7 +139,6 @@ function tool({ name, arguments: args }) {
       code: 'preview_upload_unavailable', message: '本地样式预览不执行上传，请使用上传回归或联调环境。', outcome_unknown: false,
     } } };
   }
-  if (name === 'list_templates') return response({ List: [{ TemplateId: 'demo-template', TemplateName: '预约通知', ChannelType: 'CN_NTC', TemplateContent: '您预约的服务时间为 ${time}，请准时到店。' }], Total: 1 });
   if (name === 'preview_template') {
     const request = args.request;
     if (request.channelType === 'CN_NTC' && request.templateParams.length && scenario.templateSmb) {
@@ -167,11 +159,6 @@ function tool({ name, arguments: args }) {
     if (scenario.templateChanged) return templateFailure('template_confirmation_changed', '模板参数、账号或引流核对结果已变化，请重新核对模板申请');
     if (scenario.templateUnknown) return templateFailure('1999', '模拟模板申请结果待核实，请查询模板记录。', true);
     return response({ templateId: 'demo-template', status: 1 });
-  }
-  if (name === 'send_sms') {
-    if (scenario.sendUnknown) return { content: [], isError: true, structuredContent: { success: false,
-      error: { code: '1999', message: '模拟发送结果待确认，请先查询发送记录。', outcome_unknown: true } } };
-    return response({ MessageIds: ['demo-message'] });
   }
   if (name === 'get_batch_csv_template') return response({ value: 'phone,time\n13800000000,明天上午\n', variables: ['time'] });
   if (name === 'send_batch_test_sms') return response({ messageId: 'demo-test-sms', requestedAt: Math.floor(Date.now() / 1000) }, true);

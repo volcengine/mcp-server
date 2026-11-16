@@ -15,9 +15,9 @@ The server is not yet open to external customers. This tool surface replaces the
 | Templates and binding details | `list_templates`, `list_second_templates` |
 | Sending records and statistics | `list_send_logs`, `get_send_statistics` |
 | Batch discovery and CSV example | `query_batch_tasks`, `get_batch_csv_template` |
-| Open forms | `open_sms_service_onboarding`, `open_qualification_form`, `open_signature_form`, `open_traffic_form`, `open_template_form`, `open_sms_send_form`, `open_batch_task_form` |
+| Open forms | `open_sms_service_onboarding`, `open_qualification_form`, `open_signature_form`, `open_traffic_form`, `open_template_form`, `open_batch_task_form` |
 
-All 17 declare `readOnlyHint=true`. Opening a form never submits a business operation. `prefill` contains editable values only; it cannot carry verification tickets, acceptance flags or a submission request. Unknown fields stay empty. File prefills remain subject to host limits; prefer selecting documents in the form.
+All query and open-form tools declare `readOnlyHint=true`. Opening a form never submits a business operation. A single conversational send uses `preview_sms_send` first, shows the masked recipient and rendered content, then passes the unchanged request and returned confirmation to `send_sms` after explicit user approval. The submit step rechecks template and account scope; changed input or resources require a new preview. Multiple recipients, scheduled sends and per-recipient variables use the batch form. `prefill` contains editable values only; it cannot carry verification tickets, acceptance flags or a submission request. Unknown fields stay empty. File prefills remain subject to host limits; prefer selecting documents in the form.
 
 `open_batch_task_form({"task":{"subAccount":"<group>","taskId":"<task>"}})` opens an existing task for review/launch/cancel. `task` and `prefill` cannot be supplied together. Querying or opening an existing task never creates another task.
 
@@ -41,7 +41,7 @@ The signature form uses `query_sms_resources` with `GetApplySignatureBind` to re
 | Service activation | `get_sms_service_onboarding`, `submit_sms_service_onboarding` |
 | Qualification checks | `recognize_qualification_document`, `check_qualification_enterprise`, `check_qualification_person`, `send_verification_code`, `verify_code` |
 | Business applications | `submit_qualification`, `submit_signature`, `preview_template`, `submit_template`, `preview_traffic_resource`, `submit_traffic_resources` |
-| Sending and batch management | `send_sms`, `send_batch_test_sms`, `create_batch_task`, `start_batch_task`, `cancel_batch_task` |
+| Sending and batch management | `preview_sms_send`, `send_sms`, `send_batch_test_sms`, `create_batch_task`, `start_batch_task`, `cancel_batch_task` |
 
 These tools declare `visibility=["app"]` and must not be offered to the model by a compliant host. Qualification OCR and identity checks always return details through `_meta["sms/form"]`; there is no model-visible override. Metadata still passes through the host and is not end-to-end encrypted.
 

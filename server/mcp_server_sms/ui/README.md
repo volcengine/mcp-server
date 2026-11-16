@@ -18,11 +18,11 @@ npm run build
 
 构建输出 `../src/mcp_server_sms/static/forms.html`，由 Python 包随 wheel 分发。业务数据不能写入 HTML。修改前端后需重新构建再打 Python 包。
 
-`npm run dev` 后打开 `/dev/preview.html` 可预览七个表单、窄屏和深色模式，内嵌高度随 AppBridge 通知自动调整。可用 `?form=service&scenario=renewal&theme=dark&width=narrow` 直接打开指定预览；省略参数使用默认值。这里使用官方 AppBridge 与跨源双 iframe 沙箱及模拟业务数据。`dev/sandbox.ts` 复用官方 ext-apps 的 basic-host 沙箱。生产构建不包含这些预览代码。构建器生成的 `THIRD_PARTY_LICENSES.md` 随 Python 包分发。
+`npm run dev` 后打开 `/dev/preview.html` 可预览六个表单、窄屏和深色模式，内嵌高度随 AppBridge 通知自动调整。可用 `?form=service&scenario=renewal&theme=dark&width=narrow` 直接打开指定预览；省略参数使用默认值。这里使用官方 AppBridge 与跨源双 iframe 沙箱及模拟业务数据。`dev/sandbox.ts` 复用官方 ext-apps 的 basic-host 沙箱。生产构建不包含这些预览代码。构建器生成的 `THIRD_PARTY_LICENSES.md` 随 Python 包分发。
 
 上传使用 `prepare_*` → 存储 HTTPS 直传 → `complete_*`。CSV 直传后自动核对任务，调用 `complete_recipients_upload` 一次回读共同完成校验与可选引流检查；相同输入的完整结果可在当前页面复用。`uploads.test.jsx` 使用严格的 32,000 字符宿主模拟与合成大文件回归；真实豆包的 CSP、CORS、上传授权与接口权限需另做联调。文件上传失败允许重选，正式提交结果未知仍锁定。
 
-模型可见工具只查询资源或打开页面，所有业务写入均由页面使用 App-only 工具执行。开表和提交不再共用工具名：`open_qualification_form` / `submit_qualification`、`open_signature_form` / `submit_signature`、`open_traffic_form` / `submit_traffic_resources`、`open_template_form` / `submit_template`、`open_sms_send_form` / `send_sms`。`open_batch_task_form` 的 `prefill` 用于新建，`task` 用于查看和管理已有任务；两者互斥。
+模型可见工具主要查询资源或打开页面；资质、签名、引流、模板和群发写入仍由页面使用 App-only 工具执行。单条短信不提供表单，模型在对话中补齐并确认消息组、签名、模板、一个收件号码和变量后调用模型可见的 `send_sms`；多个号码、定时发送和逐号码变量统一使用群发页面。`open_batch_task_form` 的 `prefill` 用于新建，`task` 用于查看和管理已有任务；两者互斥。
 
 模板核对调用 App-only 的 `preview_template`：先校验原生字段，再查询 `ListAllSmsProduct`，小微账号的通知变量、未开放的营销变量会阻断申请；显式引流 ID 在当前账号下回查并补齐原始绑定内容，随后用原始正文与布尔 `useVolcLink` 调用 `CheckTrafficDrivingExist`。固定资源缺失、查询失败或结果不完整都不能进入确认。固定项和变量合计最多一个链接、两个号码和一个 Path；验证码仅允许一个普通变量、指定用途词且不含引流。通知与营销模板最多包含 20 个变量且不允许相邻占位符；营销模板正文必须以“拒收请回复R”结尾。名称按 UTF-16 最多 50 字符、UTF-8 最多 100 字节，用途最多 300 字符；保留变量名会阻断核对。
 

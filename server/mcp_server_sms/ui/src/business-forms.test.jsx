@@ -2,7 +2,6 @@ import React from 'react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SmsSendForm, smsSendPayload } from './send.jsx';
 import { TemplateForm, templatePayload } from './template.jsx';
 import { BatchForm } from './batch.jsx';
 import { SmsApp } from './app.jsx';
@@ -39,7 +38,6 @@ it('模板提交展示后端 1007 原文与编号，不把错误改成未知结�
   expect(screen.getByLabelText('模版内容').value).toBe('活动优惠 拒收请回复R');
   expect(app.callServerTool.mock.calls.filter(([call]) => call.name === 'submit_template')).toHaveLength(1);
 });
-const template = { TemplateId: 't', TemplateName: '测试通知', ChannelType: 'CN_NTC', TemplateContent: '预约时间 ${time}' };
 function preview(request) {
   return { request: { ...request, area: 'cn' }, account: { userType: 'enterprise', mktParam: 1 },
     fixedTraffic: [], warnings: [], confirmation: 'a'.repeat(64) };
@@ -51,61 +49,11 @@ function client() {
     return { list: [], total: 0 };
   }), call: vi.fn(async (name, args) => {
     if (name === 'preview_template') return preview(args.request);
-    if (name === 'list_templates') return { List: [template], Total: 1 };
-    if (name === 'send_sms') return { MessageIds: ['message'] };
     if (name === 'submit_template') return { templateId: 't', status: 1 };
-    if (name === 'list_send_logs') return { List: [], Total: 0 };
     throw new Error('unexpected call');
   }) };
 }
 
-it('普通发送预填可核对实际正文，点击确认前不发送，发送后只报告摘要', async () => {
-  const api = client(); const user = userEvent.setup();
-  render(<SmsSendForm client={api} prefill={{ subAccount: 'g', signature: '测试签名', templateId: 't',
-    mobiles: ['13800000000', '13800000000'], templateParams: { time: ' 明天下午 ' } }} />);
-  await screen.findByLabelText('变量 time');
-  expect(screen.getByLabelText('变量 time').value).toBe(' 明天下午 ');
-  await waitFor(() => expect(screen.getByRole('button', { name: '核对发送信息' }).disabled).toBe(false));
-  await user.click(screen.getByRole('button', { name: '核对发送信息' }));
-  expect(screen.getByText('预约时间 明天下午', { exact: false })).toBeTruthy();
-  expect(api.call.mock.calls.some(([name]) => name === 'send_sms')).toBe(false);
-  const submit = screen.getByRole('button', { name: '确认发送短信' });
-  expect(submit.disabled).toBe(true);
-  await user.click(screen.getByText('我已核对以上信息，同意提交本次操作'));
-  await user.click(submit);
-  await screen.findByText('短信发送请求已受理');
-  expect(api.call).toHaveBeenCalledWith('send_sms', { request: {
-    subAccount: 'g', signature: '测试签名', templateId: 't', mobiles: ['13800000000', '13800000000'],
-    templateParams: { time: ' 明天下午 ' },
-  } }, { write: true });
-  expect(JSON.stringify(api.report.mock.calls)).not.toContain('13800000000');
-  expect(JSON.stringify(api.report.mock.calls)).not.toContain('明天下午');
-  expect(api.call.mock.calls.map(([name]) => name)).toEqual(['list_templates', 'send_sms']);
-});
-
-it('发送结果未知时保留确认页面并锁定重试', async () => {
-  const api = client(); const normal = api.call.getMockImplementation();
-  api.call.mockImplementation((name, ...args) => name === 'send_sms' ? Promise.reject(new OperationError('待核对', { unknown: true })) : normal(name, ...args));
-  const user = userEvent.setup();
-  render(<SmsSendForm client={api} prefill={{ subAccount: 'g', signature: '测试签名', templateId: 't', mobiles: ['13800000000'], templateParams: { time: '原文' } }} />);
-  await screen.findByLabelText('变量 time');
-  await waitFor(() => expect(screen.getByRole('button', { name: '核对发送信息' }).disabled).toBe(false));
-  await user.click(screen.getByRole('button', { name: '核对发送信息' }));
-  await user.click(screen.getByText('我已核对以上信息，同意提交本次操作'));
-  await user.click(screen.getByRole('button', { name: '确认发送短信' }));
-  await screen.findByText('待核对');
-  expect(screen.getByRole('button', { name: '确认发送短信' }).disabled).toBe(true);
-  expect(screen.getByRole('button', { name: '返回修改' }).disabled).toBe(true);
-  expect(api.call.mock.calls.filter(([name]) => name === 'send_sms')).toHaveLength(1);
-});
-
-it('发送按原样保留手机号与变量，拒绝空行和缺变量', () => {
-  const values = { subAccount: 'g', signature: 's', templateId: 't', mobiles: '13800000000', templateParams: { time: ' 原文 ' } };
-  expect(smsSendPayload(values, template).templateParams.time).toBe(' 原文 ');
-  expect(() => smsSendPayload({ ...values, mobiles: '13800000000\n' }, template)).toThrow('空行');
-  expect(() => smsSendPayload({ ...values, templateParams: {} }, template)).toThrow('完整填写');
-  expect(() => smsSendPayload(values, { ...template, BatchOnly: true })).toThrow('群发任务');
-});
 
 it('模板表单预填完整字段，返回修改保留内容，页面确认后才提交', async () => {
   const api = client(); const user = userEvent.setup();
@@ -172,26 +120,6 @@ async function choose(user, label, text) {
   // Arco 多选的 option 外层仅提供语义，实际点击目标为内部文字。
   await user.click(option.querySelector('.arco-select-option') ?? option);
 }
-
-it.each([
-  { signature: '测试签名' },
-  { subAccount: 'g' },
-])('补选缺少的上游资源后仍保留模板和变量预填 %j', async partial => {
-  const api = client(); const user = userEvent.setup();
-  render(<SmsSendForm client={api} prefill={{ ...partial, templateId: 't', mobiles: ['13800000000'], templateParams: { time: ' 保留的变量 ' } }} />);
-  await waitFor(() => expect(api.query.mock.calls.some(([action]) => action === 'GetSubAccountListForAgent')).toBe(true));
-  if (!partial.subAccount) await choose(user, '消息组', '测试消息组');
-  if (!partial.signature) {
-    await waitFor(() => expect(api.query.mock.calls.some(([action]) => action === 'ListSignaturesForAgent')).toBe(true));
-    await choose(user, '短信签名', '测试签名');
-  }
-  const variable = await screen.findByLabelText('变量 time');
-  expect(variable.value).toBe(' 保留的变量 ');
-  await waitFor(() => expect(screen.getByRole('button', { name: '核对发送信息' }).disabled).toBe(false));
-  await user.click(screen.getByRole('button', { name: '核对发送信息' }));
-  await screen.findByRole('button', { name: '确认发送短信' });
-  expect(api.call.mock.calls.some(([name]) => name === 'send_sms')).toBe(false);
-});
 
 it('历史任务首次读取失败，刷新补齐身份详情后可以核对启动', async () => {
   const api = client(); let reads = 0;

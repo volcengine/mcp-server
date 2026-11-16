@@ -170,10 +170,12 @@ class BatchTask(ApiModel):
 
 
 class SmsSendRequest(ApiModel):
-    """SmsSendRequest 承载用户在页面确认的发送参数，由短信接口做最终校验。"""
+    """SmsSendRequest 承载用户在对话中明确确认的单条发送参数。"""
 
     sub_account: Text = Field(alias="subAccount")
     signature: Text
     template_id: Text = Field(alias="templateId")
-    mobiles: Annotated[list[Mobile], Field(min_length=1, max_length=200)] = Field(repr=False)
+    mobiles: Annotated[list[Mobile], Field(min_length=1, max_length=1)] = Field(
+        repr=False, description="自然语言单条发送仅允许一个收件号码"
+    )
     template_params: dict[str, str] = Field(default_factory=dict, alias="templateParams", repr=False)

@@ -5,7 +5,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field, model_validator
 
-from .models import ApiModel, Channel, Mobile, Text
+from .models import ApiModel, Channel, Text
 from .upload_models import MAX_UPLOAD_ENCODED_LENGTH, FileContent
 
 MaterialDrafts = Annotated[list[FileContent], Field(max_length=5)]
@@ -214,11 +214,3 @@ class TemplateFormPrefill(ApiModel):
     template_traffic_driving: list[list[TemplateTrafficPrefill]] | None = Field(
         None, alias="templateTrafficDriving", repr=False,
     )
-
-
-class SmsSendPrefill(ApiModel):
-    sub_account: str | None = Field(None, alias="subAccount")
-    signature: str | None = None
-    template_id: str | None = Field(None, alias="templateId")
-    mobiles: Annotated[list[Mobile], Field(max_length=200)] | None = Field(None, repr=False)
-    template_params: dict[str, str] | None = Field(None, alias="templateParams", repr=False)
