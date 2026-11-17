@@ -734,7 +734,10 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
 
     @mcp.tool(annotations=WRITE, structured_output=True, meta=APP_ONLY_META)
     async def start_batch_task(ctx: Context, sub_account: Text, task_id: Text) -> dict[str, Any]:
-        """启动用户明确授权的指定群发任务。会实际发送短信，不能因为任务已创建就自动调用。"""
+        """启动用户明确授权的指定群发任务；新建页的一次确认可同时授权创建与启动。
+
+        会实际发送短信，必须对应页面已确认的任务，不能仅因创建成功就视为获得发送授权。
+        """
         return await invoke(ctx, "ConsentBatchTask", {"subAccount": sub_account, "taskId": task_id})
 
     @mcp.tool(annotations=CANCEL, structured_output=True, meta=APP_ONLY_META)

@@ -233,6 +233,9 @@ export function BatchForm({ client, prefill, initialTask }) {
       templateId: current.templateId ?? previous?.templateId,
       totalCount: current.totalCount ?? previous?.totalCount,
       dupCount: current.dupCount ?? previous?.dupCount,
+      // 回查已推进的状态可恢复旧页面的受理结果，不触发任何发送写操作。
+      submittedAction: previous?.submittedAction ?? reference.submittedAction
+        ?? (startedStatuses.has(current.status) ? 'start' : undefined),
     }));
     setDetail(current);
   };
@@ -247,17 +250,22 @@ export function BatchForm({ client, prefill, initialTask }) {
       try { current = await readTask(target); } catch { throw cause; }
       setDetail(current);
       if (!startedStatuses.has(current.status)) throw cause;
+      setTask(value => ({ ...value, submittedAction: 'start' }));
+      setTaskAction(null);
       await client.report({
         form: 'batch', state: 'operation_already_applied', taskId: target.taskId, operation: 'start',
       });
-      return { accepted: false, current };
+      return;
     }
+    // 受理结果先于后续详情查询落到页面；回查失败或旧状态不能重新开放启动入口。
+    setTask(value => ({ ...value, submittedAction: 'start' }));
+    setTaskAction(null);
+    setDetail(null);
     await client.report({
       form: 'batch', state: 'operation_accepted', taskId: target.taskId, operation: 'start',
     });
     const current = await readTask(target);
     setDetail(current);
-    return { accepted: true, current };
   };
   const prepare = () => operation.run(async () => {
     automaticReview.current = automaticKey;
@@ -328,12 +336,17 @@ export function BatchForm({ client, prefill, initialTask }) {
     setTask(created);
     setSnapshot(null); setFile(null); setDemo(null);
     await client.report({ form: 'batch', state: 'created', taskId: result.taskId, totalCount: result.totalCount, dupCount: result.dupCount });
-    let current = await readTask(created);
+    const current = await readTask(created);
     setDetail(current);
-    if (startedStatuses.has(current.status)) return;
+    if (startedStatuses.has(current.status)) {
+      setTask(value => ({ ...value, submittedAction: 'start' }));
+      await client.report({
+        form: 'batch', state: 'operation_already_applied', taskId: created.taskId, operation: 'start',
+      });
+      return;
+    }
     if (current.status !== 2) throw new OperationError('任务创建成功，但当前状态尚不能启动，请刷新任务状态。');
-    const started = await startTask(created);
-    if (started.accepted) setTask(value => ({ ...value, submittedAction: 'start' }));
+    await startTask(created);
   }, { mutation: true });
   const upload = source => operation.run(async () => {
     invalidate();
@@ -348,6 +361,16 @@ export function BatchForm({ client, prefill, initialTask }) {
   const refresh = () => operation.run(() => loadTask(task));
   const prepareTaskAction = action => operation.run(async () => {
     const current = await readTask(task);
+    // 先同步权威状态；拒绝或已经完成的操作不能继续显示上次的“待确认发送”。
+    setDetail(current);
+    if (action === 'start' && startedStatuses.has(current.status)) {
+      setTask(value => ({ ...value, submittedAction: 'start' }));
+      setTaskAction(null);
+      await client.report({
+        form: 'batch', state: 'operation_already_applied', taskId: task.taskId, operation: 'start',
+      });
+      return;
+    }
     if (action === 'cancel' && !cancellableStatuses.has(current.status)) throw new OperationError('当前任务状态不支持取消，请核对最新状态。');
     let confirmationContent = current.sendContent;
     if (action === 'start') {
@@ -365,8 +388,7 @@ export function BatchForm({ client, prefill, initialTask }) {
   const changeTask = () => operation.run(async () => {
     const action = taskAction;
     if (action === 'start') {
-      const started = await startTask(task);
-      if (started.accepted) setTask(current => ({ ...current, submittedAction: action }));
+      await startTask(task);
       setTaskAction(null);
       return;
     }
@@ -381,6 +403,11 @@ export function BatchForm({ client, prefill, initialTask }) {
   }, { mutation: true });
 
   const locked = operation.busy || operation.uncertain;
+  const startAccepted = task?.submittedAction === 'start';
+  const taskStatus = detail?.status === 2
+    ? (startAccepted ? '确认发送已受理，等待状态更新' : '待确认发送')
+    : startedStatuses.has(detail?.status) ? '任务已启动，送达结果请查询回执'
+      : '正在处理或已经结束，请核对平台任务记录';
   // 完整预填资源核实通过后，按参考页只读展示；部分预填及失效资源仍可补全、重选。
   const readonlyInfo = Boolean(prefill?.name && values.name === prefill.name
     && prefilled.group?.subAccountId === prefill.subAccount && values.subAccount === prefill.subAccount
@@ -404,9 +431,13 @@ export function BatchForm({ client, prefill, initialTask }) {
       {!task && <Alert className="batch-privacy" type="success" showIcon content="手机号和逐行变量仅由本机页面传给短信服务，不会作为工具结果进入对话。完成前请保持本页面打开。" />}
     </div></header>
     <div className="batch-body"><Feedback operation={operation} /><div className="batch-sheet">
-      {task ? <section className="batch-section"><Receipt title={initialTask ? '群发任务详情' : '群发任务已创建'} id={task.taskId}><p>任务创建成功不等于已经发送。</p></Receipt>
+      {task ? <section className="batch-section"><Receipt
+        title={initialTask ? '群发任务详情' : startAccepted ? '群发任务已创建并确认发送' : '群发任务已创建'}
+        id={task.taskId}><p>{startAccepted
+          ? '已确认发送，无需再次启动；实际发送进度和送达结果请查询任务状态及回执。'
+          : '任务创建成功不等于已经发送。'}</p></Receipt>
         {task.submittedAction && <p>{task.submittedAction === 'start' ? '启动' : '取消'}请求已受理，请刷新核对最新状态。</p>}
-        <Summary items={[['任务', task.name], ['名单数量', task.totalCount], ['重复号码', task.dupCount], ...(detail ? [['当前状态', detail.status === 2 ? '待确认发送' : [3, 4, 5, 6].includes(detail.status) ? '任务已启动，送达结果请查询回执' : '正在处理或已经结束，请核对平台任务记录']] : [])]} />
+        <Summary items={[['任务', task.name], ['名单数量', task.totalCount], ['重复号码', task.dupCount], ...(detail ? [['当前状态', taskStatus]] : [])]} />
         {taskAction ? <Confirm key={taskAction} title={taskAction === 'start' ? '确认启动本次群发' : '确认取消本次任务'}
           submitLabel={taskAction === 'start' ? '确认启动群发' : '确认取消任务'} backLabel="暂不操作"
           onBack={() => setTaskAction(null)} onSubmit={changeTask} busy={operation.busy} disabled={operation.uncertain}>
@@ -416,7 +447,9 @@ export function BatchForm({ client, prefill, initialTask }) {
         </Confirm> : <div className="batch-actions">
           <Button loading={operation.busy} onClick={refresh}>刷新任务状态</Button>
           <Button disabled={operation.busy || operation.uncertain || task.submittedAction === 'cancel' || !cancellableStatuses.has(detail?.status)} onClick={() => prepareTaskAction('cancel')}>取消任务</Button>
-          <Button type="primary" disabled={operation.busy || operation.uncertain || Boolean(task.submittedAction) || detail?.status !== 2} onClick={() => prepareTaskAction('start')}>核对并启动</Button>
+          {!task.submittedAction && !startedStatuses.has(detail?.status) && <Button type="primary"
+            disabled={operation.busy || operation.uncertain || Boolean(task.submittedAction) || detail?.status !== 2}
+            onClick={() => prepareTaskAction('start')}>{initialTask ? '核对并启动' : '重试确认发送'}</Button>}
         </div>}
       </section> : <>
         <section className="batch-section" aria-label="任务信息"><BatchHeading title="任务信息"

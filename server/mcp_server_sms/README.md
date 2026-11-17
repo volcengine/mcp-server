@@ -53,7 +53,7 @@ Seven forms share `ui://sms/forms.html`. Layout and Arco styles are maintained i
 - Template applications support editable text, parameter types, signature/group scope, traffic binding combinations and short-link options. Placeholder names and definitions must agree; SMS owns dynamic policy and final review.
 - Ordinary sends accept 1–200 numbers with identical parameter values. The UI renders the selected template. Ordinary sends and batch test sends call the sending API directly after confirmation; SMS owns template eligibility and parameter validation. Numbers and values are preserved, not deduplicated or rewritten. Per-recipient content belongs in a CSV batch.
 - Traffic registration reports acceptance from the native API response without per-item ID lookups. Use resource queries when IDs are needed.
-- New batch creation does not start sending. Existing task management reads current identity/state/content before user confirmation. Unknown writes stay locked rather than being repeated.
+- One confirmation in the new batch form authorizes creation and sending: the page creates the task, then starts that same task. The internal create/start tools remain independent; creation alone is not sending. Accepted starts do not require another confirmation, even if the following status query fails or returns stale data. Existing task management reads current identity/state/content before user confirmation. Unknown writes stay locked rather than being repeated.
 - UI submit/send/cancel is the user's confirmation for that displayed action; the model does not add another chat confirmation after the click. A receipt is not audit approval, carrier readiness, or delivery proof.
 
 ## File transfer and privacy

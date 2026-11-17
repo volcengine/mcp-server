@@ -91,7 +91,7 @@ it('禁止原生表单提交的沙箱仍可一次确认创建并启动，双击�
     expect(calls(api, 'create_batch_task')).toHaveLength(1);
     expect(block).not.toHaveBeenCalled();
     resolve({ taskId: 'task', totalCount: 3, dupCount: 2 });
-    await screen.findByText('群发任务已创建');
+    await screen.findByText('群发任务已创建并确认发送');
     await waitFor(() => expect(calls(api, 'start_batch_task')).toHaveLength(1));
     expect(api.report).toHaveBeenCalledWith({ form: 'batch', state: 'created', taskId: 'task', totalCount: 3, dupCount: 2 });
     expect(JSON.stringify(api.report.mock.calls)).not.toContain('private/list.csv');
@@ -109,7 +109,7 @@ it('已知创建失败保留同一请求的幂等键，重试前重新确认', a
   expect(screen.getByRole('button', { name: '确认创建并启动' }).disabled).toBe(true);
   await user.click(screen.getByText(consent));
   await user.click(screen.getByRole('button', { name: '确认创建并启动' }));
-  await screen.findByText('群发任务已创建');
+  await screen.findByText('群发任务已创建并确认发送');
   expect(calls(api, 'create_batch_task').map(([, args]) => args.request.idempotencyKey)[0])
     .toBe(calls(api, 'create_batch_task')[1][1].request.idempotencyKey);
 });
@@ -304,3 +304,119 @@ it.each(['GetSubAccountListForAgent', 'ListSignaturesForAgent', 'ListBatchTempla
     expect(calls(api, 'complete_recipients_upload')).toHaveLength(0);
     expect(calls(api, 'create_batch_task')).toHaveLength(0);
   });
+
+
+it('确认发送已受理但详情仍为旧状态时，不要求再次核对或启动', async () => {
+  const api = client(); const user = userEvent.setup(); const normal = api.call.getMockImplementation();
+  api.call.mockImplementation((name, args) => name === 'query_batch_tasks'
+    ? Promise.resolve({ taskId: 'task', subAccount: 'g', templateId: 't', signature: '签名', status: 2 })
+    : normal(name, args));
+  open(api); await reviewed(); await user.click(screen.getByText(consent));
+  await user.click(screen.getByRole('button', { name: '确认创建并启动' }));
+  await screen.findByText('群发任务已创建并确认发送');
+  await waitFor(() => expect(screen.getByRole('button', { name: '刷新任务状态' }).disabled).toBe(false));
+  expect(screen.getByText('确认发送已受理，等待状态更新')).toBeTruthy();
+  expect(screen.queryByText('待确认发送')).toBeNull();
+  expect(screen.queryByRole('button', { name: '核对并启动' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '重试确认发送' })).toBeNull();
+  await user.click(screen.getByRole('button', { name: '刷新任务状态' }));
+  await waitFor(() => expect(calls(api, 'query_batch_tasks')).toHaveLength(3));
+  expect(calls(api, 'create_batch_task')).toHaveLength(1);
+  expect(calls(api, 'start_batch_task')).toHaveLength(1);
+});
+
+it('确认发送成功后详情查询失败仍保留受理结果，刷新不会重复创建或启动', async () => {
+  const api = client(); const user = userEvent.setup(); const normal = api.call.getMockImplementation();
+  let reads = 0;
+  api.call.mockImplementation((name, args) => {
+    if (name === 'query_batch_tasks' && ++reads === 2) {
+      return Promise.reject(new OperationError('任务状态查询暂不可用', { code: 'query_failed' }));
+    }
+    return normal(name, args);
+  });
+  open(api); await reviewed(); await user.click(screen.getByText(consent));
+  await user.click(screen.getByRole('button', { name: '确认创建并启动' }));
+  await screen.findByText('任务状态查询暂不可用');
+  expect(screen.getByText('群发任务已创建并确认发送')).toBeTruthy();
+  expect(screen.queryByRole('button', { name: '核对并启动' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '重试确认发送' })).toBeNull();
+  expect(screen.queryByText('待确认发送')).toBeNull();
+  await user.click(screen.getByRole('button', { name: '刷新任务状态' }));
+  await screen.findByText('任务已启动，送达结果请查询回执');
+  expect(screen.queryByText('任务状态查询暂不可用')).toBeNull();
+  expect(calls(api, 'create_batch_task')).toHaveLength(1);
+  expect(calls(api, 'start_batch_task')).toHaveLength(1);
+});
+
+
+it('创建回查显示任务已经启动时，不重复确认发送', async () => {
+  const api = client(); const user = userEvent.setup(); const normal = api.call.getMockImplementation();
+  api.call.mockImplementation((name, args) => name === 'query_batch_tasks'
+    ? Promise.resolve({ taskId: 'task', subAccount: 'g', templateId: 't', signature: '签名', status: 3 })
+    : normal(name, args));
+  open(api); await reviewed(); await user.click(screen.getByText(consent));
+  await user.click(screen.getByRole('button', { name: '确认创建并启动' }));
+  await screen.findByText('群发任务已创建并确认发送');
+  expect(screen.queryByRole('button', { name: '核对并启动' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '重试确认发送' })).toBeNull();
+  expect(calls(api, 'create_batch_task')).toHaveLength(1);
+  expect(calls(api, 'start_batch_task')).toHaveLength(0);
+  expect(api.report).toHaveBeenCalledWith({
+    form: 'batch', state: 'operation_already_applied', taskId: 'task', operation: 'start',
+  });
+});
+
+it('创建成功但确认发送被拒绝时保留原始错误，明确重试只启动同一任务', async () => {
+  const api = client(); const user = userEvent.setup(); const normal = api.call.getMockImplementation();
+  let starts = 0;
+  api.call.mockImplementation((name, args) => {
+    if (name === 'start_batch_task' && ++starts === 1) {
+      return Promise.reject(new OperationError('确认发送被拒绝', {
+        code: '1999', httpStatus: 200, requestId: 'start-request',
+      }));
+    }
+    return normal(name, args);
+  });
+  open(api); await reviewed(); await user.click(screen.getByText(consent));
+  await user.click(screen.getByRole('button', { name: '确认创建并启动' }));
+  await screen.findByText('确认发送被拒绝');
+  expect(screen.getByText('群发任务已创建')).toBeTruthy();
+  expect(screen.getByText('排障编号：start-request')).toBeTruthy();
+  expect(screen.queryByText('群发任务已创建并确认发送')).toBeNull();
+  expect(calls(api, 'create_batch_task')).toHaveLength(1);
+  expect(calls(api, 'start_batch_task')).toHaveLength(1);
+  await user.click(screen.getByRole('button', { name: '重试确认发送' }));
+  await user.click(screen.getByText('我已核对以上信息，同意提交本次操作'));
+  await user.click(screen.getByRole('button', { name: '确认启动群发' }));
+  await screen.findByText('群发任务已创建并确认发送');
+  expect(calls(api, 'create_batch_task')).toHaveLength(1);
+  expect(calls(api, 'start_batch_task')).toHaveLength(2);
+  expect(calls(api, 'start_batch_task').every(([, args]) =>
+    args.sub_account === 'g' && args.task_id === 'task')).toBe(true);
+});
+
+
+it('旧响应误报失败后刷新查到已启动，恢复组合成功结果且不重复创建启动', async () => {
+  const api = client(); const normal = api.call.getMockImplementation(); let reads = 0;
+  api.call.mockImplementation((name, args) => {
+    if (name === 'query_batch_tasks') return Promise.resolve({
+      taskId: 'task', subAccount: 'g', templateId: 't', signature: '签名', status: ++reads === 1 ? 2 : 3,
+    });
+    if (name === 'start_batch_task') return Promise.reject(new OperationError('未收到可确认的短信 API 响应', {
+      code: 'invalid_response', httpStatus: 200, requestId: 'start-request',
+    }));
+    return normal(name, args);
+  });
+  const user = userEvent.setup(); open(api); await reviewed();
+  await user.click(screen.getByText(consent));
+  await user.click(screen.getByRole('button', { name: '确认创建并启动' }));
+  await screen.findByText('未收到可确认的短信 API 响应');
+  await user.click(screen.getByRole('button', { name: '刷新任务状态' }));
+  await screen.findByText('群发任务已创建并确认发送');
+  expect(screen.queryByText('未收到可确认的短信 API 响应')).toBeNull();
+  expect(screen.queryByText('待确认发送')).toBeNull();
+  expect(screen.queryByRole('button', { name: '核对并启动' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '重试确认发送' })).toBeNull();
+  expect(calls(api, 'create_batch_task')).toHaveLength(1);
+  expect(calls(api, 'start_batch_task')).toHaveLength(1);
+});

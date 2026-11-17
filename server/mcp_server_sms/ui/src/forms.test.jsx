@@ -208,9 +208,11 @@ it('群发一次确认创建并启动，启动后取消仍单独确认', async (
   expect(api.call.mock.calls.filter(([name]) => name === 'complete_recipients_upload')).toHaveLength(1);
   await user.click(screen.getByText('我已核对任务信息、文件校验结果和发送时间，同意创建任务并启动发送'));
   await user.click(screen.getByRole('button', { name: '确认创建并启动' }));
-  await screen.findByText('群发任务已创建');
+  await screen.findByText('群发任务已创建并确认发送');
   await waitFor(() => expect(started).toBe(true));
   expect(api.call.mock.calls.filter(([name]) => name === 'start_batch_task')).toHaveLength(1);
+  expect(screen.queryByRole('button', { name: '核对并启动' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '重试确认发送' })).toBeNull();
   expect(screen.queryByRole('button', { name: '确认启动群发' })).toBeNull();
   expect(api.call.mock.calls.find(([name]) => name === 'create_batch_task')[1].request.idempotencyKey).toBeTruthy();
   await waitFor(() => expect(screen.getByRole('button', { name: '取消任务' }).disabled).toBe(false));

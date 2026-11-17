@@ -7,7 +7,7 @@
     "ui/src/app.jsx": "c3ccb2828474d8af51301b0fc649fddb0dc622bd8fdf5d8d6ec7c9bd17f0d102",
     "ui/src/batch-controls.jsx": "b7c28cd54f84336880a94e4fc31966edc7fb73b9901f85051c7b3792c943ba4b",
     "ui/src/batch-test-sms.jsx": "327e2fea3c18d0085e7dbb20055d09c9bd96bf882ed4a6474a8d5da720bc62f8",
-    "ui/src/batch.jsx": "a1fcf2cf7b0f4ee8e1106816ac3a0fc86ccca218216ab6cd84682963e0d84b61",
+    "ui/src/batch.jsx": "5e00a1e20b45f4bca3b14fcbc10b6259ea143ca8ce55bf0c0f210983994bcbf2",
     "ui/src/client.js": "645444cbf4c8ffceb283697e5eaf75bb6bebb51deb131f5ee6108bb3d72c19e7",
     "ui/src/common.jsx": "b66bef5df864bc0089f8b4679985c0f8d3628f05b5ad37f0330c939c7554770a",
     "ui/src/contracts.js": "198b6ededa6decf6a30098110b89000a01eb720560061b64b2ddbd1fc9ecae8c",
@@ -33,5 +33,5 @@
     "ui/src/traffic.jsx": "be623f2d93d86401349559aebe196c04524f65d391585e63e73ee1a1cce11348",
     "ui/vite.config.js": "8528c3ae9e50f93872b58562ba2cbb4b4b7c1d2d78e2d9e0b88073579eb69765"
   },
-  "htmlSha256": "5b6bd886616fbcf15f827949fcb6b2bd912efd20a926f407c7c6e86fc82d481c"
+  "htmlSha256": "3e61967afaf214ad88cb7d631d4696135bb0676de8b509a4adbd67aee262eaf4"
 }

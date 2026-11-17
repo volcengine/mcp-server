@@ -261,3 +261,94 @@ def test_missing_or_empty_error_fields_are_not_replaced(error):
     assert decoded["error"]["code"] == error.get("Code")
     assert decoded["error"]["message"] == error.get("Message")
     assert decoded["error"]["backend_response"] == payload
+
+
+@pytest.mark.parametrize("action", ["ConsentBatchTask", "DeleteBatchTask"])
+@pytest.mark.parametrize("include_result", [False, True])
+async def test_batch_status_change_accepts_native_empty_acknowledgement(action, include_result):
+    # TOP SuccessResponse(nil) 的 Result 使用 omitempty，线上成功只返回元数据。
+    body = {"ResponseMetadata": {
+        "RequestId": "fixture-status-request", "Action": action, "Version": "2026-01-01",
+        "Service": "volcSMS", "Region": "cn-north-1",
+    }}
+    if include_result:
+        body["Result"] = None
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        return httpx.Response(200, json=body)
+
+    async with SmsClient(transport=httpx.MockTransport(handler)) as client:
+        result = await client.call(action, {"subAccount": "g", "taskId": "task"}, CREDENTIALS)
+    assert len(calls) == 1
+    assert result["success"] is True
+    assert result["result"] is None
+    assert result["request_id"] == "fixture-status-request"
+    assert result["error"] is None
+
+
+@pytest.mark.parametrize("action", ["ConsentBatchTask", "DeleteBatchTask"])
+@pytest.mark.parametrize("body", [
+    {}, {"ResponseMetadata": {}}, {"ResponseMetadata": None},
+    {"ResponseMetadata": {"RequestId": "fixture-status-request"}},
+    {"ResponseMetadata": {"RequestId": "", "Action": "ConsentBatchTask", "Version": "2026-01-01"}},
+    {"ResponseMetadata": {"RequestId": "fixture-status-request", "Action": "OtherAction", "Version": "2026-01-01"}},
+    {"ResponseMetadata": {"RequestId": "fixture-status-request", "Action": "ConsentBatchTask", "Version": "invalid"}},
+])
+def test_batch_status_change_does_not_guess_an_empty_acknowledgement(action, body):
+    result = SmsClient.decode(action, httpx.Response(200, json=body), CREDENTIALS)
+    assert result["success"] is False
+    assert result["error"]["code"] == "invalid_response"
+    assert result["error"]["http_status"] == 200
+    assert result["error"]["backend_response"] == body
+
+
+@pytest.mark.parametrize("action", ["SetBatchTaskForAgent", "SendSmsForAgent", "GetBatchTaskDetail"])
+def test_metadata_only_response_is_not_accepted_for_actions_requiring_results(action):
+    body = {"ResponseMetadata": {
+        "RequestId": "fixture-request", "Action": action, "Version": "2026-01-01",
+    }}
+    result = SmsClient.decode(action, httpx.Response(200, json=body), CREDENTIALS)
+    assert result["success"] is False
+    assert result["error"]["code"] == "invalid_response"
+
+
+@pytest.mark.parametrize("action", ["ConsentBatchTask", "DeleteBatchTask"])
+@pytest.mark.parametrize("status", [200, 400, 503])
+def test_batch_status_change_preserves_native_business_errors(action, status):
+    body = {"ResponseMetadata": {
+        "RequestId": "fixture-status-request", "Action": action, "Version": "2026-01-01",
+        "Error": {"Code": "1999", "Message": "Invalid operation to the record"},
+    }}
+    result = SmsClient.decode(action, httpx.Response(status, json=body), CREDENTIALS)
+    assert result["success"] is False
+    assert result["request_id"] == "fixture-status-request"
+    assert result["error"] == {
+        "code": "1999", "message": "Invalid operation to the record",
+        "http_status": status, "backend_response": body,
+    }
+
+
+@pytest.mark.parametrize("action", ["ConsentBatchTask", "DeleteBatchTask"])
+@pytest.mark.parametrize("result", [{}, "", True, 0, []])
+def test_batch_status_change_rejects_unexpected_result(action, result):
+    body = {"ResponseMetadata": {
+        "RequestId": "fixture-status-request", "Action": action, "Version": "2026-01-01",
+    }, "Result": result}
+    decoded = SmsClient.decode(action, httpx.Response(200, json=body), CREDENTIALS)
+    assert decoded["success"] is False
+    assert decoded["error"]["code"] == "invalid_response"
+    assert decoded["error"]["backend_response"] == body
+
+
+@pytest.mark.parametrize("action", ["ConsentBatchTask", "DeleteBatchTask"])
+@pytest.mark.parametrize("error", ["invalid error", False, []])
+def test_batch_status_change_does_not_ignore_malformed_error(action, error):
+    body = {"ResponseMetadata": {
+        "RequestId": "fixture-status-request", "Action": action, "Version": "2026-01-01",
+        "Error": error,
+    }, "Result": None}
+    decoded = SmsClient.decode(action, httpx.Response(200, json=body), CREDENTIALS)
+    assert decoded["success"] is False
+    assert decoded["error"]["code"] == "invalid_response"

@@ -181,11 +181,14 @@ async def test_batch_creation_and_launch_are_independent(mcp, api_calls):
     )
     assert not result.is_error
     assert api_calls[0][-1].url.params["Action"] == "ConsentBatchTask"
+    assert payload(result)["result"] is None
+    assert payload(result)["request_id"] == "fixture-request"
     result = await mcp.call_tool(
         "cancel_batch_task", {"sub_account": "group-one", "task_id": "fixture-task"}
     )
     assert not result.is_error
     assert api_calls[0][-1].url.params["Action"] == "DeleteBatchTask"
+    assert payload(result)["result"] is None
     assert len(api_calls[0]) == 3
 
 

@@ -208,3 +208,82 @@ it('模板明确更换已确定的短信类型时清除原签名，要求重新�
   await screen.findByText('请至少选择一个签名。');
   expect(api.call).not.toHaveBeenCalled();
 });
+
+
+it('历史任务启动受理后回查失败，关闭确认框且不能重复提交启动', async () => {
+  const api = client(); let reads = 0;
+  api.call.mockImplementation(async name => {
+    if (name === 'query_batch_tasks') {
+      if (++reads === 3) throw new OperationError('查询最新状态失败');
+      return { taskId: 'task', subAccount: 'g', templateId: 't', signature: '测试签名',
+        sendContent: '实际正文', status: reads < 3 ? 2 : 3 };
+    }
+    if (name === 'start_batch_task') return null;
+    throw new Error('unexpected call');
+  });
+  const user = userEvent.setup();
+  render(<BatchForm client={api} initialTask={{ subAccount: 'g', taskId: 'task' }} />);
+  await user.click(await screen.findByRole('button', { name: '核对并启动' }));
+  await user.click(screen.getByText('我已核对以上信息，同意提交本次操作'));
+  await user.click(screen.getByRole('button', { name: '确认启动群发' }));
+  await screen.findByText('查询最新状态失败');
+  expect(screen.queryByRole('button', { name: '确认启动群发' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '核对并启动' })).toBeNull();
+  await user.click(screen.getByRole('button', { name: '刷新任务状态' }));
+  await screen.findByText('任务已启动，送达结果请查询回执');
+  expect(api.call.mock.calls.filter(([name]) => name === 'start_batch_task')).toHaveLength(1);
+});
+
+
+it.each([3, 4, 5, 6])('重新打开状态为 %s 的已启动任务只查询，不再提供核对启动', async status => {
+  const api = client();
+  api.call.mockImplementation(async name => {
+    if (name === 'query_batch_tasks') return { taskId: 'task', subAccount: 'g', status };
+    throw new Error('unexpected write');
+  });
+  render(<BatchForm client={api} initialTask={{ subAccount: 'g', taskId: 'task' }} />);
+  await screen.findByText('任务已启动，送达结果请查询回执');
+  expect(screen.queryByRole('button', { name: '核对并启动' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '确认启动群发' })).toBeNull();
+  expect(screen.getByText(/已确认发送，无需再次启动/)).toBeTruthy();
+  expect(api.call.mock.calls.map(([name]) => name)).toEqual(['query_batch_tasks']);
+});
+
+it('旧页面显示待确认但回查已启动时，直接同步状态，不报错也不再次启动', async () => {
+  const api = client(); let reads = 0;
+  api.call.mockImplementation(async name => {
+    if (name === 'query_batch_tasks') return { taskId: 'task', subAccount: 'g',
+      templateId: 't', signature: '测试签名', sendContent: '实际正文', status: ++reads === 1 ? 2 : 3 };
+    throw new Error('unexpected write');
+  });
+  const user = userEvent.setup();
+  render(<BatchForm client={api} initialTask={{ subAccount: 'g', taskId: 'task' }} />);
+  await screen.findByText('待确认发送');
+  await user.click(screen.getByRole('button', { name: '核对并启动' }));
+  await screen.findByText('任务已启动，送达结果请查询回执');
+  expect(screen.queryByText('任务尚未通过校验或已启动、结束，请核对最新状态。')).toBeNull();
+  expect(screen.queryByText('待确认发送')).toBeNull();
+  expect(screen.queryByRole('button', { name: '核对并启动' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '确认启动群发' })).toBeNull();
+  expect(api.call.mock.calls.map(([name]) => name)).toEqual(['query_batch_tasks', 'query_batch_tasks']);
+  expect(api.report).toHaveBeenCalledWith({
+    form: 'batch', state: 'operation_already_applied', taskId: 'task', operation: 'start',
+  });
+});
+
+it('回查已取消任务先更新旧状态，再拒绝启动，不继续显示待确认', async () => {
+  const api = client(); let reads = 0;
+  api.call.mockImplementation(async name => {
+    if (name === 'query_batch_tasks') return { taskId: 'task', subAccount: 'g',
+      templateId: 't', signature: '测试签名', status: ++reads === 1 ? 2 : 7 };
+    throw new Error('unexpected write');
+  });
+  const user = userEvent.setup();
+  render(<BatchForm client={api} initialTask={{ subAccount: 'g', taskId: 'task' }} />);
+  await screen.findByText('待确认发送');
+  await user.click(screen.getByRole('button', { name: '核对并启动' }));
+  await screen.findByText('任务尚未通过校验或已启动、结束，请核对最新状态。');
+  expect(screen.queryByText('待确认发送')).toBeNull();
+  expect(screen.queryByRole('button', { name: '确认启动群发' })).toBeNull();
+  expect(api.call.mock.calls.every(([name]) => name === 'query_batch_tasks')).toBe(true);
+});

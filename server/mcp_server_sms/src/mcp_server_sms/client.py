@@ -31,7 +31,7 @@ API_SERVICE = "volcSMS"
 @dataclass(frozen=True)
 class Action:
     method: Literal["GET", "POST"]
-    result_format: Literal["json", "csv", "id"] = "json"
+    result_format: Literal["json", "csv", "id", "ack"] = "json"
     required_any: tuple[str, ...] = ()
     required_all: tuple[str, ...] = ()
     opaque_result_fields: tuple[str, ...] = ()
@@ -105,8 +105,8 @@ ACTIONS = {
     ),
     "GetBatchTaskDetail": Action("GET", public_result_fields=_BATCH_TASK_FIELDS),
     "GetBatchTaskList": Action("GET", public_result_fields=_BATCH_TASK_FIELDS | _PAGE_FIELDS),
-    "ConsentBatchTask": Action("POST"),
-    "DeleteBatchTask": Action("POST"),
+    "ConsentBatchTask": Action("POST", result_format="ack"),
+    "DeleteBatchTask": Action("POST", result_format="ack"),
     "ValidateBatchTaskContentForAgent": Action("POST", result_model=BatchContentChecked),
     "CheckTrafficDrivingExist": Action("GET", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
     "ListThirdTemplate": Action("GET", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
@@ -350,7 +350,19 @@ class SmsClient:
                 http_status=response.status_code,
                 backend_response=payload if payload is not None else response.text,
             )
-        if not response.is_success or not isinstance(payload, dict) or "Result" not in payload:
+        # 仅两个任务状态变更接口使用 TOP 的空结果回执。SuccessResponse(nil) 会省略
+        # Result；必须核对本次 Action、Version、RequestId 且无错误，不能仅凭 HTTP 200。
+        acknowledgement = (
+            spec.result_format == "ack"
+            and isinstance(metadata.get("RequestId"), str)
+            and bool(metadata["RequestId"])
+            and metadata.get("Action") == action
+            and metadata.get("Version") == API_VERSION
+            and metadata.get("Error") is None
+        )
+        if not response.is_success or not isinstance(payload, dict) or (
+            "Result" not in payload and not acknowledgement
+        ):
             return failure(
                 action,
                 "invalid_response",
@@ -360,9 +372,11 @@ class SmsClient:
                 http_status=response.status_code,
                 backend_response=payload if payload is not None else response.text,
             )
-        result = payload["Result"]
+        result = payload.get("Result")
         valid = True
-        if spec.result_format == "id":
+        if spec.result_format == "ack":
+            valid = acknowledgement and result is None
+        elif spec.result_format == "id":
             valid = type(result) is int and result > 0
         elif spec.required_any:
             valid = isinstance(result, dict) and any(

@@ -72,13 +72,13 @@ def api_calls():
             "ConsentBatchTask": None,
             "DeleteBatchTask": None,
         }
-        return httpx.Response(
-            200,
-            json={
-                "ResponseMetadata": {"RequestId": "fixture-request"},
-                "Result": results.get(action, {"List": [], "Total": 0}),
-            },
-        )
+        payload = {"ResponseMetadata": {
+            "RequestId": "fixture-request", "Action": action, "Version": "2026-01-01",
+        }}
+        # 状态变更的原生成功响应省略 Result，不用人工补出的 null 掩盖协议差异。
+        if action not in {"ConsentBatchTask", "DeleteBatchTask"}:
+            payload["Result"] = results.get(action, {"List": [], "Total": 0})
+        return httpx.Response(200, json=payload)
 
     return calls, SmsClient(transport=httpx.MockTransport(respond))
 
