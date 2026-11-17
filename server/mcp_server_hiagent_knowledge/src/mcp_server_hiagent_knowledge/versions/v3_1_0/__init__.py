@@ -1,15 +1,9 @@
-"""HiAgent OpenAPI compatibility implementation for HiAgent version v3.1.0.
+"""v3.1.0 contract; lazy assembly keeps shared baseline imports acyclic."""
+from .config import load_server_config
+from .tools.filtering import parse_tool_list
 
-Each supported HiAgent version is a self-contained sub-package under
-``mcp_server_hiagent_knowledge.versions``. If a future HiAgent OpenAPI changes request or
-response shapes, add a new ``vX_Y_Z`` package and register it in
-``mcp_server_hiagent_knowledge.versions`` without touching this one.
-"""
-
-from __future__ import annotations
-
-from mcp_server_hiagent_knowledge.versions.v3_1_0.config import load_server_config
-from mcp_server_hiagent_knowledge.versions.v3_1_0.server import create_mcp_server
-from mcp_server_hiagent_knowledge.versions.v3_1_0.tools import parse_tool_list
+def create_mcp_server(client=None, *, enabled_tools=None, disabled_tools=None):
+    from .server import create_mcp_server as create
+    return create(client, enabled_tools=enabled_tools, disabled_tools=disabled_tools)
 
 __all__ = ["create_mcp_server", "load_server_config", "parse_tool_list"]

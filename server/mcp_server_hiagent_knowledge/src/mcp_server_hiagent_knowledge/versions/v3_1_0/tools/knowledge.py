@@ -46,8 +46,15 @@ from mcp_server_hiagent_knowledge.versions.v3_1_0.tools._common import (
     OpenAPIClient,
 )
 
-# The single OpenAPI action every knowledge-engine capability dispatches through.
+
+# The OpenAPI action every knowledge-engine capability dispatches through by
+# default: the platform entry, which also validates runtime context.
 KNOWLEDGE_ENGINE_ACTION = "CallKnowledgeEngineTool"
+
+# The user-scoped entry for standalone AK/SK callers. Request body and wire
+# version are identical; only authorization differs — it uses the caller's own
+# knowledge-base ACL instead of a platform session.
+KNOWLEDGE_USER_ACTION = "CallKnowledgeTool"
 
 # MCP tool names registered by ``register_knowledge_tools`` (single source of
 # truth for tool-scope filtering). Distinct from ``KNOWN_TOOL_NAMES`` below,
@@ -73,6 +80,18 @@ KNOWN_TOOL_NAMES = (
     "wiki_read_page",
     "wiki_read_source_chunk",
 )
+
+
+class _ActionScopedClient:
+    """Forward capability calls through one fixed OpenAPI action."""
+
+    def __init__(self, client: OpenAPIClient, action: str) -> None:
+        self._client = client
+        self._action = action
+
+    def call(self, **kwargs: object) -> dict[str, object]:
+        kwargs["action"] = self._action
+        return self._client.call(**kwargs)
 
 
 def _call_knowledge_engine(
@@ -418,13 +437,20 @@ def read_wiki_source_doc(
     )
 
 
-def register_knowledge_tools(mcp: FastMCP, client: OpenAPIClient) -> None:
+def register_knowledge_tools(
+    mcp: FastMCP, client: OpenAPIClient, *, action: str = KNOWLEDGE_ENGINE_ACTION
+) -> None:
     """Register the knowledge-engine capability tools on a FastMCP server.
 
-    Each capability of the ``CallKnowledgeEngineTool`` action is exposed as a
-    distinct, capability-named MCP tool rather than one generic tool keyed by a
-    raw OpenAPI ``ToolName``.
+    Each capability of the knowledge-engine action is exposed as a distinct,
+    capability-named MCP tool rather than one generic tool keyed by a raw
+    OpenAPI ``ToolName``. ``action`` selects the OpenAPI entry: the platform
+    action by default, ``CallKnowledgeTool`` for standalone callers whose
+    permission subject is the AK/SK identity itself.
     """
+
+    if action != KNOWLEDGE_ENGINE_ACTION:
+        client = _ActionScopedClient(client, action)
 
     @mcp.tool(name="search_knowledge")
     def search_knowledge_tool(
@@ -433,17 +459,24 @@ def register_knowledge_tools(mcp: FastMCP, client: OpenAPIClient) -> None:
         queries: list[str],
         user_info: dict[str, object] | None = None,
     ) -> dict[str, object]:
-        """语义检索：适合概念、解释、概览、改写类问题（"是什么"/"为什么"/"怎么做"/"总结"/"对比"），
-        即答案措辞可能与提问不同的场景。返回候选分段用于导航——把它们当作"在哪找"，
-        而非最终证据；回答事实前建议用 ``list_document_chunks`` 深读原文。
+        """Semantic retrieval for concepts, explanations, overviews and
+        paraphrased questions ("what is" / "why" / "how" / "summary" /
+        "comparison"), i.e. when the answer may be worded differently from the
+        question. Returns candidate chunk segments for navigation — treat them
+        as *where to look*, not as final evidence; before answering with facts
+        it's recommended to deep-read the original text via ``list_document_chunks``.
 
-        用 ``list_datasets`` 获取知识库 id。常与 ``grep_knowledge_chunks``（精确锚定）配合以扩大召回。
+        Discover dataset ids with ``list_datasets``. Often paired with
+        ``grep_knowledge_chunks`` (exact anchoring) to widen recall.
 
-        参数：
-        - workspace_id：知识库所属的 workspace。
-        - dataset_ids：要检索的知识库 id 列表，至少 1 个。
-        - queries：1~5 个简短、独立的自然语言问题或概念描述；不要传原始对话或长段落。
-        - user_info：可选的终端用户身份，{"UserID": ..., "UserChannel": ...}，原样透传；仅 IAM/可映射的 Lark 渠道参与权限过滤（详见模块说明）。
+        Parameters:
+        - workspace_id: workspace the datasets belong to.
+        - dataset_ids: dataset ids to search, at least one.
+        - queries: 1-5 short, independent natural-language questions or concept
+          phrases; don't pass raw dialogue or long paragraphs.
+        - user_info: optional end-user identity, {"UserID": ..., "UserChannel": ...},
+          forwarded verbatim; only IAM / mappable Lark channels drive permission
+          filtering (see module docstring).
         """
 
         return search_knowledge(
@@ -465,23 +498,33 @@ def register_knowledge_tools(mcp: FastMCP, client: OpenAPIClient) -> None:
         resource_ids: list[str] | None = None,
         user_info: dict[str, object] | None = None,
     ) -> dict[str, object]:
-        """用一条 RE2 正则定位精确文本——适合标识符、固定短语、字段/API 名、版本号、错误码等
-        对措辞敏感的场景。先缩小召回候选再套用正则，不保证穷举整个数据集。返回候选分段（在哪找），
-        不是最终证据；回答前建议用 ``list_document_chunks`` 深读原文。
+        """Locate exact text with one RE2 regex — best for identifiers, fixed
+        phrases, field/API names, version strings or error codes when wording
+        matters. Narrows recalled candidates then applies the pattern; it does
+        NOT guarantee exhaustive coverage of the whole dataset. Returns candidate
+        chunk segments (where to look), not final evidence; before answering
+        it's recommended to deep-read via ``list_document_chunks``.
 
-        技巧：把近义/别名打包进 ONE 条并列正则 ``alias_a|alias_b|alias_c``，不要多次调用；
-        当 ``pattern`` 含正则运算符时，在 ``queries`` 里给不含运算符的可检索词以先召回候选。
-        常在 ``search_knowledge`` 之前用于实体锚定。
+        Tips: pack close variants into ONE alternation like
+        ``alias_a|alias_b|alias_c`` instead of repeated calls; when ``pattern``
+        contains regex operators, put plain retrievable wording in ``queries`` so
+        candidate chunks get recalled first. Often used before ``search_knowledge``
+        for entity anchoring.
 
-        参数：
-        - workspace_id：知识库所属的 workspace。
-        - dataset_ids：要检索的知识库 id 列表，至少 1 个。
-        - pattern：一条 RE2 正则（用 ``|`` 组合；不支持反向引用/前后瞻）。
-        - queries：可选，1~5 个字面检索词，套用正则前先召回候选分段。
-        - limit：返回的候选匹配数上限。
-        - grep_type：扫描范围，``dataset_ids``（默认）或 ``resource_ids``。
-        - resource_ids：限定扫描的文档/资源 id 列表；当 ``grep_type`` 为 ``resource_ids`` 时必填。
-        - user_info：可选的终端用户身份，{"UserID": ..., "UserChannel": ...}，原样透传；仅 IAM/可映射的 Lark 渠道参与权限过滤（详见模块说明）。
+        Parameters:
+        - workspace_id: workspace the datasets belong to.
+        - dataset_ids: dataset ids to search, at least one.
+        - pattern: one RE2 regular expression (use ``|`` to combine; no
+          backreferences/lookarounds).
+        - queries: optional 1-5 plain-text terms to recall candidates before the
+          regex is applied.
+        - limit: max number of candidate matches to return.
+        - grep_type: scan scope, ``dataset_ids`` (default) or ``resource_ids``.
+        - resource_ids: document/resource ids to restrict the scan to; required
+          when ``grep_type`` is ``resource_ids``.
+        - user_info: optional end-user identity, {"UserID": ..., "UserChannel": ...},
+          forwarded verbatim; only IAM / mappable Lark channels drive permission
+          filtering (see module docstring).
         """
 
         return grep_knowledge_chunks(
@@ -503,15 +546,21 @@ def register_knowledge_tools(mcp: FastMCP, client: OpenAPIClient) -> None:
         resource_ids: dict[str, list[str]],
         user_info: dict[str, object] | None = None,
     ) -> dict[str, object]:
-        """批量读取文档元数据（标题、类型、大小、状态、分段数、时间戳）。这是用于识别或对比文档的
-        "目录"，不能作为正文事实、规则、数字或引文的证据；要看正文请用 ``list_document_chunks`` 深读。
+        """Read document metadata in batch (title, type, size, status, segment
+        count, timestamps). This is a *catalog* for identifying or comparing
+        documents — it is NOT evidence for body facts, rules, figures or
+        quotations; read the actual text with ``list_document_chunks`` for that.
 
-        参数：
-        - workspace_id：知识库所属的 workspace。
-        - dataset_ids：涉及的知识库 id 列表，至少 1 个。
-        - resource_ids：知识库 id -> 该库下文档/资源 id 列表 的映射（key 必须在 ``dataset_ids`` 内），
-          如 {"dataset-1": ["resource-1", "resource-2"]}；同一库的 id 合并为一次批量调用。
-        - user_info：可选的终端用户身份，{"UserID": ..., "UserChannel": ...}，原样透传；仅 IAM/可映射的 Lark 渠道参与权限过滤（详见模块说明）。
+        Parameters:
+        - workspace_id: workspace the datasets belong to.
+        - dataset_ids: dataset ids involved, at least one.
+        - resource_ids: map of dataset id -> list of document/resource ids to
+          describe (keys must be within ``dataset_ids``), e.g.
+          {"dataset-1": ["resource-1", "resource-2"]}. Merge ids of the same
+          dataset into one batched call.
+        - user_info: optional end-user identity, {"UserID": ..., "UserChannel": ...},
+          forwarded verbatim; only IAM / mappable Lark channels drive permission
+          filtering (see module docstring).
         """
 
         return list_document_infos(
@@ -531,18 +580,24 @@ def register_knowledge_tools(mcp: FastMCP, client: OpenAPIClient) -> None:
         cursor_segment_id: str | None = None,
         user_info: dict[str, object] | None = None,
     ) -> dict[str, object]:
-        """按阅读顺序深读单个文档的原始分段——当答案依赖完整上下文而非孤立片段时，
-        推荐在 ``search_knowledge`` / ``grep_knowledge_chunks`` 命中相关文档后用它接力深读。
-        搜索工具告诉你"在哪"，本工具告诉你"文档到底写了什么"。
+        """Deep-read one document's original chunks in reading order — the
+        recommended follow-up after ``search_knowledge`` / ``grep_knowledge_chunks``
+        surface a relevant document, whenever the answer depends on full context
+        rather than a standalone snippet. Search tools tell you *where*; this
+        tells you *what the document actually says*.
 
-        参数：
-        - workspace_id：知识库所属的 workspace。
-        - dataset_ids：资源所属的知识库 id 列表，至少 1 个。
-        - resource_id：要深读的文档/资源（来自前一步 search/grep 结果）。
-        - limit：每页最多读取的有序分段数。
-        - cursor_segment_id：续读游标；从头读时不要传。只能复用**同一文档**上一次调用返回的游标，
-          不要跨文档、跨工具串用游标。
-        - user_info：可选的终端用户身份，{"UserID": ..., "UserChannel": ...}，原样透传；仅 IAM/可映射的 Lark 渠道参与权限过滤（详见模块说明）。
+        Parameters:
+        - workspace_id: workspace the datasets belong to.
+        - dataset_ids: dataset ids the resource belongs to, at least one.
+        - resource_id: the document/resource whose chunks to read (from a prior
+          search/grep result).
+        - limit: max number of ordered chunks per page.
+        - cursor_segment_id: paging cursor; omit on the first read. Only reuse the
+          cursor returned by the immediately previous call **for the same
+          document** — don't carry a cursor across documents or tools.
+        - user_info: optional end-user identity, {"UserID": ..., "UserChannel": ...},
+          forwarded verbatim; only IAM / mappable Lark channels drive permission
+          filtering (see module docstring).
         """
 
         return list_document_chunks(
@@ -563,17 +618,21 @@ def register_knowledge_tools(mcp: FastMCP, client: OpenAPIClient) -> None:
         limit: int | None = None,
         user_info: dict[str, object] | None = None,
     ) -> dict[str, object]:
-        """用 BM25 关键词匹配找到入口 Wiki 页。返回页面候选（含 ``Slug``）仅用于
-        导航——结果是摘要，不是证据，不能只凭搜索结果作答；建议用
-        ``read_wiki_page`` 读取选中页面的正文。
+        """Find entry-point Wiki pages by BM25 keyword match. Returns page
+        candidates (with ``Slug``) for navigation only — results are summaries,
+        NOT evidence; you can't answer from search results alone. Read a chosen
+        page with ``read_wiki_page`` to get the actual content.
 
-        参数：
-        - workspace_id：知识库所属的 workspace。
-        - dataset_ids：要检索的知识库 id 列表，至少 1 个。
-        - queries：1~5 个简短关键词查询；保留有区分度的实体、产品名、缩写与精确
-          术语；别名或不同表述建议拆成不同查询。
-        - limit：返回的 Wiki 页面候选数上限。
-        - user_info：可选的终端用户身份，{"UserID": ..., "UserChannel": ...}，原样透传；仅 IAM/可映射的 Lark 渠道参与权限过滤（详见模块说明）。
+        Parameters:
+        - workspace_id: workspace the datasets belong to.
+        - dataset_ids: dataset ids to search, at least one.
+        - queries: 1-5 short keyword queries; keep distinctive entities, product
+          names, abbreviations and precise terms. Put aliases / alternative
+          phrasings as separate queries.
+        - limit: max number of Wiki page candidates to return.
+        - user_info: optional end-user identity, {"UserID": ..., "UserChannel": ...},
+          forwarded verbatim; only IAM / mappable Lark channels drive permission
+          filtering (see module docstring).
         """
 
         return search_wiki(
@@ -592,20 +651,24 @@ def register_knowledge_tools(mcp: FastMCP, client: OpenAPIClient) -> None:
         slug: str,
         user_info: dict[str, object] | None = None,
     ) -> dict[str, object]:
-        """读取单个 Wiki 页面的完整内容——阅读 Wiki 材料的主力工具，适用于
-        ``search_wiki`` 找到的页面、从其他页面链接过来的页面，或特殊的
-        ``index`` 页（建议先读 ``index`` 获取知识库整体概览）。返回结果还会带出
-        相关页面（in/out 链接），可顺着链接跳 1~2 跳补充上下文。
+        """Read one Wiki page's full content — the primary tool for reading Wiki
+        material, for pages found via ``search_wiki``, linked from other pages,
+        or the special ``index`` page (read ``index`` first for a
+        knowledge-base overview). The result also surfaces related pages
+        (in/out links) you can follow 1-2 hops to gather context.
 
-        Wiki 页面是生成的导航材料，非最终证据；需要精确事实、数字、规则、引文或
-        代码时，建议用 ``read_wiki_source_chunk``（按本页 slug 溯源引用切片）或
-        ``read_wiki_source_doc``（按被引用源文档的 resource id 顺序读原文）回溯原始出处。
+        Wiki pages are generated navigation material, not final evidence; for
+        precise facts, numbers, rules, quotes or code, trace to originals with
+        ``read_wiki_source_chunk`` (by this page's slug) or ``read_wiki_source_doc``
+        (by a referenced source document's resource id).
 
-        参数：
-        - workspace_id：知识库所属的 workspace。
-        - dataset_ids：页面所属的知识库 id 列表，至少 1 个。
-        - slug：Wiki 页面 slug（来自 ``search_wiki``、相关页面或 ``index``）。
-        - user_info：可选的终端用户身份，{"UserID": ..., "UserChannel": ...}，原样透传；仅 IAM/可映射的 Lark 渠道参与权限过滤（详见模块说明）。
+        Parameters:
+        - workspace_id: workspace the datasets belong to.
+        - dataset_ids: dataset ids the page belongs to, at least one.
+        - slug: the Wiki page slug (from ``search_wiki``, a related page, or ``index``).
+        - user_info: optional end-user identity, {"UserID": ..., "UserChannel": ...},
+          forwarded verbatim; only IAM / mappable Lark channels drive permission
+          filtering (see module docstring).
         """
 
         return read_wiki_page(
@@ -626,20 +689,26 @@ def register_knowledge_tools(mcp: FastMCP, client: OpenAPIClient) -> None:
         cursor_segment_id: str | None = None,
         user_info: dict[str, object] | None = None,
     ) -> dict[str, object]:
-        """按页面 ``slug`` 解析、依 ``chunk_refs`` 顺序读取某个 Wiki 页面所引用的
-        源切片——获取该 Wiki 页面所依赖证据（事实、数字、引文、代码）的推荐方式。
-        设 ``overlap`` > 0 可在每个引用切片前后补充邻近上下文。若想按 resource id
-        顺序通读整篇被引用源文档，建议改用 ``read_wiki_source_doc``。
+        """Read the source chunks a Wiki page cites, in ``chunk_refs`` order,
+        resolved by the page ``slug`` — the recommended way to get evidence
+        that a specific Wiki page relies on (facts, numbers, quotes, code). Set
+        ``overlap`` > 0 to include neighbouring context around each cited chunk.
+        To instead read a whole referenced source document sequentially by its
+        resource id, use ``read_wiki_source_doc``.
 
-        参数：
-        - workspace_id：知识库所属的 workspace。
-        - dataset_ids：页面所属的知识库 id 列表，至少 1 个。
-        - slug：要读取来源的 Wiki 页面 slug。
-        - limit：每页消费的引用锚点数上限（是锚点数，不是最终返回切片数）。
-        - overlap：每个锚点前后扩展的邻近分段数（0 表示仅锚点本身）。
-        - cursor_segment_id：续页游标；首次读取请省略。仅可复用同一页面上一次调用
-          返回的游标。
-        - user_info：可选的终端用户身份，{"UserID": ..., "UserChannel": ...}，原样透传；仅 IAM/可映射的 Lark 渠道参与权限过滤（详见模块说明）。
+        Parameters:
+        - workspace_id: workspace the datasets belong to.
+        - dataset_ids: dataset ids the page belongs to, at least one.
+        - slug: the Wiki page slug whose cited chunks to read.
+        - limit: max number of cited anchors consumed per page (anchors, not
+          final returned chunks).
+        - overlap: neighbouring segments expanded around each anchor (0 = anchor
+          only).
+        - cursor_segment_id: paging cursor; omit on first read. Only reuse the
+          cursor from the immediately previous call for the same page.
+        - user_info: optional end-user identity, {"UserID": ..., "UserChannel": ...},
+          forwarded verbatim; only IAM / mappable Lark channels drive permission
+          filtering (see module docstring).
         """
 
         return read_wiki_source_chunk(
@@ -662,19 +731,23 @@ def register_knowledge_tools(mcp: FastMCP, client: OpenAPIClient) -> None:
         cursor_segment_id: str | None = None,
         user_info: dict[str, object] | None = None,
     ) -> dict[str, object]:
-        """按 resource id 顺序读取整篇被引用源文档的切片——当你想按原文顺序通读
-        （而非只读某页面所引用的切片）时，直接读取源文档的推荐方式，例如取 Wiki
-        页面 ``SourceRefs`` 中的某个 ``resource_id``。与 ``read_wiki_source_chunk``
-        互补（后者按页面 slug 解析引用切片）。
+        """Read a whole referenced source document sequentially, by resource id
+        — the recommended way to read a source document directly (e.g. a
+        ``resource_id`` taken from a Wiki page's ``SourceRefs``) when you want
+        its chunks in order rather than only the chunks a page cites. Companion
+        to ``read_wiki_source_chunk`` (which resolves cited chunks by page slug).
 
-        参数：
-        - workspace_id：知识库所属的 workspace。
-        - dataset_ids：资源所属的知识库 id 列表，至少 1 个。
-        - resource_id：要读取的被引用源文档/资源 id（例如取自 Wiki 页面的 SourceRefs）。
-        - limit：每页顺序返回的切片数上限。
-        - cursor_segment_id：续页游标；首次读取请省略。仅可复用同一文档上一次调用
-          返回的游标。
-        - user_info：可选的终端用户身份，{"UserID": ..., "UserChannel": ...}，原样透传；仅 IAM/可映射的 Lark 渠道参与权限过滤（详见模块说明）。
+        Parameters:
+        - workspace_id: workspace the datasets belong to.
+        - dataset_ids: dataset ids the resource belongs to, at least one.
+        - resource_id: the referenced source document/resource to read (e.g. from
+          a Wiki page's SourceRefs).
+        - limit: max number of ordered chunks per page.
+        - cursor_segment_id: paging cursor; omit on first read. Only reuse the
+          cursor from the immediately previous call for the same document.
+        - user_info: optional end-user identity, {"UserID": ..., "UserChannel": ...},
+          forwarded verbatim; only IAM / mappable Lark channels drive permission
+          filtering (see module docstring).
         """
 
         return read_wiki_source_doc(

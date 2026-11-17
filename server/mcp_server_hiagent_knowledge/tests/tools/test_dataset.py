@@ -1,110 +1,82 @@
 from __future__ import annotations
-
-from typing import Any
-
 import pytest
-
-from mcp_server_hiagent_knowledge.versions.v3_1_0.tools.dataset import get_dataset, list_datasets
-
+from mcp_server_hiagent_knowledge.versions.v3_3_0.tools.dataset import get_dataset, list_datasets
 
 class RecordingClient:
-    def __init__(self) -> None:
-        self.calls: list[dict[str, Any]] = []
-
-    def call(self, **kwargs: Any) -> dict[str, object]:
+    def __init__(self):
+        self.calls = []
+        self.response = {"Result": {"ListDatasets": {"Items": [{"DatasetID": "own-1"}, {"DatasetID": "shared-1", "WorkspaceID": "source"}], "NextCursor": "next"}}}
+    def call(self, **kwargs):
         self.calls.append(kwargs)
-        return {"ResponseMetadata": {"Action": kwargs["action"]}, "Result": {}}
+        return self.response
 
-
-def test_list_datasets_builds_workspace_request() -> None:
+def test_discovery_without_workspace_auto_discovers():
     client = RecordingClient()
+    assert list_datasets(client) is client.response
+    assert client.calls == [{"action": "CallKnowledgeTool", "version": "2023-08-01", "service": "app", "body": {"ToolName": "list_datasets", "ListDatasets": {}}}]
 
-    list_datasets(client, workspace_id="ws-1", page_number=2, page_size=10)
-
-    assert client.calls[0] == {
-        "action": "ListDatasets",
-        "version": "2023-08-01",
-        "service": "app",
-        "body": {
-            "WorkspaceID": "ws-1",
-            "PageNumber": 2,
-            "PageSize": 10,
-        },
-    }
-
-
-def test_list_datasets_defaults() -> None:
+@pytest.mark.parametrize("workspace_id", ["", "   "])
+def test_discovery_treats_blank_workspace_as_unspecified(workspace_id):
     client = RecordingClient()
+    list_datasets(client, workspace_id=workspace_id)
+    assert "WorkspaceID" not in client.calls[0]["body"]
 
+def test_discovery_with_workspace_scopes_request():
+    client = RecordingClient()
     list_datasets(client, workspace_id="ws-1")
+    assert client.calls[0]["body"] == {"WorkspaceID": "ws-1", "ToolName": "list_datasets", "ListDatasets": {}}
 
-    assert client.calls[0]["body"]["PageNumber"] == 1
-    assert client.calls[0]["body"]["PageSize"] == 20
-
-
-def test_list_datasets_without_name_omits_filter() -> None:
+def test_discovery_cursor_filter_and_identity():
     client = RecordingClient()
+    list_datasets(client, workspace_id="ws-1", user_id="iam", keyword="finance", limit=10, cursor="next")
+    assert client.calls[0]["body"] == {"WorkspaceID": "ws-1", "ToolName": "list_datasets", "UserInfo": {"UserID": "iam", "UserChannel": "IAM"}, "ListDatasets": {"Filter": {"Keyword": "finance"}, "Limit": 10, "Cursor": "next"}}
 
-    list_datasets(client, workspace_id="ws-1")
-
-    assert "Filter" not in client.calls[0]["body"]
-
-
-def test_list_datasets_name_builds_fuzzy_filter() -> None:
+@pytest.mark.parametrize("ids", [[], ["ds-2", "ds-1", "ds-2"]])
+def test_discovery_ids_preserve_empty_and_order(ids):
     client = RecordingClient()
+    list_datasets(client, ids=ids)
+    assert client.calls[0]["body"]["ListDatasets"] == {"IDs": ids}
 
-    list_datasets(client, workspace_id="ws-1", name="finance")
-
-    assert client.calls[0]["body"]["Filter"] == {"Name": "finance"}
-
-
-def test_list_datasets_empty_name_still_builds_filter() -> None:
-    # Only ``None`` omits the filter; an explicit empty string is passed through
-    # verbatim (consistent with the pagination args), leaving it to the backend.
+def test_discovery_empty_filter_and_cursor_are_forwarded():
     client = RecordingClient()
+    list_datasets(client, keyword="", cursor="")
+    assert client.calls[0]["body"]["ListDatasets"] == {"Filter": {"Keyword": ""}, "Cursor": ""}
 
-    list_datasets(client, workspace_id="ws-1", name="")
-
-    assert client.calls[0]["body"]["Filter"] == {"Name": ""}
-
-
-def test_list_datasets_requires_workspace() -> None:
-    with pytest.raises(ValueError):
-        list_datasets(RecordingClient(), workspace_id="")
-
-
-@pytest.mark.parametrize(
-    "page_number,page_size",
-    [(0, 20), (1, 0), (1, 101)],
-)
-def test_list_datasets_passes_pagination_through(page_number: int, page_size: int) -> None:
-    # Pagination bounds are enforced by the OpenAPI layer, not here; whatever
-    # the caller passes is forwarded verbatim.
+@pytest.mark.parametrize("limit", [0, 101])
+def test_discovery_leaves_value_validation_to_backend(limit):
     client = RecordingClient()
-    list_datasets(
-        client,
-        workspace_id="ws-1",
-        page_number=page_number,
-        page_size=page_size,
-    )
-    assert client.calls[0]["body"]["PageNumber"] == page_number
-    assert client.calls[0]["body"]["PageSize"] == page_size
+    list_datasets(client, ids=[], limit=limit)
+    assert client.calls[0]["body"]["ListDatasets"] == {"IDs": [], "Limit": limit}
 
-
-def test_get_dataset_builds_request() -> None:
+@pytest.mark.parametrize("user_id", ["", "   "])
+def test_discovery_rejects_empty_explicit_identity(user_id):
     client = RecordingClient()
+    with pytest.raises(ValueError, match="user_id"):
+        list_datasets(client, workspace_id="ws-1", user_id=user_id)
+    assert not client.calls
 
-    get_dataset(client, workspace_id="ws-1", dataset_id="ds-1")
+def test_discovery_only_uses_unified_tool():
+    client = RecordingClient()
+    list_datasets(client, workspace_id="ws-1", keyword="k", limit=5)
+    assert client.calls[0]["body"]["ToolName"] == "list_datasets"
+    assert set(client.calls[0]["body"]) == {"ToolName", "ListDatasets", "WorkspaceID"}
 
-    assert client.calls[0] == {
-        "action": "GetDataset",
-        "version": "2023-08-01",
-        "service": "app",
-        "body": {"WorkspaceID": "ws-1", "Id": "ds-1"},
-    }
+def test_get_dataset_reads_one_dataset_through_discovery():
+    client = RecordingClient()
+    assert get_dataset(client, workspace_id="ws-1", dataset_id="own-1") == {"Result": {"Dataset": {"DatasetID": "own-1"}}}
+    assert client.calls[0] == {"action": "CallKnowledgeTool", "version": "2023-08-01", "service": "app", "body": {"WorkspaceID": "ws-1", "ToolName": "list_datasets", "ListDatasets": {"IDs": ["own-1"]}}}
 
+@pytest.mark.parametrize("dataset_id", ["absent"])
+def test_get_dataset_rejects_dataset_outside_visible_scope(dataset_id):
+    with pytest.raises(ValueError, match="not visible"):
+        get_dataset(RecordingClient(), workspace_id="ws-1", dataset_id=dataset_id)
+
+
+def test_get_dataset_accepts_visible_shared_dataset():
+    client = RecordingClient()
+    assert get_dataset(client, workspace_id="ws-1", dataset_id="shared-1") == {"Result": {"Dataset": {"DatasetID": "shared-1", "WorkspaceID": "source"}}}
 
 @pytest.mark.parametrize("workspace_id,dataset_id", [("", "ds-1"), ("ws-1", "")])
-def test_get_dataset_requires_ids(workspace_id: str, dataset_id: str) -> None:
+def test_get_dataset_requires_ids(workspace_id, dataset_id):
     with pytest.raises(ValueError):
         get_dataset(RecordingClient(), workspace_id=workspace_id, dataset_id=dataset_id)
