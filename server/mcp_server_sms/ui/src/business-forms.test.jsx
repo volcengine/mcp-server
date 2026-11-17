@@ -107,6 +107,37 @@ it('已有任务开表只查询，页面内确认后才启动，不重新创建'
   expect(api.call.mock.calls.some(([name]) => name === 'create_batch_task')).toBe(false);
 });
 
+it('启动返回 1999 但任务状态已推进时只回查一次且不重复启动', async () => {
+  let reads = 0;
+  const api = client(); const normal = api.call.getMockImplementation();
+  api.call.mockImplementation(async (name, ...args) => {
+    if (name === 'query_batch_tasks') {
+      reads += 1;
+      return { taskId: 'task', subAccount: 'g', templateId: 't', signature: '测试签名',
+        name: '历史任务', sendContent: '实际正文', status: reads < 3 ? 2 : 3 };
+    }
+    if (name === 'start_batch_task') {
+      throw new OperationError('Invalid operation to the record, please check the status and the permission', {
+        code: 1999, httpStatus: 200, requestId: 'request-id',
+      });
+    }
+    return normal(name, ...args);
+  });
+  const user = userEvent.setup();
+  render(<BatchForm client={api} initialTask={{ subAccount: 'g', taskId: 'task' }} />);
+  await screen.findByText('历史任务');
+  await user.click(screen.getByRole('button', { name: '核对并启动' }));
+  await user.click(screen.getByText('我已核对以上信息，同意提交本次操作'));
+  await user.click(screen.getByRole('button', { name: '确认启动群发' }));
+  await screen.findByText('任务已启动，送达结果请查询回执');
+  expect(api.call.mock.calls.filter(([name]) => name === 'start_batch_task')).toHaveLength(1);
+  expect(api.call.mock.calls.filter(([name]) => name === 'query_batch_tasks')).toHaveLength(3);
+  expect(screen.queryByText(/Invalid operation/)).toBeNull();
+  expect(api.report).toHaveBeenCalledWith({
+    form: 'batch', state: 'operation_already_applied', taskId: 'task', operation: 'start',
+  });
+});
+
 it('不支持表单的宿主给出控制台路径，不声称存在文本提交后备工具', () => {
   render(<SmsApp client={client()} ready supported={false} />);
   expect(screen.getByText(/支持 MCP Apps 的客户端或短信控制台/)).toBeTruthy();

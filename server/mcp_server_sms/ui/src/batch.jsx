@@ -9,6 +9,7 @@ import { batchTemplateSchema, messageGroupSchema, signatureSchema } from './cont
 
 // 0–5 的任务可以请求取消，是否超过取消截止时间由短信服务最终校验。
 const cancellableStatuses = new Set([0, 1, 2, 3, 4, 5]);
+const startedStatuses = new Set([3, 4, 5, 6]);
 const batchChannelTypes = ['CN_NTC', 'CN_MKT'];
 const scheduleWindow = 30 * 86400;
 
@@ -235,6 +236,29 @@ export function BatchForm({ client, prefill, initialTask }) {
     }));
     setDetail(current);
   };
+  const startTask = async target => {
+    try {
+      await client.call('start_batch_task', {
+        sub_account: target.subAccount, task_id: target.taskId,
+      }, { write: true });
+    } catch (cause) {
+      if (String(cause?.code) !== '1999') throw cause;
+      let current;
+      try { current = await readTask(target); } catch { throw cause; }
+      setDetail(current);
+      if (!startedStatuses.has(current.status)) throw cause;
+      await client.report({
+        form: 'batch', state: 'operation_already_applied', taskId: target.taskId, operation: 'start',
+      });
+      return { accepted: false, current };
+    }
+    await client.report({
+      form: 'batch', state: 'operation_accepted', taskId: target.taskId, operation: 'start',
+    });
+    const current = await readTask(target);
+    setDetail(current);
+    return { accepted: true, current };
+  };
   const prepare = () => operation.run(async () => {
     automaticReview.current = automaticKey;
     if (values.scheduled) setSendTimeTouched(true);
@@ -304,7 +328,12 @@ export function BatchForm({ client, prefill, initialTask }) {
     setTask(created);
     setSnapshot(null); setFile(null); setDemo(null);
     await client.report({ form: 'batch', state: 'created', taskId: result.taskId, totalCount: result.totalCount, dupCount: result.dupCount });
-    setDetail(await readTask(created));
+    let current = await readTask(created);
+    setDetail(current);
+    if (startedStatuses.has(current.status)) return;
+    if (current.status !== 2) throw new OperationError('任务创建成功，但当前状态尚不能启动，请刷新任务状态。');
+    const started = await startTask(created);
+    if (started.accepted) setTask(value => ({ ...value, submittedAction: 'start' }));
   }, { mutation: true });
   const upload = source => operation.run(async () => {
     invalidate();
@@ -334,11 +363,20 @@ export function BatchForm({ client, prefill, initialTask }) {
     setDetail({ ...current, confirmationContent }); setTaskAction(action);
   });
   const changeTask = () => operation.run(async () => {
-    await client.call(taskAction === 'start' ? 'start_batch_task' : 'cancel_batch_task', { sub_account: task.subAccount, task_id: task.taskId }, { write: true });
-    setTask(current => ({ ...current, submittedAction: taskAction }));
+    const action = taskAction;
+    if (action === 'start') {
+      const started = await startTask(task);
+      if (started.accepted) setTask(current => ({ ...current, submittedAction: action }));
+      setTaskAction(null);
+      return;
+    }
+    await client.call('cancel_batch_task', {
+      sub_account: task.subAccount, task_id: task.taskId,
+    }, { write: true });
+    setTask(current => ({ ...current, submittedAction: action }));
     setTaskAction(null);
     setDetail(null);
-    await client.report({ form: 'batch', state: 'operation_accepted', taskId: task.taskId, operation: taskAction });
+    await client.report({ form: 'batch', state: 'operation_accepted', taskId: task.taskId, operation: action });
     setDetail(await readTask(task));
   }, { mutation: true });
 
@@ -361,7 +399,7 @@ export function BatchForm({ client, prefill, initialTask }) {
   return <LockedFields locked={locked}><main className="batch-page">
     <header className="batch-header"><div className="batch-header-inner">
       <div className="batch-title-row"><div><div className="batch-brand">火山引擎短信</div>
-        <h1>{initialTask ? '管理短信群发任务' : '创建群发任务'}</h1><p>{initialTask ? '按任务编号核对当前状态，确认后再启动或取消。' : '核对短信信息、上传收件人名单并确认创建任务，再确认启动发送。'}</p></div>
+        <h1>{initialTask ? '管理短信群发任务' : '创建群发任务'}</h1><p>{initialTask ? '按任务编号核对当前状态，确认后再启动或取消。' : '核对短信信息和收件人名单，一次确认后创建任务并启动发送。'}</p></div>
         {!task && <Button htmlType="button" status="danger" icon={<IconClose />} disabled={locked} onClick={abandon}>结束预览</Button>}</div>
       {!task && <Alert className="batch-privacy" type="success" showIcon content="手机号和逐行变量仅由本机页面传给短信服务，不会作为工具结果进入对话。完成前请保持本页面打开。" />}
     </div></header>
@@ -438,7 +476,7 @@ export function BatchForm({ client, prefill, initialTask }) {
             client={client} operation={operation} subAccount={values.subAccount}
             signature={values.signature} template={selected} variables={csvExample.variables}
             trial={trial} setTrial={setTrial} />}
-        <section className="batch-section"><BatchHeading title="校验结果与确认" description="文件上传且发送时间有效后，短信服务会自动校验；请核对统计并确认创建任务，创建后再确认启动。" />
+        <section className="batch-section"><BatchHeading title="校验结果与确认" description="文件上传且发送时间有效后，短信服务会自动校验；确认后将创建任务并启动发送。" />
           {!snapshot ? <Alert type="info" showIcon content={!file?.file ? '上传名单文件后将自动校验。'
             : values.scheduled && !values.sendAt ? '请选择定时时间，设置完成后将自动校验。'
             : operation.error ? '校验未完成，请检查当前文件和发送时间。'
@@ -468,14 +506,14 @@ export function BatchForm({ client, prefill, initialTask }) {
                 </div>)}
               </>} />}
             <div className="batch-confirm"><Checkbox checked={agreed} disabled={locked} onChange={setAgreed}>
-              我已核对任务信息、文件校验结果和发送时间，确认创建该群发任务
+              我已核对任务信息、文件校验结果和发送时间，同意创建任务并启动发送
             </Checkbox></div>
           </div>}
         </section>
         <footer className="batch-actions"><Button htmlType="button" status="danger" disabled={locked} onClick={abandon}>结束预览</Button>
           <div>{snapshot && <Button htmlType="button" disabled={locked} onClick={invalidate}>返回修改</Button>}
             <Button htmlType="button" loading={operation.busy} disabled={operation.uncertain} onClick={prepare}>核对群发任务</Button>
-            <Button htmlType="button" type="primary" icon={<IconCheck />} loading={operation.busy} disabled={locked || !snapshot || !agreed} onClick={create}>确认创建任务</Button>
+            <Button htmlType="button" type="primary" icon={<IconCheck />} loading={operation.busy} disabled={locked || !snapshot || !agreed} onClick={create}>确认创建并启动</Button>
           </div></footer>
       </>}
     </div></div>

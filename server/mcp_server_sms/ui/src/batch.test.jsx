@@ -6,12 +6,13 @@ import { BatchForm, batchPayload } from './batch.jsx';
 import { OperationError } from './client.js';
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.useRealTimers(); });
-const consent = '我已核对任务信息、文件校验结果和发送时间，确认创建该群发任务';
+const consent = '我已核对任务信息、文件校验结果和发送时间，同意创建任务并启动发送';
 const template = { TemplateId: 't', TemplateName: '通知模板', ChannelType: 'CN_NTC', TemplateContent: '预约 ${time}' };
 const recipients = { name: '名单.csv', file: 'private/list.csv', receipt: {
   signature: 'signed-list', context: { name: '名单.csv', file: 'private/list.csv', expires_at: 9999999999 },
 } };
 function client(overrides = {}) {
+  let started = false;
   return { report: vi.fn().mockResolvedValue(undefined), downloadCsv: vi.fn(), upload: vi.fn(),
     query: vi.fn(async action => {
       if (action === 'GetSubAccountListForAgent') return { list: [{ subAccountId: 'g', subAccountName: '通知组' }], total: 1 };
@@ -24,7 +25,8 @@ function client(overrides = {}) {
       if (name === 'complete_recipients_upload') return { file: args.request.context.file,
         receipt: args.request, totalCount: 5, dupCount: 2 };
       if (name === 'create_batch_task') return { taskId: 'task', totalCount: 3, dupCount: 2 };
-      if (name === 'query_batch_tasks') return { taskId: 'task', subAccount: 'g', templateId: 't', signature: '签名', status: 2 };
+      if (name === 'start_batch_task') { started = true; return null; }
+      if (name === 'query_batch_tasks') return { taskId: 'task', subAccount: 'g', templateId: 't', signature: '签名', status: started ? 3 : 2 };
       throw new Error('unexpected call');
     }), ...overrides };
 }
@@ -61,22 +63,22 @@ it('完整且有效的预填信息只读展示，自动校验名单，未确认�
   expect(calls(api, 'complete_recipients_upload')).toHaveLength(1);
   expect(calls(api, 'create_batch_task')).toHaveLength(0);
   expect(calls(api, 'start_batch_task')).toHaveLength(0);
-  expect(screen.getByRole('button', { name: '确认创建任务' }).disabled).toBe(true);
+  expect(screen.getByRole('button', { name: '确认创建并启动' }).disabled).toBe(true);
 });
 
 it('编辑任务信息立即撤销旧确认，重新校验可复用同一名单', async () => {
   const api = client(); const user = userEvent.setup(); await openEditable(api);
   await user.click(screen.getByText(consent));
-  expect(screen.getByRole('button', { name: '确认创建任务' }).disabled).toBe(false);
+  expect(screen.getByRole('button', { name: '确认创建并启动' }).disabled).toBe(false);
   fireEvent.change(screen.getByLabelText('任务名称'), { target: { value: '修改后的名称' } });
   expect(screen.queryByText(consent)).toBeNull();
-  expect(screen.getByRole('button', { name: '确认创建任务' }).disabled).toBe(true);
+  expect(screen.getByRole('button', { name: '确认创建并启动' }).disabled).toBe(true);
   await reviewed();
   expect(screen.getByRole('checkbox', { name: consent }).checked).toBe(false);
   expect(calls(api, 'complete_recipients_upload')).toHaveLength(1);
 });
 
-it('禁止原生表单提交的沙箱仍可创建，双击只创建一次，创建后不自动启动', async () => {
+it('禁止原生表单提交的沙箱仍可一次确认创建并启动，双击只执行一次', async () => {
   const api = client(); const user = userEvent.setup(); let resolve;
   const normal = api.call.getMockImplementation();
   api.call.mockImplementation((name, args) => name === 'create_batch_task'
@@ -85,12 +87,12 @@ it('禁止原生表单提交的沙箱仍可创建，双击只创建一次，创�
   document.addEventListener('submit', block, true);
   try {
     open(api); await reviewed(); await user.click(screen.getByText(consent));
-    await user.dblClick(screen.getByRole('button', { name: '确认创建任务' }));
+    await user.dblClick(screen.getByRole('button', { name: '确认创建并启动' }));
     expect(calls(api, 'create_batch_task')).toHaveLength(1);
     expect(block).not.toHaveBeenCalled();
     resolve({ taskId: 'task', totalCount: 3, dupCount: 2 });
     await screen.findByText('群发任务已创建');
-    expect(calls(api, 'start_batch_task')).toHaveLength(0);
+    await waitFor(() => expect(calls(api, 'start_batch_task')).toHaveLength(1));
     expect(api.report).toHaveBeenCalledWith({ form: 'batch', state: 'created', taskId: 'task', totalCount: 3, dupCount: 2 });
     expect(JSON.stringify(api.report.mock.calls)).not.toContain('private/list.csv');
   } finally { document.removeEventListener('submit', block, true); }
@@ -102,11 +104,11 @@ it('已知创建失败保留同一请求的幂等键，重试前重新确认', a
   api.call.mockImplementation((name, args) => name === 'create_batch_task' && ++writes === 1
     ? Promise.reject(new OperationError('任务名重复', { code: '1007', requestId: 'req' })) : normal(name, args));
   open(api); await reviewed(); await user.click(screen.getByText(consent));
-  await user.click(screen.getByRole('button', { name: '确认创建任务' }));
+  await user.click(screen.getByRole('button', { name: '确认创建并启动' }));
   await screen.findByText('任务名重复');
-  expect(screen.getByRole('button', { name: '确认创建任务' }).disabled).toBe(true);
+  expect(screen.getByRole('button', { name: '确认创建并启动' }).disabled).toBe(true);
   await user.click(screen.getByText(consent));
-  await user.click(screen.getByRole('button', { name: '确认创建任务' }));
+  await user.click(screen.getByRole('button', { name: '确认创建并启动' }));
   await screen.findByText('群发任务已创建');
   expect(calls(api, 'create_batch_task').map(([, args]) => args.request.idempotencyKey)[0])
     .toBe(calls(api, 'create_batch_task')[1][1].request.idempotencyKey);
@@ -117,11 +119,11 @@ it('未知创建结果锁定所有编辑、重试和结束按钮', async () => {
   api.call.mockImplementation((name, args) => name === 'create_batch_task'
     ? Promise.reject(new OperationError('结果待确认', { unknown: true })) : normal(name, args));
   open(api); await reviewed(); await user.click(screen.getByText(consent));
-  await user.click(screen.getByRole('button', { name: '确认创建任务' }));
+  await user.click(screen.getByRole('button', { name: '确认创建并启动' }));
   await screen.findByText('结果待确认');
   expect(screen.queryByLabelText('任务名称')).toBeNull();
   expect(screen.getByLabelText('群发 CSV 名单').disabled).toBe(true);
-  for (const label of ['确认创建任务', '返回修改', '核对群发任务', '结束预览']) {
+  for (const label of ['确认创建并启动', '返回修改', '核对群发任务', '结束预览']) {
     expect(screen.getAllByRole('button', { name: label }).every(button => button.disabled)).toBe(true);
   }
   expect(calls(api, 'create_batch_task')).toHaveLength(1);
@@ -215,10 +217,10 @@ it('核对后定时时间过期，最终提交仍阻止创建并撤销同意', a
   open(api, { scheduled: true, sendTime }); await reviewed();
   await user.click(screen.getByText(consent));
   vi.spyOn(Date, 'now').mockReturnValue(sendTime * 1000);
-  await user.click(screen.getByRole('button', { name: '确认创建任务' }));
+  await user.click(screen.getByRole('button', { name: '确认创建并启动' }));
   await screen.findByText('定时时间必须晚于当前时间。');
   expect(calls(api, 'create_batch_task')).toHaveLength(0);
-  expect(screen.getByRole('button', { name: '确认创建任务' }).disabled).toBe(true);
+  expect(screen.getByRole('button', { name: '确认创建并启动' }).disabled).toBe(true);
 });
 
 it('选框隐藏加载统计，仍能分页载入更多消息组', async () => {
@@ -298,7 +300,7 @@ it.each(['GetSubAccountListForAgent', 'ListSignaturesForAgent', 'ListBatchTempla
     await waitFor(() => expect(screen.getByLabelText('任务名称').disabled).toBe(false));
     expect(screen.getByLabelText('任务名称').value).toBe('预约通知');
     expect(screen.getByLabelText('消息组')).toBeTruthy();
-    expect(screen.getByRole('button', { name: '确认创建任务' }).disabled).toBe(true);
+    expect(screen.getByRole('button', { name: '确认创建并启动' }).disabled).toBe(true);
     expect(calls(api, 'complete_recipients_upload')).toHaveLength(0);
     expect(calls(api, 'create_batch_task')).toHaveLength(0);
   });
