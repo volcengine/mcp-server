@@ -1,10 +1,12 @@
 // MCP Apps defines inline/fullscreen/pip; the host decides where its expanded viewer appears.
 // Request expansion once per resource, so returning to the conversation is respected.
-export function qualificationDisplayPreference(app) {
+const inputForms = new Set(['qualification', 'signature', 'traffic', 'batch', 'service', 'template']);
+
+export function formDisplayPreference(app) {
   let attempted = false;
   return async ({ ready, supported, toolResult }) => {
     const initial = toolResult?.structuredContent;
-    if (attempted || !ready || !supported || initial?.form !== 'qualification' || initial.mode !== 'input') return;
+    if (attempted || !ready || !supported || !inputForms.has(initial?.form) || initial.mode !== 'input') return;
     attempted = true;
     const context = app.getHostContext();
     if (context?.displayMode === 'fullscreen' || !context?.availableDisplayModes?.includes('fullscreen')) return;

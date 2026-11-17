@@ -1,20 +1,24 @@
 import { expect, it, vi } from 'vitest';
-import { qualificationDisplayPreference } from './display-mode.js';
+import { formDisplayPreference } from './display-mode.js';
 
 const state = { ready: true, supported: true,
   toolResult: { structuredContent: { form: 'qualification', mode: 'input' } } };
 function fixture(context = { displayMode: 'inline', availableDisplayModes: ['inline', 'fullscreen'] }) {
   const app = { getHostContext: vi.fn(() => context), requestDisplayMode: vi.fn().mockResolvedValue({ mode: 'fullscreen' }) };
-  return { app, prefer: qualificationDisplayPreference(app) };
+  return { app, prefer: formDisplayPreference(app) };
 }
 
-it('资质打开且 MCP Apps 握手完成后请求展开', async () => {
-  const { app, prefer } = fixture();
-  await prefer({ ...state, ready: false });
-  expect(app.requestDisplayMode).not.toHaveBeenCalled();
-  await prefer(state);
-  expect(app.requestDisplayMode).toHaveBeenCalledExactlyOnceWith({ mode: 'fullscreen' });
-});
+it.each(['qualification', 'signature', 'traffic', 'batch', 'service', 'template'])(
+  '%s 输入表单打开且 MCP Apps 握手完成后请求展开',
+  async form => {
+    const { app, prefer } = fixture();
+    const formState = { ...state, toolResult: { structuredContent: { form, mode: 'input' } } };
+    await prefer({ ...formState, ready: false });
+    expect(app.requestDisplayMode).not.toHaveBeenCalled();
+    await prefer(formState);
+    expect(app.requestDisplayMode).toHaveBeenCalledExactlyOnceWith({ mode: 'fullscreen' });
+  },
+);
 
 it('先握手后收到工具结果也能展开，重绘和用户收回面板不会再次请求', async () => {
   const { app, prefer } = fixture();
@@ -43,10 +47,10 @@ it('宿主拒绝展示请求时保留表单，不反复尝试', async () => {
   expect(app.requestDisplayMode).toHaveBeenCalledTimes(1);
 });
 
-it('其他表单、历史收据及不支持 MCP Apps 的客户端不自动展开', async () => {
+it('未知表单、历史收据及不支持 MCP Apps 的客户端不自动展开', async () => {
   const { app, prefer } = fixture();
   await prefer({ ...state, supported: false });
   await prefer({ ...state, toolResult: { structuredContent: { form: 'qualification', mode: 'result' } } });
-  await prefer({ ...state, toolResult: { structuredContent: { form: 'signature', mode: 'input' } } });
+  await prefer({ ...state, toolResult: { structuredContent: { form: 'unknown', mode: 'input' } } });
   expect(app.requestDisplayMode).not.toHaveBeenCalled();
 });

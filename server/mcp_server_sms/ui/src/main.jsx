@@ -10,7 +10,7 @@ import './styles/service.css';
 import './host.css';
 import { SmsApp } from './app.jsx';
 import { SmsFormClient } from './client.js';
-import { qualificationDisplayPreference } from './display-mode.js';
+import { formDisplayPreference } from './display-mode.js';
 
 const app = new App(
   { name: '火山引擎短信表单', version: '0.2.0' },
@@ -18,7 +18,7 @@ const app = new App(
   { autoResize: true, strict: true, webMcpBridge: false },
 );
 const client = new SmsFormClient(app);
-const preferQualificationDisplay = qualificationDisplayPreference(app);
+const preferFormDisplay = formDisplayPreference(app);
 const root = createRoot(document.getElementById('root'));
 let state = { ready: false, supported: false, toolResult: null };
 let disposed = false;
@@ -26,7 +26,7 @@ function render(update) {
   if (disposed) return;
   state = { ...state, ...update };
   root.render(<SmsApp client={client} {...state} />);
-  void preferQualificationDisplay(state);
+  void preferFormDisplay(state);
 }
 function hostContext(context) {
   if (context.theme) {
