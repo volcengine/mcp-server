@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 Channel = Literal["CN_OTP", "CN_NTC", "CN_MKT"]
 Mobile = Annotated[str, Field(pattern=r"^1[3-9][0-9]{9}$")]
@@ -14,6 +14,12 @@ class ApiModel(BaseModel):
 
     def payload(self) -> dict:
         return self.model_dump(by_alias=True, exclude_none=True)
+
+class PreviewConfirmation(ApiModel):
+    """PreviewConfirmation 绑定预览的到期时间与服务端签名。"""
+
+    expires_at: Annotated[int, Field(strict=True, gt=0)]
+    signature: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
 
 
 class MaterialFile(ApiModel):
@@ -99,25 +105,32 @@ class TemplateParameter(ApiModel):
     name: Text
     param_type: Literal[1, 2, 3, 4, 5] = Field(alias="paramType")
 
+    @field_validator("param_type", mode="before")
+    @classmethod
+    def integer_type(cls, value):
+        if type(value) is not int:
+            raise ValueError("paramType 必须是整数")
+        return value
+
 
 class TemplateTrafficBinding(ApiModel):
     name: Text
     param_type: Literal[2, 3] = Field(alias="paramType")
-    id: int | None = Field(None, gt=0)
+    id: int = Field(gt=0, strict=True)
     content: str | None = Field(None, repr=False)
 
-    @model_validator(mode="after")
-    def require_resource(self):
-        if self.id is None and not self.content:
-            raise ValueError("引流变量需要资源 id 或完整 content")
-        return self
-
+    @field_validator("param_type", mode="before")
+    @classmethod
+    def integer_type(cls, value):
+        if type(value) is not int:
+            raise ValueError("paramType 必须是整数")
+        return value
 
 class ShortUrlConfig(ApiModel):
-    is_enabled: str | None = Field(None, alias="isEnabled")
+    is_enabled: Literal["0", "1"] | None = Field(None, alias="isEnabled")
     belong: str | None = None
-    is_need_click_details: str | None = Field(None, alias="isNeedClickDetails")
-    ua_check_strategy: int | None = Field(None, alias="uaCheckStrategy")
+    is_need_click_details: Literal["0", "1"] | None = Field(None, alias="isNeedClickDetails")
+    ua_check_strategy: int | None = Field(None, alias="uaCheckStrategy", strict=True)
 
 
 class TemplateApplication(ApiModel):
@@ -160,3 +173,15 @@ class BatchTask(ApiModel):
         if not self.scheduled and self.send_time != 0:
             raise ValueError("立即发送任务的 sendTime 必须为 0")
         return self
+
+
+class SmsSendRequest(ApiModel):
+    """SmsSendRequest 承载用户在对话中明确确认的单条发送参数。"""
+
+    sub_account: Text = Field(alias="subAccount")
+    signature: Text
+    template_id: Text = Field(alias="templateId")
+    mobiles: Annotated[list[Mobile], Field(min_length=1, max_length=1)] = Field(
+        repr=False, description="自然语言单条发送仅允许一个收件号码"
+    )
+    template_params: dict[str, str] = Field(default_factory=dict, alias="templateParams", repr=False)

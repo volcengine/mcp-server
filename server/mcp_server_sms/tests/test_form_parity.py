@@ -1,7 +1,7 @@
 """MCP 协议下验证表单的新业务分支，短信接口使用 HTTP 替身。"""
 
 import asyncio
-import base64
+import hashlib
 import json
 from contextlib import contextmanager
 
@@ -16,24 +16,37 @@ from mcp_server_sms.configuration import FORM_CONFIG
 from mcp_server_sms.protocol import SmsAPIError
 from mcp_server_sms.server import build_server, create_http_app
 from mcp_server_sms.service_onboarding import ServiceOnboarding
+from mcp_server_sms.uploads import FileUploader
 
 
 @contextmanager
-def form_api(respond):
+def form_api(respond, *, file_data=None):
     calls = []
 
     def transport(request):
         action = request.url.params["Action"]
         params = json.loads(request.content) if request.content else dict(request.url.params)
         calls.append((action, params))
-        result = respond(action, params)
+        if file_data is not None and action == "GetUploadTosURL":
+            result = {"file": "fixture.csv", "url": "https://fixture.volces.com/fixture.csv?signature=put"}
+        elif file_data is not None and action == "GetFilePublicTosURL":
+            result = {"fileName": "fixture.csv", "url": "https://fixture.volces.com/fixture.csv?signature=get"}
+        else:
+            result = respond(action, params)
         if isinstance(result, httpx.Response):
             return result
         return httpx.Response(200, json={
             "Result": result, "ResponseMetadata": {"RequestId": "form-fixture"},
         })
 
-    server = build_server(SmsClient(transport=httpx.MockTransport(transport)))
+    class FileStream(httpx.AsyncByteStream):
+        async def __aiter__(self):
+            yield file_data
+    api = SmsClient(transport=httpx.MockTransport(transport))
+    uploader = FileUploader(api, transport=httpx.MockTransport(
+        lambda _: httpx.Response(200, stream=FileStream())
+    ))
+    server = build_server(api, uploader)
     with TestClient(create_http_app(server, public_url="https://testserver", host="0.0.0.0"), base_url="https://testserver") as http:
         def call(name, args=None, *, identity="one"):
             response = rpc(http, "tools/call", token=auth_header(identity), params={
@@ -59,7 +72,7 @@ def test_qualification_manual_review_uses_upstream_ticket_only_after_confirmatio
     with form_api(respond) as (call, calls):
         check = call("check_qualification_enterprise", {
             "business_certificate_name": "示例公司", "unified_social_credit_identifier": "credit",
-            "legal_person_name": "测试人", "private": True, "offer_manual_review": True,
+            "legal_person_name": "测试人",
         })
         assert private(check) == {
             "manualReview": True, "code": "enterprise_check_mismatch", "requestId": "form-fixture",
@@ -68,7 +81,7 @@ def test_qualification_manual_review_uses_upstream_ticket_only_after_confirmatio
         assert len(calls) == 1
 
         qualification_request.pop("businessCheckTicket")
-        result = call("apply_qualification", {
+        result = call("submit_qualification", {
             "request": qualification_request, "confirm_manual_review": True,
         })
         assert result["structuredContent"]["result"] == 321
@@ -86,7 +99,7 @@ def test_manual_review_cannot_bypass_permission_rejection(qualification_request)
 
     qualification_request.pop("businessCheckTicket")
     with form_api(respond) as (call, calls):
-        result = call("apply_qualification", {
+        result = call("submit_qualification", {
             "request": qualification_request, "confirm_manual_review": True,
         })
         assert result["isError"]
@@ -94,35 +107,65 @@ def test_manual_review_cannot_bypass_permission_rejection(qualification_request)
         assert len(calls) == 1
 
 
-def test_signature_rechecks_current_company_and_requires_accepting_name_risk():
+@pytest.mark.parametrize("params", [{}, {"purpose": 0}, {"purpose": 1}, {"purpose": 2}])
+def test_signature_candidates_use_native_binding_array_without_pagination(params):
+    candidates = [{
+        "id": 15, "purpose": 1, "materialName": "示例资质",
+        "businessCertificateName": "主体公司",
+    }]
+    with form_api(lambda *_: candidates) as (call, calls):
+        result = call("query_sms_resources", {
+            "request": {"action": "GetApplySignatureBind", "params": params},
+        })
+        assert result["structuredContent"]["result"] == candidates
+        assert calls == [("GetApplySignatureBind", {
+            "Action": "GetApplySignatureBind", "Version": "2026-01-01",
+            **{key: str(value) for key, value in params.items()},
+        })]
+
+
+@pytest.mark.parametrize("candidates", [[], None])
+def test_signature_candidates_preserve_native_empty_result(candidates):
+    with form_api(lambda *_: candidates) as (call, calls):
+        result = call("query_sms_resources", {
+            "request": {"action": "GetApplySignatureBind", "params": {}},
+        })
+        assert result["structuredContent"]["result"] == candidates
+        assert len(calls) == 1
+
+
+def test_signature_candidates_reject_full_list_parameters_before_dispatch():
+    with form_api(lambda *_: pytest.fail("invalid query accessed provider")) as (call, calls):
+        result = call("query_sms_resources", {
+            "request": {"action": "GetApplySignatureBind", "params": {
+                "id": 15, "status": [3], "pageIndex": 1, "pageSize": 100,
+            }},
+        })
+        assert result["isError"]
+        assert calls == []
+
+
+@pytest.mark.parametrize("backend_error", [None, "1001"])
+def test_signature_submission_leaves_qualification_validation_to_sms(backend_error):
     def respond(action, _params):
-        if action == "GetSignatureIdentificationList":
-            return {"list": [{
-                "id": 15, "purpose": 1, "auditStatus": 3, "usable": True,
-                "businessInfo": {"businessCertificateName": "主体公司"},
-            }], "total": 1}
         assert action == "ApplySmsSignatureV2"
+        if backend_error:
+            return httpx.Response(200, json={"ResponseMetadata": {
+                "RequestId": "signature-rejected",
+                "Error": {"Code": backend_error, "Message": "material no review"},
+            }})
         return {"applyId": "application", "status": 1}
 
     request = {"content": "其他品牌", "purpose": 1, "signatureIdentificationID": 15, "source": 1,
                "projectName": "试点项目"}
     with form_api(respond) as (call, calls):
-        for name, accepted, error in (
-            ("旧主体公司", True, "qualification_changed"),
-            ("主体公司", False, "signature_name_risk"),
-        ):
-            result = call("apply_signature", {
-                "request": request,
-                "confirmation": {"businessCertificateName": name, "acceptNameRisk": accepted},
-            })
-            assert result["structuredContent"]["error"]["code"] == error
-        assert [action for action, _ in calls] == ["GetSignatureIdentificationList"] * 2
-        result = call("apply_signature", {
-            "request": request,
-            "confirmation": {"businessCertificateName": "主体公司", "acceptNameRisk": True},
-        })
-        assert result["structuredContent"]["result"]["applyId"] == "application"
-        assert calls[-1] == ("ApplySmsSignatureV2", request)
+        result = call("submit_signature", {"request": request})
+        if backend_error:
+            assert result["isError"]
+            assert result["structuredContent"]["error"]["code"] == backend_error
+        else:
+            assert result["structuredContent"]["result"]["applyId"] == "application"
+        assert calls == [("ApplySmsSignatureV2", request)]
 
 
 def test_traffic_preview_checks_protocol_duplicates_and_number_format_without_writes():
@@ -146,53 +189,34 @@ def test_traffic_preview_checks_protocol_duplicates_and_number_format_without_wr
         assert calls == []
 
 
-def test_traffic_registration_reports_readback_partial_without_rewriting():
-    numbers = [{"numberType": 2, "number": f"400123456{index}"} for index in (1, 2)]
-    create_phone = "BulkCreateTobTrafficDrivingPhoneForAgent"
-
-    def respond(action, params):
-        if action == create_phone:
-            return ""
-        assert action == "GetTobTrafficDrivingPhoneListForAgent"
-        rows = [{"id": 23, "number": numbers[0]["number"], "personId": "private-field"}]
-        return {"list": rows if params["number"] == numbers[0]["number"] else []}
-
-    with form_api(respond) as (call, calls):
-        result = call("register_traffic_resource", {
-            "request": {"action": create_phone, "params": {"data": numbers}}, "read_back": True,
-        })
-        assert result["structuredContent"]["result"] == {
-            "resourceIds": [23], "submittedRecordCount": 2, "verified": False,
-        }
-        assert [action for action, _ in calls].count(create_phone) == 1
-        assert "private-field" not in json.dumps(result)
+@pytest.mark.parametrize("kind,count", [("phone", 100), ("link", 10)])
+def test_bulk_traffic_registration_returns_without_per_item_readback(kind, count):
+    if kind == "phone":
+        action = "BulkCreateTobTrafficDrivingPhoneForAgent"
+        rows = [{"numberType": 2, "number": f"40012345{index:02d}"} for index in range(count)]
+    else:
+        action = "BulkCreateTobTrafficDrivingLinkForAgent"
+        rows = [{"useVolcLink": False, "protocol": "https",
+                 "link": f"https://EXAMPLE.com/Offer{index}?Case=Keep",
+                 "linkDomainIcp": "备案号", "linkDomainIcpBody": "备案主体"}
+                for index in range(count)]
+    request = {"action": action, "params": {"data": rows}}
+    with form_api(lambda *_: "") as (call, calls):
+        result = call("submit_traffic_resources", {"request": request})
+        assert result["structuredContent"]["result"] == ""
+        assert calls == [(action, request["params"])]
 
 
-@pytest.mark.parametrize("accepted", [True, False])
-def test_traffic_readback_requires_accepted_write_and_preserves_link_path(accepted):
-    link = "https://EXAMPLE.com/Offer?Case=Keep"
-    request = {"action": "BulkCreateTobTrafficDrivingLinkForAgent", "params": {"data": [{
-        "useVolcLink": False, "protocol": "https", "link": link,
-        "linkDomainIcp": "备案号", "linkDomainIcpBody": "备案主体",
-    }]}}
-
-    def respond(action, params):
-        if action == request["action"]:
-            assert params["data"][0]["link"] == link
-            return "" if accepted else None
-        assert action == "GetTobTrafficDrivingLinkListForAgent" and accepted
-        return {"list": [
-            {"id": 55, "link": "https://example.com/Offer?Case=Keep"},
-            {"id": 56, "link": "https://example.com/offer?Case=Keep"},
-        ]}
-
-    with form_api(respond) as (call, calls):
-        result = call("register_traffic_resource", {"request": request, "read_back": True})
-        if accepted:
-            assert result["structuredContent"]["result"]["resourceIds"] == [55]
-        else:
-            assert result["structuredContent"]["error"]["outcome_unknown"] is True
-            assert len(calls) == 1
+@pytest.mark.parametrize("response", [None, {"resourceIds": [23]}, "unexpected"])
+def test_traffic_registration_keeps_unknown_result_without_readback_or_retry(response):
+    request = {"action": "BulkCreateTobTrafficDrivingPhoneForAgent", "params": {"data": [
+        {"numberType": 2, "number": "4001234567"},
+    ]}}
+    with form_api(lambda *_: response) as (call, calls):
+        result = call("submit_traffic_resources", {"request": request})
+        assert result["isError"]
+        assert result["structuredContent"]["error"]["outcome_unknown"] is True
+        assert calls == [(request["action"], request["params"])]
 
 
 @pytest.mark.parametrize("renewal,partial", [(False, False), (True, False), (False, True)])
@@ -336,104 +360,178 @@ async def test_late_onboarding_read_cannot_release_a_new_pending_submission():
     assert signed == [[protocol_ids[0]], [protocol_ids[1]]]
 
 
-@pytest.mark.parametrize("batch_only,content_changed", [(False, False), (True, False), (False, True)])
-def test_batch_trial_checks_template_then_sends_exactly_one_mobile(batch_only, content_changed):
-    template = {"TemplateId": "t", "ChannelType": "CN_NTC", "BatchOnly": batch_only,
-                "TemplateContent": "你好 ${name}"}
-
+@pytest.mark.parametrize("error_code", [None, "1001"])
+def test_batch_trial_sends_once_and_preserves_sms_validation_result(error_code):
     def respond(action, params):
-        if action == "ListBatchTemplatesForAgent":
-            return {"List": [template], "Total": 1}
-        if action == "TemplateUploadDemoForAgent":
-            return {"value": "phone,name\n"}
         assert action == "SendSmsForAgent"
         assert params["Mobiles"] == "13800000000"
         assert json.loads(params["TemplateParam"]) == {"name": " 原样 "}
+        if error_code:
+            return httpx.Response(200, json={"ResponseMetadata": {
+                "Error": {"Code": error_code, "Message": "template unavailable"},
+            }})
         return {"MessageIds": ["fixture-message"]}
 
     with form_api(respond) as (call, calls):
         result = call("send_batch_test_sms", {"request": {
             "sub_account": "g", "signature": "示例签名", "template_id": "t",
             "mobile": "13800000000", "template_params": {"name": " 原样 "},
-            "template_content": "过期正文" if content_changed else template["TemplateContent"],
         }})
-        sends = [params for action, params in calls if action == "SendSmsForAgent"]
-        if batch_only or content_changed:
-            assert result["isError"] and not sends
+        assert [action for action, _ in calls] == ["SendSmsForAgent"]
+        if error_code:
+            assert result["isError"]
+            assert result["structuredContent"]["error"]["code"] == error_code
         else:
-            assert len(sends) == 1 and private(result)["messageId"] == "fixture-message"
+            assert private(result)["messageId"] == "fixture-message"
         assert "13800000000" not in json.dumps(result)
 
 
 def test_batch_traffic_checks_rendered_content_only_and_reuses_identical_rows():
     text = "查看 ${url}"
-    template = {"TemplateId": "t", "ChannelType": "CN_NTC", "TemplateContent": text}
     csv = ("phone,url\n13800000000,https://example.com/A\n"
            "13800000001,https://example.com/B\n13800000002,https://example.com/A\n")
 
     def respond(action, params):
-        if action == "ListBatchTemplatesForAgent":
-            return {"List": [template], "Total": 1}
-        if action == "TemplateUploadDemoForAgent":
-            return {"value": "phone,url\n"}
         if action == "ListSecondTemplate":
             return {"list": [{"templateId": "t", "useVolcLink": True}]}
         assert action == "CheckTrafficDrivingExist" and params["useVolcLink"] == "true"
         return {"list": [{"paramType": 2, "isExist": params["content"].endswith("/B")}]}
 
-    with form_api(respond) as (call, calls):
-        response = call("check_batch_traffic_resources", {"request": {
-            "sub_account": "g", "signature": "签名", "template_id": "t", "template_content": text,
-            "file": {"name": "demo.csv", "data": base64.b64encode(csv.encode()).decode()},
+    with form_api(respond, file_data=csv.encode()) as (call, calls):
+        prepared = private(call("prepare_recipients_upload", {"request": {
+            "name": "demo.csv", "size": len(csv.encode()), "sha256": hashlib.sha256(csv.encode()).hexdigest(),
+            "sub_account": "g", "template_id": "t",
+        }}))
+        response = call("complete_recipients_upload", {"request": prepared["confirmation"], "columns": ["phone", "url"], "traffic": {
+            "sub_account": "g", "signature": "签名", "template_id": "t", "content": text,
         }})
-        report = response["structuredContent"]["result"]
+        report = private(response)["trafficReport"]
         assert report == {
             "totalRows": 3, "checkedRows": 3, "failedRows": 0, "uncheckedRows": 0,
             "missingResourceRows": 2, "missingRowNumbers": [2, 4],
         }
         checked = [params["content"] for action, params in calls if action == "CheckTrafficDrivingExist"]
         assert sorted(checked) == ["查看 https://example.com/A", "查看 https://example.com/B"]
-        assert "example.com" not in json.dumps(response)
+        assert "example.com" not in json.dumps(response["content"])
+        assert "example.com" not in json.dumps(response["structuredContent"])
 
 
 def test_virtual_template_without_short_link_detail_reports_uncovered_rows():
     def respond(action, _params):
-        if action == "ListBatchTemplatesForAgent":
-            return {"List": [{
-                "TemplateId": "virtual", "ChannelType": "CN_NTC", "BatchOnly": True,
-                "TemplateContent": "${content}", "TaskFields": [{"Name": "content", "Required": True}],
-            }], "Total": 1}
-        if action == "TemplateUploadDemoForAgent":
-            return {"value": "phone\n"}
         assert action == "ListSecondTemplate"
         return {"list": []}
 
-    with form_api(respond) as (call, calls):
-        response = call("check_batch_traffic_resources", {"request": {
+    data = b"phone\n13800000000\n"
+    with form_api(respond, file_data=data) as (call, calls):
+        prepared = private(call("prepare_recipients_upload", {"request": {
+            "name": "demo.csv", "size": len(data), "sha256": hashlib.sha256(data).hexdigest(),
+            "sub_account": "g", "template_id": "virtual",
+        }}))
+        response = call("complete_recipients_upload", {"request": prepared["confirmation"], "columns": ["phone"], "traffic": {
             "sub_account": "g", "signature": "签名", "template_id": "virtual", "content": "演示通知",
-            "file": {"name": "demo.csv", "data": base64.b64encode(b"phone\n13800000000\n").decode()},
         }})
-        assert response["structuredContent"]["result"] == {
+        report = private(response)["trafficReport"]
+        assert report.pop("failures")[0]["error"]["code"] == "short_link_mode_unknown"
+        assert report == {
             "totalRows": 1, "checkedRows": 0, "failedRows": 0, "uncheckedRows": 1,
             "missingResourceRows": 0, "missingRowNumbers": [], "reason": "short_link_mode_unavailable",
         }
-        assert len(calls) == 3
+        assert [action for action, _ in calls] == ["GetUploadTosURL", "GetFilePublicTosURL", "ListSecondTemplate"]
 
 
-def test_uncertain_trial_does_not_change_existing_direct_send_error():
+@pytest.mark.parametrize("code", ["1001", "1999", "SY:0500"])
+def test_backend_errors_are_not_classified_across_both_send_forms(code):
     def respond(action, _params):
-        if action == "ListBatchTemplatesForAgent":
-            return {"List": [{"TemplateId": "t", "ChannelType": "CN_NTC", "TemplateContent": "演示"}]}
-        if action == "TemplateUploadDemoForAgent":
-            return {"value": "phone\n"}
+        if action == "ListSecondTemplate":
+            return {"List": [{
+                "TemplateId": "t", "TemplateContent": "测试内容",
+                "TemplateParams": [], "ChannelType": "CN_NTC",
+                "Signatures": ["签名"], "SubAccounts": ["g"],
+                "BatchOnly": False, "TaskFields": [],
+            }]}
         assert action == "SendSmsForAgent"
-        return httpx.Response(200, json={"ResponseMetadata": {"Error": {"Code": "1999"}}})
+        return httpx.Response(200, json={"ResponseMetadata": {"Error": {"Code": code}}})
 
     selection = {"sub_account": "g", "signature": "签名", "template_id": "t"}
-    with form_api(respond) as (call, _):
-        direct = call("send_sms", {**selection, "mobiles": ["13800000000"]})
+    with form_api(respond) as (call, calls):
+        request = {"subAccount": "g", "signature": "签名", "templateId": "t", "mobiles": ["13800000000"]}
+        preview = call("preview_sms_send", {"request": request})
+        direct = call("send_sms", {
+            "request": request,
+            "confirmation": preview["structuredContent"]["result"]["confirmation"],
+        })
         trial = call("send_batch_test_sms", {"request": {
-            **selection, "mobile": "13800000000", "template_content": "演示",
+            **selection, "mobile": "13800000000",
         }})
-        assert direct["structuredContent"]["error"]["outcome_unknown"] is False
-        assert trial["structuredContent"]["error"]["outcome_unknown"] is True
+        for result in (direct, trial):
+            assert result["structuredContent"]["error"]["code"] == code
+            assert "outcome_unknown" not in result["structuredContent"]["error"]
+            assert result["structuredContent"]["error"]["backend_response"] == {
+                "ResponseMetadata": {"Error": {"Code": code}},
+            }
+        assert [action for action, _ in calls] == [
+            "ListSecondTemplate", "ListSecondTemplate",
+            "SendSmsForAgent", "SendSmsForAgent",
+        ]
+
+
+def test_send_rechecks_template_resource_after_confirmation():
+    query_count = 0
+
+    def respond(action, _params):
+        nonlocal query_count
+        assert action == "ListSecondTemplate"
+        query_count += 1
+        return {"List": [{
+            "TemplateId": "t",
+            "TemplateContent": "通知${text}" if query_count == 1 else "变更${text}",
+            "TemplateParams": [{"Name": "text"}],
+            "ChannelType": "CN_NTC",
+            "Signatures": ["签名"],
+            "SubAccounts": ["g"],
+            "BatchOnly": False,
+            "TaskFields": [],
+        }]}
+
+    request = {
+        "subAccount": "g", "signature": "签名", "templateId": "t",
+        "mobiles": ["13800000000"], "templateParams": {"text": "内容"},
+    }
+    with form_api(respond) as (call, calls):
+        preview = call("preview_sms_send", {"request": request})
+        result = call("send_sms", {
+            "request": request,
+            "confirmation": preview["structuredContent"]["result"]["confirmation"],
+        })
+        assert result["isError"] is True
+        assert result["structuredContent"]["error"]["code"] == "send_confirmation_changed"
+        assert [action for action, _ in calls] == [
+            "ListSecondTemplate", "ListSecondTemplate",
+        ]
+
+
+def test_send_confirmation_cannot_cross_authorized_accounts():
+    def respond(action, _params):
+        assert action == "ListSecondTemplate"
+        return {"List": [{
+            "TemplateId": "t", "TemplateContent": "通知${text}",
+            "TemplateParams": [{"Name": "text"}], "ChannelType": "CN_NTC",
+            "Signatures": ["签名"], "SubAccounts": ["g"],
+            "BatchOnly": False, "TaskFields": [],
+        }]}
+
+    request = {
+        "subAccount": "g", "signature": "签名", "templateId": "t",
+        "mobiles": ["13800000000"], "templateParams": {"text": "内容"},
+    }
+    with form_api(respond) as (call, calls):
+        preview = call("preview_sms_send", {"request": request}, identity="one")
+        result = call("send_sms", {
+            "request": request,
+            "confirmation": preview["structuredContent"]["result"]["confirmation"],
+        }, identity="two")
+        assert result["isError"] is True
+        assert result["structuredContent"]["error"]["code"] == "send_confirmation_changed"
+        assert [action for action, _ in calls] == [
+            "ListSecondTemplate", "ListSecondTemplate",
+        ]

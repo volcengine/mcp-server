@@ -9,9 +9,10 @@
   },
   "dependencies": {
     "@arco-design/web-react": "2.66.15",
-    "@modelcontextprotocol/ext-apps": "2.0.4",
     "@modelcontextprotocol/client": "^2.0.0",
+    "@modelcontextprotocol/ext-apps": "2.0.4",
     "base64-js": "1.5.1",
+    "crc-32": "1.2.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "zod": "^4.2.0"

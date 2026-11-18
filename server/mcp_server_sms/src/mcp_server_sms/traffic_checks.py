@@ -1,12 +1,9 @@
-"""引流表单在提交前校验，受理后只读核对资源 ID。"""
+"""引流表单的本地格式及重复项校验。"""
 
 import re
 from urllib.parse import urlsplit
 
-from anyio import move_on_after
-
 from .client import failure
-from .observability import observe_call
 from .operations import RegisterLinksRequest, TrafficRegistration
 from .protocol import SmsAPIError
 
@@ -19,7 +16,6 @@ _NUMBER_PATTERNS = {
     6: (re.compile(r"12[0-9]{3}"), "12 号码"),
     7: (re.compile(r"[0-9]{10,12}"), "固定电话"),
 }
-_READBACK_SECONDS = 12
 _URL_SCHEME = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*://")
 
 
@@ -32,15 +28,6 @@ def _link_identity(value: str):
         raise ValueError
     # URL 路径与查询参数区分大小写。只让解析器识别协议、主机和端口，不修改原值。
     return parsed.scheme, parsed.hostname, parsed.port, parsed.path, parsed.query, parsed.fragment
-
-
-def _matches_link(candidate: str | None, identity: tuple) -> bool:
-    if not isinstance(candidate, str):
-        return False
-    try:
-        return _link_identity(candidate) == identity
-    except ValueError:
-        return False
 
 
 def validate_traffic_form(request: TrafficRegistration) -> None:
@@ -72,41 +59,3 @@ def validate_traffic_form(request: TrafficRegistration) -> None:
                 request.action, "duplicate_traffic_resource", f"第 {index} 行与本次录入的其他资源重复"
             ))
         seen.add(identity)
-
-
-async def read_back_traffic(call, request: TrafficRegistration) -> dict:
-    """read_back_traffic 保留成功写入，只为精确匹配的资源补充 ID。"""
-    ids = []
-    is_link = isinstance(request, RegisterLinksRequest)
-    action = "GetTobTrafficDrivingLinkListForAgent" if is_link else "GetTobTrafficDrivingPhoneListForAgent"
-    with observe_call("form", "traffic", path="read_back") as observation:
-        with move_on_after(_READBACK_SECONDS):
-            for row in request.params.data:
-                if is_link:
-                    field, value = ("jumpLink", row.jump_link) if row.use_volc_link else ("link", row.link)
-                    filters = {field: value, "useVolcLink": row.use_volc_link}
-                    identity = _link_identity(value)
-                else:
-                    field, value = "number", row.number
-                    filters = {field: value}
-                try:
-                    result = (await call(action, filters))["result"]
-                except SmsAPIError:
-                    continue
-                records = result.get("list", result.get("List")) if isinstance(result, dict) else None
-                if not isinstance(records, list):
-                    continue
-                matches = [
-                    item for item in records
-                    if isinstance(item, dict) and (
-                        _matches_link(item.get(field), identity)
-                        and item.get("useVolcLink", row.use_volc_link) is row.use_volc_link
-                        if is_link else item.get(field) == value
-                    )
-                ]
-                if len(matches) == 1 and type(matches[0].get("id")) is int and matches[0]["id"] > 0:
-                    ids.append(matches[0]["id"])
-        count = len(request.params.data)
-        verified = len(ids) == count
-        observation.result_class = "success" if verified else "partial"
-        return {"resourceIds": ids, "submittedRecordCount": count, "verified": verified}

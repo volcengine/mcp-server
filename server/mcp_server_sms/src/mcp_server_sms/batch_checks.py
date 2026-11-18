@@ -12,8 +12,8 @@ from .models import ApiModel, Mobile, Text
 from .observability import observe_call
 from .protocol import SmsAPIError
 from .responses import ApiResult
-from .upload_models import FileContent, RecipientsUpload, SmsRequestError
-from .uploads import decode_file, recipient_columns, recipient_rows
+from .upload_models import SmsRequestError
+from .uploads import recipient_rows
 
 _VARIABLE = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
 _MAX_CHECK_CONTENTS = 100
@@ -21,7 +21,6 @@ _CHECK_WORKERS = 6
 _CHECK_SECONDS = 25
 _ROW_SAMPLE_LIMIT = 20
 _TRAFFIC_ACTION = "CheckTrafficDrivingExist"
-_BATCH_ACTION = "ListBatchTemplatesForAgent"
 
 
 class BatchSelection(ApiModel):
@@ -32,28 +31,11 @@ class BatchSelection(ApiModel):
 
 class BatchTestSend(BatchSelection):
     mobile: Mobile = Field(repr=False)
-    template_content: Text = Field(repr=False)
     template_params: dict[str, str] = Field(default_factory=dict, repr=False)
 
 
 class BatchTrafficCheck(BatchSelection):
-    file: FileContent = Field(repr=False)
-    content: str | None = Field(None, repr=False)
-    template_content: str | None = Field(None, repr=False)
-
-
-class TaskField(ApiResult):
-    name: Literal["content"] = Field(alias="Name")
-    required: bool = Field(False, alias="Required")
-
-
-class BatchTemplate(ApiResult):
-    id: Text = Field(alias="TemplateId")
-    channel: Literal["CN_NTC", "CN_MKT"] = Field(alias="ChannelType")
-    batch_only: bool = Field(False, alias="BatchOnly")
-    template_content: str | None = Field(None, alias="TemplateContent")
-    content: str | None = Field(None, alias="Content")
-    task_fields: list[TaskField] = Field(default_factory=list, alias="TaskFields")
+    content: Text = Field(repr=False, description="页面已核对的实际正文，包含待按名单展开的变量")
 
 
 class TrafficResourceMatch(ApiResult):
@@ -76,52 +58,6 @@ def _records(result: dict):
     if not isinstance(value, dict):
         return None
     return value.get("List", value.get("list", value.get("Items", value.get("items"))))
-
-
-async def _template(call, selection: BatchSelection) -> BatchTemplate:
-    result = await call(_BATCH_ACTION, {
-        "TemplateId": selection.template_id, "SubAccounts": [selection.sub_account],
-        "Signatures": [selection.signature], "Page": 1, "PageSize": 100,
-    })
-    rows = _records(result)
-    try:
-        if not isinstance(rows, list) or len(rows) != 1:
-            raise ValueError
-        template = BatchTemplate.model_validate(rows[0])
-        if template.id != selection.template_id:
-            raise ValueError
-    except (ValidationError, ValueError):
-        raise SmsAPIError(failure(
-            _BATCH_ACTION, "batch_template_unavailable", "未取得对应消息组和签名的明确群发模板",
-            result["request_id"],
-        )) from None
-    return template
-
-
-async def _columns(call, selection: BatchSelection) -> list[str]:
-    demo = await call("TemplateUploadDemoForAgent", {
-        "subAccount": selection.sub_account, "templateId": selection.template_id,
-    })
-    try:
-        return recipient_columns(demo["result"]["value"])
-    except SmsRequestError as exc:
-        raise SmsAPIError(exc.result) from None
-
-
-async def validate_batch_test(call, request: BatchTestSend) -> None:
-    """validate_batch_test 试发前核对模板可单发，且参数与真实 CSV 变量一致。"""
-    template = await _template(call, request)
-    if template.batch_only or template.task_fields:
-        raise SmsAPIError(failure("SendSmsForAgent", "batch_only_template", "该模板仅支持群发"))
-    if request.template_content != (template.template_content or template.content):
-        raise SmsAPIError(failure(
-            "SendSmsForAgent", "batch_template_changed", "模板正文已变化，请重新核对后试发"
-        ))
-    columns = await _columns(call, request)
-    if set(request.template_params) != set(columns[1:]) or not all(request.template_params.values()):
-        raise SmsAPIError(failure(
-            "SendSmsForAgent", "invalid_test_variables", "请按当前模板填写所有试发变量"
-        ))
 
 
 def batch_test_receipt(envelope: dict, requested_at: int) -> dict:
@@ -163,7 +99,9 @@ async def _short_link_mode(call, request: BatchTrafficCheck) -> bool:
     return modes[0]
 
 
-def _group_rendered_contents(request: BatchTrafficCheck, columns: list[str], text: str):
+def _group_rendered_contents(
+    columns: list[str], text: str, data: bytes
+):
     variables = _VARIABLE.findall(text)
     if text.count("${") != len(variables) or not set(variables).issubset(columns[1:]):
         raise SmsAPIError(failure(
@@ -171,10 +109,6 @@ def _group_rendered_contents(request: BatchTrafficCheck, columns: list[str], tex
         ))
     groups: dict[str, ContentGroup] = {}
     try:
-        data, _ = decode_file(RecipientsUpload(
-            kind="recipients", sub_account=request.sub_account, template_id=request.template_id,
-            **request.file.model_dump(),
-        ))
         total = 0
         for line, _, params in recipient_rows(data, columns):
             total += 1
@@ -196,18 +130,11 @@ def _group_rendered_contents(request: BatchTrafficCheck, columns: list[str], tex
     return total, groups
 
 
-async def check_batch_traffic(call, request: BatchTrafficCheck) -> dict:
-    """check_batch_traffic 渲染实际正文，按正文去重核对，仅返回覆盖数量与行号。"""
-    template = await _template(call, request)
-    if request.content is not None and not template.task_fields:
-        raise SmsAPIError(failure(_TRAFFIC_ACTION, "invalid_batch_content", "该模板没有任务级正文"))
-    text = request.content if request.content is not None else template.template_content or template.content
-    if request.content is None and request.template_content is not None and request.template_content != text:
-        raise SmsAPIError(failure(_TRAFFIC_ACTION, "batch_template_changed", "模板正文已变化，请重新核对"))
-    if not text or (any(item.required for item in template.task_fields) and not request.content):
-        raise SmsAPIError(failure(_TRAFFIC_ACTION, "invalid_batch_content", "请补齐实际短信正文"))
-    columns = await _columns(call, request)
-    total, groups = _group_rendered_contents(request, columns, text)
+async def check_batch_traffic(
+    call, request: BatchTrafficCheck, *, data: bytes, columns: list[str]
+) -> dict:
+    """check_batch_traffic 按正文去重核对，保留覆盖数量、行号和原始调用错误。"""
+    total, groups = _group_rendered_contents(columns, request.content, data)
     try:
         use_volc_link = await _short_link_mode(call, request)
     except SmsAPIError as exc:
@@ -216,9 +143,11 @@ async def check_batch_traffic(call, request: BatchTrafficCheck) -> dict:
         return {
             "totalRows": total, "checkedRows": 0, "failedRows": 0, "uncheckedRows": total,
             "missingResourceRows": 0, "missingRowNumbers": [], "reason": "short_link_mode_unavailable",
+            "failures": [exc.result],
         }
     checked = failed = missing = 0
     missing_lines = []
+    failures = []
     work = iter(groups.items())
 
     async def worker():
@@ -227,7 +156,11 @@ async def check_batch_traffic(call, request: BatchTrafficCheck) -> dict:
             try:
                 envelope = await call(_TRAFFIC_ACTION, {"content": content, "useVolcLink": use_volc_link})
                 result = TrafficMatches.model_validate(envelope["result"])
-            except (SmsAPIError, ValidationError):
+            except SmsAPIError as exc:
+                failures.append(exc.result)
+                failed += group.count
+                continue
+            except ValidationError:
                 failed += group.count
                 continue
             checked += group.count
@@ -245,4 +178,5 @@ async def check_batch_traffic(call, request: BatchTrafficCheck) -> dict:
             "totalRows": total, "checkedRows": checked, "failedRows": failed,
             "uncheckedRows": total - checked - failed, "missingResourceRows": missing,
             "missingRowNumbers": sorted(missing_lines)[:_ROW_SAMPLE_LIMIT],
+            **({"failures": failures} if failures else {}),
         }

@@ -23,6 +23,8 @@ from mcp_server_sms.server import build_server, create_http_app
 @pytest.mark.parametrize(
     "action,params,method",
     [
+        ("GetApplySignatureBind", {}, "GET"),
+        ("GetApplySignatureBind", {"purpose": 2}, "GET"),
         (
             "GetSubAccountListForAgent",
             {
@@ -117,19 +119,6 @@ async def test_supplemental_query_contracts(mcp, api_calls, action, params, meth
     Draft202012Validator(tool.input_schema).validate(arguments)
 
 
-async def test_service_confirmation_and_activation_are_separate(mcp, api_calls):
-    first = {"action": "ConfirmProtocolDocument", "params": {"product": "sms", "documents": [1, 2]}}
-    result = await mcp.call_tool("manage_sms_service", {"request": first})
-    assert payload(result)["result"] == {"success": [1, 2], "fail": []}
-    assert len(api_calls[0]) == 1
-    assert json.loads(api_calls[0][0].content) == first["params"]
-    result = await mcp.call_tool(
-        "manage_sms_service",
-        {"request": {"action": "ActivateSmsProductInOneStep", "params": {"product": ["sms"]}}},
-    )
-    assert not result.is_error
-    assert len(api_calls[0]) == 2
-    assert api_calls[0][-1].url.params["Action"] == "ActivateSmsProductInOneStep"
 
 
 async def test_rejected_batch_content_stays_a_business_result(mcp):
@@ -177,10 +166,10 @@ async def test_rejected_batch_content_stays_a_business_result(mcp):
 )
 async def test_traffic_registration_preserves_confirmed_data(mcp, api_calls, action, data):
     result = await mcp.call_tool(
-        "register_traffic_resource", {"request": {"action": action, "params": {"data": data}}}
+        "submit_traffic_resources", {"request": {"action": action, "params": {"data": data}}}
     )
     assert not result.is_error
-    assert len(api_calls[0]) == 1
+    assert [request.url.params["Action"] for request in api_calls[0]] == [action]
     assert json.loads(api_calls[0][0].content) == {"data": data}
 
 
@@ -193,7 +182,7 @@ async def test_invalid_query_action_and_private_validation_do_not_leak(mcp, api_
     assert result.is_error
     assert secret not in result.model_dump_json()
     result = await mcp.call_tool(
-        "register_traffic_resource",
+        "submit_traffic_resources",
         {
             "request": {
                 "action": "BulkCreateTobTrafficDrivingPhoneForAgent",
@@ -273,17 +262,21 @@ async def test_special_notification_task_uses_body_and_idempotency(mcp, api_call
 
 async def test_template_traffic_types_and_signature_material_references(mcp, api_calls):
     template = {
-        "name": "模板",
+        "name": "模板", "signatures": ["示例签名"],
         "content": "请查看${url}",
         "channelType": "CN_NTC",
         "templateParams": [{"name": "url", "paramType": 2}],
         "templateTrafficDriving": [[{"name": "url", "paramType": 2, "id": 12}]],
     }
-    assert not (await mcp.call_tool("apply_template", {"request": template})).is_error
+    preview = await mcp.call_tool("preview_template", {"request": template})
+    assert not preview.is_error
+    view = preview.meta["sms/form"]["result"]
+    assert not (await mcp.call_tool("submit_template", {"request": template, "confirmation": view["confirmation"]})).is_error
     assert (
         json.loads(api_calls[0][-1].content)["templateTrafficDriving"]
         == template["templateTrafficDriving"]
     )
+    assert json.loads(api_calls[0][-1].content)["fixTrafficDriving"] == []
     assert api_calls[0][-1].url.params["Action"] == "ApplySmsTemplateV2ForAgent"
     signature = {
         "content": "示例",
@@ -295,13 +288,13 @@ async def test_template_traffic_types_and_signature_material_references(mcp, api
         "isLimitSubAccount": 1,
         "subAccounts": ["group"],
     }
-    assert not (await mcp.call_tool("apply_signature", {"request": signature})).is_error
+    assert not (await mcp.call_tool("submit_signature", {"request": signature})).is_error
     assert json.loads(api_calls[0][-1].content) == signature
 
 
 async def test_wire_schemas_are_inline_and_keep_nested_constraints(mcp, qualification_request):
     tools = await mcp.list_tools()
-    assert len(tools) == 36
+    assert len(tools) == 39
     for tool in tools:
         for schema in (tool.input_schema, tool.output_schema):
             if schema is None:
@@ -310,7 +303,7 @@ async def test_wire_schemas_are_inline_and_keep_nested_constraints(mcp, qualific
             serialized = json.dumps(schema)
             for forbidden in ('"$ref"', '"$defs"', '"definitions"'):
                 assert forbidden not in serialized
-    tool = next(t for t in tools if t.name == "apply_qualification")
+    tool = next(t for t in tools if t.name == "submit_qualification")
     validator = Draft202012Validator(tool.input_schema)
     validator.validate({"request": qualification_request})
     del qualification_request["businessInfo"]["businessCertificateName"]
@@ -367,7 +360,7 @@ async def test_tool_and_api_observations_share_correlation_without_private_data(
     monkeypatch.setattr(observability.trace, "get_tracer", lambda name: Tracer())
     caplog.set_level(logging.INFO, logger="mcp_server_sms.calls")
     result = await mcp.call_tool(
-        "register_traffic_resource",
+        "submit_traffic_resources",
         {
             "request": {
                 "action": "BulkCreateTobTrafficDrivingPhoneForAgent",
@@ -385,6 +378,7 @@ async def test_tool_and_api_observations_share_correlation_without_private_data(
     )
     assert not result.is_error
     assert {s.attributes["kind"] for s in spans} == {"tool", "api"}
+    assert len(spans) == 2
     assert len({s.attributes["correlation_id"] for s in spans}) == 1
     assert all([event[0] for event in span.events] == ["start", "end"] for span in spans)
     assert "fixture-private-person-id" not in caplog.text
@@ -395,10 +389,12 @@ async def test_tool_and_api_observations_share_correlation_without_private_data(
 @pytest.mark.parametrize(
     "result", [{"taskId": "task"}, {"taskId": "task", "totalCount": True, "dupCount": 0}]
 )
-def test_missing_or_invalid_batch_counts_leave_write_outcome_unknown(result):
+def test_missing_or_invalid_batch_counts_return_response_without_outcome_guess(result):
     response = httpx.Response(200, json={"ResponseMetadata": {}, "Result": result})
     decoded = SmsClient.decode("SetBatchTaskForAgent", response, Credentials("ak", "sk"))
-    assert decoded["error"]["outcome_unknown"] is True
+    assert decoded["error"]["code"] == "invalid_response"
+    assert "outcome_unknown" not in decoded["error"]
+    assert decoded["error"]["backend_response"]["Result"] == result
 
 
 def test_empty_counts_are_valid_and_private_resource_fields_are_removed():
@@ -437,7 +433,7 @@ def test_empty_counts_are_valid_and_private_resource_fields_are_removed():
     }
 
 
-def test_uncertain_api_error_has_same_outcome_at_tool_and_api_boundaries(caplog):
+def test_backend_error_reaches_mcp_without_message_replacement_or_outcome_guess(caplog):
     calls = []
 
     def respond(request):
@@ -462,17 +458,22 @@ def test_uncertain_api_error_has_same_outcome_at_tool_and_api_boundaries(caplog)
             "tools/call",
             token=auth_header("one"),
             params={
-                "name": "manage_sms_service",
-                "arguments": {
-                    "request": {
-                        "action": "ActivateSmsProductInOneStep",
-                        "params": {"product": ["sms"]},
-                    }
-                },
+                "name": "create_batch_task",
+                "arguments": {"request": {
+                    "subAccount": "g", "name": "n", "signature": "s", "templateId": "t",
+                    "fileUrl": "f", "scheduled": False, "sendTime": 0, "idempotencyKey": "key",
+                }},
             },
         )
     assert response.json()["result"]["isError"]
-    assert '"outcome_unknown": true' in response.json()["result"]["content"][0]["text"]
+    failure = response.json()["result"]["structuredContent"]
+    assert failure["error"]["message"] == "private"
+    assert failure["error"]["backend_response"]["ResponseMetadata"]["Error"] == {
+        "Code": "1999", "Message": "private",
+    }
+    assert "outcome_unknown" not in failure["error"]
+    assert json.loads(response.json()["result"]["content"][0]["text"]) == failure
+    assert "private" not in caplog.text
     assert len(calls) == 1
     ends = [
         json.loads(record.getMessage().removeprefix("sms_call "))
@@ -482,7 +483,7 @@ def test_uncertain_api_error_has_same_outcome_at_tool_and_api_boundaries(caplog)
     ends = [event for event in ends if event["event"] == "end"]
     assert {event["kind"] for event in ends} == {"api", "tool"}
     assert all(
-        event["result_class"] == "unknown"
+        event["result_class"] == "failed"
         and event["error_code"] == "1999"
         and event["request_id"] == "fixture-uncertain"
         for event in ends
@@ -538,34 +539,15 @@ def test_incomplete_decisions_are_not_reported_as_success(action, result):
     assert decoded["success"] is False
 
 
-def test_partial_protocol_confirmation_is_preserved_without_activation():
+async def test_partial_protocol_confirmation_is_preserved_without_activation():
     calls = []
-
     def respond(request):
         calls.append(request)
         return httpx.Response(200, json={"Result": {"success": [1], "fail": [2]}})
-
-    api = SmsClient(transport=httpx.MockTransport(respond))
-    with TestClient(
-        create_http_app(build_server(api), public_url="https://testserver", host="0.0.0.0"), base_url="https://testserver"
-    ) as http:
-        response = rpc(
-            http,
-            "tools/call",
-            token=auth_header("one"),
-            params={
-                "name": "manage_sms_service",
-                "arguments": {
-                    "request": {
-                        "action": "ConfirmProtocolDocument",
-                        "params": {"product": "sms", "documents": [1, 2]},
-                    }
-                },
-            },
-        )
-    assert response.json()["result"]["structuredContent"]["result"] == {"success": [1], "fail": [2]}
-    assert len(calls) == 1
-    assert calls[0].url.params["Action"] == "ConfirmProtocolDocument"
+    async with SmsClient(transport=httpx.MockTransport(respond)) as api:
+        result = await api.call("ConfirmProtocolDocument", {"product": "sms", "documents": [1, 2]}, Credentials("ak", "sk"))
+    assert result["result"] == {"success": [1], "fail": [2]}
+    assert len(calls) == 1 and calls[0].url.params["Action"] == "ConfirmProtocolDocument"
 
 
 @pytest.mark.parametrize(
@@ -603,31 +585,18 @@ def test_partial_protocol_confirmation_is_preserved_without_activation():
         ),
     ],
 )
-def test_service_results_must_match_the_submitted_targets(action, params, result):
+async def test_service_results_must_match_the_submitted_targets(action, params, result):
     calls = []
-
     def respond(request):
         calls.append(request)
         return httpx.Response(200, json={"Result": result})
-
-    api = SmsClient(transport=httpx.MockTransport(respond))
-    with TestClient(
-        create_http_app(build_server(api), public_url="https://testserver", host="0.0.0.0"), base_url="https://testserver"
-    ) as http:
-        response = rpc(
-            http,
-            "tools/call",
-            token=auth_header("one"),
-            params={
-                "name": "manage_sms_service",
-                "arguments": {"request": {"action": action, "params": params}},
-            },
-        )
-    outcome = response.json()["result"]
-    assert outcome["isError"] is True
-    assert '"outcome_unknown": true' in outcome["content"][0]["text"]
-    assert len(calls) == 1
-    assert json.loads(calls[0].content) == params
+    async with SmsClient(transport=httpx.MockTransport(respond)) as api:
+        outcome = await api.call(action, params, Credentials("ak", "sk"))
+    assert outcome["success"] is False
+    assert outcome["error"]["code"] == "invalid_response"
+    assert "outcome_unknown" not in outcome["error"]
+    assert outcome["error"]["backend_response"]["Result"] == result
+    assert len(calls) == 1 and json.loads(calls[0].content) == params
 
 
 def test_valid_activation_business_failure_is_preserved():

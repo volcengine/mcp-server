@@ -1,149 +1,85 @@
-# 火山引擎短信 MCP Server
+# 火山引擎短信 MCP App
 
-[English](README.md)
+面向支持 MCP Apps 的客户端：模型查询资源并打开可预填页面，客户在页面核对后提交。服务支持 MCP 2026-07-28、stdio 和无状态 Streamable HTTP，不加载或依赖 Skill。
 
-独立的短信 API 适配服务，支持 **MCP 2026-07-28**、stdio、**Stateless Streamable HTTP** 和标准 **MCP Apps**。业务工具接收完整参数并调用对应接口；打开表单不执行写入，文件上传在服务端完成授权、上传及确认。
+当前尚未对外开放，本轮统一替换原 API 型工具面，不保留旧工具别名、兼容模式或直接模型写入路径。没有 MCP Apps 的客户端可继续只读查询；业务办理使用支持表单的客户端或短信控制台。
 
-不依赖 Skill，不在服务端保存业务草稿或预览，不提供本机文件路径服务及通用 `prepare/execute` 流程；不需要 SQLite、PostgreSQL 或 Redis。五类表单在宿主沙箱内保存当前填写内容，客户端负责用户确认，现有短信服务负责业务校验、申请、任务与发送记录。
+## 模型可见工具
 
-## 工具与接口
-
-| 工具 | 短信 Action |
+| 用途 | 工具 |
 | --- | --- |
-| `list_message_groups` | `ListSubAccountForAgent` |
-| `get_message_group` | `GetSubAccountDetail` |
-| `get_account_information` | `ListAllSmsProduct` |
-| `get_qualification_requirements` | `GetAccountIdentRankForAgent` |
-| `list_qualifications` | `GetSignatureIdentificationList` |
-| `recognize_qualification_document` | `GetOCRLicenseForAgent` |
-| `check_qualification_enterprise` | `ThreeElementEnterpriseCheckForAgent` |
-| `check_qualification_person` | `ThreeElementPersonCheckForAgent` |
-| `send_verification_code` | `SendSmsVerifyCodeByMobile` |
-| `verify_code` | `CheckSmsVerifyCodeByMobile` |
-| `apply_qualification` | `ApplySignatureIdentificationForAgent` |
-| `list_signatures` | `ListSignatureForAgent` |
-| `apply_signature` | `ApplySmsSignatureV2` |
-| `list_templates` | `ListSmsTemplateForAgent` |
-| `list_second_templates` | `ListSecondTemplate` |
-| `apply_template` | `ApplySmsTemplateV2ForAgent` |
-| `send_sms` | `SendSmsForAgent` |
-| `list_send_logs` | `ListSmsSendLogForAgent` |
-| `get_send_statistics` | `GetTotalSendCountStatV4ForAgent` |
-| `get_batch_upload_url` | `GetUploadTosURL` |
-| `get_batch_csv_template` | `TemplateUploadDemoForAgent` |
-| `create_batch_task` | `SetBatchTaskForAgent` |
-| `get_batch_task` | `GetBatchTaskDetail` |
-| `list_batch_tasks` | `GetBatchTaskList` |
-| `start_batch_task` | `ConsentBatchTask` |
-| `cancel_batch_task` | `DeleteBatchTask` |
-| `query_sms_resources` | 下表中的 10 项补充查询 |
-| `manage_sms_service` | `ConfirmProtocolDocument`、`ActivateSmsProductInOneStep` |
-| `open_sms_service_onboarding`、`get_sms_service_onboarding`、`submit_sms_service_onboarding` | 开通表单、`ListAllSmsProduct`、按确认执行协议签署或开通 |
-| `register_traffic_resource`、`preview_traffic_resource` | 引流格式校验、录入及可选回查 |
-| `send_batch_test_sms`、`check_batch_traffic_resources`（仅 App 可见） | 校验群发模板后单条试发、按实际正文核对引流 |
-| `upload_sms_file`（仅 App 可见） | 内部材料授权及上传，或 CSV 模板校验与上传 |
+| 账号、材料要求和资质 | `get_account_information`、`get_qualification_requirements`、`list_qualifications` |
+| 消息组、签名、引流和运营商报备 | `query_sms_resources` |
+| 普通模板及二级绑定详情 | `list_templates`、`list_second_templates` |
+| 单条短信预览和确认发送 | `preview_sms_send`、`send_sms` |
+| 发送记录和统计 | `list_send_logs`、`get_send_statistics` |
+| 群发任务查询和 CSV 示例 | `query_batch_tasks`、`get_batch_csv_template` |
+| 打开业务页面 | `open_sms_service_onboarding`、`open_qualification_form`、`open_signature_form`、`open_traffic_form`、`open_template_form`、`open_batch_task_form` |
 
-共 **36 个工具、40 项业务 Action**，上传组件另在内部调用 `GetMUploadParam`。群发目录和 CSV 示例接口支持普通模板及特殊通知模板。验证码群发和国际短信不在范围内。三个聚合工具使用 `request.action` 和对应类型的 `request.params`。
+全部查询和开表工具都声明 `readOnlyHint=true`。开表不会申请、发码、发送短信或启动群发。自然语言单发先调用 `preview_sms_send`，向客户展示掩码号码和渲染正文；客户明确确认后，把未变化的请求和返回的 `confirmation` 交给 `send_sms`。提交前会重新核对模板和账号范围，参数或资源变化后必须重新预览。多个号码、定时发送和逐号码变量统一使用群发页面。`prefill` 只接受可编辑草稿，不接受业务提交 `request`、校验票据、确认标记或幂等键。用户已经提供的信息可预填，未知项留空。
 
-| `query_sms_resources` 的 action | 用途 |
+已有群发任务通过 `open_batch_task_form({"task":{"subAccount":"消息组 ID","taskId":"任务 ID"}})` 打开管理页；`task` 与新建用的 `prefill` 互斥。查询和打开旧任务不会重建一条任务。
+
+`query_sms_resources` 的 `request.action` 与 `request.params` 使用对应类型：
+
+- 消息组：`GetSubAccountListForAgent`、`GetSubAccountDetail`。
+- 签名与群发模板：`ListSignaturesForAgent`、`ListBatchTemplatesForAgent`。
+- 引流：`GetTobTrafficDrivingLinkListForAgent`、`GetTobTrafficDrivingPhoneListForAgent`、`ListRelationTemplateForAgent`、`CheckTrafficDrivingExist`。
+- 运营商报备：`ListThirdTemplate`、`AgentGetSignatureTemplateReportStatus`。
+- 群发正文预检：`ValidateBatchTaskContentForAgent`，只用于模板明确声明的任务级正文。
+
+`query_batch_tasks` 选择 `GetBatchTaskDetail`（`subAccount/taskId`）或 `GetBatchTaskList`（`subAccount/taskName/signature/templateId/pageIndex/pageSize`）。列表未出现任务不能代替按 ID 查询。
+
+签名表单通过 `query_sms_resources` 调用 `GetApplySignatureBind`，一次取得已审核通过的资质候选数组；可选 `purpose` 为 1（自用）、2（他用），不传或 0 不限制用途。只消费 `id/purpose/materialName/businessCertificateName`，不分页、不逐条补查。客户确认后直接调用 `ApplySmsSignatureV2`，资质归属及审核状态由短信接口校验。`list_qualifications` 继续用于完整资质列表查询。
+
+单发和模板申请的 `confirmation` 包含 `expires_at` 与 `signature`，默认有效期为 5 分钟，到期时间也参与签名。提交时完整传回该对象，过期后重新预览并由客户确认。同一票据在有效期内仍可重复使用，每次实际提交都需客户授权，结果未确认时先查询记录。
+
+## 页面内部工具
+
+| 用途 | 工具 |
 | --- | --- |
-| `GetSubAccountListForAgent` | 分页查询消息组，支持项目、名称、启用状态筛选 |
-| `ListSignaturesForAgent` | 按消息组、类型、行业、审核状态查询签名 |
-| `ListBatchTemplatesForAgent` | 查询群发模板目录，保留 `TaskFields`、`BatchOnly` |
-| `GetTobTrafficDrivingLinkListForAgent` | 查询引流链接、短链及备案信息 |
-| `GetTobTrafficDrivingPhoneListForAgent` | 查询引流号码及所属企业 |
-| `ListRelationTemplateForAgent` | 按签名、号码或链接查询关联模板 |
-| `CheckTrafficDrivingExist` | 检查实际正文中的引流资源 |
-| `ListThirdTemplate` | 查询组合模板报备 |
-| `AgentGetSignatureTemplateReportStatus` | 查询签名与模板的三网报备状态 |
-| `ValidateBatchTaskContentForAgent` | 预检特殊通知任务正文 |
+| 文件上传 | `prepare_material_upload`、`complete_material_upload`、`prepare_recipients_upload`、`complete_recipients_upload` |
+| 服务开通 | `get_sms_service_onboarding`、`submit_sms_service_onboarding` |
+| 资质核验 | `recognize_qualification_document`、`check_qualification_enterprise`、`check_qualification_person`、`send_verification_code`、`verify_code` |
+| 申请与引流录入 | `submit_qualification`、`submit_signature`、`preview_template`、`submit_template`、`preview_traffic_resource`、`submit_traffic_resources` |
+| 发送和群发管理 | `send_batch_test_sms`、`create_batch_task`、`start_batch_task`、`cancel_batch_task` |
 
-例如，查询群发模板时，工具参数为：
+这些工具声明 `visibility=["app"]`，由遵循规范的宿主从模型工具列表中排除。可见性不是鉴权：每次调用仍校验客户凭据，最终资源权限由短信/IAM 执行。
 
-```json
-{
-  "request": {
-    "action": "ListBatchTemplatesForAgent",
-    "params": {"SubAccounts": ["<消息组 ID>"], "Page": 1, "PageSize": 20}
-  }
-}
-```
+OCR、企业和人员核验详细结果固定放在 `_meta["sms/form"]`，没有改成模型可见的开关。元数据仍经宿主管理，不代表端到端加密；生产接入需核对宿主日志和留存策略。
 
-`RE:0001` 表示未开通。支持 MCP Apps 时，用 `open_sms_service_onboarding` 让客户核对协议及计费后确认。直接调用 `manage_sms_service` 时，先通过 `get_account_information` 核实协议和商品状态，获授权后按实际协议 ID 调用 `ConfirmProtocolDocument`。签署结果的 `fail` 为空后，首次开通或重新开通再调用 `ActivateSmsProductInOneStep`，参数为 `{"product":["sms"]}`，最后回查账号状态。
+## 页面流程
 
-`register_traffic_resource` 的参数为 `{"request":{"action":"<上述两种录入 Action 之一>","params":{"data":[...]}}}`。每次最多 10 个链接或 100 个号码；完整字段和必填约束见 `tools/list`。链接、路径、查询参数、号码均按原文传递，个人证件信息通过客户端私密渠道输入。
+六种表单共用 `ui://sms/forms.html`，React/Arco 样式由本包维护，不依赖原短信 Skill 的运行环境。
 
-服务端会核对协议签署结果完整覆盖本次协议且成功、失败清单不重叠，开通结果恰好对应本次商品。缺失或不匹配返回 `outcome_unknown`；合法的部分签署失败或开通业务失败保留原值，供客户端核对。
+- 资质、签名和引流保留现有填写、上传、核验及确认步骤，支持宿主预填。
+- 模板申请覆盖正文、用途、变量类型、签名、消息组、引流组合和短链选项。正文占位符与变量定义必须一致，动态业务规则和最终审核仍由短信服务判断。
+- 单条短信使用前述对话预览和确认发送流程。群发试发保留页面内的独立确认，多个号码或逐号码变量使用 CSV 群发。
+- 引流录入使用上游原生响应展示受理结果，成功后不逐条补查资源 ID；需要资源 ID 时使用资源查询工具。
+- 群发新建页面一次确认完成创建任务与确认发送：先创建，再对同一任务调用启动接口；受理后不再要求二次确认。两个内部工具仍独立调用，不把创建本身视为发送。已有任务从管理页读取最新身份、状态与正文后由客户确认启动或取消；业务结果未知时不自动重试。
+- 页面中的提交、发送或取消就是客户对所展示操作的确认。模型读取结果并回查，不在点击后再追加一轮会话确认。受理、审核、报备、任务结束与最终送达分别说明。
 
-直接发送沿用调用方提供的签名、模板和号码。已有模板 ID 交给发送接口校验。
+## 文件传输与私密数据
 
-## 资质与文件
+群发查询只返回任务摘要，不返回存储 Key、下载链接或内部扩展字段。
 
-资质申请接收完整企业、经办人、责任人、可选法人信息、材料引用和上游校验票据。`ticket` 是短信校验接口返回的业务凭据，由客户端保管并在申请时传回，不是 MCP 的草稿 ID。上游要求、票据有效性和审核结果由短信服务判断。
+原文件不进入 App 工具调用参数。页面先传文件元信息取得本次上传请求，HTTPS 直传原字节到受信 ImageX/TOS，再通过 MCP 确认。短信 AK/SK 和 ImageX STS 留在服务端，页面只获得单文件上传能力。
 
-验证码接口所需的应用 ID、场景、模板和通道来自已有业务配置，MCP 不硬编码某个内部应用或自动选择。客户端应通过私密渠道提供个人材料和验证码；OCR 默认 `private=true`，完整识别字段只放在 `_meta["sms/form"]` 供私密页面核对，普通内容只返回操作状态。客户明确同意识别结果进入模型上下文时才显式使用 `private=false`；此时姓名、证件号等会进入模型可见的 `content` 和 `structuredContent`。
+CSV 直传后只保留签名引用，在核对群发任务时通过 `complete_recipients_upload` 一次完成名单统计和可选引流检查。MCP 通过 `GetFilePublicTosURL` 校验账号文件归属，回读有大小上限的原始流，拒绝压缩响应并核对 SHA-256，按页面已加载的 CSV 列定义检查表头、号码和重复数量。模板正文与列定义在同一次核对中复用，不再次查询；可选引流检查仍按实际正文查询报备资源。相同文件和模板的完整检查结果可在当前页面及凭证有效期内复用；未完整覆盖或发现缺失资源时重新检查。创建任务仍由短信后端校验实际文件。当前账号/网关无权限时明确失败，不跳过校验。
 
-MCP Apps 表单可以选择并上传材料，服务端通过当前客户的凭据取得材料上传授权，再完成 ImageX 上传。材料上传仅允许当前 ImageX 服务的官方区域/加速域名及官方列出的历史上传主机，其他主机在发送文件和上传授权前拒绝；CSV 仍按自身 TOS 地址策略校验。也可以继续使用已有短信材料渠道的引用。MCP 不读取本机路径、不下载调用方指定的 URL、不持久保存文件，也不提供额外的 `/files` 接口；普通聊天附件不会自动转换成材料引用。
+单文件最大 10 MiB。每实例最多同时持有两个 CSV 回读/校验缓冲，槽位覆盖后续引流消费期。材料直传前由页面检查大小，服务端校验申报元信息，实际存储侧限制由 ImageX 负责。上传确认按当前凭据签名，材料 10 分钟、CSV 1 小时有效；凭据刷新后重新上传。
 
-签名申请支持 `appIcp.appIcpFileList`、`trademark.trademarkFileList`、`uploadFileList` 以及消息组绑定。`GetMUploadParam` 不作为模型可调用工具暴露，其结果整体禁止从普通 API 结果返回；临时凭据仅供服务端上传组件消费。
+上传失败保留已填内容，允许客户手动重选，不自动重传，也不会提交业务申请。普通聊天附件不会自动变成材料引用，较大文件应在表单选择；包内文件上限不代表宿主工具参数容量。
 
-群发 CSV：调用 `get_batch_upload_url`，客户端使用短期签名 URL 直接上传原文件，再把返回的 `file` 对象 Key 作为 `fileUrl` 传入 `create_batch_task`。创建与启动是短信业务本身的两个操作，必须分别调用。
+CSP 仅声明配置的 ImageX 上传域名和 TOS 桶的完整域名 `https://batch-sms-bucket.tos-cn-beijing.volces.com`，不加载外部 JS/CSS。使用完整域名，避免宿主将通配符 `*` 转义为 `%2A` 后导致浏览器拒绝连接。真实客户端需核实 CSP 支持与存储 CORS。服务没有 `/files` 路由、本机文件访问、调用方任意下载地址、持久化上传状态或服务端草稿。
 
-## MCP Apps 表单
+## 结果与观测
 
-不传 `request` 调用以下工具，只打开对应表单；传完整 `request` 仍按原工具语义直接调用短信 API，必须事先取得用户授权：
+查询失败不等于没有资源；请求受理不等于审核通过或送达。MCP 每次物理 API 请求只调用一次，不自行重试。
 
-| 工具 | 表单能力 |
-| --- | --- |
-| `apply_qualification` | 企业、人员和材料校验，企业信息未通过自动核验时由客户确认转人工审核 |
-| `apply_signature` | 唯一可用资质和消息组自动预选，公司名回填，项目和证明材料，名称风险单独确认 |
-| `register_traffic_resource` | 预览时校验格式、协议和重复项，确认录入后回查资源 ID |
-| `create_batch_task` | 单条试发及回执、按 CSV 逐行检查引流、创建后单独确认启动或取消 |
-| `open_sms_service_onboarding` | 查看国内短信商品、协议与计费，确认开通或更新协议，刷新实际状态 |
+短信后端错误码、错误原文、RequestId 和 HTTP 状态直接透传，完整原始响应保存在 `error.backend_response`。MCP 不按错误码或 HTTP 状态推断业务最终结果，也不将后端错误改写成“结果未知”；后续处理由宿主 Agent 判断。未收到后端响应时返回实际网络异常类型及信息。表单直接展示错误原文，汇总流程同时保留各次调用的原始错误。
 
-例如 `tools/call` 的参数为 `{"name":"apply_signature","arguments":{}}`。五个开表工具均通过 `_meta.ui.resourceUri` 绑定 `ui://sms/forms.html`，`resources/read` 返回 MIME 为 `text/html;profile=mcp-app` 的自包含 HTML。Python 使用官方 `Apps` 扩展，页面使用官方 `@modelcontextprotocol/ext-apps`。
-
-宿主 Agent 把已核实的字段传给 `prefill`，未知字段可以省略。打开后客户可修改或补齐，再核对提交。
-`prefill` 与 `request` 互斥；准确的字段和类型见 `tools/list`。例如
-`{"name":"create_batch_task","arguments":{"prefill":{"name":"双十一活动通知","subAccount":"group-id","signature":"示例签名","templateId":"template-id"}}}`。
-
-| 表单 | 可预填内容 |
-| --- | --- |
-| 资质 | 用途、名称、`businessInfo`、经办人、责任人、法人信息、人员关系和营业证件、人员证件、委托书、其他材料。证件图片在 `personCertificate` 中按 `front`、`back` 或法人其他证件的 `document` 提供。 |
-| 签名 | 签名内容、来源、资质 ID、消息组范围和组 ID、项目名称、说明、APP 备案、商标信息和各类证明附件。 |
-| 引流 | `kind` 为 `link` 或 `phone`；`data` 中填写对应行的链接、协议、备案或号码、类型、归属信息。 |
-| 群发 | 任务名称 `name`、消息组、签名、模板、任务级正文、`checkTraffic`、`scheduled`、`sendTime`（Unix 秒，页面显示北京时间）及 `recipientsFile`。模板声明了正文输入项时才使用任务级正文。 |
-
-签名和群发的下拉项按当前账号资源核对。群发可只预填签名或模板，补齐上游选项后再核对和选中。
-个人信息和文件须由宿主通过获授权的私密渠道传递；预填值只在工具结果的 `_meta["sms/form"].prefill` 中交给视图，普通结果不回显。
-附件形如 `{"name":"proof.png","data":"<原文件的 Base64>"}`，同一次开表的附件合计最多 10 MB；宿主不具备私密文件传递能力时由客户在表单内选择。
-页面先显示待上传文件，用户点击上传后才走原材料或 CSV 校验上传流程。预填不接受验证码、校验票据、已上传文件 Key、勾选确认或任务幂等键。
-
-表单配色、布局和样式文件复用 byted-sms-sender 1.4.6 的 React/Arco 页面；源码复制在本包 `ui/` 中，Skill 不做修改，构建及运行不依赖 Skill 路径。宿主宽窄尺寸、深色模式在独立样式中适配。JS/CSS 已内联，CSP 不声明外部连接或静态源，页面不直接请求业务 API。
-
-- 上传仅通过宿主代理调用 `upload_sms_file`，文件引用放入 `_meta["sms/form"]`，普通结果只含操作状态；OCR 默认使用该通道；企业/人员校验可显式传入 `private=true`。`_meta` 仍由宿主管理，生产接入需核实宿主的数据展示、留存及日志策略，不能将其当作端到端加密或独立权限边界。
-- `upload_sms_file` 声明 `visibility=["app"]`；宿主按标准过滤模型工具列表。该标记不替代短信/IAM 鉴权，所有业务请求仍使用本次调用者的凭据。
-- 单文件最大 **10 MiB**，每实例同时处理最多 **2** 个上传，满载时明确拒绝且不排队解码。资质图片支持 JPG/JPEG/PNG；签名材料按类别支持图片、PDF、ZIP、DOC/DOCX。CSV 按对应模板的表头校验，保留原文件，重复号码只计数不改写。更大的文件继续走现有上传渠道；宿主及网关实际请求体上限需联调确认。
-- `form_config.json` 是前后端共同的上传限制和短信材料/验证场景配置；其中是既有短信业务标识，不能填写客户 AK/SK 或 Token。
-- 用户核对并勾选后才提交；重复点击受控，未知写结果锁定重试。群发创建后重新查询任务；启动前核对任务身份、状态和正文，另行确认实际发送及费用。历史恢复只展示返回结果，不重放写操作。
-- 客户确认转人工审核后，服务端重新核验企业信息，并在符合条件时使用上游人工审核票据。人员、材料和手机号核验仍以账号要求为准。
-- CSV 引流检查逐行渲染短信正文，向查询接口提交去重后的正文，在限定时间内最多检查 100 种不同正文。确认页显示覆盖数量、缺失资源和待核对的行。
-- 开通表单在提交前重新核对当前账号及协议清单。协议更新只签待更新项，首次开通或重新开通需完整签署后再发起开通，最终以账号状态为准。同一 MCP 实例会锁定同一访问凭据的未决提交，直到查到明确结果。
-- 原有工具继续接受完整参数。表单填写内容和确认状态保留在当前宿主视图内。
-
-开发及预览见 [ui/README.md](ui/README.md)。标准接口参考 [MCP Apps](https://modelcontextprotocol.io/extensions/apps/overview)。
-
-## 0.2.0 参数迁移
-
-原有 26 个工具名保留，以下输入与结果契约有变化，客户端需要同步更新：
-
-- `apply_template` 改用 `ApplySmsTemplateV2ForAgent`。每个 `templateParams` 项必须明确给出 `paramType`（1 普通、2 链接、3 号码、4 Path、5 超级变量），不再默认为普通变量。`templateTrafficDriving` 使用二维数组，每项提供 `name`、`paramType` 及资源 `id` 或 `content`。
-- `create_batch_task` 改用 `SetBatchTaskForAgent`：必填 `subAccount/name/signature/templateId/fileUrl/scheduled/sendTime/idempotencyKey`；特殊通知按模板的 `TaskFields` 提供 `content`，先做正文预检。移除旧的 `templateName/channelType/extra` 输入，由短信服务解析模板。立即发送传 `scheduled=false, sendTime=0`，定时发送传 Unix 秒。客户端为同一已确认任务保留稳定的 `idempotencyKey`。请求等待上限为 60 秒，只有返回有效 `taskId/totalCount/dupCount` 才确认创建受理；计数为 0 有效。
-- `get_batch_csv_template` 改用 `TemplateUploadDemoForAgent`，不再接受 `force_update`；CSV 内容从结果的 `value` 读取，兼容 JSON 和原始 CSV 响应。不自行构造列名。
-- `get_send_statistics` 改用 V4：支持项目、消息组、类型/签名/模板数组、标准错误码、拆分口径与分组开关，固定查询国内短信。旧的单个类型/签名/模板输入仍可用，按 API 数组字段发送。
-- `list_send_logs` 可以省略消息组，查询当前主账户；模型结果移除完整 `mobile/content`，保留回执状态与错误码。资源查询同时移除人员证件、材料引用等私密字段，其他未知业务字段保留。
-
-Schema 由同一套类型模型生成并内联，使用标准 `oneOf/anyOf`，不包含 `$ref/$defs/definitions`。表单复用原样式并改用 AppBridge；不保留 localhost 接口。Plugin 元数据、OAuth 网关配置和上架仍需单独办理。API 失败和参数校验失败提供结构化 `isError` 结果，表单不解析错误文案判断写入是否完成。
+工具及物理 API 调用输出成对 start/end 日志与 OpenTelemetry 事件，携带关联 ID、耗时、公开错误码和请求编号，不记录文件、短信正文、号码或凭据。页面上传日志也不含文件名、URL 或授权头。观测失败不改变业务结果。
 
 ## 本地运行
 
@@ -160,7 +96,7 @@ uv run mcp-server-sms --transport stdio
 
 ```bash
 uv build
-uvx --from ./dist/mcp_server_sms-0.2.0-py3-none-any.whl mcp-server-sms --transport stdio
+uvx --from ./dist/mcp_server_sms-0.3.0-py3-none-any.whl mcp-server-sms --transport stdio
 ```
 
 功能取决于实际安装版本；仓库代码更新不等于线上函数已更新。
@@ -186,20 +122,14 @@ mcp-server-sms --transport streamable-http --host 0.0.0.0 --port 8000 \
 
 HTTP 连接池随 MCP 服务启动和关闭，凭据和签名头仍逐请求生成，不保留不同调用者之间的响应 Cookie。连接复用不引入业务状态或数据库。
 
-## 执行语义
-
-- 写工具直接产生业务操作，客户端必须先取得用户授权；工具注解不是授权证明。
-- 发送接口成功只表示受理，需按 Message ID 查询送达回执。空列表不是失败证据。
-- 资质、签名和模板申请成功不等于审核通过，分别查询其状态。
-- 不自动重试任何 API 调用。写请求超时或响应不足以确认结果时返回 `outcome_unknown`，不能盲目重发；不承诺跨请求去重或“恰好一次”。
-- 非结构化的 HTTP 400/401/403/404/405/413/415/422/429 响应按明确拒绝处理；其他非结构化状态、服务端异常和损坏或缺少关键结果的成功响应，仍保留未知写结果。API 响应错误携带 `http_status`，不回显响应正文。
-- 上传接口顶层 `url` 保持完整原文，包括参与签名的凭证参数；其他字段仍按规则脱敏。完整 URL 是短期授权信息，不要修改后上传，也不要写入日志。
-- 接口调用成功也可能返回校验未通过，例如验证码的 `status` 非零、正文预检 `Approved=false` 或协议签署 `fail` 非空；保留上游字段，调用方应检查业务结果。报备成功不代表送达，任务列表可能不含状态 2，已知任务 ID 时直接查详情。
-- 错误保留公开错误码和 RequestId，不回显请求正文、验证码、凭据或原始服务端错误文本；字段按上述隐私契约过滤，其他业务值不改写。申请、开通与引流录入的 `1999/SY:0500` 等不确定错误不应自动重试。
-
-工具调用和短信 API 调用分别记录 start/end，包含关联 ID、Action、耗时、结果分类、错误码与 RequestId。日志写 stderr，OpenTelemetry 使用宿主配置的 tracer provider，不配置 exporter 时不外发。两种观测失败均不改变业务结果；不会记录参数、正文、号码或鉴权头。部署平台还需约束自身访问日志。
-
 ## 验证和发布
+
+### 0.3.0 接入
+
+客户端、表单资源和 MCP 包一起升级，工具入口以本文当前接口表和服务返回的 Schema 为准。
+
+短信后端的错误原文和 `backend_response` 会进入工具结果，可能包含后端回显的业务数据，宿主按实际数据处理策略管理模型上下文。
+
 
 ```bash
 cd ui
@@ -217,4 +147,4 @@ uv run python -m twine check dist/*
 
 请求字段参照[官方短信 SDK](https://github.com/volcengine/volcengine-python-sdk/tree/3b116781c5b8bb648f215b29587f2ec74d9e5d02/volcenginesdkvolcsms)，请求签名使用[官方 Python SDK](https://github.com/volcengine/volc-sdk-python)。资质扩展 Action 按现有短信服务契约接入，需确认部署账号的接口可用性。
 
-源码版本为 0.2.0。复用仓库现有 PR 构建检查和合入后的 PyPI 发布流程，发布权限由维护者提供；包发布、veFaaS 升级和 ATS/Plugin 上架是分别执行的操作。许可证为 Apache-2.0。
+源码版本为 0.3.0。复用仓库现有 PR 构建检查和合入后的 PyPI 发布流程，发布权限由维护者提供；包发布、veFaaS 升级和 ATS/Plugin 上架是分别执行的操作。许可证为 Apache-2.0。

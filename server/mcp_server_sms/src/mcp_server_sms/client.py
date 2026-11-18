@@ -31,16 +31,15 @@ API_SERVICE = "volcSMS"
 @dataclass(frozen=True)
 class Action:
     method: Literal["GET", "POST"]
-    write: bool = False
-    result_format: Literal["json", "csv", "id"] = "json"
+    result_format: Literal["json", "csv", "id", "ack"] = "json"
     required_any: tuple[str, ...] = ()
     required_all: tuple[str, ...] = ()
     opaque_result_fields: tuple[str, ...] = ()
     private_result_fields: frozenset[str] = frozenset()
     result_model: type[BaseModel] | None = None
-    uncertain_error_codes: frozenset[str] = frozenset()
     timeout: float | None = None
     expose_result: bool = True
+    public_result_fields: frozenset[str] | None = None
 
 
 _RESOURCE_PRIVATE_FIELDS = frozenset({
@@ -49,41 +48,52 @@ _RESOURCE_PRIVATE_FIELDS = frozenset({
     "appicpfilelist", "trademarkfilelist", "fileurl", "filecontent",
     "numberperson", "persontype", "personid",
 })
-_UNCERTAIN_WRITE_ERRORS = frozenset({"1999", "SY:0500"})
+
+# 群发查询只公开任务摘要。文件 Key、下载能力和内部扩展字段留在短信服务。
+_BATCH_TASK_FIELDS = frozenset({
+    "taskId", "subAccount", "taskName", "signature", "templateId", "templateName",
+    "channelType", "scheduled", "sendTime", "status", "totalCount", "dupCount",
+    "sendContent", "msgCount", "okCount", "failCount", "receiptSuccessCount",
+    "receiptFailCount", "noReceiptCount", "createdAt", "updatedAt", "taskType",
+    "sendTimeStamp", "createdAtStamp", "updatedAtStamp",
+})
+_PAGE_FIELDS = frozenset({"List", "list", "Items", "items", "Total", "total", "Page", "page", "PageSize", "pageSize"})
 
 
 # Only named tools can select an action; callers cannot supply arbitrary APIs.
 ACTIONS = {
-    "ListSubAccountForAgent": Action("POST", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
     "GetSubAccountListForAgent": Action("POST", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
     "GetSubAccountDetail": Action("GET", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
     "ListAllSmsProduct": Action("GET"),
     "GetAccountIdentRankForAgent": Action("GET"),
     "GetSignatureIdentificationList": Action("POST", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
+    "GetApplySignatureBind": Action("GET"),
     "GetOCRLicenseForAgent": Action("POST"),
     "ThreeElementEnterpriseCheckForAgent": Action("POST"),
     "ThreeElementPersonCheckForAgent": Action("POST"),
-    "SendSmsVerifyCodeByMobile": Action("POST", True, required_any=("messageId",)),
-    "CheckSmsVerifyCodeByMobile": Action("POST", True, required_any=("status",)),
-    "ApplySignatureIdentificationForAgent": Action("POST", True, "id"),
-    "ListSignatureForAgent": Action("POST", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
+    "SendSmsVerifyCodeByMobile": Action("POST", required_any=("messageId",)),
+    "CheckSmsVerifyCodeByMobile": Action("POST", required_any=("status",)),
+    "ApplySignatureIdentificationForAgent": Action("POST", "id"),
     "ListSignaturesForAgent": Action("POST", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
     "ApplySmsSignatureV2": Action(
-        "POST", True, required_any=("applyId", "status"),
-        uncertain_error_codes=_UNCERTAIN_WRITE_ERRORS,
+        "POST", required_any=("applyId", "status"),
     ),
     "ListSmsTemplateForAgent": Action("POST", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
     "ListBatchTemplatesForAgent": Action("POST", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
     "ListSecondTemplate": Action("GET", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
     "ApplySmsTemplateV2ForAgent": Action(
-        "POST", True, required_any=("templateId", "status"),
-        uncertain_error_codes=_UNCERTAIN_WRITE_ERRORS,
+        "POST", required_any=("templateId", "status"),
     ),
-    "SendSmsForAgent": Action("POST", True, required_any=("MessageId", "MessageIds")),
+    "SendSmsForAgent": Action(
+        "POST", required_any=("MessageId", "MessageIds"),
+    ),
     "ListSmsSendLogForAgent": Action("POST", private_result_fields=frozenset({"mobile", "content"})),
     "GetTotalSendCountStatV4ForAgent": Action("POST"),
     "GetUploadTosURL": Action(
-        "GET", True, required_all=("file", "url"), opaque_result_fields=("url",)
+        "GET", required_all=("file", "url"), opaque_result_fields=("url",)
+    ),
+    "GetFilePublicTosURL": Action(
+        "GET", required_all=("fileName", "url"), opaque_result_fields=("url",)
     ),
     # 仅上传组件消费原始凭据；没有任何公开业务工具允许选择这个 Action。
     "GetMUploadParam": Action("GET", result_model=MaterialAuthorization, expose_result=False),
@@ -91,13 +101,12 @@ ACTIONS = {
         "POST", result_format="csv", result_model=BatchTemplateDemo
     ),
     "SetBatchTaskForAgent": Action(
-        "POST", True, result_model=BatchTaskCreated, timeout=60,
-        uncertain_error_codes=_UNCERTAIN_WRITE_ERRORS,
+        "POST", result_model=BatchTaskCreated, timeout=60,
     ),
-    "GetBatchTaskDetail": Action("GET"),
-    "GetBatchTaskList": Action("GET"),
-    "ConsentBatchTask": Action("POST", True),
-    "DeleteBatchTask": Action("POST", True),
+    "GetBatchTaskDetail": Action("GET", public_result_fields=_BATCH_TASK_FIELDS),
+    "GetBatchTaskList": Action("GET", public_result_fields=_BATCH_TASK_FIELDS | _PAGE_FIELDS),
+    "ConsentBatchTask": Action("POST", result_format="ack"),
+    "DeleteBatchTask": Action("POST", result_format="ack"),
     "ValidateBatchTaskContentForAgent": Action("POST", result_model=BatchContentChecked),
     "CheckTrafficDrivingExist": Action("GET", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
     "ListThirdTemplate": Action("GET", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
@@ -108,19 +117,16 @@ ACTIONS = {
     "GetTobTrafficDrivingPhoneListForAgent": Action("GET", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
     "ListRelationTemplateForAgent": Action("GET", private_result_fields=_RESOURCE_PRIVATE_FIELDS),
     "BulkCreateTobTrafficDrivingLinkForAgent": Action(
-        "POST", True, uncertain_error_codes=_UNCERTAIN_WRITE_ERRORS
+        "POST"
     ),
     "BulkCreateTobTrafficDrivingPhoneForAgent": Action(
-        "POST", True, private_result_fields=_RESOURCE_PRIVATE_FIELDS,
-        uncertain_error_codes=_UNCERTAIN_WRITE_ERRORS,
+        "POST", private_result_fields=_RESOURCE_PRIVATE_FIELDS,
     ),
     "ConfirmProtocolDocument": Action(
-        "POST", True, result_model=ConfirmedProtocols,
-        uncertain_error_codes=_UNCERTAIN_WRITE_ERRORS | {"RE:0000"},
+        "POST", result_model=ConfirmedProtocols,
     ),
     "ActivateSmsProductInOneStep": Action(
-        "POST", True, result_model=ActivationResult,
-        uncertain_error_codes=_UNCERTAIN_WRITE_ERRORS | {"RE:0000"},
+        "POST", result_model=ActivationResult,
     ),
 }
 
@@ -138,10 +144,6 @@ _CREDENTIAL_FIELDS = frozenset(
     }
 )
 
-# These status codes explicitly reject the request. Unstructured timeout,
-# conflict and gateway-specific responses remain uncertain for mutations.
-_REJECTED_HTTP_STATUSES = frozenset({400, 401, 403, 404, 405, 413, 415, 422, 429})
-
 
 class _RejectCookies(DefaultCookiePolicy):
     """Connection pooling must not introduce cross-caller cookie state."""
@@ -153,18 +155,20 @@ class _RejectCookies(DefaultCookiePolicy):
 def safe_result(
     value: Any, credentials: Credentials, *, opaque_fields: tuple[str, ...] = (),
     private_fields: frozenset[str] = frozenset(),
+    public_fields: frozenset[str] | None = None,
 ) -> Any:
     """Redact credentials while preserving declared top-level API references."""
     if isinstance(value, dict):
         return {
             key: item if key in opaque_fields else safe_result(
-                item, credentials, private_fields=private_fields
+                item, credentials, private_fields=private_fields, public_fields=public_fields
             )
             for key, item in value.items()
             if key.lower() not in _CREDENTIAL_FIELDS | private_fields
+            and (public_fields is None or key in public_fields)
         }
     if isinstance(value, list):
-        return [safe_result(item, credentials, private_fields=private_fields) for item in value]
+        return [safe_result(item, credentials, private_fields=private_fields, public_fields=public_fields) for item in value]
     if isinstance(value, str):
         for secret in (credentials.access_key, credentials.secret_key, credentials.session_token):
             if secret:
@@ -172,10 +176,19 @@ def safe_result(
     return value
 
 
-def failure(action, code, message, request_id=None, *, outcome_unknown=False, http_status=None):
-    error = {"code": code, "message": message, "outcome_unknown": outcome_unknown}
+def failure(
+    action, code, message, request_id=None, *, outcome_unknown=False, http_status=None,
+    backend_response=None, source=None,
+):
+    error = {"code": code, "message": message}
+    if outcome_unknown is not None:
+        error["outcome_unknown"] = outcome_unknown
     if http_status is not None:
         error["http_status"] = http_status
+    if backend_response is not None:
+        error["backend_response"] = backend_response
+    if source is not None:
+        error["source"] = source
     return {
         "success": False,
         "action": action,
@@ -264,14 +277,9 @@ class SmsClient:
                 content=request.body.encode("utf-8") if request.body else None,
                 **({"timeout": spec.timeout} if spec.timeout is not None else {}),
             )
-        except (httpx.ConnectError, httpx.ConnectTimeout, httpx.PoolTimeout):
-            return failure(action, "connection_failed", "未建立 API 连接，请检查网络")
-        except httpx.HTTPError:
+        except httpx.HTTPError as exc:
             return failure(
-                action,
-                "outcome_unknown" if spec.write else "transport_error",
-                "请求结果暂时无法确认；写操作不要自动重试",
-                outcome_unknown=spec.write,
+                action, type(exc).__name__, str(exc), outcome_unknown=None, source="transport"
             )
         return response
 
@@ -282,7 +290,6 @@ class SmsClient:
     ) -> dict:
         spec = ACTIONS[action]
         request_id = response.headers.get("x-tt-logid") or response.headers.get("x-request-id")
-        request_id = safe_result(request_id, credentials)
         try:
             payload = response.json()
         except ValueError:
@@ -318,52 +325,58 @@ class SmsClient:
                 payload = None
         metadata = payload.get("ResponseMetadata", {}) if isinstance(payload, dict) else {}
         if isinstance(metadata, dict):
-            request_id = metadata.get("RequestId") or request_id
+            request_id = metadata.get("RequestId", request_id)
         else:
             metadata = {}
-        request_id = safe_result(request_id, credentials)
-        if response.status_code >= 500 and spec.write:
-            return failure(
-                action,
-                "outcome_unknown",
-                "服务端异常，不能确认写入结果",
-                request_id,
-                outcome_unknown=True,
-                http_status=response.status_code,
-            )
         api_error = metadata.get("Error")
         if isinstance(api_error, dict):
-            # API error messages can echo identity documents, codes or auth input.
-            # Preserve the public error code and RequestId, never echo raw input.
-            code = safe_result(str(api_error.get("Code") or "api_error"), credentials)
+            # 后端错误原样交给调用方；HTTP 状态和错误码不代表业务最终结果。
             return failure(
                 action,
-                code,
-                "短信 API 返回错误，请结合错误码和 RequestId 排查",
+                api_error.get("Code"),
+                api_error.get("Message"),
                 request_id,
-                outcome_unknown=spec.write and code in spec.uncertain_error_codes,
+                outcome_unknown=None,
                 http_status=response.status_code,
+                backend_response=payload,
             )
-        if response.status_code in _REJECTED_HTTP_STATUSES:
+        if response.is_error:
             return failure(
                 action,
                 f"http_{response.status_code}",
-                "短信 API 拒绝了请求",
+                response.text,
                 request_id,
+                outcome_unknown=None,
                 http_status=response.status_code,
+                backend_response=payload if payload is not None else response.text,
             )
-        if not response.is_success or not isinstance(payload, dict) or "Result" not in payload:
+        # 仅两个任务状态变更接口使用 TOP 的空结果回执。SuccessResponse(nil) 会省略
+        # Result；必须核对本次 Action、Version、RequestId 且无错误，不能仅凭 HTTP 200。
+        acknowledgement = (
+            spec.result_format == "ack"
+            and isinstance(metadata.get("RequestId"), str)
+            and bool(metadata["RequestId"])
+            and metadata.get("Action") == action
+            and metadata.get("Version") == API_VERSION
+            and metadata.get("Error") is None
+        )
+        if not response.is_success or not isinstance(payload, dict) or (
+            "Result" not in payload and not acknowledgement
+        ):
             return failure(
                 action,
-                "outcome_unknown" if spec.write else "invalid_response",
+                "invalid_response",
                 "未收到可确认的短信 API 响应",
                 request_id,
-                outcome_unknown=spec.write,
+                outcome_unknown=None,
                 http_status=response.status_code,
+                backend_response=payload if payload is not None else response.text,
             )
-        result = payload["Result"]
+        result = payload.get("Result")
         valid = True
-        if spec.result_format == "id":
+        if spec.result_format == "ack":
+            valid = acknowledgement and result is None
+        elif spec.result_format == "id":
             valid = type(result) is int and result > 0
         elif spec.required_any:
             valid = isinstance(result, dict) and any(
@@ -390,11 +403,12 @@ class SmsClient:
         if not valid:
             return failure(
                 action,
-                "outcome_unknown" if spec.write else "invalid_response",
+                "invalid_response",
                 "接口响应缺少必要结果，不能确认操作完成",
                 request_id,
-                outcome_unknown=spec.write,
+                outcome_unknown=None,
                 http_status=response.status_code,
+                backend_response=payload,
             )
         return {
             "success": True,
@@ -405,6 +419,7 @@ class SmsClient:
             "result": safe_result(
                 result, credentials, opaque_fields=spec.opaque_result_fields,
                 private_fields=spec.private_result_fields,
+                public_fields=spec.public_result_fields,
             ) if spec.expose_result else None,
             "error": None,
         }

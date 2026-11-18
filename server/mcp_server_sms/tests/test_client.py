@@ -9,55 +9,81 @@ from mcp_server_sms.client import SmsClient
 CREDENTIALS = Credentials("fixture-access-key", "fixture-secret-key", "fixture-session-token")
 
 
+@pytest.mark.parametrize("action", ["GetBatchTaskDetail", "GetBatchTaskList"])
+async def test_batch_queries_return_summary_without_storage_capabilities(action):
+    task = {
+        "taskId": "fixture-task", "subAccount": "fixture-group", "status": 2,
+        "sendContent": "原文不变", "totalCount": 10, "receiptSuccessCount": 8,
+        "fileUrl": "private/recipients.csv",
+        "fileViewUrl": "https://fixture.invalid/recipients.csv?X-Tos-Signature=secret-capability",
+        "extra": {"privateExport": "another-private-capability"},
+    }
+    result = task if action == "GetBatchTaskDetail" else {"list": [task], "total": 1}
+    async with SmsClient(transport=httpx.MockTransport(
+        lambda _: httpx.Response(200, json={"Result": result})
+    )) as client:
+        response = await client.call(action, {}, CREDENTIALS)
+    assert response["success"]
+    public = response["result"] if action == "GetBatchTaskDetail" else response["result"]["list"][0]
+    assert public == {key: task[key] for key in (
+        "taskId", "subAccount", "status", "sendContent", "totalCount", "receiptSuccessCount"
+    )}
+    assert "private" not in json.dumps(response)
+    assert "secret-capability" not in json.dumps(response)
+    if action == "GetBatchTaskList":
+        assert response["result"]["total"] == 1
+
+
 @pytest.mark.parametrize(
-    "action,exception,unknown",
+    "action,exception",
     [
-        ("SendSmsForAgent", httpx.ReadTimeout, True),
-        ("SendSmsForAgent", httpx.WriteTimeout, True),
-        ("SendSmsForAgent", httpx.RemoteProtocolError, True),
-        ("SendSmsForAgent", httpx.ConnectError, False),
-        ("ListSubAccountForAgent", httpx.ReadTimeout, False),
+        ("SendSmsForAgent", httpx.ReadTimeout),
+        ("SendSmsForAgent", httpx.WriteTimeout),
+        ("SendSmsForAgent", httpx.RemoteProtocolError),
+        ("SendSmsForAgent", httpx.ConnectError),
+        ("GetSubAccountListForAgent", httpx.ReadTimeout),
     ],
 )
-async def test_transport_failures_never_retry(action, exception, unknown):
+async def test_transport_failures_preserve_exception_without_guessing_or_retry(action, exception):
     calls = []
 
     def handler(request):
         calls.append(request)
-        raise exception("secret diagnostic must not leak", request=request)
+        raise exception("connection closed while reading response", request=request)
 
     async with SmsClient(transport=httpx.MockTransport(handler)) as client:
         result = await client.call(action, {}, CREDENTIALS)
     assert len(calls) == 1
     assert result["success"] is False
-    assert result["error"]["outcome_unknown"] is unknown
-    assert "secret diagnostic" not in json.dumps(result)
+    assert result["error"]["code"] == exception.__name__
+    assert result["error"]["message"] == "connection closed while reading response"
+    assert result["error"]["source"] == "transport"
+    assert "outcome_unknown" not in result["error"]
 
 
 @pytest.mark.parametrize(
-    "status,body,unknown",
+    "status,body",
     [
-        (200, b"not-json", True),
-        (502, b"gateway error", True),
-        (200, b'{"Result":{}}', True),
-        (200, b'{"Result":{"MessageIds":[]}}', True),
+        (200, b"not-json"),
+        (502, b"gateway error"),
+        (200, b'{"Result":{}}'),
+        (200, b'{"Result":{"MessageIds":[]}}'),
         (
             200,
             b'{"ResponseMetadata":{"RequestId":"public-id","Error":{"Code":"RE:0012","Message":"private text"}}}',
-            False,
         ),
     ],
 )
-async def test_write_response_is_not_guessed(status, body, unknown):
+async def test_write_response_is_not_guessed(status, body):
     async with SmsClient(
         transport=httpx.MockTransport(lambda request: httpx.Response(status, content=body))
     ) as client:
         result = await client.call("SendSmsForAgent", {}, CREDENTIALS)
     assert result["success"] is False
-    assert result["error"]["outcome_unknown"] is unknown
-    assert "private text" not in json.dumps(result)
-    if not unknown:
+    assert "outcome_unknown" not in result["error"]
+    if b"ResponseMetadata" in body:
         assert result["error"]["code"] == "RE:0012"
+        assert result["error"]["message"] == "private text"
         assert result["request_id"] == "public-id"
 
 
@@ -70,7 +96,7 @@ async def test_official_signer_carries_sts_without_logging(capsys, caplog):
 
     async with SmsClient(transport=httpx.MockTransport(handler)) as client:
         result = await client.call(
-            "ListSubAccountForAgent", {"SubAccountName": "示例"}, CREDENTIALS
+            "GetSubAccountListForAgent", {"SubAccountName": "示例"}, CREDENTIALS
         )
     assert result["success"]
     request = calls[0]
@@ -137,7 +163,7 @@ async def test_redirects_are_not_followed():
     async with SmsClient(transport=httpx.MockTransport(handler)) as client:
         result = await client.call("SendSmsForAgent", {}, CREDENTIALS)
     assert len(calls) == 1
-    assert result["error"]["outcome_unknown"]
+    assert "outcome_unknown" not in result["error"]
 
 
 async def test_incomplete_upload_authorization_is_not_reported_as_success():
@@ -177,18 +203,19 @@ def test_upload_url_preserves_signed_query_without_disabling_other_redaction():
     assert CREDENTIALS.access_key not in ordinary["result"]["url"]
 
 
-@pytest.mark.parametrize("status", [400, 401, 403, 404, 405, 413, 415, 422, 429])
-def test_plain_client_rejection_is_definite_and_retains_http_status(status):
+@pytest.mark.parametrize("status", [400, 401, 403, 404, 405, 408, 409, 413, 415, 422, 429, 499, 503])
+def test_http_error_preserves_body_without_interpreting_outcome(status):
     response = httpx.Response(
         status, text="private gateway body", headers={"x-request-id": "public-id"}
     )
     result = SmsClient.decode("SendSmsForAgent", response, CREDENTIALS)
     assert not result["success"]
-    assert result["error"]["outcome_unknown"] is False
+    assert "outcome_unknown" not in result["error"]
     assert result["error"]["code"] == f"http_{status}"
     assert result["error"]["http_status"] == status
     assert result["request_id"] == "public-id"
-    assert "private gateway body" not in json.dumps(result)
+    assert result["error"]["message"] == "private gateway body"
+    assert result["error"]["backend_response"] == "private gateway body"
 
 
 @pytest.mark.parametrize(
@@ -202,7 +229,126 @@ def test_plain_client_rejection_is_definite_and_retains_http_status(status):
         (200, b'{"Result":{}}'),
     ],
 )
-def test_ambiguous_responses_keep_unknown_outcome(status, body):
+def test_ambiguous_responses_preserve_evidence_for_the_caller(status, body):
     result = SmsClient.decode("SendSmsForAgent", httpx.Response(status, content=body), CREDENTIALS)
-    assert result["error"]["outcome_unknown"] is True
+    assert "outcome_unknown" not in result["error"]
     assert result["error"]["http_status"] == status
+    assert result["error"]["backend_response"] == (json.loads(body) if body.startswith(b"{") else body.decode())
+
+
+@pytest.mark.parametrize("action", [
+    "ListSignaturesForAgent", "ApplySmsTemplateV2ForAgent", "SendSmsForAgent", "GetMUploadParam",
+])
+@pytest.mark.parametrize("status,code", [(200, "1007"), (400, 1007), (500, "1999"), (503, "SY:0500")])
+def test_all_sms_errors_pass_through_without_rewriting_or_classification(action, status, code):
+    message = " 营销模板末尾必须为拒收请回复R\n且退订关键词必须在模版末尾 "
+    payload = {"ResponseMetadata": {
+        "RequestId": "fixture-request-id", "Action": action,
+        "Error": {"Code": code, "Message": message, "Details": {"field": "content", "value": "回T退订"}},
+    }}
+    decoded = SmsClient.decode(action, httpx.Response(status, json=payload), CREDENTIALS)
+    assert decoded["request_id"] == "fixture-request-id"
+    assert decoded["error"] == {
+        "code": code, "message": message, "http_status": status, "backend_response": payload,
+    }
+
+
+@pytest.mark.parametrize("error", [{"Code": "1007", "Message": ""}, {"Code": "1999"}, {}])
+def test_missing_or_empty_error_fields_are_not_replaced(error):
+    payload = {"ResponseMetadata": {"RequestId": "", "Error": error}}
+    decoded = SmsClient.decode("SendSmsForAgent", httpx.Response(500, json=payload), CREDENTIALS)
+    assert decoded["request_id"] == ""
+    assert decoded["error"]["code"] == error.get("Code")
+    assert decoded["error"]["message"] == error.get("Message")
+    assert decoded["error"]["backend_response"] == payload
+
+
+@pytest.mark.parametrize("action", ["ConsentBatchTask", "DeleteBatchTask"])
+@pytest.mark.parametrize("include_result", [False, True])
+async def test_batch_status_change_accepts_native_empty_acknowledgement(action, include_result):
+    # TOP SuccessResponse(nil) 的 Result 使用 omitempty，线上成功只返回元数据。
+    body = {"ResponseMetadata": {
+        "RequestId": "fixture-status-request", "Action": action, "Version": "2026-01-01",
+        "Service": "volcSMS", "Region": "cn-north-1",
+    }}
+    if include_result:
+        body["Result"] = None
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        return httpx.Response(200, json=body)
+
+    async with SmsClient(transport=httpx.MockTransport(handler)) as client:
+        result = await client.call(action, {"subAccount": "g", "taskId": "task"}, CREDENTIALS)
+    assert len(calls) == 1
+    assert result["success"] is True
+    assert result["result"] is None
+    assert result["request_id"] == "fixture-status-request"
+    assert result["error"] is None
+
+
+@pytest.mark.parametrize("action", ["ConsentBatchTask", "DeleteBatchTask"])
+@pytest.mark.parametrize("body", [
+    {}, {"ResponseMetadata": {}}, {"ResponseMetadata": None},
+    {"ResponseMetadata": {"RequestId": "fixture-status-request"}},
+    {"ResponseMetadata": {"RequestId": "", "Action": "ConsentBatchTask", "Version": "2026-01-01"}},
+    {"ResponseMetadata": {"RequestId": "fixture-status-request", "Action": "OtherAction", "Version": "2026-01-01"}},
+    {"ResponseMetadata": {"RequestId": "fixture-status-request", "Action": "ConsentBatchTask", "Version": "invalid"}},
+])
+def test_batch_status_change_does_not_guess_an_empty_acknowledgement(action, body):
+    result = SmsClient.decode(action, httpx.Response(200, json=body), CREDENTIALS)
+    assert result["success"] is False
+    assert result["error"]["code"] == "invalid_response"
+    assert result["error"]["http_status"] == 200
+    assert result["error"]["backend_response"] == body
+
+
+@pytest.mark.parametrize("action", ["SetBatchTaskForAgent", "SendSmsForAgent", "GetBatchTaskDetail"])
+def test_metadata_only_response_is_not_accepted_for_actions_requiring_results(action):
+    body = {"ResponseMetadata": {
+        "RequestId": "fixture-request", "Action": action, "Version": "2026-01-01",
+    }}
+    result = SmsClient.decode(action, httpx.Response(200, json=body), CREDENTIALS)
+    assert result["success"] is False
+    assert result["error"]["code"] == "invalid_response"
+
+
+@pytest.mark.parametrize("action", ["ConsentBatchTask", "DeleteBatchTask"])
+@pytest.mark.parametrize("status", [200, 400, 503])
+def test_batch_status_change_preserves_native_business_errors(action, status):
+    body = {"ResponseMetadata": {
+        "RequestId": "fixture-status-request", "Action": action, "Version": "2026-01-01",
+        "Error": {"Code": "1999", "Message": "Invalid operation to the record"},
+    }}
+    result = SmsClient.decode(action, httpx.Response(status, json=body), CREDENTIALS)
+    assert result["success"] is False
+    assert result["request_id"] == "fixture-status-request"
+    assert result["error"] == {
+        "code": "1999", "message": "Invalid operation to the record",
+        "http_status": status, "backend_response": body,
+    }
+
+
+@pytest.mark.parametrize("action", ["ConsentBatchTask", "DeleteBatchTask"])
+@pytest.mark.parametrize("result", [{}, "", True, 0, []])
+def test_batch_status_change_rejects_unexpected_result(action, result):
+    body = {"ResponseMetadata": {
+        "RequestId": "fixture-status-request", "Action": action, "Version": "2026-01-01",
+    }, "Result": result}
+    decoded = SmsClient.decode(action, httpx.Response(200, json=body), CREDENTIALS)
+    assert decoded["success"] is False
+    assert decoded["error"]["code"] == "invalid_response"
+    assert decoded["error"]["backend_response"] == body
+
+
+@pytest.mark.parametrize("action", ["ConsentBatchTask", "DeleteBatchTask"])
+@pytest.mark.parametrize("error", ["invalid error", False, []])
+def test_batch_status_change_does_not_ignore_malformed_error(action, error):
+    body = {"ResponseMetadata": {
+        "RequestId": "fixture-status-request", "Action": action, "Version": "2026-01-01",
+        "Error": error,
+    }, "Result": None}
+    decoded = SmsClient.decode(action, httpx.Response(200, json=body), CREDENTIALS)
+    assert decoded["success"] is False
+    assert decoded["error"]["code"] == "invalid_response"

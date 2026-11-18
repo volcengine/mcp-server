@@ -1,34 +1,10 @@
-"""服务开通与引流录入的类型化写请求；用户确认由客户端负责。"""
+"""引流录入的类型化请求；服务开通由专用页面流程负责。"""
 
 from typing import Annotated, Literal
 
 from pydantic import Field, model_validator
 
 from .models import ApiModel, Text
-
-
-class ProtocolConfirmation(ApiModel):
-    product: Literal["sms"]
-    documents: Annotated[list[Annotated[int, Field(gt=0)]], Field(min_length=1)]
-
-
-class ServiceActivation(ApiModel):
-    product: Annotated[list[Literal["sms"]], Field(min_length=1, max_length=1)]
-
-
-class ConfirmProtocolsRequest(ApiModel):
-    action: Literal["ConfirmProtocolDocument"]
-    params: ProtocolConfirmation
-
-
-class ActivateServiceRequest(ApiModel):
-    action: Literal["ActivateSmsProductInOneStep"]
-    params: ServiceActivation
-
-
-ServiceOperation = Annotated[
-    ConfirmProtocolsRequest | ActivateServiceRequest, Field(discriminator="action")
-]
 
 
 class TrafficLink(ApiModel):

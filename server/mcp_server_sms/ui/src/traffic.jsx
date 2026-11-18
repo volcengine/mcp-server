@@ -1,122 +1,186 @@
-import React, { useState } from 'react';
-import { Button, Checkbox, Radio } from '@arco-design/web-react';
-import { Choice, Confirm, Feedback, Field, Receipt, Summary, maskedIdentifier, useOperation } from './common.jsx';
-import { required } from './client.js';
+import React, { useRef, useState } from 'react';
+import { Alert, Button, Input, Select } from '@arco-design/web-react';
+import { Feedback, useOperation } from './common.jsx';
+import { OperationError } from './client.js';
+import {
+  displayValue, inferProtocol, initialRow, labels, numberTypes, parseLink, trafficPayload, validateRows,
+} from './traffic-controller.js';
 
-const numberTypes = [[1, '手机号码'], [2, '400 号码'], [3, '700 号码'], [4, '800 号码'], [5, '95 / 96 号码'], [6, '12 号码'], [7, '固定电话']];
-const labels = {
-  link: '文案链接', protocol: '文案链接协议', linkDomainIcp: '文案域名备案号', linkDomainIcpBody: '文案域名备案主体',
-  jumpLink: '跳转链接', jumpLinkDomainIcp: '跳转域名备案号', jumpLinkDomainIcpBody: '跳转域名备案主体',
-  number: '联系号码', company: '号码所属企业', numberProvince: '号码归属省份', numberCity: '号码归属城市',
-  numberPerson: '号码所属人', personId: '证件号码',
-  useVolcLink: '使用火山短链', numberType: '号码类型', personType: '证件类型',
-};
-
-export function trafficPayload(kind, rows) {
-  return rows.map(row => {
-    if (kind === 'phone') {
-      required(row.numberType, '请选择号码类型。'); required(row.number, '请输入联系号码。');
-      const fields = ['numberType', 'number', 'numberProvince', 'numberCity', ...(row.numberType === 1 ? ['numberPerson', 'personType', 'personId'] : ['company'])];
-      return Object.fromEntries(fields.filter(key => row[key] !== undefined).map(key => [key, row[key]]));
-    }
-    const fields = row.useVolcLink
-      ? ['useVolcLink', 'jumpLink', 'jumpLinkDomainIcp', 'jumpLinkDomainIcpBody']
-      : ['useVolcLink', 'protocol', 'link', 'linkDomainIcp', 'linkDomainIcpBody'];
-    fields.forEach(key => required(row[key], `请填写${labels[key] ?? '链接类型'}。`));
-    return Object.fromEntries(fields.map(key => [key, row[key]]));
-  });
-}
-
-function emptyRow(kind) {
-  return kind === 'link' ? { useVolcLink: false, protocol: 'https' } : {};
-}
-
-function draftRow(kind, row) {
-  if (Object.keys(row).length === 0) return emptyRow(kind);
-  if (kind === 'link') {
-    // 跳转信息只出现在火山短链分支；未知协议由客户核对，不套用空表默认值。
-    const hasJump = [row.jumpLink, row.jumpLinkDomainIcp, row.jumpLinkDomainIcpBody]
-      .some(value => value !== undefined);
-    return { ...row, useVolcLink: row.useVolcLink ?? hasJump };
-  }
-  // 私密证件字段只属于手机号码；有其他已确认的号码类型时保留宿主选择。
-  const hasPerson = [row.numberPerson, row.personType, row.personId].some(value => value !== undefined);
-  return hasPerson && row.numberType === undefined ? { ...row, numberType: 1 } : row;
-}
+export { trafficPayload } from './traffic-controller.js';
 
 export function TrafficForm({ client, prefill }) {
   const [kind, setKind] = useState(prefill?.kind ?? 'link');
-  const [rows, setRows] = useState(() => prefill?.data?.map(row => draftRow(kind, row)) ?? [emptyRow(kind)]);
+  const [rows, setRows] = useState(() => prefill?.data?.map(row => initialRow(kind, row)) ?? [initialRow(kind)]);
   const [preview, setPreview] = useState(null);
   const [receipt, setReceipt] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const form = useRef(null);
+  const ended = useRef(false);
   const operation = useOperation();
-  const edit = (index, field, value) => setRows(current => current.map((row, i) => i === index ? { ...row, [field]: value } : row));
-  const prepare = () => operation.run(async () => {
-    const request = {
-      action: kind === 'link' ? 'BulkCreateTobTrafficDrivingLinkForAgent' : 'BulkCreateTobTrafficDrivingPhoneForAgent',
-      params: { data: trafficPayload(kind, rows) },
-    };
-    await client.call('preview_traffic_resource', { request });
-    setPreview(request);
-  });
-  const submit = () => operation.run(async () => {
-    const count = preview.params.data.length;
-    const result = await client.call('register_traffic_resource', { request: preview, read_back: true }, { write: true });
-    const resourceIds = Array.isArray(result?.resourceIds)
-      ? result.resourceIds.filter(id => Number.isSafeInteger(id) && id > 0) : [];
-    const verified = result?.verified === true && resourceIds.length === count;
-    setReceipt({ resourceIds, verified, count }); setRows([]); setPreview(null);
-    await client.report({ form: 'traffic', state: verified ? 'verified' : 'accepted', kind, count, resourceIds });
-  }, { mutation: true });
+  const locked = operation.busy || operation.uncertain || Boolean(receipt);
+  const invalidate = () => { setPreview(null); setFieldErrors({}); };
+  const edit = (index, field, value) => {
+    if (locked || ended.current) return;
+    setRows(current => current.map((row, position) => position !== index ? row
+      : field === 'link' ? { ...row, link: value, protocol: inferProtocol(value) }
+        : { ...row, [field]: value }));
+    invalidate();
+  };
+  const prepare = () => {
+    if (locked || ended.current) return;
+    // 每次预览先撤销旧确认，服务端校验成功后才展示新请求。
+    setPreview(null);
+    const errors = validateRows(kind, rows);
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) {
+      const first = form.current?.querySelector(`[data-validation-field="${Object.keys(errors)[0]}"]`);
+      first?.scrollIntoView?.({ block: 'center', behavior: 'smooth' });
+      first?.querySelector('input, [tabindex]')?.focus();
+      return;
+    }
+    return operation.run(async () => {
+      const request = {
+        action: kind === 'link' ? 'BulkCreateTobTrafficDrivingLinkForAgent' : 'BulkCreateTobTrafficDrivingPhoneForAgent',
+        params: { data: trafficPayload(kind, rows) },
+      };
+      await client.call('preview_traffic_resource', { request });
+      setPreview(request);
+    });
+  };
+  const submit = () => {
+    if (!preview || locked || ended.current) return;
+    return operation.run(async () => {
+      const count = preview.params.data.length;
+      let result;
+      try {
+        result = await client.call('submit_traffic_resources', { request: preview }, { write: true });
+      } catch (error) {
+        if (error instanceof OperationError && !error.unknown) setPreview(null);
+        throw error;
+      }
+      if (result !== '') throw new OperationError('未收到明确的引流录入结果，请查询核对。', { unknown: true });
+      ended.current = true;
+      setReceipt({ count }); setRows([]); setPreview(null); setFieldErrors({});
+      await client.report({ form: 'traffic', state: 'accepted', kind, count });
+    }, { mutation: true });
+  };
+  const abandon = () => {
+    if (locked || ended.current) return;
+    return operation.run(async () => {
+      ended.current = true;
+      setRows([]); setPreview(null); setFieldErrors({}); setReceipt({ abandoned: true });
+      await client.report({ form: 'traffic', state: 'abandoned' });
+    });
+  };
+  const inputEnter = event => {
+    if (event.key === 'Enter' && !event.nativeEvent.isComposing
+      && event.target.tagName === 'INPUT' && !event.target.readOnly && !event.target.closest('.arco-select')) {
+      event.preventDefault();
+      prepare();
+    }
+  };
+  function field(index, key, { required = false, wide = false, options = null, placeholder = '' } = {}) {
+    const id = `traffic-${index}-${key}`;
+    const value = rows[index][key] ?? '';
+    const error = fieldErrors[`${index}.${key}`];
+    return <div className={`traffic-field${wide ? ' wide' : ''}`} key={key}
+      data-field={key} data-validation-field={`${index}.${key}`}>
+      <label htmlFor={id}>{required && <span className="traffic-required" aria-hidden="true">*</span>}{labels[key]}</label>
+      {options ? <Select id={id} aria-label={labels[key]} value={value === '' ? undefined : value}
+        options={options.map(([value, label]) => ({ value, label }))} placeholder="请选择"
+        disabled={locked} error={Boolean(error)} aria-required={required} aria-invalid={Boolean(error)}
+        onChange={value => edit(index, key, value)} />
+        : <Input id={id} name={key} aria-label={labels[key]} autoComplete="off" value={value}
+          placeholder={placeholder} disabled={locked} error={Boolean(error)}
+          aria-required={required} aria-invalid={Boolean(error)} onChange={value => edit(index, key, value)} />}
+      {error && <div className="traffic-field-error" role="alert">{error}</div>}
+    </div>;
+  }
+  function derivedField(index, key, value) {
+    const id = `traffic-${index}-${key}`;
+    return <div className="traffic-field" data-field={key}>
+      <label htmlFor={id}>{labels[key]}</label>
+      <Input id={id} aria-label={labels[key]} value={value} readOnly />
+    </div>;
+  }
 
   return <main className="traffic-page">
-    <span className="traffic-eyebrow">火山引擎 · 短信服务</span>
-    <h1>录入短信引流信息</h1><p>填写真实的链接备案或号码归属信息，核对后再提交。</p>
+    <div className="traffic-eyebrow">火山引擎短信</div>
+    <h1>{kind === 'phone' ? '录入引流号码' : '录入引流链接'}</h1>
+    <p>{kind === 'phone' ? '填写号码及归属信息，确认后提交短信服务。个人材料不会进入对话。'
+      : '核对链接及域名备案信息，确认后提交短信服务。已有查询结果可预填，缺失项在这里补充。'}</p>
+    {kind === 'link' && <Alert type="info" content="文案链接是短信正文中的链接；使用火山短链时，跳转链接是客户点击后打开的落地页。" />}
     <Feedback operation={operation} />
-    {receipt ? <Receipt title={receipt.verified ? '引流资源已录入并核对' : '录入已受理，部分资源待核对'}>
-      <p>已查到 {receipt.resourceIds.length} / {receipt.count} 条资源。</p>
-      {receipt.resourceIds.length > 0 && <p>资源 ID {receipt.resourceIds.join('、')}</p>}
-      {!receipt.verified && <p>请通过引流资源查询继续核对，避免重复录入。</p>}
-    </Receipt>
-      : preview ? <div className="traffic-card"><Confirm title="确认本次引流信息" busy={operation.busy} disabled={operation.uncertain}
-        onBack={() => setPreview(null)} onSubmit={submit}>
-        {preview.params.data.map((row, index) => <Summary key={index} items={[
-          ['序号', index + 1], ...Object.entries(row).map(([key, value]) => [labels[key],
-            key === 'useVolcLink' ? value ? '是' : '否'
-              : key === 'numberType' ? numberTypes.find(([id]) => id === value)?.[1]
-                : key === 'personType' ? value === 1 ? '居民身份证' : '未填写'
-                  : key === 'personId' ? maskedIdentifier(value) : value || '未填写']),
-        ]} />)}
-      </Confirm></div> : <>
-        <Radio.Group value={kind} disabled={operation.busy || operation.uncertain} onChange={value => {
-          setKind(value); setRows([emptyRow(value)]);
-        }} options={[{ label: '引流链接', value: 'link' }, { label: '联系号码', value: 'phone' }]} />
-        <fieldset disabled={operation.busy || operation.uncertain} className="sms-fieldset">
-          {rows.map((row, index) => <section className="traffic-card" key={index}>
-            <div className="traffic-row-title"><h2>{kind === 'link' ? '链接' : '号码'} {index + 1}</h2>
-              {rows.length > 1 && <Button type="text" onClick={() => setRows(rows.filter((_, i) => i !== index))}>移除</Button>}
-            </div>
+    {receipt ? <section className="traffic-card traffic-result" aria-live="polite">
+      <h2>{receipt.abandoned ? '本次录入已结束' : '引流信息已提交'}</h2>
+      <p>{receipt.abandoned ? '尚未提交的材料已清除。'
+        : `本次提交 ${receipt.count} 条资料。录入成功不代表运营商报备已生效，可回到对话查询资源并继续申请模板。`}</p>
+    </section> : <>
+      {!prefill?.kind && <div className="traffic-kind">
+        <label htmlFor="traffic-kind">引流类型</label>
+        <Select id="traffic-kind" aria-label="引流类型" value={kind} disabled={locked}
+          options={[{ label: '引流链接', value: 'link' }, { label: '引流号码', value: 'phone' }]}
+          onChange={value => {
+            if (locked || ended.current) return;
+            setKind(value); setRows([initialRow(value)]); invalidate();
+          }} />
+      </div>}
+      <form ref={form} onSubmit={event => event.preventDefault()} onKeyDown={inputEnter}>
+        {rows.map((row, index) => <section className="traffic-card" key={index}>
+          <div className="traffic-row-title"><h2>{kind === 'link' ? '链接' : '号码'} {index + 1}</h2>
+            {rows.length > 1 && <Button type="text" htmlType="button" disabled={locked} onClick={() => {
+              setRows(current => current.filter((_, position) => position !== index)); invalidate();
+            }}>移除</Button>}
+          </div>
+          <div className="traffic-fields">
             {kind === 'link' ? <>
-              <Checkbox checked={row.useVolcLink} onChange={value => edit(index, 'useVolcLink', value)}>使用火山短链</Checkbox>
-              <div className="traffic-fields">
-                {!row.useVolcLink && <Choice label="文案链接协议" value={row.protocol} onChange={value => edit(index, 'protocol', value)} options={[['https', 'https'], ['http', 'http'], ['缺省', '缺省']]} />}
-                {(row.useVolcLink ? ['jumpLink', 'jumpLinkDomainIcp', 'jumpLinkDomainIcpBody'] : ['link', 'linkDomainIcp', 'linkDomainIcpBody']).map(key =>
-                  <Field key={key} label={labels[key]} value={row[key]} onChange={value => edit(index, key, value)} required />)}
-              </div>
-            </> : <div className="traffic-fields">
-              <Choice label="号码类型" value={row.numberType} onChange={value => edit(index, 'numberType', value)} options={numberTypes} />
-              <Field label="联系号码" value={row.number} onChange={value => edit(index, 'number', value)} required />
-              {(row.numberType === 1 ? ['numberPerson', 'personId'] : ['company']).map(key =>
-                <Field key={key} label={labels[key]} value={row[key]} onChange={value => edit(index, key, value)} />)}
-              {row.numberType === 1 && <Choice label="证件类型" value={row.personType} onChange={value => edit(index, 'personType', value)} options={[[0, '未填写'], [1, '居民身份证']]} />}
-              {['numberProvince', 'numberCity'].map(key => <Field key={key} label={labels[key]} value={row[key]} onChange={value => edit(index, key, value)} />)}
-            </div>}
-          </section>)}
-        </fieldset>
+              {field(index, 'useVolcLink', { required: true, options: [[false, '否'], [true, '是']] })}
+              {!row.useVolcLink && <>
+                {field(index, 'protocol', { required: true, options: [['https', 'https'], ['http', 'http'], ['缺省', '不带协议']] })}
+                {field(index, 'link', { required: true, placeholder: '请输入短信正文中的完整链接' })}
+                {field(index, 'linkDomainIcp', { required: true })}
+                {field(index, 'linkDomainIcpBody', { required: true })}
+                {derivedField(index, 'linkDomain', parseLink(row.link).domain)}
+                {derivedField(index, 'linkPath', parseLink(row.link).path)}
+              </>}
+              {field(index, 'jumpLink', { required: row.useVolcLink === true, wide: true, placeholder: '请输入点击后打开的完整落地页链接' })}
+              {field(index, 'jumpLinkDomainIcp', { required: row.useVolcLink === true })}
+              {field(index, 'jumpLinkDomainIcpBody', { required: row.useVolcLink === true })}
+              {row.jumpLink && <>
+                {derivedField(index, 'jumpLinkDomain', parseLink(row.jumpLink).domain)}
+                {derivedField(index, 'jumpLinkPath', parseLink(row.jumpLink).path)}
+              </>}
+            </> : <>
+              {field(index, 'numberType', { required: true, options: numberTypes })}
+              {field(index, 'number', { required: true, placeholder: '不带 86、空格或分隔符' })}
+              {row.numberType === 1 ? <>
+                {field(index, 'numberPerson')}
+                {field(index, 'personType', { options: [[1, '居民身份证']] })}
+                {field(index, 'personId', { wide: true })}
+              </> : field(index, 'company', { wide: true })}
+              {field(index, 'numberProvince')}{field(index, 'numberCity')}
+            </>}
+          </div>
+        </section>)}
         <div className="traffic-actions">
-          <Button disabled={operation.busy || operation.uncertain || rows.length >= (kind === 'link' ? 10 : 100)} onClick={() => setRows([...rows, emptyRow(kind)])}>继续添加</Button>
-          <Button type="primary" loading={operation.busy} disabled={operation.uncertain} onClick={prepare}>核对信息</Button>
+          <Button htmlType="button" disabled={locked || rows.length >= (kind === 'link' ? 10 : 100)} onClick={() => {
+            setRows(current => [...current, initialRow(kind)]); invalidate();
+          }}>添加一条</Button>
+          <Button type="primary" htmlType="button" disabled={locked} loading={operation.busy} onClick={prepare}>预览录入内容</Button>
         </div>
-      </>}
+      </form>
+      {preview && <section className="traffic-card" aria-label="录入预览" aria-live="polite">
+        <h2>核对本次录入</h2>
+        {preview.params.data.map((row, index) => <dl className="traffic-preview" key={index}>
+          {Object.entries(row).filter(([, value]) => value !== '').map(([key, value]) => <React.Fragment key={key}>
+            <dt>{labels[key]}</dt><dd>{displayValue(key, value)}</dd>
+          </React.Fragment>)}
+        </dl>)}
+        <div className="traffic-actions">
+          <Button type="primary" htmlType="button" disabled={locked} loading={operation.busy} onClick={submit}>确认录入</Button>
+        </div>
+      </section>}
+      <div className="traffic-actions"><Button htmlType="button" disabled={locked} onClick={abandon}>结束本次录入</Button></div>
+    </>}
   </main>;
 }

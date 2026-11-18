@@ -20,6 +20,10 @@ class MessageGroupsQuery(ApiModel):
     all_status: bool | None = Field(None, alias="allStatus")
 
 
+class SignatureQualificationsQuery(ApiModel):
+    purpose: Literal[0, 1, 2] | None = None
+
+
 class SignatureDetailsQuery(ApiModel):
     signature: str | None = Field(None, alias="Signature")
     exact_match: bool | None = Field(None, alias="ExactMatch")
@@ -99,6 +103,11 @@ class MessageGroupsRequest(ApiModel):
     params: MessageGroupsQuery
 
 
+class SignatureQualificationsRequest(ApiModel):
+    action: Literal["GetApplySignatureBind"]
+    params: SignatureQualificationsQuery
+
+
 class SignatureDetailsRequest(ApiModel):
     action: Literal["ListSignaturesForAgent"]
     params: SignatureDetailsQuery
@@ -144,8 +153,18 @@ class BatchContentRequest(ApiModel):
     params: BatchContentQuery
 
 
+class MessageGroupDetailQuery(ApiModel):
+    sub_account: Text = Field(alias="subAccount")
+
+
+class MessageGroupDetailRequest(ApiModel):
+    action: Literal["GetSubAccountDetail"]
+    params: MessageGroupDetailQuery
+
+
 ResourceQuery = Annotated[
-    MessageGroupsRequest
+    MessageGroupsRequest | MessageGroupDetailRequest
+    | SignatureQualificationsRequest
     | SignatureDetailsRequest
     | BatchTemplatesRequest
     | TrafficLinksRequest
@@ -156,4 +175,33 @@ ResourceQuery = Annotated[
     | ReportStatusRequest
     | BatchContentRequest,
     Field(discriminator="action"),
+]
+
+
+class BatchTaskReference(ApiModel):
+    sub_account: Text = Field(alias="subAccount")
+    task_id: Text = Field(alias="taskId")
+
+
+class BatchTaskListQuery(ApiModel):
+    sub_account: str | None = Field(None, alias="subAccount")
+    task_name: str | None = Field(None, alias="taskName")
+    signature: str | None = None
+    template_id: str | None = Field(None, alias="templateId")
+    page: Page = Field(1, alias="pageIndex")
+    page_size: PageSize = Field(20, alias="pageSize")
+
+
+class BatchTaskDetailRequest(ApiModel):
+    action: Literal["GetBatchTaskDetail"]
+    params: BatchTaskReference
+
+
+class BatchTaskListRequest(ApiModel):
+    action: Literal["GetBatchTaskList"]
+    params: BatchTaskListQuery
+
+
+BatchTaskQuery = Annotated[
+    BatchTaskDetailRequest | BatchTaskListRequest, Field(discriminator="action")
 ]

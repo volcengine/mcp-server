@@ -25,6 +25,28 @@ def api_calls():
         calls.append(request)
         action = request.url.params["Action"]
         results = {
+            "ListAllSmsProduct": {"businessName": "示例企业", "userType": "enterprise", "mktParam": 1},
+            "CheckTrafficDrivingExist": {"list": []},
+            "GetTobTrafficDrivingLinkListForAgent": {"list": [{"id": 12, "useVolcLink": False, "link": "https://example.com/Path?Q=A"}]},
+            "ListSmsTemplateForAgent": {"List": [{"TemplateId": "SPT_fixture", "TemplateContent": "内容${text}", "ChannelType": "CN_NTC"}], "Total": 1},
+            "ListSecondTemplate": {"List": [{
+                "TemplateId": "SPT_fixture",
+                "TemplateContent": "内容${text}",
+                "TemplateParams": [{"Name": "text"}],
+                "ChannelType": "CN_NTC",
+                "Signatures": ["示例签名", "签名"],
+                "SubAccounts": ["g", "group-one"],
+                "BatchOnly": False,
+                "TaskFields": [],
+            }], "Total": 1},
+            "GetSubAccountListForAgent": {
+                "list": [{"subAccountId": "group-one", "status": 1}],
+                "total": 1,
+            },
+            "GetSignatureIdentificationList": {"list": [{"id": 12, "purpose": 1, "auditStatus": 3, "usable": True, "businessCertificateName": "示例企业"}], "total": 1},
+            "GetApplySignatureBind": [{"id": 12, "purpose": 1, "materialName": "示例资质", "businessCertificateName": "示例企业"}],
+            "BulkCreateTobTrafficDrivingPhoneForAgent": "",
+            "BulkCreateTobTrafficDrivingLinkForAgent": "",
             "SendSmsForAgent": {"MessageIds": ["fixture-message"]},
             "ApplySmsSignatureV2": {"applyId": "fixture-signature", "status": 1},
             "ApplySmsTemplateV2ForAgent": {"templateId": "fixture-template", "status": 1},
@@ -50,13 +72,13 @@ def api_calls():
             "ConsentBatchTask": None,
             "DeleteBatchTask": None,
         }
-        return httpx.Response(
-            200,
-            json={
-                "ResponseMetadata": {"RequestId": "fixture-request"},
-                "Result": results.get(action, {"List": [], "Total": 0}),
-            },
-        )
+        payload = {"ResponseMetadata": {
+            "RequestId": "fixture-request", "Action": action, "Version": "2026-01-01",
+        }}
+        # 状态变更的原生成功响应省略 Result，不用人工补出的 null 掩盖协议差异。
+        if action not in {"ConsentBatchTask", "DeleteBatchTask"}:
+            payload["Result"] = results.get(action, {"List": [], "Total": 0})
+        return httpx.Response(200, json=payload)
 
     return calls, SmsClient(transport=httpx.MockTransport(respond))
 

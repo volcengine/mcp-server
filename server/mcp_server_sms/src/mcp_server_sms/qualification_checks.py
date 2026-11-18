@@ -26,7 +26,8 @@ async def check_enterprise(call, params: dict, *, offer_manual_review: bool) -> 
     status = status.get("status") if isinstance(status, dict) else None
     mismatch = envelope["success"] and type(status) in (int, str) and status in _MISMATCH_STATUSES
     unavailable = not envelope["success"] and (
-        diagnostic.get("code") in _UNAVAILABLE_CODES or diagnostic.get("http_status", 0) >= 500
+        diagnostic.get("source") == "transport" or diagnostic.get("code") in _UNAVAILABLE_CODES
+        or diagnostic.get("http_status", 0) >= 500
     )
     if mismatch or unavailable:
         with observe_call("form", "qualification", path="manual_review_available") as observation:
@@ -37,6 +38,7 @@ async def check_enterprise(call, params: dict, *, offer_manual_review: bool) -> 
                 "manualReview": True,
                 "code": "enterprise_check_mismatch" if mismatch else diagnostic.get("code"),
                 "requestId": envelope["request_id"],
+                **({"failure": envelope} if not envelope["success"] else {}),
             },
         }
     if not envelope["success"]:

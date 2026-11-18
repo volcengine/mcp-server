@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "defaultActionId": "sms-qualification-preview",
+  "actions": [
+    {
+      "id": "sms-qualification-preview",
+      "name": "资质申请预览",
+      "command": "npm run dev -- --port 5173 --strictPort --open /dev/preview.html",
+      "cwd": ".",
+      "background": true,
+      "source": "agent",
+      "readiness": {
+        "outputPatterns": ["ready in"],
+        "timeoutMs": 60000
+      },
+      "open": {
+        "type": "preview",
+        "url": "http://127.0.0.1:5173/dev/preview.html"
+      }
+    }
+  ]
+}

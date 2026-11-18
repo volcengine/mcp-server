@@ -1,52 +1,35 @@
 import React, { createContext, useContext, useId, useRef, useState } from 'react';
 import { Alert, Button, Checkbox, Input, Select } from '@arco-design/web-react';
-import { IconUpload } from '@arco-design/web-react/icon';
 import { OperationError } from './client.js';
+export { Files } from './files.jsx';
 
 const LockContext = createContext(false);
 export function LockedFields({ locked, children }) {
   return <LockContext.Provider value={locked}>{children}</LockContext.Provider>;
 }
 
-export function Field({ label, value, onChange, required = false, type = 'text', multiline = false, children, ...props }) {
+export function Field({ label, value, onChange, required = false, type = 'text', multiline = false,
+  children, wrapperClassName = '', validationName, error, ...props }) {
   const id = useId();
+  const errorId = `${id}-error`;
   const locked = useContext(LockContext);
   const Component = multiline ? Input.TextArea : Input;
-  return <div className="traffic-field">
+  return <div className={`traffic-field ${wrapperClassName}`.trim()} data-validation-field={validationName}>
     <label htmlFor={id}>{required && <span className="traffic-required">*</span>}{label}</label>
-    {React.isValidElement(children) ? React.cloneElement(children, { disabled: locked || children.props.disabled })
-      : <Component id={id} aria-label={label} value={value ?? ''} type={type} onChange={onChange} {...props} disabled={locked || props.disabled} />}
+    {React.isValidElement(children) ? React.cloneElement(children, {
+      disabled: locked || children.props.disabled, error: Boolean(error),
+      'aria-invalid': Boolean(error), 'aria-describedby': error ? errorId : undefined,
+    }) : <Component id={id} aria-label={label} value={value ?? ''} type={type} onChange={onChange}
+      error={Boolean(error)} aria-invalid={Boolean(error)} aria-describedby={error ? errorId : undefined}
+      {...props} disabled={locked || props.disabled} />}
+    {error && <div id={errorId} className="traffic-field-error" role="alert">{error}</div>}
   </div>;
 }
 
-export function Choice({ label, value, onChange, options, ...props }) {
+export function Choice({ label, value, onChange, options, validationName, error, ...props }) {
   const id = useId();
-  return <Field label={label}><Select id={id} aria-label={label} value={value} onChange={onChange}
-    options={options.map(([value, label]) => ({ value, label }))} {...props} /></Field>;
-}
-
-export function Files({ label, accept, value = [], onSelect, onRemove, multiple = false, disabled = false, uploadDisabled = disabled }) {
-  const input = useRef(null);
-  return <div className="upload-block">
-    <div className="upload-label">{label}</div>
-    <div className="upload-zone">
-      <IconUpload className="upload-icon" />
-      <Button disabled={uploadDisabled} onClick={() => input.current?.click()}>选择并上传</Button>
-      <input ref={input} hidden type="file" aria-label={label} accept={accept} multiple={multiple}
-        disabled={uploadDisabled} onChange={event => {
-          const selected = Array.from(event.target.files ?? []);
-          event.target.value = '';
-          if (selected.length) onSelect(selected);
-        }} />
-      <div className="upload-tip">单个文件最大 10 MB</div>
-    </div>
-    {value.map((file, index) => <div className="sms-file" key={index}>
-      <span>{file.name}{file.data !== undefined && '（待上传）'}</span>
-      {file.data !== undefined && <Button type="text" disabled={uploadDisabled} aria-label={`上传 ${file.name}`}
-        onClick={() => onSelect([file], index)}>上传</Button>}
-      <Button type="text" disabled={disabled} onClick={() => onRemove(index)}>移除</Button>
-    </div>)}
-  </div>;
+  return <Field label={label} validationName={validationName} error={error}><Select id={id} aria-label={label}
+    value={value} onChange={onChange} options={options.map(([value, label]) => ({ value, label }))} {...props} /></Field>;
 }
 
 export function useOperation() {
@@ -65,13 +48,16 @@ export function useOperation() {
       if (problem.unknown) setUncertain(true);
     } finally { lock.current = false; setBusy(false); }
   };
-  return { run, busy, error, uncertain };
+  return { run, busy, error, uncertain, clearError: () => setError(null) };
 }
 
 export function Feedback({ operation }) {
   if (!operation.error) return null;
   return <Alert className="sms-feedback" type={operation.uncertain ? 'warning' : 'error'}
-    content={<>{operation.error.message}{operation.error.code && <div>错误码：{operation.error.code}</div>}{operation.error.requestId && <div>排障编号：{operation.error.requestId}</div>}</>} />;
+    content={<><div style={{ whiteSpace: 'pre-wrap' }}>{operation.error.message}</div>
+      {operation.error.code != null && <div>错误码：{operation.error.code}</div>}
+      {operation.error.httpStatus != null && <div>HTTP 状态：{operation.error.httpStatus}</div>}
+      {operation.error.requestId && <div>排障编号：{operation.error.requestId}</div>}</>} />;
 }
 
 export function Summary({ items }) {

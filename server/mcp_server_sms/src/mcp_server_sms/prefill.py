@@ -5,7 +5,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field, model_validator
 
-from .models import ApiModel, Text
+from .models import ApiModel, Channel, Text
 from .upload_models import MAX_UPLOAD_ENCODED_LENGTH, FileContent
 
 MaterialDrafts = Annotated[list[FileContent], Field(max_length=5)]
@@ -180,3 +180,37 @@ class BatchFormPrefill(ApiModel):
         if self.scheduled is False and self.send_time not in (None, 0):
             raise ValueError("立即发送不能指定定时时间")
         return self
+
+
+class TemplateParameterPrefill(ApiModel):
+    name: str | None = None
+    param_type: Literal[1, 2, 3, 4, 5] | None = Field(None, alias="paramType")
+
+
+class TemplateTrafficPrefill(ApiModel):
+    name: str | None = None
+    param_type: Literal[2, 3] | None = Field(None, alias="paramType")
+    id: Annotated[int, Field(gt=0)] | None = None
+    content: str | None = Field(None, repr=False)
+
+
+class ShortUrlPrefill(ApiModel):
+    is_enabled: Literal["0", "1"] | None = Field(None, alias="isEnabled")
+    belong: str | None = None
+    is_need_click_details: Literal["0", "1"] | None = Field(None, alias="isNeedClickDetails")
+    ua_check_strategy: int | None = Field(None, alias="uaCheckStrategy")
+
+
+class TemplateFormPrefill(ApiModel):
+    name: str | None = None
+    content: str | None = Field(None, repr=False)
+    channel_type: Channel | None = Field(None, alias="channelType")
+    signatures: list[str] | None = None
+    sub_accounts: list[str] | None = Field(None, alias="subAccounts")
+    template_params: list[TemplateParameterPrefill] | None = Field(None, alias="templateParams")
+    description: str | None = Field(None, alias="desc")
+    project: str | None = None
+    short_url_config: ShortUrlPrefill | None = Field(None, alias="shortUrlConfig")
+    template_traffic_driving: list[list[TemplateTrafficPrefill]] | None = Field(
+        None, alias="templateTrafficDriving", repr=False,
+    )

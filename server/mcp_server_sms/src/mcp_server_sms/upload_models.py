@@ -10,6 +10,7 @@ from .responses import ApiResult
 
 MAX_UPLOAD_BYTES = FORM_CONFIG["maxUploadBytes"]
 MAX_UPLOAD_ENCODED_LENGTH = ((MAX_UPLOAD_BYTES + 2) // 3) * 4
+MaterialCategory = Literal["identity", "business", "authorization", "other", "app", "trademark"]
 
 
 class FileContent(ApiModel):
@@ -19,18 +20,58 @@ class FileContent(ApiModel):
     )
 
 
-class MaterialUpload(FileContent):
-    kind: Literal["material"]
-    category: Literal["identity", "business", "authorization", "other", "app", "trademark"]
 
 
-class RecipientsUpload(FileContent):
-    kind: Literal["recipients"]
+class MaterialUploadMetadata(ApiModel):
+    """MaterialUploadMetadata 仅传输原文件元信息，不携带文件内容。"""
+
+    name: Annotated[str, Field(min_length=1, max_length=255)]
+    category: MaterialCategory
+    size: Annotated[int, Field(strict=True, gt=0, le=MAX_UPLOAD_BYTES)]
+    crc32: Annotated[str, Field(pattern=r"^[0-9a-f]{8}$")]
+
+
+class MaterialUploadContext(ApiModel):
+    """MaterialUploadContext 绑定一次已申请的上传会话，由凭据签名后交给表单。"""
+
+    name: Annotated[str, Field(min_length=1, max_length=255)]
+    suffix: Annotated[str, Field(min_length=1, max_length=5)]
+    uri: Annotated[str, Field(min_length=1, max_length=4096)] = Field(repr=False)
+    session_key: Annotated[str, Field(min_length=1, max_length=8192)] = Field(repr=False)
+    expires_at: Annotated[int, Field(strict=True, gt=0)]
+
+
+class MaterialUploadConfirmation(ApiModel):
+    """MaterialUploadConfirmation 验证当前登录凭据与上传会话，避免跨账号或篡改后确认。"""
+
+    context: MaterialUploadContext = Field(repr=False)
+    signature: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")] = Field(repr=False)
+
+
+class RecipientsUploadMetadata(ApiModel):
+    """RecipientsUploadMetadata 以大小和摘要绑定所选名单，正文不进入工具参数。"""
+
+    name: Annotated[str, Field(min_length=1, max_length=255)]
+    size: Annotated[int, Field(strict=True, gt=0, le=MAX_UPLOAD_BYTES)]
+    sha256: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
     sub_account: Text
     template_id: Text
 
 
-FileUpload = Annotated[MaterialUpload | RecipientsUpload, Field(discriminator="kind")]
+class RecipientsUploadContext(RecipientsUploadMetadata):
+    """RecipientsUploadContext 只接受本次账号申请的文件 Key，不接受调用方提供下载地址。"""
+
+    file: Annotated[str, Field(min_length=1, max_length=4096)] = Field(repr=False)
+    expires_at: Annotated[int, Field(strict=True, gt=0)]
+
+
+class RecipientsUploadConfirmation(ApiModel):
+    context: RecipientsUploadContext = Field(repr=False)
+    signature: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")] = Field(repr=False)
+
+
+
+
 
 
 class MaterialToken(ApiResult):
@@ -64,8 +105,6 @@ class ApplyUploadResponse(ApiResult):
     result: AppliedUpload = Field(alias="Result")
 
 
-class UploadedMaterial(ApiResult):
-    code: Literal[2000]
 
 
 class CommittedMaterial(ApiResult):
@@ -84,7 +123,7 @@ class CommitUploadResponse(ApiResult):
 
 
 class SmsRequestError(Exception):
-    """SmsRequestError 只保存已经脱敏的失败结果。"""
+    """SmsRequestError 保留调用边界返回的原始失败结果。"""
 
     def __init__(self, result: dict):
         self.result = result

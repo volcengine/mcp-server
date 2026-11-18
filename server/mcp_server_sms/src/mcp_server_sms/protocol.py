@@ -38,7 +38,7 @@ def inline_schema(schema: dict) -> dict:
 
 
 class SmsAPIError(ToolError):
-    """SmsAPIError 保留已脱敏的结构化失败，供协议和观测边界共同消费。"""
+    """SmsAPIError 保留原始结构化失败，供协议和观测边界共同消费。"""
 
     def __init__(self, result: dict):
         self.result = result

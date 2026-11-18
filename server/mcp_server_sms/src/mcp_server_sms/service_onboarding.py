@@ -122,13 +122,14 @@ async def _submit_service_onboarding(call, credentials: Credentials, current: di
             try:
                 submitted = await call(_ACTIVATE, {"product": ["sms"]})
             except SmsAPIError as exc:
-                if exc.result["error"]["outcome_unknown"]:
+                if exc.result["error"].get("outcome_unknown"):
                     raise
                 observation.record(exc.result)
                 return {
                     **{key: value for key, value in current.items() if key != "confirmation"},
-                    "status": "activation_rejected", "requestId": exc.result["request_id"],
+                    "status": "activation_error", "requestId": exc.result["request_id"],
                     "errorCode": exc.result["error"]["code"],
+                    "failure": exc.result,
                 }
             order = submitted["result"]["list"][0]
             # 上游下单调用异常也可能返回非受理状态，只有回查能明确最终结果。
@@ -136,8 +137,8 @@ async def _submit_service_onboarding(call, credentials: Credentials, current: di
 
         try:
             latest = await read_service_onboarding(call, credentials)
-        except SmsAPIError:
-            latest = current
+        except SmsAPIError as exc:
+            latest = {**current, "failure": exc.result}
         if latest["status"] in _TERMINAL:
             pending = latest["status"]
         observation.result_class = "success" if pending == "available" else "partial"
@@ -213,7 +214,7 @@ class ServiceOnboarding:
                 write_started = True
                 view = await _submit_service_onboarding(call, credentials, view)
         except SmsAPIError as exc:
-            if write_started and exc.result["error"]["outcome_unknown"]:
+            if write_started and exc.result["error"].get("outcome_unknown"):
                 self._unresolved[scope] = _SubmissionReservation("submission_outcome_unknown")
             else:
                 self._unresolved.pop(scope, None)
