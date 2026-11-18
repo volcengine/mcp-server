@@ -150,6 +150,34 @@ async def test_send_rejects_changed_request_after_preview(mcp, api_calls):
         "ListSecondTemplate", "ListSecondTemplate",
     ]
 
+@pytest.mark.parametrize(
+    "content,name,rendered",
+    [
+        ("预约时间 ${1}", "1", "预约时间 明天"),
+        ("预约时间 ${time}，请在 ${time} 到达", "time", "预约时间 明天，请在 明天 到达"),
+    ],
+)
+async def test_send_preview_supports_existing_template_variable_syntax(content, name, rendered):
+    async def call(action, _params):
+        assert action == "ListSecondTemplate"
+        return {"success": True, "result": {"List": [{
+            "TemplateId": "SPT_fixture", "TemplateContent": content,
+            "TemplateParams": [{"Name": name}], "ChannelType": "CN_NTC",
+            "Signatures": ["签名"], "SubAccounts": ["g"],
+            "BatchOnly": False, "TaskFields": [],
+        }]}}
+
+    view = await prepare_sms_send(
+        call,
+        SmsSendRequest.model_validate({
+            "subAccount": "g", "signature": "签名", "templateId": "SPT_fixture",
+            "mobiles": ["13800000000"], "templateParams": {name: "明天"},
+        }),
+        Credentials("fixture-access", "fixture-secret"),
+    )
+    assert view["renderedContent"] == rendered
+    assert view["variableNames"] == [name]
+
 
 @pytest.mark.parametrize(
     "template_changes,params,code",

@@ -16,7 +16,7 @@ from .models import SmsSendRequest
 from .protocol import SmsAPIError
 
 SendConfirmation = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
-_VARIABLE = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
+_VARIABLE = re.compile(r"\$\{([A-Za-z0-9_]+)\}")
 _CHANNELS = {"CN_OTP", "CN_NTC", "CN_MKT"}
 
 
@@ -168,7 +168,7 @@ async def prepare_sms_send(call, request: SmsSendRequest, credentials: Credentia
     if set(request.template_params) != set(expected):
         _reject("template_variables_mismatch", "变量值必须与模板变量逐一对应")
     content_variables = _VARIABLE.findall(view["templateContent"])
-    if len(content_variables) != len(set(content_variables)) or set(content_variables) != set(expected):
+    if set(content_variables) != set(expected):
         _reject("template_metadata_mismatch", "模板正文变量与变量元数据不一致")
     rendered = _VARIABLE.sub(
         lambda match: request.template_params[match.group(1)],

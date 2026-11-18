@@ -4,13 +4,14 @@
 
 当前尚未对外开放，本轮统一替换原 API 型工具面，不保留旧工具别名、兼容模式或直接模型写入路径。没有 MCP Apps 的客户端可继续只读查询；业务办理使用支持表单的客户端或短信控制台。
 
-## 模型可见：17 个工具
+## 模型可见工具
 
 | 用途 | 工具 |
 | --- | --- |
 | 账号、材料要求和资质 | `get_account_information`、`get_qualification_requirements`、`list_qualifications` |
 | 消息组、签名、引流和运营商报备 | `query_sms_resources` |
 | 普通模板及二级绑定详情 | `list_templates`、`list_second_templates` |
+| 单条短信预览和确认发送 | `preview_sms_send`、`send_sms` |
 | 发送记录和统计 | `list_send_logs`、`get_send_statistics` |
 | 群发任务查询和 CSV 示例 | `query_batch_tasks`、`get_batch_csv_template` |
 | 打开业务页面 | `open_sms_service_onboarding`、`open_qualification_form`、`open_signature_form`、`open_traffic_form`、`open_template_form`、`open_batch_task_form` |
@@ -31,15 +32,15 @@
 
 签名表单通过 `query_sms_resources` 调用 `GetApplySignatureBind`，一次取得已审核通过的资质候选数组；可选 `purpose` 为 1（自用）、2（他用），不传或 0 不限制用途。只消费 `id/purpose/materialName/businessCertificateName`，不分页、不逐条补查。客户确认后直接调用 `ApplySmsSignatureV2`，资质归属及审核状态由短信接口校验。`list_qualifications` 继续用于完整资质列表查询。
 
-## 页面内部：22 个工具
+## 页面内部工具
 
 | 用途 | 工具 |
 | --- | --- |
 | 文件上传 | `prepare_material_upload`、`complete_material_upload`、`prepare_recipients_upload`、`complete_recipients_upload` |
 | 服务开通 | `get_sms_service_onboarding`、`submit_sms_service_onboarding` |
 | 资质核验 | `recognize_qualification_document`、`check_qualification_enterprise`、`check_qualification_person`、`send_verification_code`、`verify_code` |
-| 申请与引流录入 | `submit_qualification`、`submit_signature`、`submit_template`、`preview_traffic_resource`、`submit_traffic_resources` |
-| 发送和群发管理 | `preview_sms_send`、`send_sms`、`send_batch_test_sms`、`create_batch_task`、`start_batch_task`、`cancel_batch_task` |
+| 申请与引流录入 | `submit_qualification`、`submit_signature`、`preview_template`、`submit_template`、`preview_traffic_resource`、`submit_traffic_resources` |
+| 发送和群发管理 | `send_batch_test_sms`、`create_batch_task`、`start_batch_task`、`cancel_batch_task` |
 
 这些工具声明 `visibility=["app"]`，由遵循规范的宿主从模型工具列表中排除。可见性不是鉴权：每次调用仍校验客户凭据，最终资源权限由短信/IAM 执行。
 
@@ -47,11 +48,11 @@ OCR、企业和人员核验详细结果固定放在 `_meta["sms/form"]`，没有
 
 ## 页面流程
 
-七种表单共用 `ui://sms/forms.html`，React/Arco 样式由本包维护，不依赖原短信 Skill 的运行环境。
+六种表单共用 `ui://sms/forms.html`，React/Arco 样式由本包维护，不依赖原短信 Skill 的运行环境。
 
 - 资质、签名和引流保留现有填写、上传、核验及确认步骤，支持宿主预填。
 - 模板申请覆盖正文、用途、变量类型、签名、消息组、引流组合和短链选项。正文占位符与变量定义必须一致，动态业务规则和最终审核仍由短信服务判断。
-- 普通发送支持 1–200 个国内号码，使用同一组变量。页面根据已选模板展示实际正文，普通发送和群发试发在确认后直接调用发送接口，模板有效性及发送参数由短信接口校验；保留号码及变量原文，不静默去重或拆单。每个收件人内容不同时使用 CSV 群发。
+- 单条短信使用前述对话预览和确认发送流程。群发试发保留页面内的独立确认，多个号码或逐号码变量使用 CSV 群发。
 - 引流录入使用上游原生响应展示受理结果，成功后不逐条补查资源 ID；需要资源 ID 时使用资源查询工具。
 - 群发新建页面一次确认完成创建任务与确认发送：先创建，再对同一任务调用启动接口；受理后不再要求二次确认。两个内部工具仍独立调用，不把创建本身视为发送。已有任务从管理页读取最新身份、状态与正文后由客户确认启动或取消；业务结果未知时不自动重试。
 - 页面中的提交、发送或取消就是客户对所展示操作的确认。模型读取结果并回查，不在点击后再追加一轮会话确认。受理、审核、报备、任务结束与最终送达分别说明。
@@ -93,7 +94,7 @@ uv run mcp-server-sms --transport stdio
 
 ```bash
 uv build
-uvx --from ./dist/mcp_server_sms-0.2.0-py3-none-any.whl mcp-server-sms --transport stdio
+uvx --from ./dist/mcp_server_sms-0.3.0-py3-none-any.whl mcp-server-sms --transport stdio
 ```
 
 功能取决于实际安装版本；仓库代码更新不等于线上函数已更新。
@@ -137,4 +138,4 @@ uv run python -m twine check dist/*
 
 请求字段参照[官方短信 SDK](https://github.com/volcengine/volcengine-python-sdk/tree/3b116781c5b8bb648f215b29587f2ec74d9e5d02/volcenginesdkvolcsms)，请求签名使用[官方 Python SDK](https://github.com/volcengine/volc-sdk-python)。资质扩展 Action 按现有短信服务契约接入，需确认部署账号的接口可用性。
 
-源码版本为 0.2.0。复用仓库现有 PR 构建检查和合入后的 PyPI 发布流程，发布权限由维护者提供；包发布、veFaaS 升级和 ATS/Plugin 上架是分别执行的操作。许可证为 Apache-2.0。
+源码版本为 0.3.0。复用仓库现有 PR 构建检查和合入后的 PyPI 发布流程，发布权限由维护者提供；包发布、veFaaS 升级和 ATS/Plugin 上架是分别执行的操作。许可证为 Apache-2.0。

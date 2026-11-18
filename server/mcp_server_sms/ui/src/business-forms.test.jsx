@@ -234,6 +234,34 @@ it('历史任务启动受理后回查失败，关闭确认框且不能重复提�
   expect(api.call.mock.calls.filter(([name]) => name === 'start_batch_task')).toHaveLength(1);
 });
 
+it('历史任务启动响应丢失后撤销旧确认，再次操作先回查已启动状态', async () => {
+  let started = false;
+  const app = { callServerTool: vi.fn(async ({ name }) => {
+    if (name === 'start_batch_task') {
+      started = true;
+      throw new Error('bridge disconnected');
+    }
+    if (name === 'query_batch_tasks') return { structuredContent: { success: true, result: {
+      taskId: 'task', subAccount: 'g', templateId: 't', signature: '测试签名',
+      sendContent: '实际正文', status: started ? 3 : 2,
+    } } };
+    throw new Error('unexpected call');
+  }) };
+  const user = userEvent.setup();
+  render(<BatchForm client={new SmsFormClient(app)} initialTask={{ subAccount: 'g', taskId: 'task' }} />);
+  await user.click(await screen.findByRole('button', { name: '核对并启动' }));
+  await user.click(screen.getByText('我已核对以上信息，同意提交本次操作'));
+  await user.click(screen.getByRole('button', { name: '确认启动群发' }));
+  await screen.findByText('bridge disconnected');
+  expect(screen.queryByRole('button', { name: '确认启动群发' })).toBeNull();
+  await user.click(screen.getByRole('button', { name: '核对并启动' }));
+  await screen.findByText('任务已启动，送达结果请查询回执');
+  expect(screen.queryByRole('button', { name: '核对并启动' })).toBeNull();
+  expect(app.callServerTool.mock.calls.map(([call]) => call.name)).toEqual([
+    'query_batch_tasks', 'query_batch_tasks', 'start_batch_task', 'query_batch_tasks',
+  ]);
+});
+
 
 it.each([3, 4, 5, 6])('重新打开状态为 %s 的已启动任务只查询，不再提供核对启动', async status => {
   const api = client();

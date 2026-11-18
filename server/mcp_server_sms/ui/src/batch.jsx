@@ -387,16 +387,15 @@ export function BatchForm({ client, prefill, initialTask }) {
   });
   const changeTask = () => operation.run(async () => {
     const action = taskAction;
+    setTaskAction(null);
     if (action === 'start') {
       await startTask(task);
-      setTaskAction(null);
       return;
     }
     await client.call('cancel_batch_task', {
       sub_account: task.subAccount, task_id: task.taskId,
     }, { write: true });
     setTask(current => ({ ...current, submittedAction: action }));
-    setTaskAction(null);
     setDetail(null);
     await client.report({ form: 'batch', state: 'operation_accepted', taskId: task.taskId, operation: action });
     setDetail(await readTask(task));

@@ -6,13 +6,14 @@ An interactive SMS application for MCP Apps hosts. The model queries resources a
 
 The server is not yet open to external customers. This tool surface replaces the earlier API-style tools without aliases or compatibility profiles. Hosts without MCP Apps can use read-only queries; business changes require a supported host or the SMS console. App-only visibility is a host presentation boundary, not authorization: every request still uses the customer's credentials and SMS/IAM checks.
 
-## Model-visible tools: 17
+## Model-visible tools
 
 | Purpose | Tools |
 | --- | --- |
 | Account, requirements, qualifications | `get_account_information`, `get_qualification_requirements`, `list_qualifications` |
 | Resources and carrier reports | `query_sms_resources` |
 | Templates and binding details | `list_templates`, `list_second_templates` |
+| Confirmable single send | `preview_sms_send`, `send_sms` |
 | Sending records and statistics | `list_send_logs`, `get_send_statistics` |
 | Batch discovery and CSV example | `query_batch_tasks`, `get_batch_csv_template` |
 | Open forms | `open_sms_service_onboarding`, `open_qualification_form`, `open_signature_form`, `open_traffic_form`, `open_template_form`, `open_batch_task_form` |
@@ -33,7 +34,7 @@ All query and open-form tools declare `readOnlyHint=true`. Opening a form never 
 
 The signature form uses `query_sms_resources` with `GetApplySignatureBind` to retrieve approved qualification candidates in one unpaginated array. The optional `purpose` filter accepts 1 (self-use), 2 (third-party use), or 0 (all); omitting it also returns both purposes. The form consumes only `id/purpose/materialName/businessCertificateName`, without per-item lookups. After customer confirmation it submits directly to `ApplySmsSignatureV2`; SMS validates qualification ownership and approval status. `list_qualifications` remains available for full qualification list queries.
 
-## App-only tools: 22
+## App-only tools
 
 | Purpose | Tools |
 | --- | --- |
@@ -41,17 +42,17 @@ The signature form uses `query_sms_resources` with `GetApplySignatureBind` to re
 | Service activation | `get_sms_service_onboarding`, `submit_sms_service_onboarding` |
 | Qualification checks | `recognize_qualification_document`, `check_qualification_enterprise`, `check_qualification_person`, `send_verification_code`, `verify_code` |
 | Business applications | `submit_qualification`, `submit_signature`, `preview_template`, `submit_template`, `preview_traffic_resource`, `submit_traffic_resources` |
-| Sending and batch management | `preview_sms_send`, `send_sms`, `send_batch_test_sms`, `create_batch_task`, `start_batch_task`, `cancel_batch_task` |
+| Sending and batch management | `send_batch_test_sms`, `create_batch_task`, `start_batch_task`, `cancel_batch_task` |
 
 These tools declare `visibility=["app"]` and must not be offered to the model by a compliant host. Qualification OCR and identity checks always return details through `_meta["sms/form"]`; there is no model-visible override. Metadata still passes through the host and is not end-to-end encrypted.
 
 ## Forms and confirmation
 
-Seven forms share `ui://sms/forms.html`. Layout and Arco styles are maintained in this package; the original SMS Skill is not a build or runtime dependency.
+Six forms share `ui://sms/forms.html`. Layout and Arco styles are maintained in this package; the original SMS Skill is not a build or runtime dependency.
 
 - Qualification, signature and traffic forms preserve their existing upload, validation and review flows.
 - Template applications support editable text, parameter types, signature/group scope, traffic binding combinations and short-link options. Placeholder names and definitions must agree; SMS owns dynamic policy and final review.
-- Ordinary sends accept 1–200 numbers with identical parameter values. The UI renders the selected template. Ordinary sends and batch test sends call the sending API directly after confirmation; SMS owns template eligibility and parameter validation. Numbers and values are preserved, not deduplicated or rewritten. Per-recipient content belongs in a CSV batch.
+- Single-recipient sends use the conversational preview and confirmation flow described above. Batch test sends remain in the form with their own confirmation. Multiple recipients or per-recipient content use CSV batches.
 - Traffic registration reports acceptance from the native API response without per-item ID lookups. Use resource queries when IDs are needed.
 - One confirmation in the new batch form authorizes creation and sending: the page creates the task, then starts that same task. The internal create/start tools remain independent; creation alone is not sending. Accepted starts do not require another confirmation, even if the following status query fails or returns stale data. Existing task management reads current identity/state/content before user confirmation. Unknown writes stay locked rather than being repeated.
 - UI submit/send/cancel is the user's confirmation for that displayed action; the model does not add another chat confirmation after the click. A receipt is not audit approval, carrier readiness, or delivery proof.
@@ -96,7 +97,7 @@ Alternatively, build and run the local wheel for this version:
 
 ```bash
 uv build
-uvx --from ./dist/mcp_server_sms-0.2.0-py3-none-any.whl mcp-server-sms --transport stdio
+uvx --from ./dist/mcp_server_sms-0.3.0-py3-none-any.whl mcp-server-sms --transport stdio
 ```
 
 Features depend on the installed version. Updating repository code does not update a deployed function.
@@ -141,4 +142,4 @@ Tests exercise MCP, API mapping, credential isolation, uncertain writes, CSV, in
 
 API fields are checked against the [official SMS SDK](https://github.com/volcengine/volcengine-python-sdk/tree/3b116781c5b8bb648f215b29587f2ec74d9e5d02/volcenginesdkvolcsms). V4 signing uses the [official Python SDK](https://github.com/volcengine/volc-sdk-python). Qualification extension APIs use the existing SMS service contract; SDK coverage and account availability must be verified for the deployment.
 
-The source version is 0.2.0. The repository's package workflow builds PRs and publishes new versions after merge, with maintainer PyPI permissions. Package publication, veFaaS upgrades and ATS/Plugin listing are separate operations. Licensed under Apache-2.0.
+The source version is 0.3.0. The repository's package workflow builds PRs and publishes new versions after merge, with maintainer PyPI permissions. Package publication, veFaaS upgrades and ATS/Plugin listing are separate operations. Licensed under Apache-2.0.

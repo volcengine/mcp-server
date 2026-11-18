@@ -13,7 +13,7 @@ import { SmsFormClient } from './client.js';
 import { formDisplayPreference } from './display-mode.js';
 
 const app = new App(
-  { name: '火山引擎短信表单', version: '0.2.0' },
+  { name: '火山引擎短信表单', version: '0.3.0' },
   { availableDisplayModes: ['inline', 'fullscreen'] },
   { autoResize: true, strict: true, webMcpBridge: false },
 );
