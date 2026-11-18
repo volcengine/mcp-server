@@ -127,19 +127,9 @@ The HTTP connection pool is owned by the MCP server lifespan and closed at shutd
 
 ## Development
 
-### Migrating to 0.3.0
+### Integrating 0.3.0
 
-Upgrade client integration and bundled form resources together. The tool table above describes the current surface.
-
-| Previous entry point | Current entry point |
-| --- | --- |
-| `upload_sms_file`, `get_batch_upload_url` | The material and CSV `prepare_*_upload` / `complete_*_upload` tools |
-| `check_batch_traffic_resources` | `complete_recipients_upload` reads CSV once and optionally checks traffic resources |
-| `list_message_groups`, `get_message_group`, `list_signatures` | `query_sms_resources` |
-| `get_batch_task`, `list_batch_tasks` | `query_batch_tasks` |
-| `apply_qualification`, `apply_signature`, `apply_template`, `register_traffic_resource` | Corresponding `open_*_form` tools and App-only `submit_*` tools |
-| `manage_sms_service` | `open_sms_service_onboarding` and its internal read/submit tools |
-| Previous `send_sms` arguments | Obtain `preview_sms_send`, then submit `request` and the complete expiring `confirmation` |
+Upgrade the client integration, bundled form resources and MCP package together. Use the current tool table and the schemas returned by the service.
 
 Backend error messages and `backend_response` are returned in tool results and may include business data echoed by the upstream API. Hosts apply their model-context and retention policies to those results.
 

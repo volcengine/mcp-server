@@ -124,19 +124,9 @@ HTTP 连接池随 MCP 服务启动和关闭，凭据和签名头仍逐请求生�
 
 ## 验证和发布
 
-### 0.3.0 接入迁移
+### 0.3.0 接入
 
-客户端与表单资源一起升级。原工具调整如下，其他工具见前面的接口表。
-
-| 原入口 | 当前入口 |
-| --- | --- |
-| `upload_sms_file`、`get_batch_upload_url` | 材料和 CSV 分别使用 `prepare_*_upload` 与 `complete_*_upload` |
-| `check_batch_traffic_resources` | `complete_recipients_upload` 一次回读名单并按需检查引流 |
-| `list_message_groups`、`get_message_group`、`list_signatures` | `query_sms_resources` |
-| `get_batch_task`、`list_batch_tasks` | `query_batch_tasks` |
-| `apply_qualification`、`apply_signature`、`apply_template`、`register_traffic_resource` | 对应 `open_*_form` 页面及 App-only `submit_*` 工具 |
-| `manage_sms_service` | `open_sms_service_onboarding` 页面及其内部查询、提交工具 |
-| 原 `send_sms` 参数 | 先 `preview_sms_send`，确认后提交 `request` 和含到期时间的完整 `confirmation` |
+客户端、表单资源和 MCP 包一起升级，工具入口以本文当前接口表和服务返回的 Schema 为准。
 
 短信后端的错误原文和 `backend_response` 会进入工具结果，可能包含后端回显的业务数据，宿主按实际数据处理策略管理模型上下文。
 
