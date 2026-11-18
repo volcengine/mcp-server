@@ -6,16 +6,15 @@ import json
 import math
 import re
 from collections.abc import Mapping
-from typing import Annotated, Any
-
-from pydantic import Field
+from time import time
+from typing import Any
 
 from .auth import Credentials
 from .client import failure
+from .configuration import FORM_CONFIG
 from .models import SmsSendRequest
 from .protocol import SmsAPIError
 
-SendConfirmation = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
 _VARIABLE = re.compile(r"\$\{([A-Za-z0-9_]+)\}")
 _CHANNELS = {"CN_OTP", "CN_NTC", "CN_MKT"}
 
@@ -88,7 +87,9 @@ def _segments(content: str, signature: str) -> int:
     return 1 if length <= 70 else math.ceil(length / 67)
 
 
-async def prepare_sms_send(call, request: SmsSendRequest, credentials: Credentials) -> dict[str, Any]:
+async def prepare_sms_send(
+    call, request: SmsSendRequest, credentials: Credentials, *, expires_at: int | None = None
+) -> dict[str, Any]:
     """重新读取模板和消息组，生成可展示的单条发送预览。"""
     envelope = await call("ListSecondTemplate", {
         "templateId": request.template_id,
@@ -174,12 +175,15 @@ async def prepare_sms_send(call, request: SmsSendRequest, credentials: Credentia
         lambda match: request.template_params[match.group(1)],
         view["templateContent"],
     )
+    if expires_at is None:
+        expires_at = int(time()) + FORM_CONFIG["previewConfirmationTtlSeconds"]
     canonical = {
         "request": request.payload(),
         "resource": view,
         "renderedContentSha256": hashlib.sha256(rendered.encode()).hexdigest(),
         "accessKey": credentials.access_key,
         "sessionToken": credentials.session_token,
+        "expiresAt": expires_at,
     }
     encoded = json.dumps(
         canonical, ensure_ascii=False, sort_keys=True, separators=(",", ":")
@@ -196,5 +200,5 @@ async def prepare_sms_send(call, request: SmsSendRequest, credentials: Credentia
         "variableNames": sorted(expected),
         "renderedContent": rendered,
         "estimatedSegments": _segments(rendered, request.signature),
-        "confirmation": confirmation,
+        "confirmation": {"expires_at": expires_at, "signature": confirmation},
     }

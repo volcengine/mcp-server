@@ -42,6 +42,7 @@ from .models import (
     BatchTask,
     Channel,
     Mobile,
+    PreviewConfirmation,
     QualificationApplication,
     SignatureApplication,
     SmsSendRequest,
@@ -59,10 +60,9 @@ from .prefill import (
 from .protocol import SmsAPIError, SmsMCPServer
 from .qualification_checks import check_enterprise, enterprise_ticket
 from .queries import BatchTaskQuery, BatchTaskReference, ResourceQuery
-from .send_checks import SendConfirmation, prepare_sms_send
+from .send_checks import prepare_sms_send
 from .service_onboarding import ServiceConfirmation, ServiceOnboarding
 from .template_checks import (
-    TemplateConfirmation,
     prepare_template_application,
     template_apply_payload,
 )
@@ -124,7 +124,8 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
             "用户要办理资质、签名、引流、模板或群发时，调用对应 open_* 工具并用 prefill 填已知字段。"
             "单条短信不打开页面；对话中补齐消息组、签名、模板、收件号码和变量值，"
             "先调用 preview_sms_send 展示掩码号码和渲染正文，用户明确确认该预览后，"
-            "再把原请求与 confirmation 交给 send_sms；确认后参数或资源变化须重新预览。"
+            "再把原请求与完整 confirmation 交给 send_sms；确认超过 expires_at、"
+            "参数或资源变化须重新预览。"
             "未知项留空，打开和恢复页面不等于授权提交。"
         ),
     )
@@ -382,7 +383,7 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
         unified_social_credit_identifier: Text,
         legal_person_name: Text,
     ) -> CallToolResult:
-        """校验企业信息。私密表单可请求人工审核选项，操作由客户单独确认。"""
+        """私密核验企业信息并提供适用的人工审核选项，后续操作由客户单独确认。"""
         result = await check_enterprise(
             lambda action, params: invoke(ctx, action, params),
             {
@@ -549,7 +550,7 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
 
     @mcp.tool(annotations=WRITE, structured_output=True, meta=APP_ONLY_META)
     async def submit_template(
-        ctx: Context, request: TemplateApplication, confirmation: TemplateConfirmation
+        ctx: Context, request: TemplateApplication, confirmation: PreviewConfirmation
     ) -> dict[str, Any]:
         """再次前检后提交当前预览的申请；参数、账号或引流变化须重新核对。"""
         credentials = credentials_for(ctx)
@@ -557,11 +558,18 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
         async def call(action, params):
             return await invoke_as(credentials, action, params)
 
-        view = await prepare_template_application(call, request, credentials)
-        if not hmac.compare_digest(confirmation, view["confirmation"]):
+        view = await prepare_template_application(
+            call, request, credentials, expires_at=confirmation.expires_at
+        )
+        if not hmac.compare_digest(confirmation.signature, view["confirmation"]["signature"]):
             raise SmsAPIError(failure(
                 "ApplySmsTemplateV2ForAgent", "template_confirmation_changed",
                 "模板参数、账号或引流核对结果已变化，请重新核对模板申请",
+            ))
+        if int(time()) >= confirmation.expires_at:
+            raise SmsAPIError(failure(
+                "ApplySmsTemplateV2ForAgent", "template_confirmation_expired",
+                "模板申请预览已过期，请重新核对并确认",
             ))
         return await call("ApplySmsTemplateV2ForAgent", template_apply_payload(view))
 
@@ -578,7 +586,7 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
 
     @mcp.tool(annotations=WRITE, structured_output=True)
     async def send_sms(
-        ctx: Context, request: SmsSendRequest, confirmation: SendConfirmation
+        ctx: Context, request: SmsSendRequest, confirmation: PreviewConfirmation
     ) -> dict[str, Any]:
         """复核已确认的单条短信预览后发送；产生费用，结果未知时不自动重试。"""
         credentials = credentials_for(ctx)
@@ -586,12 +594,17 @@ def build_server(client: SmsClient | None = None, uploader: FileUploader | None 
         async def call(action, params):
             return await invoke_as(credentials, action, params)
 
-        view = await prepare_sms_send(call, request, credentials)
-        if not hmac.compare_digest(confirmation, view["confirmation"]):
+        view = await prepare_sms_send(call, request, credentials, expires_at=confirmation.expires_at)
+        if not hmac.compare_digest(confirmation.signature, view["confirmation"]["signature"]):
             raise SmsAPIError(failure(
                 "SendSmsForAgent",
                 "send_confirmation_changed",
                 "短信参数、账号或模板资源已变化，请重新预览并确认",
+            ))
+        if int(time()) >= confirmation.expires_at:
+            raise SmsAPIError(failure(
+                "SendSmsForAgent", "send_confirmation_expired",
+                "短信发送预览已过期，请重新预览并确认",
             ))
         return await call("SendSmsForAgent", {
             "SubAccount": request.sub_account, "Signature": request.signature,

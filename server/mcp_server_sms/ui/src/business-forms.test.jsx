@@ -40,7 +40,7 @@ it('模板提交展示后端 1007 原文与编号，不把错误改成未知结�
 });
 function preview(request) {
   return { request: { ...request, area: 'cn' }, account: { userType: 'enterprise', mktParam: 1 },
-    fixedTraffic: [], warnings: [], confirmation: 'a'.repeat(64) };
+    fixedTraffic: [], warnings: [], confirmation: { expires_at: 2000000000, signature: 'a'.repeat(64) } };
 }
 function client() {
   return { report: vi.fn().mockResolvedValue(undefined), query: vi.fn(async action => {
@@ -74,7 +74,8 @@ it('模板表单预填完整字段，返回修改保留内容，页面确认后�
   await user.click(screen.getByText('我已核对以上信息，同意提交本次操作'));
   await user.click(screen.getByRole('button', { name: '确认提交模板' }));
   await screen.findByText('模板申请已受理');
-  expect(api.call).toHaveBeenCalledWith('submit_template', { request: { ...draft, area: 'cn' }, confirmation: 'a'.repeat(64) }, { write: true });
+  expect(api.call).toHaveBeenCalledWith('submit_template', { request: { ...draft, area: 'cn' },
+    confirmation: { expires_at: 2000000000, signature: 'a'.repeat(64) } }, { write: true });
 });
 
 it('模板变量、组合绑定和验证码占位符校验不会自动改写用户内容', () => {

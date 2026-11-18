@@ -14,7 +14,7 @@ from .observability import observe_call
 FORM_URI = "ui://sms/forms.html"
 FORM_META = {"ui": {"resourceUri": FORM_URI, "visibility": ["model", "app"]}}
 APP_ONLY_META = {"ui": {"visibility": ["app"]}}
-FormKind = Literal["qualification", "signature", "traffic", "batch", "service", "template", "send"]
+FormKind = Literal["qualification", "signature", "traffic", "batch", "service", "template"]
 # 保留工具原有的结构化结果 Schema，同时用 CallToolResult 携带仅给表单的元数据。
 FormToolResult = Annotated[CallToolResult, dict[str, Any]]
 
@@ -26,7 +26,6 @@ _FORM_HELP = {
     "batch": "选择消息组和模板、上传名单并预览；创建任务与确认启动分别执行。",
     "service": "核对国内短信服务状态，阅读协议和计费说明后按页面确认。",
     "template": "填写模板正文、变量和适用范围，由客户在页面确认后申请审核。",
-    "send": "选择短信资源、填写收件号码和变量，由客户在页面核对正文后发送。",
 }
 
 

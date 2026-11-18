@@ -9,7 +9,7 @@ afterEach(cleanup);
 
 const draft = { name: '预约通知', channelType: 'CN_NTC', content: ' 原始正文 ${time} ',
   signatures: ['签名'], subAccounts: ['g'], templateParams: [{ name: 'time', paramType: 1 }] };
-const token = 'a'.repeat(64);
+const token = { expires_at: 2000000000, signature: 'a'.repeat(64) };
 function preview(request, extra = {}) {
   return { request: { ...request, area: 'cn' }, account: { userType: 'enterprise', businessName: '测试企业' },
     fixedTraffic: [], warnings: [], confirmation: token, ...extra };

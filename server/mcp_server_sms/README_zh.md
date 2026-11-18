@@ -32,6 +32,8 @@
 
 签名表单通过 `query_sms_resources` 调用 `GetApplySignatureBind`，一次取得已审核通过的资质候选数组；可选 `purpose` 为 1（自用）、2（他用），不传或 0 不限制用途。只消费 `id/purpose/materialName/businessCertificateName`，不分页、不逐条补查。客户确认后直接调用 `ApplySmsSignatureV2`，资质归属及审核状态由短信接口校验。`list_qualifications` 继续用于完整资质列表查询。
 
+单发和模板申请的 `confirmation` 包含 `expires_at` 与 `signature`，默认有效期为 5 分钟，到期时间也参与签名。提交时完整传回该对象，过期后重新预览并由客户确认。同一票据在有效期内仍可重复使用，每次实际提交都需客户授权，结果未确认时先查询记录。
+
 ## 页面内部工具
 
 | 用途 | 工具 |
@@ -121,6 +123,23 @@ mcp-server-sms --transport streamable-http --host 0.0.0.0 --port 8000 \
 HTTP 连接池随 MCP 服务启动和关闭，凭据和签名头仍逐请求生成，不保留不同调用者之间的响应 Cookie。连接复用不引入业务状态或数据库。
 
 ## 验证和发布
+
+### 0.3.0 接入迁移
+
+客户端与表单资源一起升级。原工具调整如下，其他工具见前面的接口表。
+
+| 原入口 | 当前入口 |
+| --- | --- |
+| `upload_sms_file`、`get_batch_upload_url` | 材料和 CSV 分别使用 `prepare_*_upload` 与 `complete_*_upload` |
+| `check_batch_traffic_resources` | `complete_recipients_upload` 一次回读名单并按需检查引流 |
+| `list_message_groups`、`get_message_group`、`list_signatures` | `query_sms_resources` |
+| `get_batch_task`、`list_batch_tasks` | `query_batch_tasks` |
+| `apply_qualification`、`apply_signature`、`apply_template`、`register_traffic_resource` | 对应 `open_*_form` 页面及 App-only `submit_*` 工具 |
+| `manage_sms_service` | `open_sms_service_onboarding` 页面及其内部查询、提交工具 |
+| 原 `send_sms` 参数 | 先 `preview_sms_send`，确认后提交 `request` 和含到期时间的完整 `confirmation` |
+
+短信后端的错误原文和 `backend_response` 会进入工具结果，可能包含后端回显的业务数据，宿主按实际数据处理策略管理模型上下文。
+
 
 ```bash
 cd ui

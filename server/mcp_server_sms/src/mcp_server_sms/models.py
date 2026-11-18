@@ -15,6 +15,12 @@ class ApiModel(BaseModel):
     def payload(self) -> dict:
         return self.model_dump(by_alias=True, exclude_none=True)
 
+class PreviewConfirmation(ApiModel):
+    """PreviewConfirmation 绑定预览的到期时间与服务端签名。"""
+
+    expires_at: Annotated[int, Field(strict=True, gt=0)]
+    signature: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
+
 
 class MaterialFile(ApiModel):
     file_type: int = Field(alias="fileType", ge=0, le=19)

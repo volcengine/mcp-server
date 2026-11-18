@@ -35,7 +35,9 @@ export const templatePreviewSchema = z.object({
   account: z.object({ userType: z.string(), businessName: z.string().nullish() }).passthrough(),
   fixedTraffic: z.array(z.object({ paramType: z.union([z.literal(2), z.literal(3)]),
     isExist: z.literal(true), content: z.string().optional() }).passthrough()),
-  warnings: z.array(z.string()), confirmation: confirmationSignature,
+  warnings: z.array(z.string()), confirmation: z.object({
+    expires_at: z.number().int().positive(), signature: confirmationSignature,
+  }),
 });
 const fileMetadata = {
   name: z.string().min(1).max(255), size: z.number().int().positive(),

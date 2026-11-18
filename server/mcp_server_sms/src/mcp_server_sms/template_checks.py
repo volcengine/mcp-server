@@ -4,12 +4,11 @@ import hmac
 import json
 import re
 from collections import Counter
-from typing import Annotated
-
-from pydantic import Field
+from time import time
 
 from .auth import Credentials
 from .client import failure
+from .configuration import FORM_CONFIG
 from .models import TemplateApplication
 from .observability import observe_call
 from .protocol import SmsAPIError
@@ -20,7 +19,6 @@ _OTP_CONTENT = re.compile(r"验证码|code\s|code\s+is|注册码|校验码|动�
 _MARKETING_UNSUBSCRIBE = "拒收请回复R"
 _MAX_TEMPLATE_VARIABLES = 20
 _MAX_TRAFFIC = {2: 1, 3: 2, 4: 1}
-TemplateConfirmation = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
 
 
 def _reject(code: str, message: str, action: str = "ApplySmsTemplateV2ForAgent"):
@@ -141,7 +139,9 @@ async def _resolve_traffic(call, body: dict) -> None:
                 item["content"] = original
 
 
-async def prepare_template_application(call, request: TemplateApplication, credentials: Credentials) -> dict:
+async def prepare_template_application(
+    call, request: TemplateApplication, credentials: Credentials, *, expires_at: int | None = None
+) -> dict:
     """预览和提交均调用同一只读前检，确认绑定参数、账号及核对结果。"""
     with observe_call("form", "template", path="prepare") as observation:
         try:
@@ -192,12 +192,16 @@ async def prepare_template_application(call, request: TemplateApplication, crede
                 "account": {key: account[key] for key in ("businessName", "userType", "mktParam") if key in account},
                 "fixedTraffic": fixed, "warnings": warnings,
             }
+            if expires_at is None:
+                expires_at = int(time()) + FORM_CONFIG["previewConfirmationTtlSeconds"]
             encoded = json.dumps({
                 "view": view, "accessKey": credentials.access_key, "sessionToken": credentials.session_token,
+                "expiresAt": expires_at,
             }, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()
-            view["confirmation"] = hmac.digest(
+            signature = hmac.digest(
                 credentials.secret_key.encode(), b"sms-template\0" + encoded, "sha256"
             ).hex()
+            view["confirmation"] = {"expires_at": expires_at, "signature": signature}
         except SmsAPIError as exc:
             observation.record(exc.result)
             raise

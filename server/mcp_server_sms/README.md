@@ -34,6 +34,8 @@ All query and open-form tools declare `readOnlyHint=true`. Opening a form never 
 
 The signature form uses `query_sms_resources` with `GetApplySignatureBind` to retrieve approved qualification candidates in one unpaginated array. The optional `purpose` filter accepts 1 (self-use), 2 (third-party use), or 0 (all); omitting it also returns both purposes. The form consumes only `id/purpose/materialName/businessCertificateName`, without per-item lookups. After customer confirmation it submits directly to `ApplySmsSignatureV2`; SMS validates qualification ownership and approval status. `list_qualifications` remains available for full qualification list queries.
 
+Send and template previews return a `confirmation` object with `expires_at` and `signature`. Its default lifetime is five minutes, and the expiry is signed together with the preview. Pass the complete object back at submission. After expiry, obtain a new preview and user approval. A confirmation remains reusable during its lifetime. Each submission requires user authorization, and an unconfirmed outcome requires a status check.
+
 ## App-only tools
 
 | Purpose | Tools |
@@ -124,6 +126,23 @@ The MCP SDK checks `Host` and any supplied `Origin` header. Set `--public-url` t
 The HTTP connection pool is owned by the MCP server lifespan and closed at shutdown. Credentials and signed headers remain per-request, and response cookies are not retained between callers. Connection reuse does not introduce business state or a database.
 
 ## Development
+
+### Migrating to 0.3.0
+
+Upgrade client integration and bundled form resources together. The tool table above describes the current surface.
+
+| Previous entry point | Current entry point |
+| --- | --- |
+| `upload_sms_file`, `get_batch_upload_url` | The material and CSV `prepare_*_upload` / `complete_*_upload` tools |
+| `check_batch_traffic_resources` | `complete_recipients_upload` reads CSV once and optionally checks traffic resources |
+| `list_message_groups`, `get_message_group`, `list_signatures` | `query_sms_resources` |
+| `get_batch_task`, `list_batch_tasks` | `query_batch_tasks` |
+| `apply_qualification`, `apply_signature`, `apply_template`, `register_traffic_resource` | Corresponding `open_*_form` tools and App-only `submit_*` tools |
+| `manage_sms_service` | `open_sms_service_onboarding` and its internal read/submit tools |
+| Previous `send_sms` arguments | Obtain `preview_sms_send`, then submit `request` and the complete expiring `confirmation` |
+
+Backend error messages and `backend_response` are returned in tool results and may include business data echoed by the upstream API. Hosts apply their model-context and retention policies to those results.
+
 
 ```bash
 cd ui

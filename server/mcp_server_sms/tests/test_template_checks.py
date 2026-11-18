@@ -149,7 +149,7 @@ def test_changed_confirmation_never_applies(change):
         elif change == "fixed":
             fixed["list"] = [{"paramType": 3, "isExist": True, "id": 31, "content": "4008000000"}]
         elif change == "signature":
-            args["confirmation"] = "0" * 64
+            args["confirmation"] = {**view["confirmation"], "signature": "0" * 64}
         result = call("submit_template", args, identity="two" if change == "identity" else "one")
         assert result["structuredContent"]["error"]["code"] == "template_confirmation_changed"
         assert all(action != "ApplySmsTemplateV2ForAgent" for action, _ in calls)
