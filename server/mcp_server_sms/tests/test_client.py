@@ -87,7 +87,11 @@ async def test_write_response_is_not_guessed(status, body):
         assert result["request_id"] == "public-id"
 
 
-async def test_official_signer_carries_sts_without_logging(capsys, caplog):
+@pytest.mark.parametrize(
+    "action,params",
+    [("ListAllSmsProduct", {}), ("GetSubAccountListForAgent", {"SubAccountName": "示例"})],
+)
+async def test_official_signer_carries_sts_without_logging(action, params, capsys, caplog):
     calls = []
 
     def handler(request):
@@ -95,12 +99,11 @@ async def test_official_signer_carries_sts_without_logging(capsys, caplog):
         return httpx.Response(200, json={"Result": {"List": [], "Total": 0}})
 
     async with SmsClient(transport=httpx.MockTransport(handler)) as client:
-        result = await client.call(
-            "GetSubAccountListForAgent", {"SubAccountName": "示例"}, CREDENTIALS
-        )
+        result = await client.call(action, params, CREDENTIALS)
     assert result["success"]
     request = calls[0]
     assert request.url.host == "sms.volcengineapi.com"
+    assert request.headers["x-request-source"] == "mcp"
     assert "Credential=fixture-access-key/" in request.headers["authorization"]
     assert "/cn-north-1/volcSMS/request" in request.headers["authorization"]
     assert request.headers["x-security-token"] == CREDENTIALS.session_token
