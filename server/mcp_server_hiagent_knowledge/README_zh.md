@@ -32,9 +32,9 @@ HiAgent OpenAPI 通过单个 `CallKnowledgeEngineTool` action 暴露知识引擎
 | `read_wiki_source_chunk` | `CallKnowledgeEngineTool` | `wiki_read_source_chunk` | `WikiReadSourceChunk` | 按页面 slug 读取 Wiki 引用的切片 |
 | `read_wiki_source_doc` | `CallKnowledgeEngineTool` | `list_knowledge_chunks` | `ListKnowledgeChunks` | 按 resource_id 顺序读取某引用源文档的切片 |
 
-> 说明：HiAgent 中 dataset 即知识库，故 `list_datasets` / `get_dataset` 是「列/查知识库」能力。每个知识引擎工具还接受可选的 `user_info`（`{"UserID": ..., "UserChannel": ...}`），原样透传为 OpenAPI 的 `UserInfo` 终端用户身份。仅当 `UserChannel="IAM"`（或可映射到 IAM 用户的 `"Lark"`）且 `UserID` 为租户内真实用户时，后端才据此做知识库/文档级权限过滤；其它渠道按游客处理。透传它可让检索遵循终端用户自身的访问权限。
+> 说明：HiAgent 中 dataset 即知识库，故 `list_datasets` / `get_dataset` 是「列/查知识库」能力。逐子工具的参数、验证与返回结构清单见 [docs/knowledge-engine-subtools.md](../../docs/knowledge-engine-subtools.md)。
 
-> 校验模型：本 Server 是薄适配层，只校验「必须发送的字段是否存在」（workspace/dataset ID、能力要求的 pattern/slug/queries 等）并依赖工具 schema 的参数类型；数值范围、枚举、跨字段规则（如 `limit`/`overlap` 的上下限、`grep_type` 的范围约束）由后端服务负责且随版本变化，因此其 `InvalidParameter.*` 报错会原样透传给调用方，不在本层重复校验。
+> 校验模型：本 Server 是薄适配层，只校验「必须发送的字段是否存在」（workspace/dataset ID、能力要求的 pattern/slug/queries 等）并依赖工具 schema 的参数类型；数值范围、枚举、跨字段规则（如 `limit`/`overlap` 的上下限、`grep_type` 的范围约束）由后端服务负责且随版本变化，因此其 `InvalidParameter.*` 报错会原样透传给调用方，不在本层重复校验。检索工具还接受可选的 `user_info`（`{"UserID": ..., "UserChannel": ...}`），原样透传为 OpenAPI 的 `UserInfo` 终端用户身份。仅当 `UserChannel="IAM"`（或可映射到 IAM 用户的 `"Lark"`）且 `UserID` 为租户内真实用户时，后端才据此做知识库/文档级权限过滤；其它渠道按游客处理。透传它可让检索遵循终端用户自身的访问权限。
 
 ## 使用指南
 
@@ -105,7 +105,7 @@ Trae | Cursor | Claude Desktop | Cline | HiAgent MCP 插件 | ...
 | `HIAGENT_ACCESS_KEY_ID` | HiAgent 账号 AccessKey ID | - |
 | `HIAGENT_SECRET_ACCESS_KEY` | HiAgent 账号 SecretAccessKey | - |
 | `HIAGENT_ACCOUNT_ID` | 作为 `X-Account-Id` 查询参数发送的主账号 ID | `1000000000` |
-| `HIAGENT_VERSION` | 使用的 HiAgent OpenAPI 兼容版本，对应 `versions/` 下的自包含实现；不填默认使用最新已注册版本（当前为 `v3.1.0`）。也可用 `--hiagent-version` 命令行参数按次指定，且优先级更高；当前支持 `v3.1.0` | 最新（`v3.1.0`） |
+| `HIAGENT_VERSION` | 使用的 HiAgent OpenAPI 兼容版本，对应 `versions/` 下该版本的自有契约；不填默认使用最新已注册版本（当前为 `v3.3.0`）。也可用 `--hiagent-version` 命令行参数按次指定，且优先级更高；当前支持 `v3.1.0`、`v3.2.1`、`v3.3.0` | 最新（`v3.3.0`） |
 | `HIAGENT_TOOLS` | 工具白名单，逗号分隔的精确工具名；选定暴露的基础工具集，不填表示全部。可用 `--tools`/`-t` 命令行参数按次指定，优先级更高 | - |
 | `HIAGENT_DISABLED_TOOLS` | 工具黑名单，逗号分隔；在白名单（或全部工具）基础上再剔除。可用 `--disabled-tools` 命令行参数按次指定，优先级更高 | - |
 | `HIAGENT_REGION` | 用于 AK/SK V4 签名的 Region（非网络地址） | `cn-north-1` |
@@ -118,7 +118,7 @@ Trae | Cursor | Claude Desktop | Cline | HiAgent MCP 插件 | ...
 HiAgent Knowledge MCP Server 提供以下功能：
 
 - `health_check`: 返回 MCP server 与 OpenAPI 的配置状态
-- `list_datasets`: 列出指定 workspace 下的知识库列表
+- `list_datasets`: 发现调用身份可访问的知识库（自有库与可见共享库）
 - `get_dataset`: 获取单个知识库的详细信息
 - `search_knowledge`: 在一个或多个知识库中按相关性检索知识片段
 - `grep_knowledge_chunks`: 按 RE2 正则匹配知识切片
@@ -137,22 +137,44 @@ health_check()
 
 #### list_datasets
 
+发现调用身份可访问的知识库（自有库与可见共享库），通过
+`list_datasets` 子工具调用（HiAgent v3.3.0 起统一发现）。独立 AK/SK 调用方经
+`CallKnowledgeTool` 发起该发现，鉴权主体为调用身份本人；请求体与 wire 版本不变。
+
 ```python
 list_datasets(
-    workspace_id="workspace_id",
-    name="财报",
-    page_number=1,
-    page_size=20,
+    workspace_id="workspace_id",   # 可选：不传则自动发现
+    user_id="iam_user_id",
+    keyword="财报",
+    limit=20,
 )
 ```
 
-Parameters:
-- `workspace_id` (必须): 要列出知识库的 workspace ID
-- `name` (可选): 按名称模糊搜索的关键词（后端对知识库名称/描述做模糊匹配）；不传则列出全部
-- `page_number` (可选): 页码（默认值：1）
-- `page_size` (可选): 每页数量（默认值：20）
+- `workspace_id`：可选。传则查该空间的自有及可见共享库；不传或传空白时，按调用身份
+  合并其加入的 HiAgent 空间及旧个人空间可见的全部知识库，同一 `DatasetID` 只返回一次。
+- `user_id`：可选 IAM 用户 ID，身份渠道固定为 IAM；不传则由服务端解析凭证对应用户。
+- `keyword`：可选名称/描述关键词，对应 `ListDatasets.Filter.Keyword`。
+- `limit`：可选，每页 1..100 条；不传时服务端默认 100。
+- `cursor`：可选，上一页的 `NextCursor`。翻页时保持用户、Workspace、关键词及 limit 不变；
+  不能复用其它工具或其它参数组合下的游标。
+- `ids`：可选 ID 列表；`[]` 表示空结果，与显式 `limit`/`cursor` 互斥。
+
+返回完整 OpenAPI 响应，结果位于 `Result.ListDatasets`：`Items` 含 `DatasetID`、
+`Name`、`Description`、`WorkspaceID`、`Icon`、`IndexingTechnique`、`IndexTypes`，
+`NextCursor` 仅在有下一页时返回，不包含 `Total`。共享库的 `WorkspaceID` 为源空间。
+权限和参数值域由服务端校验；发现范围不替代检索时的权限校验。
+
+迁移：本 Server 每次只使用一个契约，不探测后端版本，也不会在调用失败后改用其它契约，
+因此请按实际部署的服务版本设置 `HIAGENT_VERSION`（或 `--hiagent-version`）。使用
+`v3.1.0` 或 `v3.2.1` 时，`list_datasets` 仍为原 `ListDatasets` action：`workspace_id`
+必填，分页用 `name`、`page_number`（默认 1）、`page_size`（默认 20），响应含 `Total`。
+三个版本的 MCP 工具名都是 `list_datasets`，切换版本后需刷新客户端工具 schema，
+工具白/黑名单也应填写对应版本实际暴露的名称。
 
 #### get_dataset
+
+`v3.3.0` 下经 `list_datasets` 的 `ids` 过滤读取，独立调用方不使用平台侧的
+`GetDataset` action。
 
 ```python
 get_dataset(
@@ -300,7 +322,7 @@ Parameters:
 
 #### read_wiki_source_doc
 
-按 resource_id 顺序读取某个被引用源文档的切片。与 `read_wiki_source_chunk` 互补：后者按页面 slug 读引用切片；本工具顺序遍历单个被引用源文档（`resource_id`，如取自 Wiki 页面的 `SourceRefs`）。
+按 resource_id 顺序读取某个被引用源文档的切片。与 `read_wiki_source_chunk` 互补：后者按页面 slug 读引用切片；本工具顺序遍历单个引用源文档（`resource_id`，如取自 Wiki 页面的 `SourceRefs`）。
 
 ```python
 read_wiki_source_doc(
