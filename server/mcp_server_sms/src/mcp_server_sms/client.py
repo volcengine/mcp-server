@@ -248,7 +248,11 @@ class SmsClient:
         request.set_host(API_HOST)
         request.set_path("/")
         request.set_method(spec.method)
-        request.set_headers({"Accept": "application/json", "Content-Type": "application/json"})
+        request.set_headers({
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "X-Request-Source": "mcp",
+        })
         query = {"Action": action, "Version": API_VERSION}
         if spec.method == "GET":
             for key, value in wire.items():
