@@ -2,6 +2,8 @@ import json
 from urllib.parse import urlparse
 
 import requests
+import volcenginesdkcore
+from volcenginesdkapmplusserver import APMPLUSSERVERApi, models
 
 from mcp_server_apmplus.config import ApmplusConfig
 from mcp_server_apmplus.model import *
@@ -11,15 +13,28 @@ DEFAULT_REGION = "cn-beijing"
 
 
 class ApmplusApi(object):
+    cred: ApmplusConfig
+    apmplusApiClient: APMPLUSSERVERApi
+
     def __init__(self, cred: ApmplusConfig):
         if cred.access_key == "" or cred.secret_key == "" or cred.endpoint == "":
             raise ValueError("access_key, secret_key or endpoint is empty")
         self.cred = cred
+        self.apmplusApiClient = APMPLUSSERVERApi(
+            volcenginesdkcore.ApiClient(configuration=cred.to_volc_configuration())
+        )
+
+    def _get_volc_client(self, dynamic_conf: ApmplusConfig) -> APMPLUSSERVERApi:
+        return APMPLUSSERVERApi(
+            volcenginesdkcore.ApiClient(
+                configuration=dynamic_conf.to_volc_configuration()
+            )
+        )
 
     def do_request(self, service, region, req: requests.Request) -> requests.Response:
         # 添加header
         req.headers["Content-Type"] = "application/json"
-        req.headers["Host"] = urlparse(self.cred.endpoint).hostname
+        req.headers["Host"] = urlparse(req.url).hostname
         # 签名
         self.cred.append_authorization(
             urlparse(req.url).path,
@@ -41,15 +56,15 @@ class ApmplusApi(object):
         query = {
             "Action": "GetAlertRuleList",
             "Version": "2022-07-11",
-            "Region": req.region_id,
+            "Region": req.region,
         }
         request = requests.Request(
             method="POST",
-            url=self.cred.endpoint,
+            url="https://" + self.cred.endpoint,
             data=req_json,
             params=query,
         )
-        response = self.do_request(SERVER_SERVICE, req.region_id, request)
+        response = self.do_request(SERVER_SERVICE, req.region, request)
         if response.status_code != 200:
             raise Exception(
                 f"get_result failed, status_code: {response.status_code}, response: {response.text},request_headers: {request.headers}, request_url:{request.url}, request_params:{request.params}, request_data:{request.data},request_body:{request.json}"
@@ -61,15 +76,15 @@ class ApmplusApi(object):
         query = {
             "Action": "NotifyGroupList",
             "Version": "2022-07-11",
-            "Region": req.region_id,
+            "Region": req.region,
         }
         request = requests.Request(
             method="POST",
-            url=self.cred.endpoint,
+            url="https://" + self.cred.endpoint,
             data=req_json,
             params=query,
         )
-        response = self.do_request(SERVER_SERVICE, req.region_id, request)
+        response = self.do_request(SERVER_SERVICE, req.region, request)
         if response.status_code != 200:
             raise Exception(
                 f"get_result failed, status_code: {response.status_code}, response: {response.text},request_headers: {request.headers}, request_url:{request.url}, request_params:{request.params}, request_data:{request.data},request_body:{request.json}"
@@ -77,41 +92,41 @@ class ApmplusApi(object):
         return response.text
 
     def server_query_metrics(self, req: ApmplusServerQueryMetricsRequest) -> str:
-        if not req.region_id:
-            req.region_id = DEFAULT_REGION
+        if not req.region:
+            req.region = DEFAULT_REGION
         req_json = json.dumps(req.to_dict())
         query = {
             "Action": "Draw",
             "Version": "2022-11-09",
-            "Region": req.region_id,
+            "Region": req.region,
         }
         request = requests.Request(
             method="POST",
-            url=self.cred.endpoint,
+            url="https://" + self.cred.endpoint,
             data=req_json,
             params=query,
         )
-        response = self.do_request(SERVER_SERVICE, req.region_id, request)
+        response = self.do_request(SERVER_SERVICE, req.region, request)
         if response.status_code != 200:
             raise Exception(
                 f"get_result failed, status_code: {response.status_code}, response: {response.text},request_headers: {request.headers}, request_url:{request.url}, request_params:{request.params}, request_data:{request.data},request_body:{request.json}"
             )
         return response.text
 
+    async def server_get_trace_detail(
+        self, args: dict, dynamic_conf: ApmplusConfig = None
+    ) -> models.get_trace_detail_response.GetTraceDetailResponse:
+        client = self.apmplusApiClient
+        if dynamic_conf is not None:
+            client = self._get_volc_client(dynamic_conf)
+        return client.get_trace_detail(
+            models.get_trace_detail_request.GetTraceDetailRequest(**args)
+        )
 
-if __name__ == "__main__":
-    req = ApmplusServerQueryMetricsRequest(
-        region_id="",
-        query="histogram_quantile(0.99, sum(rate(gen_ai_client_operation_duration_bucket{}[5m])) by (le))",
-        start_time=1746777063,
-        end_time=1746780663,
-    )
-    # Body的格式需要配合Content-Type，API使用的类型请阅读具体的官方文档，如:json格式需要json.dumps(obj)
-    config = ApmplusConfig(
-        access_key="",
-        secret_key="",
-        endpoint="https://open.volcengineapi.com",
-    )
-    api = ApmplusApi(config)
-    response_body = api.server_query_metrics(req)
-    print(response_body)
+    async def server_list_span(
+        self, args: dict, dynamic_conf: ApmplusConfig = None
+    ) -> dict:
+        client = self.apmplusApiClient
+        if dynamic_conf is not None:
+            client = self._get_volc_client(dynamic_conf)
+        return client.list_span(models.list_span_request.ListSpanRequest(**args))
