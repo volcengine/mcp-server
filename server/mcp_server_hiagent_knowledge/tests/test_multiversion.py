@@ -62,12 +62,49 @@ def test_321_workspace_remains_required():
     with pytest.raises(ValueError, match="workspace_id"):
         v321.list_datasets(RecordingClient(), workspace_id="")
 
-@pytest.mark.parametrize("version", ["v3.1.0", "v3.2.1", "v3.3.0"])
-def test_unchanged_retrieval_and_health_for_all_versions(version):
+@pytest.mark.parametrize(
+    "version,expected_action",
+    [
+        ("v3.1.0", "CallKnowledgeEngineTool"),
+        ("v3.2.1", "CallKnowledgeEngineTool"),
+        ("v3.3.0", "CallKnowledgeTool"),
+    ],
+)
+def test_retrieval_action_and_body_per_version(version, expected_action):
     client = RecordingClient()
     server = load_version_module(version).create_mcp_server(client=client)
     asyncio.run(server.call_tool("search_knowledge", {"workspace_id": "ws", "dataset_ids": ["ds"], "queries": ["q"]}))
+    assert client.calls[0]["action"] == expected_action
     assert client.calls[0]["body"] == {"WorkspaceID": "ws", "DatasetIDs": ["ds"], "ToolName": "knowledge_search", "KnowledgeSearch": {"Queries": ["q"]}}
+
+def test_v330_retrieval_and_get_dataset_allow_omitting_workspace():
+    client = RecordingClient()
+    server = load_version_module("v3.3.0").create_mcp_server(client=client)
+    asyncio.run(server.call_tool("search_knowledge", {"dataset_ids": ["ds"], "queries": ["q"]}))
+    assert client.calls[0]["action"] == "CallKnowledgeTool"
+    assert client.calls[0]["body"] == {"DatasetIDs": ["ds"], "ToolName": "knowledge_search", "KnowledgeSearch": {"Queries": ["q"]}}
+
+def test_v330_read_wiki_source_doc_uses_dedicated_subtool():
+    client_v330 = RecordingClient()
+    server_v330 = load_version_module("v3.3.0").create_mcp_server(client=client_v330)
+    asyncio.run(server_v330.call_tool("read_wiki_source_doc", {"dataset_ids": ["ds"], "resource_id": "res-1", "limit": 10}))
+    assert client_v330.calls[0]["action"] == "CallKnowledgeTool"
+    assert client_v330.calls[0]["body"] == {
+        "DatasetIDs": ["ds"],
+        "ToolName": "wiki_read_source_doc",
+        "WikiReadSourceDoc": {"ResourceID": "res-1", "Limit": 10},
+    }
+
+    client_v310 = RecordingClient()
+    server_v310 = load_version_module("v3.1.0").create_mcp_server(client=client_v310)
+    asyncio.run(server_v310.call_tool("read_wiki_source_doc", {"workspace_id": "ws", "dataset_ids": ["ds"], "resource_id": "res-1"}))
+    assert client_v310.calls[0]["action"] == "CallKnowledgeEngineTool"
+    assert client_v310.calls[0]["body"] == {
+        "WorkspaceID": "ws",
+        "DatasetIDs": ["ds"],
+        "ToolName": "list_knowledge_chunks",
+        "ListKnowledgeChunks": {"ResourceID": "res-1"},
+    }
 
 @pytest.mark.parametrize("env,flag,expected", [(None, None, "v3.3.0"), ("v3.2.1", None, "v3.2.1"), ("v3.2.1", "v3.3.0", "v3.3.0"), ("v3.3.0", "v3.1.0", "v3.1.0")])
 def test_cli_version_precedence(monkeypatch, env, flag, expected):

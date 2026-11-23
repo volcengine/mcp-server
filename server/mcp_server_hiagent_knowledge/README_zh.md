@@ -173,19 +173,21 @@ list_datasets(
 
 #### get_dataset
 
-`v3.3.0` 下经 `list_datasets` 的 `ids` 过滤读取，独立调用方不使用平台侧的
-`GetDataset` action。
+`v3.3.0` 下经 `list_datasets` 的 `ids` 过滤读取单个可见知识库的摘要信息（`DatasetID`、
+`Name`、`Description`、`WorkspaceID`、`Icon`、`IndexingTechnique`、`IndexTypes`，
+不含默认检索参数），`workspace_id` 可选。`v3.1.0` / `v3.2.1` 下仍调用 `GetDataset`
+（`workspace_id` 必填，含默认检索参数）。
 
 ```python
 get_dataset(
-    workspace_id="workspace_id",
     dataset_id="dataset_id",
+    workspace_id="workspace_id",   # v3.3.0 下可选；v3.1.0/v3.2.1 下必填
 )
 ```
 
 Parameters:
-- `workspace_id` (必须): 知识库所属的 workspace ID
 - `dataset_id` (必须): 要获取信息的知识库 ID
+- `workspace_id` (`v3.3.0` 可选，`v3.1.0`/`v3.2.1` 必须): 消费空间 ID；`v3.3.0` 下不传或传空白则按调用身份跨空间查找
 
 #### search_knowledge
 

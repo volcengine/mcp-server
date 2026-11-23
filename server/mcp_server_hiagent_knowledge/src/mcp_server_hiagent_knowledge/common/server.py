@@ -16,10 +16,17 @@ def _remove_tool(mcp: FastMCP, name: str) -> None:
     else:
         mcp.remove_tool(name)
 
-def create_mcp_server(client: OpenAPIClient | None = None, *, dataset_module,
-                      hiagent_version: str, knowledge_action: str = KNOWLEDGE_ENGINE_ACTION,
-                      enabled_tools: Iterable[str] | None = None,
-                      disabled_tools: Iterable[str] | None = None) -> FastMCP:
+def create_mcp_server(
+    client: OpenAPIClient | None = None,
+    *,
+    dataset_module,
+    hiagent_version: str,
+    knowledge_action: str = KNOWLEDGE_ENGINE_ACTION,
+    workspace_optional: bool = False,
+    use_wiki_source_doc_tool: bool = False,
+    enabled_tools: Iterable[str] | None = None,
+    disabled_tools: Iterable[str] | None = None,
+) -> FastMCP:
     names = (*dataset_module.DATASET_TOOL_NAMES, *KNOWLEDGE_TOOL_NAMES)
     config = load_hiagent_config()
     openapi_client = client or HiAgentOpenAPIClient(config)
@@ -44,7 +51,13 @@ def create_mcp_server(client: OpenAPIClient | None = None, *, dataset_module,
                 "secret_key_configured": bool(config.secret_access_key),
                 "region": config.region, "service": config.service}
     dataset_module.register_dataset_tools(mcp, openapi_client)
-    register_knowledge_tools(mcp, openapi_client, action=knowledge_action)
+    register_knowledge_tools(
+        mcp,
+        openapi_client,
+        action=knowledge_action,
+        workspace_optional=workspace_optional,
+        use_wiki_source_doc_tool=use_wiki_source_doc_tool,
+    )
     for name in names:
         if name not in keep:
             _remove_tool(mcp, name)

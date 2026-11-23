@@ -66,17 +66,22 @@ def test_get_dataset_reads_one_dataset_through_discovery():
     assert get_dataset(client, workspace_id="ws-1", dataset_id="own-1") == {"Result": {"Dataset": {"DatasetID": "own-1"}}}
     assert client.calls[0] == {"action": "CallKnowledgeTool", "version": "2023-08-01", "service": "app", "body": {"WorkspaceID": "ws-1", "ToolName": "list_datasets", "ListDatasets": {"IDs": ["own-1"]}}}
 
+def test_get_dataset_without_workspace_omits_workspace_id():
+    client = RecordingClient()
+    assert get_dataset(client, dataset_id="shared-1") == {"Result": {"Dataset": {"DatasetID": "shared-1", "WorkspaceID": "source"}}}
+    assert client.calls[0] == {"action": "CallKnowledgeTool", "version": "2023-08-01", "service": "app", "body": {"ToolName": "list_datasets", "ListDatasets": {"IDs": ["shared-1"]}}}
+
 @pytest.mark.parametrize("dataset_id", ["absent"])
 def test_get_dataset_rejects_dataset_outside_visible_scope(dataset_id):
-    with pytest.raises(ValueError, match="not visible"):
+    with pytest.raises(ValueError, match="not visible in workspace"):
         get_dataset(RecordingClient(), workspace_id="ws-1", dataset_id=dataset_id)
-
+    with pytest.raises(ValueError, match="not visible to the caller"):
+        get_dataset(RecordingClient(), dataset_id=dataset_id)
 
 def test_get_dataset_accepts_visible_shared_dataset():
     client = RecordingClient()
     assert get_dataset(client, workspace_id="ws-1", dataset_id="shared-1") == {"Result": {"Dataset": {"DatasetID": "shared-1", "WorkspaceID": "source"}}}
 
-@pytest.mark.parametrize("workspace_id,dataset_id", [("", "ds-1"), ("ws-1", "")])
-def test_get_dataset_requires_ids(workspace_id, dataset_id):
-    with pytest.raises(ValueError):
-        get_dataset(RecordingClient(), workspace_id=workspace_id, dataset_id=dataset_id)
+def test_get_dataset_requires_dataset_id():
+    with pytest.raises(ValueError, match="dataset_id"):
+        get_dataset(RecordingClient(), workspace_id="ws-1", dataset_id="")

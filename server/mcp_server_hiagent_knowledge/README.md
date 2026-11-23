@@ -13,22 +13,22 @@ This MCP server exposes a **knowledge base (knowledge engine)** as MCP tools. Ea
 
 ### Capability-based tool naming
 
-The HiAgent OpenAPI exposes the knowledge engine through a single `CallKnowledgeEngineTool` action whose `ToolName` field selects a sub-tool and whose request carries a same-named PascalCase parameter object. This server maps each `(ToolName, parameter object)` combination to its own capability-named MCP tool with a flat argument schema:
+The HiAgent OpenAPI exposes the knowledge engine through a single action (`CallKnowledgeTool` in `v3.3.0`, the default for standalone AK/SK callers; `CallKnowledgeEngineTool` in `v3.1.0` / `v3.2.1`) whose `ToolName` field selects a sub-tool and whose request carries a same-named PascalCase parameter object. This server maps each `(ToolName, parameter object)` combination to its own capability-named MCP tool with a flat argument schema:
 
-| MCP tool | OpenAPI action | `ToolName` | Parameter object | Capability |
+| MCP tool | OpenAPI action (`v3.3.0` / `v3.1.0`–`v3.2.1`) | `ToolName` | Parameter object | Capability |
 |---|---|---|---|---|
-| `search_knowledge` | `CallKnowledgeEngineTool` | `knowledge_search` | `KnowledgeSearch` | Relevance search across datasets |
-| `grep_knowledge_chunks` | `CallKnowledgeEngineTool` | `grep_chunks` | `GrepChunks` | RE2 regex match over candidate chunks |
-| `list_document_infos` | `CallKnowledgeEngineTool` | `list_doc_infos` | `ListDocInfos` | Documents' metadata, batched by dataset |
-| `list_document_chunks` | `CallKnowledgeEngineTool` | `list_knowledge_chunks` | `ListKnowledgeChunks` | Sequential read of one document's chunks |
-| `search_wiki` | `CallKnowledgeEngineTool` | `wiki_search` | `WikiSearch` | Search generated Wiki pages |
-| `read_wiki_page` | `CallKnowledgeEngineTool` | `wiki_read_page` | `WikiReadPage` | Read a Wiki page by slug |
-| `read_wiki_source_chunk` | `CallKnowledgeEngineTool` | `wiki_read_source_chunk` | `WikiReadSourceChunk` | Read a Wiki page's referenced source chunks, by page slug |
-| `read_wiki_source_doc` | `CallKnowledgeEngineTool` | `list_knowledge_chunks` | `ListKnowledgeChunks` | Read one referenced source document's chunks in order, by resource id |
+| `search_knowledge` | `CallKnowledgeTool` / `CallKnowledgeEngineTool` | `knowledge_search` | `KnowledgeSearch` | Relevance search across datasets |
+| `grep_knowledge_chunks` | `CallKnowledgeTool` / `CallKnowledgeEngineTool` | `grep_chunks` | `GrepChunks` | RE2 regex match over candidate chunks |
+| `list_document_infos` | `CallKnowledgeTool` / `CallKnowledgeEngineTool` | `list_doc_infos` | `ListDocInfos` | Documents' metadata, batched by dataset |
+| `list_document_chunks` | `CallKnowledgeTool` / `CallKnowledgeEngineTool` | `list_knowledge_chunks` | `ListKnowledgeChunks` | Sequential read of one document's chunks |
+| `search_wiki` | `CallKnowledgeTool` / `CallKnowledgeEngineTool` | `wiki_search` | `WikiSearch` | Search generated Wiki pages |
+| `read_wiki_page` | `CallKnowledgeTool` / `CallKnowledgeEngineTool` | `wiki_read_page` | `WikiReadPage` | Read a Wiki page by slug |
+| `read_wiki_source_chunk` | `CallKnowledgeTool` / `CallKnowledgeEngineTool` | `wiki_read_source_chunk` | `WikiReadSourceChunk` | Read a Wiki page's referenced source chunks, by page slug |
+| `read_wiki_source_doc` | `CallKnowledgeTool` / `CallKnowledgeEngineTool` | `wiki_read_source_doc` (`v3.3.0`) / `list_knowledge_chunks` (`v3.1.0`–`v3.2.1`) | `WikiReadSourceDoc` (`v3.3.0`) / `ListKnowledgeChunks` (`v3.1.0`–`v3.2.1`) | Read one referenced source document's chunks in order, by resource id |
 
-> Note: in HiAgent a *dataset* is a *knowledge base*, so `list_datasets` / `get_dataset` are the "list/inspect knowledge base" capabilities. A per-sub-tool parameter, verification and return-shape matrix is maintained in [docs/knowledge-engine-subtools.md](../../docs/knowledge-engine-subtools.md).
+> Note: in HiAgent a *dataset* is a *knowledge base*, so `list_datasets` / `get_dataset` are the "list/inspect knowledge base" capabilities.
 
-> Validation model: this server is a thin adapter. It only checks that the fields it must always send are present (workspace/dataset ids, a pattern/slug/queries where the capability requires one) and relies on argument types from the tool schema. Value ranges, enums and cross-field rules (e.g. `limit`/`overlap` bounds, `grep_type` scope rules) are owned by the backend service and are version-specific, so its `InvalidParameter.*` errors are passed through to the caller rather than duplicated here. The retrieval tools also accept an optional `user_info` (`{"UserID": ..., "UserChannel": ...}`) forwarded verbatim as the OpenAPI `UserInfo` end-user identity. The backend applies knowledge-base / document-level permission filtering to it only when `UserChannel` is `"IAM"` (or a `"Lark"` identity it can map to an IAM user) and `UserID` is a real user in the tenant; other channels are treated as guest. Pass it to make retrieval honor an end user's own access rights.
+> Validation model: this server is a thin adapter. It only checks that the fields it must always send are present (dataset ids, a pattern/slug/queries where the capability requires one, plus `workspace_id` on `v3.1.0`/`v3.2.1`) and relies on argument types from the tool schema. Value ranges, enums and cross-field rules (e.g. `limit`/`overlap` bounds, `grep_type` scope rules) are owned by the backend service and are version-specific, so its `InvalidParameter.*` errors are passed through to the caller rather than duplicated here. On `v3.3.0` (`CallKnowledgeTool`), `workspace_id` is optional (omit/blank to authorize across the caller's visible datasets), and optional `user_info` (`{"UserID": ..., "UserChannel": "IAM"}`) may only name the TOP-authenticated IAM user itself (other users or channels such as `"Lark"` are rejected with 403). On `v3.1.0` / `v3.2.1` (`CallKnowledgeEngineTool`), `workspace_id` is required and `user_info` supports IAM or mappable Lark channels (other channels are treated as guest).
 
 ## Setup
 
@@ -179,20 +179,23 @@ changes and configure tool allow/deny lists with the names that version exposes.
 
 #### get_dataset
 
-Get information about a single dataset, including its default retrieval parameters.
-On `v3.3.0` it is read through `list_datasets` with an explicit `ids` filter,
-because standalone callers cannot use the platform-scoped `GetDataset` action.
+On `v3.3.0`, returns one visible dataset's summary (`DatasetID`, `Name`,
+`Description`, `WorkspaceID`, `Icon`, `IndexingTechnique`, `IndexTypes`) via
+`list_datasets` with an explicit `ids` filter (does not return default retrieval
+parameters). On `v3.1.0` / `v3.2.1`, calls `GetDataset` with a required
+`workspace_id` and returns full dataset details including default retrieval
+parameters.
 
 ```python
 get_dataset(
-    workspace_id="workspace_id",
     dataset_id="dataset_id",
+    workspace_id="workspace_id",   # optional on v3.3.0; required on v3.1.0/v3.2.1
 )
 ```
 
 Parameters:
-- `workspace_id` (required): the workspace id the dataset belongs to.
 - `dataset_id` (required): the id of the dataset to inspect.
+- `workspace_id` (optional on `v3.3.0`; required on `v3.1.0`/`v3.2.1`): consuming workspace id to scope lookup to; omit/blank on `v3.3.0` to look up across the caller's joined and legacy personal spaces.
 
 #### search_knowledge
 
