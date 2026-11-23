@@ -19,22 +19,22 @@ HiAgent Knowledge MCP Server 是一个模型上下文协议（Model Context Prot
 
 ### 面向能力的工具命名
 
-HiAgent OpenAPI 通过单个 `CallKnowledgeEngineTool` action 暴露知识引擎：`ToolName` 字段选择子工具，请求体携带同名 PascalCase 参数对象。本 Server 把每个 `(ToolName, 参数对象)` 组合映射为一个面向能力命名、参数扁平的独立 MCP 工具：
+HiAgent OpenAPI 通过单个 action（`v3.3.0` 默认独立 AK/SK 调用方使用 `CallKnowledgeTool`；`v3.1.0` / `v3.2.1` 使用 `CallKnowledgeEngineTool`）暴露知识引擎：`ToolName` 字段选择子工具，请求体携带同名 PascalCase 参数对象。本 Server 把每个 `(ToolName, 参数对象)` 组合映射为一个面向能力命名、参数扁平的独立 MCP 工具：
 
-| MCP 工具 | OpenAPI action | `ToolName` | 参数对象 | 能力 |
+| MCP 工具 | OpenAPI action（`v3.3.0` / `v3.1.0`–`v3.2.1`） | `ToolName` | 参数对象 | 能力 |
 |---|---|---|---|---|
-| `search_knowledge` | `CallKnowledgeEngineTool` | `knowledge_search` | `KnowledgeSearch` | 跨知识库按相关性检索 |
-| `grep_knowledge_chunks` | `CallKnowledgeEngineTool` | `grep_chunks` | `GrepChunks` | 候选切片内 RE2 正则匹配 |
-| `list_document_infos` | `CallKnowledgeEngineTool` | `list_doc_infos` | `ListDocInfos` | 按知识库批量查文档元数据 |
-| `list_document_chunks` | `CallKnowledgeEngineTool` | `list_knowledge_chunks` | `ListKnowledgeChunks` | 顺序读取单个文档的分片 |
-| `search_wiki` | `CallKnowledgeEngineTool` | `wiki_search` | `WikiSearch` | 搜索生成的 Wiki 页面 |
-| `read_wiki_page` | `CallKnowledgeEngineTool` | `wiki_read_page` | `WikiReadPage` | 按 slug 读取 Wiki 页面 |
-| `read_wiki_source_chunk` | `CallKnowledgeEngineTool` | `wiki_read_source_chunk` | `WikiReadSourceChunk` | 按页面 slug 读取 Wiki 引用的切片 |
-| `read_wiki_source_doc` | `CallKnowledgeEngineTool` | `list_knowledge_chunks` | `ListKnowledgeChunks` | 按 resource_id 顺序读取某引用源文档的切片 |
+| `search_knowledge` | `CallKnowledgeTool` / `CallKnowledgeEngineTool` | `knowledge_search` | `KnowledgeSearch` | 跨知识库按相关性检索 |
+| `grep_knowledge_chunks` | `CallKnowledgeTool` / `CallKnowledgeEngineTool` | `grep_chunks` | `GrepChunks` | 候选切片内 RE2 正则匹配 |
+| `list_document_infos` | `CallKnowledgeTool` / `CallKnowledgeEngineTool` | `list_doc_infos` | `ListDocInfos` | 按知识库批量查文档元数据 |
+| `list_document_chunks` | `CallKnowledgeTool` / `CallKnowledgeEngineTool` | `list_knowledge_chunks` | `ListKnowledgeChunks` | 顺序读取单个文档的分片 |
+| `search_wiki` | `CallKnowledgeTool` / `CallKnowledgeEngineTool` | `wiki_search` | `WikiSearch` | 搜索生成的 Wiki 页面 |
+| `read_wiki_page` | `CallKnowledgeTool` / `CallKnowledgeEngineTool` | `wiki_read_page` | `WikiReadPage` | 按 slug 读取 Wiki 页面 |
+| `read_wiki_source_chunk` | `CallKnowledgeTool` / `CallKnowledgeEngineTool` | `wiki_read_source_chunk` | `WikiReadSourceChunk` | 按页面 slug 读取 Wiki 引用的切片 |
+| `read_wiki_source_doc` | `CallKnowledgeTool` / `CallKnowledgeEngineTool` | `wiki_read_source_doc`（`v3.3.0`）/ `list_knowledge_chunks`（`v3.1.0`–`v3.2.1`） | `WikiReadSourceDoc`（`v3.3.0`）/ `ListKnowledgeChunks`（`v3.1.0`–`v3.2.1`） | 按 resource_id 顺序读取某引用源文档的切片 |
 
-> 说明：HiAgent 中 dataset 即知识库，故 `list_datasets` / `get_dataset` 是「列/查知识库」能力。逐子工具的参数、验证与返回结构清单见 [docs/knowledge-engine-subtools.md](../../docs/knowledge-engine-subtools.md)。
+> 说明：HiAgent 中 dataset 即知识库，故 `list_datasets` / `get_dataset` 是「列/查知识库」能力。
 
-> 校验模型：本 Server 是薄适配层，只校验「必须发送的字段是否存在」（workspace/dataset ID、能力要求的 pattern/slug/queries 等）并依赖工具 schema 的参数类型；数值范围、枚举、跨字段规则（如 `limit`/`overlap` 的上下限、`grep_type` 的范围约束）由后端服务负责且随版本变化，因此其 `InvalidParameter.*` 报错会原样透传给调用方，不在本层重复校验。检索工具还接受可选的 `user_info`（`{"UserID": ..., "UserChannel": ...}`），原样透传为 OpenAPI 的 `UserInfo` 终端用户身份。仅当 `UserChannel="IAM"`（或可映射到 IAM 用户的 `"Lark"`）且 `UserID` 为租户内真实用户时，后端才据此做知识库/文档级权限过滤；其它渠道按游客处理。透传它可让检索遵循终端用户自身的访问权限。
+> 校验模型：本 Server 是薄适配层，只校验「必须发送的字段是否存在」（dataset ID、能力要求的 pattern/slug/queries，以及 `v3.1.0`/`v3.2.1` 下的 `workspace_id`）并依赖工具 schema 的参数类型；数值范围、枚举、跨字段规则（如 `limit`/`overlap` 的上下限、`grep_type` 的范围约束）由后端服务负责且随版本变化，因此其 `InvalidParameter.*` 报错会原样透传给调用方，不在本层重复校验。在 `v3.3.0`（`CallKnowledgeTool`）下，`workspace_id` 可选（不传或传空白时按调用方可见知识库鉴权），可选的 `user_info`（`{"UserID": ..., "UserChannel": "IAM"}`）仅允许指定 TOP 认证的 IAM 用户本人，指定其他用户或非 IAM 渠道（如 `"Lark"`）会被后端以 403 拒绝。在 `v3.1.0` / `v3.2.1`（`CallKnowledgeEngineTool`）下，`workspace_id` 必填，`user_info` 支持 `"IAM"` 或可映射的 `"Lark"` 渠道（其他渠道按游客处理）。
 
 ## 使用指南
 
