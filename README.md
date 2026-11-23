@@ -227,6 +227,7 @@ MCP Server列表 与 **[火山引擎大模型生态广场](https://www.volcengin
 - **[Needle](https://github.com/needle-ai/needle-mcp)**：Production-ready RAG out of the box to search and retrieve data from your own documents.  
 - **[Cloudinary](https://github.com/felores/cloudinary-mcp-server)**：Cloudinary Model Context Protocol Server to upload media to Cloudinary and get back the media link and details.  
 - **[Pandoc](https://github.com/vivekVells/mcp-pandoc)**：MCP server for seamless document format conversion using Pandoc.  
+- **[BrewPage](https://github.com/kochetkov-ma/brewpage-openapi/tree/main/mcp-server)**：将 HTML、Markdown、JSON、文件和静态站点发布为可分享的 HTTPS 链接，支持远程端点 https://brewpage.app/mcp（Streamable HTTP）与 npx brewpage-mcp。  
 
 
 ### **协作沟通**  
