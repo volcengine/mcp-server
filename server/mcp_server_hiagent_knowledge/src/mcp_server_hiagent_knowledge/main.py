@@ -65,10 +65,15 @@ def main() -> None:
     # Select the HiAgent OpenAPI compatibility implementation by version.
     # Precedence: --hiagent-version CLI flag > HIAGENT_VERSION env > latest.
     version = (
-        args.hiagent_version
+        (args.hiagent_version or "").strip()
         or os.getenv("HIAGENT_VERSION", "").strip()
         or DEFAULT_VERSION
     )
+    if version not in SUPPORTED_VERSIONS:
+        parser.error(
+            f"unsupported HIAGENT_VERSION {version!r}; "
+            f"supported versions: {', '.join(SUPPORTED_VERSIONS)}"
+        )
     impl = load_version_module(version)
     logger.info("Using HiAgent version %s", version)
 

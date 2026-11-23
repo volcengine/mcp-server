@@ -1,24 +1,9 @@
-"""Shared contracts for HiAgent OpenAPI tool modules."""
+"""Re-export shared OpenAPI protocol and constants for v3.1.0 compatibility."""
 
-from __future__ import annotations
+from mcp_server_hiagent_knowledge.common.tools._common import (
+    OPENAPI_SERVICE,
+    OPENAPI_VERSION,
+    OpenAPIClient,
+)
 
-from collections.abc import Mapping
-from typing import Protocol
-
-
-OPENAPI_VERSION = "2023-08-01"
-OPENAPI_SERVICE = "app"
-
-
-class OpenAPIClient(Protocol):
-    """OpenAPI call boundary used by tool modules."""
-
-    def call(
-        self,
-        *,
-        action: str,
-        body: Mapping[str, object] | None = None,
-        version: str = OPENAPI_VERSION,
-        service: str | None = None,
-        timeout_seconds: float = 30,
-    ) -> dict[str, object]: ...
+__all__ = ["OPENAPI_SERVICE", "OPENAPI_VERSION", "OpenAPIClient"]
